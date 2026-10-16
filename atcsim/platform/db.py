@@ -55,6 +55,20 @@ CREATE TABLE IF NOT EXISTS exercise_members (
   added_at REAL NOT NULL,
   PRIMARY KEY (exercise_id, user_id)
 );
+CREATE TABLE IF NOT EXISTS evaluations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  exercise_id TEXT NOT NULL,
+  kind TEXT NOT NULL CHECK (kind IN ('atc', 'pilot')),   -- atc: instructor rates the controller; pilot: controller rates the pseudo-pilot
+  rater_id INTEGER NOT NULL,
+  ratee_id INTEGER NOT NULL,
+  scores TEXT NOT NULL,            -- {"dimension": 1..5}
+  grade INTEGER NOT NULL,          -- overall, 1..5
+  comment TEXT DEFAULT '',
+  created_at REAL NOT NULL,
+  ack_at REAL,
+  ack_comment TEXT,
+  UNIQUE (exercise_id, kind, rater_id, ratee_id)
+);
 CREATE TABLE IF NOT EXISTS recordings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   exercise_id TEXT NOT NULL,
@@ -79,6 +93,11 @@ def conn() -> sqlite3.Connection:
             for col in ("user_id INTEGER", "title TEXT"):          # added with the controller-view recordings
                 try:
                     _conn.execute(f"ALTER TABLE recordings ADD COLUMN {col}")
+                except sqlite3.OperationalError:
+                    pass
+            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1"):   # added with the statistics
+                try:
+                    _conn.execute(f"ALTER TABLE exercises ADD COLUMN {col}")
                 except sqlite3.OperationalError:
                     pass
         return _conn

@@ -19,7 +19,7 @@ from . import config, db
 from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/")
-PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/")
+PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/", "/stats")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)

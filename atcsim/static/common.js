@@ -21,7 +21,7 @@ async function header(cur) {
   const links = [['/', 'Home']];
   if (ME.role === 'instructor' || ME.role === 'admin') links.push(['/designer', 'Scenario designer'], ['/radar', 'Solo radar']);
   if (ME.role === 'admin') links.push(['/admin', 'Users']);
-  links.push(['/profile', 'Profile']);
+  links.push(['/stats', 'Stats'], ['/profile', 'Profile']);
   const h = document.createElement('header'); h.className = 'top';
   h.innerHTML = `<div class="brand">ATC <span>SIM</span></div><nav>${links.map(([u, t]) => `<a href="${u}" class="${u === cur ? 'cur' : ''}">${t}</a>`).join('')}</nav>
     <div class="who"><span>${esc(ME.name)} · ${ROLE_NAMES[ME.role] || ME.role}${ME.licence ? ' · ' + esc(ME.licence) : ''}</span><button class="small" id="logout">Sign out</button></div>`;

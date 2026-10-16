@@ -98,6 +98,22 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   (and instructors), who answer as that unit. Pseudo-pilots and instructors call the controller as any of those
   units from their *Telephone* panel; the controller sees a ringing box with the unit and answers. Calls are full
   duplex (open microphone) until hung up; instructors hear every call.
+- **Evaluations:** when an exercise ends, the instructor rates each controller (phraseology, conflict detection,
+  conflict resolution, anticipation and planning, coordination, and an overall grade, all out of 5, with a comment),
+  and each controller rates the pseudo-pilots (readbacks, execution of clearances, reaction time, R/T, realism, overall
+  grade, comment). They are written from the home page (*Evaluations*, also linked from the "exercise ended" banner).
+  The controller reads the instructor's evaluation there and acknowledges it with a comment, which the instructor sees.
+- **Stats** (menu): tabs by role.
+  - *As instructor:* exercises run, hours simulated, pupils, evaluations given; the pupils' losses of separation by
+    session number (the mean over the pupils of their 1st, 2nd, 3rd… session with you, and the mean of the sessions
+    so far: lower is better), one line per pupil, the mean grade by session number, exercises per month, and a table
+    per pupil (first / last / mean losses, mean grade).
+  - *As controller:* losses of separation per session (and per hour of simulation), the instructors' grades over
+    time (overall and each dimension), other mistakes (area infringements, RVSM, wrong-direction exits, weather
+    penetrations, requests left unanswered), reaction times (assume, answer a request), the average profile per
+    dimension, and the list of sessions. Solo-radar sessions count as practice.
+  - *As pseudo-pilot:* the controllers' ratings over time, the average profile and their comments.
+  The results of an exercise are kept when it is ended with *End exercise*.
 - **Recording:** what matters is the controller's screen. While the exercise runs, the controller's browser sends
   what happens on it (scope size, zoom and pan, display options, weather product, label positions, selection, RBLs,
   every on-screen panel with its text: toolbar, HUD, alarms, the label menu with what is being typed, telephone
@@ -762,6 +778,9 @@ atcsim/static/seat.js, comms.js  controller / pseudo-pilot / instructor seats, p
 atcsim/static/login.html, profile.html, admin.html
 tests/test_platform.py           accounts, rights, voice relay, recording (python -m tests.test_platform)
 tests/e2e_platform.py            three browsers with fake microphones through a whole exercise
+tests/test_stats.py              evaluations both ways, acknowledgement, statistics
+atcsim/platform/stats.py         evaluations and statistics API, /stats page
+atcsim/static/stats.html, vendor/chart.umd.min.js   statistics charts (Chart.js 4.4.1, MIT)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)
 scenarios/*.json                 scenario library
 tools/build_scenarios.py         scenario generator + trap/solution verification (python tools/build_scenarios.py a02 s16 ...)

@@ -201,7 +201,7 @@ with sync_playwright() as p:
     ins.screenshot(path=f"{OUT}/12_instructor_seat.png")
     ins.once("dialog", lambda d: d.accept())
     ins.click("#endBtn")
-    ins.wait_for_url(BASE + "/", timeout=60000)
+    ins.wait_for_url(BASE + "/#evaluations", timeout=60000)
     atc.wait_for_selector("#pauseBanner:has-text('ended')", timeout=15000)
     ok(True, "end: the controller's screen says so")
     for _ in range(300):
@@ -209,6 +209,30 @@ with sync_playwright() as p:
         if r and r[0]["status"] != "rendering":
             break
         time.sleep(1)
+    # evaluations: the instructor rates the controller, the controller rates the pilot and acknowledges
+    ins.wait_for_selector("[data-ev]")
+    ins.click("[data-ev]")
+    for g in ins.locator(".modal .stars").all():
+        g.locator("button").nth(3).click()
+    ins.fill("#evC", "Good scan. Anticipate the crossing at TERTO earlier.")
+    ins.click("#evGo")
+    ins.wait_for_selector(".modal", state="detached")
+    ok(True, "instructor evaluates the controller")
+    atc.goto("/#evaluations")
+    atc.wait_for_selector("#evalReceived .ev")
+    ok("Anticipate the crossing" in atc.locator("#evalReceived").inner_text(), "controller reads the evaluation")
+    atc.fill("[data-ackc]", "Noted, thank you.")
+    atc.click("[data-ack]")
+    atc.wait_for_selector("#evalReceived .ack .cm")
+    ok(True, "controller acknowledges it")
+    atc.click("[data-ev]")
+    for g in atc.locator(".modal .stars").all():
+        g.locator("button").nth(4).click()
+    atc.click("#evGo")
+    atc.wait_for_selector(".modal", state="detached")
+    ok(True, "controller rates the pseudo-pilot")
+    atc.goto("/stats"); atc.wait_for_selector("canvas")
+    atc.screenshot(path=f"{OUT}/14_controller_stats.png", full_page=True)
     ok(r[0]["status"] == "ready", f"recording {r[0]['status']} {r[0].get('error') or ''} {r[0].get('duration_s')} s")
     ins.reload(); ins.wait_for_selector("#recs tr")
     ins.screenshot(path=f"{OUT}/13_recordings.png")

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Statistics</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/vendor/chart.umd.min.js"></script>
+<style>
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+  .tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 9px 14px; color: var(--dim); font-weight: 600; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .kpi .v { font: 700 26px var(--mono); color: var(--text); } .kpi .l { color: var(--dim); font-size: 12px; }
+  .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 14px; }
+  .chart { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .chart h3 { margin: 0 0 2px; font-size: 14px; } .chart .sub { color: var(--dim); font-size: 12px; margin-bottom: 8px; }
+  .chart canvas { width: 100% !important; height: 260px !important; }
+  .pane { display: none; } .pane.on { display: block; }
+  td.num { font-family: var(--mono); text-align: right; }
+  @media (max-width: 700px) { .charts { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Statistics</h1>
+  <div class="tabs" id="tabs"></div>
+  <div id="panes"></div>
+  <p class="dim" id="none" style="display:none">No finished exercise yet. Statistics appear after the first exercise is ended (End exercise).</p>
+</main>
+<script src="/static/common.js"></script>
+<script>
+const C = { a: '#5fd3a3', b: '#7fb8ff', c: '#f2b84b', d: '#ff6b6b', e: '#d79bff', f: '#9ad0ff', g: '#c9d6e2', h: '#ffb36b' };
+const PAL = ['#5fd3a3', '#7fb8ff', '#f2b84b', '#d79bff', '#ff8a8a', '#9ae6e6', '#ffd166', '#b5e48c', '#f4a3c4', '#a0a8ff'];
+Chart.defaults.color = '#8a9bb0'; Chart.defaults.borderColor = '#1f2b38'; Chart.defaults.font.family = 'system-ui';
+const charts = [];
+function chart(id, cfg) { const c = new Chart(document.getElementById(id), cfg); charts.push(c); return c; }
+const d8 = t => new Date(t * 1000).toLocaleDateString([], { day: '2-digit', month: 'short' });
+const lineOpts = (y, extra = {}) => ({ responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+  scales: { y: { beginAtZero: true, title: { display: !!y, text: y } }, ...(extra.scales || {}) }, plugins: { legend: { labels: { boxWidth: 12 } }, ...(extra.plugins || {}) } });
+function kpis(list) { return `<div class="kpis">${list.map(([v, l]) => `<div class="kpi"><div class="v">${v == null ? '–' : v}</div><div class="l">${l}</div></div>`).join('')}</div>`; }
+function box(id, title, sub) { return `<div class="chart"><h3>${title}</h3><div class="sub">${sub || ''}</div><canvas id="${id}"></canvas></div>`; }
+
+function instructorPane(I) {
+  let h = kpis([[I.exercises, 'exercises run'], [I.sim_hours, 'hours simulated'], [I.pupils, 'pupils (controllers)'], [I.given, 'controller evaluations given']]);
+  h += `<div class="charts">` + box('iCurve', 'Pupils’ losses of separation, by session number', 'mean over your pupils of their 1st, 2nd, 3rd… session with you · lower is better') +
+    box('iPupils', 'Losses of separation per pupil', 'each line is one pupil, session after session') +
+    box('iGrade', 'Your grades, by session number', 'mean overall grade (out of 5) of your pupils at their n-th session') +
+    box('iMonth', 'Exercises per month', '') + `</div>`;
+  h += `<h2>Pupils</h2><div class="card"><table><thead><tr><th>Pupil</th><th>Sessions</th><th>Losses (first)</th><th>Losses (last)</th><th>Mean losses</th><th>Mean grade</th></tr></thead><tbody>` +
+    I.pupils_series.map(p => { const s = p.sessions, m = s.reduce((a, x) => a + x.los, 0) / s.length, g = s.filter(x => x.grade != null);
+      return `<tr><td>${esc(p.name)}</td><td class="num">${s.length}</td><td class="num">${s[0].los}</td><td class="num">${s[s.length - 1].los}</td><td class="num">${m.toFixed(2)}</td>
+        <td class="num">${g.length ? (g.reduce((a, x) => a + x.grade, 0) / g.length).toFixed(1) : '–'}</td></tr>`; }).join('') +
+    (I.pupils_series.length ? '' : '<tr><td colspan="6" class="empty">No pupil yet: invite a controller to an exercise and end it.</td></tr>') + `</tbody></table></div>`;
+  return h;
+}
+function drawInstructor(I) {
+  const labels = I.curve.map(c => '#' + c.n);
+  chart('iCurve', { type: 'line', data: { labels, datasets: [
+    { label: 'mean losses at session n', data: I.curve.map(c => c.mean_los), borderColor: C.d, backgroundColor: C.d, tension: .25 },
+    { label: 'mean of the sessions so far', data: I.curve.map(c => c.mean_cumulative_los), borderColor: C.c, backgroundColor: C.c, borderDash: [5, 4], tension: .25 },
+    { label: 'pupils with that many sessions', data: I.curve.map(c => c.pupils), type: 'bar', backgroundColor: '#1f3346', yAxisID: 'y2' }] },
+    options: lineOpts('losses of separation', { scales: { y2: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { precision: 0 }, title: { display: true, text: 'pupils' } } } }) });
+  const nmax = Math.max(0, ...I.pupils_series.map(p => p.sessions.length));
+  chart('iPupils', { type: 'line', data: { labels: Array.from({ length: nmax }, (_, i) => '#' + (i + 1)),
+    datasets: I.pupils_series.map((p, k) => ({ label: p.name, data: p.sessions.map(s => s.los), borderColor: PAL[k % PAL.length], backgroundColor: PAL[k % PAL.length], tension: .2 })) },
+    options: lineOpts('losses of separation') });
+  chart('iGrade', { type: 'line', data: { labels, datasets: [{ label: 'mean overall grade', data: I.curve.map(c => c.mean_grade), borderColor: C.a, backgroundColor: C.a, tension: .25, spanGaps: true }] },
+    options: lineOpts('grade', { scales: { y: { min: 0, max: 5 } } }) });
+  chart('iMonth', { type: 'bar', data: { labels: I.per_month.map(m => m.month), datasets: [{ label: 'exercises', data: I.per_month.map(m => m.n), backgroundColor: C.b }] },
+    options: lineOpts('', { plugins: { legend: { display: false } } }) });
+}
+
+function controllerPane(Cc, dims) {
+  const s = Cc.sessions;
+  let h = kpis([[s.length, 'sessions'], [Cc.sim_hours, 'hours controlled'], [Cc.mean_los, 'mean losses of separation per session'], [Cc.mean_grade, 'mean overall grade (out of 5)']]);
+  h += `<div class="charts">` + box('cLos', 'Losses of separation, session after session', 'bars: number of losses · line: per hour of simulation · lower is better') +
+    box('cGrades', 'Instructor grades', 'overall grade and each dimension, out of 5') +
+    box('cOther', 'Other mistakes', 'area infringements, RVSM, wrong-direction exits, weather penetrations, requests left unanswered') +
+    box('cTimes', 'Reaction times', 'seconds to assume an aircraft calling, and to answer a pilot request') +
+    box('cDims', 'Your profile', 'average of each dimension over all graded sessions') + `</div>`;
+  h += `<h2>Sessions</h2><div class="card"><table><thead><tr><th>Date</th><th>Exercise</th><th>Instructor</th><th>Hours</th><th>Losses</th><th>Infr.</th><th>Assume (s)</th><th>Requests (s)</th><th>Grade</th></tr></thead><tbody>` +
+    s.slice().reverse().map(x => `<tr><td>${fmtDate(x.date)}</td><td>${esc(x.exercise)} <span class="dim">${esc(x.scenario)}${x.solo ? ' · solo' : ''}</span></td><td>${esc(x.solo ? '–' : x.instructor)}</td>
+      <td class="num">${x.sim_hours}</td><td class="num ${x.los ? 'bad' : ''}">${x.los}</td><td class="num">${x.metrics.area_infringements}</td>
+      <td class="num">${x.metrics.assume_mean_delay_s ?? '–'}</td><td class="num">${x.metrics.request_mean_response_s ?? '–'}</td><td class="num">${x.grade ?? '–'}</td></tr>`).join('') + `</tbody></table></div>
+    <p class="dim" style="font-size:12px">The instructors' written evaluations, and your acknowledgements, are on the home page (Evaluations).</p>`;
+  return h;
+}
+function drawController(Cc, dims) {
+  const s = Cc.sessions, labels = s.map((x, i) => `#${i + 1} ${d8(x.date)}`);
+  chart('cLos', { type: 'bar', data: { labels, datasets: [
+    { label: 'losses', data: s.map(x => x.los), backgroundColor: '#ff6b6b99' },
+    { label: 'per hour', data: s.map(x => x.los_per_hour), type: 'line', borderColor: C.c, backgroundColor: C.c, tension: .25, spanGaps: true }] }, options: lineOpts('') });
+  chart('cGrades', { type: 'line', data: { labels, datasets: [{ label: 'overall', data: s.map(x => x.grade), borderColor: '#fff', backgroundColor: '#fff', borderWidth: 3, spanGaps: true }]
+    .concat(dims.map((d, k) => ({ label: d.label, data: s.map(x => x.scores ? x.scores[d.key] : null), borderColor: PAL[k + 1], backgroundColor: PAL[k + 1], spanGaps: true, borderWidth: 1.5 }))) },
+    options: lineOpts('out of 5', { scales: { y: { min: 0, max: 5 } } }) });
+  const M = k => s.map(x => x.metrics[k] || 0);
+  chart('cOther', { type: 'bar', data: { labels, datasets: [
+    { label: 'area infringements', data: M('area_infringements'), backgroundColor: '#e0c13c' }, { label: 'RVSM', data: M('rvsm_violations'), backgroundColor: '#ff8a8a' },
+    { label: 'wrong-direction exits', data: M('wrong_direction_exits'), backgroundColor: '#d79bff' }, { label: 'weather penetrations', data: M('weather_penetrations'), backgroundColor: '#9ae6e6' },
+    { label: 'requests expired', data: M('requests_expired'), backgroundColor: '#7fb8ff' }] },
+    options: { ...lineOpts(''), scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } } });
+  chart('cTimes', { type: 'line', data: { labels, datasets: [
+    { label: 'assume (mean s)', data: s.map(x => x.metrics.assume_mean_delay_s), borderColor: C.a, backgroundColor: C.a, spanGaps: true, tension: .25 },
+    { label: 'answer a request (mean s)', data: s.map(x => x.metrics.request_mean_response_s), borderColor: C.b, backgroundColor: C.b, spanGaps: true, tension: .25 }] }, options: lineOpts('seconds') });
+  chart('cDims', { type: 'radar', data: { labels: dims.map(d => d.label), datasets: [{ label: 'average', data: dims.map(d => Cc.dims_avg[d.key]), borderColor: C.a, backgroundColor: '#5fd3a333' }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#1f2b38' }, angleLines: { color: '#1f2b38' } } } } });
+}
+
+function pilotPane(P, dims) {
+  let h = kpis([[P.ratings.length, 'ratings received'], [P.mean_grade, 'mean overall grade (out of 5)']]);
+  h += `<div class="charts">` + box('pGrades', 'Ratings from the controllers', 'overall grade and each dimension, out of 5') + box('pDims', 'Your profile', 'average of each dimension') + `</div>`;
+  h += `<h2>Comments</h2>` + P.ratings.slice().reverse().map(r => `<div class="card" style="margin-bottom:8px"><b>${esc(r.exercise || '')}</b> <span class="dim">· ${fmtDate(r.date)} · ${esc(r.rater)} · ${r.grade}/5</span>${r.comment ? `<div style="white-space:pre-wrap;margin-top:6px">${esc(r.comment)}</div>` : ''}</div>`).join('');
+  return h;
+}
+function drawPilot(P, dims) {
+  const labels = P.ratings.map((r, i) => `#${i + 1} ${d8(r.date)}`);
+  chart('pGrades', { type: 'line', data: { labels, datasets: [{ label: 'overall', data: P.ratings.map(r => r.grade), borderColor: '#fff', backgroundColor: '#fff', borderWidth: 3 }]
+    .concat(dims.map((d, k) => ({ label: d.label, data: P.ratings.map(r => r.scores[d.key]), borderColor: PAL[k + 1], backgroundColor: PAL[k + 1], borderWidth: 1.5 }))) },
+    options: lineOpts('out of 5', { scales: { y: { min: 0, max: 5 } } }) });
+  chart('pDims', { type: 'radar', data: { labels: dims.map(d => d.label), datasets: [{ label: 'average', data: dims.map(d => P.dims_avg[d.key]), borderColor: C.b, backgroundColor: '#7fb8ff33' }] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#1f2b38' }, angleLines: { color: '#1f2b38' } } } } });
+}
+
+(async () => {
+  await header('/stats');
+  const S = await api('/api/stats'), dims = S.dimensions;
+  const panes = [];
+  if (S.instructor) panes.push(['instructor', 'As instructor', instructorPane(S.instructor), () => drawInstructor(S.instructor)]);
+  if (S.controller) panes.push(['controller', 'As controller', controllerPane(S.controller, dims.atc), () => drawController(S.controller, dims.atc)]);
+  if (S.pilot) panes.push(['pilot', 'As pseudo-pilot', pilotPane(S.pilot, dims.pilot), () => drawPilot(S.pilot, dims.pilot)]);
+  if (!panes.length) { $('#none').style.display = ''; return; }
+  $('#tabs').innerHTML = panes.map(p => `<button data-p="${p[0]}">${p[1]}</button>`).join('');
+  $('#panes').innerHTML = panes.map(p => `<div class="pane" data-pane="${p[0]}">${p[2]}</div>`).join('');
+  const drawn = {};
+  const show = k => { $$('.pane').forEach(x => x.classList.toggle('on', x.dataset.pane === k)); $$('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.p === k));
+    if (!drawn[k]) { drawn[k] = 1; panes.find(p => p[0] === k)[3](); } };
+  $$('#tabs button').forEach(b => b.onclick = () => show(b.dataset.p));
+  show(panes[0][0]);
+})();
+</script>
+</body>
+</html>

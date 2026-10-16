@@ -26,7 +26,7 @@ app = FastAPI(
                 "Coordinates in NM (origin = sector centre, x east, y north).",
 )
 from .platform import config as pconfig
-from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec
+from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec, stats as pstats
 from .platform.access import AccessMiddleware, seat_for
 
 if pconfig.AUTH == "off":
@@ -41,6 +41,7 @@ app.include_router(pauth.router)
 app.include_router(pex.router)
 app.include_router(pcomms.router)
 app.include_router(prec.router)
+app.include_router(pstats.router)
 
 
 @app.on_event("startup")

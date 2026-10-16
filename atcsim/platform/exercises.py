@@ -327,6 +327,30 @@ def end_exercise(eid: str, request: Request):
     return end(eid)
 
 
+def summarize_metrics(w) -> dict:
+    """The numbers kept per exercise (the full metrics stay in the recording)."""
+    m = w.metrics()
+    asm = m.get("assumption") or {}
+    req = m.get("requests") or {}
+    sep = m.get("separation") or {}
+    return {
+        "los_events": sep.get("loss_events", 0), "los_seconds": sep.get("loss_seconds", 0),
+        "min_separation_nm": min([x["min_horizontal_nm"] for x in sep.get("losses", []) if x.get("min_horizontal_nm") is not None] or [None])
+        if sep.get("losses") else None,
+        "area_infringements": (m.get("airspace") or {}).get("infringement_events", 0),
+        "rvsm_violations": len((m.get("rvsm") or {}).get("violations", [])),
+        "wrong_direction_exits": len((m.get("semicircular") or {}).get("wrong_direction_exits", [])),
+        "weather_penetrations": len((m.get("weather") or {}).get("penetrations", [])),
+        "assume_mean_delay_s": asm.get("mean_delay_s"), "never_assumed": len(asm.get("never_assumed") or []),
+        "requests": req.get("total", 0), "request_mean_response_s": req.get("mean_response_time_s"),
+        "requests_expired": (req.get("by_status") or {}).get("expired", 0),
+        "extra_track_miles": (m.get("traffic") or {}).get("extra_track_miles", 0),
+        "aircraft": (m.get("traffic") or {}).get("total", 0),
+        "atc_entries": sum(1 for e in w.events if e.get("type") == "atc_entry"),
+        "instructions": (m.get("instructions") or {}).get("issued", 0),
+    }
+
+
 def end(eid: str) -> dict:
     """Stop the simulation, close the voice room, render the recording."""
     from . import comms, recorder
@@ -334,6 +358,11 @@ def end(eid: str) -> dict:
     if s is not None:
         with s.lock:
             s.status = "finished"
+            try:                                   # the exercise's results, for the statistics
+                db.x("UPDATE exercises SET metrics=?, sim_time_s=?, multi=? WHERE id=?",
+                     (db.dumps(summarize_metrics(s.world)), round(s.world.t, 1), 1 if s.multi else 0, eid))
+            except Exception:  # noqa: BLE001 - never block the end of an exercise
+                pass
     rec_id = recorder.finish(eid, s)
     comms.hub.close_room(eid)
     if s is not None:

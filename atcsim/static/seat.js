@@ -42,7 +42,8 @@
     SID = null;                                   // stop polling the finished session
     if (ws) { try { ws.onclose = null; ws.close(); } catch (e) {} }
     const b = $('#pauseBanner'); b.style.display = 'block'; b.style.color = '#c9d6e2';
-    b.innerHTML = 'This exercise has ended. <a href="/" style="pointer-events:auto;color:#7fb8ff">Back to the home page</a>';
+    b.innerHTML = 'This exercise has ended. ' + (SEAT === 'pilot' ? '' : '<a href="/#evaluations" style="pointer-events:auto;color:#7fb8ff">Evaluate it</a> · ') +
+      '<a href="/" style="pointer-events:auto;color:#7fb8ff">Home</a>';
     b.style.pointerEvents = 'auto';
   }
   function tick() {
@@ -380,7 +381,7 @@
     });
     $('#endBtn').onclick = async () => {
       if (!confirm('End this exercise for everybody? The recording (radar + all audio) is then turned into an .mp4 on the home page.')) return;
-      try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); showEnded(); setTimeout(() => location.href = '/', 1500); } catch (e) { $('#exMsg').textContent = e.message; }
+      try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); showEnded(); setTimeout(() => location.href = '/#evaluations', 1500); } catch (e) { $('#exMsg').textContent = e.message; }
     };
     renderMembers();
     setInterval(async () => { try { const d = await api(`/api/exercises/${EXID}`); EXINFO.members = d.members; renderMembers(); } catch (e) {} }, 6000);
