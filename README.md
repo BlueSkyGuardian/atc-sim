@@ -50,6 +50,19 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     the pseudo-pilot flies what was said on the frequency. When the level the aircraft actually selected differs
     from the controller's CFL it appears in amber after the CFL (`S300`), as Mode S selected level does, so a wrong
     readback or execution is visible.
+  - **Label line 3:** ground speed, speed and heading. A value being changed shows current›assigned in a highlight
+    colour (`M78›76`, `127›250`) until the aircraft reaches it; then only the assigned value (`M76`, `H250`). On the
+    controller's seat "assigned" is what the controller entered; elsewhere it is what the aircraft was told.
+  - **Long press** on a label (or an aircraft): its route from the present position, every point with the minutes to
+    it, in a bright colour, while held and 4 s after.
+  - **RBL** between two aircraft, an aircraft and any point of the map (snapped to a fix when close to one), or two
+    points. A point stands still: the CPA is the aircraft's closest approach to it.
+  - **⚙ Display:** zoom, label font, point-name font, aircraft symbol, speed vector length, history dots, weather
+    opacity, and the colours of the scope (background, boundaries, sector lines, airways, RAD, points, aerodromes…),
+    of each aircraft state (assumed, calling, not concerned, handed off, selected, STCA, loss) and of each label line
+    (callsign, level, speed/heading, info; *auto* = the state colour), the changing-value and Mode S highlights.
+    Saved in the browser; the controller video uses the controller's settings.
+  - **Assume again:** a decontrolled aircraft is taken back with ASSUME in its label menu or a double-click.
   - **Decontrol by hand:** an aircraft that leaves the sector stays assumed (full label, *left sector · decontrol*)
     and keeps flying its flight plan in the next sectors until the controller decontrols it (label menu
     **DECONTROL**, or `CS REL`); it then turns grey as another sector's traffic and leaves the picture once well
@@ -67,6 +80,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     **Heading** (left / right / shortest, resume own navigation), **Speed** (Mach, knots now, on conversion, resume
     normal), **Direct** (the next points of the route as buttons, or any point), **Weather** deviation. The result,
     or the aircraft's *unable …*, shows under it. Enter validates a field.
+  - **Weather does not block the pseudo-pilot:** a heading or direct into weather is executed, with a note
+    (the simulated pilots of the agent API still refuse them, as a real crew would).
   - **Can do now:** the deck shows the aircraft's present limits and refreshes them every 10 s: the levels it may
     be given (FL100 to the sector's top, or FL50–FL600 once it is in another sector) and its maximum level at this
     weight, climb rate available now, idle descent rate (and with speed brakes), turn radius, assignable Mach and

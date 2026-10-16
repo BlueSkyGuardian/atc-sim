@@ -106,7 +106,10 @@ class Capture:
                                    (a.formation or {}).get("size"), 1 if a.military else 0,
                                    [a.arr.get("tod_in_nm"), a.arr.get("loa_latest_descent_in_nm"), a.arr.get("runway"),
                                     a.vs_fpm < -100 or a.cleared_alt_ft < a.alt_ft - 50]
-                                   if a.destination else None])
+                                   if a.destination else None,
+                                   [int(round(a.hdg)) % 360 or 360,
+                                    (f"M{int(round(a.speed_target()[1] * 100))}" if a.speed_target()[0] == "mach"
+                                     else f"I{int(round(a.speed_target()[1]))}") if a.speed_assigned else None]])
                         route = [x for x in a.route if not x.startswith("@")]
                         if self._routes.get(a.callsign) != route:
                             self._routes[a.callsign] = route

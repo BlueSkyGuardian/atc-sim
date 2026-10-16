@@ -150,7 +150,7 @@
   }
   function refreshMenuHead() {
     const a = allAc().find(x => x.callsign === menuCs); if (!a) { closeMenu(); return; }
-    const calling = a.on_frequency && !a.assumed && !a.released && a.status === 'active';
+    const calling = !a.assumed && (a.on_frequency || a.released);     // first call, or taking it back after a decontrol
     $('#lmRelease').style.display = a.assumed ? '' : 'none';
     $('#lmHead').innerHTML = `${a.callsign} <span class="c-dim" style="font-weight:400">${a.type} · FL${a.fl}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ''} · ${a.flight_plan && a.flight_plan.departure || ''}→${a.flight_plan && a.flight_plan.destination || ''}</span>`;
     $('#lmAssume').style.display = calling ? '' : 'none';

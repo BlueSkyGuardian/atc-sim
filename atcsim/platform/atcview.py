@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import bisect
 import json
+import re
 import math
 import os
 import shutil
@@ -126,7 +127,22 @@ class View:
         self.V = v.get("V") or {}
         self.wx = v.get("wx") or ["cappi", 350, True]
         self.lo = v.get("lo") or {}
-        self.key = json.dumps([self.w, self.h, self.cx, self.cy, self.s, self.V], sort_keys=True)
+        self.th = v.get("th") or {}                # the controller's display settings (colours, sizes)
+        self.key = json.dumps([self.w, self.h, self.cx, self.cy, self.s, self.V, self.th], sort_keys=True)
+
+    def c(self, key: str, default):
+        """A colour of the controller's display settings (or the default)."""
+        v = self.th.get(key)
+        if not v:
+            return default
+        r = hexc(v, None)
+        return tuple(r[:3]) if r else default
+
+    def n(self, key: str, default: float) -> float:
+        try:
+            return float(self.th.get(key, default))
+        except (TypeError, ValueError):
+            return default
 
     def P(self, x: float, y: float):
         return (self.ox + self.k * (self.w / 2 + (x - self.cx) * self.s),
@@ -156,7 +172,7 @@ class Renderer:
     def map_layer(self, vw: View) -> Image.Image:
         if self._map_key == vw.key:
             return self._map
-        img = Image.new("RGB", (self.W, self.H), COL["bg"])
+        img = Image.new("RGB", (self.W, self.H), vw.c("bg", COL["bg"]))
         d = ImageDraw.Draw(img)
         k, sec, wp = vw.k, self.sec, self.wp
         poly = lambda pts: [vw.P(*p) for p in pts] + [vw.P(*pts[0])]
@@ -165,18 +181,18 @@ class Renderer:
             ctl = set(sec.get("controlled_sectors") or [])
             for sc in sectors:
                 if vw.on("sectors"):
-                    dashed(d, poly(sc["polygon"]), (47, 122, 95), 1, 3 * k, 4 * k)
+                    dashed(d, poly(sc["polygon"]), vw.c("sectorLines", (47, 122, 95)), 1, 3 * k, 4 * k)
                 if vw.on("freqs"):
                     cx = sum(p[0] for p in sc["polygon"]) / len(sc["polygon"])
                     cy = sum(p[1] for p in sc["polygon"]) / len(sc["polygon"])
                     x, y = vw.P(cx, cy)
                     d.text((x - 50 * k, y - 8 * k), f"{sc['name'].upper()} {sc.get('frequency') or ''}",
-                           fill=(63, 156, 122) if sc["id"] in ctl else (43, 90, 73), font=font(10.5 * k))
+                           fill=vw.c("freqs", (63, 156, 122)) if sc["id"] in ctl else tuple(int(v * 0.7) for v in vw.c("freqs", (63, 156, 122))), font=font(10.5 * k))
         if sec.get("outline"):
-            d.line(poly(sec["outline"]), fill=(45, 66, 88), width=max(1, round(1.2 * k)))
+            d.line(poly(sec["outline"]), fill=vw.c("outline", (45, 66, 88)), width=max(1, round(1.2 * k)))
         shape = (sec.get("shape") or {}).get("polygon") or (sec.get("shape") or {}).get("corners") or []
         if shape:
-            d.line(poly(shape), fill=(74, 104, 134), width=max(1, round(1.8 * k)))
+            d.line(poly(shape), fill=vw.c("sector", (74, 104, 134)), width=max(1, round(1.8 * k)))
         route_keys = {tuple(r) for r in sec.get("routes") or []}
         for r in sec.get("routes") or []:
             rad = tuple(r) in self.rad
@@ -188,11 +204,11 @@ class Renderer:
             if len(pts) < 2:
                 continue
             if rad:
-                dashed(d, pts, (42, 63, 51), 1, 6 * k, 6 * k)
+                dashed(d, pts, vw.c("rad", (42, 63, 51)), 1, 6 * k, 6 * k)
                 if tuple(reversed(r)) not in route_keys:
                     arrows(d, pts, (61, 92, 72), 6 * k)
             else:
-                d.line(pts, fill=(27, 40, 53), width=1)
+                d.line(pts, fill=vw.c("airways", (27, 40, 53)), width=1)
         if vw.on("routes"):
             for name, aw in (sec.get("airways") or {}).items():
                 p = aw.get("points") or []
@@ -200,12 +216,12 @@ class Renderer:
                 if i + 1 >= len(p) or p[i] not in wp or p[i + 1] not in wp:
                     continue
                 mx, my = vw.P((wp[p[i]][0] + wp[p[i + 1]][0]) / 2, (wp[p[i]][1] + wp[p[i + 1]][1]) / 2)
-                text(img, (mx + 4 * k, my - 8 * k), name, (58, 80, 104), font(9.5 * k))
+                text(img, (mx + 4 * k, my - 8 * k), name, vw.c("airwayNames", (58, 80, 104)), font(9.5 * k))
                 if aw.get("one_way") and all(n in wp for n in p):
                     arrows(d, [vw.P(*wp[n]) for n in p], (58, 80, 104), 6 * k)
         ext, xfer = set(sec.get("external_points") or []), set(sec.get("transfer_points") or [])
         cops = set(sec.get("coordination_points") or [])
-        f = font(10.5 * k)
+        f = font(vw.n("nameFont", 10.5) * k)
         for n, p in wp.items():
             x, y = vw.P(*p)
             if not (-20 < x < self.W + 20 and -20 < y < self.H + 20):
@@ -214,12 +230,12 @@ class Renderer:
                 d.line([(x - 3 * k, y), (x + 3 * k, y)], fill=(61, 85, 108))
                 continue
             if n in ext:
-                c = (65, 88, 110)
+                c = vw.c("extPoints", (65, 88, 110))
                 d.polygon([(x, y - 4 * k), (x + 4 * k, y), (x, y + 4 * k), (x - 4 * k, y)], outline=c)
                 if vw.on("names"):
                     text(img, (x + 6 * k, y - 4 * k), n, c, f)
                 continue
-            c = (92, 122, 150)
+            c = vw.c("points", (92, 122, 150))
             tri = [(x, y - 5 * k), (x + 4.5 * k, y + 3.5 * k), (x - 4.5 * k, y + 3.5 * k)]
             d.polygon(tri, fill=c if n in xfer else None, outline=c)
             if vw.on("names"):
@@ -286,10 +302,18 @@ class Renderer:
         if wx_meta is not None and wx_on:
             w = self.weather(vw, wx_meta)
             if w:
-                img.paste(w[0], w[1], w[0])
+                im, pos_ = w
+                a = vw.n("wxAlpha", 1.0)
+                if a < 0.99:
+                    im = im.copy()
+                    im.putalpha(im.getchannel("A").point(lambda v: int(v * a)))
+                img.paste(im, pos_, im)
         d = ImageDraw.Draw(img)
         k, wp = vw.k, self.wp
-        f9, f10, f11 = font(9.5 * k), font(10.5 * k), font(11 * k)
+        fs = vw.n("lblFont", 11.0)
+        f9, f10, f11 = font(9.5 * k), font(10.5 * k), font(fs * k)
+        lh = fs * 1.1 * k
+        changed_c = vw.c("changed", (255, 209, 102))
         # cloud tops of the strong cells (the radar's "tops" option)
         if wx_meta is not None and wx_on and (vw.wx[2] if len(vw.wx) > 2 else True):
             drawn = []
@@ -377,18 +401,23 @@ class Renderer:
             cs, x, y, fl, cfl, gs, trk, vs, onf, asm, ent = r[:11]
             typ, nav, nxt, ahdg, spd, dest, entry, form, mil, arr = (r[11:21] + [None] * 10)[:10]
             calling = onf and not asm
-            col = COL["los"] if cs in los else COL["amber"] if cs in warn else COL["sel"] if cs == sel else \
-                (COL["white"] if blink else COL["calling2"]) if calling else COL["assumed"] if onf else COL["other"]
+            col = vw.c("los", COL["los"]) if cs in los else vw.c("stca", COL["amber"]) if cs in warn else \
+                vw.c("selected", COL["sel"]) if cs == sel else \
+                (vw.c("calling", COL["white"]) if blink else COL["calling2"]) if calling else \
+                vw.c("assumed", COL["assumed"]) if onf else vw.c("other", COL["other"])
+            plain = cs not in los and cs not in warn and cs != sel
+            cur_hdg, asg_spd = ((r[21] if len(r) > 21 and r[21] else None) or [None, None])[:2]
             px, py = vw.P(x, y)
             if not (-200 < px < self.W + 200 and -200 < py < self.H + 200):
                 continue
             if vw.on("trails"):
                 dim = tuple(int(c * 0.55) for c in col)
-                for (tx, ty) in trail.get(cs, []):
+                for (tx, ty) in trail.get(cs, [])[:int(vw.n("trail", 12))]:
                     qx, qy = vw.P(tx, ty)
                     d.rectangle([qx - 1.2 * k, qy - 1.2 * k, qx + 1.2 * k, qy + 1.2 * k], fill=dim)
             a = math.radians(trk)
-            vx, vy = vw.P(x + math.sin(a) * gs / 30, y + math.cos(a) * gs / 30)
+            vmin = vw.n("vectorMin", 2.0)
+            vx, vy = vw.P(x + math.sin(a) * gs / 60 * vmin, y + math.cos(a) * gs / 60 * vmin)
             d.line([(px, py), (vx, vy)], fill=col, width=max(1, round(1.2 * k)))
             if cs in los or cs in warn:          # half-minimum halo: two halos touching = the separation minimum
                 rr = sep_h / 2 * vw.s * k
@@ -408,7 +437,7 @@ class Renderer:
                             text(img, (tx - 3 * k, ty - 6 * k), lbl, c, font(10 * k, bold=True))
                             break
                         left -= L
-            h = 3.5 * k
+            h = vw.n("symbol", 7.0) / 2 * k
             d.rectangle([px - h, py - h, px + h, py + h], outline=col, width=max(1, round(1.5 * k)))
             # data block, as on the controller's seat
             e = ent if isinstance(ent, list) else [None] * 5
@@ -421,7 +450,33 @@ class Renderer:
             if nxt in self.cops:
                 rt = routes.get(cs, [])
                 nxt = next((n for n in rt[rt.index(nxt) + 1:] if n not in self.cops), "") if nxt in rt else ""
-            l3 = f"{gs}" + (f" {espd}" if espd else "") + (f" H{int(ehdg):03d}" if ehdg else f" >{edct}" if edct else f" >{nxt or ''}")
+            # line 3 as on the radar page: gs · speed (current›assigned while changing) · heading (current›assigned)
+            segs = [(f"{gs} ", False)]
+            tgt = None
+            if espd:
+                m_ = re.match(r"^M?0?\.?(\d{2})$", str(espd)) if str(espd)[:1] in "M.0" else None
+                m2 = re.match(r"^[SK]?(\d{3})(KT)?$", str(espd))
+                tgt = f"M{m_.group(1)}" if m_ else f"I{m2.group(1)}" if m2 else None
+            elif asg_spd:
+                tgt = asg_spd
+            cur = spd or ""
+            if tgt and cur and tgt != cur:
+                same = tgt[0] == cur[0]
+                try:
+                    small = same and abs(int(tgt[1:]) - int(cur[1:])) <= (0 if cur[0] == "M" else 3)
+                except ValueError:
+                    small = False
+                segs.append((tgt, False) if small else (f"{cur}›{tgt[1:] if same else tgt}", True))
+            else:
+                segs.append((cur, False))
+            hdg_t = int(ehdg) if ehdg else (ahdg if nav != "L" and ahdg is not None else None)
+            if hdg_t is not None and cur_hdg is not None:
+                dd = abs((cur_hdg - hdg_t + 540) % 360 - 180)
+                pre = " DEV" if nav == "W" and not ehdg else " H"
+                segs.append((f"{pre}{hdg_t:03d}", False) if dd <= 3 else (f" {cur_hdg:03d}›{hdg_t:03d}", True))
+            else:
+                segs.append((f" >{edct or nxt or ''}", bool(edct and edct != nxt)))
+            l3 = "".join(t for t, _ in segs)
             l4 = (f"→{dest}" if dest and dest != "ZZZZ" else "") if onf else f"prev sector → {entry or ''}"
             if onf and arr and arr[0] is not None:
                 l4 = f"→{dest} {arr[2] or ''} TOD {round(arr[0])}"
@@ -433,26 +488,58 @@ class Renderer:
                 d.line([(px, py), (bx + (60 * k if o[0] < 0 else -2 * k), by + (26 * k if o[1] < 0 else -10 * k))],
                        fill=tuple(int(c * 0.7) for c in col))
             top = by - 10 * k
-            text(img, (bx, top), l1, col, f11)
-            text(img, (bx, top + 12 * k), l2, col, f11)
+            pc = (lambda key, dflt: vw.c(key, dflt) if plain else dflt)
+            text(img, (bx, top), l1, pc("lblCallsign", col), f11)
+            text(img, (bx, top + lh), l2, pc("lblLevel", col), f11)
             if sfl:
-                text(img, (bx + d.textlength(l2, font=f11), top + 12 * k), sfl, COL["amber"], f11)
-            text(img, (bx, top + 24 * k), l3, col, f11)
+                text(img, (bx + d.textlength(l2, font=f11), top + lh), sfl, vw.c("sfl", COL["amber"]), f11)
+            x3 = bx
+            for t, chg in segs:
+                text(img, (x3, top + 2 * lh), t, changed_c if chg else pc("lblSpeed", col), f11)
+                x3 += d.textlength(t, font=f11)
             if l4:
-                text(img, (bx, top + 36 * k), l4, tuple(int(c * 0.8) for c in col), f11)
-        # range and bearing lines
+                text(img, (bx, top + 3 * lh), l4, pc("lblInfo", tuple(int(c * 0.8) for c in col)), f11)
+        # the route shown by a long press on a label
+        rs = vw.v.get("rs")
+        if rs and rs in {r[0] for r in acs}:
+            R = next(r for r in acs if r[0] == rs)
+            rc = vw.c("routeShow", (255, 79, 216))
+            rt = routes.get(rs, [])
+            nx = R[13] if len(R) > 13 else None
+            names = [n for n in (rt[rt.index(nx):] if nx in rt else []) if n in wp]
+            pts = [vw.P(R[1], R[2])] + [vw.P(*wp[n]) for n in names]
+            if len(pts) > 1:
+                d.line(pts, fill=rc, width=max(2, round(2.5 * k)))
+                dist_, prev = 0.0, (R[1], R[2])
+                for n in names:
+                    dist_ += math.hypot(wp[n][0] - prev[0], wp[n][1] - prev[1])
+                    prev = wp[n]
+                    x_, y_ = vw.P(*wp[n])
+                    d.ellipse([x_ - 3.5 * k, y_ - 3.5 * k, x_ + 3.5 * k, y_ + 3.5 * k], fill=rc)
+                    if n not in self.cops:
+                        text(img, (x_ + 8 * k, y_ - 16 * k), f"{n} +{round(dist_ / max(R[5], 1) * 60)}'", rc, f10)
+        # range and bearing lines (aircraft or fixed points)
         by_cs = {r[0]: r for r in acs}
         for pair in vw.v.get("rbl") or []:
-            A, B = by_cs.get(pair[0]), by_cs.get(pair[1])
+            ends = []
+            for e_ in pair:
+                if isinstance(e_, str):
+                    ends.append(by_cs.get(e_))
+                elif isinstance(e_, list) and len(e_) >= 2:
+                    ends.append([e_[2] if len(e_) > 2 else "", e_[0], e_[1], None, None, 0, 0])
+                else:
+                    ends.append(None)
+            A, B = ends
             if not A or not B:
                 continue
             t, dd, rng, brg = cpa(A, B)
             (ax, ay), (bx2, by2) = vw.P(A[1], A[2]), vw.P(B[1], B[2])
-            c = (215, 155, 255)
+            c = vw.c("rbl", (215, 155, 255))
             d.line([(ax, ay), (bx2, by2)], fill=c, width=max(1, round(1.3 * k)))
             mx, my = (ax + bx2) / 2, (ay + by2) / 2
-            t1 = f"{int(round(brg)):03d}° {rng:.1f} NM  ΔFL {abs(A[3] - B[3])}"
-            t2 = f"CPA {dd:.1f} NM in {int(t // 60):02d}:{int(t % 60):02d}" if t > 0 else "diverging"
+            moving = A[5] or B[5]
+            t1 = f"{int(round(brg)):03d}° {rng:.1f} NM" + (f"  ΔFL {abs(A[3] - B[3])}" if A[3] is not None and B[3] is not None else "")
+            t2 = (f"CPA {dd:.1f} NM in {int(t // 60):02d}:{int(t % 60):02d}" if t > 0 else "diverging") if moving else ""
             d.rectangle([mx - 4 * k, my - 12 * k, mx + max(d.textlength(t1, font=f10), d.textlength(t2, font=f10)) + 4 * k,
                          my + 16 * k], fill=(11, 16, 22))
             text(img, (mx, my - 10 * k), t1, c, f10)

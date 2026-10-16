@@ -64,7 +64,9 @@
   function viewState() {
     return { w: cv.clientWidth, h: cv.clientHeight, cx: +view.cx.toFixed(3), cy: +view.cy.toFixed(3), s: +(view.s / devicePixelRatio).toFixed(5),
       V: { ...V }, wx: [$('#wxMode').value, $('#wxMode').value === 'sel' ? selFl() : (+$('#wxFl').value || 350), $('#wxCells').checked],
-      lo: labelOff, sel: selected || null, rbl: rbls.map(r => [r.a, r.b]) };
+      lo: labelOff, sel: selected || null,
+      rbl: rbls.map(r => [r.a, r.b].map(t => typeof t === 'string' ? t : [+t.x.toFixed(2), +t.y.toFixed(2), t.name || ''])),
+      rs: routeShow && routeShow.until > performance.now() ? routeShow.cs : null, th: TH };
   }
   function start() {
     if (started) return; started = true;

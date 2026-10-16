@@ -174,6 +174,15 @@ class World:
         if itype not in INSTRUCTION_TYPES:
             raise InstructionError(f"unknown instruction type '{itype}', expected one of {INSTRUCTION_TYPES}")
         cs = str(instr.get("callsign", "")).upper()
+        if itype == "assume" and not by_pilot:      # first call, or taking back an aircraft decontrolled earlier
+            ac = self.aircraft.get(cs)
+            if ac is None or not (ac.active or ac.outside):
+                raise InstructionError(f"unknown callsign {cs}")
+            if ac.assumed:
+                raise InstructionError(f"{cs} is already assumed")
+            if not (ac.on_frequency or ac.released or ac.outside):
+                raise InstructionError(f"{cs} is not on your frequency yet (still with the previous sector)")
+            return {"type": "assume", "callsign": cs}
         if itype == "release":                       # the controller decontrols the aircraft (by hand)
             ac = self.aircraft.get(cs)
             if ac is None or not (ac.active or ac.outside):
@@ -251,7 +260,9 @@ class World:
             out["heading"] = 360 if round(h) % 360 == 0 else int(round(h))
             out["turn"] = turn
             if pilot.heading_into_weather(self, ac, float(out["heading"])):
-                raise InstructionError(f"{cs} unable heading {out['heading']:03d}, weather on that heading")
+                if not by_pilot:
+                    raise InstructionError(f"{cs} unable heading {out['heading']:03d}, weather on that heading")
+                out["wx_note"] = f"weather ahead on heading {out['heading']:03d}"
         elif itype == "direct":
             wp = str(instr.get("waypoint", instr.get("value", ""))).upper()
             if wp not in self.waypoints or wp.startswith("@"):
@@ -260,7 +271,9 @@ class World:
                 raise InstructionError(f"{cs} is already at {wp}")
             from .geometry import bearing
             if pilot.heading_into_weather(self, ac, bearing(ac.pos, self.waypoints[wp])):
-                raise InstructionError(f"{cs} unable direct {wp}, weather on the direct track")
+                if not by_pilot:                    # the simulated pilot refuses; a pseudo-pilot decides for himself
+                    raise InstructionError(f"{cs} unable direct {wp}, weather on the direct track")
+                out["wx_note"] = f"weather on the direct track to {wp}"
             out["waypoint"] = wp
         elif itype == "deviation":
             side = str(instr.get("side", "either")).lower()
@@ -395,6 +408,8 @@ class World:
         cs = norm["callsign"]
 
         rec["warnings"] = self._warnings(norm)
+        if norm.get("wx_note"):
+            rec["warnings"].append(norm.pop("wx_note"))
         if rec["warnings"] and norm["type"] == "altitude":
             self.m["wrong_direction_clearances"] += sum(1 for x in rec["warnings"] if "direction" in x)
         if norm["type"] == "release":
@@ -493,11 +508,15 @@ class World:
 
     def _assume(self, ac: Aircraft, by: str) -> None:
         """The controller assumes the aircraft (accepts the transfer): from now on it is under our control."""
+        again = ac.released or ac.assumed_t is not None       # taking back an aircraft decontrolled earlier
         ac.assumed, ac.released = True, False
-        ac.assumed_t = self.t
         wait = round(self.t - (ac.first_contact_t if ac.first_contact_t is not None else self.t), 1)
-        if self.record:
+        if self.record and not again:
             self.m.setdefault("assume_times_s", []).append(wait)
+        ac.assumed_t = self.t
+        if again:
+            self._event("assumed", callsign=ac.callsign, after_s=0, text=f"{ac.callsign} assumed again")
+            return
         for req in self.requests.values():
             if req.callsign == ac.callsign and req.kind == "checkin" and req.status == "pending":
                 self._resolve_request(req, "acknowledged", by)
