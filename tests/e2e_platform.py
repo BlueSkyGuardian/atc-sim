@@ -170,6 +170,24 @@ with sync_playwright() as p:
     ok(any(t.strip() == "WXL" and c == wxtag for t, c in segs), "WX tag after a weather deviation entry")
     ok(atc.locator("#lblMenu [data-lv].ok, #lblMenu [data-lv].cf").count() >= 4, "level probe colours the proposed levels")
     atc.keyboard.press("Escape")
+    # exit level (XFL) for the OLDI coordination: key X opens the field
+    atc.evaluate(f"selected = '{calling}'; document.activeElement && document.activeElement.blur()")
+    atc.keyboard.press("x")
+    atc.wait_for_selector("#lblMenu.on")
+    xfl = newfl - 20
+    atc.keyboard.type(str(xfl)); atc.keyboard.press("Enter")
+    atc.wait_for_function(f"() => state.coord && state.coord['{calling}'] && state.coord['{calling}'].xfl === {xfl} && state.coord['{calling}'].xfl_entered")
+    atc.wait_for_timeout(700)
+    ok(any(f" X{xfl}" in ln for ln in texts(calling)), f"label shows CFL and XFL: {texts(calling)[1:3]}")
+    ok("→" in atc.inner_text("#lmCoord"), "label menu shows the coordination: " + atc.inner_text("#lmCoord"))
+    atc.keyboard.press("Escape")
+    atc.evaluate("document.activeElement && document.activeElement.blur()")
+    atc.keyboard.press("o")
+    atc.wait_for_selector("#olWin table")
+    atc.wait_for_timeout(500)
+    ok(atc.locator("#olWin tr[data-cs]").count() > 0, f"O: OLDI messages ({atc.locator('#olWin tr[data-cs]').count()})")
+    atc.screenshot(path=f"{OUT}/07i_oldi.png")
+    atc.keyboard.press("Escape")
     # keyboard: F flight plan, G flight list, M MTCD
     atc.evaluate(f"selected = '{calling}'; document.activeElement && document.activeElement.blur()")
     atc.keyboard.press("f")
@@ -193,7 +211,8 @@ with sync_playwright() as p:
     box = atc.evaluate(f"""() => {{ const l = labelRects.find(r => r.cs === '{calling}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
         return l ? [c.left + (l.x0 + 12) / d, c.top + (l.y0 + l.y1) / 2 / d] : null; }}""")
     atc.mouse.move(*box); atc.wait_for_timeout(900)
-    ok(atc.evaluate(f"window.__drawnLabels['{calling}'].x") > 0, "extended label on hover: " + " | ".join(texts(calling)[-4:]))
+    hv = atc.evaluate("hoverLbl")              # the label under the mouse (another one may lie on top in dense traffic)
+    ok(bool(hv) and atc.evaluate(f"window.__drawnLabels['{hv}'].x") > 0, f"extended label on hover ({hv}): " + " | ".join(texts(hv)[-4:]))
     atc.screenshot(path=f"{OUT}/07g_extended_label.png")
     atc.mouse.move(40, 700)
     # any track can be assumed: one still with the previous sector

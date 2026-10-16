@@ -398,11 +398,13 @@ def command(sid: str, body: Command, request: Request):
 class Entry(BaseModel):
     callsign: str
     cfl: Optional[Union[int, str]] = None
+    xfl: Optional[Union[int, str]] = None
     speed: Optional[str] = None
     heading: Optional[Union[int, str]] = None
     direct: Optional[str] = None
     note: Optional[str] = None
     wx: Optional[str] = None
+    coord: Optional[str] = None
 
 
 @app.post("/sessions/{sid}/entries")
@@ -448,6 +450,19 @@ def mtcd_probe(sid: str, body: MtcdProbe):
             return atctools.probe(s.world, body.callsign, body.cfl, body.heading, body.direct, body.levels)
         except ValueError as e:
             raise HTTPException(400, str(e))
+
+
+@app.get("/sessions/{sid}/oldi")
+def oldi_messages(sid: str, since: int = 0, callsign: Optional[str] = None):
+    """OLDI messages exchanged with the adjacent units (ABI, ACT, REV; dir out = sent by us, in = received),
+    and the coordination state of each aircraft (cleared level, exit level, coordinated level, manual coordination)."""
+    from . import oldi, atctools
+    s = _session(sid)
+    with s.lock:
+        w = s.world
+        abi, act, rev = oldi.settings(w)
+        return {"utc": atctools.utc(w), "abi_s": abi, "act_s": act, "rev_limit_s": rev,
+                "messages": oldi.messages(w, since, callsign), "coord": oldi.coord_view(w)}
 
 
 @app.get("/sessions/{sid}/flightplans")

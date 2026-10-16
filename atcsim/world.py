@@ -104,6 +104,10 @@ class World:
         # aircraft (cleared level, speed, heading, direct). They do not move the aircraft - the pseudo-pilot does.
         self.entries: Dict[str, dict] = {}
         self.multi = False                 # connected exercise (controller enters, pseudo-pilot flies)
+        self.oldi: List[dict] = []         # OLDI messages with the adjacent units (oldi.py)
+        self.coord: Dict[str, dict] = {}   # outbound coordination per aircraft
+        self.coord_in: Dict[str, dict] = {}
+        self.oldi_cfg: dict = {}
         self.start_utc_min = 720.0         # UTC time of day at T+0, minutes
         self.mag_var = 0.0
         self.events: List[dict] = []
@@ -843,6 +847,8 @@ class World:
                 pilot.update(self, ac)
         # 7. monitoring
         if self.record:
+            from . import oldi
+            oldi.update(self)
             self._monitor(dt)
             self._monitor_weather(dt)
             if self.t - self._last_frame_t >= self.recording["every_s"] - 1e-6 or self.finished:
@@ -1327,7 +1333,7 @@ class World:
         out.sort(key=lambda c: c["time_to_los_s"])
         return out
 
-    ENTRY_FIELDS = ("cfl", "speed", "heading", "direct", "note", "wx")
+    ENTRY_FIELDS = ("cfl", "xfl", "speed", "heading", "direct", "note", "wx", "coord")
 
     def enter(self, callsign: str, fields: dict, who: str = "atc") -> dict:
         """Controller's label input (connected mode): cleared level, speed, heading, direct, free note.
@@ -1343,10 +1349,10 @@ class World:
             if v is None or v == "":
                 e.pop(k, None)
                 continue
-            if k == "cfl":
-                v = int(v)
+            if k in ("cfl", "xfl"):
+                v = int(str(v).upper().lstrip("FL").lstrip("F") or 0)
                 if v % 10 or not (0 < v <= 660):
-                    raise InstructionError("cleared level: a flight level, multiple of 10 (e.g. 350)")
+                    raise InstructionError(("exit" if k == "xfl" else "cleared") + " level: a flight level, multiple of 10 (e.g. 350)")
             elif k == "heading":
                 v = int(v)
                 if not (1 <= v <= 360):
@@ -1355,6 +1361,10 @@ class World:
                 v = str(v).upper()
                 if v not in self.waypoints or v.startswith("@"):
                     raise InstructionError(f"unknown point {v}")
+            elif k == "coord":                    # "phone": the controller coordinated the exit by telephone
+                v = str(v).lower()
+                if v != "phone":
+                    raise InstructionError("coord: phone")
             elif k == "wx":                       # weather deviation approved on the frequency: L / R / L20 / R15
                 v = str(v).upper().replace(" ", "")
                 if not re.match(r"^(L|R|Y|LR)?\d{0,3}$", v) or v == "":
@@ -1372,7 +1382,7 @@ class World:
         return e
 
     def state(self, trails: bool = False) -> dict:
-        from . import atctools
+        from . import atctools, oldi
         acs = [a.snapshot(trails) for a in self.aircraft.values() if a.active]
         for d in acs:
             a = self.aircraft[d["callsign"]]
@@ -1385,6 +1395,8 @@ class World:
             "mtcd": atctools.mtcd(self),
             "special": atctools.special_tracks(self),
             "system_cfl": atctools.system_cfls(self),
+            "coord": oldi.coord_view(self),
+            "oldi_last": self.oldi[-1]["id"] if self.oldi else 0,
             "duration_s": self.duration_s,
             "finished": self.finished,
             "aircraft": acs,

@@ -193,7 +193,18 @@ def unit_for_region(region: str) -> Optional[str]:
     return None
 
 
-def adjacent_units(asp, names: List[str], idx_entry: int, idx_exit: int, waypoints) -> Tuple[str, str]:
+_AD_UNIT = (("GM", "GMMM"), ("GC", "GCCC"), ("LPMA", "MADEIRA"), ("LPPS", "MADEIRA"), ("LP", "LPPC"), ("LE", "LECS"))
+
+
+def _unit_of_aerodrome(code: str) -> Optional[str]:
+    for pre, u in _AD_UNIT:
+        if (code or "").upper().startswith(pre):
+            return u
+    return None
+
+
+def adjacent_units(asp, names: List[str], idx_entry: int, idx_exit: int, waypoints, dep: str = "",
+                   dest: str = "") -> Tuple[str, str]:
     """(previous unit, next unit) for a route: the Agadir sector not controlled on the other side of the boundary,
     else the unit of the first neighbouring-region point before the entry / after the exit."""
     from .geometry import bearing
@@ -219,10 +230,15 @@ def adjacent_units(asp, names: List[str], idx_entry: int, idx_exit: int, waypoin
                 u = unit_for_region(info.get("region", ""))
                 if u:
                     return u
-        # by geography: north = Casablanca, south-west = Canarias, west = Lisboa (oceanic)
-        if probe[1] > waypoints[names[i0]][1] + 2 and abs(probe[0] - waypoints[names[i0]][0]) < 4:
-            return "GMMM"
-        return "GCCC" if probe[1] < waypoints[names[i0]][1] else "GMMM"
+        # an aerodrome next door (Morocco, Canaries, Portugal, Spain) on that side of the flight
+        u = _unit_of_aerodrome(dep if step < 0 else dest)
+        if u:
+            return u
+        # by geography: north-east = Casablanca, south = Canarias, north-west = Lisboa (oceanic)
+        dx, dy = probe[0] - pa[0], probe[1] - pa[1]
+        if dy < 0:
+            return "GCCC"
+        return "GMMM" if dx > 0 else "LPPC"
     return side(idx_entry, -1), side(idx_exit, 1)
 
 

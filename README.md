@@ -47,15 +47,29 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   flight-plan list (**FPL**), the **MTCD** list, **?** (shortcuts) and the UTC clock.
   - **Assume any track, any time:** a calling aircraft (blinking, *CALL*), one still with the previous sector (early
     assume; it then calls already assumed), or one decontrolled earlier. Double-click it, ASSUME in its label menu,
-    or key **A**. **Decontrol** (label menu, key **X**, `CS REL`) and take back as often as needed.
+    or key **A**. **Decontrol** (label menu, **Shift+X**, `CS REL`) and take back as often as needed.
   - **Click a label** to enter what was cleared: CFL (with quick levels, coloured by the level probe: green = no
     conflict in 20 min, red = conflict, hover for which), speed (M78, 280, SN), heading, direct (points of the route
-    or any point), **weather deviation** (L, R, L20, either side) and a free note; **Probe** checks the level / heading
+    or any point), **exit level** (XFL), **weather deviation** (L, R, L20, either side) and a free note; **Probe** checks the level / heading
     / direct typed before giving it. This is what the label then shows. The aircraft does not move: the pseudo-pilot
     flies what was said on the frequency.
-  - **System cleared level:** the CFL on the label is the one the system knows: what the controller entered, or
-    else the coordinated level. When the level the aircraft has selected differs it appears in amber after it
-    (`S300`) — only for aircraft with Mode S enhanced surveillance, as on a real system.
+  - **Three levels:** the **current level** (AFL, from Mode C / Mode S), the **cleared level** (CFL, what the
+    controller entered; until then the coordinated level) and the **exit level** (XFL, entered for the coordination
+    with the next unit; empty = the cleared level is coordinated). The level line reads `350↓330 S350 X310 B738`:
+    current, arrow, cleared, the Mode S selected level in amber when it differs from the CFL (enhanced surveillance
+    only), and `X310` when an exit level is entered or differs — cyan once coordinated by ACT, light blue after the
+    ABI, white not yet sent, amber when it breaks the LoA / semicircular rule or needs a phone coordination.
+  - **OLDI coordination** (automatic, for every aircraft you control, with the unit it goes to): **ABI** 20 minutes
+    before the coordination point (again if the exit level changes), **ACT** 10 minutes before (binding: point,
+    estimate, exit level), **REV** when the exit level — or the estimate, by more than 3 minutes — changes after the
+    ACT, and a **LAM** back from the receiving system for each. A change closer than 3 minutes to the point is not
+    sent: `COORD` blinks on the label, the OLDI button shows ⚠, and the label menu says what to coordinate with whom
+    by phone, with a *✓ coordinated by phone* button. The previous units send their ABI / ACT for incoming traffic:
+    an inbound label shows the entry point, the coordinated entry level and the unit (`KORNO F350 ←GMMM`). The
+    **OLDI** window (key **O**) lists every message sent and received; the label menu, the extended label and the
+    flight-plan window show the coordination state. Times per scenario: `"oldi": {"abi_s": 1200, "act_s": 600,
+    "rev_limit_s": 180}`. Pseudo-pilots and instructors, who play the adjacent units, see the same messages and the
+    level coordinated for the selected aircraft.
   - **Label line 3:** ground speed, speed, the **present heading (always)** and the next point of the route (or the
     direct entered). A speed or heading being changed shows current›assigned in a highlight colour (`M78›76`,
     `127›250`). An assigned heading adds a yellow **H**, an approved weather deviation a yellow **WX** (`WXL20`).
@@ -90,8 +104,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   - **RBL:** right-drag from an aircraft or any point to another (no button needed; points snap to a fix), or
     shift-click two, or the RBL button. A point stands still: the CPA is the aircraft's closest approach to it. Drag
     an RBL label to move it; right-click it to remove it.
-  - **Keyboard** (outside text fields): Tab / Shift+Tab next aircraft, C or L cleared level, H heading, S speed,
-    D direct, W weather deviation, N note, A assume, X decontrol, F flight plan, E extended label, R route, B RBL
+  - **Keyboard** (outside text fields): Tab / Shift+Tab next aircraft, C or L cleared level, X exit level,
+    H heading, S speed, D direct, W weather deviation, N note, A assume, Shift+X decontrol, O OLDI, F flight plan, E extended label, R route, B RBL
     from it, Delete last RBL (Shift+Delete all), G flight list, M MTCD, + / − zoom, arrows pan, 0 reset, Esc,
     ? help; Space (held) transmits.
   - **⚙ Display:** zoom, label font, point-name font, aircraft symbol, speed vector length, history dots, weather
@@ -551,6 +565,7 @@ sequencing fix.
 | GET | `/sessions/{id}/separation` | Current pairs and **predicted** conflicts, area infringements and **weather penetrations** |
 | POST | `/sessions/{id}/probe` | What-if for candidate instructions (including replies to requests); changes nothing |
 | GET / POST | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories (20 min) / probe one aircraft: `{"callsign", "cfl"\|"heading"\|"direct"}` or `{"callsign", "levels": [...]}` |
+| GET | `/sessions/{id}/oldi?since=&callsign=` | OLDI messages (ABI, ACT, REV, PHONE; sent / received, LAM) and each aircraft's cleared, exit and coordinated levels |
 | GET | `/sessions/{id}/flightplans` · `/flightplans/{cs}` | Every flight plan / one: FPL message, decoded items, estimates over the points ahead, coordination, correlation |
 | POST | `/sessions/{id}/instructions` · `/command` | Issue instructions / controller shorthand |
 | GET | `/sessions/{id}/requests` · `/events` · `/metrics` · `/instructions` | Logs and scores |
@@ -831,6 +846,7 @@ tests/e2e_platform.py            three browsers with fake microphones through a 
 tests/test_stats.py              evaluations both ways, acknowledgement, statistics
 tests/test_atctools.py           flight plans, MTCD and probe, special-track alerts, early assume
 atcsim/flightplan.py             ICAO flight plans (generator, message, items), surveillance and Mode S data
+atcsim/oldi.py                   cleared / exit levels, OLDI coordination (ABI, ACT, REV, LAM) with the adjacent units
 atcsim/atctools.py               MTCD and probe, special tracks / monitoring alerts, flight-plan list and estimates
 atcsim/static/atctools.js        flight-plan window and list, MTCD list and display, keyboard shortcuts, UTC clock
 tools/fill_flightplans.py        writes complete flight plans into the scenario files

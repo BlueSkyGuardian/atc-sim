@@ -113,4 +113,41 @@ for _ in range(900):
         break
 ok(pre.on_frequency and pre.assumed and not any(q.callsign == pre.callsign and q.kind == "checkin" and q.status == "pending"
                                                 for q in w.requests.values()), "it calls already assumed: nothing to answer")
+# ---- three levels and OLDI: ABI, ACT, REV, refused REV close to the boundary, inbound messages
+from atcsim import oldi  # noqa: E402
+w = build_world(load_scenario("c01_cta_moderate_wx"))
+w.multi = True
+for _ in range(900):
+    w.step(1)
+kinds = {(m["dir"], m["type"]) for m in w.oldi}
+ok({("out", "ABI"), ("out", "ACT"), ("in", "ABI"), ("in", "ACT")} <= kinds, f"OLDI messages {sorted(kinds)}")
+ok(all(m["status"] == "LAM" for m in w.oldi if w.t - m["t"] > 3), "every message acknowledged (LAM)")
+cv = oldi.coord_view(w)
+cs = next(c for c, v in cv.items() if v["state"] == "act" and oldi.time_to_exit(w, w.aircraft[c]) > 400)
+a = w.aircraft[cs]
+ok(cv[cs]["xfl"] == cv[cs]["cfl"] and not cv[cs]["xfl_entered"], f"{cs}: exit level empty = cleared level F{cv[cs]['cfl']}")
+w.enter(cs, {"xfl": cv[cs]["cfl"] - 20})
+w.step(1)
+rev = [m for m in oldi.messages(w, callsign=cs) if m["type"] == "REV"]
+ok(rev and rev[-1]["level"] == cv[cs]["cfl"] - 20 and rev[-1]["unit"] == a.next_unit, f"REV to {a.next_unit}: {rev[-1]['text']}")
+w.enter(cs, {"cfl": cv[cs]["cfl"] - 40})
+w.step(1)
+ok(oldi.coord_view(w)[cs]["xfl"] == cv[cs]["cfl"] - 20, "a new cleared level does not change an entered exit level")
+w.enter(cs, {"xfl": ""})
+w.step(1)
+ok(oldi.messages(w, callsign=cs)[-1]["level"] == cv[cs]["cfl"] - 40, "exit level cleared: the cleared level is coordinated (REV)")
+while oldi.time_to_exit(w, a) > oldi.REV_LIMIT_S - 20:
+    w.step(1)
+n = len(oldi.messages(w, callsign=cs))
+w.enter(cs, {"xfl": cv[cs]["cfl"]})
+w.step(1)
+co = oldi.coord_view(w)[cs]
+ok(len(oldi.messages(w, callsign=cs)) == n and co.get("manual"), "too close to the point: no REV, phone coordination: " + str(co.get("manual")))
+w.enter(cs, {"coord": "phone"})
+w.step(1)
+ok(not oldi.coord_view(w)[cs].get("manual") and oldi.messages(w, callsign=cs)[-1]["type"] == "PHONE", "coordinated by phone: recorded, alert cleared")
+d = atctools.flight_detail(w, cs)
+ok(d["coordination"]["exit"]["level"] == cv[cs]["cfl"] and d["oldi"], "flight plan shows the exit level and the messages")
+inb = [m for m in w.oldi if m["dir"] == "in" and m["type"] == "ACT"]
+ok(all(m["unit"] in ("GMMM", "LPPC", "GCCC", "LECS", "MADEIRA") for m in inb), "inbound ACTs from the adjacent units")
 print("atc tools checks passed")

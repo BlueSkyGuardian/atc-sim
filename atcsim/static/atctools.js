@@ -49,7 +49,8 @@
       <div class="sub">Coordination</div>
       <table><tr><th></th><th>Point</th><th>ETO</th><th>Level</th><th>Unit</th></tr>
         <tr><td class="c-dim">Entry</td><td>${esc(co.entry.point)}</td><td>${esc(co.entry.eto)}</td><td>F${String(co.entry.level).padStart(3, '0')}</td><td>from ${esc(co.entry.from)}</td></tr>
-        <tr><td class="c-dim">Exit</td><td>${esc(co.exit.point)}</td><td>${esc(co.exit.eto || '—')}</td><td>F${String(co.exit.level).padStart(3, '0')}${ent.cfl != null ? ' <span class="c-dim">(CFL)</span>' : ''}</td><td>to ${esc(co.exit.to)}</td></tr></table>
+        <tr><td class="c-dim">Exit</td><td>${esc(co.exit.point)}</td><td>${esc(co.exit.eto || '—')}</td><td>F${String(co.exit.level).padStart(3, '0')} <span class="c-dim">${co.exit.xfl_entered ? 'XFL' : '(= CFL F' + String(co.exit.cfl).padStart(3, '0') + ')'}</span></td><td>to ${esc(co.exit.to)} <span class="c-dim">${esc(co.exit.state || '')}</span></td></tr></table>
+      ${(d.oldi || []).length ? `<div class="sub">OLDI</div><table>${d.oldi.map(m => `<tr><td>${esc(m.utc)}</td><td class="${m.dir}">${m.dir === 'out' ? '→' : '←'} ${esc(m.unit)}</td><td><b>${esc(m.type)}</b></td><td>${esc(m.point)} ${esc(m.eto)}</td><td>F${String(m.level).padStart(3, '0')}</td><td class="c-dim">${esc(m.status)}${m.note ? ' · ' + esc(m.note) : ''}</td></tr>`).join('')}</table>` : ''}
       <div class="sub">Estimates (points ahead)</div>
       <table><tr><th>Point</th><th>ETO</th><th>In</th><th>Dist</th><th></th></tr>${d.etos.map(e => `<tr><td>${esc(e.point)}</td><td>${esc(e.eto)}</td><td>${Math.max(0, Math.round(e.in_s / 60))}'</td><td>${e.dist_nm} NM</td><td class="c-dim">${esc(e.role)}</td></tr>`).join('') || '<tr><td colspan="5" class="c-dim">no point ahead</td></tr>'}</table>
       <div class="sub">Items</div>
@@ -124,14 +125,38 @@
     }
   };
 
+  // ------------------------------------------------------------------ OLDI: coordination messages with the adjacent units
+  let olFilter = 'all';
+  async function renderOldi(force) {
+    const b = document.getElementById('olBtn');
+    const man = state && state.coord ? Object.values(state.coord).filter(c => c.manual).length : 0;   // REV refused: phone
+    if (b) { b.textContent = man ? `OLDI ⚠${man}` : 'OLDI'; b.classList.toggle('hit', man > 0); b.title = man ? `${man} coordination(s) to do by phone (O)` : 'OLDI: coordination messages with the adjacent units (O)'; }
+    if (!isOpen('olWin') || !SID) return;
+    let d; try { d = await api(`/sessions/${SID}/oldi`); } catch (e) { return; }
+    const el = win('olWin', `OLDI <span class="c-dim" style="font-weight:400">coordination with the adjacent units · ABI ${Math.round(d.abi_s / 60)}' · ACT ${Math.round(d.act_s / 60)}' · REV until ${Math.round(d.rev_limit_s / 60)}' before the point</span>`, 80, 60, 660);
+    const body = el.querySelector('.wb');
+    const ms = d.messages.slice().reverse().filter(m => olFilter === 'all' || m.dir === olFilter);
+    const manual = Object.entries(d.coord).filter(([, c]) => c.manual);
+    const html = `<div class="ol-filter">${[['all', 'All'], ['out', 'Sent (to next units)'], ['in', 'Received (from previous units)']].map(([k, t]) => `<button data-of="${k}" class="${olFilter === k ? 'on' : ''}">${t}</button>`).join('')}</div>` +
+      (manual.length ? `<div class="sub" style="color:var(--warn)">Coordination by phone needed</div>` + manual.map(([cs, c]) => `<div class="c-warn" style="font-size:12px;margin-bottom:3px"><b>${esc(cs)}</b> ${esc(c.manual)}</div>`).join('') : '') +
+      `<table><tr><th>UTC</th><th></th><th>Msg</th><th>Callsign</th><th>Unit</th><th>Point</th><th>ETO</th><th>Level</th><th></th></tr>` +
+      ms.slice(0, 200).map(m => `<tr data-cs="${esc(m.callsign)}"><td>${esc(m.utc.slice(0, 2) + ':' + m.utc.slice(2))}</td><td class="${m.dir}">${m.dir === 'out' ? '→' : '←'}</td><td><b>${esc(m.type)}</b></td><td>${esc(m.callsign)}</td><td>${esc(m.unit)}</td><td>${esc(m.point)}</td><td>${esc(m.eto)}</td><td>F${String(m.level).padStart(3, '0')}</td><td class="c-dim">${esc(m.status)}${m.note ? ' · ' + esc(m.note) : ''}</td></tr>`).join('') + '</table>' +
+      (ms.length ? '' : '<div class="empty">no message yet</div>');
+    if (force || body.dataset.h !== html) { body.innerHTML = html; body.dataset.h = html;
+      body.querySelectorAll('[data-of]').forEach(x => x.onclick = () => { olFilter = x.dataset.of; renderOldi(true); });
+      body.querySelectorAll('tr[data-cs]').forEach(tr => tr.onclick = () => { if (allAc().some(a => a.callsign === tr.dataset.cs)) selected = tr.dataset.cs; openFpl(tr.dataset.cs); }); }
+  }
+  setInterval(() => renderOldi(false), 2000);
+  function toggleOldi() { if (isOpen('olWin')) closeWin('olWin'); else { win('olWin', 'OLDI', 80, 60, 660); renderOldi(true); } }
+
   // ------------------------------------------------------------------ help
   const KEYS = [
     ['click', 'select an aircraft (controller: opens its label input)'], ['Tab / Shift+Tab', 'next / previous aircraft (calling first)'],
     ['C or L', 'cleared level of the selected aircraft'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct'], ['W', 'weather deviation (WX tag)'], ['N', 'note'],
-    ['A', 'assume the selected aircraft'], ['X', 'decontrol it'], ['F', 'its flight plan'], ['E', 'pin its extended label (Shift+E: all)'],
+    ['X', 'exit level (XFL) for the coordination'], ['A', 'assume the selected aircraft'], ['Shift+X', 'decontrol it'], ['F', 'its flight plan'], ['E', 'pin its extended label (Shift+E: all)'],
     ['R', 'show its route for 8 s (or long-press the label)'], ['B', 'range/bearing line from it (then click the other end)'],
     ['right-drag', 'range/bearing line between two aircraft or points'], ['Delete', 'remove the last RBL (Shift+Delete: all)'],
-    ['G', 'flight plan list'], ['M', 'MTCD list'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
+    ['G', 'flight plan list'], ['M', 'MTCD list'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
     ['Space (hold)', 'transmit on the frequency'], ['Esc', 'close the menu / windows, cancel'], ['?', 'this help'],
   ];
   function openHelp() {
@@ -143,6 +168,7 @@
   // ------------------------------------------------------------------ toolbar
   document.getElementById('flBtn').onclick = () => isOpen('flWin') ? closeWin('flWin') : openFlightList();
   document.getElementById('mtBtn').onclick = () => { if (isOpen('mtWin')) closeWin('mtWin'); else { win('mtWin', 'MTCD', 60, 50, 380); renderMtcd(); } };
+  document.getElementById('olBtn').onclick = toggleOldi;
   document.getElementById('helpBtn').onclick = () => isOpen('helpWin') ? closeWin('helpWin') : openHelp();
   setInterval(() => {
     const el = document.getElementById('utcClock');
@@ -164,8 +190,8 @@
   window.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || typing()) return;
     const k = e.key, cs = selected, atc = SEAT === 'atc' && EXID;
-    const field = { c: 'cfl', l: 'cfl', h: 'heading', s: 'speed', d: 'direct', w: 'wx', n: 'note' }[k.toLowerCase()];
-    if (k === 'Escape') { for (const id of ['helpWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
+    const field = e.shiftKey ? null : { c: 'cfl', l: 'cfl', x: 'xfl', h: 'heading', s: 'speed', d: 'direct', w: 'wx', n: 'note' }[k.toLowerCase()];
+    if (k === 'Escape') { for (const id of ['helpWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
     if (k === '?') { isOpen('helpWin') ? closeWin('helpWin') : openHelp(); e.preventDefault(); return; }
     if (k === 'Tab') { e.preventDefault(); cycle(e.shiftKey ? -1 : 1); return; }
     if (k === '+' || k === '=') { setZoom(userZoom * 1.25); return; }
@@ -177,16 +203,17 @@
     const low = k.toLowerCase();
     if (low === 'g' && SEAT !== 'pilot') { isOpen('flWin') ? closeWin('flWin') : openFlightList(); return; }
     if (low === 'm' && SEAT !== 'pilot') { document.getElementById('mtBtn').click(); return; }
+    if (low === 'o') { toggleOldi(); return; }
     if (low === 'e' && e.shiftKey) { extAll = !extAll; return; }
     if (!cs) return;
     if (field) {
       e.preventDefault();
       if (atc && window.openLabelMenu) openLabelMenu(cs, field);
-      else focusDeck({ cfl: 'fl', heading: 'hdg', speed: 'mach', direct: 'dct' }[field] || 'fl');
+      else if (field !== 'xfl') focusDeck({ cfl: 'fl', heading: 'hdg', speed: 'mach', direct: 'dct' }[field] || 'fl');
       return;
     }
     if (low === 'a' && SEAT !== 'pilot') { assume(cs); return; }
-    if (low === 'x' && SEAT !== 'pilot') { release(cs); return; }
+    if (low === 'x' && e.shiftKey && SEAT !== 'pilot') { release(cs); return; }
     if (low === 'f') { openFpl(cs); return; }
     if (low === 'e') { extPinned.has(cs) ? extPinned.delete(cs) : extPinned.add(cs); return; }
     if (low === 'r') { routeShow = routeShow && routeShow.cs === cs ? null : { cs, until: performance.now() + 8000 }; return; }

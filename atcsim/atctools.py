@@ -376,13 +376,16 @@ def flight_detail(w, cs: str) -> dict:
                      "role": "entry" if n == a.entry_wp else "exit" if n == a.planned_exit else
                              ("next sector" if n in a.route_after else "")})
     exit_eto = next((e for e in etos if e["role"] == "exit"), None)
+    from . import oldi
+    xl, xe = oldi.xfl(w, a)
     return {"callsign": a.callsign, "status": _status(a), "utc": utc(w), "flight_plan": fp, "items": fields(fp),
             "message": fp.get("message", ""), "etos": etos,
             "coordination": {
                 "entry": {"point": a.entry_wp, "eto": utc(w, a.boundary_time), "level": a.fl, "from": a.prev_unit},
                 "exit": {"point": a.planned_exit, "eto": exit_eto["eto"] if exit_eto else None,
-                         "level": int(ent["cfl"]) if ent.get("cfl") is not None else int(round(a.cleared_alt_ft / 100)),
-                         "to": a.next_unit}},
+                         "level": xl, "xfl_entered": xe, "cfl": oldi.cfl(w, a), "to": a.next_unit,
+                         "state": (getattr(w, "coord", {}).get(a.callsign) or {}).get("state")}},
+            "oldi": oldi.messages(w, callsign=a.callsign),
             "correlation": {"ssr": fp.get("ssr"), "mode_s_address": fp.get("mode_s_address"),
                             "surveillance": fp.get("surveillance"), "track": a.status != "scheduled"},
             "entries": ent}

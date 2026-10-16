@@ -403,7 +403,8 @@ def build_world(scn: dict) -> World:
         }
         ac.route_after = after_exit
         ac.route_before = [w for w in filed[:filed.index(route[0])] if w in waypoints] if route[0] in filed else []
-        ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints)
+        ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints,
+                                                                str(a.get("dep") or ""), str(a.get("dest") or ac.destination or ""))
         ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
         aircraft.append(ac)
 
@@ -488,6 +489,7 @@ def build_world(scn: dict) -> World:
               lower_fl=lower_fl, upper_fl=upper_fl, aerodromes=aerodromes, seq=seqfixes, events=events)
     w.persist_s = float(scn.get("post_exit_display_s", 240.0))
     w.start_utc_min = start_min
+    w.oldi_cfg = dict(scn.get("oldi") or {})       # {"abi_s": 1200, "act_s": 600, "rev_limit_s": 180}
     w.mag_var = float(scn.get("magnetic_variation", -1.0 if asp.projection is not None else 0.0))
     for ac in aircraft:
         ac.mag_var = w.mag_var

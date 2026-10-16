@@ -140,6 +140,8 @@ class Capture:
                             continue
                         if ev["type"] in ("atc_entry", "assumed"):
                             acts.append({k: ev.get(k) for k in ("type", "callsign", "entry")})
+                        elif ev["type"] == "oldi" and ev.get("direction") == "out":
+                            acts.append({"type": "oldi", "callsign": ev.get("callsign"), "text": ev.get("text")})
                     if w.events:
                         self._ev_seq = w.events[-1]["seq"]
                     if acts:

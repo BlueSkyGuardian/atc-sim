@@ -80,6 +80,9 @@
   #utcClock { font: 600 12px var(--mono); color: var(--text); background: #0d141ccc; border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; }
   #utcClock:empty { display: none; }
   #mtBtn.hit { border-color: #8a5fd0; color: #d9c2ff; }
+  #olBtn.hit { border-color: #2f8aa0; color: #bfefff; }
+  .win td.out { color: #9fe0c0; } .win td.in { color: #9fc3e6; }
+  .win .ol-filter { display: flex; gap: 4px; margin-bottom: 6px; } .win .ol-filter button { padding: 1px 7px; font-size: 11px; }
   /* floating windows: flight plan, flight list, MTCD, help */
   .win { position: absolute; z-index: 8; background: #101820f7; border: 1px solid #34506a; border-radius: 6px; box-shadow: 0 10px 30px #000b; font-size: 12px; min-width: 260px; max-height: calc(100% - 70px); display: flex; flex-direction: column; }
   .win .wh { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); cursor: move; user-select: none; font-weight: 600; }
@@ -226,7 +229,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection: conflicts over the next 20 minutes (M)">MTCD</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection: conflicts over the next 20 minutes (M)">MTCD</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -322,6 +325,7 @@ const TH_DEF = {
   assumed: '#5fd3a3', calling: '#ffffff', inbound: '#9db8d0', other: '#6f8191', handedOff: '#56636f', selected: '#7fb8ff', stca: '#f2b84b', los: '#ff5a5a',
   xfer: '#5ad1e6', mtcd: '#c38cff',
   lblCallsign: '', lblLevel: '', lblSpeed: '', lblInfo: '', changed: '#ffd166', sfl: '#f2b84b', tags: '#7fb8ff',
+  xflOk: '#5ad1e6', xflAbi: '#9fc3e6', xflPend: '#ffffff',
   hTag: '#ffd84a', wxTag: '#ffd84a', alertInfo: '#8fd3ff', alertWarn: '#f2b84b', alertBad: '#ff5a5a', extLabel: '#b9c8d8',
   rbl: '#d79bff', routeShow: '#ff4fd8',
   lblFont: 11, nameFont: 10.5, symbol: 7, vectorMin: 2, trail: 12, wxAlpha: 1,
@@ -354,13 +358,14 @@ async function api(path, opts = {}) {
     routeShow: 'Route (long press)', rbl: 'Range / bearing lines',
     lblCallsign: 'Callsign line', lblLevel: 'Level line', lblSpeed: 'Speed / heading line', lblInfo: 'Destination / info line',
     changed: 'Value changing (current›assigned)', sfl: 'Mode S level ≠ CFL', tags: 'Tags (REQ, TURB…)',
+    xflOk: 'Exit level, coordinated (ACT)', xflAbi: 'Exit level, announced (ABI)', xflPend: 'Exit level, not yet sent',
     hTag: 'Assigned heading tag (H)', wxTag: 'Weather deviation tag (WX)', alertInfo: 'Special track (MIL, NRVSM)', alertWarn: 'Alert (NSL, route deviation)', alertBad: 'Alert (level bust)', extLabel: 'Extended label (Mode S)',
   };
   const SIZES = [['lblFont', 'Label font', 8, 18, 0.5], ['nameFont', 'Point names', 7, 16, 0.5], ['symbol', 'Aircraft symbol', 4, 14, 1],
                  ['vectorMin', 'Speed vector (min)', 0, 6, 1], ['trail', 'History dots', 0, 12, 1], ['wxAlpha', 'Weather opacity', 0.1, 1, 0.05]];
   const GROUPS = [['Scope', ['bg', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'cellTops']],
                   ['Aircraft', ['assumed', 'calling', 'inbound', 'xfer', 'handedOff', 'selected', 'stca', 'los', 'mtcd', 'routeShow', 'rbl']],
-                  ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'tags', 'hTag', 'wxTag', 'alertInfo', 'alertWarn', 'alertBad', 'extLabel']]];
+                  ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'xflOk', 'xflAbi', 'xflPend', 'tags', 'hTag', 'wxTag', 'alertInfo', 'alertWarn', 'alertBad', 'extLabel']]];
   const box = document.getElementById('dispPanel');
   function build() {
     let h = `<h4 data-g="zoom">Zoom <span>▾</span></h4><div class="grid" data-gg="zoom"><span class="zoom"><button id="dpOut">−</button><input type="range" id="dpZoom" min="${Math.log(0.3)}" max="${Math.log(20)}" step="0.01" value="${Math.log(userZoom)}"><button id="dpIn">+</button></span><button id="dpHome">Reset view</button></div>`;
@@ -1010,7 +1015,9 @@ const sgn = v => (v > 0 ? '+' : '') + v;
 function extLines(a, ent) {           // extended label: flight-plan data and the Mode S downlinked parameters
   const fp = a.flight_plan || {}, ms = a.mode_s, out = [];
   out.push(`A${a.squawk || fp.ssr || '----'} ${fp.registration || ''} ${a.type}/${fp.wake || ''} ${fp.surveillance ? fp.surveillance.replace('Mode S ', '').replace('Mode ', '') : ''}`);
-  out.push(`${fp.departure || '----'}→${fp.destination || '----'} RFL${(fp.rfl || fp.cruise || '').replace('F', '')}${ent && ent.cfl != null ? ' CFL' + ent.cfl : ''}${a.next_unit ? ' →' + a.next_unit : ''}`);
+  out.push(`${fp.departure || '----'}→${fp.destination || '----'} RFL${(fp.rfl || fp.cruise || '').replace('F', '')}${a.next_unit ? ' →' + a.next_unit : ''}`);
+  const co = (shown && shown.coord && shown.coord[a.callsign]) || null;
+  if (co) out.push(`AFL${pad(a.fl, 3)} CFL${pad(co.cfl, 3)} XFL${pad(co.xfl, 3)}${co.xfl_entered ? '' : '(=CFL)'} ${co.state === 'act' ? 'ACT' + (co.coordinated === co.xfl ? '✓' : '…') : co.state === 'abi' ? 'ABI' : co.state === 'transferred' ? 'XFRD' : co.entry_level ? 'IN F' + pad(co.entry_level, 3) : ''}`);
   if (ms && ms.ehs) {
     out.push(`SFL${pad(ms.selected_fl, 3)} HDG${pad(ms.mag_heading, 3)} IAS${ms.ias_kt} M${pad(ms.mach * 100, 2)}`);
     out.push(`TAS${ms.tas_kt} GS${ms.gs_kt} TRK${pad(ms.track_deg, 3)} ${sgn(ms.baro_rate_fpm)}fpm`);
@@ -1336,7 +1343,7 @@ function draw() {
   const seeAlerts = SEAT !== 'pilot' && !replayMode;
   const special = seeAlerts ? (shown.special || {}) : {};
   const mtBy = {};
-  if (seeAlerts) for (const c of (shown.mtcd || []).filter(c => !c.current)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
+  if (seeAlerts) for (const c of (shown.mtcd || []).filter(c => !c.current && c.time_to_conflict_s >= 120)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
   const blink = (Date.now() / 500 | 0) % 2;
   const fs = +TH.lblFont, lh = fs * 1.1;
   // aircraft decontrolled, in the next sectors: grey, short label (callsign, level, next unit)
@@ -1396,8 +1403,10 @@ function draw() {
     const ent = atcSeat ? ((state && state.entries && state.entries[a.callsign]) || {}) : null;
     const pc = (k, dflt) => plain && TH[k] ? TH[k] : dflt;
     const lines = [];
+    const co = seeAlerts && shown.coord ? shown.coord[a.callsign] : null;     // cleared / exit level, OLDI state
     const l0 = [];                                          // alerts: special tracks, monitoring, MTCD
     for (const [code, sev] of special[a.callsign] || []) l0.push([code + ' ', sev === 'alert' ? (blink ? TH.alertBad : TH.alertBad + '77') : sev === 'warn' ? TH.alertWarn : TH.alertInfo]);
+    if (co && co.manual && a.assumed) l0.push(['COORD ', blink ? TH.alertWarn : TH.alertWarn + '88']);
     if (mtBy[a.callsign]) l0.push([`MTC${Math.max(0, Math.floor(mtBy[a.callsign].time_to_conflict_s / 60))}' `, TH.mtcd]);
     if (l0.length) lines.push(l0);
     const k1 = lines.length;
@@ -1413,14 +1422,23 @@ function draw() {
     const sysCfl = ent && shown.system_cfl ? shown.system_cfl[a.callsign] : null;     // controller: the level the system knows
     const cflShown = ent && ent.cfl != null ? ent.cfl : sysCfl != null ? sysCfl : a.cleared_fl;
     const rv = a.rvsm.status === 'unable' ? ' RVSM✗' : a.rvsm.status === 'non_approved' ? ' NRVSM' : '';
-    const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''} ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col)]];
+    // level line: current level (Mode C/S), vertical arrow, cleared level, Mode S selected level when it differs (amber),
+    // exit level when entered or different from the cleared level (green once coordinated by ACT, amber when it needs
+    // a phone coordination or breaks the LoA / semicircular rule), type
+    const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''}`, pc('lblLevel', col)]];
     const ms = a.mode_s;
     if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl]);
+    if (co && a.assumed && (co.xfl_entered || co.xfl !== cflShown)) {
+      const xc = co.manual ? (blink ? TH.alertWarn : TH.alertWarn + '77') : co.warn ? TH.alertWarn
+        : co.state && co.state !== 'transferred' && co.coordinated === co.xfl ? (co.state === 'act' ? TH.xflOk : TH.xflAbi) : TH.xflPend;
+      l2.push([` X${co.xfl}`, xc]);
+    }
+    l2.push([` ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col)]);
     lines.push(l2);
     lines.push(labelLine3(a, ent).map(([t, rl]) => [t, rl === 'chg' ? TH.changed : rl === 'htag' ? TH.hTag : rl === 'wxtag' ? TH.wxTag : pc('lblSpeed', col)]));
     const dest = (a.flight_plan && a.flight_plan.destination) || '';
     const info = pc('lblInfo', col + 'bb'), l4 = [];
-    if (cst === 'inbound') l4.push([`${a.entry_waypoint} ←${a.prev_unit || 'prev'}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : ''), info]);
+    if (cst === 'inbound') l4.push([`${a.entry_waypoint}${co && co.entry_level ? ' F' + pad(co.entry_level, 3) : ''} ←${a.prev_unit || 'prev'}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : ''), info]);
     else if (cst === 'leftAssumed') l4.push([`DECONTROL →${a.next_unit || a.exit_point || ''}`, blink ? TH.xfer : TH.xfer + '88']);
     else if (cst === 'xfer') l4.push([`XFR →${a.next_unit || ''} ${nextReal(a) === a.planned_exit ? '' : a.planned_exit || ''}`.trim(), TH.xfer]);
     else if (a.arrival && a.arrival.tod_in_nm != null) l4.push([`→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`, info]);

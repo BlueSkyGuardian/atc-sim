@@ -669,6 +669,8 @@ def _entry_text(cs: str, e: dict) -> str:
     parts = []
     if e.get("cfl") is not None:
         parts.append(f"CFL {e['cfl']}")
+    if e.get("xfl") is not None:
+        parts.append(f"XFL {e['xfl']}")
     if e.get("speed"):
         parts.append(f"SPD {e['speed']}")
     if e.get("heading"):
@@ -763,6 +765,8 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
                 caps.append((fr["w"], fr["t"], f"ASSUME {a['callsign']}"))
             elif a["type"] == "atc_entry":
                 caps.append((fr["w"], fr["t"], _entry_text(a["callsign"], a.get("entry") or {})))
+            elif a["type"] == "oldi":
+                caps.append((fr["w"], fr["t"], "OLDI " + str(a.get("text") or "")[2:]))
     fr_walls = [f["w"] for f in frames]
 
     def sim_at(wall):

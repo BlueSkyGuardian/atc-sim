@@ -155,6 +155,13 @@
     $('#lmRelease').style.display = a.assumed ? '' : 'none';
     $('#lmHead').innerHTML = `${a.callsign} <span class="c-dim" style="font-weight:400">${a.type} · FL${a.fl}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ''} · ${a.flight_plan && a.flight_plan.departure || ''}→${a.flight_plan && a.flight_plan.destination || ''}</span>`;
     $('#lmAssume').style.display = calling ? '' : 'none';
+    const co = (state.coord || {})[a.callsign], el = $('#lmCoord');
+    if (el) el.innerHTML = !co ? '' : !a.assumed ? (co.entry_level ? `coordinated in: F${co.entry_level} from ${h(a.prev_unit)} (${co.in_state.toUpperCase()})` : '')
+      : `→ ${h(co.next_unit || '?')}: ${co.state === 'act' ? `ACT F${co.coordinated}` + (co.coordinated === co.xfl ? ' ✓' : ' · REV due') : co.state === 'abi' ? `ABI F${co.coordinated}` + (co.act_in_s != null ? ` · ACT in ${Math.ceil(co.act_in_s / 60)} min` : '') : co.state === 'transferred' ? 'transferred' : `nothing sent yet (XFL F${co.xfl}${co.act_in_s != null ? ', ACT in ' + Math.ceil(co.act_in_s / 60) + ' min' : ''})`}`
+        + (co.manual ? `<br><span class="c-warn">${h(co.manual)}</span> <button id="lmPhone" style="font-size:10px;padding:0 5px">✓ coordinated by phone</button>` : '')
+        + (co.warn ? `<br><span class="c-warn">${h(co.warn)}</span>` : '');
+    const pb = $('#lmPhone');
+    if (pb) pb.onclick = async () => { try { await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify({ callsign: a.callsign, coord: 'phone' }) }); } catch (e) {} };
   }
   function openMenu(cs, e, field) {
     const a = state && allAc().find(x => x.callsign === cs); if (!a) return;
@@ -168,6 +175,8 @@
       <div id="lmRelease" style="margin-bottom:7px"><button id="lmRelBtn" style="width:100%;padding:4px" title="hand it off: it keeps flying as another sector's traffic">DECONTROL ${cs}</button></div>
       <div class="f"><span class="c-dim">CFL</span><input data-f="cfl" value="${sys}" inputmode="numeric"><button data-ok="cfl">OK</button></div>
       <div class="lv">${lv.map(l => `<button data-lv="${l}">${l}</button>`).join('')}</div>
+      <div class="f"><span class="c-dim" title="exit level for the coordination with the next unit (OLDI); empty = the cleared level">XFL</span><input data-f="xfl" value="${ent.xfl != null ? ent.xfl : ''}" placeholder="= CFL" inputmode="numeric"><button data-ok="xfl">OK</button></div>
+      <div id="lmCoord" class="c-dim" style="font-size:11px;margin:-2px 0 6px 59px"></div>
       <div class="f"><span class="c-dim">Speed</span><input data-f="speed" value="${h(ent.speed || '')}" placeholder="M78 · 280 · SN"><button data-ok="speed">OK</button></div>
       <div class="f"><span class="c-dim">Heading</span><input data-f="heading" value="${ent.heading || ''}" placeholder="e.g. 250" inputmode="numeric"><button data-ok="heading">OK</button></div>
       <div class="f"><span class="c-dim">Direct</span><input data-f="direct" value="${h(ent.direct || '')}" list="lmPts" placeholder="point"><button data-ok="direct">OK</button></div>
@@ -370,7 +379,9 @@
     if (!a || !el) return;
     const [k, t] = statusOf(a), vs = a.vertical_speed_fpm;
     const pend = (state.pending_instructions || []).filter(p => p.text && p.text.startsWith(deckCs)).map(p => h(p.text.slice(deckCs.length + 1)));
-    el.innerHTML = `<span><b>FL${String(a.fl).padStart(3, '0')}</b>${vs > 0 ? ' ↑' : vs < 0 ? ' ↓' : ''}${a.cleared_fl !== a.fl ? ' → ' + a.cleared_fl : ''}</span><span>${fmtSpd(a)}</span><span>HDG ${String(Math.round(a.heading)).padStart(3, '0')}</span><span>${fmtNav(a)}</span><span class="badge b-${k}">${t}</span>` +
+    const co = (state.coord || {})[deckCs];
+    const coTxt = co && a.assumed && co.state && co.state !== 'transferred' ? `<div class="dk-pend">coordinated with ${h(co.next_unit)}: F${co.coordinated} (${co.state.toUpperCase()})${co.manual ? ' · <span class="c-warn">phone coordination needed</span>' : ''}</div>` : '';
+    el.innerHTML = coTxt + `<span><b>FL${String(a.fl).padStart(3, '0')}</b>${vs > 0 ? ' ↑' : vs < 0 ? ' ↓' : ''}${a.cleared_fl !== a.fl ? ' → ' + a.cleared_fl : ''}</span><span>${fmtSpd(a)}</span><span>HDG ${String(Math.round(a.heading)).padStart(3, '0')}</span><span>${fmtNav(a)}</span><span class="badge b-${k}">${t}</span>` +
       (pend.length ? `<div class="dk-pend">executing: ${pend.join(' · ')}</div>` : '');
   }
   function renderPilot(scroll) {
