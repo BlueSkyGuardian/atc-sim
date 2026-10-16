@@ -74,6 +74,46 @@
   body:not(.exercise) .ex-only { display: none !important; }
   body.seat-pilot .ctl-only { display: none !important; }
   body:not(.seat-atc) .atc-only { display: none !important; }
+  /* side panel tabs (exercise pages) */
+  body.exercise aside [data-tab]:not(.tab-on) { display: none !important; }
+  #asideTabs { display: flex; position: sticky; top: 0; z-index: 2; background: var(--panel); border-bottom: 1px solid var(--line); }
+  #asideTabs button { flex: 1; border: 0; border-radius: 0; background: none; padding: 9px 4px; color: var(--dim); font-weight: 600; border-bottom: 2px solid transparent; }
+  #asideTabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+  /* pseudo-pilot workspace */
+  .todo { display: grid; grid-template-columns: 54px 1fr auto; gap: 8px; align-items: center; padding: 7px 8px; border: 1px solid var(--line); border-left-width: 3px; border-radius: 5px; margin-bottom: 6px; cursor: pointer; background: #0d141c; }
+  .todo.call { border-left-color: #c9a227; } .todo.req { border-left-color: #5a8a3b; }
+  .todo .tg { font: 600 10px var(--mono); letter-spacing: .06em; color: var(--dim); }
+  .todo.call .tg { color: #ffe08a; } .todo.req .tg { color: #a8e28a; }
+  .todo .tx { font-size: 12.5px; line-height: 1.35; } .todo .tx b { font-family: var(--mono); }
+  .todo .tx i { font-style: normal; color: #fff; } .todo small { display: block; color: var(--dim); font-size: 11px; }
+  .todo .bt { display: flex; flex-direction: column; gap: 4px; }
+  .todo .bt button { padding: 3px 9px; font-size: 12px; }
+  .todo .bt .yes { border-color: #2f7a5f; color: #bff5dc; } .todo .bt .no { border-color: #6b2b2b; color: #ffb3b3; }
+  #deck { font-size: 12.5px; }
+  .dk-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .dk-cs { font: 700 17px var(--mono); color: var(--sel); }
+  .dk-x { padding: 1px 7px; }
+  .dk-now { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-family: var(--mono); padding: 6px 8px; background: #0d141c; border: 1px solid var(--line); border-radius: 5px; }
+  .dk-pend { width: 100%; color: #9fc3e6; font-family: system-ui; font-size: 11.5px; }
+  .dk-lim { font-size: 11px; margin: 4px 0 8px; min-height: 14px; }
+  .dk-row { display: grid; grid-template-columns: 62px 1fr; gap: 8px; align-items: start; padding: 7px 0; border-top: 1px dashed var(--line); }
+  .dk-row > label { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding-top: 5px; }
+  .dk-ctl { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+  .dk-ctl input, .dk-ctl select { font-family: var(--mono); text-transform: uppercase; padding: 3px 6px; }
+  .dk-ctl button { padding: 3px 8px; font-size: 12px; }
+  .dk-ctl button.go { background: #1d4d3d; border-color: #2f7a5f; color: #e6fff4; }
+  .dk-ctl button.pt { font-family: var(--mono); }
+  .dk-steps { display: inline-flex; } .dk-steps button { border-radius: 0; margin-left: -1px; padding: 3px 6px; }
+  .dk-steps button:first-child { border-radius: 4px 0 0 4px; } .dk-steps button:last-child { border-radius: 0 4px 4px 0; }
+  .dk-any { display: inline-flex; gap: 4px; margin-left: 4px; }
+  .dk-out { min-height: 18px; font-size: 12px; margin-top: 6px; padding: 4px 6px; border-radius: 4px; }
+  .dk-out.ok { color: var(--accent); background: #12261e; } .dk-out.warn { color: var(--warn); background: #2a2412; } .dk-out.bad { color: #ffb3b3; background: #2a1414; }
+  table.fleet { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  table.fleet th { text-align: left; color: var(--dim); font: 600 10px system-ui; text-transform: uppercase; letter-spacing: .06em; padding: 3px 4px; }
+  table.fleet td { padding: 5px 4px; border-top: 1px solid #16212c; white-space: nowrap; }
+  table.fleet tr[data-cs] { cursor: pointer; } table.fleet tr[data-cs]:hover td { background: #131d28; }
+  table.fleet tr.sel td { background: #142235; } table.fleet tr.st-prev td { color: #56636f; }
+  .badge.b-call { border-color: #c9a227; color: #ffe08a; } .badge.b-req { border-color: #5a8a3b; color: #a8e28a; } .badge.b-ok { border-color: #2f7a5f; color: var(--accent); } .badge.b-prev { color: #56636f; }
   body.exercise .legacy-only, body.exercise #legacyRow1, body.exercise #legacyRow2 { display: none !important; }
   #ptt { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; z-index: 4; font-family: var(--mono); font-size: 12px; }
   #ptt .k { background: #0d141cdd; border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; color: var(--dim); user-select: none; cursor: pointer; }
@@ -156,7 +196,8 @@
     <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · shift-click two aircraft for an RBL, right-click its label to remove</span></div>
   </div>
   <aside>
-    <section id="exSec" class="ex-only instr-only">
+    <nav id="asideTabs" class="ex-only instr-only"><button data-t="pilot">✈ Aircraft</button><button data-t="exercise">Exercise</button><button data-t="monitor">Monitor</button></nav>
+    <section id="exSec" class="ex-only instr-only" data-tab="exercise">
       <h2>Exercise <a href="/" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--sel)">all exercises ↗</a></h2>
       <div class="row"><select id="exSwitch" style="flex:1" title="Switch to another of your live exercises"></select></div>
       <div id="exMembers" style="margin-bottom:6px"></div>
@@ -164,16 +205,21 @@
       <div class="row" style="font-size:11px"><span class="c-dim">Links:</span><button data-link="atc" style="font-size:11px;padding:1px 6px">copy controller link</button><button data-link="pilot" style="font-size:11px;padding:1px 6px">copy pilot link</button><button data-link="instructor" style="font-size:11px;padding:1px 6px">co-instructor</button></div>
       <div class="row"><span id="exMsg" class="c-dim" style="font-size:11px;flex:1"></span><button id="endBtn" style="border-color:#6b2b2b;color:#ffb3b3">End exercise</button></div>
     </section>
-    <section id="pilotSec" class="ex-only">
-      <h2>Aircraft <span class="c-dim" style="text-transform:none;letter-spacing:0">you fly them: execute what the controller says</span></h2>
-      <div id="pilotList"></div>
+    <section id="todoSec" class="ex-only" data-tab="pilot">
+      <h2>To do <span id="todoN" class="c-dim"></span><span class="c-dim" style="text-transform:none;letter-spacing:0">say it on the frequency (hold SPACE)</span></h2>
+      <div id="todo"></div>
     </section>
-    <section id="phoneSec" class="ex-only">
+    <section id="deckSec" class="ex-only" data-tab="pilot"><div id="deck"></div></section>
+    <section id="fleetSec" class="ex-only" data-tab="pilot">
+      <h2>Aircraft <span class="c-dim" style="text-transform:none;letter-spacing:0">click one to fly it</span></h2>
+      <div id="fleet"></div>
+    </section>
+    <section id="phoneSec" class="ex-only" data-tab="pilot">
       <h2>Telephone <span class="c-dim" style="text-transform:none;letter-spacing:0">call the controller as</span></h2>
       <div class="units2" id="pilotUnits"></div>
       <div id="callList" style="margin-top:6px;font-size:12px"></div>
     </section>
-    <section class="instr-only">
+    <section class="instr-only" data-tab="exercise">
       <h2>Session <a class="legacy-only" href="/" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--sel)">← home</a></h2>
       <div class="row" id="legacyRow1">
         <select id="sessSel" style="flex:1"></select>
@@ -196,17 +242,17 @@
         <label style="font-size:11px" class="c-dim" title="Open a recording file exported earlier">Load <input type="file" id="rpFile" accept=".json" style="width:84px;font-size:10px"></label>
       </div>
     </section>
-    <section>
-      <h2><span class="ex-only">Command line</span><span class="legacy-only">Controller input</span> <span class="c-dim" style="text-transform:none;letter-spacing:0">click an aircraft to select</span></h2>
+    <section data-tab="pilot">
+      <h2><span class="ex-only">Shorthand</span><span class="legacy-only">Controller input</span> <span class="c-dim" style="text-transform:none;letter-spacing:0">click an aircraft to select</span></h2>
       <input id="cmd" placeholder="RAM101 FL250 M76 K280 · H250 · L250 · D S3 · S280 · SN · DEV · RES · APP · UNA" autocomplete="off">
       <div id="cmdmsg"></div>
     </section>
-    <section id="selSec" style="display:none"><h2>Selected aircraft <span class="c-dim" id="selName"></span></h2><div id="selInfo" style="font-family:var(--mono);font-size:12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px"></div></section>
-    <section class="instr-only"><h2>Pilot requests</h2><div id="reqs"></div></section>
-    <section class="instr-only"><h2>Sequence <span class="c-dim" style="text-transform:none;letter-spacing:0">ETA · spacing · TOD</span></h2><div id="seq"></div></section>
-    <section class="instr-only"><h2>Predicted conflicts <span class="c-dim" id="la"></span></h2><div id="confl"></div></section>
-    <section class="grow instr-only"><h2>Events</h2><div id="events"></div></section>
-    <section class="instr-only"><h2>Metrics</h2><div id="metrics"></div></section>
+    <section id="selSec" data-tab="monitor" style="display:none"><h2>Selected aircraft <span class="c-dim" id="selName"></span></h2><div id="selInfo" style="font-family:var(--mono);font-size:12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px"></div></section>
+    <section class="instr-only" data-tab="monitor"><h2>Pilot requests</h2><div id="reqs"></div></section>
+    <section class="instr-only" data-tab="monitor"><h2>Sequence <span class="c-dim" style="text-transform:none;letter-spacing:0">ETA · spacing · TOD</span></h2><div id="seq"></div></section>
+    <section class="instr-only" data-tab="monitor"><h2>Predicted conflicts <span class="c-dim" id="la"></span></h2><div id="confl"></div></section>
+    <section class="grow instr-only" data-tab="monitor"><h2>Events</h2><div id="events"></div></section>
+    <section class="instr-only" data-tab="monitor"><h2>Metrics</h2><div id="metrics"></div></section>
   </aside>
 </div>
 <script>

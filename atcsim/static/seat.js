@@ -25,6 +25,7 @@
     const pre = () => { voice.ensureMic(); window.removeEventListener('pointerdown', pre); window.removeEventListener('keydown', pre); };
     window.addEventListener('pointerdown', pre); window.addEventListener('keydown', pre);
     setupPTT();
+    setupTabs();
     if (SEAT === 'instructor') setupInstructor();
     await attach(EXID);
     setInterval(tick, 500);
@@ -52,6 +53,19 @@
     } else b.style.display = 'none';
     if (SEAT !== 'atc') renderPilot();
     if (SEAT === 'atc' && $('#lblMenu').classList.contains('on')) refreshMenuHead();
+  }
+
+  // ------------------------------------------------------------------ side panel tabs (instructor: Aircraft · Exercise · Monitor)
+  function showTab(t) {
+    document.querySelectorAll('aside [data-tab]').forEach(el => el.classList.toggle('tab-on', el.dataset.tab === t));
+    document.querySelectorAll('#asideTabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+    try { localStorage.setItem('atc_tab', t); } catch (e) {}
+  }
+  window.showTab = showTab;
+  function setupTabs() {
+    document.querySelectorAll('#asideTabs button').forEach(b => b.onclick = () => showTab(b.dataset.t));
+    let t = 'pilot'; try { t = localStorage.getItem('atc_tab') || 'pilot'; } catch (e) {}
+    showTab(SEAT === 'instructor' ? t : 'pilot');
   }
 
   // ------------------------------------------------------------------ push-to-talk
@@ -122,6 +136,7 @@
   window.onSelectAircraft = (cs, e, isLabel) => {
     if (SEAT === 'atc') { openMenu(cs, e); return true; }
     pilotSel = cs; renderPilot(true);
+    if (SEAT === 'instructor') showTab('pilot');
     return false;
   };
   let menuCs = null;
@@ -178,7 +193,8 @@
   // the controller assumes by double-click too; it goes through /assume
   window.assume = async cs => { try { await api(`/sessions/${SID}/assume/${cs}`, { method: 'POST' }); } catch (e) { note(e.message, true); } };
 
-  // ------------------------------------------------------------------ pseudo-pilot panel (also the instructor's)
+  // ------------------------------------------------------------------ pseudo-pilot workspace (also the instructor's)
+  // To do (calls to make, requests to read) · the selected aircraft's control deck · the list of aircraft
   function speedInstr(v) {
     v = v.toUpperCase().replace(/\s/g, '');
     if (v === 'SN' || v === 'RESUME') return { type: 'speed', resume_normal: true };
@@ -190,83 +206,134 @@
   async function fly(cs, instr, out) {
     try {
       const r = (await api(`/sessions/${SID}/instructions`, { method: 'POST', body: JSON.stringify({ callsign: cs, ...instr }) }))[0];
-      if (out) { out.className = r.status === 'rejected' ? 'c-los' : r.warnings && r.warnings.length ? 'c-warn' : 'c-ok';
-        out.textContent = r.status === 'rejected' ? r.reason : '✓ ' + (r.warnings && r.warnings.length ? r.warnings.join(' | ') : 'executing'); }
+      if (out) { out.className = 'dk-out ' + (r.status === 'rejected' ? 'bad' : r.warnings && r.warnings.length ? 'warn' : 'ok');
+        out.textContent = r.status === 'rejected' ? '✗ ' + r.reason : '✓ ' + (r.warnings && r.warnings.length ? r.warnings.join(' | ') : 'done — the aircraft is executing'); }
       return r;
-    } catch (e) { if (out) { out.className = 'c-los'; out.textContent = e.message; } }
+    } catch (e) { if (out) { out.className = 'dk-out bad'; out.textContent = e.message; } }
   }
-  function pilotCtl(cs, a) {
-    const pts = [...new Set(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint))).filter(n => !n.startsWith('@')).concat(a.route_after_exit || []))];
-    const el = document.createElement('div'); el.className = 'ctl';
-    el.innerHTML = `<span class="c-dim">FL</span><span><input data-i="fl" placeholder="${a.cleared_fl}" inputmode="numeric"> <button data-go="fl">Climb/descend</button></span>
-      <span class="c-dim">HDG</span><span><input data-i="hdg" placeholder="${String(Math.round(a.heading)).padStart(3, '0')}" inputmode="numeric"> <button data-go="hl">Left</button><button data-go="hr">Right</button><button data-go="h">Turn</button></span>
-      <span class="c-dim">SPD</span><span><input data-i="spd" placeholder="M78/280/K280/SN"> <button data-go="spd">Set</button></span>
-      <span class="c-dim">DCT</span><span><input data-i="dct" list="plPts" placeholder="point"> <button data-go="dct">Direct</button></span>
-      <span></span><span>${pts.slice(0, 8).map(n => `<button data-d="${n}" style="font-family:var(--mono)">${n}</button>`).join(' ')}</span>
-      <span></span><span><button data-go="res">Resume own navigation</button> <button data-go="dev">Deviate (weather)</button></span>
-      <span></span><span data-out style="font-family:system-ui;font-size:11px"></span>`;
-    const out = el.querySelector('[data-out]'), val = k => el.querySelector(`[data-i=${k}]`).value.trim();
+  const reqsOf = cs => (state.pending_requests || []).filter(q => q.callsign === cs);
+  const statusOf = a => { if (!a.on_frequency) return ['prev', 'prev sector'];
+    if (!a.assumed) return ['call', 'CALLING'];
+    if (reqsOf(a.callsign).some(q => q.kind !== 'checkin')) return ['req', 'REQUEST'];
+    return ['ok', 'on frequency']; };
+  const fmtSpd = a => a.speed_mode === 'mach' ? 'M' + String(Math.round(a.mach * 100)).padStart(2, '0') : a.ias_kt + ' kt';
+  const fmtNav = a => a.nav_mode === 'heading' ? 'HDG ' + String(a.assigned_heading).padStart(3, '0') : a.nav_mode === 'wxdev' ? 'deviating' : '→ ' + (a.next_waypoint || '');
+  function select(cs) { pilotSel = cs; selected = cs; renderPilot(true); }
+
+  // ---- to do
+  let todoH = '';
+  function renderTodo() {
+    const items = (state.pending_requests || []).slice().sort((a, b) => a.time_s - b.time_s).map(q => {
+      const age = Math.round(state.sim_time_s - q.time_s);
+      if (q.kind === 'checkin') return `<div class="todo call" data-cs="${q.callsign}"><span class="tg">CALL</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>first call · the controller assumes it · ${age} s</small></div></div>`;
+      const btns = q.type === 'report' ? `<button data-rep="${q.id}" data-dec="roger" data-cs="${q.callsign}">Acknowledged</button>`
+        : `<button class="yes" data-rep="${q.id}" data-dec="approved" data-cs="${q.callsign}" title="the controller approved: the aircraft does it">Approved</button><button class="no" data-rep="${q.id}" data-dec="unable" data-cs="${q.callsign}">Refused</button>`;
+      return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s</small></div><div class="bt">${btns}</div></div>`;
+    });
+    const html = items.join('') || '<div class="empty">Nothing to say right now. Fly what the controller gives you.</div>';
+    if (html !== todoH) { $('#todo').innerHTML = html; todoH = html; }
+    $('#todoN').textContent = items.length ? `(${items.length})` : '';
+  }
+  // one listener each (the lists are re-drawn every second; mousedown survives a re-draw between press and release)
+  function bindLists() {
+    $('#todo').addEventListener('mousedown', e => {
+      const b = e.target.closest('[data-rep]');
+      if (b) { e.preventDefault(); const out = $('#deck .dk-out'); fly(b.dataset.cs, { type: 'reply', request_id: b.dataset.rep, decision: b.dataset.dec }, out); select(b.dataset.cs); return; }
+      const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
+    });
+    $('#fleet').addEventListener('mousedown', e => { const r = e.target.closest('[data-cs]'); if (r) select(r.dataset.cs); });
+  }
+
+  // ---- aircraft list
+  let fleetH = '';
+  function renderFleet() {
+    const rank = { call: 0, req: 1, ok: 2, prev: 3 };
+    const list = state.aircraft.slice().sort((a, b) => rank[statusOf(a)[0]] - rank[statusOf(b)[0]] || a.callsign.localeCompare(b.callsign));
+    const html = list.length ? `<table class="fleet"><tr><th>Callsign</th><th>Level</th><th>Speed</th><th>Nav</th><th></th></tr>` + list.map(a => {
+      const [k, t] = statusOf(a), vs = a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : '';
+      return `<tr data-cs="${a.callsign}" class="${a.callsign === pilotSel ? 'sel' : ''} st-${k}"><td><b>${a.callsign}</b> <span class="c-dim">${a.type}</span></td>
+        <td>${String(a.fl).padStart(3, '0')}${vs}${a.cleared_fl !== a.fl ? ' ' + a.cleared_fl : ''}</td><td>${fmtSpd(a)}</td><td>${fmtNav(a)}</td><td><span class="badge b-${k}">${t}</span></td></tr>`; }).join('') + '</table>'
+      : '<div class="empty">No aircraft in the sector yet.</div>';
+    if (html !== fleetH) { $('#fleet').innerHTML = html; fleetH = html; }
+  }
+
+  // ---- control deck of the selected aircraft
+  let deckCs = null;
+  async function buildDeck(cs) {
+    deckCs = cs;
+    const a = state.aircraft.find(x => x.callsign === cs), box = $('#deck');
+    if (!a) { box.innerHTML = '<div class="empty">Select an aircraft (in the list, in To do, or on the radar) to fly it.</div>'; return; }
+    const fp = a.flight_plan || {};
+    const route = [...new Set(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint))).filter(n => !n.startsWith('@')).concat(a.route_after_exit || []))];
+    box.innerHTML = `<div class="dk-head"><div><span class="dk-cs">${cs}</span> <span class="c-dim">${a.type} · ${h(fp.departure || '')} → ${h(fp.destination || '')}</span></div><button class="dk-x" title="close">✕</button></div>
+      <div class="dk-now" data-now></div>
+      <div class="dk-lim c-dim" data-lim></div>
+      <div class="dk-row"><label>Level</label><div class="dk-ctl">
+        <input data-i="fl" inputmode="numeric" value="${a.cleared_fl}" style="width:62px">
+        <span class="dk-steps"><button data-step="-20">−20</button><button data-step="-10">−10</button><button data-step="10">+10</button><button data-step="20">+20</button></span>
+        <select data-i="rate" title="rate"><option value="">any rate</option><option value="1000">≥1000 ft/min</option><option value="1500">≥1500</option><option value="2000">≥2000</option></select>
+        <button class="go" data-go="fl">Climb / descend</button></div></div>
+      <div class="dk-row"><label>Heading</label><div class="dk-ctl">
+        <input data-i="hdg" inputmode="numeric" placeholder="${String(Math.round(a.heading)).padStart(3, '0')}" style="width:62px">
+        <button data-go="hl">◀ Left</button><button data-go="h">Turn</button><button data-go="hr">Right ▶</button>
+        <button data-go="res" title="back on the route">Resume own nav</button></div></div>
+      <div class="dk-row"><label>Speed</label><div class="dk-ctl">
+        <input data-i="mach" placeholder="M.78" style="width:62px"><button data-go="mach">Mach</button>
+        <input data-i="kt" placeholder="280" inputmode="numeric" style="width:56px"><button data-go="kt" title="fly this IAS now">Knots</button><button data-go="kconv" title="on conversion from Mach">On conversion</button>
+        <button data-go="sn">Resume normal</button></div></div>
+      <div class="dk-row"><label>Direct</label><div class="dk-ctl dk-wrap">
+        ${route.slice(0, 10).map(n => `<button class="pt" data-d="${n}">${n}</button>`).join('')}
+        <span class="dk-any"><input data-i="dct" list="plPts" placeholder="any point" style="width:96px"><button class="go" data-go="dct">Direct</button></span></div></div>
+      <div class="dk-row"><label>Weather</label><div class="dk-ctl">
+        <select data-i="side"><option value="either">either side</option><option value="left">left</option><option value="right">right</option></select>
+        <button data-go="dev">Deviate around weather</button></div></div>
+      <div class="dk-out" data-out></div>`;
+    const val = k => box.querySelector(`[data-i=${k}]`).value.trim(), out = box.querySelector('[data-out]');
+    const flBtn = box.querySelector('[data-go=fl]'), flIn = box.querySelector('[data-i=fl]');
+    const label = () => { const cur = state.aircraft.find(x => x.callsign === cs); const v = parseInt(flIn.value, 10);
+      flBtn.textContent = !cur || !v ? 'Climb / descend' : v * 100 > cur.altitude_ft + 50 ? `Climb FL${v}` : v * 100 < cur.altitude_ft - 50 ? `Descend FL${v}` : `Maintain FL${v}`; };
+    flIn.oninput = label; label();
+    box.querySelectorAll('[data-step]').forEach(b => b.onclick = () => { flIn.value = Math.max(100, (parseInt(flIn.value, 10) || a.cleared_fl) + +b.dataset.step); label(); });
     const go = async k => {
-      if (k === 'fl') { const v = parseInt(val('fl').replace(/^F(L)?/i, ''), 10); if (!v) return; await fly(cs, { type: 'altitude', fl: v }, out); }
-      else if (k === 'h' || k === 'hl' || k === 'hr') { const v = parseInt(val('hdg'), 10); if (!v) return; await fly(cs, { type: 'heading', heading: v, turn: k === 'hl' ? 'left' : k === 'hr' ? 'right' : null }, out); }
-      else if (k === 'spd') { const s = speedInstr(val('spd')); if (!s) { out.className = 'c-los'; out.textContent = 'speed: M78, 280 (knots now), K280 (on conversion) or SN'; return; } await fly(cs, s, out); }
-      else if (k === 'dct') { const v = val('dct').toUpperCase(); if (v) await fly(cs, { type: 'direct', waypoint: v }, out); }
+      if (k === 'fl') { const v = parseInt(val('fl').replace(/^F(L)?/i, ''), 10); if (!v) return; const r = val('rate');
+        await fly(cs, { type: 'altitude', fl: v, ...(r ? { rate_fpm: +r } : {}) }, out); }
+      else if (k === 'h' || k === 'hl' || k === 'hr') { const v = parseInt(val('hdg'), 10); if (!v) { out.className = 'dk-out bad'; out.textContent = 'type a heading first'; return; }
+        await fly(cs, { type: 'heading', heading: v, turn: k === 'hl' ? 'left' : k === 'hr' ? 'right' : null }, out); }
       else if (k === 'res') await fly(cs, { type: 'resume' }, out);
-      else if (k === 'dev') await fly(cs, { type: 'deviation', side: 'either' }, out);
+      else if (k === 'mach') { const sp = speedInstr(val('mach').startsWith('M') || val('mach').startsWith('.') ? val('mach') : 'M' + val('mach')); if (sp && sp.mach) await fly(cs, sp, out); else { out.className = 'dk-out bad'; out.textContent = 'Mach like 78 or .78'; } }
+      else if (k === 'kt' || k === 'kconv') { const v = parseInt(val('kt'), 10); if (!v) { out.className = 'dk-out bad'; out.textContent = 'type a speed in knots first'; return; }
+        await fly(cs, k === 'kt' ? { type: 'speed', ias_kt: v } : { type: 'speed', conversion_kt: v }, out); }
+      else if (k === 'sn') await fly(cs, { type: 'speed', resume_normal: true }, out);
+      else if (k === 'dct') { const v = val('dct').toUpperCase(); if (v) await fly(cs, { type: 'direct', waypoint: v }, out); }
+      else if (k === 'dev') await fly(cs, { type: 'deviation', side: val('side') }, out);
     };
-    el.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
-    el.querySelectorAll('[data-d]').forEach(b => b.onclick = () => fly(cs, { type: 'direct', waypoint: b.dataset.d }, out));
-    el.querySelectorAll('input').forEach(i => i.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') go(i.dataset.i === 'fl' ? 'fl' : i.dataset.i === 'hdg' ? 'h' : i.dataset.i); });
-    return el;
+    box.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+    box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => fly(cs, { type: 'direct', waypoint: b.dataset.d }, out));
+    const enterMap = { fl: 'fl', hdg: 'h', mach: 'mach', kt: 'kt', dct: 'dct' };
+    box.querySelectorAll('input[data-i]').forEach(i => i.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter' && enterMap[i.dataset.i]) go(enterMap[i.dataset.i]); });
+    box.querySelector('.dk-x').onclick = () => { pilotSel = null; selected = null; renderPilot(); };
+    try {                                         // what the aircraft can do (for the pseudo-pilot's "unable")
+      const d = await api(`/sessions/${SID}/aircraft/${cs}`), p = d.performance || {};
+      if (deckCs === cs) box.querySelector('[data-lim]').textContent = `max FL${p.max_fl_at_present_weight} now · Mach ${(p.assignable_mach || []).map(x => x.toFixed(2)).join('–')} · ${(p.assignable_ias_kt || []).join('–')} kt · climb ${p.climb_rate_available_fpm} ft/min`;
+    } catch (e) {}
+  }
+  function refreshDeck() {
+    const a = deckCs && state.aircraft.find(x => x.callsign === deckCs), el = $('#deck [data-now]');
+    if (!a || !el) return;
+    const [k, t] = statusOf(a), vs = a.vertical_speed_fpm;
+    const pend = (state.pending_instructions || []).filter(p => p.text && p.text.startsWith(deckCs)).map(p => h(p.text.slice(deckCs.length + 1)));
+    el.innerHTML = `<span><b>FL${String(a.fl).padStart(3, '0')}</b>${vs > 0 ? ' ↑' : vs < 0 ? ' ↓' : ''}${a.cleared_fl !== a.fl ? ' → ' + a.cleared_fl : ''}</span><span>${fmtSpd(a)}</span><span>HDG ${String(Math.round(a.heading)).padStart(3, '0')}</span><span>${fmtNav(a)}</span><span class="badge b-${k}">${t}</span>` +
+      (pend.length ? `<div class="dk-pend">executing: ${pend.join(' · ')}</div>` : '');
   }
   function renderPilot(scroll) {
-    if (!state || !$('#pilotList')) return;
-    const box = $('#pilotList');
+    if (!state || !$('#fleet')) return;
     if (!$('#plPts') && sector) { const dl = document.createElement('datalist'); dl.id = 'plPts'; dl.innerHTML = Object.keys(sector.waypoints).map(n => `<option value="${n}">`).join(''); document.body.appendChild(dl); }
-    const reqs = state.pending_requests || [], pend = state.pending_instructions || [];
-    const rank = a => { const calling = a.on_frequency && !a.assumed, rq = reqs.some(r => r.callsign === a.callsign && r.kind !== 'checkin');
-      return calling ? 0 : rq ? 1 : a.on_frequency ? 2 : 3; };
-    const list = state.aircraft.slice().sort((a, b) => rank(a) - rank(b) || a.callsign.localeCompare(b.callsign));
-    const seen = new Set();
-    let order = 0;
-    for (const a of list) {
-      const cs = a.callsign; seen.add(cs);
-      let r = rows[cs];
-      if (!r) {
-        const el = document.createElement('div'); el.className = 'pl';
-        el.innerHTML = '<div class="ph"></div><div data-says></div>';
-        el.querySelector('.ph').onclick = () => { pilotSel = pilotSel === cs ? null : cs; selected = pilotSel; renderPilot(); };
-        r = rows[cs] = { el, ph: el.querySelector('.ph'), says: el.querySelector('[data-says]'), ctl: null, phH: '', saysH: '' };
-      }
-      if (box.children[order] !== r.el) box.insertBefore(r.el, box.children[order] || null);
-      order++;
-      const calling = a.on_frequency && !a.assumed;
-      const spd = a.speed_mode === 'mach' ? 'M' + String(Math.round(a.mach * 100)).padStart(2, '0') : a.ias_kt + 'kt';
-      const nav = a.nav_mode === 'heading' ? 'H' + String(a.assigned_heading).padStart(3, '0') : a.nav_mode === 'wxdev' ? 'DEV' : '>' + (a.next_waypoint || '');
-      const phH = `<b>${cs}</b><span>${String(a.fl).padStart(3, '0')}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' '}${a.cleared_fl !== a.fl ? a.cleared_fl : ''}</span><span>${spd}</span><span>${nav}</span><span class="grow"></span>` +
-        (!a.on_frequency ? '<span class="badge prev">prev sector</span>' : calling ? '<span class="badge call">CALLING</span>' : '<span class="badge asm">on freq</span>');
-      if (phH !== r.phH) { r.ph.innerHTML = phH; r.phH = phH; }
-      const says = [];
-      for (const q of reqs.filter(q => q.callsign === cs)) {
-        if (q.kind === 'checkin') says.push(`<div class="say call"><span>Call the controller: <b>“${h(q.phraseology)}”</b></span></div>`);
-        else says.push(`<div class="say"><span><b>“${h(q.phraseology)}”</b>${q.reason ? ` <span style="opacity:.7">(${h(q.reason)})</span>` : ''}</span><span style="white-space:nowrap">${q.type === 'report' ? `<button data-rep="${q.id}" data-dec="roger">Acknowledged</button>` :
-          `<button data-rep="${q.id}" data-dec="approved" title="the controller approved it: do it">Approved</button><button data-rep="${q.id}" data-dec="unable">Refused</button>`}</span></div>`);
-      }
-      for (const p of pend.filter(p => p.text && p.text.startsWith(cs))) says.push(`<div class="say" style="background:#1a2633;color:#9fc3e6;border-color:#24384c"><span>executing: ${h(p.text)}</span></div>`);
-      const saysH = says.join('');
-      if (saysH !== r.saysH) {
-        r.says.innerHTML = saysH; r.saysH = saysH;
-        r.says.querySelectorAll('[data-rep]').forEach(b => b.onclick = () => fly(cs, { type: 'reply', request_id: b.dataset.rep, decision: b.dataset.dec }, $('#cmdmsg')));
-      }
-      const sel = pilotSel === cs;
-      r.el.classList.toggle('sel', sel);
-      if (sel && !r.ctl) { r.ctl = pilotCtl(cs, a); r.el.appendChild(r.ctl); }
-      if (!sel && r.ctl) { r.ctl.remove(); r.ctl = null; }
-      if (sel && scroll) r.el.scrollIntoView({ block: 'nearest' });
-    }
-    for (const cs of Object.keys(rows)) if (!seen.has(cs)) { rows[cs].el.remove(); delete rows[cs]; if (pilotSel === cs) pilotSel = null; }
-    if (!list.length) box.innerHTML = '<div class="empty">no aircraft in the sector yet</div>';
-    else { const e = box.querySelector('.empty'); if (e) e.remove(); }
+    if (!$('#todo').dataset.bound) { $('#todo').dataset.bound = 1; bindLists(); }
+    if (pilotSel && !state.aircraft.some(a => a.callsign === pilotSel)) pilotSel = null;
+    renderTodo(); renderFleet();
+    if (pilotSel !== deckCs || !$('#deck').innerHTML) buildDeck(pilotSel);
+    refreshDeck();
+    if (scroll && pilotSel) $('#deckSec').scrollIntoView({ block: 'nearest' });
   }
 
   // ------------------------------------------------------------------ instructor

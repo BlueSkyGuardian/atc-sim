@@ -52,13 +52,21 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     readback or execution is visible.
   - STCA (3 min) and loss-of-separation alarms; no medium-term conflict list, no pilot request list: requests come
     by voice.
-- **Pseudo-pilot** (seat *pilot*): the radar and an **aircraft panel**: every aircraft, calling ones first.
-  - *Call the controller: “RAM101 FL350, checking in”* when an aircraft reaches the frequency.
-  - Pilot requests to read out (“…request FL380…”), with **Approved** (executes it) / **Refused**.
-  - Click an aircraft for its controls: level, heading (left/right), speed (Mach, knots now, on conversion,
-    resume), direct to (route points or any point), resume own navigation, weather deviation; the result
-    (accepted, or the aircraft's *unable …*) shows under the controls. The command line accepts the same shorthand
-    as before.
+- **Pseudo-pilot** (seat *pilot*): the radar and a workspace in three parts.
+  - **To do:** what to say on the frequency, oldest first: first calls (*“RAM101 FL350, checking in”*, until the
+    controller assumes) and pilot requests or reports to read out, with **Approved** (the aircraft does it) /
+    **Refused** / **Acknowledged**.
+  - **Control deck** of the selected aircraft (click it in the list, in To do or on the radar): present level,
+    speed, heading and navigation, what it is executing, its limits (max FL now, Mach and IAS range, climb rate),
+    then one row per action: **Level** (value, ±10/±20, optional minimum rate, *Climb / Descend FLxxx*),
+    **Heading** (left / right / shortest, resume own navigation), **Speed** (Mach, knots now, on conversion, resume
+    normal), **Direct** (the next points of the route as buttons, or any point), **Weather** deviation. The result,
+    or the aircraft's *unable …*, shows under it. Enter validates a field.
+  - **Aircraft:** every aircraft with level, speed, navigation and status (calling, request, on frequency,
+    previous sector), those needing something first. The *Shorthand* line still takes the command syntax.
+- **Instructor's side panel** is in tabs: **Aircraft** (the pseudo-pilot workspace and telephone), **Exercise**
+  (members, invitations, links, run / pause / speed / restart / replay, end), **Monitor** (selected aircraft details,
+  requests, sequence, predicted conflicts, events, metrics).
 - **Radio:** hold the **space bar** (outside text fields) or the on-screen button to transmit on the frequency.
   Everybody in the exercise hears it; the scope shows who is transmitting.
 - **Telephone:** the controller's ☎ menu lists GMMM, LPPC, GCCC, LECS, MADEIRA; calling one rings the pseudo-pilots
