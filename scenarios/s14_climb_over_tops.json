@@ -1,0 +1,196 @@
+{
+  "name": "s14_climb_over_tops",
+  "title": "Request to climb over a line of storms",
+  "description": "A broken line of moderate thunderstorms (tops around FL350) lies WSW-ENE across the middle of the sector, drifting north-east.",
+  "design_notes": "RAM212 (A20N, FL340, S2->N3, northbound) would have to go far around the line, so it asks to climb about 3000 ft above the radar tops: FL380 (an even level). AEA38 (B738, FL380, E2->W2) crosses its path there: approving the requested climb loses separation. Correct: unable the climb and approve a lateral deviation, or climb RAM212 through to FL400 early enough to be above AEA38 before it arrives (check it with /probe), or turn AEA38.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 31,
+    "temperature": {
+      "surface_c": 24,
+      "tropopause_fl": 390,
+      "lapse_c_per_kft": 2.1
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 200,
+          "kt": 10
+        },
+        {
+          "fl": 100,
+          "dir": 220,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 240,
+          "kt": 40
+        },
+        {
+          "fl": 350,
+          "dir": 250,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 255,
+          "kt": 40
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
+    "cells": [
+      {
+        "id": "CB1",
+        "x": -24,
+        "y": 4,
+        "at_time": 400,
+        "top_fl": 350,
+        "dbz": 52,
+        "radius_nm": 3.5,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 60,
+          "kt": 18
+        }
+      },
+      {
+        "id": "CB2",
+        "x": -12,
+        "y": 0,
+        "at_time": 400,
+        "top_fl": 350,
+        "dbz": 52,
+        "radius_nm": 3.5,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 60,
+          "kt": 18
+        }
+      },
+      {
+        "id": "CB3",
+        "x": 0,
+        "y": -3,
+        "at_time": 400,
+        "top_fl": 350,
+        "dbz": 52,
+        "radius_nm": 3.5,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 60,
+          "kt": 18
+        }
+      },
+      {
+        "id": "CB4",
+        "x": 12,
+        "y": -6,
+        "at_time": 400,
+        "top_fl": 350,
+        "dbz": 52,
+        "radius_nm": 3.5,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 60,
+          "kt": 18
+        }
+      },
+      {
+        "id": "CB5",
+        "x": 24,
+        "y": -9,
+        "at_time": 400,
+        "top_fl": 350,
+        "dbz": 52,
+        "radius_nm": 3.5,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 60,
+          "kt": 18
+        }
+      }
+    ]
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "RAM212",
+      "type": "A20N",
+      "route": [
+        "S2",
+        "N3"
+      ],
+      "fl": 340,
+      "entry_time": 0
+    },
+    {
+      "callsign": "AEA38",
+      "type": "B738",
+      "route": [
+        "E2",
+        "W2"
+      ],
+      "fl": 380,
+      "reach": {
+        "point": [
+          -5.001,
+          -20.0
+        ],
+        "time": 306
+      }
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "AEA38",
+          "RAM212"
+        ]
+      ],
+      "wx_request": "RAM212"
+    },
+    "passive": {
+      "los": false,
+      "wx_request": "RAM212"
+    }
+  },
+  "solution": [
+    {
+      "on_request": "RAM212",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "unable"
+        },
+        {
+          "callsign": "RAM212",
+          "type": "deviation",
+          "side": "either"
+        }
+      ]
+    }
+  ]
+}

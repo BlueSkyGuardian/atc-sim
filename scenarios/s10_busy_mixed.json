@@ -1,0 +1,308 @@
+{
+  "name": "s10_busy_mixed",
+  "title": "Busy sector - mixed traffic, requests and an area",
+  "description": "Eleven flights, a danger area activating mid-session, several pilot requests.",
+  "design_notes": "Built-in conflicts: RAM602/AFR11 at FL370 (crossing t=700), EZY8/VLG33 at FL340 (northbound, crossing t=900); with everyone southbound at FL370, AFR11 also meets TAP7 and RAM602 meets SWR40 later on. TAP7 follows RYR3 on N2->S1 at FL370, 7 NM in trail at the same speed (legal). D55 (danger, FL000-FL400) activates at t=800 under IBE9's route - it needs a vector or a climb above FL400. Traps: KLM6 (FL350) asks FL370 at t=520 (conflicts with SWR40 converging at the centre at t=760, and with RAM602); TAP7 asks Mach .81 at t=600 (runs it into RYR3 before S1); UAE4 asks direct E1 at t=650 (new track crosses D55 after activation). Safe: DLH5 FL360 -> FL380 at t=400.",
+  "duration_s": 1800,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "areas": [
+    {
+      "id": "D55",
+      "name": "Live firing",
+      "kind": "danger",
+      "circle": {
+        "center": [
+          27,
+          2
+        ],
+        "radius_nm": 7
+      },
+      "lower_fl": 0,
+      "upper_fl": 400,
+      "active": false,
+      "schedule": [
+        {
+          "time": 800,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "name": "Nuclear plant",
+      "kind": "prohibited",
+      "circle": {
+        "center": [
+          -48,
+          -45
+        ],
+        "radius_nm": 4
+      },
+      "lower_fl": 0,
+      "upper_fl": 660,
+      "active": true
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "RAM602",
+      "type": "B738",
+      "route": [
+        "N1",
+        "S3"
+      ],
+      "fl": 370,
+      "reach": {
+        "point": [
+          -18.0,
+          6.0
+        ],
+        "time": 700
+      }
+    },
+    {
+      "callsign": "AFR11",
+      "type": "A320",
+      "route": [
+        "W1",
+        "E2"
+      ],
+      "fl": 370,
+      "reach": {
+        "point": [
+          -18.0,
+          6.0
+        ],
+        "time": 700
+      }
+    },
+    {
+      "callsign": "EZY8",
+      "type": "A320",
+      "route": [
+        "S4",
+        "N2"
+      ],
+      "fl": 340,
+      "reach": {
+        "point": [
+          18.0,
+          -6.0
+        ],
+        "time": 900
+      }
+    },
+    {
+      "callsign": "VLG33",
+      "type": "A320",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 340,
+      "reach": {
+        "point": [
+          18.0,
+          -6.0
+        ],
+        "time": 900
+      }
+    },
+    {
+      "callsign": "KLM6",
+      "type": "B738",
+      "route": [
+        "N4",
+        "S1"
+      ],
+      "fl": 350,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 760
+      }
+    },
+    {
+      "callsign": "SWR40",
+      "type": "A21N",
+      "route": [
+        "N3",
+        "S2"
+      ],
+      "fl": 370,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 760
+      }
+    },
+    {
+      "callsign": "RYR3",
+      "type": "B738",
+      "route": [
+        "N2",
+        "S1"
+      ],
+      "fl": 370,
+      "mach": 0.76,
+      "reach": {
+        "waypoint": "S1",
+        "time": 1150
+      }
+    },
+    {
+      "callsign": "TAP7",
+      "type": "A320",
+      "route": [
+        "N2",
+        "S1"
+      ],
+      "fl": 370,
+      "mach": 0.76,
+      "entry_time": 150
+    },
+    {
+      "callsign": "DLH5",
+      "type": "A21N",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 360,
+      "load": 0.35,
+      "entry_time": 250
+    },
+    {
+      "callsign": "UAE4",
+      "type": "A388",
+      "route": [
+        "W2",
+        "E2"
+      ],
+      "fl": 390,
+      "load": 0.4,
+      "entry_time": 400
+    },
+    {
+      "callsign": "IBE9",
+      "type": "A320",
+      "route": [
+        "S3",
+        "N4"
+      ],
+      "fl": 380,
+      "entry_time": 500
+    }
+  ],
+  "requests": [
+    {
+      "time": 400,
+      "callsign": "DLH5",
+      "type": "altitude",
+      "value": 380,
+      "reason": "fuel"
+    },
+    {
+      "time": 520,
+      "callsign": "KLM6",
+      "type": "altitude",
+      "value": 370,
+      "reason": "smoother ride reported"
+    },
+    {
+      "time": 600,
+      "callsign": "TAP7",
+      "type": "speed",
+      "value": 0.81,
+      "reason": "making up time"
+    },
+    {
+      "time": 650,
+      "callsign": "UAE4",
+      "type": "direct",
+      "value": "E1",
+      "reason": "company reroute"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": true
+    },
+    "naive_approve": {
+      "los": true
+    }
+  }
+}

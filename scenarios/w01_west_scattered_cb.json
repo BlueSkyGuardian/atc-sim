@@ -1,0 +1,1717 @@
+{
+  "name": "w01_west_scattered_cb",
+  "airspace": "agadir",
+  "duration_s": 3600,
+  "pilot_delay_s": 4,
+  "areas": [],
+  "requests": [
+    {
+      "time": 1300,
+      "callsign": "RYR81DQ",
+      "type": "speed",
+      "value": 0.74,
+      "reason": "early arrival, holding expected"
+    },
+    {
+      "time": 1440,
+      "callsign": "RAM1402",
+      "type": "altitude",
+      "value": 380,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 560,
+      "callsign": "RAM205",
+      "type": "altitude",
+      "value": 250,
+      "reason": "descent for Casablanca"
+    },
+    {
+      "time": 119,
+      "callsign": "RAM6589K",
+      "type": "altitude",
+      "value": 380,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 514,
+      "callsign": "RAM9022K",
+      "type": "altitude",
+      "value": 380,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 1068,
+      "callsign": "RAM6936",
+      "type": "altitude",
+      "value": 360,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 121,
+      "callsign": "RAM2367",
+      "type": "altitude",
+      "value": 380,
+      "reason": "requesting cruise level"
+    }
+  ],
+  "events": [],
+  "title": "West sectors, scattered thunderstorms, IBALU and VEDOD merges",
+  "description": "West North + West South band-boxed, at about sector capacity. Scattered strong thunderstorms (tops FL380-450) over the middle of West South. Southbound Europe-Canaries flows (UN857, RUNAX-IBALU-TERTO standard route, TAKAV-VEDOD-TERTO), northbound Canaries-Europe flows (UN858 from VASTO, DESUM-SULAM-UN858, VASTO-BAROK, VASTO-NIDEB-TIGGI), Casablanca arrivals and departures, GCRR arrivals via TERTO (LoA FL250, 10 NM).",
+  "control": [
+    "WN",
+    "WS"
+  ],
+  "weather": {
+    "seed": 101,
+    "temperature": {
+      "surface_c": 24,
+      "tropopause_fl": 390,
+      "lapse_c_per_kft": 2.1
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 200,
+          "kt": 10
+        },
+        {
+          "fl": 100,
+          "dir": 220,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 240,
+          "kt": 40
+        },
+        {
+          "fl": 350,
+          "dir": 250,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 255,
+          "kt": 40
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
+    "convection": {
+      "regime": "scattered",
+      "intensity": "strong",
+      "count": 8,
+      "region": [
+        -40,
+        -120,
+        60,
+        -40
+      ]
+    }
+  },
+  "aircraft": [
+    {
+      "callsign": "EWG7TB",
+      "type": "A320",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "dep": "EDDK",
+      "dest": "GCFV",
+      "arrival": false,
+      "reach": {
+        "waypoint": "IBALU",
+        "time": 900
+      }
+    },
+    {
+      "callsign": "IBE3215",
+      "type": "A21N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "dep": "LEMD",
+      "dest": "GCLP",
+      "arrival": false,
+      "reach": {
+        "waypoint": "IBALU",
+        "time": 918
+      }
+    },
+    {
+      "callsign": "RAM205",
+      "type": "B789",
+      "route": [
+        "BEXAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "dep": "CYUL",
+      "dest": "GMMN",
+      "load": 0.4,
+      "reach": {
+        "point": [
+          83.909,
+          122.585
+        ],
+        "time": 700
+      }
+    },
+    {
+      "callsign": "BEL5AT",
+      "type": "A332",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "dep": "GOBD",
+      "dest": "EBBR",
+      "load": 0.4,
+      "reach": {
+        "point": [
+          83.908,
+          122.584
+        ],
+        "time": 699
+      }
+    },
+    {
+      "callsign": "RYR81DQ",
+      "type": "B38M",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 340,
+      "dep": "GCTS",
+      "dest": "EGSS",
+      "reach": {
+        "waypoint": "IBLIV",
+        "time": 1800
+      }
+    },
+    {
+      "callsign": "EZY64LK",
+      "type": "A20N",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 340,
+      "dep": "GCTS",
+      "dest": "EGKK",
+      "reach": {
+        "waypoint": "IBLIV",
+        "time": 1870
+      }
+    },
+    {
+      "callsign": "RAM1307",
+      "type": "B738",
+      "route": [
+        "NIPRI",
+        "NIDEB",
+        "ROLRO"
+      ],
+      "fl": 350,
+      "dep": "LPAZ",
+      "dest": "GMAD",
+      "reach": {
+        "point": [
+          2.828,
+          -43.348
+        ],
+        "time": 1300
+      }
+    },
+    {
+      "callsign": "TAP1462",
+      "type": "A20N",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "dep": "LPPT",
+      "dest": "GCXO",
+      "reach": {
+        "point": [
+          2.828,
+          -43.348
+        ],
+        "time": 1300
+      }
+    },
+    {
+      "callsign": "EXS82H",
+      "type": "B738",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "dep": "EGCC",
+      "dest": "GCRR",
+      "reach": {
+        "waypoint": "VEDOD",
+        "time": 2500
+      }
+    },
+    {
+      "callsign": "TOM5LX",
+      "type": "B38M",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "dep": "EGGW",
+      "dest": "GCFV",
+      "arrival": false,
+      "reach": {
+        "waypoint": "VEDOD",
+        "time": 2525
+      }
+    },
+    {
+      "callsign": "RAM1402",
+      "type": "B738",
+      "route": [
+        "MARJA",
+        "ABODA",
+        "AMSEL"
+      ],
+      "fl": 260,
+      "dep": "GMMN",
+      "dest": "LPPT",
+      "reach": {
+        "waypoint": "MARJA",
+        "time": 1500
+      }
+    },
+    {
+      "callsign": "CFG4MT",
+      "type": "A321",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 290,
+      "dep": "EDDF",
+      "dest": "GCTS",
+      "load": 0.4,
+      "reach": {
+        "point": [
+          181.405,
+          128.452
+        ],
+        "time": 1661
+      }
+    },
+    {
+      "callsign": "VLG8397A",
+      "type": "B739",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.44,
+      "entry_time": -1353,
+      "dep": "EGLL",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS2590K",
+      "type": "A321",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.33,
+      "entry_time": -613,
+      "dep": "LEMD",
+      "dest": "GCLA",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS5355A",
+      "type": "B738",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.36,
+      "entry_time": -70,
+      "dep": "EGKK",
+      "dest": "GCLA",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "AEA9041P",
+      "type": "A20N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.45,
+      "entry_time": 761,
+      "dep": "LFPG",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "TAP1776P",
+      "type": "B38M",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.45,
+      "entry_time": 1547,
+      "dep": "EBBR",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS867A",
+      "type": "B738",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.55,
+      "entry_time": 2160,
+      "dep": "ENGM",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "EXS5108",
+      "type": "B38M",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.53,
+      "entry_time": 3087,
+      "dep": "LEMD",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false
+    },
+    {
+      "callsign": "EZY7986",
+      "type": "A320",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.34,
+      "entry_time": -520,
+      "dep": "EIDW",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr"
+    },
+    {
+      "callsign": "EZY1918A",
+      "type": "B38M",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.6,
+      "entry_time": 836,
+      "dep": "EGGW",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr"
+    },
+    {
+      "callsign": "RYR6469P",
+      "type": "A20N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.6,
+      "entry_time": 2027,
+      "dep": "EIDW",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr"
+    },
+    {
+      "callsign": "CFG6337",
+      "type": "A321",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.36,
+      "entry_time": -1544,
+      "dep": "LFPG",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "IBE9631A",
+      "type": "B38M",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.3,
+      "entry_time": -577,
+      "dep": "EDDF",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS2606X",
+      "type": "A321",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.39,
+      "entry_time": 274,
+      "dep": "LPPR",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "AEA786",
+      "type": "A319",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.56,
+      "entry_time": 1447,
+      "dep": "EHAM",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "SWR8054",
+      "type": "A20N",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.37,
+      "entry_time": 2207,
+      "dep": "LEBL",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "EWG3489",
+      "type": "A320",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.34,
+      "entry_time": 3327,
+      "dep": "LEMD",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false
+    },
+    {
+      "callsign": "TUI8709K",
+      "type": "B739",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 310,
+      "load": 0.37,
+      "entry_time": 60,
+      "dep": "EDDF",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "runax_gcrr"
+    },
+    {
+      "callsign": "BTI584",
+      "type": "B739",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "load": 0.59,
+      "entry_time": -1350,
+      "dep": "DIAP",
+      "dest": "LMML",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "IBE5106",
+      "type": "A20N",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 340,
+      "load": 0.59,
+      "entry_time": -486,
+      "dep": "GCXO",
+      "dest": "LFPG",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "AFR7764",
+      "type": "A332",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 360,
+      "load": 0.41,
+      "entry_time": 209,
+      "dep": "GVAC",
+      "dest": "LGAV",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "SWR1193",
+      "type": "B739",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 340,
+      "load": 0.47,
+      "entry_time": 1048,
+      "dep": "GCTS",
+      "dest": "LEVC",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS7589P",
+      "type": "A20N",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 300,
+      "load": 0.56,
+      "entry_time": 1967,
+      "dep": "DNMM",
+      "dest": "LFPG",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "TAP1859A",
+      "type": "A332",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "load": 0.31,
+      "entry_time": 3078,
+      "dep": "GUCY",
+      "dest": "LEPA",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false
+    },
+    {
+      "callsign": "DLH2788P",
+      "type": "A20N",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "load": 0.57,
+      "entry_time": -667,
+      "dep": "GCRR",
+      "dest": "LEPA",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS7069P",
+      "type": "B739",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 300,
+      "load": 0.57,
+      "entry_time": 642,
+      "dep": "GCTS",
+      "dest": "LEIB",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false
+    },
+    {
+      "callsign": "KLM5756P",
+      "type": "B38M",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 360,
+      "load": 0.47,
+      "entry_time": 1290,
+      "dep": "GCLP",
+      "dest": "LEZL",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS6792A",
+      "type": "A20N",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "load": 0.55,
+      "entry_time": 2453,
+      "dep": "GCFV",
+      "dest": "LEPA",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false
+    },
+    {
+      "callsign": "EWG9358",
+      "type": "B739",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.4,
+      "entry_time": -1425,
+      "dep": "EBBR",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "RYR4374",
+      "type": "B738",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.49,
+      "entry_time": -434,
+      "dep": "EDDF",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS7794",
+      "type": "A320",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.43,
+      "entry_time": 409,
+      "dep": "EGLL",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "TVF4472P",
+      "type": "B739",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.46,
+      "entry_time": 646,
+      "dep": "EDDM",
+      "dest": "GCLA",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "EXS6735X",
+      "type": "A321",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.42,
+      "entry_time": 1745,
+      "dep": "ENGM",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS5358X",
+      "type": "B38M",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.49,
+      "entry_time": 2360,
+      "dep": "EGKK",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "NOZ5259",
+      "type": "A320",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.36,
+      "entry_time": 3244,
+      "dep": "LEMD",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false
+    },
+    {
+      "callsign": "EZY3586P",
+      "type": "A320",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.43,
+      "entry_time": -1482,
+      "dep": "EDDF",
+      "dest": "SVMI",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "AFR8080K",
+      "type": "A21N",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 350,
+      "load": 0.46,
+      "entry_time": -959,
+      "dep": "EDDF",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "SWR6255P",
+      "type": "A333",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.55,
+      "entry_time": -635,
+      "dep": "LOWW",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "TAP6745K",
+      "type": "A20N",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.59,
+      "entry_time": -243,
+      "dep": "EDDF",
+      "dest": "SCEL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "LAN1537X",
+      "type": "B788",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 330,
+      "load": 0.31,
+      "entry_time": 100,
+      "dep": "EDDM",
+      "dest": "SBGL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "LAN2090",
+      "type": "B772",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 390,
+      "load": 0.42,
+      "entry_time": 814,
+      "dep": "LSZH",
+      "dest": "SAEZ",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "EZY593",
+      "type": "B38M",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 350,
+      "load": 0.36,
+      "entry_time": 1124,
+      "dep": "EDDM",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS8196X",
+      "type": "A333",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.4,
+      "entry_time": 1402,
+      "dep": "LOWW",
+      "dest": "SBGL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "TAP8682K",
+      "type": "A332",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 350,
+      "load": 0.52,
+      "entry_time": 2090,
+      "dep": "EDDM",
+      "dest": "SCEL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "BAW5185K",
+      "type": "A319",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 350,
+      "load": 0.46,
+      "entry_time": 2327,
+      "dep": "LIMC",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "VLG4261A",
+      "type": "A319",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 370,
+      "load": 0.57,
+      "entry_time": 2765,
+      "dep": "EDDF",
+      "dest": "SVMI",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "IBS3302K",
+      "type": "A359",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.46,
+      "entry_time": 3384,
+      "dep": "LIMC",
+      "dest": "SKBO",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM623P",
+      "type": "A21N",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 330,
+      "load": 0.45,
+      "entry_time": -1300,
+      "dep": "LPPR",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false
+    },
+    {
+      "callsign": "IBE1024",
+      "type": "A321",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 330,
+      "load": 0.33,
+      "entry_time": 471,
+      "dep": "EKCH",
+      "dest": "GMMX",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false
+    },
+    {
+      "callsign": "IBE6123",
+      "type": "A21N",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 370,
+      "load": 0.42,
+      "entry_time": 2955,
+      "dep": "LPPT",
+      "dest": "GMMX",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM8272K",
+      "type": "B738",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 290,
+      "load": 0.54,
+      "entry_time": 686,
+      "dep": "EGLL",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "marja_arr"
+    },
+    {
+      "callsign": "RAM5415K",
+      "type": "B738",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 330,
+      "load": 0.52,
+      "entry_time": 2366,
+      "dep": "EBBR",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "marja_arr"
+    },
+    {
+      "callsign": "RAM5608",
+      "type": "A320",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 310,
+      "load": 0.42,
+      "entry_time": 1873,
+      "dep": "EBBR",
+      "dest": "GMMX",
+      "direction": "southbound",
+      "flow": "marja_south",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM4482X",
+      "type": "B739",
+      "route": [
+        "OSLAD",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 330,
+      "load": 0.6,
+      "entry_time": -881,
+      "dep": "LPPR",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "salca_arr"
+    },
+    {
+      "callsign": "RAM1969P",
+      "type": "B789",
+      "route": [
+        "BEXAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 390,
+      "load": 0.47,
+      "entry_time": -134,
+      "dep": "CYUL",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "salca_nat"
+    },
+    {
+      "callsign": "RAM6589K",
+      "type": "B788",
+      "route": [
+        "SALCA",
+        "IBALU",
+        "SUBAL"
+      ],
+      "fl": 260,
+      "load": 0.52,
+      "entry_time": -502,
+      "dep": "GMMN",
+      "dest": "KMIA",
+      "direction": "northbound",
+      "flow": "gmmn_dep_nat",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM9022K",
+      "type": "B788",
+      "route": [
+        "SALCA",
+        "IBALU",
+        "BEXAL"
+      ],
+      "fl": 260,
+      "load": 0.38,
+      "entry_time": 447,
+      "dep": "GMMN",
+      "dest": "CYUL",
+      "direction": "northbound",
+      "flow": "gmmn_dep_nat_b",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM7739",
+      "type": "B788",
+      "route": [
+        "SUBAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "load": 0.46,
+      "entry_time": 697,
+      "dep": "KORD",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "subal_nat"
+    },
+    {
+      "callsign": "SAT710X",
+      "type": "A320",
+      "route": [
+        "NIPRI",
+        "NIDEB",
+        "ROLRO"
+      ],
+      "fl": 330,
+      "load": 0.5,
+      "entry_time": 305,
+      "dep": "LPPD",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "nipri_rolro",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM3675A",
+      "type": "A320",
+      "route": [
+        "NIPRI",
+        "NIDEB",
+        "ROLRO"
+      ],
+      "fl": 390,
+      "load": 0.32,
+      "entry_time": 1782,
+      "dep": "KJFK",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "nipri_rolro",
+      "arrival": false
+    },
+    {
+      "callsign": "SAT1895",
+      "type": "B738",
+      "route": [
+        "NIPRI",
+        "NIDEB",
+        "ROLRO"
+      ],
+      "fl": 330,
+      "load": 0.31,
+      "entry_time": 2623,
+      "dep": "KJFK",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "nipri_rolro",
+      "arrival": false
+    },
+    {
+      "callsign": "KLM7892",
+      "type": "A359",
+      "route": [
+        "VASTO",
+        "BAROK"
+      ],
+      "fl": 340,
+      "load": 0.41,
+      "entry_time": -339,
+      "dep": "SKBO",
+      "dest": "EBBR",
+      "direction": "northbound",
+      "flow": "vasto_barok",
+      "arrival": false
+    },
+    {
+      "callsign": "KLM3119",
+      "type": "B789",
+      "route": [
+        "VASTO",
+        "BAROK"
+      ],
+      "fl": 360,
+      "load": 0.38,
+      "entry_time": 639,
+      "dep": "SKBO",
+      "dest": "EGKK",
+      "direction": "northbound",
+      "flow": "vasto_barok",
+      "arrival": false
+    },
+    {
+      "callsign": "EZY633",
+      "type": "A320",
+      "route": [
+        "VASTO",
+        "BAROK"
+      ],
+      "fl": 380,
+      "load": 0.49,
+      "entry_time": 1563,
+      "dep": "DIAP",
+      "dest": "LPPR",
+      "direction": "northbound",
+      "flow": "vasto_barok",
+      "arrival": false
+    },
+    {
+      "callsign": "AVA7940A",
+      "type": "A321",
+      "route": [
+        "VASTO",
+        "BAROK"
+      ],
+      "fl": 360,
+      "load": 0.57,
+      "entry_time": 2065,
+      "dep": "SBGR",
+      "dest": "EGKK",
+      "direction": "northbound",
+      "flow": "vasto_barok",
+      "arrival": false
+    },
+    {
+      "callsign": "AEA7290A",
+      "type": "A343",
+      "route": [
+        "VASTO",
+        "BAROK"
+      ],
+      "fl": 340,
+      "load": 0.52,
+      "entry_time": 2969,
+      "dep": "DNMM",
+      "dest": "ENGM",
+      "direction": "northbound",
+      "flow": "vasto_barok",
+      "arrival": false
+    },
+    {
+      "callsign": "AEA6059K",
+      "type": "A21N",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 360,
+      "load": 0.35,
+      "entry_time": -1079,
+      "dep": "GCLP",
+      "dest": "EKCH",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "CFG162",
+      "type": "A320",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 300,
+      "load": 0.46,
+      "entry_time": -172,
+      "dep": "GCXO",
+      "dest": "EGKK",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "TVF5872X",
+      "type": "A320",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 380,
+      "load": 0.51,
+      "entry_time": 716,
+      "dep": "GCRR",
+      "dest": "LSZH",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS5213",
+      "type": "A320",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 300,
+      "load": 0.4,
+      "entry_time": 1252,
+      "dep": "GCFV",
+      "dest": "LEBL",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "BTI6360P",
+      "type": "A21N",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 320,
+      "load": 0.55,
+      "entry_time": 2047,
+      "dep": "GCTS",
+      "dest": "EDDM",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "SAS4621P",
+      "type": "A321",
+      "route": [
+        "VASTO",
+        "NIDEB",
+        "TIGGI"
+      ],
+      "fl": 360,
+      "load": 0.55,
+      "entry_time": 3247,
+      "dep": "GCLP",
+      "dest": "EGCC",
+      "direction": "northbound",
+      "flow": "vasto_tiggi",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM6936",
+      "type": "B739",
+      "route": [
+        "MARJA",
+        "ABODA",
+        "AMSEL"
+      ],
+      "fl": 240,
+      "load": 0.35,
+      "entry_time": 957,
+      "dep": "GMMN",
+      "dest": "LPPT",
+      "direction": "northbound",
+      "flow": "gmmn_dep_amsel",
+      "arrival": false
+    },
+    {
+      "callsign": "RAM2367",
+      "type": "B738",
+      "route": [
+        "NISBA",
+        "IBALU",
+        "OSLAD"
+      ],
+      "fl": 260,
+      "load": 0.57,
+      "entry_time": -623,
+      "dep": "GMMN",
+      "dest": "EGLL",
+      "direction": "northbound",
+      "flow": "gmmn_dep_oslad",
+      "arrival": false
+    }
+  ],
+  "design_notes": "Planted conflicts (passive): EWG7TB (standard route) and IBE3215 (UN857) merge at IBALU at FL350 18 s apart; RAM1307 (NIPRI-NIDEB-ROLRO) crosses TAP1462 on TAKAV-VEDOD at FL350 soon after entering at NIDEB; EXS82H (UN857, GCRR arrival) and TOM5LX (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart. Request traps (naive): RAM205 (SALCA arrival from BEXAL, FL370) asks descent and would descend through BEL5AT (northbound on UN858) where the tracks cross; RYR81DQ (northbound UN858, FL340) asks Mach .74 with EZY64LK 9 NM behind at the same level; GMMN departure RAM1402 asks FL380 climbing through CFG4MT (RUNAX standard route, level set to the one RAM1402 climbs through there) at the MARJA-ABODA crossing. Weather deviations around the West South cells add the rest.",
+  "expected": {
+    "passive": {
+      "allow_left_sector": true,
+      "los": true,
+      "pairs": [
+        [
+          "EWG7TB",
+          "IBE3215"
+        ],
+        [
+          "RAM1307",
+          "TAP1462"
+        ],
+        [
+          "EXS82H",
+          "TOM5LX"
+        ]
+      ]
+    },
+    "naive_approve": {
+      "allow_left_sector": true,
+      "los": true,
+      "pairs": [
+        [
+          "EZY64LK",
+          "RYR81DQ"
+        ],
+        [
+          "CFG4MT",
+          "RAM1402"
+        ],
+        [
+          "BEL5AT",
+          "RAM205"
+        ]
+      ]
+    }
+  }
+}

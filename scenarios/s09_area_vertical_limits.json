@@ -1,0 +1,143 @@
+{
+  "name": "s09_area_vertical_limits",
+  "title": "Descent request into an active restricted area",
+  "description": "A restricted area is active from the surface to FL360. Two flights overfly it; both ask for level changes.",
+  "design_notes": "R40 (FL000-FL360) is active on the N4-S2 route. ARN501 overflies at FL370 (clear above the inclusive upper limit) and asks FL350 at t=240 - approving drops it into the area. ETD33 at FL390 asks FL410 at t=250 - harmless (distractor). Correct: unable ARN501 until clear of R40, approve ETD33.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 22,
+    "temperature": {
+      "surface_c": 25,
+      "tropopause_fl": 380
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 20,
+          "kt": 18
+        },
+        {
+          "fl": 100,
+          "dir": 10,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 355,
+          "kt": 35
+        },
+        {
+          "fl": 350,
+          "dir": 350,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 340,
+          "kt": 35
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 10
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 22
+        }
+      ],
+      "noise_kt": 4,
+      "noise_scale_nm": 40
+    }
+  },
+  "areas": [
+    {
+      "id": "R40",
+      "name": "Air defence training",
+      "kind": "restricted",
+      "polygon": [
+        [
+          10,
+          22
+        ],
+        [
+          34,
+          22
+        ],
+        [
+          34,
+          -6
+        ],
+        [
+          10,
+          -6
+        ]
+      ],
+      "lower_fl": 0,
+      "upper_fl": 360,
+      "active": true
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "ARN501",
+      "type": "B738",
+      "route": [
+        "N4",
+        "S2"
+      ],
+      "fl": 370,
+      "entry_time": 60
+    },
+    {
+      "callsign": "ETD33",
+      "type": "B789",
+      "route": [
+        "N3",
+        "S1"
+      ],
+      "fl": 390,
+      "load": 0.3,
+      "entry_time": 90
+    },
+    {
+      "callsign": "RAM330",
+      "type": "E75L",
+      "route": [
+        "W2",
+        "E2"
+      ],
+      "fl": 250,
+      "entry_time": 30
+    }
+  ],
+  "requests": [
+    {
+      "time": 240,
+      "callsign": "ARN501",
+      "type": "altitude",
+      "value": 350,
+      "reason": "descent planning"
+    },
+    {
+      "time": 250,
+      "callsign": "ETD33",
+      "type": "altitude",
+      "value": 410,
+      "reason": "fuel"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": false,
+      "infringement": false
+    },
+    "naive_approve": {
+      "los": false,
+      "infringement": true
+    }
+  }
+}

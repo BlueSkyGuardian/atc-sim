@@ -1,0 +1,232 @@
+{
+  "name": "s15_convective_afternoon",
+  "title": "Convective afternoon - open problem",
+  "description": "Scattered strong thunderstorms (multicell clusters, tops FL360-450) developing and decaying across the sector, south-westerly flow aloft, twelve flights. Pilots ask for deviations as they need them.",
+  "design_notes": "No single scripted trap: the conflicts come from where the cells happen to be when each flight arrives, from deviations pushing aircraft into each other, and from cells growing on the far side of a deviation. For evaluating general weather handling (LoS, weather penetration, deviations without clearance, extra track miles, response times).",
+  "duration_s": 2100,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 41,
+    "temperature": {
+      "surface_c": 24,
+      "tropopause_fl": 390,
+      "lapse_c_per_kft": 2.1
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 200,
+          "kt": 10
+        },
+        {
+          "fl": 100,
+          "dir": 220,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 240,
+          "kt": 40
+        },
+        {
+          "fl": 350,
+          "dir": 250,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 255,
+          "kt": 40
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
+    "convection": {
+      "regime": "scattered",
+      "intensity": "strong",
+      "count": 9,
+      "region": [
+        -70,
+        -70,
+        70,
+        70
+      ]
+    }
+  },
+  "areas": [
+    {
+      "id": "R71",
+      "name": "Military training",
+      "kind": "restricted",
+      "polygon": [
+        [
+          25,
+          30
+        ],
+        [
+          50,
+          30
+        ],
+        [
+          50,
+          52
+        ],
+        [
+          25,
+          52
+        ]
+      ],
+      "lower_fl": 0,
+      "upper_fl": 450,
+      "active": true
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "RAM301",
+      "type": "B738",
+      "route": [
+        "N1",
+        "S3"
+      ],
+      "fl": 370,
+      "entry_time": 0
+    },
+    {
+      "callsign": "AFR77",
+      "type": "A320",
+      "route": [
+        "W1",
+        "E2"
+      ],
+      "fl": 350,
+      "entry_time": 60
+    },
+    {
+      "callsign": "DLH2T",
+      "type": "A21N",
+      "route": [
+        "E1",
+        "W2"
+      ],
+      "fl": 370,
+      "load": 0.35,
+      "entry_time": 90
+    },
+    {
+      "callsign": "IBE12",
+      "type": "A20N",
+      "route": [
+        "S2",
+        "N4"
+      ],
+      "fl": 340,
+      "entry_time": 150
+    },
+    {
+      "callsign": "EZY8K",
+      "type": "A319",
+      "route": [
+        "N4",
+        "S1"
+      ],
+      "fl": 390,
+      "entry_time": 220
+    },
+    {
+      "callsign": "UAE8",
+      "type": "B77W",
+      "route": [
+        "W2",
+        "E1"
+      ],
+      "fl": 340,
+      "load": 0.4,
+      "entry_time": 280
+    },
+    {
+      "callsign": "TAP15",
+      "type": "A332",
+      "route": [
+        "S4",
+        "N2"
+      ],
+      "fl": 400,
+      "load": 0.35,
+      "entry_time": 330
+    },
+    {
+      "callsign": "RYR4",
+      "type": "B38M",
+      "route": [
+        "N2",
+        "S4"
+      ],
+      "fl": 350,
+      "entry_time": 420
+    },
+    {
+      "callsign": "KLM3",
+      "type": "B789",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 360,
+      "load": 0.35,
+      "entry_time": 500
+    },
+    {
+      "callsign": "SVA9",
+      "type": "A333",
+      "route": [
+        "S1",
+        "N3"
+      ],
+      "fl": 380,
+      "load": 0.35,
+      "entry_time": 580
+    },
+    {
+      "callsign": "CNTKB",
+      "type": "C550",
+      "route": [
+        "W1",
+        "E1"
+      ],
+      "fl": 410,
+      "entry_time": 650
+    },
+    {
+      "callsign": "JAF4",
+      "type": "B738",
+      "route": [
+        "S3",
+        "N1"
+      ],
+      "fl": 340,
+      "entry_time": 700
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "naive_approve": {
+      "allow_left_sector": true
+    },
+    "passive": {
+      "allow_left_sector": true
+    }
+  }
+}

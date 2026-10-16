@@ -1,0 +1,194 @@
+{
+  "name": "s07_restricted_area_activation",
+  "title": "Restricted area activates across a route",
+  "description": "A military restricted area (surface to FL450) activates at T+05:00 across the W1-E2 route. A danger area is active below FL300 and a small prohibited area sits south-east.",
+  "design_notes": "R12 activates at t=300 across W1->E2. AMC31 (FL350) will fly straight into it unless vectored. Avoiding NORTH runs into JAF412 (FL350, N2->S3) crossing just north of the area; avoiding SOUTH is clear of traffic but must stay clear of prohibited P7. D20 is irrelevant at FL350 (tests that the agent reads vertical limits). Passive => restricted area infringement.",
+  "duration_s": 1700,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "areas": [
+    {
+      "id": "R12",
+      "name": "Military exercise",
+      "kind": "restricted",
+      "polygon": [
+        [
+          -38,
+          -2
+        ],
+        [
+          -18,
+          -2
+        ],
+        [
+          -18,
+          16
+        ],
+        [
+          -38,
+          16
+        ]
+      ],
+      "lower_fl": 0,
+      "upper_fl": 450,
+      "active": false,
+      "schedule": [
+        {
+          "time": 300,
+          "active": true
+        },
+        {
+          "time": 1500,
+          "active": false
+        }
+      ]
+    },
+    {
+      "id": "D20",
+      "name": "Glider area",
+      "kind": "danger",
+      "circle": {
+        "center": [
+          20,
+          30
+        ],
+        "radius_nm": 10
+      },
+      "lower_fl": 0,
+      "upper_fl": 300,
+      "active": true
+    },
+    {
+      "id": "P7",
+      "name": "Protected site",
+      "kind": "prohibited",
+      "circle": {
+        "center": [
+          -14,
+          -22
+        ],
+        "radius_nm": 5
+      },
+      "lower_fl": 0,
+      "upper_fl": 660,
+      "active": true
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "AMC31",
+      "type": "A320",
+      "route": [
+        "W1",
+        "E2"
+      ],
+      "fl": 350,
+      "entry_time": 200
+    },
+    {
+      "callsign": "JAF412",
+      "type": "B738",
+      "route": [
+        "N2",
+        "S3"
+      ],
+      "fl": 350,
+      "reach": {
+        "point": [
+          -11.6,
+          46.4
+        ],
+        "time": 420
+      }
+    },
+    {
+      "callsign": "RAM9F",
+      "type": "B788",
+      "route": [
+        "S1",
+        "N1"
+      ],
+      "fl": 380,
+      "entry_time": 250
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "passive": {
+      "los": false,
+      "infringement": true
+    },
+    "naive_approve": {
+      "los": false,
+      "infringement": true
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "name": "s03_descent_through_opposite",
+  "title": "Descent request through opposite-direction traffic",
+  "description": "Two flights on the same route in opposite directions, 3000 ft apart. The upper one reports turbulence and asks to descend.",
+  "design_notes": "DLH303 FL390 southbound and RAM304 FL360 northbound on the N3-S2 route meet head-on at the centre at t=600 (closing speed 900 kt). DLH303 asks for FL350 at t=520, when they are 20 NM apart: the descent would cross FL360 roughly where they pass. Correct: unable until passed: 'unable, opposite-direction traffic, expect lower in 2 minutes'. FL370 is an acceptable interim step (1000 ft above RAM304).",
+  "duration_s": 1400,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 22,
+    "temperature": {
+      "surface_c": 25,
+      "tropopause_fl": 380
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 20,
+          "kt": 18
+        },
+        {
+          "fl": 100,
+          "dir": 10,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 355,
+          "kt": 35
+        },
+        {
+          "fl": 350,
+          "dir": 350,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 340,
+          "kt": 35
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 10
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 22
+        }
+      ],
+      "noise_kt": 4,
+      "noise_scale_nm": 40
+    }
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "DLH303",
+      "type": "A21N",
+      "route": [
+        "N3",
+        "S2"
+      ],
+      "fl": 390,
+      "load": 0.35,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 600
+      }
+    },
+    {
+      "callsign": "RAM304",
+      "type": "B738",
+      "route": [
+        "S2",
+        "N3"
+      ],
+      "fl": 360,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 600
+      }
+    },
+    {
+      "callsign": "KLM52M",
+      "type": "B738",
+      "route": [
+        "W2",
+        "E2"
+      ],
+      "fl": 330,
+      "entry_time": 700
+    }
+  ],
+  "requests": [
+    {
+      "time": 520,
+      "callsign": "DLH303",
+      "type": "altitude",
+      "value": 350,
+      "reason": "moderate turbulence at FL390"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": false
+    },
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "DLH303",
+          "RAM304"
+        ]
+      ]
+    }
+  }
+}

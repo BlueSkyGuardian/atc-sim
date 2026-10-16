@@ -1,0 +1,193 @@
+{
+  "name": "s11_weather_deviation_into_traffic",
+  "title": "Weather deviation request into crossing traffic",
+  "description": "A mature thunderstorm (tops FL460) sits on the N1-S4 route in the middle of the sector, drifting east at 20 kt. Westerly jet north of the sector. Pilots will ask for weather deviations.",
+  "design_notes": "RAM8TJ (B738, FL370, N1->S4) sees CB1 on its route and asks for a heading for ~65 miles. On its filed route it is never close to IBE45 (A320, FL370, N2->S1), but the deviation it asks for runs straight into IBE45. Approving it blindly loses separation. Saying unable is not a solution either: the pilot will deviate anyway when the cell is 15 NM away. Correct: approve the deviation with a level change (RAM8TJ FL390, or IBE45 FL330), or vector IBE45.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    },
+    "cells": [
+      {
+        "id": "CB1",
+        "x": -5,
+        "y": 0,
+        "at_time": 300,
+        "top_fl": 460,
+        "dbz": 59,
+        "radius_nm": 5.0,
+        "lifetime_s": 6000,
+        "age_s": 1800,
+        "motion": {
+          "toward": 85,
+          "kt": 20
+        }
+      }
+    ]
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "RAM8TJ",
+      "type": "B738",
+      "route": [
+        "N1",
+        "S4"
+      ],
+      "fl": 370,
+      "entry_time": 0
+    },
+    {
+      "callsign": "IBE45",
+      "type": "A320",
+      "route": [
+        "N2",
+        "S1"
+      ],
+      "fl": 370,
+      "reach": {
+        "point": [
+          -25.249,
+          19.005
+        ],
+        "time": 335
+      }
+    },
+    {
+      "callsign": "TVF2",
+      "type": "B738",
+      "route": [
+        "E1",
+        "W2"
+      ],
+      "fl": 350,
+      "entry_time": 120
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "IBE45",
+          "RAM8TJ"
+        ]
+      ],
+      "wx_request": "RAM8TJ"
+    },
+    "passive": {
+      "wx_request": "RAM8TJ"
+    }
+  },
+  "solution": [
+    {
+      "on_request": "RAM8TJ",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        },
+        {
+          "callsign": "RAM8TJ",
+          "type": "altitude",
+          "fl": 390
+        }
+      ]
+    },
+    {
+      "on_request": "TVF2",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "RAM8TJ",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 600,
+      "do": [
+        {
+          "callsign": "RAM8TJ",
+          "type": "altitude",
+          "fl": 250
+        }
+      ]
+    }
+  ]
+}

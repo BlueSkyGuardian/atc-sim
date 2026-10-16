@@ -1,0 +1,134 @@
+{
+  "name": "s06_speed_up_into_crossing",
+  "title": "Sleeper conflict activated by a speed request",
+  "description": "Two crossing southbound flights at FL370 pass about 8 NM apart. A routine-looking speed request arrives at the same time as a harmless level request from another flight.",
+  "design_notes": "IBE612 (W1->E2) crosses KLM88B's route behind KLM88B: about 8 NM, legal. At t=300 IBE612 asks for Mach .81; that erases the margin (LoS at the crossing). At t=305 BAW15 asks FL380, which is safe - the distraction. Correct: approve BAW15, unable/amend IBE612 (or approve it with a level change: FL350/FL390 free).",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 22,
+    "temperature": {
+      "surface_c": 25,
+      "tropopause_fl": 380
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 20,
+          "kt": 18
+        },
+        {
+          "fl": 100,
+          "dir": 10,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 355,
+          "kt": 35
+        },
+        {
+          "fl": 350,
+          "dir": 350,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 340,
+          "kt": 35
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 10
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 22
+        }
+      ],
+      "noise_kt": 4,
+      "noise_scale_nm": 40
+    }
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "KLM88B",
+      "type": "B738",
+      "route": [
+        "N2",
+        "S3"
+      ],
+      "fl": 370,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 640
+      }
+    },
+    {
+      "callsign": "IBE612",
+      "type": "A320",
+      "route": [
+        "W1",
+        "E2"
+      ],
+      "fl": 370,
+      "mach": 0.74,
+      "arrival": false,
+      "reach": {
+        "point": [
+          0.0,
+          0.0
+        ],
+        "time": 700
+      }
+    },
+    {
+      "callsign": "BAW15",
+      "type": "B772",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 400,
+      "load": 0.3,
+      "entry_time": 100
+    }
+  ],
+  "requests": [
+    {
+      "time": 300,
+      "callsign": "IBE612",
+      "type": "speed",
+      "value": 0.81,
+      "reason": "making up a delay"
+    },
+    {
+      "time": 305,
+      "callsign": "BAW15",
+      "type": "altitude",
+      "value": 380,
+      "reason": "better winds reported at FL380"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": false
+    },
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "IBE612",
+          "KLM88B"
+        ]
+      ]
+    }
+  }
+}

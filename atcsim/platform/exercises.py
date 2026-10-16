@@ -1,0 +1,342 @@
+"""Scenarios (ownership, sharing) and exercises (a simulator session with an instructor, controllers and
+pseudo-pilots), invitations, the instructor's dashboard data, and the pages."""
+from __future__ import annotations
+
+import json
+import os
+import secrets
+import shutil
+import time
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import FileResponse, RedirectResponse
+from pydantic import BaseModel
+
+from ..scenario import SCENARIO_DIR, ScenarioError, list_scenarios
+from . import config, db
+from .access import seat_for
+from .auth import require_user
+
+router = APIRouter()
+STATIC = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+manager = None                      # set by server.py (the SessionManager)
+
+
+def page(name: str) -> FileResponse:
+    return FileResponse(os.path.join(STATIC, name))
+
+
+# ------------------------------------------------------------------ pages
+@router.get("/login", include_in_schema=False)
+def login_page():
+    return page("login.html")
+
+
+@router.get("/", include_in_schema=False)
+def home_page():
+    return page("home.html")
+
+
+@router.get("/profile", include_in_schema=False)
+def profile_page():
+    return page("profile.html")
+
+
+@router.get("/admin", include_in_schema=False)
+def admin_page():
+    return page("admin.html")
+
+
+@router.get("/radar", include_in_schema=False)
+def radar_page(request: Request):
+    require_user(request, roles=("instructor",))
+    return page("radar.html")
+
+
+@router.get("/x/{eid}", include_in_schema=False)
+def exercise_page(eid: str, request: Request):
+    u = require_user(request)
+    if seat_for(eid, u) is None:
+        raise HTTPException(403, "you are not a member of this exercise")
+    return page("radar.html")
+
+
+@router.get("/join/{token}", include_in_schema=False)
+def join(token: str, request: Request):
+    from .auth import current_user
+    e = (db.q1("SELECT *, 'atc' AS seat FROM exercises WHERE atc_token=?", (token,)) or
+         db.q1("SELECT *, 'pilot' AS seat FROM exercises WHERE pilot_token=?", (token,)) or
+         db.q1("SELECT *, 'instructor' AS seat FROM exercises WHERE observer_token=?", (token,)))
+    if e is None:
+        raise HTTPException(404, "this invitation link is not valid (any more)")
+    u = current_user(request)
+    if u is None:
+        return RedirectResponse(f"/login?next=/join/{token}", status_code=303)
+    if seat_for(e["id"], u) is None:
+        db.add_member(e["id"], u["id"], e["seat"])
+    return RedirectResponse(f"/x/{e['id']}", status_code=303)
+
+
+# ------------------------------------------------------------------ scenarios
+def _scn_meta(name: str) -> dict:
+    m = db.q1("SELECT s.*, u.email, u.first_name, u.last_name FROM scenario_meta s LEFT JOIN users u ON u.id=s.owner_id "
+              "WHERE s.name=?", (name,))
+    if m is None or m["owner_id"] is None:
+        return {"owner": None, "library": True}
+    return {"owner": {"id": m["owner_id"], "email": m["email"], "name": f"{m['first_name']} {m['last_name']}".strip()},
+            "library": False}
+
+
+@router.get("/api/scenarios")
+def scenarios(request: Request):
+    u = require_user(request, roles=("instructor",))
+    out = []
+    for s in list_scenarios():
+        acc = db.scenario_access(s["name"], u)
+        if acc is None:
+            continue
+        meta = _scn_meta(s["name"])
+        out.append({**s, "access": acc, **meta,
+                    "shares": db.shares(s["name"]) if (meta["owner"] and meta["owner"]["id"] == u["id"])
+                    or u["role"] == "admin" else []})
+    return out
+
+
+class Share(BaseModel):
+    user_id: int
+    perm: str = "read"
+
+
+@router.post("/api/scenarios/{name}/shares")
+def share(name: str, body: Share, request: Request):
+    u = require_user(request, roles=("instructor",))
+    meta = _scn_meta(name)
+    if meta["library"] or (meta["owner"]["id"] != u["id"] and u["role"] != "admin"):
+        raise HTTPException(403, "only the owner shares a scenario (library scenarios: make a copy first)")
+    if body.perm not in ("read", "write"):
+        raise HTTPException(400, "perm: read or write")
+    t = db.user_by_id(body.user_id)
+    if t is None or t["role"] not in ("instructor", "admin"):
+        raise HTTPException(400, "scenarios are shared with instructors")
+    db.x("INSERT OR REPLACE INTO scenario_shares (name, user_id, perm) VALUES (?,?,?)", (name, body.user_id, body.perm))
+    return db.shares(name)
+
+
+@router.delete("/api/scenarios/{name}/shares/{uid}")
+def unshare(name: str, uid: int, request: Request):
+    u = require_user(request, roles=("instructor",))
+    meta = _scn_meta(name)
+    if meta["library"] or (meta["owner"]["id"] != u["id"] and u["role"] != "admin"):
+        raise HTTPException(403, "only the owner changes sharing")
+    db.x("DELETE FROM scenario_shares WHERE name=? AND user_id=?", (name, uid))
+    return db.shares(name)
+
+
+class Copy(BaseModel):
+    new_name: str
+
+
+@router.post("/api/scenarios/{name}/copy")
+def copy_scenario(name: str, body: Copy, request: Request):
+    from ..designer import NAME_RE
+    u = require_user(request, roles=("instructor",))
+    if db.scenario_access(name, u) is None:
+        raise HTTPException(403, "no access to this scenario")
+    new = body.new_name.strip()
+    if not NAME_RE.match(new):
+        raise HTTPException(400, "name: lower-case letters, digits, '_' or '-'")
+    dst = os.path.join(SCENARIO_DIR, new + ".json")
+    if os.path.exists(dst):
+        raise HTTPException(409, "a scenario with that name exists")
+    with open(os.path.join(SCENARIO_DIR, name + ".json")) as f:
+        d = json.load(f)
+    d["name"] = new
+    with open(dst, "w") as f:
+        json.dump(d, f, indent=1)
+    db.set_owner(new, u["id"])
+    return {"copied": new}
+
+
+@router.delete("/api/scenarios/{name}")
+def delete_scenario(name: str, request: Request):
+    u = require_user(request, roles=("instructor",))
+    meta = _scn_meta(name)
+    if meta["library"] or (meta["owner"]["id"] != u["id"] and u["role"] != "admin"):
+        raise HTTPException(403, "only the owner deletes a scenario; library scenarios cannot be deleted")
+    path = os.path.join(SCENARIO_DIR, name + ".json")
+    if os.path.exists(path):
+        os.makedirs(os.path.join(config.DATA_DIR, "deleted_scenarios"), exist_ok=True)
+        shutil.move(path, os.path.join(config.DATA_DIR, "deleted_scenarios", f"{name}.{int(time.time())}.json"))
+    db.x("DELETE FROM scenario_meta WHERE name=?", (name,))
+    db.x("DELETE FROM scenario_shares WHERE name=?", (name,))
+    return {"deleted": name}
+
+
+def check_scenario_write(name: str, u: dict) -> None:
+    """Designer save: a new name becomes the user's scenario; an existing one needs write access."""
+    if os.path.exists(os.path.join(SCENARIO_DIR, name + ".json")):
+        acc = db.scenario_access(name, u)
+        if acc != "write":
+            raise HTTPException(403, "read-only scenario: save it under a new name (a copy)")
+    else:
+        db.set_owner(name, u["id"])
+
+
+# ------------------------------------------------------------------ exercises
+class NewExercise(BaseModel):
+    scenario: str
+    name: Optional[str] = None
+    time_factor: float = 1.0
+
+
+def _summary(e: dict, u: dict, with_picture: bool = False) -> dict:
+    s = manager.sessions.get(e["id"]) if manager else None
+    out = {"id": e["id"], "name": e["name"], "scenario": e["scenario"], "created_at": e["created_at"],
+           "ended_at": e["ended_at"], "seat": seat_for(e["id"], u), "members": db.members(e["id"]),
+           "instructor": db.public_user(db.user_by_id(e["instructor_id"]) or {
+               "id": 0, "email": "?", "first_name": "", "last_name": "", "licence": "", "role": "", "active": 0})["name"],
+           "live": s is not None}
+    from . import comms
+    room = comms.hub.rooms.get(e["id"])
+    out["online"] = [{"name": c.name, "seat": c.seat, "ptt": c.ptt} for c in room.conns.values()] if room else []
+    out["calls"] = len(room.calls) if room else 0
+    if s is None:
+        out["status"] = "ended" if e["ended_at"] else "closed (server restarted)"
+        return out
+    with s.lock:
+        w = s.world
+        losses = [p["aircraft"] for p in w.current_pairs() if p["loss_of_separation"]]
+        out.update(status=s.status, sim_time_s=round(w.t), duration_s=w.duration_s, time_factor=s.time_factor,
+                   losses=losses, aircraft=len(w.active_aircraft()),
+                   calling=sum(1 for a in w.active_aircraft() if a.on_frequency and not a.assumed),
+                   pending_requests=sum(1 for r in w.requests.values() if r.status == "pending"))
+        if with_picture:
+            out["picture"] = [[a.callsign, round(a.x, 1), round(a.y, 1), int(round(a.alt_ft / 100)),
+                               1 if a.assumed else (0 if a.on_frequency else -1), int(round(a.gs)),
+                               int(round(a.trk)), int(round(a.vs_fpm, -2))] for a in w.active_aircraft()]
+            out["sep_h"] = w.sep_h
+    return out
+
+
+@router.get("/api/exercises")
+def exercises(request: Request, pictures: bool = False):
+    u = require_user(request)
+    if u["role"] == "admin":
+        rows = db.q("SELECT * FROM exercises ORDER BY created_at DESC LIMIT 200")
+    elif u["role"] == "instructor":
+        rows = db.q("SELECT * FROM exercises WHERE instructor_id=? OR id IN (SELECT exercise_id FROM exercise_members "
+                    "WHERE user_id=?) ORDER BY created_at DESC LIMIT 200", (u["id"], u["id"]))
+    else:
+        rows = db.q("SELECT e.* FROM exercises e JOIN exercise_members m ON m.exercise_id=e.id WHERE m.user_id=? "
+                    "ORDER BY e.created_at DESC LIMIT 100", (u["id"],))
+    return [_summary(e, u, with_picture=pictures and seat_for(e["id"], u) == "instructor") for e in rows]
+
+
+@router.get("/api/exercises/{eid}/outline")
+def outline(eid: str, request: Request):
+    """Airspace outline and sector lines for the dashboard thumbnails (static; fetched once per exercise)."""
+    u = require_user(request)
+    if seat_for(eid, u) is None:
+        raise HTTPException(403, "not a member")
+    s = manager.sessions.get(eid)
+    if s is None:
+        raise HTTPException(404, "exercise not running")
+    d = s.world.airspace.describe()
+    return {"outline": d["outline"], "controlled": d["shape"]["polygon"], "bbox": d["bbox_nm"],
+            "sectors": [sc["polygon"] for sc in d["sectors"]] if len(d["sectors"]) > 1 else [],
+            "sep_h": s.world.sep_h}
+
+
+@router.post("/api/exercises")
+def create_exercise(body: NewExercise, request: Request):
+    u = require_user(request, roles=("instructor",))
+    if db.scenario_access(body.scenario, u) is None:
+        raise HTTPException(403, "no access to this scenario")
+    try:
+        s = manager.create(scenario_name=body.scenario, mode="realtime", time_factor=body.time_factor,
+                           autostart=False, label=body.name or body.scenario)
+    except (ScenarioError, ValueError) as e:
+        raise HTTPException(400, str(e))
+    register(s, u, body.name or body.scenario, multi=True)
+    return _summary(db.exercise(s.id), u)
+
+
+def register(s, u: dict, name: str, multi: bool = True) -> None:
+    """Record a simulator session as an exercise of this instructor; start its radio/phone room and recording."""
+    from . import recorder
+    s.multi = multi
+    db.x("INSERT INTO exercises (id, name, scenario, instructor_id, created_at, atc_token, pilot_token, observer_token) "
+         "VALUES (?,?,?,?,?,?,?,?)", (s.id, name, s.scenario_name, u["id"], time.time(),
+                                      secrets.token_urlsafe(12), secrets.token_urlsafe(12), secrets.token_urlsafe(12)))
+    if multi:
+        recorder.start(s.id, s, name)
+
+
+@router.get("/api/exercises/{eid}")
+def exercise_detail(eid: str, request: Request):
+    u = require_user(request)
+    e = db.exercise(eid)
+    seat = seat_for(eid, u)
+    if seat is None:
+        raise HTTPException(403, "you are not a member of this exercise")
+    if e is None:                                  # a bare session (local mode / admin)
+        return {"id": eid, "name": eid, "seat": seat, "live": eid in manager.sessions, "members": [],
+                "units": config.ADJACENT_UNITS, "unit_names": config.UNIT_NAMES, "me": db.public_user(u)}
+    out = _summary(e, u)
+    out.update(units=config.ADJACENT_UNITS, unit_names=config.UNIT_NAMES, me=db.public_user(u))
+    if seat == "instructor":
+        base = config.PUBLIC_URL or str(request.base_url).rstrip("/")
+        out["links"] = {"atc": f"{base}/join/{e['atc_token']}", "pilot": f"{base}/join/{e['pilot_token']}",
+                        "instructor": f"{base}/join/{e['observer_token']}"}
+    return out
+
+
+class Member(BaseModel):
+    user_id: int
+    seat: str
+
+
+@router.post("/api/exercises/{eid}/members")
+def add_member(eid: str, body: Member, request: Request):
+    u = require_user(request, roles=("instructor",))
+    if seat_for(eid, u) != "instructor":
+        raise HTTPException(403, "only the exercise's instructor invites")
+    if body.seat not in config.SEATS:
+        raise HTTPException(400, f"seat: {config.SEATS}")
+    if db.user_by_id(body.user_id) is None:
+        raise HTTPException(404, "no such user")
+    db.add_member(eid, body.user_id, body.seat)
+    return db.members(eid)
+
+
+@router.delete("/api/exercises/{eid}/members/{uid}")
+def remove_member(eid: str, uid: int, request: Request):
+    u = require_user(request, roles=("instructor",))
+    if seat_for(eid, u) != "instructor":
+        raise HTTPException(403, "only the exercise's instructor removes members")
+    db.x("DELETE FROM exercise_members WHERE exercise_id=? AND user_id=?", (eid, uid))
+    return db.members(eid)
+
+
+@router.post("/api/exercises/{eid}/end")
+def end_exercise(eid: str, request: Request):
+    u = require_user(request, roles=("instructor",))
+    if seat_for(eid, u) != "instructor":
+        raise HTTPException(403, "only the exercise's instructor ends it")
+    return end(eid)
+
+
+def end(eid: str) -> dict:
+    """Stop the simulation, close the voice room, render the recording."""
+    from . import comms, recorder
+    s = manager.sessions.get(eid)
+    if s is not None:
+        with s.lock:
+            s.status = "finished"
+    rec_id = recorder.finish(eid, s)
+    comms.hub.close_room(eid)
+    if s is not None:
+        manager.delete(eid)
+    db.x("UPDATE exercises SET ended_at=COALESCE(ended_at, ?), status='ended' WHERE id=?", (time.time(), eid))
+    return {"ended": eid, "recording_id": rec_id}

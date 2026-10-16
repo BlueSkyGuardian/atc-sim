@@ -1,0 +1,180 @@
+{
+  "name": "s12_squall_line_gap",
+  "title": "Squall line with a single gap",
+  "description": "A severe squall line (tops FL450-500) lies NNW-SSE across the western half of the sector, moving east-north-east at about 23 kt, with one gap about 22 NM wide near y = -10. Trailing stratiform rain behind it. Every east-west flight has to get through the gap.",
+  "design_notes": "AFR71 (A320, W1->E1) and RAM44 (B738, W2->E2) are both at FL350 on parallel routes 40 NM apart, so they are never a factor for each other on their filed routes. The line forces both of them through the same gap: AFR71 asks for ~140 for 40 miles, RAM44 for ~075 for 35 miles, and approving both funnels them into the gap together (LoS ~3 NM). UAE61 (A388, FL370) and ETH5 (B788, FL380) come westbound through the same gap, so the level options are limited. Correct: approve both deviations and separate the eastbound pair vertically (e.g. RAM44 FL330, the next level in its direction), or sequence them through the gap.",
+  "duration_s": 1800,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 31,
+    "temperature": {
+      "surface_c": 24,
+      "tropopause_fl": 390,
+      "lapse_c_per_kft": 2.1
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 200,
+          "kt": 10
+        },
+        {
+          "fl": 100,
+          "dir": 220,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 240,
+          "kt": 40
+        },
+        {
+          "fl": 350,
+          "dir": 250,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 255,
+          "kt": 40
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
+    "convection": {
+      "regime": "squall_line",
+      "intensity": "severe",
+      "line": {
+        "center": [
+          -30,
+          0
+        ],
+        "length_nm": 240,
+        "gaps": 0,
+        "gap_list": [
+          [
+            10,
+            22
+          ]
+        ],
+        "spacing_nm": 8
+      }
+    }
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "AFR71",
+      "type": "A320",
+      "route": [
+        "W1",
+        "E1"
+      ],
+      "fl": 350,
+      "arrival": false,
+      "entry_time": 0
+    },
+    {
+      "callsign": "RAM44",
+      "type": "B738",
+      "route": [
+        "W2",
+        "E2"
+      ],
+      "fl": 350,
+      "entry_time": 80
+    },
+    {
+      "callsign": "UAE61",
+      "type": "A388",
+      "route": [
+        "E1",
+        "W2"
+      ],
+      "fl": 370,
+      "load": 0.4,
+      "entry_time": 60
+    },
+    {
+      "callsign": "ETH5",
+      "type": "B788",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 380,
+      "entry_time": 160
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "AFR71",
+          "RAM44"
+        ]
+      ],
+      "wx_request": "AFR71"
+    },
+    "passive": {
+      "wx_request": "RAM44"
+    }
+  },
+  "solution": [
+    {
+      "on_request": "AFR71",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "UAE61",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "ETH5",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "RAM44",
+      "type": "weather_deviation",
+      "do": [
+        {
+          "reply": "approved"
+        },
+        {
+          "callsign": "RAM44",
+          "type": "altitude",
+          "fl": 330
+        }
+      ]
+    }
+  ]
+}

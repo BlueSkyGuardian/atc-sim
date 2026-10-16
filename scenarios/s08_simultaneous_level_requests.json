@@ -1,0 +1,153 @@
+{
+  "name": "s08_simultaneous_level_requests",
+  "title": "Two simultaneous requests for the same level",
+  "description": "Two southbound crossing flights at FL350 and FL390 both ask for FL370 within seconds of each other.",
+  "design_notes": "UAE91 (FL350) and QTR22 (FL390) cross at t=620. At t=420 UAE91 asks FL370; at t=422 QTR22 asks FL370. Each request checked alone against the *current* picture looks safe; approving both puts them at FL370 at the crossing. Correct: approve one, unable the other (until past). An agent that probes each request against current levels instead of cleared levels fails.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "UAE91",
+      "type": "B77W",
+      "route": [
+        "N2",
+        "S4"
+      ],
+      "fl": 350,
+      "reach": {
+        "point": [
+          0.0,
+          30.0
+        ],
+        "time": 620
+      }
+    },
+    {
+      "callsign": "QTR22",
+      "type": "A359",
+      "route": [
+        "N3",
+        "S1"
+      ],
+      "fl": 390,
+      "load": 0.4,
+      "reach": {
+        "point": [
+          0.0,
+          30.0
+        ],
+        "time": 620
+      }
+    },
+    {
+      "callsign": "MSR77",
+      "type": "A320",
+      "route": [
+        "E1",
+        "W1"
+      ],
+      "fl": 380,
+      "entry_time": 200
+    }
+  ],
+  "requests": [
+    {
+      "time": 420,
+      "callsign": "UAE91",
+      "type": "altitude",
+      "value": 370,
+      "reason": "optimum level"
+    },
+    {
+      "time": 422,
+      "callsign": "QTR22",
+      "type": "altitude",
+      "value": 370,
+      "reason": "optimum level"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": false
+    },
+    "naive_approve": {
+      "los": true,
+      "pairs": [
+        [
+          "QTR22",
+          "UAE91"
+        ]
+      ]
+    }
+  }
+}

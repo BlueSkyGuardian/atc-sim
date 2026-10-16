@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATC Radar</title>
+<style>
+  :root {
+    --bg: #0b1016; --panel: #111922; --line: #1f2b38; --text: #c9d6e2; --dim: #6c7f92;
+    --accent: #5fd3a3; --warn: #f2b84b; --alert: #ff5a5a; --sel: #7fb8ff;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  #app { display: grid; grid-template-columns: 1fr 380px; height: 100vh; }
+  #scope { position: relative; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
+  #hud { position: absolute; left: 10px; top: 8px; background: #0b1016dd; padding: 6px 9px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--dim); pointer-events: none; }
+  #hud b { color: var(--text); font-weight: 600; }
+  #hud:empty { display: none; }
+  #alerts { position: absolute; left: 50%; transform: translateX(-50%); top: 8px; display: flex; flex-direction: column; gap: 4px; align-items: center; pointer-events: auto; z-index: 3; max-width: 60%; }
+  #alerts .al { font-family: var(--mono); font-size: 12px; padding: 3px 10px; border-radius: 3px; cursor: pointer; white-space: nowrap; }
+  #alerts .los { background: #ff5a5a; color: #fff; font-weight: 700; animation: blink 1s steps(2, start) infinite; }
+  #alerts .stca { background: #f2b84b; color: #111; font-weight: 600; }
+  #alerts .more { color: var(--dim); font-size: 11px; }
+  @keyframes blink { to { background: #8a1f1f; } }
+  #legend { position: absolute; left: 12px; bottom: 10px; font-size: 11px; color: var(--dim); display: flex; gap: 14px; pointer-events: none; }
+  #legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border: 1px solid; }
+  .lg-d::before { border-color: #e08a3c !important; background: #e08a3c33; }
+  .lg-r::before { border-color: #e0c13c !important; background: #e0c13c33; }
+  .lg-p::before { border-color: #ff5a5a !important; background: #ff5a5a33; }
+  aside { background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
+  section { border-bottom: 1px solid var(--line); padding: 10px 12px; }
+  section.grow { flex: 1; overflow: auto; min-height: 80px; }
+  h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 0 0 6px; font-weight: 600; display: flex; justify-content: space-between; }
+  select, input, button { font: inherit; color: var(--text); background: #0d141c; border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; }
+  button { cursor: pointer; } button:hover { border-color: var(--dim); }
+  button.on { border-color: var(--accent); color: var(--accent); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+  .row:last-child { margin-bottom: 0; }
+  #cmd { width: 100%; font-family: var(--mono); text-transform: uppercase; }
+  #cmdmsg { font-family: var(--mono); font-size: 11px; color: var(--dim); min-height: 15px; margin-top: 4px; }
+  .item { font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); }
+  .item:last-child { border-bottom: 0; }
+  .req { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .req small { color: var(--dim); display: block; font-family: system-ui; }
+  .req button { padding: 2px 6px; font-size: 11px; }
+  .c-los { color: var(--alert); } .c-warn { color: var(--warn); } .c-dim { color: var(--dim); } .c-ok { color: var(--accent); }
+  #metrics { font-family: var(--mono); font-size: 12px; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; }
+  .empty { color: var(--dim); font-style: italic; font-size: 12px; }
+  #busy { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: #0b1016b3; z-index: 5; }
+  #busy.on { display: flex; }
+  #busy .box { width: min(420px, 80%); background: #111922; border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; }
+  #busy .t { font-weight: 600; margin-bottom: 4px; } #busy .s { color: var(--dim); font-size: 12px; min-height: 17px; }
+  #busy .bar { height: 6px; background: #1a2633; border-radius: 3px; overflow: hidden; margin: 10px 0 6px; position: relative; }
+  #busy .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); border-radius: 3px; transition: width .4s linear; }
+  #busy .fill.ind { width: 35% !important; animation: slide 1.2s ease-in-out infinite; }
+  @keyframes slide { from { left: -35%; } to { left: 100%; } }
+  #busy .e { font-family: var(--mono); font-size: 11px; color: var(--dim); display: flex; justify-content: space-between; }
+  @media (max-width: 900px) { #app { grid-template-columns: 1fr; grid-template-rows: 60vh auto; } aside { border-left: 0; } }
+  /* view toolbar (every seat) */
+  #viewbar { position: absolute; left: 10px; top: 8px; display: flex; gap: 4px; align-items: center; flex-wrap: wrap; max-width: calc(100% - 20px); z-index: 4; }
+  #viewbar button, #viewbar select, #viewbar input { padding: 2px 7px; font-size: 11.5px; background: #0d141ccc; }
+  #viewbar label { font-size: 11px; color: var(--dim); background: #0d141ccc; border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; }
+  #viewbar .sep { width: 6px; }
+  #viewbar button.on { border-color: #2f7a5f; color: var(--accent); }
+  #hud { top: 40px; }
+  #alerts { top: 40px; }
+  /* seats */
+  body.seat-atc #app { grid-template-columns: 1fr; } body.seat-atc aside { display: none; }
+  body.exercise #tl, body.exercise .legend-help { display: none; }
+  body.seat-pilot #alerts { display: none; }
+  body:not(.seat-instructor).exercise .instr-only { display: none !important; }
+  body:not(.exercise) .ex-only { display: none !important; }
+  body.seat-pilot .ctl-only { display: none !important; }
+  body:not(.seat-atc) .atc-only { display: none !important; }
+  body.exercise .legacy-only, body.exercise #legacyRow1, body.exercise #legacyRow2 { display: none !important; }
+  #ptt { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; z-index: 4; font-family: var(--mono); font-size: 12px; }
+  #ptt .k { background: #0d141cdd; border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; color: var(--dim); user-select: none; cursor: pointer; }
+  #ptt .k.tx { background: #b32d2d; border-color: #ff6b6b; color: #fff; font-weight: 700; }
+  #ptt .rx { background: #1d3a5c; border: 1px solid #3b6e93; border-radius: 4px; padding: 4px 10px; color: #cfe6ff; }
+  #ptt .rx.ph { background: #2b3e1d; border-color: #5a8a3b; color: #dcffc9; }
+  #phoneBtn { position: absolute; right: 12px; bottom: 12px; z-index: 4; font-size: 18px; padding: 4px 12px; background: #0d141cdd; }
+  #phonePanel { position: absolute; right: 12px; bottom: 54px; z-index: 4; background: #111922f2; border: 1px solid var(--line); border-radius: 6px; padding: 10px; display: none; width: 250px; }
+  #phonePanel.on { display: block; }
+  #phonePanel .units { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #phonePanel .units button { padding: 10px 6px; font-weight: 600; font-family: var(--mono); }
+  #phonePanel .units button small { display: block; font-weight: 400; color: var(--dim); font-family: system-ui; font-size: 10px; }
+  #callHud { position: absolute; right: 12px; top: 40px; z-index: 6; display: flex; flex-direction: column; gap: 8px; }
+  .callbox { background: #111922f5; border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; min-width: 250px; box-shadow: 0 6px 24px #0008; }
+  .callbox.ring { border-color: #f2b84b; animation: ring 1s ease-in-out infinite; }
+  .callbox.act { border-color: #5a8a3b; }
+  @keyframes ring { 50% { box-shadow: 0 0 0 4px #f2b84b55; } }
+  .callbox .u { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .callbox .d { color: var(--dim); font-size: 12px; margin: 2px 0 8px; }
+  .callbox button { margin-right: 6px; }
+  .callbox button.ans { background: #1d4d3d; border-color: #2f7a5f; color: #e6fff4; }
+  .callbox button.hang { background: #5a1d1d; border-color: #a33; color: #ffdede; }
+  #lblMenu { position: absolute; z-index: 7; background: #111922f8; border: 1px solid #3b6e93; border-radius: 6px; padding: 8px 10px; display: none; width: 236px; font-size: 12px; box-shadow: 0 8px 26px #000a; }
+  #lblMenu.on { display: block; }
+  #lblMenu .h { font-family: var(--mono); font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  #lblMenu .f { display: grid; grid-template-columns: 54px 1fr auto; gap: 5px; align-items: center; margin-bottom: 5px; }
+  #lblMenu input { width: 100%; font-family: var(--mono); text-transform: uppercase; padding: 3px 6px; }
+  #lblMenu button { padding: 2px 7px; font-size: 11px; }
+  #lblMenu .lv { display: flex; flex-wrap: wrap; gap: 3px; margin: -1px 0 6px 59px; }
+  #lblMenu .lv button { font-family: var(--mono); padding: 1px 5px; }
+  #pauseBanner { position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); background: #0b1016d0; border: 1px solid var(--line); padding: 10px 22px; border-radius: 6px; font-size: 15px; color: var(--warn); display: none; z-index: 3; pointer-events: none; }
+  .pl { border: 1px solid var(--line); border-radius: 5px; margin-bottom: 6px; font-family: var(--mono); font-size: 12px; }
+  .pl.sel { border-color: var(--sel); }
+  .pl .ph { display: flex; gap: 8px; align-items: center; padding: 5px 7px; cursor: pointer; }
+  .pl .ph b { min-width: 64px; }
+  .pl .say { padding: 4px 7px; background: #1d2b18; border-top: 1px solid #2c4424; color: #dcffc9; display: flex; justify-content: space-between; gap: 6px; align-items: center; font-family: system-ui; }
+  .pl .say.call { background: #2c2a14; border-color: #5a5424; color: #fff3b0; }
+  .pl .ctl { padding: 6px 7px; border-top: 1px dashed var(--line); display: grid; grid-template-columns: 36px 1fr; gap: 4px 6px; align-items: center; }
+  .pl .ctl input, .pl .ctl select { padding: 2px 5px; font-family: var(--mono); width: 74px; text-transform: uppercase; }
+  .pl .ctl button { padding: 2px 6px; font-size: 11px; }
+  .badge { font-size: 10px; padding: 0 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim); font-family: system-ui; }
+  .badge.call { border-color: #c9a227; color: #ffe08a; } .badge.asm { border-color: #2f7a5f; color: var(--accent); } .badge.prev { color: #56636f; }
+  .units2 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+  .units2 button { font-family: var(--mono); font-weight: 600; padding: 6px 4px; }
+  .mem { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; padding: 2px 0; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
+  .dot.on { background: var(--accent); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="scope">
+    <canvas id="cv"></canvas>
+    <div id="viewbar">
+      <select id="wxMode" title="Weather display">
+        <option value="composite">WX composite</option><option value="cappi" selected>WX at FL</option>
+        <option value="sel">WX selected a/c FL</option><option value="echo_tops">Echo tops</option>
+        <option value="edr">Turbulence at FL</option><option value="off">WX off</option>
+      </select>
+      <input id="wxFl" type="number" value="350" min="0" max="800" step="10" style="width:62px" title="Flight level">
+      <label><input type="checkbox" id="wxCells" checked> tops</label>
+      <span class="sep"></span>
+      <button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button>
+      <span class="sep"></span>
+      <button id="rblBtn" title="Range/bearing line between two aircraft: click the button, then two aircraft (or shift-click two aircraft). Right-click an RBL label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines">✕ RBL</button><button id="homeBtn" title="Reset the view">⌂</button>
+      <span class="c-dim" id="rblHint" style="font-size:11px"></span>
+    </div>
+    <div id="hud"></div>
+    <div id="pauseBanner"></div>
+    <div id="ptt" class="ex-only"><span class="k" id="pttKey" title="Hold the space bar (or this button) to transmit on the frequency">🎙 hold SPACE to transmit</span><span id="rxBox"></span></div>
+    <button id="phoneBtn" class="ex-only atc-only" title="Telephone lines">☎</button>
+    <div id="phonePanel"><div class="c-dim" style="font-size:11px;margin-bottom:6px">Call an adjacent unit</div><div class="units" id="atcUnits"></div></div>
+    <div id="callHud"></div>
+    <div id="lblMenu"></div>
+    <div id="alerts"></div>
+    <div id="busy"><div class="box"><div class="t" id="busyT"></div><div class="s" id="busyS"></div>
+      <div class="bar"><div class="fill" id="busyF"></div></div><div class="e"><span id="busyE"></span><span id="busyH"></span></div></div></div>
+    <canvas id="tl" style="position:absolute;left:0;right:0;bottom:28px;height:46px;width:100%;cursor:pointer"></canvas>
+    <div id="tltip" style="position:absolute;display:none;background:#0b1016ee;border:1px solid #1f2b38;padding:3px 6px;font:11px ui-monospace,monospace;color:#c9d6e2;pointer-events:none;white-space:nowrap"></div>
+    <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · shift-click two aircraft for an RBL, right-click its label to remove</span></div>
+  </div>
+  <aside>
+    <section id="exSec" class="ex-only instr-only">
+      <h2>Exercise <a href="/" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--sel)">all exercises ↗</a></h2>
+      <div class="row"><select id="exSwitch" style="flex:1" title="Switch to another of your live exercises"></select></div>
+      <div id="exMembers" style="margin-bottom:6px"></div>
+      <div class="row"><select id="invUser" style="flex:1"></select><select id="invSeat"><option value="atc">Controller</option><option value="pilot">Pseudo-pilot</option><option value="instructor">Instructor</option></select><button id="invBtn">Invite</button></div>
+      <div class="row" style="font-size:11px"><span class="c-dim">Links:</span><button data-link="atc" style="font-size:11px;padding:1px 6px">copy controller link</button><button data-link="pilot" style="font-size:11px;padding:1px 6px">copy pilot link</button><button data-link="instructor" style="font-size:11px;padding:1px 6px">co-instructor</button></div>
+      <div class="row"><span id="exMsg" class="c-dim" style="font-size:11px;flex:1"></span><button id="endBtn" style="border-color:#6b2b2b;color:#ffb3b3">End exercise</button></div>
+    </section>
+    <section id="pilotSec" class="ex-only">
+      <h2>Aircraft <span class="c-dim" style="text-transform:none;letter-spacing:0">you fly them: execute what the controller says</span></h2>
+      <div id="pilotList"></div>
+    </section>
+    <section id="phoneSec" class="ex-only">
+      <h2>Telephone <span class="c-dim" style="text-transform:none;letter-spacing:0">call the controller as</span></h2>
+      <div class="units2" id="pilotUnits"></div>
+      <div id="callList" style="margin-top:6px;font-size:12px"></div>
+    </section>
+    <section class="instr-only">
+      <h2>Session <a class="legacy-only" href="/" style="text-transform:none;letter-spacing:0;font-weight:400;color:var(--sel)">← home</a></h2>
+      <div class="row" id="legacyRow1">
+        <select id="sessSel" style="flex:1"></select>
+        <button id="refreshBtn" title="Refresh session list">↻</button>
+      </div>
+      <div class="row" id="legacyRow2">
+        <select id="scnSel" style="flex:1"></select>
+        <button id="newBtn">New session</button> <a href="/designer" target="_blank" style="color:var(--dim);font-size:12px">designer ↗</a>
+      </div>
+      <div class="row" id="ctrlRow">
+        <button data-act="pause">Pause</button><button data-act="resume">Run</button>
+        <button data-tf="1">×1</button><button data-tf="2">×2</button><button data-tf="5">×5</button><button data-tf="10">×10</button><button data-tf="30">×30</button>
+        <button data-act="step">+10 s</button><button data-act="restart">Restart</button>
+      </div>
+      <div class="row">
+        <button id="rpPlay" title="Replay from the timeline position (click or drag the timeline under the scope)">▶ Replay</button>
+        <button id="rpLive">Live</button>
+        <select id="rpSpeed" title="Replay speed"><option value="1">×1</option><option value="5">×5</option><option value="10" selected>×10</option><option value="30">×30</option><option value="60">×60</option></select>
+        <button id="rpExport" title="Download the recording of this session">Export</button>
+        <label style="font-size:11px" class="c-dim" title="Open a recording file exported earlier">Load <input type="file" id="rpFile" accept=".json" style="width:84px;font-size:10px"></label>
+      </div>
+    </section>
+    <section>
+      <h2><span class="ex-only">Command line</span><span class="legacy-only">Controller input</span> <span class="c-dim" style="text-transform:none;letter-spacing:0">click an aircraft to select</span></h2>
+      <input id="cmd" placeholder="RAM101 FL250 M76 K280 · H250 · L250 · D S3 · S280 · SN · DEV · RES · APP · UNA" autocomplete="off">
+      <div id="cmdmsg"></div>
+    </section>
+    <section id="selSec" style="display:none"><h2>Selected aircraft <span class="c-dim" id="selName"></span></h2><div id="selInfo" style="font-family:var(--mono);font-size:12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px"></div></section>
+    <section class="instr-only"><h2>Pilot requests</h2><div id="reqs"></div></section>
+    <section class="instr-only"><h2>Sequence <span class="c-dim" style="text-transform:none;letter-spacing:0">ETA · spacing · TOD</span></h2><div id="seq"></div></section>
+    <section class="instr-only"><h2>Predicted conflicts <span class="c-dim" id="la"></span></h2><div id="confl"></div></section>
+    <section class="grow instr-only"><h2>Events</h2><div id="events"></div></section>
+    <section class="instr-only"><h2>Metrics</h2><div id="metrics"></div></section>
+  </aside>
+</div>
+<script>
+const $ = s => document.querySelector(s);
+const API = '';
+let SID = new URLSearchParams(location.search).get('session');
+const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || null;
+let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
+const V = { areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true };
+try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
+if (EXID) SID = EXID;
+let sector = null, state = null, sep = null, selected = null, lastSeq = 0, eventsBuf = [], weather = null, ws = null, wsOk = false;
+let wxImg = null, wxMeta = null, wxCellsData = [], arrInfo = null;
+async function pollArrivals() { if (!SID) return; try { arrInfo = await api(`/sessions/${SID}/aerodromes`); } catch (e) {} }
+setInterval(pollArrivals, 5000);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+
+async function api(path, opts = {}) {
+  const r = await fetch(API + path, { headers: { 'Content-Type': 'application/json' }, ...opts });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search); }
+  if (!r.ok) throw new Error(j.detail ? (typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail)) : r.statusText);
+  return j;
+}
+document.querySelectorAll('#viewbar [data-v]').forEach(b => {
+  b.classList.toggle('on', !!V[b.dataset.v]);
+  b.onclick = () => { V[b.dataset.v] = !V[b.dataset.v]; b.classList.toggle('on', V[b.dataset.v]); try { localStorage.setItem('atc_view', JSON.stringify(V)); } catch (e) {} };
+});
+
+// ---------- session management
+async function loadLists() {
+  const [scns, sess] = await Promise.all([api('/scenarios'), api('/sessions')]);
+  $('#scnSel').innerHTML = scns.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  $('#sessSel').innerHTML = '<option value="">— select session —</option>' +
+    sess.map(s => `<option value="${s.session_id}" ${s.session_id === SID ? 'selected' : ''}>${s.session_id} · ${s.scenario} · ${s.status}</option>`).join('');
+}
+// ---------- loading indicator (session creation can take several seconds on a dense scenario)
+let busyT0 = 0, busyTimer = null, busyExpect = 0, busyKey = '';
+function busy(title, step, key) {
+  if (title === false) { clearInterval(busyTimer); busyTimer = null; $('#busy').classList.remove('on');
+    if (busyKey && busyT0) { try { localStorage.setItem('atc_load_' + busyKey, String((performance.now() - busyT0) / 1000)); } catch (e) {} }
+    busyKey = ''; busyT0 = 0; return; }
+  if (!busyTimer) {
+    busyT0 = performance.now(); busyKey = key || '';
+    try { busyExpect = +(localStorage.getItem('atc_load_' + busyKey) || 0); } catch (e) { busyExpect = 0; }
+    busyTimer = setInterval(() => {
+      const el = (performance.now() - busyT0) / 1000, f = $('#busyF');
+      $('#busyE').textContent = `${el.toFixed(0)} s`;
+      if (busyExpect > 0) { f.classList.remove('ind'); f.style.width = `${Math.min(97, 100 * el / busyExpect)}%`;
+        $('#busyH').textContent = `usually ~${Math.round(busyExpect)} s`; }
+      else { f.classList.add('ind'); $('#busyH').textContent = 'first time for this scenario'; }
+    }, 250);
+  }
+  if (title) $('#busyT').textContent = title;
+  if (step != null) $('#busyS').textContent = step;
+  $('#busy').classList.add('on');
+}
+function gotPicture() { if (busyTimer) busy(false); }
+async function attach(id) {
+  SID = id; lastSeq = 0; eventsBuf = []; selected = null; state = null; sep = null;
+  rec = null; recOffline = false; replayMode = false; replayPlaying = false;
+  if (!EXID) history.replaceState(null, '', id ? '?session=' + id : location.pathname);
+  if (!id) { sector = null; return; }
+  if (busyTimer) busy(null, 'Connecting and loading the traffic picture…');
+  else busy('Opening session ' + id, 'Loading the traffic picture…', 'attach');
+  try {
+    const b = await api(`/sessions/${id}/connect?client=radar`, { method: "POST" });
+    sector = b.sector; weather = b.weather; fitView();
+    openStream(id);
+    await Promise.all([pollState(), pollEvents(), pollMetrics()]);
+  } catch (e) { busy(false); msg(e.message, true); return; }
+  pollSep(); pollWeather(); pollArrivals();
+}
+$('#sessSel').onchange = e => attach(e.target.value);
+$('#refreshBtn').onclick = loadLists;
+$('#newBtn').onclick = async () => {
+  if (busyTimer) return;                                 // already creating one
+  const name = $('#scnSel').value;
+  busy(`Creating session · ${name}`, 'Building the scenario: traffic, flight plans, performance tables and weather…', 'new_' + name);
+  $('#newBtn').disabled = true;
+  try {
+    const b = await api('/sessions', { method: 'POST', body: JSON.stringify({ scenario: name, label: 'radar' }) });
+    busy(null, 'Session created, connecting…');
+    await loadLists(); $('#sessSel').value = b.session.session_id; await attach(b.session.session_id);
+  } catch (e) { busy(false); msg(e.message, true); }
+  finally { $('#newBtn').disabled = false; }
+};
+$('#ctrlRow').onclick = async e => {
+  const t = e.target; if (!SID || t.tagName !== 'BUTTON') return;
+  try {
+    if (t.dataset.tf) await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: 'set_speed', time_factor: +t.dataset.tf }) });
+    else if (t.dataset.act === 'step') { await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: 'pause' }) });
+      await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: 'step', seconds: 10 }) }); }
+    else { if (t.dataset.act === 'restart') { lastSeq = 0; eventsBuf = []; }
+      await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: t.dataset.act }) }); }
+    pollState(); pollSep();
+  } catch (err) { msg(err.message, true); }
+};
+
+// ---------- commands
+function msg(t, bad) { $('#cmdmsg').textContent = t; $('#cmdmsg').className = bad ? 'c-los' : 'c-ok'; }
+$('#cmd').addEventListener('keydown', async e => {
+  if (e.key !== 'Enter' || !SID) return;
+  const text = e.target.value.trim(); if (!text) return;
+  try {
+    const recs = await api(`/sessions/${SID}/command`, { method: 'POST', body: JSON.stringify({ text }) });
+    const bad = recs.filter(r => r.status === 'rejected');
+    if (bad.length) msg(bad.map(r => r.reason).join(' | '), true);
+    else {
+      const warn = recs.flatMap(r => r.warnings || []);
+      if (warn.length) { $('#cmdmsg').textContent = '✓ ' + recs.map(r => r.id).join(', ') + ' · ⚠ ' + warn.join(' | '); $('#cmdmsg').className = 'c-warn'; }
+      else msg('✓ ' + recs.map(r => r.id).join(', '));
+      e.target.value = selected ? selected + ' ' : '';
+    }
+    pollState(); pollSep();
+  } catch (err) { msg(err.message, true); }
+});
+async function reply(cs, rid, dec) {
+  await api(`/sessions/${SID}/instructions`, { method: 'POST', body: JSON.stringify({ callsign: cs, type: 'reply', request_id: rid, decision: dec }) });
+  pollState(); pollSep();
+}
+window.reply = reply;
+async function assume(cs) {
+  try { const r = await api(`/sessions/${SID}/instructions`, { method: 'POST', body: JSON.stringify({ callsign: cs, type: 'assume' }) });
+    msg(r.status === 'rejected' ? r.reason : `${cs} assumed`, r.status === 'rejected'); } catch (e) { msg(e.message, true); }
+  pollState();
+}
+window.assume = assume;
+
+// ---------- weather layer
+const DBZ_BINS = [[15,'#0300f4'],[20,'#02fd02'],[25,'#01c501'],[30,'#008e00'],[35,'#fdf802'],[40,'#e5bc00'],
+                  [45,'#fd9500'],[50,'#fd0000'],[55,'#d40000'],[60,'#bc0000'],[65,'#f800fd']];
+function hexRgb(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+const DBZ_RGB = DBZ_BINS.map(([d, c]) => [d, hexRgb(c)]);
+function colourFor(product, v) {
+  if (v === 0) return null;
+  if (product === 'cappi' || product === 'composite') {
+    const dbz = v / 2 - 10; let c = null;
+    for (const [d, rgb] of DBZ_RGB) if (dbz >= d) c = rgb;
+    return c;
+  }
+  if (product === 'echo_tops') {           // FL150 -> FL550 : blue -> yellow -> magenta
+    const fl = v * 5; if (fl < 150) return null;
+    const f = Math.min(1, (fl - 150) / 400);
+    return [Math.round(40 + 215 * f), Math.round(90 + 140 * Math.sin(f * Math.PI)), Math.round(220 - 60 * f)];
+  }
+  if (product === 'edr') {
+    const e = v / 250; if (e < 0.12) return null;
+    return e >= 0.5 ? [220, 40, 220] : e >= 0.3 ? [240, 130, 30] : [200, 200, 60];
+  }
+  return null;
+}
+async function pollWeather() {
+  if (!SID) return;
+  const mode = $('#wxMode').value;
+  if (mode === 'off') { wxImg = null; return; }
+  let product = mode, fl = +$('#wxFl').value || 350;
+  if (mode === 'sel') { product = 'cappi'; const a = state && state.aircraft.find(a => a.callsign === selected); if (a) fl = a.fl; }
+  try {
+    const at = replayMode ? `&at_s=${Math.round(replayT)}` : '';
+    const r = await api(`/sessions/${SID}/weather/radar?product=${product}&fl=${fl}&res_nm=${sector && sector.bbox_nm && (sector.bbox_nm[2] - sector.bbox_nm[0]) > 250 ? 3 : 2}${at}`);
+    const bin = atob(r.data), n = r.nx * r.ny;
+    const off = document.createElement('canvas'); off.width = r.nx; off.height = r.ny;
+    const octx = off.getContext('2d'), img = octx.createImageData(r.nx, r.ny);
+    for (let k = 0; k < n; k++) {
+      const c = colourFor(product, bin.charCodeAt(k)); if (!c) continue;
+      const row = Math.floor(k / r.nx), col = k % r.nx, o = ((r.ny - 1 - row) * r.nx + col) * 4;   // flip: north up
+      const v = bin.charCodeAt(k);
+      const weak = (product === 'cappi' || product === 'composite') && v / 2 - 10 < 30;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = weak ? 55 : 140;
+    }
+    octx.putImageData(img, 0, 0);
+    wxImg = off; wxMeta = { ...r, product, flShown: fl };
+    if ($('#wxCells').checked) { const wsum = await api(`/sessions/${SID}/weather${replayMode ? '?at_s=' + Math.round(replayT) : ''}`); wxCellsData = wsum.cells; weather = { ...weather, ...wsum }; }
+    else wxCellsData = [];
+  } catch (e) {}
+}
+setInterval(pollWeather, 4000);
+$('#wxMode').onchange = pollWeather; $('#wxFl').onchange = pollWeather; $('#wxCells').onchange = pollWeather;
+
+// ---------- live stream (WebSocket); polling is only the fallback
+function openStream(id) {
+  if (ws) { try { ws.onclose = null; ws.close(); } catch (e) {} }
+  wsOk = false;
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/sessions/${id}/stream?client=radar&since=${lastSeq}`);
+  ws.onopen = () => { wsOk = true; };
+  ws.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if (m.type !== 'tick' || id !== SID) return;
+    state = m.state; renderSide(); gotPicture();
+    if (m.separation) { sep = m.separation; renderConfl(); }
+    if (m.events.length) { lastSeq = m.events[m.events.length - 1].seq; eventsBuf = eventsBuf.concat(m.events).slice(-200); renderEvents(); }
+  };
+  ws.onclose = () => { wsOk = false; if (id === SID) setTimeout(() => SID === id && openStream(id), 2000); };
+}
+
+// ---------- polling
+async function pollState() { if (!SID) return; try { state = await api(`/sessions/${SID}/state?trails=true`); renderSide(); gotPicture(); } catch (e) {} }
+async function pollSep() { if (!SID) return; try { sep = await api(`/sessions/${SID}/separation?lookahead_s=600`); renderConfl(); } catch (e) {} }
+async function pollEvents() {
+  if (!SID) return;
+  try { const r = await api(`/sessions/${SID}/events?since=${lastSeq}`); lastSeq = r.last_seq; eventsBuf = eventsBuf.concat(r.events).slice(-200); renderEvents(); } catch (e) {}
+}
+async function pollMetrics() {
+  if (!SID) return;
+  try {
+    const m = await api(`/sessions/${SID}/metrics`);
+    const rows = [
+      ['Separation losses', m.separation.loss_events, m.separation.loss_events ? 'c-los' : ''],
+      ['LoS seconds', m.separation.loss_seconds, m.separation.loss_seconds ? 'c-los' : ''],
+      ['Area infringements', m.airspace.infringement_events, m.airspace.infringement_events ? 'c-warn' : ''],
+      ['Non-RVSM in RVSM airspace', m.rvsm ? m.rvsm.violations.length : 0, m.rvsm && m.rvsm.violations.length ? 'c-los' : ''],
+      ['Wrong-direction exits', m.semicircular ? m.semicircular.wrong_direction_exits.length : 0, m.semicircular && m.semicircular.wrong_direction_exits.length ? 'c-warn' : ''],
+      ['Instructions (rejected)', `${m.instructions.issued} (${m.instructions.rejected})`, ''],
+      ['Requests appr/unable/amend/exp', `${m.requests.by_status.approved}/${m.requests.by_status.unable}/${m.requests.by_status.amended}/${m.requests.by_status.expired}`, ''],
+      ['Exited (planned exit)', `${m.traffic.exited} (${m.traffic.exited_at_planned_exit}) / ${m.traffic.total}`, ''],
+      ['Extra track miles', m.traffic.extra_track_miles, ''],
+    ];
+    $('#metrics').innerHTML = rows.map(([k, v, c]) => `<span class="c-dim">${k}</span><span class="${c}">${v}</span>`).join('');
+  } catch (e) {}
+}
+setInterval(() => { if (!wsOk) pollState(); }, 500);
+setInterval(() => { if (!wsOk) pollSep(); }, 2000);
+setInterval(() => { if (!wsOk) pollEvents(); }, 1000);
+setInterval(pollMetrics, 3000);
+setInterval(pollSelected, 2000);
+async function pollSelected() {
+  if (!SID || !selected) { $('#selSec').style.display = 'none'; return; }
+  try {
+    const a = await api(`/sessions/${SID}/aircraft/${selected}`);
+    if (a.status !== 'active') { $('#selSec').style.display = 'none'; return; }
+    const p = a.performance || {};
+    $('#selSec').style.display = '';
+    $('#selName').textContent = `${a.callsign} · ${a.type_name}`;
+    const fp = a.flight_plan || {};
+    const rows = [
+      ['Flight plan', `${fp.departure || '-'} → <b>${fp.destination || '-'}</b> · ${fp.aircraft_type}/${fp.wake} · ${fp.speed} ${fp.cruise}`],
+      ['Route', `<span style="white-space:normal">${fp.route || a.route.join(' ')}</span>`],
+      ['RVSM', a.rvsm.status === 'approved' ? 'approved (W)' : a.rvsm.status === 'unable' ? `<span class="c-los">UNABLE (${a.rvsm.reason}) since ${fmtT(a.rvsm.since_s)}</span>` : '<span class="c-warn">NOT approved</span>'],
+      ['Equipment', fp.equipment || a.equipment],
+      ['Category', a.category + (a.formation ? ` · formation ${a.formation.types}` : '') + (a.rvsm.needs_2000ft ? ' · 2000 ft in RVSM' : '')],
+      ['Direction / level', `${a.direction}, FL${a.cleared_fl} ${a.level_parity_ok ? '' : '<span class="c-warn">wrong-direction level</span>'}`],
+      ['FL / cleared', `${a.fl} / ${a.cleared_fl}`], ['Vertical speed', `${a.vertical_speed_fpm} ft/min`],
+      ['Mach / IAS / TAS / GS', `${a.mach.toFixed(2)} / ${a.ias_kt} / ${a.tas_kt} / ${a.gs_kt}`],
+      ['Speed target', `${a.speed_mode === 'mach' ? 'M' + a.speed_target.toFixed(2) : a.speed_target + ' kt'}${a.speed_assigned_by_atc ? ' (ATC)' : ''}`],
+      ['Heading / track', `${a.heading} / ${Math.round(a.track_deg)}`], ['Wind', `${a.wind.dir}/${a.wind.kt}`],
+      ['Mass / fuel used', `${(a.mass_kg / 1000).toFixed(1)} t / ${Math.round(a.fuel_used_kg)} kg`],
+      ['Max FL now', p.max_fl_at_present_weight], ['Climb rate avail.', `${p.climb_rate_available_fpm} ft/min`],
+      ['Idle descent', `${p.idle_descent_rate_fpm} ft/min`],
+      ['Mach range', (p.assignable_mach || []).map(x => x.toFixed(2)).join('-')], ['IAS range', (p.assignable_ias_kt || []).join('-')],
+      ['Turn radius', `${p.turn_radius_nm} NM`],
+      ['Weather', a.nav_mode === 'wxdev' ? `deviating H${a.weather_deviation.heading} ${Math.round(a.weather_deviation.flown_nm)}/${a.weather_deviation.distance_nm} NM → ${a.weather_deviation.then_direct}`
+                  : (a.weather_ahead_nm != null ? `ahead ${Math.round(a.weather_ahead_nm)} NM (${a.weather_phase})` : 'clear')],
+      ['Turbulence', a.turbulence],
+      ['Speed pair', `M${a.speed_pair.mach.toFixed(2)} / ${a.speed_pair.ias_kt} kt, conversion FL${a.speed_pair.conversion_fl}`],
+      ...(a.arrival ? [['Arrival', `${a.destination} RWY ${a.arrival.runway} (${a.arrival.approach}), ${a.arrival.distance_to_faf_nm} NM to FAF`],
+                       ['Top of descent', `${a.arrival.tod_in_nm} NM (needs ${a.arrival.descent_needed_nm} NM)`],
+                       ['LoA latest descent', a.arrival.loa_latest_descent_in_nm != null ? `${a.arrival.loa_latest_descent_in_nm} NM` : 'at/below LoA level']] : []),
+      ['Control', a.control],
+    ];
+    if (a.on_frequency && !a.assumed && SEAT !== 'pilot') rows.unshift(['First contact', `<button class="on" onclick="assume('${a.callsign}')">Assume ${a.callsign}</button> <span class="c-dim" style="font-size:11px">or double-click it, or type ${a.callsign} AS</span>`]);
+    const ahead = a.route.slice(a.route.indexOf(a.next_waypoint) >= 0 ? a.route.indexOf(a.next_waypoint) : 0).filter(n => !n.startsWith('@'));
+    const dct = [...new Set([...ahead, ...(a.route_after_exit || [])])];
+    rows.push(['Direct to', `<span class="dct">${dct.map(n => `<button data-dct="${n}" style="padding:0 5px;font-size:11px;margin:1px">${n}</button>`).join('')}</span>
+      <span class="c-dim" style="font-size:11px">or type ${a.callsign} D &lt;point&gt;</span>`]);
+    $('#selInfo').innerHTML = rows.map(([k, v]) => `<span class="c-dim">${k}</span><span>${v}</span>`).join('');
+    $('#selInfo').querySelectorAll('[data-dct]').forEach(b => b.onclick = async () => {
+      try { const r = await api(`/sessions/${SID}/instructions`, { method: 'POST', body: JSON.stringify({ callsign: a.callsign, type: 'direct', waypoint: b.dataset.dct }) });
+        msg(r.status === 'rejected' ? r.reason : `${a.callsign} direct ${b.dataset.dct}`, r.status === 'rejected'); } catch (e) { msg(e.message, true); } });
+  } catch (e) {}
+}
+
+// ---------- side panel
+const fmtT = s => { s = Math.max(0, Math.round(s)); return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+function renderSeq() {
+  if (!state || !state.sequence) return;
+  $('#seq').innerHTML = state.sequence.map(f => {
+    const head = `<div class="item"><b>${f.fix}</b> → ${f.aerodrome} RWY ${f.runway_in_use} <span class="c-dim">(${f.approach}) · ${f.letter_of_agreement.replace(f.fix + ': ', '')}</span></div>`;
+    const rows = f.inbound.map(r => {
+      const sp = r.spacing_to_preceding_nm == null ? '' : `<span class="${r.spacing_ok ? 'c-ok' : 'c-los'}">${r.spacing_to_preceding_nm} NM</span>`;
+      const lvl = r.cleared_fl != null && r.cleared_fl !== r.fl ? `${r.fl}→${r.cleared_fl}` : `${r.fl}`;
+      const tod = r.tod_in_nm == null ? '' : (r.tod_in_nm > 0 ? `TOD ${Math.round(r.tod_in_nm)}` : `<span class="c-warn">TOD ${Math.round(r.tod_in_nm)}</span>`);
+      const loa = r.loa_latest_descent_in_nm == null ? '' : (r.loa_latest_descent_in_nm > 0 ? ` · LoA ${Math.round(r.loa_latest_descent_in_nm)}` : ` · <span class="c-los">LoA ${Math.round(r.loa_latest_descent_in_nm)}</span>`);
+      return `<div class="item" style="display:grid;grid-template-columns:62px 44px 54px 1fr;gap:6px"><span class="${r.status === 'on frequency' ? '' : 'c-dim'}">${r.callsign}</span><span>${fmtT(r.eta_s)}</span><span>${lvl}</span><span>${sp} ${tod}${loa}</span></div>`;
+    }).join('');
+    const done = f.crossed.slice(-3).map(c => `<div class="item c-dim">✓ ${c.callsign} ${fmtT(c.time_s)} FL${c.fl}${c.spacing_nm != null ? ' · ' + c.spacing_nm + ' NM' : ''} ${c.level_ok && c.spacing_ok ? '' : '<span class="c-los">✗</span>'}</div>`).join('');
+    return head + rows + done;
+  }).join('') || '<div class="empty">no sequencing fixes</div>';
+}
+
+function renderSide() {
+  if (!state) return;
+  renderSeq();
+  const s = state.session;
+  $('#hud').innerHTML = (replayMode ? `<span style="color:#fff;background:#7a2d8a;padding:0 5px">REPLAY T+${fmtT(replayT)}</span> ` : '') + `<b>${s.scenario}</b> · ${s.session_id}<br>T+ <b>${fmtT(state.sim_time_s)}</b> / ${fmtT(state.duration_s)} · ${s.status.toUpperCase()} · ×${s.time_factor}<br>` +
+    `${state.aircraft.length} in sector · ${state.inbound.length} inbound · SEP <b>${SEPH()} NM</b>` + (sector && sector.controlled_sectors ? ` · ${sector.controlled_sectors.join('+')}` : '') +
+    (weather && weather.wind_profile_at_centre ? `<br>wind FL350 ${weather.wind_profile_at_centre['350'].dir}/${weather.wind_profile_at_centre['350'].kt} · ISA${weather.temperature.isa_deviation_used_for_performance_c >= 0 ? '+' : ''}${weather.temperature.isa_deviation_used_for_performance_c} · FZL FL${weather.temperature.freezing_level_fl}` : '') +
+    (wxMeta ? `<br>WX: ${wxMeta.product === 'cappi' ? 'reflectivity FL' + wxMeta.flShown : wxMeta.product === 'edr' ? 'turbulence FL' + wxMeta.flShown : wxMeta.product.replace('_', ' ')}${weather && weather.cells ? ' · ' + weather.cells.length + ' cells' : ''}` : '') +
+    (state.pending_instructions.length ? `<br><span class="c-warn">readback: ${state.pending_instructions.map(p => p.text).join(' · ')}</span>` : '');
+  $('#reqs').innerHTML = state.pending_requests.length ? state.pending_requests.map(r => `
+    <div class="item req"><div>${r.id} <b>${r.phraseology}</b><small>${r.reason || ''} · ${Math.round(state.sim_time_s - r.time_s)} s ago</small></div>
+    <div>${r.kind === 'checkin' ? `<button class="on" onclick="assume('${r.callsign}')">Assume</button>` : r.type === 'report' ? `<button onclick="reply('${r.callsign}','${r.id}','roger')">Roger</button>` :
+      `<button onclick="reply('${r.callsign}','${r.id}','approved')">Approve</button> <button onclick="reply('${r.callsign}','${r.id}','unable')">Unable</button>`}</div></div>`).join('')
+    : '<div class="empty">none pending</div>';
+}
+function SEPH() { return (state && state.separation_minimum_nm) || (sector && sector.separation_minima && sector.separation_minima.horizontal_nm) || 5; }
+// ---------- alarms: loss of separation (red, flashing) and short-term conflict alert (amber, LoS within 3 min)
+const STCA_S = 180; let alertKeys = new Set(), muted = true, actx = null;
+function beep(freq, ms) {
+  if (muted) return;
+  try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + ms / 1000); } catch (e) {}
+}
+function renderAlerts() {
+  const box = $('#alerts'); if (!box) return;
+  if (!state || replayMode) { box.innerHTML = ''; return; }
+  const items = [], keys = new Set();
+  for (const p of state.current_losses || []) {
+    const k = 'L' + p.aircraft.join('-'); keys.add(k);
+    items.push(`<div class="al los" data-cs="${p.aircraft[0]}">LOSS OF SEPARATION ${p.aircraft.join(' × ')} · ${p.horizontal_nm} NM / ${p.vertical_ft} ft (min ${p.required_horizontal_nm} NM / ${p.required_vertical_ft} ft)</div>`);
+  }
+  for (const c of (sep && sep.predicted_conflicts) || []) {
+    if (c.time_to_los_s == null || c.time_to_los_s <= 0 || c.time_to_los_s > STCA_S) continue;
+    const k = 'S' + c.aircraft.join('-'); keys.add(k);
+    items.push(`<div class="al stca" data-cs="${c.aircraft[0]}">STCA ${c.aircraft.join(' × ')} · LoS in ${fmtT(c.time_to_los_s)} · CPA ${c.cpa_horizontal_nm} NM / ${c.vertical_at_cpa_ft} ft</div>`);
+  }
+  for (const k of keys) if (!alertKeys.has(k)) { beep(k[0] === 'L' ? 880 : 660, k[0] === 'L' ? 400 : 200); break; }
+  alertKeys = keys;
+  box.innerHTML = items.slice(0, 5).join('') + (items.length > 5 ? `<div class="al more">+${items.length - 5} more</div>` : '') +
+    `<div class="al more" id="muteBtn" title="sound for new alerts">${muted ? '🔇 alarms muted (click)' : '🔊 alarms on'}</div>`;
+  box.querySelectorAll('[data-cs]').forEach(el => el.onclick = () => { selected = el.dataset.cs; pollSelected(); });
+  $('#muteBtn').onclick = () => { muted = !muted; if (!muted) beep(660, 120); renderAlerts(); };
+}
+setInterval(renderAlerts, 1000);
+function renderConfl() {
+  if (!sep) return;
+  $('#la').textContent = `next ${sep.lookahead_s / 60} min`;
+  const c = sep.predicted_conflicts.map(p => `<div class="item ${p.time_to_los_s === 0 ? 'c-los' : 'c-warn'}">${p.aircraft.join(' × ')} — LoS in ${fmtT(p.time_to_los_s)}, CPA ${p.cpa_horizontal_nm} NM / ${p.vertical_at_cpa_ft} ft</div>`);
+  const a = sep.predicted_area_infringements.map(p => `<div class="item c-warn">${p.callsign} → ${p.kind} area ${p.area_id} in ${fmtT(p.time_to_entry_s)}</div>`);
+  const w = (sep.predicted_weather_penetrations || []).map(p => `<div class="item c-warn">${p.callsign} → weather ${p.dbz} dBZ in ${fmtT(p.time_to_entry_s)}</div>`);
+  $('#confl').innerHTML = (c.concat(a, w)).join('') || '<div class="empty">no conflicts predicted</div>';
+}
+const EV_CLASS = { separation_loss_start: 'c-los', area_infringement_start: 'c-warn', pilot_request: 'c-ok', instruction_rejected: 'c-los', aircraft_left_sector: 'c-los',
+  deviation_without_clearance: 'c-los', weather_penetration_start: 'c-los', turbulence_report: 'c-warn', request_repeated: 'c-warn',
+  runway_change: 'c-warn', checkin: 'c-dim', rvsm_status: 'c-warn', rvsm_airspace_violation_start: 'c-los', wrong_direction_level: 'c-warn' };
+function evText(e) {
+  switch (e.type) {
+    case 'pilot_request': return `${e.request_id} ${e.text}${e.reason ? ' (' + e.reason + ')' : ''}`;
+    case 'instruction': return `→ ${e.text}`;
+    case 'instruction_rejected': return `✗ rejected: ${e.reason}`;
+    case 'separation_loss_start': return `LOSS OF SEPARATION ${e.aircraft.join(' × ')} ${e.horizontal_nm} NM / ${e.vertical_ft} ft (min ${e.required_horizontal_nm} NM / ${e.required_vertical_ft} ft)`;
+    case 'separation_loss_end': return `LoS ended ${e.aircraft.join(' × ')} (${e.duration_s} s, min ${e.min_horizontal_nm} NM)`;
+    case 'area_infringement_start': return `${e.callsign} entered ACTIVE ${e.kind} area ${e.area_id}`;
+    case 'area_activated': return `Area ${e.area_id} (${e.kind}) ACTIVATED`;
+    case 'area_deactivated': return `Area ${e.area_id} (${e.kind}) deactivated`;
+    case 'aircraft_entered': return `${e.callsign} (${e.aircraft_type}) entered at ${e.at} FL${e.fl} → ${e.exit}`;
+    case 'aircraft_exited': return `${e.callsign} exited at ${e.at}${e.at !== e.planned_exit ? ' (planned ' + e.planned_exit + ')' : ''}`;
+    case 'request_resolved': return `${e.request_id} ${e.status} (${e.response_time_s} s)`;
+    case 'instruction_executed': return null;
+    case 'deviation_without_clearance': return `⚠ ${e.text}`;
+    case 'checkin': case 'runway_change': case 'deviation_previous_sector': return e.text;
+    case 'fix_crossing': return (e.level_ok && e.spacing_ok !== false ? '' : '✗ ') + e.text;
+    case 'weather_penetration_start': return `${e.callsign} IN WEATHER ${e.dbz} dBZ FL${e.fl}`;
+    case 'weather_penetration_end': return `${e.callsign} out of weather (${e.duration_s} s, max ${e.max_dbz} dBZ)`;
+    case 'turbulence_report': case 'pilot_report': case 'pilot_readback': case 'weather_deviation_complete': case 'request_repeated': return e.text;
+    case 'request_cancelled': return `${e.request_id} cancelled: ${e.reason}`;
+    case 'client_connected': return `client connected: ${e.client}`;
+    case 'rvsm_status': return e.status === 'unable' ? `${e.callsign} UNABLE RVSM (${e.reason}) at FL${e.fl}` : e.text;
+    case 'rvsm_airspace_violation_start': return `⚠ ${e.text} FL${e.fl}`;
+    case 'rvsm_airspace_violation_end': return `${e.callsign} out of RVSM airspace (${e.duration_s} s)`;
+    case 'wrong_direction_level': return `⚠ ${e.text}`;
+    default: return `${e.type}`;
+  }
+}
+function renderEvents() {
+  $('#events').innerHTML = eventsBuf.slice().reverse().map(e => { const t = evText(e); return t ? `<div class="item ${EV_CLASS[e.type] || ''}"><span class="c-dim">${fmtT(e.time_s)}</span> ${t}</div>` : ''; }).join('') || '<div class="empty">—</div>';
+}
+
+// ---------- recording / replay
+let shown = null, rec = null, replayMode = false, replayT = 0, replayPlaying = false, recOffline = false, lastRpWx = -1e9;
+async function pollRecording() {
+  if (!SID || recOffline) return;
+  try {
+    const since = rec && rec.frames.length ? rec.frames[rec.frames.length - 1].t : -1;
+    const r = await api(`/sessions/${SID}/recording?since=${since}`);
+    if (!rec || since < 0) rec = { frames: [], events: [], meta: {} };
+    rec.frames = rec.frames.concat(r.frames); rec.events = rec.events.concat(r.events);
+    Object.assign(rec.meta, r.meta); rec.duration_s = r.duration_s; rec.every_s = r.every_s; rec.sim_time_s = r.sim_time_s;
+  } catch (e) {}
+}
+setInterval(pollRecording, 3000);
+function frameIndex(t) {           // last frame with time <= t (binary search)
+  const f = rec.frames; let lo = 0, hi = f.length - 1;
+  if (!f.length) return -1; if (t <= f[0].t) return 0;
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (f[m].t <= t) lo = m; else hi = m - 1; }
+  return lo;
+}
+function replayState() {
+  if (!rec || !rec.frames.length) return state;
+  const i = frameIndex(replayT), f0 = rec.frames[i], f1 = rec.frames[Math.min(i + 1, rec.frames.length - 1)];
+  const k = f1.t > f0.t ? Math.max(0, Math.min(1, (replayT - f0.t) / (f1.t - f0.t))) : 0;
+  const nxt = Object.fromEntries(f1.ac.map(r => [r[0], r]));
+  const trails = {};
+  for (let j = Math.max(0, i - 12); j < i; j += 2) for (const r of rec.frames[j].ac) (trails[r[0]] = trails[r[0]] || []).push([r[1], r[2]]);
+  const RV = { A: 'approved', N: 'non_approved', U: 'unable' };
+  const mk = r => {
+    const n = nxt[r[0]], m = rec.meta[r[0]] || {}, x = n ? r[1] + (n[1] - r[1]) * k : r[1], y = n ? r[2] + (n[2] - r[2]) * k : r[2];
+    const sp = r[8] || 'M0', rv = RV[r[14]] || 'approved';
+    return { callsign: r[0], x_nm: x, y_nm: y, fl: r[3], cleared_fl: r[4], vertical_speed_fpm: r[5], gs_kt: r[6], track_deg: r[7],
+      speed_mode: sp[0] === 'M' ? 'mach' : 'cas', mach: +sp.slice(1) / 100, ias_kt: +sp.slice(1),
+      nav_mode: { L: 'lnav', H: 'heading', W: 'wxdev' }[r[9]], assigned_heading: r[10], next_waypoint: r[11], on_frequency: !!r[12],
+      status: r[13] === 'A' ? 'active' : 'exited', type: m.type, route: m.route || [], entry_waypoint: m.entry,
+      flight_plan: { destination: m.dest }, category: m.military ? 'military' : 'civil', formation: m.formation ? { size: m.formation } : null,
+      rvsm: { status: rv, needs_2000ft: rv !== 'approved' || !!m.formation }, arrival: null, speed_restriction: null,
+      trail: trails[r[0]] || [], exit_point: null };
+  };
+  const all = f0.ac.map(mk);
+  const areas = ((state && state.areas) || rec.areas || []).map(a => ({ ...a, active: f0.areas.includes(a.id) }));
+  return { aircraft: all.filter(a => a.status === 'active'), transferred: all.filter(a => a.status !== 'active'),
+           current_losses: f0.los.map(p => ({ aircraft: p })), pending_requests: f0.req.map(q => ({ callsign: q[0], type: q[1], kind: q[2] })),
+           areas, sim_time_s: replayT };
+}
+function setReplay(on, t) {
+  replayMode = on && !!rec && rec.frames.length > 0;
+  if (t != null && rec && rec.frames.length) replayT = Math.max(rec.frames[0].t, Math.min(t, rec.frames[rec.frames.length - 1].t));
+  $('#rpPlay').textContent = replayPlaying ? '❚❚ Pause' : '▶ Replay';
+  $('#rpLive').classList.toggle('on', !replayMode);
+  if (replayMode && Math.abs(replayT - lastRpWx) > 30) { lastRpWx = replayT; pollWeather(); }
+  if (!replayMode) pollWeather();
+}
+$('#rpPlay').onclick = () => { if (!rec || !rec.frames.length) return; if (!replayMode) setReplay(true, Math.max(0, (rec.frames[rec.frames.length - 1].t) - 300));
+  replayPlaying = !replayPlaying; setReplay(true); };
+$('#rpLive').onclick = () => { if (recOffline) return; replayPlaying = false; setReplay(false); };
+$('#rpExport').onclick = () => { if (SID) window.open(`/sessions/${SID}/recording/export`, '_blank'); };
+$('#rpFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const d = JSON.parse(await f.text());
+  if (d.kind !== 'atcsim-recording') { msg('not a recording file', true); return; }
+  if (ws) { try { ws.onclose = null; ws.close(); } catch (er) {} }
+  SID = null; state = null; sep = null; recOffline = true; rec = d; sector = d.sector; weather = null; wxImg = null; fitView();
+  eventsBuf = d.events.slice(-200); renderEvents();
+  $('#hud').innerHTML = `<b>recording</b> · ${d.scenario} · ${d.session_id}`;
+  replayPlaying = false; setReplay(true, 0);
+};
+let lastTick = performance.now();
+setInterval(() => {
+  const now = performance.now(), dt = (now - lastTick) / 1000; lastTick = now;
+  if (replayMode && replayPlaying && rec && rec.frames.length) {
+    replayT += dt * +$('#rpSpeed').value;
+    const end = rec.frames[rec.frames.length - 1].t;
+    if (replayT >= end) { replayT = end; replayPlaying = false; setReplay(true); }
+    if (Math.abs(replayT - lastRpWx) > 30) { lastRpWx = replayT; pollWeather(); }
+  }
+}, 100);
+// timeline: markers, cursor, scrubbing
+const tl = $('#tl'), tctx = tl.getContext('2d');
+const TL_COL = { separation_loss_start: '#ff5a5a', area_infringement_start: '#e0c13c', pilot_request: '#7fb8ff', instruction: '#8a9bb0',
+  instruction_rejected: '#ff9a5a', rvsm_status: '#f2b84b', weather_penetration_start: '#d05ad0', aircraft_left_sector: '#ff5a5a',
+  area_activated: '#e0c13c', runway_change: '#5fd3a3', fix_crossing: '#5fd3a3', wrong_direction_level: '#f2b84b',
+  rvsm_airspace_violation_start: '#ff5a5a' };
+const TL_ROW = { separation_loss_start: 0, aircraft_left_sector: 0, rvsm_airspace_violation_start: 0, weather_penetration_start: 0,
+  area_infringement_start: 0, pilot_request: 1, rvsm_status: 1, instruction: 2, instruction_rejected: 2, area_activated: 3,
+  runway_change: 3, fix_crossing: 3, wrong_direction_level: 3 };
+function tlSpan() { const d = (rec && rec.duration_s) || (state && state.duration_s) || 1800; return Math.max(d, rec && rec.frames.length ? rec.frames[rec.frames.length - 1].t : 0); }
+function drawTimeline() {
+  const r = tl.getBoundingClientRect(), dpr = devicePixelRatio;
+  if (tl.width !== Math.round(r.width * dpr)) { tl.width = r.width * dpr; tl.height = r.height * dpr; }
+  const W = tl.width, H = tl.height, L = 50 * dpr, R = W - 16 * dpr, span = tlSpan(), X = t => L + (R - L) * t / span;
+  tctx.clearRect(0, 0, W, H); tctx.fillStyle = '#111a24ee'; tctx.fillRect(0, 0, W, H); tctx.fillStyle = '#26384a'; tctx.fillRect(0, 0, W, dpr);
+  if (!rec) return;
+  const recEnd = rec.frames.length ? rec.frames[rec.frames.length - 1].t : 0;
+  tctx.fillStyle = '#1e3346'; tctx.fillRect(L, 6 * dpr, X(recEnd) - L, H - 18 * dpr);          // recorded part
+  tctx.font = `${9 * dpr}px ui-monospace,monospace`; tctx.fillStyle = '#6c7f92';
+  for (let m = 0; m <= span / 60; m += span > 3000 ? 10 : 5) { const x = X(m * 60); tctx.fillRect(x, H - 12 * dpr, 1, 4 * dpr); tctx.fillText(`${m}'`, x - 6 * dpr, H - 1 * dpr); }
+  tctx.fillText('LoS/inf', 2 * dpr, 13 * dpr); tctx.fillText('req', 2 * dpr, 21 * dpr); tctx.fillText('instr', 2 * dpr, 29 * dpr); tctx.fillText('other', 2 * dpr, 37 * dpr);
+  for (const e of rec.events) { const row = TL_ROW[e.type]; if (row == null) continue;
+    tctx.fillStyle = TL_COL[e.type] || '#888'; tctx.fillRect(X(e.time_s) - dpr, (7 + row * 8) * dpr, 2 * dpr, 6 * dpr); }
+  if (state && !recOffline) { tctx.fillStyle = '#5fd3a3'; tctx.fillRect(X(state.sim_time_s) - dpr, 2 * dpr, 2 * dpr, H - 12 * dpr); }
+  if (replayMode) { tctx.fillStyle = '#ffffff'; tctx.fillRect(X(replayT) - dpr, 0, 2 * dpr, H - 10 * dpr);
+    tctx.fillText(fmtT(replayT), Math.min(X(replayT) + 4 * dpr, W - 40 * dpr), 9 * dpr); }
+}
+function tlTime(e) { const r = tl.getBoundingClientRect(), dpr = devicePixelRatio, L = 50, R = r.width - 16;
+  return Math.max(0, Math.min(1, (e.clientX - r.left - L) / (R - L))) * tlSpan(); }
+let tlDrag = false;
+tl.addEventListener('mousedown', e => { tlDrag = true; replayPlaying = false; setReplay(true, tlTime(e)); e.stopPropagation(); });
+window.addEventListener('mouseup', () => { tlDrag = false; });
+tl.addEventListener('mousemove', e => {
+  if (tlDrag) { setReplay(true, tlTime(e)); }
+  if (!rec) return;
+  const t = tlTime(e), r = tl.getBoundingClientRect(), tol = 4 / (r.width - 66) * tlSpan(), row = Math.floor((e.clientY - r.top - 7) / 8);
+  const hit = rec.events.filter(ev => TL_ROW[ev.type] === row && Math.abs(ev.time_s - t) < tol).slice(0, 4);
+  const tip = $('#tltip');
+  if (hit.length) { tip.style.display = ''; tip.style.left = Math.min(e.clientX - r.left + 10, r.width - 320) + 'px'; tip.style.bottom = '78px';
+    tip.innerHTML = hit.map(ev => `${fmtT(ev.time_s)} ${evText(ev) || ev.type}`).join('<br>'); }
+  else tip.style.display = 'none';
+});
+tl.addEventListener('mouseleave', () => { $('#tltip').style.display = 'none'; });
+tl.addEventListener('wheel', e => { e.preventDefault(); if (!rec || !rec.frames.length) return; replayPlaying = false;
+  setReplay(true, (replayMode ? replayT : rec.frames[rec.frames.length - 1].t) + (e.deltaY > 0 ? 1 : -1) * Math.max(10, tlSpan() / 300)); }, { passive: false });
+
+// ---------- scope drawing
+let view = { s: 1, cx: 0, cy: 0 };
+function resize() { const r = cv.getBoundingClientRect(); cv.width = r.width * devicePixelRatio; cv.height = r.height * devicePixelRatio; }
+window.addEventListener('resize', resize); resize();
+function toPx(x, y) { const w = cv.width, h = cv.height, s = view.s; return [w / 2 + (x - view.cx) * s, h / 2 - (y - view.cy) * s]; }
+function fromPx(px, py) { const w = cv.width, h = cv.height, s = view.s; return [(px - w / 2) / s + view.cx, -(py - h / 2) / s + view.cy]; }
+let userZoom = 1, home = { cx: 0, cy: 0, half: 96 };
+function fitView() {
+  const b = sector && sector.bbox_nm;
+  if (!b) { home = { cx: 0, cy: 0, half: 96 }; }
+  else if (sector.shape && sector.shape.type === 'square') home = { cx: 0, cy: 0, half: sector.shape.half_size_nm + 36 };
+  else {
+    // fit the controlled area (a single sector zooms in on it; the band-boxed CTA shows everything)
+    const pts = sector.shape.polygon, xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    home = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half: Math.max(x1 - x0, y1 - y0) / 2 + 30 };
+  }
+  view.cx = home.cx; view.cy = home.cy; userZoom = 1;
+}
+cv.addEventListener('wheel', e => { e.preventDefault(); userZoom = Math.max(0.5, Math.min(12, userZoom * (e.deltaY < 0 ? 1.1 : 0.9))); }, { passive: false });
+// labels: offsets in CSS px per callsign; rectangles of the last frame for hit testing
+const labelOff = {}, labelRects = [];
+let drag = null;
+function canvasPt(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; }
+function labelAt(e) { const [x, y] = canvasPt(e); return labelRects.find(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1); }
+cv.addEventListener('mousedown', e => {
+  const l = labelAt(e);
+  if (l) { const o = labelOff[l.cs] || [10, -14]; drag = { label: l.cs, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; }
+  else drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false };
+});
+window.addEventListener('mouseup', e => {
+  if (drag && !drag.moved && drag.label && (rblMode || e.shiftKey)) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e) || drag.label); drag = null; return; }
+  if (drag && !drag.moved) { if (drag.label) { selected = drag.label;
+      if (window.onSelectAircraft && onSelectAircraft(selected, e, true)) { drag = null; return; }
+      $('#cmd').value = selected + ' '; $('#cmd').focus(); pollSelected(); } else pick(e); }
+  drag = null;
+});
+window.addEventListener('mousemove', e => {
+  if (!drag) { cv.style.cursor = labelAt(e) ? 'move' : 'crosshair'; return; }
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+  if (drag.label) { labelOff[drag.label] = [drag.ox + dx, drag.oy + dy]; return; }
+  view.cx = drag.cx - dx * devicePixelRatio / view.s; view.cy = drag.cy + dy * devicePixelRatio / view.s;
+});
+cv.addEventListener('dblclick', e => {
+  const cs = nearestAircraft(e), a = cs && state && state.aircraft.find(x => x.callsign === cs);
+  if (a && a.on_frequency && !a.assumed && !replayMode) { assume(cs); return; }           // assume on first contact
+  const l = labelAt(e); if (l) { delete labelOff[l.cs]; return; } if (!EXID) fitView(); });
+$('#homeBtn').onclick = fitView;
+// ---------- RBL (range and bearing line) tool: current range/bearing, CPA distance, time to CPA, CPA positions
+const rbls = [];                 // [{a, b}]
+let rblMode = false, rblFirst = null;
+const rblRects = [];
+function setRblMode(on) {
+  rblMode = on; rblFirst = null;
+  $('#rblBtn').classList.toggle('on', on);
+  $('#rblHint').textContent = on ? 'click the first aircraft' : '';
+}
+$('#rblBtn').onclick = () => setRblMode(!rblMode);
+$('#rblClear').onclick = () => { rbls.length = 0; setRblMode(false); };
+window.addEventListener('keydown', e => { if (e.key === 'Escape') setRblMode(false); });
+function rblPick(cs) {
+  if (!cs) return;
+  if (!rblFirst) { rblFirst = cs; $('#rblHint').textContent = `${cs} → click the second aircraft`; return; }
+  if (cs !== rblFirst && !rbls.some(r => (r.a === rblFirst && r.b === cs) || (r.a === cs && r.b === rblFirst)))
+    rbls.push({ a: rblFirst, b: cs });
+  setRblMode(false);
+}
+cv.addEventListener('contextmenu', e => {
+  const [x, y] = canvasPt(e), hit = rblRects.find(r => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1);
+  if (hit) { e.preventDefault(); rbls.splice(rbls.findIndex(r => r.a === hit.a && r.b === hit.b), 1); }
+});
+function cpa(A, B) {
+  // straight-line extrapolation of both tracks at present ground speed (what an RBL/CPA tool on a radar does)
+  const va = [A.gs_kt * Math.sin(A.track_deg * Math.PI / 180) / 3600, A.gs_kt * Math.cos(A.track_deg * Math.PI / 180) / 3600];
+  const vb = [B.gs_kt * Math.sin(B.track_deg * Math.PI / 180) / 3600, B.gs_kt * Math.cos(B.track_deg * Math.PI / 180) / 3600];
+  const px = B.x_nm - A.x_nm, py = B.y_nm - A.y_nm, vx = vb[0] - va[0], vy = vb[1] - va[1];
+  const v2 = vx * vx + vy * vy;
+  const t = v2 < 1e-12 ? 0 : Math.max(0, -(px * vx + py * vy) / v2);
+  return { t, d: Math.hypot(px + vx * t, py + vy * t), range: Math.hypot(px, py),
+           brg: (Math.atan2(px, py) * 180 / Math.PI + 360) % 360,
+           pa: [A.x_nm + va[0] * t, A.y_nm + va[1] * t], pb: [B.x_nm + vb[0] * t, B.y_nm + vb[1] * t] };
+}
+function drawRbls(byCs) {
+  const dpr = devicePixelRatio; rblRects.length = 0;
+  for (let i = rbls.length - 1; i >= 0; i--) if (!byCs[rbls[i].a] || !byCs[rbls[i].b]) rbls.splice(i, 1);   // aircraft gone
+  for (const r of rbls) {
+    const A = byCs[r.a], B = byCs[r.b], c = cpa(A, B);
+    const vmin = 1000, dv = Math.abs(A.fl - B.fl) * 100;
+    const col = c.d < SEPH() + (A.formation || B.formation ? 1 : 0) && dv < vmin * (A.rvsm && A.rvsm.needs_2000ft || B.rvsm && B.rvsm.needs_2000ft ? 2 : 1) ? '#ff6b9a' : '#d79bff';
+    const [ax, ay] = toPx(A.x_nm, A.y_nm), [bx, by] = toPx(B.x_nm, B.y_nm);
+    ctx.strokeStyle = col; ctx.lineWidth = 1.3 * dpr; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    if (c.t > 0) {
+      const [qax, qay] = toPx(...c.pa), [qbx, qby] = toPx(...c.pb);
+      ctx.setLineDash([4 * dpr, 4 * dpr]); ctx.lineWidth = 1 * dpr;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(qax, qay); ctx.moveTo(bx, by); ctx.lineTo(qbx, qby); ctx.stroke();
+      ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(qax, qay); ctx.lineTo(qbx, qby); ctx.stroke();
+      for (const [qx, qy, cs] of [[qax, qay, r.a], [qbx, qby, r.b]]) {
+        ctx.beginPath(); ctx.arc(qx, qy, 4 * dpr, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = col; ctx.font = `${9.5 * dpr}px ui-monospace,monospace`; ctx.fillText(cs, qx + 6 * dpr, qy + 3 * dpr);
+      }
+    }
+    const mx = (ax + bx) / 2, my = (ay + by) / 2;
+    const l1 = `${String(Math.round(c.brg)).padStart(3, '0')}° ${c.range.toFixed(1)} NM  ΔFL ${Math.abs(A.fl - B.fl)}`;
+    const l2 = c.t > 0 ? `CPA ${c.d.toFixed(1)} NM in ${fmtT(c.t)}` : 'diverging';
+    ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
+    const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 8 * dpr;
+    ctx.fillStyle = '#0b1016cc'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, 28 * dpr);
+    ctx.fillStyle = col; ctx.fillText(l1, mx, my); ctx.fillText(l2, mx, my + 13 * dpr);
+    rblRects.push({ a: r.a, b: r.b, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my + 16 * dpr });
+  }
+}
+function nearestAircraft(e) {
+  if (!shown) return null; const r = cv.getBoundingClientRect();
+  const [x, y] = fromPx((e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio);
+  let best = null, bd = 4 / (view.s / devicePixelRatio) * 4;
+  for (const a of shown.aircraft.concat(shown.transferred || [])) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < bd) { bd = d; best = a.callsign; } }
+  return best;
+}
+function pick(e) {
+  if (!shown) return;
+  if (rblMode || e.shiftKey) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e)); return; }
+  const r = cv.getBoundingClientRect();
+  const [x, y] = fromPx((e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio);
+  let best = null, bd = 4 / (view.s / devicePixelRatio) * 4;
+  for (const a of shown.aircraft) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < bd) { bd = d; best = a.callsign; } }
+  selected = best;
+  if (best && window.onSelectAircraft && onSelectAircraft(best, e, false)) return;
+  if (best) { $('#cmd').value = best + ' '; $('#cmd').focus(); }
+  pollSelected();
+}
+
+
+function legArrows(pts, col) {          // direction arrows at the middle of each leg (one-way routings)
+  const dpr = devicePixelRatio; ctx.strokeStyle = col; ctx.lineWidth = dpr;
+  for (let k = 0; k < pts.length - 1; k++) {
+    const [x1, y1] = toPx(...pts[k]), [x2, y2] = toPx(...pts[k + 1]);
+    const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, an = Math.atan2(y2 - y1, x2 - x1), L = 6 * dpr;
+    ctx.beginPath(); ctx.moveTo(cx - L * Math.cos(an - 0.5), cy - L * Math.sin(an - 0.5)); ctx.lineTo(cx, cy);
+    ctx.lineTo(cx - L * Math.cos(an + 0.5), cy - L * Math.sin(an + 0.5)); ctx.stroke();
+  }
+}
+const AREA_COL = { danger: '#e08a3c', restricted: '#e0c13c', prohibited: '#ff5a5a' };
+function draw() {
+  shown = replayMode ? replayState() : state;
+  const W = cv.width, H = cv.height, dpr = devicePixelRatio;
+  ctx.fillStyle = '#0b1016'; ctx.fillRect(0, 0, W, H);
+  view.s = Math.min(W, H) / (2 * home.half * 1.02) * userZoom;      // room for traffic before entry
+  if (!sector) { ctx.fillStyle = '#6c7f92'; ctx.font = `${14 * dpr}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('Select or create a session', W / 2, H / 2); return requestAnimationFrame(draw); }
+  ctx.textAlign = 'left';
+  // weather
+  if (wxImg && wxMeta) {
+    const [wx0, wy0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [wx1, wy1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(wxImg, wx0, wy0, wx1 - wx0, wy1 - wy0);
+  }
+  if (wxCellsData.length && $('#wxCells').checked && $('#wxMode').value !== 'off') {
+    ctx.font = `${10 * dpr}px ui-monospace,monospace`; ctx.fillStyle = '#e9eef3cc';
+    const drawn = [];
+    for (const c of wxCellsData) {                       // sorted strongest first by the server
+      if (c.max_dbz < 45 || c.stage === 'dissipating') continue;
+      if (drawn.some(d => Math.hypot(d[0] - c.x_nm, d[1] - c.y_nm) < 8)) continue;
+      drawn.push([c.x_nm, c.y_nm]);
+      const [cx, cy] = toPx(c.x_nm, c.y_nm);
+      ctx.fillText(`${c.echo_top_fl}`, cx - 9 * dpr, cy + 3 * dpr);
+    }
+  }
+  // airspace: whole CTA outline, sector lines, controlled area
+  const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };
+  const wp = sector.waypoints;
+  if (sector.sectors && sector.sectors.length > 1 && (V.sectors || V.freqs)) {
+    ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
+    for (const sc of sector.sectors) {
+      const ctl = (sector.controlled_sectors || []).includes(sc.id);
+      poly(sc.polygon); ctx.setLineDash([3 * dpr, 4 * dpr]); ctx.strokeStyle = '#2f7a5f'; ctx.lineWidth = 1 * dpr; if (V.sectors) ctx.stroke(); ctx.setLineDash([]);
+      if (!ctl && V.sectors) { ctx.fillStyle = '#ffffff06'; ctx.fill(); }
+      if (!V.freqs) continue;
+      const cx = sc.polygon.reduce((a, p) => a + p[0], 0) / sc.polygon.length, cy = sc.polygon.reduce((a, p) => a + p[1], 0) / sc.polygon.length;
+      const [lx, ly] = toPx(cx, cy); ctx.fillStyle = ctl ? '#3f9c7a' : '#2b5a49';
+      ctx.fillText(`${sc.name.toUpperCase()} ${sc.frequency || ''}`, lx - 50 * dpr, ly);
+    }
+  }
+  if (sector.outline && sector.shape.type !== 'square') { poly(sector.outline); ctx.strokeStyle = '#2d4258'; ctx.lineWidth = 1.2 * dpr; ctx.stroke(); }
+  poly(sector.shape.polygon || sector.shape.corners); ctx.strokeStyle = '#4a6886'; ctx.lineWidth = 1.8 * dpr; ctx.stroke();
+  // published routes (airways solid, RAD direct routings dashed)
+  const radSet = new Set((sector.rad_routes || []).map(r => r.join('-'))), routeKeys = new Set((sector.routes || []).map(r => r.join('-')));
+  ctx.lineWidth = 1 * dpr;
+  for (const r of sector.routes) {
+    const rkey = [...r].reverse().join('-'), rad = radSet.has(r.join('-')) || radSet.has(rkey), twoWay = routeKeys.has(rkey);
+    if (rad ? !V.rad : !V.routes) continue;
+    if (!r.every(n => wp[n])) continue;
+    ctx.strokeStyle = rad ? '#2a3f33' : '#1b2835'; ctx.setLineDash(rad ? [6 * dpr, 6 * dpr] : []);
+    poly(r.map(n => wp[n]), false); ctx.stroke(); ctx.setLineDash([]);
+    if (rad && !twoWay) legArrows(r.map(n => wp[n]), '#3d5c48');
+  }
+  if (sector.airways && V.routes) {
+    ctx.font = `${9.5 * dpr}px ui-monospace,monospace`; ctx.fillStyle = '#3a5068';
+    for (const [name, aw] of Object.entries(sector.airways)) {
+      const p = aw.points, i = Math.floor((p.length - 1) / 2); if (!wp[p[i]] || !wp[p[i + 1]]) continue;
+      const [mx, my] = toPx((wp[p[i]][0] + wp[p[i + 1]][0]) / 2, (wp[p[i]][1] + wp[p[i + 1]][1]) / 2);
+      ctx.fillText(name, mx + 4 * dpr, my);
+      if (aw.one_way) {                          // direction arrows on one-way airways
+        ctx.strokeStyle = '#3a5068'; ctx.lineWidth = 1 * dpr;
+        for (let k = 0; k < p.length - 1; k++) {
+          const [x1, y1] = toPx(...wp[p[k]]), [x2, y2] = toPx(...wp[p[k + 1]]);
+          const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, an = Math.atan2(y2 - y1, x2 - x1), L = 6 * dpr;
+          ctx.beginPath(); ctx.moveTo(cx - L * Math.cos(an - 0.5), cy - L * Math.sin(an - 0.5)); ctx.lineTo(cx, cy);
+          ctx.lineTo(cx - L * Math.cos(an + 0.5), cy - L * Math.sin(an + 0.5)); ctx.stroke();
+        }
+      }
+    }
+  }
+  // active flight-plan routes, highlighted
+  if (shown && V.routes) {
+    ctx.strokeStyle = '#24394d';
+    for (const a of shown.aircraft) { const r = a.route.filter(n => wp[n]); for (let i = 0; i < r.length - 1; i++) { const [ax, ay] = toPx(...wp[r[i]]), [bx, by] = toPx(...wp[r[i + 1]]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); }
+      if (!a.on_frequency && wp[a.entry_waypoint]) { const [ax, ay] = toPx(a.x_nm, a.y_nm), [bx, by] = toPx(...wp[a.entry_waypoint]);
+        ctx.setLineDash([2 * dpr, 4 * dpr]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]); } }
+  }
+  // destination aerodromes, runway in use, approach paths from the sequencing fixes
+  if (arrInfo) {
+    for (const f of arrInfo.sequencing_fixes) {
+      const ap = f.approach_with_runway_in_use; if (!ap) continue;
+      ctx.strokeStyle = '#3b6e93'; ctx.lineWidth = 1 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.beginPath();
+      ap.points.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke(); ctx.setLineDash([]);
+      const [fx, fy] = toPx(...ap.faf); ctx.fillStyle = '#3b6e93'; ctx.fillRect(fx - 2 * dpr, fy - 2 * dpr, 4 * dpr, 4 * dpr);
+    }
+    for (const ad of arrInfo.aerodromes) {
+      const hdg = (ad.runways.find(r => r.id === ad.runway_in_use) || {}).landing_heading || 0, hr = hdg * Math.PI / 180;
+      let [ax, ay] = toPx(ad.x_nm, ad.y_nm);
+      const inView = ax > 0 && ay > 0 && ax < W && ay < H;
+      ctx.font = `${10.5 * dpr}px ui-monospace,monospace`; ctx.fillStyle = '#7fa8c9';
+      if (inView) {
+        const [r1x, r1y] = toPx(ad.x_nm - Math.sin(hr) * 0.9, ad.y_nm - Math.cos(hr) * 0.9), [r2x, r2y] = toPx(ad.x_nm + Math.sin(hr) * 0.9, ad.y_nm + Math.cos(hr) * 0.9);
+        ctx.strokeStyle = '#a9c7df'; ctx.lineWidth = 4 * dpr; ctx.beginPath(); ctx.moveTo(r1x, r1y); ctx.lineTo(r2x, r2y); ctx.stroke(); ctx.lineWidth = 1 * dpr;
+        ctx.fillText(`${ad.id} RWY ${ad.runway_in_use}`, ax + 8 * dpr, ay - 8 * dpr);
+      } else {
+        const cx = Math.min(Math.max(ax, 50 * dpr), W - 110 * dpr), cy = Math.min(Math.max(ay, 20 * dpr), H - 40 * dpr);
+        const dnm = Math.hypot(ad.x_nm - view.cx, ad.y_nm - view.cy);
+        ctx.fillText(`→ ${ad.id} RWY ${ad.runway_in_use} (${Math.round(dnm)} NM)`, cx, cy);
+      }
+    }
+  }
+  // areas
+  for (const ar of (shown && V.areas ? shown.areas : [])) {
+    const col = AREA_COL[ar.kind]; ctx.beginPath();
+    if (ar.shape.type === 'circle') { const [cx, cy] = toPx(...ar.shape.center); ctx.arc(cx, cy, ar.shape.radius_nm * view.s, 0, Math.PI * 2); }
+    else { ar.shape.points.forEach((p, i) => { const [px, py] = toPx(...p); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); }
+    ctx.setLineDash(ar.active ? [] : [6 * dpr, 5 * dpr]);
+    ctx.strokeStyle = ar.active ? col : col + '88'; ctx.lineWidth = (ar.active ? 1.6 : 1) * dpr; ctx.stroke();
+    if (ar.active) { ctx.fillStyle = col + '22'; ctx.fill(); }
+    ctx.setLineDash([]);
+    let lx, ly;
+    if (ar.shape.type === 'circle') [lx, ly] = toPx(ar.shape.center[0] - ar.shape.radius_nm * 0.6, ar.shape.center[1]);
+    else { const xs = ar.shape.points.map(p => p[0]), ys = ar.shape.points.map(p => p[1]); [lx, ly] = toPx(Math.min(...xs) + 1, (Math.min(...ys) + Math.max(...ys)) / 2); }
+    ctx.fillStyle = ar.active ? col : col + '99'; ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
+    ctx.fillText(`${ar.designator}`, lx, ly);
+    ctx.fillText(`${String(ar.lower_fl).padStart(3, '0')}-${ar.upper_fl} ${ar.active ? 'ACT' : 'off'}`, lx, ly + 12 * dpr);
+  }
+  // waypoints: filled = transfer (entry/exit) point on the boundary, hollow = internal point
+  ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
+  const xfer = new Set(sector.transfer_points || []);
+  const sq = sector.shape.type === 'square' ? sector.shape.half_size_nm : null;
+  const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []);
+  for (const [n, p] of Object.entries(wp)) {
+    const [px, py] = toPx(...p);
+    if (extSet.has(n)) {                 // neighbouring-sector point: small diamond, '?' = provisional position
+      ctx.strokeStyle = ctx.fillStyle = '#41586e'; ctx.lineWidth = 1 * dpr; ctx.beginPath();
+      ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
+      if (V.names) ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); continue;
+    }
+    ctx.fillStyle = ctx.strokeStyle = '#5c7a96'; ctx.lineWidth = 1 * dpr; ctx.beginPath();
+    ctx.moveTo(px, py - 5 * dpr); ctx.lineTo(px + 4.5 * dpr, py + 3.5 * dpr); ctx.lineTo(px - 4.5 * dpr, py + 3.5 * dpr); ctx.closePath();
+    xfer.has(n) ? ctx.fill() : ctx.stroke();
+    let off = 4, offx = 7;
+    if (sq) { off = p[1] >= sq - 1 ? -10 : p[1] <= -sq + 1 ? 18 : 4; offx = p[0] <= -sq + 1 ? -24 : p[0] >= sq - 1 ? 8 : -8; }
+    if (V.names) ctx.fillText(n, px + offx * dpr, py + off * dpr);
+  }
+  if (!shown) return requestAnimationFrame(draw);
+  // conflict status per aircraft
+  const status = {};
+  const pairs = [];
+  if (sep && !replayMode && SEAT !== 'pilot') for (const c of sep.predicted_conflicts) { if (SEAT === 'atc' && EXID && !(c.time_to_los_s != null && c.time_to_los_s <= STCA_S)) continue; for (const cs of c.aircraft) status[cs] = status[cs] === 'los' ? 'los' : 'warn'; pairs.push(c); }
+  if (SEAT !== 'pilot') for (const p of shown.current_losses) for (const cs of p.aircraft) status[cs] = 'los';
+  const pos = Object.fromEntries(shown.aircraft.map(a => [a.callsign, a]));
+  // conflict lines
+  for (const c of pairs) { const a = pos[c.aircraft[0]], b = pos[c.aircraft[1]]; if (!a || !b) continue;
+    const [ax, ay] = toPx(a.x_nm, a.y_nm), [bx, by] = toPx(b.x_nm, b.y_nm);
+    ctx.strokeStyle = (status[a.callsign] === 'los' && status[b.callsign] === 'los') ? '#ff5a5a66' : '#f2b84b55'; ctx.setLineDash([3 * dpr, 4 * dpr]);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]); }
+  // transferred traffic (already with the next sector): grey, still painted for a few minutes
+  labelRects.length = 0;
+  for (const a of shown.transferred || []) {
+    const [px, py] = toPx(a.x_nm, a.y_nm), col = '#56636f';
+    ctx.fillStyle = col; if (V.trails) for (const t of a.trail || []) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1 * dpr, ty - 1 * dpr, 2 * dpr, 2 * dpr); }
+    const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 30, [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
+    ctx.strokeStyle = col; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(vx, vy); ctx.stroke();
+    ctx.strokeRect(px - 3 * dpr, py - 3 * dpr, 6 * dpr, 6 * dpr);
+    const o = labelOff[a.callsign] || [10, -14], bx = px + o[0] * dpr, by = py + o[1] * dpr;
+    ctx.font = `${10.5 * dpr}px ui-monospace,monospace`; ctx.fillStyle = col;
+    ctx.fillText(a.callsign, bx, by); ctx.fillText(`${String(a.fl).padStart(3, '0')} ${a.exit_point ? 'via ' + a.exit_point : 'off route'}`, bx, by + 12 * dpr);
+    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - 11 * dpr, x1: bx + 90 * dpr, y1: by + 15 * dpr });
+  }
+  // aircraft
+  for (const a of shown.aircraft) {
+    const st = status[a.callsign];
+    const calling = a.on_frequency && a.assumed === false;          // has called, not assumed yet
+    const col = st === 'los' ? '#ff5a5a' : st === 'warn' ? '#f2b84b' : (a.callsign === selected ? '#7fb8ff' :
+                calling ? ((Date.now() / 500 | 0) % 2 ? '#ffffff' : '#c9d6e2') : (a.on_frequency ? '#5fd3a3' : '#6f8191'));
+    // top of descent (T) and latest descent for the letter of agreement (L) along the route ahead
+    if (a.callsign === selected && a.arrival && a.nav_mode === 'lnav' && a.next_waypoint) {
+      const idx = a.route.indexOf(a.next_waypoint), pts = [[a.x_nm, a.y_nm]].concat(a.route.slice(idx).map(n => wp[n]));
+      const at = d => { for (let i = 0; i < pts.length - 1; i++) { const L = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+        if (d <= L) return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * d / L, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * d / L]; d -= L; } return null; };
+      for (const [k, lbl, c] of [['tod_in_nm', 'T', '#7fb8ff'], ['loa_latest_descent_in_nm', 'L', '#f2b84b']]) {
+        const d = a.arrival[k]; if (d == null || d <= 0 || a.cleared_fl < a.fl) continue;
+        const p = at(d); if (!p) continue; const [tx, ty] = toPx(...p);
+        ctx.fillStyle = c; ctx.font = `bold ${10 * dpr}px ui-monospace,monospace`; ctx.fillText(lbl, tx - 3 * dpr, ty + 4 * dpr);
+      }
+    }
+    ctx.fillStyle = col + '88';
+    if (V.trails) for (const t of a.trail || []) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1.2 * dpr, ty - 1.2 * dpr, 2.4 * dpr, 2.4 * dpr); }
+    const [px, py] = toPx(a.x_nm, a.y_nm);
+    // 2-minute speed vector
+    const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 30;
+    const [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
+    ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(vx, vy); ctx.stroke();
+    // half-minimum halo when in conflict (two halos touching = the separation minimum)
+    if (st) { ctx.strokeStyle = col + '55'; ctx.beginPath(); ctx.arc(px, py, SEPH() / 2 * view.s, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.strokeStyle = col; ctx.lineWidth = 1.5 * dpr; ctx.strokeRect(px - 3.5 * dpr, py - 3.5 * dpr, 7 * dpr, 7 * dpr);
+    // data block
+    const arrow = a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' ';
+    const l1 = a.callsign + (a.formation ? ` x${a.formation.size}` : '') + (a.on_frequency && a.assumed === false ? '  CALL' : '');
+    const rv = a.rvsm.status === 'unable' ? ' RVSM✗' : a.rvsm.status === 'non_approved' ? ' NRVSM' : '';
+    // the controller's seat shows what the controller entered (CFL, speed, heading, direct) and, in amber, the level
+    // the aircraft has actually selected when it differs (Mode S SFL) - a readback/execution error shows up there
+    const ent = SEAT === 'atc' && EXID && !replayMode ? ((state && state.entries && state.entries[a.callsign]) || {}) : null;
+    const cflShown = ent && ent.cfl != null ? ent.cfl : a.cleared_fl;
+    const sfl = ent && ent.cfl != null && ent.cfl !== a.cleared_fl ? ` S${a.cleared_fl}` : '';
+    const l2 = `${String(a.fl).padStart(3, '0')}${arrow}${cflShown !== a.fl ? cflShown : ''} ${a.type}${a.category === 'military' ? ' MIL' : ''}${rv}`;
+    const spd = a.speed_mode === 'mach' ? 'M' + String(Math.round(a.mach * 100)).padStart(2, '0') : 'I' + a.ias_kt;
+    const nav = a.nav_mode === 'heading' ? ' H' + String(a.assigned_heading).padStart(3, '0')
+              : a.nav_mode === 'wxdev' ? ' DEV' + String(a.assigned_heading).padStart(3, '0') : ' >' + (a.next_waypoint || '');
+    const sr = a.speed_restriction;
+    const rest = sr ? ' ' + (sr.ias_kt ? 'S' + sr.ias_kt : (sr.mach ? 'M' + Math.round(sr.mach * 100) : '') + (sr.conversion_kt ? '/K' + sr.conversion_kt : '')) : '';
+    let l3 = `${a.gs_kt} ${spd}${rest}${nav}`;
+    if (ent) l3 = `${a.gs_kt}${ent.speed ? ' ' + ent.speed : ''}${ent.heading ? ' H' + String(ent.heading).padStart(3, '0') : ent.direct ? ' >' + ent.direct : ' >' + (a.next_waypoint || '')}`;
+    const dest = (a.flight_plan && a.flight_plan.destination) || '';
+    let l4 = dest && dest !== 'ZZZZ' ? `→${dest}` : '';
+    if (a.arrival && a.arrival.tod_in_nm != null) l4 = `→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`;
+    if (!a.on_frequency) l4 = `prev sector → ${a.entry_waypoint}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : '');
+    if (ent && ent.note) l4 = (l4 ? l4 + ' ' : '') + ent.note;
+    ctx.fillStyle = col; ctx.font = `${11 * dpr}px ui-monospace,monospace`;
+    const o = labelOff[a.callsign] || [10, -14];
+    const bx = px + o[0] * dpr, by = py + o[1] * dpr;
+    if (labelOff[a.callsign]) {                              // leader line to a moved label
+      ctx.strokeStyle = col + '99'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py);
+      ctx.lineTo(bx + (o[0] < 0 ? 60 * dpr : -2 * dpr), by + (o[1] < 0 ? 26 * dpr : -10 * dpr)); ctx.stroke();
+    }
+    ctx.fillText(l1, bx, by); ctx.fillText(l2, bx, by + 12 * dpr); ctx.fillText(l3, bx, by + 24 * dpr);
+    if (sfl) { ctx.fillStyle = '#f2b84b'; ctx.fillText(sfl, bx + ctx.measureText(l2).width, by + 12 * dpr); ctx.fillStyle = col; }
+    if (l4) { ctx.fillStyle = col + 'bb'; ctx.fillText(l4, bx, by + 36 * dpr); }
+    const lw = Math.max(ctx.measureText(l2).width, ctx.measureText(l3).width, ctx.measureText(l4).width, ctx.measureText(l1).width + 50 * dpr);
+    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - 11 * dpr, x1: bx + lw, y1: by + (l4 ? 39 : 27) * dpr });
+    let tag = '';
+    const pq = SEAT === 'atc' && EXID ? [] : shown.pending_requests.filter(q => q.callsign === a.callsign);   // the controller hears requests on the frequency
+    if (pq.length) tag = pq.some(q => q.type === 'weather_deviation') ? 'WXREQ' : pq.some(q => q.kind === 'descent') ? 'DESC?' : pq.some(q => q.type === 'report') ? 'RPT' : 'REQ';
+    else if (a.nav_mode === 'wxdev') tag = 'WXDEV';
+    if ((!EXID || SEAT !== 'atc') && (a.turbulence === 'moderate' || a.turbulence === 'severe')) tag += (tag ? ' ' : '') + (a.turbulence === 'severe' ? 'SEV TURB' : 'MOD TURB');
+    if (tag) { ctx.fillStyle = '#7fb8ff'; ctx.fillText(tag, bx + ctx.measureText(l1).width + 6 * dpr, by); }
+  }
+  drawRbls(Object.fromEntries(shown.aircraft.concat(shown.transferred || []).map(a => [a.callsign, a])));
+  if (rblMode && rblFirst && pos[rblFirst]) { const [fx, fy] = toPx(pos[rblFirst].x_nm, pos[rblFirst].y_nm);
+    ctx.strokeStyle = '#d79bff'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(fx, fy, 9 * dpr, 0, Math.PI * 2); ctx.stroke(); }
+  // scale bar
+  const [sx, sy] = [W - 30 * dpr - 10 * view.s, H - 84 * dpr];
+  ctx.strokeStyle = '#6c7f92'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + 10 * view.s, sy); ctx.stroke();
+  ctx.fillStyle = '#6c7f92'; ctx.font = `${10 * dpr}px system-ui`; ctx.fillText('10 NM', sx, sy - 5 * dpr);
+  drawTimeline();
+  requestAnimationFrame(draw);
+}
+if (!EXID) loadLists().then(() => { if (SID) attach(SID); });
+requestAnimationFrame(draw);
+</script>
+<script src="/static/comms.js"></script>
+<script src="/static/seat.js"></script>
+<script src="/static/uirec.js"></script>
+</body>
+</html>

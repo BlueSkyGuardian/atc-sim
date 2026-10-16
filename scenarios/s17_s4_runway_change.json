@@ -1,0 +1,205 @@
+{
+  "name": "s17_s4_runway_change",
+  "title": "S4 arrivals and a runway change at the destination",
+  "description": "Four arrivals for SPRT via S4. SPRT lands runway 18 (straight-in from S4); at T+08:00 it changes to runway 36, which needs an overhead and reversal procedure. Letter of agreement: level FL250 at S4, 10 NM in trail.",
+  "design_notes": "With runway 18 the pilots ask for descent 30-60 NM before S4 and can make FL250. After the change to 36 their computed top of descent moves ~30 NM later, behind the point where they can still be level FL250 at S4: KLM81 asks only when it is already too late (crosses S4 at ~FL290 even if approved at once). Correct: watch the latest-descent point, not the pilot's request, and start the descent yourself for the late flights.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 22,
+    "temperature": {
+      "surface_c": 25,
+      "tropopause_fl": 380
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 20,
+          "kt": 18
+        },
+        {
+          "fl": 100,
+          "dir": 10,
+          "kt": 22
+        },
+        {
+          "fl": 250,
+          "dir": 355,
+          "kt": 35
+        },
+        {
+          "fl": 350,
+          "dir": 350,
+          "kt": 55
+        },
+        {
+          "fl": 450,
+          "dir": 340,
+          "kt": 35
+        },
+        {
+          "fl": 600,
+          "dir": 90,
+          "kt": 10
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 22
+        }
+      ],
+      "noise_kt": 4,
+      "noise_scale_nm": 40
+    }
+  },
+  "aerodromes": [
+    {
+      "id": "EFLD",
+      "name": "Eastfield (fictional)",
+      "x": 97.0,
+      "y": 6.0,
+      "elev_ft": 300,
+      "runways": [
+        {
+          "id": "09",
+          "heading": 90
+        },
+        {
+          "id": "27",
+          "heading": 270
+        }
+      ],
+      "runway_in_use": "09"
+    },
+    {
+      "id": "SPRT",
+      "name": "Southport (fictional)",
+      "x": 58.0,
+      "y": -148.0,
+      "elev_ft": 150,
+      "runways": [
+        {
+          "id": "18",
+          "heading": 180
+        },
+        {
+          "id": "36",
+          "heading": 360
+        }
+      ],
+      "runway_in_use": "18",
+      "runway_schedule": [
+        {
+          "time": 480,
+          "runway": "36"
+        }
+      ]
+    }
+  ],
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "RAM508",
+      "type": "B738",
+      "route": [
+        "N1",
+        "S4"
+      ],
+      "fl": 350,
+      "reach": {
+        "waypoint": "S4",
+        "time": 520
+      }
+    },
+    {
+      "callsign": "BAW3J",
+      "type": "B772",
+      "route": [
+        "N2",
+        "S4"
+      ],
+      "fl": 370,
+      "load": 0.35,
+      "reach": {
+        "waypoint": "S4",
+        "time": 640
+      }
+    },
+    {
+      "callsign": "KLM81",
+      "type": "B738",
+      "route": [
+        "N3",
+        "S4"
+      ],
+      "fl": 350,
+      "reach": {
+        "waypoint": "S4",
+        "time": 900
+      }
+    },
+    {
+      "callsign": "UAE57",
+      "type": "A388",
+      "route": [
+        "N4",
+        "S4"
+      ],
+      "fl": 390,
+      "load": 0.35,
+      "reach": {
+        "waypoint": "S4",
+        "time": 1060
+      }
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "passive": {
+      "seq_level": true
+    },
+    "naive_approve": {
+      "seq_level": true
+    }
+  },
+  "solution": [
+    {
+      "on_request": "RAM508",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "BAW3J",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "on_request": "UAE57",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 600,
+      "do": [
+        {
+          "callsign": "KLM81",
+          "type": "altitude",
+          "fl": 250
+        }
+      ]
+    }
+  ]
+}

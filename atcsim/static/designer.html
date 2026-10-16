@@ -1,0 +1,1369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scenario Designer</title>
+<style>
+  :root {
+    --bg: #0b1016; --panel: #111922; --line: #1f2b38; --text: #c9d6e2; --dim: #6c7f92;
+    --accent: #5fd3a3; --warn: #f2b84b; --alert: #ff5a5a; --sel: #7fb8ff; --req: #7fb8ff; --evt: #f2b84b; --wx: #d05ad0;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+  #app { display: grid; grid-template-columns: 1fr 400px; grid-template-rows: 1fr 230px; height: 100vh; }
+  #map { position: relative; overflow: hidden; grid-column: 1; grid-row: 1; }
+  #map canvas { display: block; width: 100%; height: 100%; }
+  #tlWrap { grid-column: 1; grid-row: 2; border-top: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: #0d141c; }
+  #tlBar { display: flex; gap: 6px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
+  #tlScroll { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+  #tl { display: block; width: 100%; cursor: col-resize; }
+  #tlRuler { display: block; width: 100%; height: 24px; cursor: col-resize; }
+  aside { grid-column: 2; grid-row: 1 / span 2; background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  #tabs { display: flex; border-bottom: 1px solid var(--line); }
+  #tabs button { flex: 1; border: 0; border-radius: 0; background: transparent; padding: 8px 4px; color: var(--dim); border-bottom: 2px solid transparent; }
+  #tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
+  .pane { display: none; overflow-y: auto; flex: 1; min-height: 0; }
+  .pane.on { display: block; }
+  section { border-bottom: 1px solid var(--line); padding: 10px 12px; }
+  h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 0 0 8px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  select, input, button, textarea { font: inherit; color: var(--text); background: #0d141c; border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; }
+  textarea { width: 100%; font-family: var(--mono); font-size: 11.5px; resize: vertical; }
+  button { cursor: pointer; } button:hover { border-color: var(--dim); }
+  button.on { border-color: var(--accent); color: var(--accent); }
+  button.primary { border-color: #2f7a5f; background: #12291f; }
+  button.danger { border-color: #6b2b2b; color: #ff9a9a; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 6px; }
+  .row label { color: var(--dim); font-size: 12px; }
+  .grid { display: grid; grid-template-columns: 88px 1fr; gap: 5px 8px; align-items: center; }
+  .grid label { color: var(--dim); font-size: 12px; }
+  .grid input, .grid select { width: 100%; }
+  #tools { position: absolute; left: 10px; top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  #tools button { width: 112px; text-align: left; background: #0d141cee; font-size: 12px; }
+  #hud { position: absolute; right: 10px; top: 8px; background: #0b1016dd; padding: 6px 9px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--dim); pointer-events: none; text-align: right; }
+  #hud b { color: var(--text); }
+  #hint { position: absolute; left: 132px; top: 10px; right: 260px; background: #0b1016dd; border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; font-size: 12px; color: var(--text); }
+  #hint:empty { display: none; }
+  #status { position: absolute; left: 10px; bottom: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); background: #0b1016cc; padding: 2px 6px; border-radius: 3px; }
+  .item { font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
+  .item:hover { color: #fff; }
+  .c-los { color: var(--alert); } .c-warn { color: var(--warn); } .c-dim { color: var(--dim); } .c-ok { color: var(--accent); }
+  .empty { color: var(--dim); font-style: italic; font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip { font-family: var(--mono); font-size: 11.5px; border: 1px solid var(--line); border-radius: 10px; padding: 1px 7px; cursor: pointer; }
+  .chip:hover { border-color: var(--dim); }
+  small.note { color: var(--dim); display: block; font-size: 11.5px; margin-top: 4px; }
+  kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="map">
+    <canvas id="cv"></canvas>
+    <div id="tools">
+      <button data-tool="select" class="on" title="Select, drag aircraft along their route (re-times them to the cursor time), drag cells and areas, pan (V)">⬚ Select / move</button>
+      <button data-tool="aircraft" title="Click waypoints to build a route, then click on the route where the aircraft must be at the cursor time (A)">✈ Aircraft</button>
+      <button data-tool="cell" title="Click to place a thunderstorm cell at the cursor time (C)">⛈ Storm cell</button>
+      <button data-tool="squall" title="Drag along the line to draw a squall line (L)">≋ Squall line</button>
+      <button data-tool="region" title="Drag a rectangle: isolated / scattered / embedded convection region (R)">▦ Convection area</button>
+      <button data-tool="strat" title="Drag a rectangle: stratiform (widespread moderate) rain area (W)">≈ Rain area</button>
+      <button data-tool="areaPoly" title="Click the corners, double-click or Enter to close (P)">⬠ Area (polygon)</button>
+      <button data-tool="areaCircle" title="Drag from the centre (O)">◯ Area (circle)</button>
+      <button data-tool="rbl" title="Range and bearing line between two aircraft, with their closest point of approach along their routes (B)">↔ RBL</button>
+      <button id="rblClear" title="Remove all RBLs">✕ Clear RBLs</button>
+    </div>
+    <div id="hint"></div>
+    <div id="hud"></div>
+    <div id="status"></div>
+  </div>
+  <div id="tlWrap">
+    <div id="tlBar">
+      <button id="play" title="Play / pause (Space)">▶</button>
+      <select id="playSpeed"><option>10</option><option selected>30</option><option>60</option><option>120</option></select>
+      <span class="c-dim">×</span>
+      <span id="tlTime" style="font-family:var(--mono);min-width:120px"></span>
+      <label class="c-dim" style="font-size:12px"><input type="checkbox" id="showPreview"> show preview run</label>
+      <label class="c-dim" style="font-size:12px"><input type="checkbox" id="showWx" checked> weather</label>
+      <select id="wxProduct" title="weather product"><option value="composite">composite</option><option value="cappi">CAPPI at FL</option></select>
+      <input id="wxFl" type="number" value="350" step="10" style="width:64px">
+      <span style="flex:1"></span>
+      <span class="c-dim" style="font-size:11.5px">wheel = scrub · ctrl+wheel = zoom · drag a bar or marker to re-time it</span>
+    </div>
+    <canvas id="tlRuler"></canvas>
+    <div id="tlScroll"><canvas id="tl"></canvas></div>
+  </div>
+  <aside>
+    <div style="padding:6px 12px;font-size:12px;border-bottom:1px solid #1f2b38"><a href="/" style="color:#7fb8ff;text-decoration:none">← Home</a></div>
+    <div id="tabs">
+      <button data-tab="scn" class="on">Scenario</button>
+      <button data-tab="sel">Selected</button>
+      <button data-tab="chk">Check &amp; preview</button>
+    </div>
+    <!-- ======================= scenario ======================= -->
+    <div class="pane on" id="pane-scn">
+      <section>
+        <h2>File</h2>
+        <div class="row">
+          <select id="loadSel" style="flex:1"></select>
+          <button id="loadBtn">Open</button>
+        </div>
+        <div class="row">
+          <select id="newAsp"></select>
+          <span id="newCtl" class="chips"></span>
+          <button id="newBtn">New</button>
+        </div>
+        <div class="row">
+          <button id="saveBtn" class="primary">Save</button>
+          <button id="runBtn" title="Save, then open a session of it in the radar">Save &amp; open in radar</button>
+          <button id="dlBtn" title="Download the JSON">⤓ JSON</button>
+          <button id="undoBtn" title="Undo (Ctrl+Z)">↶</button>
+          <button id="redoBtn" title="Redo (Ctrl+Y)">↷</button>
+        </div>
+      </section>
+      <section>
+        <h2>Scenario</h2>
+        <div class="grid">
+          <label>name</label><input id="f-name" placeholder="lower_case_name">
+          <label>title</label><input id="f-title">
+          <label>airspace</label><span id="f-asp" style="font-family:var(--mono)"></span>
+          <label>duration</label><span><input id="f-dur" type="number" step="60" style="width:90px"> s</span>
+          <label>pilot delay</label><span><input id="f-pd" type="number" step="1" style="width:90px"> s</span>
+          <label>separation</label><span><input id="f-sep" type="number" step="0.5" min="3" max="20" style="width:90px" placeholder="default"> NM <span class="c-dim" id="f-sepd"></span></span>
+        </div>
+        <div style="margin-top:8px"><label class="c-dim" style="font-size:12px">description (briefing, visible to the controller)</label>
+          <textarea id="f-desc" rows="3"></textarea></div>
+        <div style="margin-top:6px"><label class="c-dim" style="font-size:12px">design notes (the traps, hidden from the agent)</label>
+          <textarea id="f-notes" rows="4"></textarea></div>
+      </section>
+      <section>
+        <h2>Weather</h2>
+        <div class="grid">
+          <label>seed</label><input id="w-seed" type="number">
+          <label>new storms</label><select id="w-int" title="intensity given to the next pattern or cell you draw"><option>moderate</option><option selected>strong</option><option>severe</option></select>
+          <label>surface °C</label><input id="w-sfc" type="number">
+          <label>tropopause</label><input id="w-trop" type="number" step="10" placeholder="FL">
+          <label>wind FL350</label><span><input id="w-wdir" type="number" step="10" style="width:64px" placeholder="dir"> ° <input id="w-wkt" type="number" step="5" style="width:64px" placeholder="kt"> kt</span>
+        </div>
+        <div style="margin-top:8px" class="c-dim">Weather in this scenario <span style="font-size:11px">(all combined)</span></div>
+        <div id="wxList"></div>
+        <div class="row" style="margin-top:4px"><button data-wxadd="squall">+ squall line</button><button data-wxadd="region">+ convection area</button>
+          <button data-wxadd="cell">+ cell</button><button data-wxadd="strat">+ rain area</button></div>
+        <small class="note">Any number of squall lines, convection areas (isolated, scattered or embedded cells), single cells and stratiform rain areas, all at once, on top of the wind and jet. Draw them with the tools on the map. The wind sets a standard profile scaled to the FL350 value (leave empty to keep the scenario's own profile).</small>
+        <details style="margin-top:6px"><summary class="c-dim" style="font-size:12px;cursor:pointer">advanced weather JSON</summary>
+          <textarea id="w-json" rows="10"></textarea><div class="row" style="margin-top:4px"><button id="w-apply">Apply JSON</button></div></details>
+      </section>
+      <section>
+        <h2>Expected results <span><button id="expFill" style="font-size:11px;padding:1px 6px" title="Fill from the last preview runs">from previews</button></span></h2>
+        <textarea id="f-exp" rows="6" placeholder='{"passive": {"los": true, "pairs": [["A","B"]]}}'></textarea>
+        <small class="note">Used by tools/build_scenarios.py-style verification and by evaluators.</small>
+      </section>
+    </div>
+    <!-- ======================= selected ======================= -->
+    <div class="pane" id="pane-sel"><div id="selBody"></div></div>
+    <!-- ======================= check ======================= -->
+    <div class="pane" id="pane-chk">
+      <section>
+        <h2>Check <span id="compState" class="c-dim" style="text-transform:none;letter-spacing:0"></span></h2>
+        <div id="errors"></div>
+        <div id="warnings"></div>
+      </section>
+      <section>
+        <h2>Planned conflicts <span class="c-dim" style="text-transform:none;letter-spacing:0">filed routes &amp; levels</span></h2>
+        <div id="conflicts"></div>
+      </section>
+      <section>
+        <h2>Fast-time preview</h2>
+        <div class="row">
+          <button id="pvPassive">Run passive</button>
+          <button id="pvNaive" title="every pilot request approved as asked">Run naive approve</button>
+          <span id="pvState" class="c-dim"></span>
+        </div>
+        <div id="pvOut"></div>
+      </section>
+      <section>
+        <h2>Traffic</h2>
+        <div id="trafficList"></div>
+      </section>
+    </div>
+  </aside>
+</div>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, { headers: { 'content-type': 'application/json' }, ...opts });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.detail ? (typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail)) : r.statusText);
+  return d;
+};
+const fmtT = s => { const neg = s < 0; s = Math.abs(Math.round(s)); return (neg ? '-' : '') + `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+
+// ============================================================ state
+let scn = null, sector = null, types = [], comp = null, prev = { passive: null, naive_approve: null }, lastGoodComp = null;
+let T = 0, playing = false, tool = 'select', sel = null, draft = null;
+const undoStack = [], redoStack = [];
+const AIRLINES = ['RAM', 'AFR', 'IBE', 'EZY', 'RYR', 'TAP', 'DLH', 'BAW', 'KLM', 'TVF', 'VLG', 'TOM', 'EXS', 'SWR', 'BEL', 'NAX'];
+const DEFAULT_WIND = [[0, 0.25], [100, 0.5], [200, 0.75], [300, 0.95], [350, 1], [400, 0.85], [500, 0.5]];
+
+function snapshot() { undoStack.push(JSON.stringify(scn)); if (undoStack.length > 80) undoStack.shift(); redoStack.length = 0; }
+function changed(recompile = true) { renderScenarioForm(); renderSel(); if (recompile) scheduleCompile(); scheduleWx(); }
+function undo() { if (!undoStack.length) return; redoStack.push(JSON.stringify(scn)); scn = JSON.parse(undoStack.pop()); fixSel(); changed(); }
+function redo() { if (!redoStack.length) return; undoStack.push(JSON.stringify(scn)); scn = JSON.parse(redoStack.pop()); fixSel(); changed(); }
+function fixSel() {
+  if (!sel) return;
+  if (sel.kind === 'ac' && !scn.aircraft.some(a => a.callsign === sel.cs)) sel = null;
+  if (sel && sel.kind === 'cell' && !(scn.weather.cells || [])[sel.i]) sel = null;
+  if (sel && sel.kind === 'area' && !scn.areas[sel.i]) sel = null;
+}
+function status(t, cls = 'c-dim') { $('#status').innerHTML = `<span class="${cls}">${esc(t)}</span>`; }
+
+// ============================================================ loading
+async function loadLists() {
+  const [list, asps] = await Promise.all([api('/scenarios'), api('/airspaces')]);
+  $('#loadSel').innerHTML = list.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+  $('#newAsp').innerHTML = asps.map(a => `<option>${a}</option>`).join('');
+  $('#newAsp').value = 'agadir'; renderNewCtl();
+  types = await api('/types');
+}
+async function renderNewCtl() {
+  const a = $('#newAsp').value;
+  if (a === 'training') { $('#newCtl').innerHTML = ''; return; }
+  const d = await api(`/airspace?name=${a}`);
+  $('#newCtl').innerHTML = d.sectors.map(s => `<label class="chip"><input type="checkbox" value="${s.id}" checked style="margin:0 3px 0 0;vertical-align:-2px">${s.id}</label>`).join('');
+}
+$('#newAsp').onchange = renderNewCtl;
+async function setScenario(s) {
+  scn = s;
+  scn.weather = scn.weather || {}; scn.aircraft = scn.aircraft || []; scn.areas = scn.areas || [];
+  convList();
+  scn.requests = scn.requests || []; scn.events = scn.events || []; scn.expected = scn.expected || {};
+  scn.duration_s = scn.duration_s || 1800;
+  const asp = scn.airspace || 'training', ctl = scn.control ? (Array.isArray(scn.control) ? scn.control.join(',') : scn.control) : '';
+  sector = await api(`/airspace?name=${asp}${ctl ? '&control=' + ctl : ''}`);
+  comp = null; lastGoodComp = null; prev = { passive: null, naive_approve: null }; sel = null; T = Math.min(T, scn.duration_s);
+  tlz = { t0: 0, t1: scn.duration_s + 30 };
+  undoStack.length = 0; redoStack.length = 0; fitView(); changed();
+  history.replaceState(null, '', `?scenario=${encodeURIComponent(scn.name || '')}`);
+}
+$('#loadBtn').onclick = async () => { try { await setScenario(await api(`/scenarios/${$('#loadSel').value}/raw`));
+  status(scn._access === 'read' ? `opened ${scn.name} (read-only: change its name to save your own copy)` : `opened ${scn.name}`, scn._access === 'read' ? 'c-warn' : undefined); } catch (e) { status(e.message, 'c-los'); } };
+$('#newBtn').onclick = () => {
+  const asp = $('#newAsp').value, ctl = [...document.querySelectorAll('#newCtl input:checked')].map(i => i.value);
+  const s = { name: 'new_scenario', title: 'New scenario', description: '', design_notes: '', duration_s: 3600, pilot_delay_s: 4,
+    weather: { seed: Math.floor(Math.random() * 1000), temperature: { surface_c: 22, tropopause_fl: 380 }, convection: [] },
+    areas: [], aircraft: [], requests: [], events: [], expected: {} };
+  if (asp !== 'training') { s.airspace = asp; s.control = ctl; }
+  else s.duration_s = 1800;
+  setWind(s.weather, 260, 60);
+  setScenario(s);
+};
+function setWind(w, dir, kt) {
+  w.wind = { profile: DEFAULT_WIND.map(([fl, k]) => ({ fl, dir: (dir + (fl < 200 ? -10 : 0) + 360) % 360, kt: Math.round(kt * k) })), noise_kt: 4, noise_scale_nm: 45 };
+}
+
+// ============================================================ scenario form
+function renderScenarioForm() {
+  if (!scn) return;
+  const act = document.activeElement;
+  const set = (id, v) => { const el = $(id); if (el !== act) el.value = v == null ? '' : v; };
+  set('#f-name', scn.name); set('#f-title', scn.title); set('#f-desc', scn.description); set('#f-notes', scn.design_notes);
+  set('#f-dur', scn.duration_s); set('#f-pd', scn.pilot_delay_s ?? 4); set('#f-sep', (scn.separation || {}).horizontal_nm ?? '');
+  $('#f-sepd').textContent = `airspace default ${scn.airspace === 'agadir' ? 7 : 5} NM`;
+  $('#f-asp').textContent = `${scn.airspace || 'training'}${scn.control ? ' · ' + [].concat(scn.control).join('+') : ''}`;
+  const w = scn.weather;
+  set('#w-seed', w.seed ?? 0);
+  renderWxList();
+  set('#w-sfc', (w.temperature || {}).surface_c ?? ''); set('#w-trop', (w.temperature || {}).tropopause_fl ?? '');
+  const p350 = ((w.wind || {}).profile || []).find(p => p.fl === 350) || ((w.wind || {}).profile || []).slice(-3)[0];
+  set('#w-wdir', p350 ? p350.dir : ''); set('#w-wkt', p350 ? p350.kt : '');
+  if ($('#w-json') !== act) $('#w-json').value = JSON.stringify(w, null, 1);
+  if ($('#f-exp') !== act) $('#f-exp').value = Object.keys(scn.expected || {}).length ? JSON.stringify(scn.expected, null, 1) : '';
+}
+const bindField = (id, fn, recompile = true) => $(id).addEventListener('change', e => { if (!scn) return; snapshot(); fn(e.target.value); changed(recompile); });
+bindField('#f-name', v => scn.name = v.trim(), false);
+bindField('#f-title', v => scn.title = v, false);
+bindField('#f-desc', v => scn.description = v, false);
+bindField('#f-notes', v => scn.design_notes = v, false);
+bindField('#f-dur', v => scn.duration_s = Math.max(300, +v || 1800));
+bindField('#f-pd', v => scn.pilot_delay_s = Math.max(0, +v || 0));
+bindField('#f-sep', v => { if (v === '') delete scn.separation; else scn.separation = { horizontal_nm: +v }; });
+bindField('#w-seed', v => scn.weather.seed = +v || 0);
+// weather = a list of storm patterns (squall lines, convection areas) + placed cells + stratiform rain areas
+function convList() {
+  let c = scn.weather.convection;
+  if (!Array.isArray(c)) c = c && c.regime && c.regime !== 'none' ? [c] : [];
+  scn.weather.convection = c; return c;
+}
+const newIntensity = () => $('#w-int').value || 'strong';
+function renderWxList() {
+  const el = $('#wxList'); if (!el || !scn) return;
+  const rows = [];
+  convList().forEach((c, i) => rows.push(`<div class="item" data-wsel="conv:${i}">${c.regime === 'squall_line' ? '≋ squall line' : '▦ ' + c.regime + ' area'} · ${c.intensity || 'strong'}${c.count ? ' · ' + c.count + ' cells' : ''}<button data-wdel="conv:${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`));
+  (scn.weather.cells || []).forEach((c, i) => rows.push(`<div class="item" data-wsel="cell:${i}">⛈ cell ${esc(c.id || i + 1)} · ${c.dbz ?? 55} dBZ · top FL${c.top_fl ?? 420} · at T+${fmtT(c.at_time || 0)}<button data-wdel="cell:${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`));
+  (scn.weather.stratiform || []).forEach((c, i) => rows.push(`<div class="item" data-wsel="strat:${i}">≈ rain area · ${c.dbz ?? 30} dBZ · ${(c.radius_nm || [50, 30]).join('×')} NM<button data-wdel="strat:${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`));
+  el.innerHTML = rows.join('') || '<div class="empty">no convection (wind and temperature only)</div>';
+  el.querySelectorAll('[data-wsel]').forEach(r => r.onclick = ev => { if (ev.target.dataset.wdel) return; const [k, i] = r.dataset.wsel.split(':'); sel = { kind: k, i: +i }; renderSel(); showTab('sel'); });
+  el.querySelectorAll('[data-wdel]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.wdel.split(':'); sel = { kind: k, i: +i }; deleteSel(); });
+}
+document.querySelectorAll('[data-wxadd]').forEach(b => b.onclick = () => setTool(b.dataset.wxadd));
+bindField('#w-sfc', v => (scn.weather.temperature = scn.weather.temperature || {}).surface_c = +v);
+bindField('#w-trop', v => (scn.weather.temperature = scn.weather.temperature || {}).tropopause_fl = +v);
+const windChange = () => { const d = $('#w-wdir').value, k = $('#w-wkt').value; if (d === '' || k === '') return; setWind(scn.weather, +d, +k); };
+bindField('#w-wdir', windChange); bindField('#w-wkt', windChange);
+$('#w-apply').onclick = () => { try { const w = JSON.parse($('#w-json').value); snapshot(); scn.weather = w; changed(); } catch (e) { status('weather JSON: ' + e.message, 'c-los'); } };
+$('#f-exp').addEventListener('change', e => { try { snapshot(); scn.expected = e.target.value.trim() ? JSON.parse(e.target.value) : {}; status('expected results updated'); } catch (er) { status('expected JSON: ' + er.message, 'c-los'); } });
+$('#expFill').onclick = () => {
+  snapshot(); scn.expected = scn.expected || {};
+  for (const [pol, r] of Object.entries(prev)) if (r && r.ok) {
+    const pairs = [...new Set(r.losses.map(l => JSON.stringify([...l.aircraft].sort())))].map(JSON.parse);
+    scn.expected[pol] = { ...(scn.expected[pol] || {}), los: pairs.length > 0, ...(pairs.length ? { pairs } : {}) };
+    if (r.left_sector && r.left_sector.length) scn.expected[pol].allow_left_sector = true;
+  }
+  changed(false);
+};
+
+// ============================================================ save / run
+function cleanScenario() {
+  const s = JSON.parse(JSON.stringify(scn)); delete s._access;
+  for (const k of ['requests', 'events']) s[k].sort((a, b) => a.time - b.time);
+  if (!s.events.length) delete s.events;
+  return s;
+}
+async function save(overwrite) {
+  if (!scn) return null;
+  try { return await api('/designer/save', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario(), name: scn.name, overwrite }) }); }
+  catch (e) {
+    if (/exists/.test(e.message) && confirm(`Scenario ${scn.name} exists. Overwrite it?`)) return save(true);
+    status(e.message, 'c-los'); return null;
+  }
+}
+$('#saveBtn').onclick = async () => { const r = await save(false); if (r) { status(`saved ${r.path} · ${r.warnings.length} warnings · ${r.planned_conflicts} planned conflicts`, 'c-ok'); loadLists(); } };
+$('#runBtn').onclick = async () => {
+  const btn = $('#runBtn'); if (btn.disabled) return;
+  const w = window.open('about:blank', '_blank');          // open now (popup blockers), point it at the session when ready
+  btn.disabled = true; const t0 = performance.now();
+  const tick = setInterval(() => status(`saving and creating the session… ${((performance.now() - t0) / 1000).toFixed(0)} s`), 250);
+  try {
+    const r = await save(false); if (!r) { if (w) w.close(); return; }
+    const b = await api('/api/exercises', { method: 'POST', body: JSON.stringify({ scenario: scn.name, name: `${scn.name} (designer test)` }) });
+    if (w) w.location = `/x/${b.id}`; else window.open(`/x/${b.id}`, '_blank');
+    status(`exercise ${b.id} created (paused) in ${((performance.now() - t0) / 1000).toFixed(1)} s`, 'c-ok');
+  } catch (e) { if (w) w.close(); status(e.message, 'c-los'); }
+  finally { clearInterval(tick); btn.disabled = false; }
+};
+$('#dlBtn').onclick = () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(cleanScenario(), null, 1)], { type: 'application/json' }));
+  a.download = `${scn.name || 'scenario'}.json`; a.click();
+};
+$('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
+
+// ============================================================ compile (plans, planned conflicts, lint)
+let compTimer = null, compSeq = 0;
+function scheduleCompile() { clearTimeout(compTimer); compTimer = setTimeout(compile, 500); $('#compState').textContent = 'checking…'; }
+async function compile() {
+  if (!scn) return;
+  const my = ++compSeq;
+  try {
+    const r = await api('/designer/compile', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario() }) });
+    if (my !== compSeq) return;
+    comp = r; if (r.ok) lastGoodComp = r;
+    $('#compState').innerHTML = r.ok ? `<span class="c-ok">builds</span> · ${Object.keys(r.plans).length} aircraft` : '<span class="c-los">error</span>';
+    status(r.ok ? `${Object.keys(r.plans).length} aircraft · ${r.planned_conflicts.length} planned conflicts · ${r.warnings.length} warnings` : r.error, r.ok ? 'c-dim' : 'c-los');
+  } catch (e) { if (my === compSeq) status(e.message, 'c-los'); }
+  renderCheck(); renderSel();
+}
+function renderCheck() {
+  const c = comp;
+  $('#errors').innerHTML = c && !c.ok ? `<div class="c-los" style="font-family:var(--mono);font-size:12px">${esc(c.error)}</div>` : '';
+  const g = lastGoodComp;
+  $('#warnings').innerHTML = g && g.warnings.length ? g.warnings.map(w => `<div class="item c-warn">${esc(w)}</div>`).join('') : (c && c.ok ? '<div class="empty">no warnings</div>' : '');
+  $('#conflicts').innerHTML = g && g.planned_conflicts.length ? g.planned_conflicts.map((k, i) =>
+    `<div class="item ${k.inside ? 'c-los' : 'c-dim'}" data-conf="${i}">${fmtT(k.start_s)} ${k.aircraft.join(' × ')} FL${k.fl.join('/')} min ${k.min_nm} NM @${fmtT(k.t_min_s)}${k.inside ? '' : ' (outside)'}</div>`).join('')
+    : '<div class="empty">none — every pair stays separated on its filed route and level</div>';
+  $('#trafficList').innerHTML = g ? Object.entries(g.aircraft).sort((a, b) => a[1].entry_s - b[1].entry_s).map(([cs, a]) =>
+    `<div class="item" data-ac="${cs}">${fmtT(a.entry_s)} <b>${cs}</b> ${a.type} FL${a.fl} ${a.entry}→${a.exit}${a.arrival ? ' ⇒' + a.arrival : ''}${a.rvsm !== 'approved' ? ' NRVSM' : ''}${a.formation ? ' x' + a.formation : ''}</div>`).join('') : '';
+}
+$('#conflicts').onclick = e => { const el = e.target.closest('[data-conf]'); if (!el) return; const k = lastGoodComp.planned_conflicts[+el.dataset.conf];
+  setT(k.start_s); sel = { kind: 'ac', cs: k.aircraft[0] }; const ps = positionsAt(T).filter(q => k.aircraft.includes(q.cs));
+  if (ps.length) { view.cx = ps.reduce((u, q) => u + q.x, 0) / ps.length; view.cy = ps.reduce((u, q) => u + q.y, 0) / ps.length; } renderSel(); scrollLaneIntoView(k.aircraft[0]); };
+$('#trafficList').onclick = e => { const el = e.target.closest('[data-ac]'); if (!el) return; selectAc(el.dataset.ac, true); };
+
+// ============================================================ preview runs
+async function runPreview(policy) {
+  if (!scn) return;
+  $('#pvState').textContent = `running ${policy}…`;
+  const t0 = performance.now();
+  try {
+    const r = await api('/designer/preview', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario(), policy }) });
+    if (!r.ok) { $('#pvState').innerHTML = `<span class="c-los">${esc(r.error)}</span>`; return; }
+    prev[policy] = r; $('#showPreview').checked = true; previewPolicy = policy;
+    $('#pvState').textContent = `${policy} done in ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+  } catch (e) { $('#pvState').innerHTML = `<span class="c-los">${esc(e.message)}</span>`; }
+  renderPreview();
+}
+let previewPolicy = 'passive';
+function renderPreview() {
+  const out = [];
+  for (const [pol, r] of Object.entries(prev)) {
+    if (!r) continue;
+    out.push(`<div style="margin:6px 0 2px"><b>${pol}</b> ${r.losses.length ? `<span class="c-los">${r.losses.length} losses</span>` : '<span class="c-ok">no loss</span>'}</div>`);
+    for (const l of r.losses) out.push(`<div class="item c-los" data-t="${l.start_s}" data-cs="${l.aircraft[0]}">${fmtT(l.start_s)} ${l.aircraft.join(' × ')} min ${l.min_nm} NM / ${l.min_ft} ft</div>`);
+    for (const q of r.scenario_requests || []) out.push(`<div class="item" data-t="${q[0]}" data-cs="${q[1]}">${fmtT(q[0])} ${esc(q[2])} <span class="c-dim">→ ${q[3]}</span></div>`);
+    for (const q of r.pilot_requests) out.push(`<div class="item c-dim">pilot (own): ${esc(q[2])}</div>`);
+    const extra = [['rvsm violations', r.rvsm_violations], ['infringements', r.infringements], ['wrong-direction exits', r.wrong_direction_exits],
+      ['weather penetrations', r.wx_penetrations], ['left sector', r.left_sector], ['rejected', r.rejected]];
+    for (const [k, v] of extra) if (v && v.length) out.push(`<div class="item c-warn">${k}: ${esc(JSON.stringify(v))}</div>`);
+  }
+  $('#pvOut').innerHTML = out.join('') || '<div class="empty">Runs the scenario in fast time without a controller (passive) or approving every pilot request (naive). Takes a few seconds; dense scenarios ~2 min.</div>';
+}
+$('#pvOut').onclick = e => { const el = e.target.closest('[data-t]'); if (!el) return; T = +el.dataset.t; selectAc(el.dataset.cs, true); $('#showPreview').checked = true; };
+$('#pvPassive').onclick = () => runPreview('passive');
+$('#pvNaive').onclick = () => { previewPolicy = 'naive_approve'; runPreview('naive_approve'); };
+
+// ============================================================ weather image at T
+let wxImg = null, wxMeta = null, wxTimer = null, wxKey = '', wxBusy = false;
+const DBZ_BINS = [[15,'#0300f4'],[20,'#02fd02'],[25,'#01c501'],[30,'#008e00'],[35,'#fdf802'],[40,'#e5bc00'],
+                  [45,'#fd9500'],[50,'#fd0000'],[55,'#d40000'],[60,'#bc0000'],[65,'#f800fd']];
+const DBZ_RGB = DBZ_BINS.map(([d, c]) => [d, [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]]);
+function scheduleWx() { clearTimeout(wxTimer); wxTimer = setTimeout(fetchWx, 250); }
+async function fetchWx() {
+  if (!scn || !$('#showWx').checked) { wxImg = null; return; }
+  const tq = Math.round(T / 30) * 30, key = JSON.stringify([scn.weather, scn.duration_s, scn.airspace, tq, $('#wxProduct').value, $('#wxFl').value]);
+  if (key === wxKey) return;
+  if (wxBusy) { scheduleWx(); return; }
+  wxBusy = true; $('#hud').dataset.wx = '1';
+  const wxNote = setTimeout(() => status('rendering the weather…'), 800);
+  try {
+    const r = await api('/designer/weather', { method: 'POST', body: JSON.stringify({ scenario: { weather: scn.weather, duration_s: scn.duration_s, airspace: scn.airspace, control: scn.control }, at_s: tq, product: $('#wxProduct').value, fl: +$('#wxFl').value || 350 }) });
+    const bin = atob(r.data), off = document.createElement('canvas'); off.width = r.nx; off.height = r.ny;
+    const octx = off.getContext('2d'), img = octx.createImageData(r.nx, r.ny);
+    for (let k = 0; k < r.nx * r.ny; k++) {
+      const v = bin.charCodeAt(k); if (!v) continue; const dbz = v / 2 - 10; let c = null;
+      for (const [d, rgb] of DBZ_RGB) if (dbz >= d) c = rgb; if (!c) continue;
+      const row = Math.floor(k / r.nx), col = k % r.nx, o = ((r.ny - 1 - row) * r.nx + col) * 4;
+      img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2]; img.data[o + 3] = dbz < 30 ? 55 : 140;
+    }
+    octx.putImageData(img, 0, 0); wxImg = off; wxMeta = r; wxKey = key;
+  } catch (e) { status('weather: ' + e.message, 'c-los'); }
+  clearTimeout(wxNote); if ($('#status').textContent.startsWith('rendering the weather')) status('');
+  wxBusy = false;
+}
+['#showWx', '#wxProduct', '#wxFl'].forEach(id => $(id).addEventListener('change', () => { wxKey = ''; scheduleWx(); }));
+
+// ============================================================ positions at T
+function planPos(plan, t) {
+  if (!plan || plan.length < 2 || t < plan[0][0] || t > plan[plan.length - 1][0]) return null;
+  let i = 0; while (i < plan.length - 2 && plan[i + 1][0] < t) i++;
+  const a = plan[i], b = plan[i + 1], k = b[0] > a[0] ? (t - a[0]) / (b[0] - a[0]) : 0;
+  const x = a[1] + (b[1] - a[1]) * k, y = a[2] + (b[2] - a[2]) * k;
+  return { x, y, trk: (Math.atan2(b[1] - a[1], b[2] - a[2]) * 180 / Math.PI + 360) % 360, gs: dist([a[1], a[2]], [b[1], b[2]]) / Math.max(1, b[0] - a[0]) * 3600 };
+}
+function trackPos(tr, t) {           // preview tracks: [t, x, y, fl, on_freq]
+  if (!tr || !tr.length || t < tr[0][0] || t > tr[tr.length - 1][0] + 10) return null;
+  let lo = 0, hi = tr.length - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (tr[m][0] <= t) lo = m; else hi = m - 1; }
+  const a = tr[lo], b = tr[Math.min(lo + 1, tr.length - 1)], k = b[0] > a[0] ? Math.min(1, (t - a[0]) / (b[0] - a[0])) : 0;
+  return { x: a[1] + (b[1] - a[1]) * k, y: a[2] + (b[2] - a[2]) * k, fl: Math.round(a[3] + (b[3] - a[3]) * k),
+           trk: (Math.atan2(b[1] - a[1], b[2] - a[2]) * 180 / Math.PI + 360) % 360, onf: a[4] };
+}
+function positionsAt(t) {
+  const out = [], g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  if (!g) return out;
+  for (const [cs, info] of Object.entries(g.aircraft)) {
+    let p = null;
+    if (pv && pv.tracks) { p = trackPos(pv.tracks[cs], t); if (p) p.src = 'run'; }
+    else { p = planPos(g.plans[cs], t); if (p) { p.fl = info.fl; p.src = 'plan'; } }
+    if (p) out.push({ cs, ...p, info });
+  }
+  return out;
+}
+
+function posOf(cs, t) {
+  const g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  if (!g || !g.aircraft[cs]) return null;
+  if (pv && pv.tracks) return trackPos(pv.tracks[cs], t);
+  const p = planPos(g.plans[cs], t); if (p) p.fl = g.aircraft[cs].fl; return p;
+}
+// ---- RBL: range / bearing now, and the closest point of approach along both trajectories (filed plans, or the
+// preview run when it is shown) - not a straight-line extrapolation, so a turn or a level change is accounted for
+const rbls = []; let rblFirst = null; const rblRects = [];
+function rblCpa(a, b, t0) {
+  const end = Math.min(scn.duration_s + 600, t0 + 3600);
+  let best = null;
+  for (let t = t0; t <= end; t += 5) {
+    const A = posOf(a, t), B = posOf(b, t); if (!A || !B) { if (best && t > best.t + 30) break; continue; }
+    const d = Math.hypot(A.x - B.x, A.y - B.y);
+    if (!best || d < best.d) best = { t, d, A, B };
+  }
+  return best;
+}
+$('#rblClear').onclick = () => { rbls.length = 0; rblFirst = null; if (tool === 'rbl') setTool('select'); };
+
+// ============================================================ map view
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const view = { cx: 0, cy: 0, s: 2 };
+let home = { cx: 0, cy: 0, half: 100 }, userZoom = 1;
+function resize() {
+  for (const c of [cv, $('#tlRuler')]) { const r = c.getBoundingClientRect(); c.width = r.width * devicePixelRatio; c.height = r.height * devicePixelRatio; }
+}
+window.addEventListener('resize', resize);
+function fitView() {
+  if (!sector) return;
+  const pts = sector.shape.polygon || sector.shape.corners, xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  home = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half: Math.max(x1 - x0, y1 - y0) / 2 + 25 };
+  view.cx = home.cx; view.cy = home.cy; userZoom = 1;
+}
+const toPx = (x, y) => [cv.width / 2 + (x - view.cx) * view.s, cv.height / 2 - (y - view.cy) * view.s];
+const fromPx = (px, py) => [(px - cv.width / 2) / view.s + view.cx, -(py - cv.height / 2) / view.s + view.cy];
+const evPt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; };
+const evNm = e => fromPx(...evPt(e));
+const pxNm = px => px * devicePixelRatio / view.s;
+
+// ---- geometry helpers
+function routePts(names) { return names.map(n => sector.waypoints[n]).filter(Boolean); }
+function project(pts, p) {          // nearest point on a polyline: {pt, d, along, seg}
+  let best = null, along = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], L = dist(a, b), dx = b[0] - a[0], dy = b[1] - a[1];
+    const k = L < 1e-9 ? 0 : Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (L * L)));
+    const q = [a[0] + dx * k, a[1] + dy * k], d = dist(p, q);
+    if (!best || d < best.d) best = { pt: q, d, along: along + k * L, seg: i };
+    along += L;
+  }
+  return best;
+}
+function nearestWp(p, maxPx = 12) {
+  let best = null, bd = pxNm(maxPx);
+  for (const [n, q] of Object.entries(sector.waypoints)) { const d = dist(p, q); if (d < bd) { bd = d; best = n; } }
+  return best;
+}
+function acAt(p, maxPx = 12) {
+  let best = null, bd = pxNm(maxPx);
+  for (const a of positionsAt(T)) { const d = dist(p, [a.x, a.y]); if (d < bd) { bd = d; best = a; } }
+  return best;
+}
+function stratAt(p) {
+  const st = scn.weather.stratiform || [];
+  for (let i = st.length - 1; i >= 0; i--) {
+    const s0 = st[i], r = s0.radius_nm || [50, 30], o = (s0.orient_deg || 0) * Math.PI / 180, dx = p[0] - s0.center[0], dy = p[1] - s0.center[1];
+    const a1 = (dx * Math.sin(o) + dy * Math.cos(o)) / r[0], a2 = (dx * Math.cos(o) - dy * Math.sin(o)) / r[1];
+    if (a1 * a1 + a2 * a2 <= 1) return i;
+  }
+  return -1;
+}
+function cellAt(p) {
+  const cells = scn.weather.cells || []; let best = -1, bd = pxNm(14);
+  cells.forEach((c, i) => { const q = cellPos(c, T), d = dist(p, q); if (d < Math.max(bd, c.radius_nm || 3.5) && d < (best < 0 ? 1e9 : bd)) { bd = d; best = i; } });
+  return best;
+}
+function areaAt(p) {
+  for (let i = scn.areas.length - 1; i >= 0; i--) {
+    const a = scn.areas[i];
+    if (a.circle) { if (dist(p, nm(a.circle.center)) <= a.circle.radius_nm) return i; }
+    else if (a.polygon && inPoly(p, a.polygon.map(nm))) return i;
+  }
+  return -1;
+}
+function nm(v) { return Array.isArray(v) ? v : typeof v === 'string' ? (sector.waypoints[v.toUpperCase()] || [0, 0]) : [0, 0]; }
+function inPoly(p, poly) { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, yi] = poly[i], [xj, yj] = poly[j]; if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) c = !c; } return c; }
+// storm motion for drawing explicit cells between compiles: server-side steering if known
+function cellMotion(c) {
+  if (c.motion) { const r = c.motion.toward * Math.PI / 180; return [c.motion.kt * Math.sin(r) / 3600, c.motion.kt * Math.cos(r) / 3600]; }
+  const m = wxMeta && wxMeta.steering; if (m && m.toward_deg != null) { const r = m.toward_deg * Math.PI / 180; return [m.kt * Math.sin(r) / 3600, m.kt * Math.cos(r) / 3600]; }
+  return [0, 0];
+}
+function cellPos(c, t) { const [u, v] = cellMotion(c), dt = t - (c.at_time || 0); return [c.x + u * dt, c.y + v * dt]; }
+function cellAlive(c, t) { const lt = c.lifetime_s || 5400, age = c.age_s ?? lt * 0.4, tb = (c.at_time || 0) - age; return t >= tb && t <= tb + lt; }
+function areaActive(a, t) { let on = !!a.active; for (const e of [...(a.schedule || [])].sort((x, y) => x.time - y.time)) if (e.time <= t) on = !!e.active; return on; }
+
+// ============================================================ map interaction
+let mdrag = null;
+cv.addEventListener('wheel', e => { e.preventDefault();
+  const before = evNm(e); userZoom = Math.max(0.4, Math.min(16, userZoom * (e.deltaY < 0 ? 1.12 : 0.89))); view.s = baseScale() * userZoom;
+  const after = evNm(e); view.cx += before[0] - after[0]; view.cy += before[1] - after[1]; }, { passive: false });
+function baseScale() { return Math.min(cv.width, cv.height) / (2 * home.half); }
+function setTool(t) {
+  tool = t; draft = null; rblFirst = null;
+  document.querySelectorAll('#tools button[data-tool]').forEach(b => b.classList.toggle('on', b.dataset.tool === t));
+  hint();
+}
+document.querySelectorAll('#tools button[data-tool]').forEach(b => b.onclick = () => setTool(b.dataset.tool));
+function hint() {
+  const h = {
+    select: '', cell: `Click to place a storm cell at T+${fmtT(T)} (it is there at that time and drifts with the storm motion).`,
+    squall: 'Drag along the line (from one end to the other); it is added to the existing weather. Gaps and intensity can be set in the Selected tab.',
+    region: 'Drag a rectangle where random cells develop during the scenario (adds to the existing weather).',
+    strat: 'Drag a rectangle for a stratiform rain area (adds to the existing weather).',
+    areaPoly: 'Click the corners; double-click or press Enter to close.', areaCircle: 'Drag from the centre to set the radius.',
+    rbl: rblFirst ? `RBL from <b>${rblFirst}</b>: click the second aircraft.` : 'Click two aircraft. The line shows bearing, range and ΔFL at the cursor time and their closest point of approach along their routes; it follows them as you scroll the timeline. Right-click a label to remove it.',
+  }[tool];
+  if (tool === 'aircraft') {
+    const r = draft && draft.route || [], st = draft && draft.start;
+    $('#hint').innerHTML = st
+      ? `Aircraft at the clicked position at <b>T+${fmtT(st.time)}</b>. Click the waypoints it flies to${r.length ? ': <b>' + r.join(' ') + '</b>' : ''}, then <b>Enter</b> or double-click to place it. <kbd>Backspace</kbd> removes the last point, <kbd>Esc</kbd> cancels.`
+      : r.length < 2 ? `<b>Click anywhere</b> to put the aircraft there at T+${fmtT(T)} and then click its waypoints — or click waypoints to build the route first${r.length ? ': <b>' + r.join(' ') + '</b>' : ''} · or pick a published route: <select id="routePick"><option value="">—</option>${routeOptions()}</select>`
+      : `Route <b>${r.join(' ')}</b> — keep clicking waypoints to extend it, or <b>click on the route</b> where the aircraft must be at <b>T+${fmtT(T)}</b> (scroll the timeline first). <kbd>Backspace</kbd> removes the last point, <kbd>Esc</kbd> cancels.`;
+    const rp = $('#routePick'); if (rp) rp.onchange = () => { if (rp.value) { draft = { route: rp.value.split(' ') }; hint(); } };
+  } else $('#hint').innerHTML = h || '';
+}
+function routeOptions() {
+  const out = [], seen = new Set(), add = (r, tag) => { const k = r.join(' '); if (seen.has(k)) return; seen.add(k); out.push(`<option value="${k}">${tag} ${r.join('-')}</option>`); };
+  for (const r of sector.standard_routes || []) add(r, 'STD');
+  for (const r of sector.rad_routes || []) add(r, 'RAD');
+  const geo = sector.waypoints_geo || {}, xfer = new Set(sector.transfer_points || []);
+  const okEnds = r => { const f0 = (geo[r[0]] || {}).fra || '', f1 = (geo[r[r.length - 1]] || {}).fra || '';
+    return !(xfer.has(r[0]) && f0 && !f0.includes('E')) && !(xfer.has(r[r.length - 1]) && f1 && !f1.includes('X')); };
+  for (const r of sector.routes || []) if (okEnds(r)) add(r, 'AWY');
+  return out.join('');
+}
+cv.addEventListener('mousedown', e => {
+  if (!scn || e.button !== 0) return;
+  const p = evNm(e);
+  if (tool === 'select') {
+    const a = acAt(p);
+    if (a) { selectAc(a.cs); mdrag = { kind: 'ac', cs: a.cs, moved: false, free: e.shiftKey }; return; }
+    const ci = cellAt(p);
+    if (ci >= 0) { sel = { kind: 'cell', i: ci }; renderSel(); mdrag = { kind: 'cell', i: ci, start: p, orig: { ...scn.weather.cells[ci] }, moved: false }; return; }
+    const ai = areaAt(p);
+    if (ai >= 0) { sel = { kind: 'area', i: ai }; renderSel(); mdrag = { kind: 'area', i: ai, start: p, orig: JSON.parse(JSON.stringify(scn.areas[ai])), moved: false }; return; }
+    const cl = convList();
+    for (let i = 0; i < cl.length; i++) {
+      const c = cl[i];
+      if (c.regime === 'squall_line' && c.line && dist(p, c.line.center) < pxNm(12)) { sel = { kind: 'conv', i }; renderSel(); mdrag = { kind: 'squallMove', i, start: p, orig: [...c.line.center], moved: false }; return; }
+      if (c.region && c.regime !== 'squall_line') { const g = c.region; const nearEdge = p[0] >= g[0] - pxNm(6) && p[0] <= g[2] + pxNm(6) && p[1] >= g[1] - pxNm(6) && p[1] <= g[3] + pxNm(6) &&
+          Math.min(Math.abs(p[0] - g[0]), Math.abs(p[0] - g[2]), Math.abs(p[1] - g[1]), Math.abs(p[1] - g[3])) < pxNm(6);
+        if (nearEdge) { sel = { kind: 'conv', i }; renderSel(); mdrag = { kind: 'regionMove', i, start: p, orig: [...g], moved: false }; return; } }
+    }
+    const si = stratAt(p);
+    if (si >= 0) { const st = scn.weather.stratiform[si]; sel = { kind: 'strat', i: si }; renderSel(); mdrag = { kind: 'stratMove', i: si, start: p, orig: [...st.center], moved: false }; return; }
+    sel = null; renderSel();
+    mdrag = { kind: 'pan', px: e.clientX, py: e.clientY, cx: view.cx, cy: view.cy };
+  } else if (tool === 'aircraft') {
+    draft = draft || { route: [] };
+    const r = draft.route, pts = routePts(r), pr = pts.length >= 2 && !draft.start ? project(pts, p) : null, w = nearestWp(p);
+    if (!r.length && !draft.start && !w) {           // free position: the aircraft is here at the cursor time
+      draft.start = { point: [+p[0].toFixed(2), +p[1].toFixed(2)], time: Math.round(T) }; hint(); return;
+    }
+    if (pr && pr.d < pxNm(10) && !(w && w !== r[r.length - 1] && !r.includes(w) && dist(p, sector.waypoints[w]) < pr.d + pxNm(3))) {
+      placeAircraft(r, pr.pt, w && r.includes(w) && dist(sector.waypoints[w], pr.pt) < 2.5 ? w : null);
+    } else if (w && w !== r[r.length - 1]) { r.push(w); hint(); }
+  } else if (tool === 'rbl') {
+    const a = acAt(p); if (!a) return;
+    if (!rblFirst) { rblFirst = a.cs; hint(); return; }
+    if (a.cs !== rblFirst && !rbls.some(r => (r.a === rblFirst && r.b === a.cs) || (r.a === a.cs && r.b === rblFirst))) rbls.push({ a: rblFirst, b: a.cs });
+    rblFirst = null; hint(); return;
+  } else if (tool === 'cell') {
+    snapshot(); const cells = scn.weather.cells = scn.weather.cells || [];
+    const intens = newIntensity(), P = { moderate: [47, 340, 2.5], strong: [54, 410, 3.5], severe: [60, 470, 4.5] }[intens];
+    cells.push({ id: `CB${cells.length + 1}`, x: +p[0].toFixed(1), y: +p[1].toFixed(1), at_time: Math.round(T), dbz: P[0], top_fl: P[1], radius_nm: P[2], lifetime_s: 5400, age_s: 1800 });
+    sel = { kind: 'cell', i: cells.length - 1 }; changed(false); showTab('sel');
+  } else if (tool === 'squall' || tool === 'region' || tool === 'areaCircle' || tool === 'strat') {
+    mdrag = { kind: tool, start: p, cur: p };
+  } else if (tool === 'areaPoly') {
+    draft = draft || { poly: [] };
+    if (draft.poly.length >= 3 && dist(p, draft.poly[0]) < pxNm(10)) { finishPoly(); return; }
+    draft.poly.push([+p[0].toFixed(1), +p[1].toFixed(1)]);
+  }
+});
+window.addEventListener('mousemove', e => {
+  if (!mdrag) { if (e.target === cv) hover = evNm(e); return; }
+  const p = evNm(e);
+  if (mdrag.kind === 'pan') { view.cx = mdrag.cx - (e.clientX - mdrag.px) * devicePixelRatio / view.s; view.cy = mdrag.cy + (e.clientY - mdrag.py) * devicePixelRatio / view.s; return; }
+  if (mdrag.kind === 'ac') {
+    const a = scn.aircraft.find(x => x.callsign === mdrag.cs);
+    if (a.start || mdrag.free) {             // free position: it is here at the cursor time, then flies its route
+      if (!mdrag.moved) { snapshot(); mdrag.moved = true; }
+      a.start = { point: [+p[0].toFixed(2), +p[1].toFixed(2)], time: Math.round(T) }; delete a.reach; delete a.entry_time;
+      mdrag.ghost = p; return;
+    }
+    const pts = routePts(a.route.map(n => n.toUpperCase())), pr = project(pts, p);
+    if (!mdrag.moved) { snapshot(); mdrag.moved = true; }
+    a.reach = { point: [+pr.pt[0].toFixed(2), +pr.pt[1].toFixed(2)], time: Math.round(T) }; delete a.entry_time;
+    retimeLocal(a.callsign, pr.pt, pts);
+    return;
+  }
+  if (mdrag.kind === 'cell') {
+    if (!mdrag.moved) { snapshot(); mdrag.moved = true; }
+    const c = scn.weather.cells[mdrag.i]; c.x = +p[0].toFixed(1); c.y = +p[1].toFixed(1); c.at_time = Math.round(T); return;
+  }
+  if (mdrag.kind === 'area') {
+    if (!mdrag.moved) { snapshot(); mdrag.moved = true; }
+    const dx = p[0] - mdrag.start[0], dy = p[1] - mdrag.start[1], a = scn.areas[mdrag.i], o = mdrag.orig;
+    if (o.circle) a.circle.center = [+(nm(o.circle.center)[0] + dx).toFixed(1), +(nm(o.circle.center)[1] + dy).toFixed(1)];
+    else a.polygon = o.polygon.map(q => [+(nm(q)[0] + dx).toFixed(1), +(nm(q)[1] + dy).toFixed(1)]);
+    return;
+  }
+  if (mdrag.kind === 'squallMove' || mdrag.kind === 'stratMove' || mdrag.kind === 'regionMove') {
+    if (!mdrag.moved) { snapshot(); mdrag.moved = true; }
+    const dx = p[0] - mdrag.start[0], dy = p[1] - mdrag.start[1];
+    if (mdrag.kind === 'squallMove') convList()[mdrag.i].line.center = [+(mdrag.orig[0] + dx).toFixed(1), +(mdrag.orig[1] + dy).toFixed(1)];
+    else if (mdrag.kind === 'stratMove') scn.weather.stratiform[mdrag.i].center = [+(mdrag.orig[0] + dx).toFixed(1), +(mdrag.orig[1] + dy).toFixed(1)];
+    else { const o = mdrag.orig; convList()[mdrag.i].region = [o[0] + dx, o[1] + dy, o[2] + dx, o[3] + dy].map(v => Math.round(v)); }
+    return;
+  }
+  mdrag.cur = p;
+});
+let hover = null;
+window.addEventListener('mouseup', () => {
+  if (!mdrag) return;
+  const d = mdrag; mdrag = null;
+  if (['ac', 'cell', 'area', 'squallMove', 'stratMove', 'regionMove'].includes(d.kind)) { if (d.moved) changed(d.kind === 'ac' || d.kind === 'area'); return; }
+  if (d.kind === 'pan') return;
+  const a = d.start, b = d.cur, L = dist(a, b);
+  if (L < 3) return;
+  snapshot();
+  if (d.kind === 'squall') {
+    const cl = convList();
+    cl.push({ regime: 'squall_line', intensity: newIntensity(),
+              line: { center: [+((a[0] + b[0]) / 2).toFixed(1), +((a[1] + b[1]) / 2).toFixed(1)], length_nm: Math.round(L),
+                      orient_deg: Math.round((Math.atan2(b[0] - a[0], b[1] - a[1]) * 180 / Math.PI + 360) % 180), gaps: 0, gap_list: [], spacing_nm: 9 } });
+    sel = { kind: 'conv', i: cl.length - 1 };
+  } else if (d.kind === 'region') {
+    const cl = convList();
+    cl.push({ regime: 'scattered', intensity: newIntensity(),
+              region: [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1])].map(v => Math.round(v)) });
+    sel = { kind: 'conv', i: cl.length - 1 };
+  } else if (d.kind === 'strat') {
+    const st = scn.weather.stratiform = scn.weather.stratiform || [];
+    st.push({ center: [+((a[0] + b[0]) / 2).toFixed(1), +((a[1] + b[1]) / 2).toFixed(1)],
+              radius_nm: [Math.max(5, Math.round(Math.abs(b[0] - a[0]) / 2)), Math.max(5, Math.round(Math.abs(b[1] - a[1]) / 2))], orient_deg: 90, dbz: 32 });
+    sel = { kind: 'strat', i: st.length - 1 };
+  } else if (d.kind === 'areaCircle') {
+    scn.areas.push({ id: nextAreaId(), name: 'Area', kind: 'restricted', circle: { center: [+a[0].toFixed(1), +a[1].toFixed(1)], radius_nm: +L.toFixed(1) },
+      lower_fl: 0, upper_fl: 450, active: false, schedule: [{ time: Math.round(T), active: true }] });
+    sel = { kind: 'area', i: scn.areas.length - 1 };
+  }
+  setTool('select'); changed(); showTab('sel');
+});
+cv.addEventListener('contextmenu', e => {
+  const [x, y] = evPt(e), hit = rblRects.find(q => x >= q.x0 && x <= q.x1 && y >= q.y0 && y <= q.y1);
+  if (hit) { e.preventDefault(); rbls.splice(rbls.indexOf(hit.r), 1); }
+});
+cv.addEventListener('dblclick', e => { if (tool === 'aircraft' && draft && draft.start) { placeStarted(); return; } if (tool === 'areaPoly') finishPoly(); else if (tool === 'select' && !acAt(evNm(e))) fitView(); });
+function finishPoly() {
+  if (!draft || !draft.poly || draft.poly.length < 3) return;
+  snapshot();
+  scn.areas.push({ id: nextAreaId(), name: 'Area', kind: 'restricted', polygon: draft.poly, lower_fl: 0, upper_fl: 450, active: false,
+                   schedule: [{ time: Math.round(T), active: true }] });
+  sel = { kind: 'area', i: scn.areas.length - 1 }; draft = null; setTool('select'); changed(); showTab('sel');
+}
+function nextAreaId() { let k = 1; while (scn.areas.some(a => a.id === `R${10 + k}`)) k++; return `R${10 + k}`; }
+// move the dragged aircraft's planned trajectory immediately (server recompiles on release)
+function retimeLocal(cs, pt, pts) {
+  const g = lastGoodComp; if (!g || !g.plans[cs]) return;
+  const plan = g.plans[cs], cur = project(plan.map(q => [q[1], q[2]]), pt);
+  if (!cur) return;
+  const i = cur.seg, a = plan[i], b = plan[i + 1], L = dist([a[1], a[2]], [b[1], b[2]]);
+  const k = L > 0 ? dist([a[1], a[2]], cur.pt) / L : 0, tp = a[0] + (b[0] - a[0]) * k, dt = T - tp;
+  for (const q of plan) q[0] += dt;
+  const info = g.aircraft[cs]; for (const f of ['appear_s', 'entry_s', 'exit_s']) if (info[f] != null) info[f] += dt;
+}
+function placeStarted() {                 // aircraft from a free start position
+  if (!draft || !draft.start || !draft.route.length) return;
+  snapshot();
+  const cs = newCallsign(), r = draft.route, a0 = draft.start.point, z = sector.waypoints[r[r.length - 1]];
+  const b = (Math.atan2(z[0] - a0[0], z[1] - a0[1]) * 180 / Math.PI + 360) % 360, last = scn.aircraft[scn.aircraft.length - 1];
+  scn.aircraft.push({ callsign: cs, type: last ? last.type : 'B738', route: [...r], fl: b >= 90 && b < 270 ? 350 : 360, start: { ...draft.start } });
+  sel = { kind: 'ac', cs }; draft = { route: [] }; changed(); showTab('sel'); hint();
+}
+function placeAircraft(route, pt, wp) {
+  snapshot();
+  const cs = newCallsign(), b = Math.atan2(sector.waypoints[route[route.length - 1]][0] - sector.waypoints[route[0]][0], sector.waypoints[route[route.length - 1]][1] - sector.waypoints[route[0]][1]) * 180 / Math.PI;
+  const south = ((b + 360) % 360) >= 90 && ((b + 360) % 360) < 270;
+  const last = scn.aircraft[scn.aircraft.length - 1];
+  const fl = south ? 350 : 360;
+  const a = { callsign: cs, type: last ? last.type : 'B738', route: [...route], fl,
+              reach: wp ? { waypoint: wp, time: Math.round(T) } : { point: [+pt[0].toFixed(2), +pt[1].toFixed(2)], time: Math.round(T) } };
+  scn.aircraft.push(a); sel = { kind: 'ac', cs }; draft = { route: [] };
+  changed(); showTab('sel'); hint();
+}
+function newCallsign() {
+  for (;;) { const cs = AIRLINES[Math.floor(Math.random() * AIRLINES.length)] + (100 + Math.floor(Math.random() * 8900));
+    if (!scn.aircraft.some(a => a.callsign === cs)) return cs; }
+}
+function selectAc(cs, center) {
+  sel = { kind: 'ac', cs }; renderSel(); showTab('sel');
+  if (center) { const p = positionsAt(T).find(a => a.cs === cs); if (p) { view.cx = p.x; view.cy = p.y; } }
+  scrollLaneIntoView(cs);
+}
+window.addEventListener('keydown', e => {
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo(); return; }
+  if (e.key === 'Escape') { setTool('select'); sel = null; renderSel(); return; }
+  if (e.key === 'Enter' && tool === 'areaPoly') { finishPoly(); return; }
+  if (e.key === 'Enter' && tool === 'aircraft') { placeStarted(); return; }
+  if (e.key === 'Backspace' && tool === 'aircraft' && draft && (draft.route.length || draft.start)) { e.preventDefault(); if (draft.route.length) draft.route.pop(); else delete draft.start; hint(); return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); deleteSel(); return; }
+  if (e.key === ' ') { e.preventDefault(); togglePlay(); return; }
+  if (e.key === 'ArrowRight') { setT(T + (e.shiftKey ? 60 : 10)); return; }
+  if (e.key === 'ArrowLeft') { setT(T - (e.shiftKey ? 60 : 10)); return; }
+  const k = { v: 'select', a: 'aircraft', c: 'cell', l: 'squall', r: 'region', p: 'areaPoly', o: 'areaCircle', b: 'rbl', w: 'strat' }[e.key.toLowerCase()];
+  if (k && !e.ctrlKey && !e.metaKey) setTool(k);
+});
+function deleteSel() {
+  if (!sel) return; snapshot();
+  if (sel.kind === 'ac') { scn.aircraft = scn.aircraft.filter(a => a.callsign !== sel.cs); scn.requests = scn.requests.filter(r => r.callsign !== sel.cs); scn.events = scn.events.filter(r => r.callsign !== sel.cs); }
+  else if (sel.kind === 'cell') scn.weather.cells.splice(sel.i, 1);
+  else if (sel.kind === 'area') scn.areas.splice(sel.i, 1);
+  else if (sel.kind === 'req') scn.requests.splice(sel.i, 1);
+  else if (sel.kind === 'evt') scn.events.splice(sel.i, 1);
+  else if (sel.kind === 'conv') convList().splice(sel.i, 1);
+  else if (sel.kind === 'strat') scn.weather.stratiform.splice(sel.i, 1);
+  sel = null; changed();
+}
+
+// ============================================================ map drawing
+
+function legArrows(pts, col) {          // direction arrows at the middle of each leg (one-way routings)
+  const dpr = devicePixelRatio; ctx.strokeStyle = col; ctx.lineWidth = dpr;
+  for (let k = 0; k < pts.length - 1; k++) {
+    const [x1, y1] = toPx(...pts[k]), [x2, y2] = toPx(...pts[k + 1]);
+    const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, an = Math.atan2(y2 - y1, x2 - x1), L = 6 * dpr;
+    ctx.beginPath(); ctx.moveTo(cx - L * Math.cos(an - 0.5), cy - L * Math.sin(an - 0.5)); ctx.lineTo(cx, cy);
+    ctx.lineTo(cx - L * Math.cos(an + 0.5), cy - L * Math.sin(an + 0.5)); ctx.stroke();
+  }
+}
+const AREA_COL = { danger: '#e08a3c', restricted: '#e0c13c', prohibited: '#ff5a5a' };
+function draw() {
+  const W = cv.width, H = cv.height, dpr = devicePixelRatio;
+  ctx.fillStyle = '#0b1016'; ctx.fillRect(0, 0, W, H);
+  if (!sector) { ctx.fillStyle = '#6c7f92'; ctx.font = `${14 * dpr}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('Open a scenario or start a new one', W / 2, H / 2); ctx.textAlign = 'left'; return requestAnimationFrame(draw); }
+  view.s = baseScale() * userZoom;
+  const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };
+  const mono = sz => `${sz * dpr}px ui-monospace,monospace`;
+  if (wxImg && wxMeta && $('#showWx').checked) { const [x0, y0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [x1, y1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]); ctx.drawImage(wxImg, x0, y0, x1 - x0, y1 - y0); }
+  // airspace
+  const wp = sector.waypoints;
+  for (const sc of sector.sectors || []) {
+    const ctl = (sector.controlled_sectors || []).includes(sc.id);
+    poly(sc.polygon); ctx.setLineDash([3 * dpr, 4 * dpr]); ctx.strokeStyle = '#2f7a5f'; ctx.lineWidth = dpr; ctx.stroke(); ctx.setLineDash([]);
+    if (!ctl) { ctx.fillStyle = '#ffffff06'; ctx.fill(); }
+  }
+  if (sector.outline && sector.shape.type !== 'square') { poly(sector.outline); ctx.strokeStyle = '#2d4258'; ctx.lineWidth = 1.2 * dpr; ctx.stroke(); }
+  poly(sector.shape.polygon || sector.shape.corners); ctx.strokeStyle = '#4a6886'; ctx.lineWidth = 1.8 * dpr; ctx.stroke();
+  const radSet = new Set((sector.rad_routes || []).map(r => r.join('-'))), routeKeys = new Set((sector.routes || []).map(r => r.join('-')));
+  for (const r of sector.routes) { if (!r.every(n => wp[n])) continue; const rkey = [...r].reverse().join('-'), rad = radSet.has(r.join('-')) || radSet.has(rkey), twoWay = routeKeys.has(rkey);
+    ctx.strokeStyle = rad ? '#26392e' : '#1b2835'; ctx.lineWidth = dpr; ctx.setLineDash(rad ? [6 * dpr, 6 * dpr] : []); poly(r.map(n => wp[n]), false); ctx.stroke(); ctx.setLineDash([]);
+    if (rad && !twoWay) legArrows(r.map(n => wp[n]), '#3d5c48'); }
+  if (sector.airways) for (const aw of Object.values(sector.airways)) if (aw.one_way) {
+    const p = aw.points; ctx.strokeStyle = '#3a5068';
+    for (let k = 0; k < p.length - 1; k++) { if (!wp[p[k]] || !wp[p[k + 1]]) continue; const [x1, y1] = toPx(...wp[p[k]]), [x2, y2] = toPx(...wp[p[k + 1]]);
+      const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, an = Math.atan2(y2 - y1, x2 - x1), L = 6 * dpr;
+      ctx.beginPath(); ctx.moveTo(cx - L * Math.cos(an - 0.5), cy - L * Math.sin(an - 0.5)); ctx.lineTo(cx, cy); ctx.lineTo(cx - L * Math.cos(an + 0.5), cy - L * Math.sin(an + 0.5)); ctx.stroke(); }
+  }
+  // convection regime overlays
+  convList().forEach((conv, ci) => {
+    const isSel = sel && sel.kind === 'conv' && sel.i === ci;
+    if (conv.regime === 'squall_line' && conv.line) {
+      const l = conv.line, r = (l.orient_deg || 0) * Math.PI / 180, ex = Math.sin(r), ey = Math.cos(r), h = (l.length_nm || 170) / 2;
+      ctx.strokeStyle = isSel ? '#ff9af0' : '#d05ad088'; ctx.lineWidth = 1.5 * dpr; ctx.setLineDash([8 * dpr, 4 * dpr]);
+      poly([[l.center[0] - ex * h, l.center[1] - ey * h], [l.center[0] + ex * h, l.center[1] + ey * h]], false); ctx.stroke(); ctx.setLineDash([]);
+      const [cx, cy] = toPx(...l.center); ctx.fillStyle = '#d05ad0'; ctx.fillRect(cx - 4 * dpr, cy - 4 * dpr, 8 * dpr, 8 * dpr);
+      ctx.font = mono(10); ctx.fillText(`squall line ${conv.intensity || 'strong'} (t=0)`, cx + 7 * dpr, cy - 6 * dpr);
+    } else if (conv.region) {
+      const g = conv.region; ctx.strokeStyle = isSel ? '#ff9af0' : '#d05ad066'; ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([5 * dpr, 5 * dpr]);
+      poly([[g[0], g[1]], [g[2], g[1]], [g[2], g[3]], [g[0], g[3]]]); ctx.stroke(); ctx.setLineDash([]);
+      const [lx, ly] = toPx(g[0], g[3]); ctx.fillStyle = '#d05ad0aa'; ctx.font = mono(10); ctx.fillText(`${conv.regime} ${conv.intensity || 'strong'}${conv.count ? ' ×' + conv.count : ''}`, lx + 4 * dpr, ly + 12 * dpr);
+    }
+  });
+  (scn.weather.stratiform || []).forEach((st, si) => {
+    const isSel = sel && sel.kind === 'strat' && sel.i === si, [cx, cy] = toPx(...st.center), r = st.radius_nm || [50, 30];
+    ctx.strokeStyle = isSel ? '#9fd8ff' : '#5f9fcf77'; ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([3 * dpr, 4 * dpr]); ctx.beginPath();
+    ctx.ellipse(cx, cy, r[0] * view.s, r[1] * view.s, ((st.orient_deg ?? 0) - 90) * Math.PI / 180, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = ctx.strokeStyle; ctx.font = mono(10); ctx.fillText(`rain ${st.dbz ?? 30} dBZ (t=0)`, cx - 30 * dpr, cy);
+  });
+  // areas
+  scn.areas.forEach((a, i) => {
+    const col = AREA_COL[a.kind] || '#e0c13c', on = areaActive(a, T), isSel = sel && sel.kind === 'area' && sel.i === i;
+    ctx.beginPath();
+    if (a.circle) { const [cx, cy] = toPx(...nm(a.circle.center)); ctx.arc(cx, cy, a.circle.radius_nm * view.s, 0, Math.PI * 2); }
+    else poly(a.polygon.map(nm));
+    ctx.setLineDash(on ? [] : [6 * dpr, 5 * dpr]); ctx.strokeStyle = isSel ? '#ffffff' : on ? col : col + '88'; ctx.lineWidth = (isSel ? 2 : on ? 1.6 : 1) * dpr; ctx.stroke(); ctx.setLineDash([]);
+    if (on) { ctx.fillStyle = col + '22'; ctx.fill(); }
+    const c0 = a.circle ? nm(a.circle.center) : a.polygon.map(nm).reduce((s, q) => [s[0] + q[0] / a.polygon.length, s[1] + q[1] / a.polygon.length], [0, 0]);
+    const [lx, ly] = toPx(...c0); ctx.fillStyle = on ? col : col + '99'; ctx.font = mono(10.5);
+    ctx.fillText(`${a.id} ${String(a.lower_fl).padStart(3, '0')}-${a.upper_fl} ${on ? 'ACT' : 'off'}`, lx - 30 * dpr, ly);
+  });
+  // waypoints
+  ctx.font = mono(10.5);
+  const xfer = new Set(sector.transfer_points || []), draftR = draft && draft.route ? new Set(draft.route) : null;
+  const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []);
+  for (const [n, p] of Object.entries(wp)) {
+    const [px, py] = toPx(...p), hot = draftR && draftR.has(n);
+    if (extSet.has(n)) {
+      ctx.strokeStyle = ctx.fillStyle = hot ? '#7fb8ff' : '#4a6178'; ctx.lineWidth = dpr; ctx.beginPath();
+      ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
+      ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); continue;
+    }
+    ctx.fillStyle = ctx.strokeStyle = hot ? '#7fb8ff' : '#5c7a96'; ctx.lineWidth = dpr; ctx.beginPath();
+    ctx.moveTo(px, py - 5 * dpr); ctx.lineTo(px + 4.5 * dpr, py + 3.5 * dpr); ctx.lineTo(px - 4.5 * dpr, py + 3.5 * dpr); ctx.closePath();
+    xfer.has(n) ? ctx.fill() : ctx.stroke(); ctx.fillText(n, px + 7 * dpr, py + 4 * dpr);
+  }
+  // explicit cells
+  (scn.weather.cells || []).forEach((c, i) => {
+    const alive = cellAlive(c, T), [x, y] = cellPos(c, T), [px, py] = toPx(x, y), isSel = sel && sel.kind === 'cell' && sel.i === i;
+    ctx.strokeStyle = isSel ? '#ffffff' : alive ? '#ff7af0' : '#ff7af055'; ctx.lineWidth = (isSel ? 2 : 1.2) * dpr; ctx.setLineDash(alive ? [] : [3 * dpr, 3 * dpr]);
+    ctx.beginPath(); ctx.arc(px, py, Math.max(6 * dpr, (c.radius_nm || 3.5) * view.s), 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = ctx.strokeStyle; ctx.font = mono(10); ctx.fillText(`${c.id || 'CB' + (i + 1)} ${c.top_fl || 420}`, px + 8 * dpr, py - 8 * dpr);
+    if (isSel) { const [u, v] = cellMotion(c), [qx, qy] = toPx(x + u * 600, y + v * 600); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, qy); ctx.stroke(); }
+  });
+  // selected aircraft: whole route + reach marker; draft route
+  const selA = sel && sel.kind === 'ac' && scn.aircraft.find(a => a.callsign === sel.cs);
+  if (selA) {
+    ctx.strokeStyle = '#7fb8ff88'; ctx.lineWidth = 2.5 * dpr; poly((selA.start ? [nm(selA.start.point)] : []).concat(routePts(selA.route.map(n => n.toUpperCase()))), false); ctx.stroke();
+    if (selA.start) { const [sx, sy] = toPx(...nm(selA.start.point)); ctx.strokeStyle = '#7fb8ff'; ctx.strokeRect(sx - 5 * dpr, sy - 5 * dpr, 10 * dpr, 10 * dpr);
+      ctx.fillStyle = '#7fb8ff'; ctx.font = mono(10); ctx.fillText(`start T+${fmtT(selA.start.time)}`, sx + 8 * dpr, sy + 12 * dpr); }
+    const si = lastGoodComp && lastGoodComp.aircraft[selA.callsign];
+    if (si) {                       // flight plan before the entry / after the exit (next sectors), dashed
+      ctx.setLineDash([3 * dpr, 5 * dpr]); ctx.lineWidth = 1.5 * dpr;
+      if (si.route_before.length) { poly(routePts([...si.route_before, si.entry]), false); ctx.stroke(); }
+      if (si.route_after.length) { poly(routePts([si.exit, ...si.route_after]), false); ctx.stroke(); }
+      ctx.setLineDash([]);
+    }
+    const r = selA.reach; if (r) { const q = r.waypoint ? wp[r.waypoint.toUpperCase()] : nm(r.point); if (q) { const [px, py] = toPx(...q);
+      ctx.strokeStyle = '#7fb8ff'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.moveTo(px, py - 7 * dpr); ctx.lineTo(px + 7 * dpr, py); ctx.lineTo(px, py + 7 * dpr); ctx.lineTo(px - 7 * dpr, py); ctx.closePath(); ctx.stroke();
+      ctx.fillStyle = '#7fb8ff'; ctx.font = mono(10); ctx.fillText(`at T+${fmtT(r.time)}`, px + 9 * dpr, py + 12 * dpr); } }
+  }
+  if (draft && draft.start) {
+    const [sx, sy] = toPx(...draft.start.point); ctx.strokeStyle = ctx.fillStyle = '#7fb8ff'; ctx.lineWidth = 2 * dpr;
+    ctx.strokeRect(sx - 5 * dpr, sy - 5 * dpr, 10 * dpr, 10 * dpr); ctx.font = mono(10.5); ctx.fillText(`T+${fmtT(draft.start.time)}`, sx + 8 * dpr, sy - 8 * dpr);
+    if (draft.route.length) { ctx.setLineDash([6 * dpr, 4 * dpr]); poly([draft.start.point, ...routePts(draft.route)], false); ctx.stroke(); ctx.setLineDash([]); }
+  }
+  if (draft && draft.route && draft.route.length && !draft.start) {
+    ctx.strokeStyle = '#7fb8ff'; ctx.lineWidth = 2 * dpr; ctx.setLineDash([6 * dpr, 4 * dpr]); poly(routePts(draft.route), false); ctx.stroke(); ctx.setLineDash([]);
+    if (hover && draft.route.length >= 2) { const pr = project(routePts(draft.route), hover); if (pr && pr.d < pxNm(10)) { const [px, py] = toPx(...pr.pt);
+      ctx.fillStyle = '#7fb8ff'; ctx.beginPath(); ctx.arc(px, py, 4 * dpr, 0, Math.PI * 2); ctx.fill(); ctx.font = mono(10.5); ctx.fillText(`place here at T+${fmtT(T)}`, px + 8 * dpr, py - 8 * dpr); } }
+  }
+  if (mdrag && mdrag.kind === 'ac' && mdrag.ghost) { const [gx, gy] = toPx(...mdrag.ghost); ctx.strokeStyle = '#7fb8ff'; ctx.lineWidth = 2 * dpr; ctx.strokeRect(gx - 5 * dpr, gy - 5 * dpr, 10 * dpr, 10 * dpr); }
+  if (draft && draft.poly) { ctx.strokeStyle = '#e0c13c'; ctx.lineWidth = 1.5 * dpr; poly(hover ? [...draft.poly, hover] : draft.poly, false); ctx.stroke(); }
+  if (mdrag && mdrag.cur) {
+    const a = mdrag.start, b = mdrag.cur; ctx.strokeStyle = mdrag.kind === 'areaCircle' ? '#e0c13c' : '#d05ad0'; ctx.lineWidth = 1.5 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]);
+    if (mdrag.kind === 'squall') poly([a, b], false);
+    else if (mdrag.kind === 'region') poly([[a[0], a[1]], [b[0], a[1]], [b[0], b[1]], [a[0], b[1]]]);
+    else { ctx.beginPath(); const [cx, cy] = toPx(...a); ctx.arc(cx, cy, dist(a, b) * view.s, 0, Math.PI * 2); }
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  // traffic at T
+  const pos = positionsAt(T), byCs = Object.fromEntries(pos.map(p => [p.cs, p]));
+  const conflicts = new Set(), confLines = [];
+  if (lastGoodComp && !($('#showPreview').checked && prev[previewPolicy])) for (const k of lastGoodComp.planned_conflicts) {
+    if (T >= k.start_s - 120 && T <= k.end_s + 30 && byCs[k.aircraft[0]] && byCs[k.aircraft[1]]) { k.aircraft.forEach(c => conflicts.add(c)); confLines.push(k); }
+  }
+  const pv = $('#showPreview').checked && prev[previewPolicy];
+  if (pv) for (const l of pv.losses) if (T >= l.start_s - 60 && T <= (l.end_s || l.start_s) + 10 && byCs[l.aircraft[0]] && byCs[l.aircraft[1]]) { l.aircraft.forEach(c => conflicts.add(c)); confLines.push(l); }
+  for (const k of confLines) { const A = byCs[k.aircraft[0]], B = byCs[k.aircraft[1]], [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y), d = dist([A.x, A.y], [B.x, B.y]);
+    ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = dpr; ctx.setLineDash([4 * dpr, 3 * dpr]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#ff5a5a'; ctx.font = mono(10); ctx.fillText(`${d.toFixed(1)} NM`, (ax + bx) / 2 + 4 * dpr, (ay + by) / 2); }
+  for (const a of pos) {
+    const [px, py] = toPx(a.x, a.y), isSel = selA && selA.callsign === a.cs, conf = conflicts.has(a.cs);
+    const inbound = a.src === 'plan' ? T < a.info.entry_s : !a.onf;
+    const col = isSel ? '#7fb8ff' : conf ? '#ff5a5a' : inbound ? '#8a9bb0' : '#5fd3a3';
+    ctx.strokeStyle = ctx.fillStyle = col; ctx.lineWidth = 1.3 * dpr;
+    ctx.strokeRect(px - 4 * dpr, py - 4 * dpr, 8 * dpr, 8 * dpr);
+    const r = a.trk * Math.PI / 180, L = 2 * 60 * 7.5 / 60;   // 2-minute vector at ~450 kt
+    const [qx, qy] = toPx(a.x + Math.sin(r) * L, a.y + Math.cos(r) * L); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, qy); ctx.stroke();
+    ctx.font = mono(10.5); ctx.fillText(a.cs, px + 8 * dpr, py - 10 * dpr);
+    const i = a.info; ctx.fillText(`${a.fl} ${i.type}${i.rvsm !== 'approved' ? ' NRVSM' : ''}${i.formation ? ' x' + i.formation : ''}`, px + 8 * dpr, py + 2 * dpr);
+  }
+  // RBLs
+  rblRects.length = 0;
+  for (const r of rbls) {
+    const A = byCs[r.a], B = byCs[r.b]; if (!A || !B) continue;
+    const c = rblCpa(r.a, r.b, T), [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y);
+    const g = lastGoodComp, fa = g.aircraft[r.a], fb = g.aircraft[r.b];
+    const H = g.separation_horizontal_nm || 5, hmin = Math.max(H, ...[fa, fb].map(f => f && f.formation ? H + 1 : H));
+    const vNeed = (fa && fa.rvsm !== 'approved') || (fb && fb.rvsm !== 'approved') || (fa && fa.formation) || (fb && fb.formation) ? 2000 : 1000;
+    const bad = c && c.d < hmin && Math.abs((c.A.fl || 0) - (c.B.fl || 0)) * 100 < vNeed;
+    const col = bad ? '#ff6b9a' : '#d79bff';
+    ctx.strokeStyle = col; ctx.lineWidth = 1.3 * dpr; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    if (c && c.t > T) {
+      const [qax, qay] = toPx(c.A.x, c.A.y), [qbx, qby] = toPx(c.B.x, c.B.y);
+      ctx.setLineDash([4 * dpr, 4 * dpr]); ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(qax, qay); ctx.lineTo(qbx, qby); ctx.stroke(); ctx.setLineDash([]);
+      for (const [qx, qy, cs] of [[qax, qay, r.a], [qbx, qby, r.b]]) { ctx.beginPath(); ctx.arc(qx, qy, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = col; ctx.font = mono(9.5); ctx.fillText(cs, qx + 6 * dpr, qy + 3 * dpr); }
+    }
+    const brg = (Math.atan2(B.x - A.x, B.y - A.y) * 180 / Math.PI + 360) % 360, rng = Math.hypot(B.x - A.x, B.y - A.y);
+    const l1 = `${r.a}→${r.b} ${String(Math.round(brg)).padStart(3, '0')}° ${rng.toFixed(1)} NM ΔFL ${Math.abs(A.fl - B.fl)}`;
+    const l2 = !c ? 'no common time' : c.t <= T + 2 ? `diverging (closest now)` : `CPA ${c.d.toFixed(1)} NM at T+${fmtT(c.t)} (in ${fmtT(c.t - T)}) ΔFL ${Math.abs((c.A.fl || 0) - (c.B.fl || 0))}`;
+    ctx.font = mono(10.5); const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 8 * dpr;
+    const mx = (ax + bx) / 2, my = (ay + by) / 2;
+    ctx.fillStyle = '#0b1016dd'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, 28 * dpr);
+    ctx.fillStyle = col; ctx.fillText(l1, mx, my); ctx.fillText(l2, mx, my + 13 * dpr);
+    rblRects.push({ r, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my + 16 * dpr });
+  }
+  // HUD
+  const nIn = pos.filter(a => a.src === 'plan' ? T >= a.info.entry_s : a.onf).length;
+  $('#hud').innerHTML = `<b>${esc(scn.name || '')}</b> · SEP ${(lastGoodComp && lastGoodComp.separation_horizontal_nm) || '?'} NM<br>T+ <b>${fmtT(T)}</b> / ${fmtT(scn.duration_s)}<br>${nIn} in sector · ${pos.length - nIn} inbound<br>${pv ? `showing <b>${previewPolicy}</b> run` : 'showing filed plans'}`;
+  drawTimeline();
+  requestAnimationFrame(draw);
+}
+
+// ============================================================ timeline
+const tl = $('#tl'), tctx = tl.getContext('2d'), ruler = $('#tlRuler'), rctx = ruler.getContext('2d');
+const LANE_H = 16, LABEL_W = 96;
+let tlz = { t0: 0, t1: 1800 }, lanes = [], tlHits = [];
+function tlX(t) { const W = ruler.clientWidth; return LABEL_W + (W - LABEL_W - 10) * (t - tlz.t0) / (tlz.t1 - tlz.t0); }
+function tlT(x) { const W = ruler.clientWidth; return tlz.t0 + (x - LABEL_W) / (W - LABEL_W - 10) * (tlz.t1 - tlz.t0); }
+function setT(t) { if (!scn) return; T = Math.max(0, Math.min(scn.duration_s, t)); scheduleWx(); if (tool === 'aircraft' && draft && draft.route.length >= 2 || tool === 'cell') hint();
+  document.querySelectorAll('.tnow').forEach(e => e.textContent = fmtT(T)); }
+function buildLanes() {
+  lanes = [{ kind: 'wx', label: 'weather' }, ...scn.areas.map((a, i) => ({ kind: 'area', i, label: `area ${a.id}` }))];
+  const g = lastGoodComp, ac = [...scn.aircraft];
+  if (g) ac.sort((a, b) => ((g.aircraft[a.callsign] || {}).entry_s ?? 1e9) - ((g.aircraft[b.callsign] || {}).entry_s ?? 1e9));
+  for (const a of ac) lanes.push({ kind: 'ac', cs: a.callsign, label: a.callsign });
+}
+function drawTimeline() {
+  if (!scn) return;
+  const dpr = devicePixelRatio;
+  if (tlz.t1 > scn.duration_s + 60 || tlz.t1 - tlz.t0 < 60) { tlz.t1 = Math.min(tlz.t1, scn.duration_s + 60); if (tlz.t1 - tlz.t0 < 60) tlz.t0 = Math.max(-60, tlz.t1 - 60); }
+  buildLanes();
+  const Wc = $('#tlScroll').clientWidth, Hc = lanes.length * LANE_H + 6;
+  if (tl.width !== Math.round(Wc * dpr) || tl.height !== Math.round(Hc * dpr)) { tl.width = Wc * dpr; tl.height = Hc * dpr; tl.style.height = Hc + 'px'; }
+  const rw = ruler.getBoundingClientRect(); if (ruler.width !== Math.round(rw.width * dpr)) { ruler.width = rw.width * dpr; ruler.height = rw.height * dpr; }
+  // ruler
+  rctx.setTransform(dpr, 0, 0, dpr, 0, 0); rctx.clearRect(0, 0, rw.width, rw.height); rctx.fillStyle = '#0d141c'; rctx.fillRect(0, 0, rw.width, rw.height);
+  const span = tlz.t1 - tlz.t0, step = [30, 60, 120, 300, 600, 900, 1800].find(s => span / s < 18) || 3600;
+  rctx.font = '10px ui-monospace,monospace'; rctx.fillStyle = '#6c7f92'; rctx.strokeStyle = '#1f2b38';
+  for (let t = Math.ceil(tlz.t0 / step) * step; t <= tlz.t1; t += step) { const x = tlX(t); rctx.fillRect(x, 14, 1, 10); rctx.fillText(fmtT(t), x + 3, 12); }
+  const xd = tlX(scn.duration_s); rctx.fillStyle = '#ff5a5a55'; rctx.fillRect(xd, 0, 2, 24);
+  // lanes
+  const ctx2 = tctx; ctx2.setTransform(dpr, 0, 0, dpr, 0, 0); ctx2.clearRect(0, 0, Wc, Hc);
+  tlHits = [];
+  const g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  const confBy = {};
+  if (g) for (const k of g.planned_conflicts) for (const c of k.aircraft) (confBy[c] = confBy[c] || []).push(k);
+  const lossBy = {};
+  if (pv) for (const l of pv.losses) for (const c of l.aircraft) (lossBy[c] = lossBy[c] || []).push(l);
+  lanes.forEach((ln, li) => {
+    const y = li * LANE_H + 3, isSel = (ln.kind === 'ac' && sel && sel.kind === 'ac' && sel.cs === ln.cs) || (ln.kind === 'area' && sel && sel.kind === 'area' && sel.i === ln.i);
+    if (isSel) { ctx2.fillStyle = '#16273a'; ctx2.fillRect(0, y - 1, Wc, LANE_H); }
+    else if (li % 2) { ctx2.fillStyle = '#0f171f'; ctx2.fillRect(0, y - 1, Wc, LANE_H); }
+    ctx2.font = '11px ui-monospace,monospace'; ctx2.fillStyle = isSel ? '#7fb8ff' : '#8a9bb0';
+    let lab = ln.label;
+    if (ln.kind === 'ac' && g && g.aircraft[ln.cs]) lab = `${ln.cs} ${g.aircraft[ln.cs].fl}`;
+    ctx2.fillText(lab, 4, y + 11);
+    ctx2.save(); ctx2.beginPath(); ctx2.rect(LABEL_W, 0, Wc - LABEL_W, Hc); ctx2.clip();
+    if (ln.kind === 'wx') {
+      (scn.weather.cells || []).forEach((c, i) => { const lt = c.lifetime_s || 5400, tb = (c.at_time || 0) - (c.age_s ?? lt * 0.4);
+        const x0 = tlX(tb), x1 = tlX(tb + lt), xa = tlX(c.at_time || 0); ctx2.fillStyle = '#d05ad033'; ctx2.fillRect(x0, y + 3, x1 - x0, LANE_H - 7);
+        ctx2.fillStyle = sel && sel.kind === 'cell' && sel.i === i ? '#ffffff' : '#ff7af0'; ctx2.fillRect(xa - 2, y + 1, 4, LANE_H - 3);
+        tlHits.push({ kind: 'cell', i, x: xa, y, field: 'at_time' }); });
+      const lbl = convList().map(c => `${c.regime.replace('_', ' ')} ${c.intensity || 'strong'}`).concat((scn.weather.stratiform || []).length ? [`${scn.weather.stratiform.length} rain area(s)`] : []).join(' + ');
+      if (lbl) { ctx2.fillStyle = '#d05ad0aa'; ctx2.fillText(lbl, LABEL_W + 6, y + 11); }
+    } else if (ln.kind === 'area') {
+      const a = scn.areas[ln.i], sch = [...(a.schedule || [])].sort((p, q) => p.time - q.time); let on = !!a.active, t0 = 0;
+      const col = AREA_COL[a.kind] || '#e0c13c';
+      const seg = (ta, tb) => { ctx2.fillStyle = col + '66'; ctx2.fillRect(tlX(ta), y + 3, tlX(tb) - tlX(ta), LANE_H - 7); };
+      for (const e of sch) { if (on) seg(t0, e.time); on = !!e.active; t0 = e.time; }
+      if (on) seg(t0, scn.duration_s);
+      (a.schedule || []).forEach((e, k) => { const x = tlX(e.time); ctx2.fillStyle = e.active ? col : '#8a9bb0'; ctx2.fillRect(x - 2, y + 1, 4, LANE_H - 3);
+        tlHits.push({ kind: 'sched', i: ln.i, k, x, y }); });
+    } else {
+      const info = g && g.aircraft[ln.cs], plan = g && g.plans[ln.cs];
+      if (info && plan && plan.length) {
+        const x0 = tlX(plan[0][0]), xe = tlX(info.entry_s), x1 = tlX(info.exit_s ?? plan[plan.length - 1][0]);
+        ctx2.fillStyle = '#2a3a4a'; ctx2.fillRect(x0, y + 4, xe - x0, LANE_H - 9);
+        ctx2.fillStyle = isSel ? '#3f78b5' : info.military ? '#5f6fb0' : info.rvsm !== 'approved' ? '#a07a3a' : '#2f7a5f'; ctx2.fillRect(xe, y + 3, x1 - xe, LANE_H - 7);
+        tlHits.push({ kind: 'bar', cs: ln.cs, x0: xe, x1, y });
+        const a = scn.aircraft.find(q => q.callsign === ln.cs);
+        if (a && a.reach) { const xr = tlX(a.reach.time); ctx2.fillStyle = '#cfe3ff'; ctx2.beginPath(); ctx2.moveTo(xr, y + 2); ctx2.lineTo(xr + 3, y + 7); ctx2.lineTo(xr, y + 12); ctx2.lineTo(xr - 3, y + 7); ctx2.fill(); }
+      }
+      for (const k of confBy[ln.cs] || []) { ctx2.fillStyle = k.inside ? '#ff5a5a' : '#ff5a5a66'; ctx2.fillRect(tlX(k.start_s), y + 9, Math.max(3, tlX(k.end_s) - tlX(k.start_s)), 4); }
+      for (const l of lossBy[ln.cs] || []) { ctx2.fillStyle = '#ffffff'; ctx2.fillRect(tlX(l.start_s), y + 1, Math.max(3, tlX(l.end_s || l.start_s) - tlX(l.start_s)), 3); }
+      scn.requests.forEach((r, i) => { if (r.callsign.toUpperCase() !== ln.cs) return; const x = tlX(r.time), s = sel && sel.kind === 'req' && sel.i === i;
+        ctx2.fillStyle = s ? '#ffffff' : '#7fb8ff'; ctx2.beginPath(); ctx2.arc(x, y + 7, 4.5, 0, Math.PI * 2); ctx2.fill();
+        ctx2.fillStyle = '#0b1016'; ctx2.font = 'bold 8px system-ui'; ctx2.fillText({ altitude: 'L', direct: 'D', speed: 'S', weather_deviation: 'W', descent: '↓' }[r.type] || '?', x - 2.5, y + 10);
+        tlHits.push({ kind: 'req', i, x, y }); });
+      scn.events.forEach((r, i) => { if (r.callsign.toUpperCase() !== ln.cs) return; const x = tlX(r.time), s = sel && sel.kind === 'evt' && sel.i === i;
+        ctx2.fillStyle = s ? '#ffffff' : '#f2b84b'; ctx2.fillRect(x - 4, y + 3, 8, 8); tlHits.push({ kind: 'evt', i, x, y }); });
+    }
+    ctx2.restore();
+  });
+  // cursor
+  const xc = tlX(T); ctx2.fillStyle = '#ffffff'; ctx2.fillRect(xc - 0.5, 0, 1.5, Hc);
+  rctx.fillStyle = '#ffffff'; rctx.fillRect(xc - 0.5, 0, 1.5, 24);
+  $('#tlTime').textContent = `T+${fmtT(T)} / ${fmtT(scn.duration_s)}`;
+}
+function scrollLaneIntoView(cs) {
+  const li = lanes.findIndex(l => l.kind === 'ac' && l.cs === cs); if (li < 0) return;
+  const sc = $('#tlScroll'), y = li * LANE_H; if (y < sc.scrollTop || y > sc.scrollTop + sc.clientHeight - LANE_H) sc.scrollTop = y - sc.clientHeight / 2;
+}
+let tdrag = null;
+function tlEvent(e) { const r = tl.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+ruler.addEventListener('mousedown', e => { const r = ruler.getBoundingClientRect(); setT(tlT(e.clientX - r.left)); tdrag = { kind: 'scrub', canvas: ruler }; });
+tl.addEventListener('mousedown', e => {
+  if (!scn) return;
+  const [x, y] = tlEvent(e), li = Math.floor((y - 2) / LANE_H), ln = lanes[li];
+  if (x < LABEL_W) {
+    if (!ln) return;
+    if (ln.kind === 'ac') selectAc(ln.cs, true); else if (ln.kind === 'area') { sel = { kind: 'area', i: ln.i }; renderSel(); showTab('sel'); }
+    return;
+  }
+  const hit = tlHits.find(h => h.y <= y && y <= h.y + LANE_H && h.x != null && Math.abs(h.x - x) <= 5);
+  if (hit) {
+    if (hit.kind === 'req' || hit.kind === 'evt' || hit.kind === 'cell') sel = { kind: hit.kind, i: hit.i };
+    else if (hit.kind === 'sched') sel = { kind: 'area', i: hit.i };
+    renderSel(); showTab('sel');
+    tdrag = { kind: 'marker', hit, x0: x, moved: false }; return;
+  }
+  const bar = tlHits.find(h => h.kind === 'bar' && h.y <= y && y <= h.y + LANE_H && x >= h.x0 && x <= h.x1);
+  if (bar) { selectAc(bar.cs); tdrag = { kind: 'bar', cs: bar.cs, x0: x, moved: false }; return; }
+  setT(tlT(x)); tdrag = { kind: 'scrub', canvas: tl };
+});
+window.addEventListener('mousemove', e => {
+  if (!tdrag) return;
+  if (tdrag.kind === 'scrub') { const r = tdrag.canvas.getBoundingClientRect(); setT(tlT(e.clientX - r.left)); return; }
+  const [x] = tlEvent(e), dt = Math.round((tlT(x) - tlT(tdrag.x0)) / 5) * 5;
+  if (!dt) return;
+  if (!tdrag.moved) { snapshot(); tdrag.moved = true; }
+  tdrag.x0 = tlX(tlT(tdrag.x0) + dt);
+  if (tdrag.kind === 'marker') {
+    const h = tdrag.hit;
+    if (h.kind === 'req') scn.requests[h.i].time = Math.max(0, scn.requests[h.i].time + dt);
+    else if (h.kind === 'evt') scn.events[h.i].time = Math.max(0, scn.events[h.i].time + dt);
+    else if (h.kind === 'cell') scn.weather.cells[h.i].at_time = (scn.weather.cells[h.i].at_time || 0) + dt;
+    else if (h.kind === 'sched') scn.areas[h.i].schedule[h.k].time = Math.max(0, scn.areas[h.i].schedule[h.k].time + dt);
+  } else if (tdrag.kind === 'bar') {
+    const a = scn.aircraft.find(q => q.callsign === tdrag.cs);
+    if (a.reach) a.reach.time += dt; else if (a.entry_time != null) a.entry_time += dt;
+    const g = lastGoodComp; if (g && g.plans[a.callsign]) { for (const q of g.plans[a.callsign]) q[0] += dt; const i = g.aircraft[a.callsign]; for (const f of ['appear_s', 'entry_s', 'exit_s']) if (i[f] != null) i[f] += dt; }
+  }
+  renderSel();
+});
+window.addEventListener('mouseup', () => {
+  if (!tdrag) return; const d = tdrag; tdrag = null;
+  if (d.moved) changed(d.kind === 'bar' || (d.hit && d.hit.kind !== 'cell'));
+});
+for (const c of [tl, ruler]) c.addEventListener('wheel', e => {
+  if (!scn) return; e.preventDefault();
+  const r = c.getBoundingClientRect(), tm = tlT(e.clientX - r.left);
+  if (e.ctrlKey || e.metaKey) {
+    const f = e.deltaY < 0 ? 0.8 : 1.25, n0 = tm - (tm - tlz.t0) * f, n1 = tm + (tlz.t1 - tm) * f;
+    tlz = { t0: Math.max(-60, n0), t1: Math.min(scn.duration_s + 60, n1) };
+  } else if (e.shiftKey) { $('#tlScroll').scrollTop += e.deltaY; }
+  else setT(T + Math.sign(e.deltaY) * Math.max(5, (tlz.t1 - tlz.t0) / 200) * (Math.abs(e.deltaY) > 50 ? 3 : 1));
+}, { passive: false });
+// play
+let lastTick = performance.now();
+function togglePlay() { playing = !playing; $('#play').textContent = playing ? '❚❚' : '▶'; lastTick = performance.now(); }
+$('#play').onclick = togglePlay;
+setInterval(() => { const now = performance.now(), dt = (now - lastTick) / 1000; lastTick = now;
+  if (playing && scn) { setT(T + dt * +$('#playSpeed').value); if (T >= scn.duration_s) togglePlay(); } }, 50);
+
+// ============================================================ selected panel
+function showTab(t) { document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === t)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === 'pane-' + t)); }
+document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => showTab(b.dataset.tab));
+const typeOpts = cur => types.map(t => `<option value="${t.icao}" ${t.icao === cur ? 'selected' : ''}>${t.icao}${t.category === 'military' ? ' (mil)' : ''}</option>`).join('');
+function field(label, html) { return `<label>${label}</label>${html}`; }
+function reqValueText(r) {
+  if (r.type === 'descent') return r.value ? `(would like FL${r.value})` : '';
+  if (r.type !== 'weather_deviation') return r.value;
+  const v = r.value || {};
+  const how = v.heading ? `heading ${String(v.heading).padStart(3, '0')}` : v.offset_deg ? `${v.offset_deg}° ${v.side || 'left'}` : `around weather${v.side && v.side !== 'either' ? ' ' + v.side : ''}`;
+  return `${how}${v.distance_nm ? ' for ' + v.distance_nm + ' NM' : ''}${v.then_direct ? ' then ' + v.then_direct : ''}`;
+}
+function renderSel() {
+  const b = $('#selBody');
+  if (!scn || !sel) { b.innerHTML = '<section><div class="empty">Nothing selected. Click an aircraft, a storm cell or an area on the map or on the timeline — or use a tool on the left of the map to add one.</div></section>'; return; }
+  if (document.activeElement && b.contains(document.activeElement) && document.activeElement.matches('input,textarea')) return;   // don't clobber typing
+  if (sel.kind === 'ac' || sel.kind === 'req' || sel.kind === 'evt') {
+    const cs = sel.kind === 'ac' ? sel.cs : (sel.kind === 'req' ? scn.requests[sel.i] : scn.events[sel.i]).callsign.toUpperCase();
+    const a = scn.aircraft.find(x => x.callsign.toUpperCase() === cs); if (!a) { b.innerHTML = ''; return; }
+    const info = lastGoodComp && lastGoodComp.aircraft[a.callsign], pl = lastGoodComp && lastGoodComp.plans[a.callsign];
+    const fp = info && info.flight_plan;
+    const reqs = scn.requests.map((r, i) => [r, i]).filter(([r]) => r.callsign.toUpperCase() === cs);
+    const evs = scn.events.map((r, i) => [r, i]).filter(([r]) => r.callsign.toUpperCase() === cs);
+    const reachTxt = a.start ? `starts at ${nm(a.start.point).map(v => (+v).toFixed(1)).join(', ')} at T+${fmtT(a.start.time)} (free position)`
+      : a.reach ? (a.reach.waypoint ? `over ${a.reach.waypoint}` : `at ${a.reach.point.map(v => (+v).toFixed(1)).join(', ')}`) + ` at T+${fmtT(a.reach.time)}` : `boundary at T+${fmtT(a.entry_time || 0)}`;
+    const myConf = lastGoodComp ? lastGoodComp.planned_conflicts.filter(k => k.aircraft.includes(a.callsign)) : [];
+    b.innerHTML = `<section><h2>Aircraft <span><button class="danger" id="acDel" style="font-size:11px;padding:1px 6px">delete</button></span></h2>
+      <div class="grid">
+        ${field('callsign', `<input id="a-cs" value="${esc(a.callsign)}">`)}
+        ${field('type', `<select id="a-type">${typeOpts(a.type || 'A320')}</select>`)}
+        ${field('level', `<input id="a-fl" type="number" step="10" value="${a.fl}">`)}
+        ${field('route', `<input id="a-route" value="${esc(a.route.join(' '))}" style="font-family:var(--mono)">`)}
+        ${field('dep / dest', `<span style="display:flex;gap:4px"><input id="a-dep" value="${esc(a.dep || '')}" placeholder="dep"><input id="a-dest" value="${esc(a.dest || '')}" placeholder="dest"></span>`)}
+        ${field('timing', `<span style="font-family:var(--mono);font-size:12px">${reachTxt}</span>`)}
+        ${field('', `<span class="row" style="margin:0"><button id="a-reachT" title="Keep the same point, at the cursor time">at cursor T+<span class="tnow">${fmtT(T)}</span></button></span>`)}
+        ${field('speed', `<input id="a-mach" type="number" step="0.01" placeholder="filed Mach (type default)" value="${a.mach ?? ''}">`)}
+        ${field('RVSM', `<select id="a-rvsm"><option value="">type default</option><option value="true" ${a.rvsm === true ? 'selected' : ''}>approved</option><option value="false" ${a.rvsm === false ? 'selected' : ''}>non-RVSM</option></select>`)}
+        ${field('formation', `<input id="a-form" type="number" min="0" max="8" placeholder="none" value="${a.formation ? (a.formation.size || a.formation) : ''}">`)}
+        ${field('direction', `<select id="a-dir"><option value="">from route</option><option ${a.direction === 'southbound' ? 'selected' : ''}>southbound</option><option ${a.direction === 'northbound' ? 'selected' : ''}>northbound</option></select>`)}
+      </div>
+      ${info ? `<small class="note">${info.southbound ? 'southbound (odd levels)' : 'northbound (even levels)'} · appears T+${fmtT(info.appear_s)} · enters ${info.entry} T+${fmtT(info.entry_s)} · exits ${info.exit} T+${fmtT(info.exit_s)}${info.arrival ? ' · arrival ' + info.arrival : ''}${fp ? '<br>FPL: ' + esc(fp.route) : ''}</small>` : ''}
+      ${myConf.map(k => `<div class="c-los" style="font-family:var(--mono);font-size:12px;margin-top:4px">planned conflict ${k.aircraft.join(' × ')} T+${fmtT(k.start_s)} min ${k.min_nm} NM</div>`).join('')}
+      </section>
+      <section><h2>Pilot requests &amp; events</h2>
+        ${reqs.map(([r, i]) => `<div class="item ${sel.kind === 'req' && sel.i === i ? 'c-ok' : ''}" data-req="${i}">T+${fmtT(r.time)} <b>${r.type === 'weather_deviation' ? 'wx deviation' : r.type}</b> ${esc(reqValueText(r))} <span class="c-dim">${esc(r.reason || '')}</span> <button data-rdel="${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`).join('')}
+        ${evs.map(([r, i]) => `<div class="item c-warn ${sel.kind === 'evt' && sel.i === i ? 'c-ok' : ''}" data-evt="${i}">T+${fmtT(r.time)} <b>${r.type}</b> <span class="c-dim">${esc(r.reason || '')}</span> <button data-edel="${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`).join('')}
+        ${reqs.length || evs.length ? '' : '<div class="empty">none</div>'}
+        <div style="margin-top:8px" class="c-dim">Add at the cursor time <b style="color:var(--text)">T+<span class="tnow">${fmtT(T)}</span></b> (drag the marker on the timeline to re-time it):</div>
+        <div class="row" style="margin-top:4px">
+          <select id="r-type"><option value="descent">request descent</option><option value="altitude">level</option><option value="direct">direct</option><option value="speed">speed</option><option value="weather_deviation">weather deviation</option><option value="rvsm_unable">unable RVSM</option><option value="rvsm_restored">RVSM restored</option></select>
+          <span id="r-valWrap"></span>
+        </div>
+        <div class="row"><input id="r-reason" placeholder="reason (pilot's words)" style="flex:1"><button id="r-add" class="primary">Add</button></div>
+      </section>`;
+    const set = (id, fn) => $(id).addEventListener('change', e => { snapshot(); fn(e.target.value); changed(); });
+    set('#a-cs', v => { v = v.toUpperCase().trim(); if (!v || scn.aircraft.some(x => x !== a && x.callsign === v)) return;
+      for (const r of [...scn.requests, ...scn.events]) if (r.callsign.toUpperCase() === a.callsign) r.callsign = v; a.callsign = v; sel = { kind: 'ac', cs: v }; });
+    set('#a-type', v => a.type = v);
+    set('#a-fl', v => a.fl = +v);
+    set('#a-route', v => { a.route = v.toUpperCase().split(/[\s,\-]+/).filter(Boolean); if (a.reach && a.reach.waypoint && !a.route.includes(a.reach.waypoint.toUpperCase())) a.reach = { point: sector.waypoints[a.route[0]] || [0, 0], time: a.reach.time }; });
+    set('#a-dep', v => { if (v) a.dep = v.toUpperCase(); else delete a.dep; });
+    set('#a-dest', v => { if (v) a.dest = v.toUpperCase(); else delete a.dest; });
+    set('#a-mach', v => { if (v) a.mach = +v; else delete a.mach; });
+    set('#a-rvsm', v => { if (v === '') delete a.rvsm; else a.rvsm = v === 'true'; });
+    set('#a-form', v => { if (+v >= 2) { a.formation = { size: +v }; a.rvsm = false; } else delete a.formation; });
+    set('#a-dir', v => { if (v) a.direction = v; else delete a.direction; });
+    $('#a-reachT').onclick = () => {
+      snapshot(); const p = positionsAt(T).find(q => q.cs === a.callsign);
+      if (a.start) a.start.time = Math.round(T);
+      else if (p && lastGoodComp) { a.reach = { point: [+p.x.toFixed(2), +p.y.toFixed(2)], time: Math.round(T) }; }
+      else if (a.reach) a.reach.time = Math.round(T);
+      delete a.entry_time; changed();
+    };
+    $('#acDel').onclick = deleteSel;
+    const valWrap = () => {
+      const t = $('#r-type').value, w = $('#r-valWrap');
+      if (t === 'altitude') w.innerHTML = `<input id="r-val" type="number" step="10" value="${a.fl + (info && info.southbound ? 20 : 20)}" style="width:80px"> FL`;
+      else if (t === 'direct') w.innerHTML = `<select id="r-val">${a.route.slice(1).map(n => `<option>${n}</option>`).join('')}${Object.keys(sector.waypoints).filter(n => !a.route.includes(n)).sort().map(n => `<option>${n}</option>`).join('')}</select>`;
+      else if (t === 'speed') w.innerHTML = `<input id="r-val" type="number" step="0.01" value="0.76" style="width:80px"> <span class="c-dim">Mach (&lt;2) or IAS kt</span>`;
+      else if (t === 'descent') w.innerHTML = `<input id="r-val" type="number" step="10" placeholder="level (opt.)" style="width:96px"> <span class="c-dim">"request descent"; empty = LoA level</span>`;
+      else if (t === 'weather_deviation') {
+        const dn = a.route.slice(1).map(n => `<option>${n}</option>`).join('');
+        w.innerHTML = `<select id="wd-mode" title="how the pilot's request is formed when it is made">
+            <option value="auto">around the weather (pilot's own plan)</option><option value="offset">offset from track</option><option value="heading">fixed heading</option></select>
+          <span id="wd-f" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px"></span>`;
+        const fields = () => { const m = $('#wd-mode').value;
+          $('#wd-f').innerHTML = (m === 'heading' ? `<input id="wd-hdg" type="number" min="1" max="360" placeholder="heading" style="width:76px">`
+              : `<select id="wd-side"><option value="${m === 'auto' ? 'either' : 'left'}">${m === 'auto' ? 'either side' : 'left'}</option>${m === 'auto' ? '<option>left</option>' : ''}<option>right</option></select>`)
+            + (m === 'offset' ? `<input id="wd-off" type="number" min="5" max="90" value="30" style="width:56px" title="degrees off track">°` : '')
+            + `<input id="wd-dist" type="number" min="3" max="200" placeholder="${m === 'auto' ? 'NM (auto)' : 'NM'}" ${m === 'auto' ? '' : 'value="20"'} style="width:76px" title="distance on the deviation heading">`
+            + `<select id="wd-then" title="then direct"><option value="">then direct (auto)</option>${dn}</select>`; };
+        $('#wd-mode').onchange = fields; fields();
+      }
+      else w.innerHTML = '';
+    };
+    $('#r-type').onchange = valWrap; valWrap();
+    $('#r-add').onclick = () => {
+      const t = $('#r-type').value, reason = $('#r-reason').value.trim();
+      snapshot();
+      if (t === 'rvsm_unable' || t === 'rvsm_restored') { scn.events.push({ time: Math.round(T), callsign: a.callsign, type: t, reason: reason || (t === 'rvsm_unable' ? 'autopilot failure' : 'equipment restored') }); sel = { kind: 'evt', i: scn.events.length - 1 }; }
+      else if (t === 'weather_deviation') {
+        const m = $('#wd-mode').value, v = {};
+        if (m === 'heading') { const h = +$('#wd-hdg').value; if (!(h >= 1 && h <= 360)) { status('give a heading 001-360', 'c-los'); undoStack.pop(); return; } v.heading = h; }
+        else v.side = $('#wd-side').value;
+        if (m === 'offset') v.offset_deg = +$('#wd-off').value || 30;
+        if ($('#wd-dist').value) v.distance_nm = +$('#wd-dist').value;
+        if ($('#wd-then').value) v.then_direct = $('#wd-then').value;
+        scn.requests.push({ time: Math.round(T), callsign: a.callsign, type: t, value: v, reason: reason || 'weather ahead' });
+        sel = { kind: 'req', i: scn.requests.length - 1 }; }
+      else if (t === 'descent') { const v = $('#r-val').value;
+        scn.requests.push({ time: Math.round(T), callsign: a.callsign, type: 'descent', ...(v ? { value: +v } : {}), reason: reason || 'approaching top of descent' });
+        sel = { kind: 'req', i: scn.requests.length - 1 }; }
+      else { let v = $('#r-val').value; v = t === 'direct' ? v : +v;
+        scn.requests.push({ time: Math.round(T), callsign: a.callsign, type: t, value: v, reason: reason || { altitude: 'requesting better ride', direct: 'requesting shortcut', speed: 'company speed' }[t] });
+        sel = { kind: 'req', i: scn.requests.length - 1 }; }
+      changed();
+    };
+    b.querySelectorAll('[data-rdel]').forEach(x => x.onclick = ev => { ev.stopPropagation(); snapshot(); scn.requests.splice(+x.dataset.rdel, 1); sel = { kind: 'ac', cs }; changed(); });
+    b.querySelectorAll('[data-edel]').forEach(x => x.onclick = ev => { ev.stopPropagation(); snapshot(); scn.events.splice(+x.dataset.edel, 1); sel = { kind: 'ac', cs }; changed(); });
+    b.querySelectorAll('[data-req]').forEach(x => x.onclick = () => { sel = { kind: 'req', i: +x.dataset.req }; T = scn.requests[sel.i].time; renderSel(); });
+    b.querySelectorAll('[data-evt]').forEach(x => x.onclick = () => { sel = { kind: 'evt', i: +x.dataset.evt }; T = scn.events[sel.i].time; renderSel(); });
+    return;
+  }
+  if (sel.kind === 'cell') {
+    const c = scn.weather.cells[sel.i]; if (!c) { b.innerHTML = ''; return; }
+    b.innerHTML = `<section><h2>Storm cell <span><button class="danger" id="cDel" style="font-size:11px;padding:1px 6px">delete</button></span></h2>
+      <div class="grid">
+        ${field('id', `<input id="c-id" value="${esc(c.id || '')}">`)}
+        ${field('position', `<span style="font-family:var(--mono);font-size:12px">${(+c.x).toFixed(1)}, ${(+c.y).toFixed(1)} NM at T+${fmtT(c.at_time || 0)}</span>`)}
+        ${field('max dBZ', `<input id="c-dbz" type="number" value="${c.dbz ?? 55}">`)}
+        ${field('echo top', `<input id="c-top" type="number" step="10" value="${c.top_fl ?? 420}">`)}
+        ${field('radius NM', `<input id="c-rad" type="number" step="0.5" value="${c.radius_nm ?? 3.5}">`)}
+        ${field('lifetime s', `<input id="c-lt" type="number" step="300" value="${c.lifetime_s ?? 5400}">`)}
+        ${field('age at T', `<input id="c-age" type="number" step="300" value="${c.age_s ?? Math.round((c.lifetime_s || 5400) * 0.4)}">`)}
+        ${field('moving to', `<span style="display:flex;gap:4px"><input id="c-mdir" type="number" placeholder="storm motion" value="${c.motion ? c.motion.toward : ''}"><input id="c-mkt" type="number" placeholder="kt" value="${c.motion ? c.motion.kt : ''}"></span>`)}
+      </div><small class="note">Drag the cell on the map to put it somewhere at the cursor time; drag its marker on the weather lane to change when it is there. Mature cells (age ≈ 40% of lifetime) are strongest.</small></section>`;
+    const set = (id, fn) => $(id).addEventListener('change', e => { snapshot(); fn(e.target.value); changed(false); });
+    set('#c-id', v => c.id = v); set('#c-dbz', v => c.dbz = +v); set('#c-top', v => c.top_fl = +v); set('#c-rad', v => c.radius_nm = +v);
+    set('#c-lt', v => c.lifetime_s = +v); set('#c-age', v => c.age_s = +v);
+    const mot = () => { const d = $('#c-mdir').value, k = $('#c-mkt').value; if (d === '' || k === '') delete c.motion; else c.motion = { toward: +d, kt: +k }; };
+    set('#c-mdir', mot); set('#c-mkt', mot);
+    $('#cDel').onclick = deleteSel; return;
+  }
+  if (sel.kind === 'area') {
+    const a = scn.areas[sel.i]; if (!a) { b.innerHTML = ''; return; }
+    b.innerHTML = `<section><h2>Area <span><button class="danger" id="arDel" style="font-size:11px;padding:1px 6px">delete</button></span></h2>
+      <div class="grid">
+        ${field('id', `<input id="ar-id" value="${esc(a.id)}">`)}
+        ${field('name', `<input id="ar-name" value="${esc(a.name || '')}">`)}
+        ${field('kind', `<select id="ar-kind">${['danger', 'restricted', 'prohibited'].map(k => `<option ${a.kind === k ? 'selected' : ''}>${k}</option>`).join('')}</select>`)}
+        ${field('levels', `<span style="display:flex;gap:4px"><input id="ar-lo" type="number" step="10" value="${a.lower_fl}"><input id="ar-hi" type="number" step="10" value="${a.upper_fl}"></span>`)}
+        ${field('at start', `<select id="ar-act"><option value="false">inactive</option><option value="true" ${a.active ? 'selected' : ''}>active</option></select>`)}
+        ${a.circle ? field('radius NM', `<input id="ar-rad" type="number" step="1" value="${a.circle.radius_nm}">`) : ''}
+      </div>
+      <div style="margin-top:8px" class="c-dim">Schedule</div>
+      ${(a.schedule || []).map((e, k) => `<div class="item">T+${fmtT(e.time)} ${e.active ? '<span class="c-warn">activated</span>' : 'deactivated'} <button data-sdel="${k}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`).join('') || '<div class="empty">no changes</div>'}
+      <div class="row" style="margin-top:6px"><button id="ar-on">Activate at T+<span class="tnow">${fmtT(T)}</span></button><button id="ar-off">Deactivate at T+<span class="tnow">${fmtT(T)}</span></button></div>
+      <small class="note">Drag the area on the map to move it; drag its schedule markers on the timeline to re-time them.</small></section>`;
+    const set = (id, fn) => $(id).addEventListener('change', e => { snapshot(); fn(e.target.value); changed(); });
+    set('#ar-id', v => a.id = v); set('#ar-name', v => a.name = v); set('#ar-kind', v => a.kind = v);
+    set('#ar-lo', v => a.lower_fl = +v); set('#ar-hi', v => a.upper_fl = +v); set('#ar-act', v => a.active = v === 'true');
+    if (a.circle) set('#ar-rad', v => a.circle.radius_nm = +v);
+    $('#ar-on').onclick = () => { snapshot(); (a.schedule = a.schedule || []).push({ time: Math.round(T), active: true }); changed(); };
+    $('#ar-off').onclick = () => { snapshot(); (a.schedule = a.schedule || []).push({ time: Math.round(T), active: false }); changed(); };
+    b.querySelectorAll('[data-sdel]').forEach(x => x.onclick = () => { snapshot(); a.schedule.splice(+x.dataset.sdel, 1); changed(); });
+    $('#arDel').onclick = deleteSel; return;
+  }
+  if (sel.kind === 'strat') {
+    const st = (scn.weather.stratiform || [])[sel.i]; if (!st) { b.innerHTML = ''; return; }
+    const r = st.radius_nm || [50, 30];
+    b.innerHTML = `<section><h2>Rain area (stratiform) <span><button class="danger" id="stDel" style="font-size:11px;padding:1px 6px">remove</button></span></h2>
+      <div class="grid">
+        ${field('reflectivity', `<input id="st-dbz" type="number" value="${st.dbz ?? 30}"> <span class="c-dim">dBZ</span>`)}
+        ${field('half axes NM', `<span style="display:flex;gap:4px"><input id="st-a" type="number" value="${r[0]}"><input id="st-b" type="number" value="${r[1]}"></span>`)}
+        ${field('orientation', `<input id="st-or" type="number" value="${st.orient_deg ?? 0}">`)}
+        ${field('moving to', `<span style="display:flex;gap:4px"><input id="st-mdir" type="number" placeholder="storm motion" value="${st.motion ? st.motion.toward : ''}"><input id="st-mkt" type="number" placeholder="kt" value="${st.motion ? st.motion.kt : ''}"></span>`)}
+      </div><small class="note">Widespread moderate rain (about 25-35 dBZ): turbulence is light, pilots don't deviate around it below 30 dBZ. Drawn where it is at T+0; drag it on the map.</small></section>`;
+    const set = (id, fn) => $(id).addEventListener('change', e => { snapshot(); fn(e.target.value); changed(false); });
+    set('#st-dbz', v => st.dbz = +v); set('#st-a', v => st.radius_nm = [+v, r[1]]); set('#st-b', v => st.radius_nm = [r[0], +v]); set('#st-or', v => st.orient_deg = +v);
+    const mot = () => { const d = $('#st-mdir').value, k = $('#st-mkt').value; if (d === '' || k === '') delete st.motion; else st.motion = { toward: +d, kt: +k }; };
+    set('#st-mdir', mot); set('#st-mkt', mot);
+    $('#stDel').onclick = deleteSel; return;
+  }
+  if (sel.kind === 'conv') {
+    const c = convList()[sel.i]; if (!c) { b.innerHTML = ''; return; }
+    const isLine = c.regime === 'squall_line', l = c.line || {};
+    b.innerHTML = `<section><h2>${isLine ? 'Squall line' : 'Convection area'} <span><button class="danger" id="cvDel" style="font-size:11px;padding:1px 6px">remove</button></span></h2>
+      <div class="grid">
+        ${field('intensity', `<select id="cv-int">${['moderate', 'strong', 'severe'].map(k => `<option ${c.intensity === k ? 'selected' : ''}>${k}</option>`).join('')}</select>`)}
+        ${field('pattern', `<span class="c-dim">${sel.i + 1} of ${convList().length} storm patterns</span>`)}
+      ${isLine ? field('length NM', `<input id="cv-len" type="number" value="${l.length_nm ?? 170}">`) + field('orientation', `<input id="cv-or" type="number" value="${l.orient_deg ?? 0}">`)
+          + field('random gaps', `<input id="cv-gaps" type="number" min="0" value="${l.gaps ?? 1}">`) + field('gap list', `<input id="cv-gl" placeholder="along,width; …" value="${(l.gap_list || []).map(g => g.join(',')).join('; ')}">`)
+          + field('cell spacing', `<input id="cv-sp" type="number" value="${l.spacing_nm ?? 9}">`)
+          : field('regime', `<select id="cv-reg">${['isolated', 'scattered', 'embedded'].map(k => `<option ${c.regime === k ? 'selected' : ''}>${k}</option>`).join('')}</select>`) + field('cells', `<input id="cv-n" type="number" placeholder="default" value="${c.count ?? ''}">`)}
+      </div><small class="note">${isLine ? 'The line is drawn where it is at T+0; it moves with the storm motion (mid-level wind). Gap positions are NM along the line from its centre.' : 'Cells are born at random times and places in the rectangle; the seed (Scenario tab) decides which.'}</small></section>`;
+    const set = (id, fn) => { const el = $(id); if (el) el.addEventListener('change', e => { snapshot(); fn(e.target.value); changed(false); }); };
+    set('#cv-int', v => c.intensity = v); set('#cv-len', v => l.length_nm = +v); set('#cv-or', v => l.orient_deg = +v); set('#cv-gaps', v => l.gaps = +v);
+    set('#cv-sp', v => l.spacing_nm = +v); set('#cv-reg', v => c.regime = v); set('#cv-n', v => { if (v === '') delete c.count; else c.count = +v; });
+    set('#cv-gl', v => l.gap_list = v.split(';').map(s => s.split(',').map(Number)).filter(g => g.length === 2 && g.every(isFinite)));
+    $('#cvDel').onclick = deleteSel;
+  }
+}
+
+// ============================================================ boot
+(async () => {
+  resize(); await loadLists();
+  const q = new URLSearchParams(location.search).get('scenario');
+  if (q) { try { await setScenario(await api(`/scenarios/${q}/raw`)); } catch (e) { status(e.message, 'c-los'); } }
+  else if ($('#loadSel').options.length) { $('#loadSel').value = [...$('#loadSel').options].some(o => o.value === 's02_climb_request_into_crossing') ? 's02_climb_request_into_crossing' : $('#loadSel').options[0].value; }
+  renderPreview(); renderSel(); requestAnimationFrame(draw);
+})();
+</script>
+</body>
+</html>

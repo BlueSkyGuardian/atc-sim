@@ -1,0 +1,140 @@
+{
+  "name": "s04_direct_request_reroute",
+  "title": "Direct-to request that crosses traffic",
+  "description": "A flight asks for a different exit (company reroute). Its new track would cut across a south-eastbound flight at the same level.",
+  "design_notes": "AFR404 (N1->S1, FL350) and TVF88 (W1->E2, FL350, both southbound): on their filed routes TVF88 crosses AFR404's track well before AFR404 gets there - no conflict. At t=360 AFR404 requests direct S3. The new diagonal track meets TVF88 further east. Correct: approve with a level change (FL330/FL370 are free; FL340/FL360 would be wrong-direction levels), delay the direct, or unable.",
+  "duration_s": 1500,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "AFR404",
+      "type": "A320",
+      "route": [
+        "N1",
+        "S1"
+      ],
+      "fl": 350,
+      "reach": {
+        "point": [
+          -45.0,
+          -15.0
+        ],
+        "time": 820
+      }
+    },
+    {
+      "callsign": "TVF88",
+      "type": "B738",
+      "route": [
+        "W1",
+        "E2"
+      ],
+      "fl": 350,
+      "reach": {
+        "point": [
+          -25.006,
+          8.335
+        ],
+        "time": 646
+      }
+    },
+    {
+      "callsign": "BAW9J",
+      "type": "B772",
+      "route": [
+        "S4",
+        "N3"
+      ],
+      "fl": 380,
+      "load": 0.35,
+      "entry_time": 150
+    }
+  ],
+  "requests": [
+    {
+      "time": 360,
+      "callsign": "AFR404",
+      "type": "direct",
+      "value": "S3",
+      "reason": "company reroute, destination change"
+    }
+  ],
+  "expected": {
+    "passive": {
+      "los": false
+    },
+    "naive_approve": {
+      "los": true
+    }
+  }
+}

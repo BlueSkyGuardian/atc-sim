@@ -1,0 +1,343 @@
+{
+  "name": "s16_e1_arrival_sequencing",
+  "title": "Five arrivals converging on E1",
+  "description": "Five arrivals for EFLD (runway 09, straight-in) converge on E1 from W1, W2, N3 and N4 at FL340-FL390. Letter of agreement: level FL250 at E1, 10 NM in trail. One westbound overflight at FL360.",
+  "design_notes": "The arrivals reach E1 only 6-8 NM apart if nothing is done, and all of them are high (the close aerodrome gives early tops of descent, 50-60 NM before E1). Approving every descent request as it comes puts them all at FL250 at E1 at the same time: spacing violations and a loss of separation (EZY91 / IBE77, 0.4 NM). Leaving them high violates the LoA level. Correct: decide the order early, delay followers with vectors and Mach / conversion IAS restrictions, and give each its descent so it is level FL250 by E1.",
+  "duration_s": 1800,
+  "pilot_delay_s": 4,
+  "weather": {
+    "seed": 21,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          30
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "aerodromes": [
+    {
+      "id": "EFLD",
+      "name": "Eastfield (fictional)",
+      "x": 97.0,
+      "y": 6.0,
+      "elev_ft": 300,
+      "runways": [
+        {
+          "id": "09",
+          "heading": 90
+        },
+        {
+          "id": "27",
+          "heading": 270
+        }
+      ],
+      "runway_in_use": "09"
+    },
+    {
+      "id": "SPRT",
+      "name": "Southport (fictional)",
+      "x": 58.0,
+      "y": -148.0,
+      "elev_ft": 150,
+      "runways": [
+        {
+          "id": "18",
+          "heading": 180
+        },
+        {
+          "id": "36",
+          "heading": 360
+        }
+      ],
+      "runway_in_use": "18"
+    }
+  ],
+  "areas": [],
+  "aircraft": [
+    {
+      "callsign": "AFR318",
+      "type": "A320",
+      "route": [
+        "N4",
+        "E1"
+      ],
+      "fl": 390,
+      "reach": {
+        "waypoint": "E1",
+        "time": 700
+      }
+    },
+    {
+      "callsign": "TAP210",
+      "type": "E190",
+      "route": [
+        "N3",
+        "E1"
+      ],
+      "fl": 370,
+      "reach": {
+        "waypoint": "E1",
+        "time": 745
+      }
+    },
+    {
+      "callsign": "RAM960",
+      "type": "B738",
+      "route": [
+        "W1",
+        "E1"
+      ],
+      "fl": 350,
+      "reach": {
+        "waypoint": "E1",
+        "time": 790
+      }
+    },
+    {
+      "callsign": "IBE77",
+      "type": "A20N",
+      "route": [
+        "W2",
+        "E1"
+      ],
+      "fl": 340,
+      "reach": {
+        "waypoint": "E1",
+        "time": 840
+      }
+    },
+    {
+      "callsign": "EZY91",
+      "type": "A319",
+      "route": [
+        "W1",
+        "E1"
+      ],
+      "fl": 370,
+      "reach": {
+        "waypoint": "E1",
+        "time": 880
+      }
+    },
+    {
+      "callsign": "DLH3",
+      "type": "A21N",
+      "route": [
+        "E2",
+        "W1"
+      ],
+      "fl": 360,
+      "load": 0.35,
+      "entry_time": 100
+    }
+  ],
+  "requests": [],
+  "expected": {
+    "passive": {
+      "seq_level": true,
+      "seq_spacing": true
+    },
+    "naive_approve": {
+      "los": true,
+      "seq_spacing": true
+    }
+  },
+  "solution": [
+    {
+      "on_request": "AFR318",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 261.0,
+      "do": [
+        {
+          "callsign": "TAP210",
+          "type": "heading",
+          "heading": 102
+        }
+      ]
+    },
+    {
+      "at": 351.0,
+      "do": [
+        {
+          "callsign": "TAP210",
+          "type": "direct",
+          "waypoint": "E1"
+        }
+      ]
+    },
+    {
+      "on_request": "TAP210",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 7.0,
+      "do": [
+        {
+          "callsign": "RAM960",
+          "type": "heading",
+          "heading": 130
+        }
+      ]
+    },
+    {
+      "at": 207.0,
+      "do": [
+        {
+          "callsign": "RAM960",
+          "type": "direct",
+          "waypoint": "E1"
+        }
+      ]
+    },
+    {
+      "on_request": "RAM960",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 7.0,
+      "do": [
+        {
+          "callsign": "IBE77",
+          "type": "heading",
+          "heading": 117
+        }
+      ]
+    },
+    {
+      "at": 267.0,
+      "do": [
+        {
+          "callsign": "IBE77",
+          "type": "direct",
+          "waypoint": "E1"
+        }
+      ]
+    },
+    {
+      "on_request": "IBE77",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    },
+    {
+      "at": 25.0,
+      "do": [
+        {
+          "callsign": "EZY91",
+          "type": "speed",
+          "mach": 0.72,
+          "conversion_kt": 250
+        }
+      ]
+    },
+    {
+      "at": 26.0,
+      "do": [
+        {
+          "callsign": "EZY91",
+          "type": "heading",
+          "heading": 135
+        }
+      ]
+    },
+    {
+      "at": 285.0,
+      "do": [
+        {
+          "callsign": "EZY91",
+          "type": "direct",
+          "waypoint": "E1"
+        }
+      ]
+    },
+    {
+      "on_request": "EZY91",
+      "type": "altitude",
+      "do": [
+        {
+          "reply": "approved"
+        }
+      ]
+    }
+  ]
+}

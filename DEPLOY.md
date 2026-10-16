@@ -1,0 +1,96 @@
+# Putting the simulator on the internet
+
+The connected tool (instructors, controllers, pseudo-pilots, radio and telephone, recordings) runs as one
+server behind HTTPS. HTTPS is not optional: browsers only give a page the microphone when it is served
+securely (or from `localhost`).
+
+What you need: a small Linux server (2 vCPU / 4 GB is enough for a few simultaneous exercises; recording
+rendering uses one core for a minute or two after each exercise), a domain name, Docker.
+
+## 1. Domain and server
+
+1. Create a DNS `A` record, e.g. `atc.example.com`, pointing to the server's public IP address.
+2. Open ports 80 and 443 in the server's firewall (80 is used once by Let's Encrypt to issue the certificate).
+3. Install Docker (`curl -fsSL https://get.docker.com | sh`).
+
+## 2. Google sign-in (the OAuth client)
+
+In the [Google Cloud console](https://console.cloud.google.com/):
+
+1. Create a project (or pick one), e.g. *ATC simulator*.
+2. **APIs & Services → OAuth consent screen**: user type *External*, app name *ATC simulator*, your support
+   e-mail, scopes `openid`, `email`, `profile` (the defaults). While the app is in *Testing* mode, only the Gmail
+   addresses you add as *test users* can sign in (up to 100); click *Publish app* to let any Google account in
+   (the simulator still only lets them do what their role allows, and new accounts start as controllers with
+   no exercise).
+3. **APIs & Services → Credentials → Create credentials → OAuth client ID**:
+   * Application type: **Web application**
+   * Authorised JavaScript origins: `https://atc.example.com`
+   * Authorised redirect URIs: `https://atc.example.com/auth/callback`
+4. Copy the *Client ID* and *Client secret*.
+
+## 3. Configure and start
+
+```bash
+git clone <this repository> atc-sim        # or copy the folder to the server
+cd atc-sim/deploy
+cp env.example .env
+nano .env                                    # domain, public URL, Google client, your Gmail as admin
+docker compose up -d --build
+```
+
+Open `https://atc.example.com`, sign in with the Gmail address listed in `ATC_ADMIN_EMAILS`: you are the
+administrator. Complete your profile (first name, last name, licence number).
+
+## 4. Accounts and roles
+
+* Everybody signs in with their Google account and fills in first name, last name and licence number.
+* A new account is a **controller**. The administrator changes roles on the **Users** page
+  (controller, pseudo-pilot, instructor, administrator) and can disable accounts. Accounts can also be
+  created in advance there (the person then signs in with that Gmail address).
+* Instructors invite people to an exercise from the user list (they find them by name or licence number), or
+  send them the controller / pseudo-pilot link of the exercise.
+
+## 5. Settings (`.env`)
+
+| Variable | Meaning |
+|---|---|
+| `ATC_DOMAIN` | the domain Caddy gets a certificate for |
+| `ATC_PUBLIC_URL` | `https://` + domain; used for the Google redirect and the invitation links |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | the OAuth client |
+| `ATC_ADMIN_EMAILS` | Gmail addresses that are always administrators (comma separated) |
+| `ATC_SECRET_KEY` | optional: signs the session cookies (default: generated once into the data volume) |
+| `ATC_API_KEY` | optional: scripts and agents send it as `X-API-Key` and get full rights |
+| `ATC_AUTH` | `off` = the old open single-user mode (only on your own computer, never on the internet) |
+| `ATC_DEV_LOGIN` | `1` = password-less test login form (automatic when no Google client is set; never online) |
+
+## 6. Data, backups, updates
+
+Everything lives in the `atc-data` Docker volume: `atcsim.db` (accounts, scenario sharing, exercises),
+`recordings/<exercise>/exercise.mp4` and the raw material it was made from, and `secret.key`.
+Scenarios saved with the designer are in `scenarios/` on the host.
+
+```bash
+docker compose exec atcsim sqlite3 /data/atcsim.db ".backup /data/backup.db"   # or copy the volume
+docker compose pull && docker compose up -d --build                            # update
+```
+
+A recording takes about 1 MB per minute of exercise. Archive or delete old ones from the home page.
+
+## 7. Agents and scripts
+
+With accounts on, HTTP clients (such as `examples/baseline_agent.py`) need the API key:
+
+```bash
+ATC_API_KEY=... python examples/baseline_agent.py --server https://atc.example.com --scenario s10_busy_mixed
+```
+
+## Local test without Google
+
+```bash
+python run.py --port 8000          # no Google client: the sign-in page offers a test login (any e-mail)
+```
+
+The first account created that way is administrator (unless `ATC_ADMIN_EMAILS` is set). The microphone
+works on `http://localhost`; from other computers on the network it needs HTTPS, e.g. a quick local
+certificate with Caddy: `caddy reverse-proxy --from <your-ip>.nip.io --to localhost:8000`.

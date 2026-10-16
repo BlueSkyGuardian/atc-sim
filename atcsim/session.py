@@ -1,0 +1,308 @@
+"""Sessions: one running scenario each, with its own clock thread."""
+from __future__ import annotations
+
+import re
+import threading
+import time
+import uuid
+from typing import Dict, List, Optional
+
+from . import airspace as airspace_mod
+from .geometry import SEP_H_NM, SEP_V_FT
+from .scenario import build_world, load_scenario, public_view
+from .world import World
+
+
+class Session:
+    def __init__(self, scenario_name: str, mode: str = "realtime", time_factor: float = 1.0,
+                 autostart: bool = True, label: Optional[str] = None, auto_assume: Optional[bool] = None):
+        if mode not in ("realtime", "stepped"):
+            raise ValueError("mode must be 'realtime' or 'stepped'")
+        self.id = uuid.uuid4().hex[:8]
+        self.label = label or ""
+        self.multi = False                 # connected exercise: instructor + controller + pseudo-pilot seats
+        self.scenario_name = scenario_name
+        self.scn = load_scenario(scenario_name)
+        if auto_assume is not None:
+            self.scn["auto_assume"] = bool(auto_assume)
+        self.world: World = build_world(self.scn)
+        self.mode = mode
+        self.time_factor = max(0.1, min(float(time_factor), 100.0))
+        self.lock = threading.RLock()
+        self.created_at = time.time()
+        self.clients: List[dict] = []
+        self.status = "created"
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True, name=f"session-{self.id}")
+        self._thread.start()
+        if autostart and mode == "realtime":
+            self.status = "running"
+        elif mode == "stepped":
+            self.status = "paused"
+
+    # ------------------------------------------------------------------ clock
+    def _run(self) -> None:
+        next_tick = time.monotonic()
+        while not self._stop.is_set():
+            if self.status == "running" and self.mode == "realtime":
+                with self.lock:
+                    self.world.step(1.0)
+                    if self.world.finished:
+                        self.status = "finished"
+                next_tick += 1.0 / self.time_factor
+                delay = next_tick - time.monotonic()
+                if delay < -1.0:            # fell behind (e.g. very high time factor) -> resync
+                    next_tick = time.monotonic()
+                    delay = 0
+                self._stop.wait(max(0.0, delay))
+            else:
+                next_tick = time.monotonic()
+                self._stop.wait(0.05)
+
+    def stop(self) -> None:
+        self._stop.set()
+
+    def control(self, action: str, seconds: float = 1.0, time_factor: Optional[float] = None,
+                mode: Optional[str] = None) -> dict:
+        with self.lock:
+            if action in ("start", "resume"):
+                if self.status != "finished":
+                    self.mode = "realtime"
+                    self.status = "running"
+            elif action == "pause":
+                if self.status != "finished":
+                    self.status = "paused"
+            elif action == "set_speed":
+                if time_factor is None:
+                    raise ValueError("time_factor required")
+                self.time_factor = max(0.1, min(float(time_factor), 100.0))
+            elif action == "set_mode":
+                if mode not in ("realtime", "stepped"):
+                    raise ValueError("mode must be realtime|stepped")
+                self.mode = mode
+                if mode == "stepped" and self.status == "running":
+                    self.status = "paused"
+            elif action == "step":
+                if self.status == "running":
+                    raise ValueError("pause the session (or use stepped mode) before stepping")
+                n = int(max(1, min(float(seconds), 7200)))
+                for _ in range(n):
+                    self.world.step(1.0)
+                    if self.world.finished:
+                        self.status = "finished"
+                        break
+            elif action == "restart":
+                self.world = build_world(self.scn)
+                self.status = "running" if self.mode == "realtime" else "paused"
+            else:
+                raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart")
+            return self.summary()
+
+    # ------------------------------------------------------------------ views
+    def summary(self) -> dict:
+        w = self.world
+        return {
+            "session_id": self.id, "label": self.label, "scenario": self.scenario_name,
+            "title": self.scn.get("title", ""), "status": self.status, "mode": self.mode,
+            "time_factor": self.time_factor, "sim_time_s": round(w.t, 1), "duration_s": w.duration_s,
+            "active_aircraft": len(w.active_aircraft()),
+            "pending_requests": sum(1 for r in w.requests.values() if r.status == "pending"),
+            "clients": len(self.clients),
+        }
+
+    def separation(self, lookahead_s: float = 600.0, include_inbound: bool = True, all_pairs: bool = False,
+                   max_pair_distance_nm: float = 40.0) -> dict:
+        """Current pairs + predicted conflicts. Cached per sim time (prediction runs the full aircraft model).
+        The look-ahead runs on a copy of the world taken under the lock, so the (slow) prediction never holds
+        the session lock: the clock keeps running and the stream keeps flowing while it is computed."""
+        with self.lock:
+            w = self.world
+            key = (w.t, lookahead_s, include_inbound, all_pairs, id(w))
+            pairs = w.current_pairs(max_pair_distance_nm)
+            cached = self._sep_val if getattr(self, "_sep_key", None) == key else None
+            snap = None if cached is not None else w.clone()
+        if cached is None:
+            an = snap.analyze(snap.predict(lookahead_s, extra=None, include_inbound=include_inbound),
+                              lookahead_conflicts_only=not all_pairs)
+            cached = {"sim_time_s": round(key[0], 1), "minima": minima(snap),
+                      "lookahead_s": lookahead_s, "predicted_conflicts": an["conflicts"],
+                      "predicted_area_infringements": an["area_infringements"],
+                      "predicted_weather_penetrations": an["weather_penetrations"]}
+            with self.lock:
+                self._sep_key, self._sep_val = key, cached
+        res = dict(cached)
+        res["current_pairs"] = pairs
+        return res
+
+    def briefing(self) -> dict:
+        """Everything a client needs when it connects: scenario, sector, waypoints, routes, areas."""
+        w = self.world
+        return {
+            "session": self.summary(),
+            "scenario": public_view(self.scn),
+            "sector": sector_description(w),
+            "areas": [a.snapshot(w.t) for a in w.areas.values()],
+            "weather": weather_description(w),
+            "arrivals": arrivals_description(w),
+            "aircraft_types": sorted({a.icao for a in w.aircraft.values()}),
+            "weather_products": ["/weather", "/weather/radar?product=cappi|composite|echo_tops|edr&fl=",
+                                 "/weather/hazards?fl=", "/weather/column?x=&y=", "/weather/wind?fl="],
+            "state": w.state(),
+        }
+
+
+def arrivals_description(w: World) -> dict:
+    return {
+        "aerodromes": [a.snapshot() for a in w.aerodromes.values()],
+        "sequencing_fixes": [{**q.snapshot(), "approach_with_runway_in_use": w.approach(f, q.aerodrome)}
+                             for f, q in w.seq.items()],
+        "note": "every flight whose exit is a sequencing fix is an arrival to that aerodrome; it requests descent "
+                "at its computed top of descent, which depends on the runway in use (straight-in or reversal)",
+    }
+
+
+def weather_description(w: World) -> dict:
+    return w.env.weather.summary(w.t)
+
+
+def minima(w: Optional[World] = None) -> dict:
+    h = float(w.sep_h) if w is not None else SEP_H_NM
+    return {"horizontal_nm": h, "vertical_ft": SEP_V_FT,
+            "vertical_non_rvsm_ft": 2000, "rvsm_band": [290, 410],
+            "rules": [f"{h:g} NM horizontally (radar separation minimum of this airspace / scenario)",
+                      "1000 ft below FL290, and between RVSM-approved aircraft from FL290 to FL410 inclusive",
+                      "2000 ft in FL290-FL410 when either aircraft is non-RVSM (not approved, unable RVSM)",
+                      "2000 ft when either aircraft is above FL410",
+                      f"military formation: 2000 ft from any other aircraft at any level, or {h:g} NM + formation "
+                      "extent (default 1 NM) horizontally"]}
+
+
+MINIMA = minima()          # training default, kept for importers
+
+
+def sector_description(w: Optional[World] = None) -> dict:
+    asp = w.airspace if w is not None else airspace_mod.get("training")
+    d = asp.describe()
+    if w is not None:
+        d["waypoints"] = {k: [round(v[0], 2), round(v[1], 2)] for k, v in w.waypoints.items() if not k.startswith("@")}
+        d["vertical_limits"] = {"lower_fl": w.lower_fl, "upper_fl": w.upper_fl}
+    d["headings"] = "degrees, 1-360, relative to grid north (+y)" + (
+        "; grid north = true north on the central meridian, within about 2 deg elsewhere" if asp.projection else
+        " (true)")
+    d["separation_minima"] = minima(w)
+    return {
+        **d,
+        "pilot_delay_s": w.pilot_delay_s if w else None,
+        "instruction_types": {
+            "altitude": {"fl": "int, multiple of 10", "rate_fpm": "optional: 'at X ft/min or greater'"},
+            "heading": {"heading": "1-360 (true)", "turn": "optional 'left'|'right'"},
+            "direct": {"waypoint": "waypoint name; a transfer point on the boundary becomes the new exit"},
+            "speed": {"mach": "e.g. 0.76 (flown above the conversion altitude)",
+                      "conversion_kt": "IAS to fly after converting from Mach, e.g. 280",
+                      "ias_kt": "fly this IAS now, at every level", "resume_normal": "true = own speed schedule"},
+            "altitude+speed": "an altitude instruction can carry mach / conversion_kt / ias_kt: "
+                              "'descend FL250, maintain Mach .76, on conversion 280 knots'",
+            "resume": {},
+            "reply": {"request_id": "Rxxx", "decision": "'approved' | 'unable' ('roger' for pilot reports)"},
+            "deviation": {"side": "left|right|either", "max_nm": "optional max offset",
+                          "then_direct": "optional waypoint to rejoin"},
+        },
+    }
+
+
+class SessionManager:
+    def __init__(self):
+        self.sessions: Dict[str, Session] = {}
+        self.lock = threading.Lock()
+
+    def create(self, **kw) -> Session:
+        s = Session(**kw)
+        with self.lock:
+            self.sessions[s.id] = s
+        return s
+
+    def get(self, sid: str) -> Session:
+        s = self.sessions.get(sid)
+        if s is None:
+            raise KeyError(sid)
+        return s
+
+    def delete(self, sid: str) -> None:
+        with self.lock:
+            s = self.sessions.pop(sid, None)
+        if s:
+            s.stop()
+
+    def list(self) -> List[dict]:
+        return [s.summary() for s in self.sessions.values()]
+
+
+# --- free-text command parser (used by the radar page and POST /command) -------------
+_CMD_HELP = ("CALLSIGN then commands: FL360 [V1500] | H270 / L270 / R270 (turn left/right) | D S2 | "
+             "M76 (Mach) | K280 (on conversion 280 kt) | S280 (280 kt now) | SN (resume normal speed) | DEV / DEVL20 / DEVR (weather deviation) | "
+             "RES | APP [Rxxx] | UNA [Rxxx] | ROG [Rxxx] (acknowledge a report) | AS (assume on first contact).  "
+             "e.g. 'RAM101 FL370 H250'")
+
+
+def parse_command(text: str, world: World) -> List[dict]:
+    toks = text.strip().upper().split()
+    if len(toks) < 2:
+        raise ValueError("expected: " + _CMD_HELP)
+    cs = toks[0]
+    out = []
+    i = 1
+    while i < len(toks):
+        tk = toks[i]
+        m = re.fullmatch(r"(?:FL|F|C|DES|CL)(\d{2,3})", tk)
+        if m:
+            out.append({"callsign": cs, "type": "altitude", "fl": int(m.group(1))}); i += 1; continue
+        m = re.fullmatch(r"(H|HDG|L|R|HL|HR|TL|TR)(\d{1,3})", tk)
+        if m:
+            p = m.group(1)
+            turn = "left" if p in ("L", "HL", "TL") else "right" if p in ("R", "HR", "TR") else None
+            out.append({"callsign": cs, "type": "heading", "heading": int(m.group(2)), "turn": turn}); i += 1; continue
+        m = re.fullmatch(r"V(\d{3,4})", tk)
+        if m and out and out[-1]["type"] == "altitude":
+            out[-1]["rate_fpm"] = int(m.group(1)); i += 1; continue
+        m = re.fullmatch(r"(?:S|SPD|IAS)(\d{3})", tk)
+        mm = re.fullmatch(r"M\.?0?(\d{2})", tk)
+        mk = re.fullmatch(r"K(\d{3})", tk)
+        if m or mm or mk:
+            key, val = (("ias_kt", int(m.group(1))) if m else ("mach", int(mm.group(1)) / 100.0) if mm
+                        else ("conversion_kt", int(mk.group(1))))
+            # speed after a level in the same command = speed restriction of that clearance
+            host = next((o for o in reversed(out) if o["type"] in ("altitude", "speed")), None)
+            if host is None:
+                host = {"callsign": cs, "type": "speed"}
+                out.append(host)
+            host[key] = val
+            i += 1; continue
+        if tk in ("ASSUME", "AS", "ASS", "RC"):
+            out.append({"callsign": cs, "type": "assume"}); i += 1; continue
+        if tk in ("SN", "RNS", "NORMAL"):
+            out.append({"callsign": cs, "type": "speed", "resume_normal": True}); i += 1; continue
+        m = re.fullmatch(r"(?:D|DCT)([A-Z]{1,5}\d*)", tk)
+        if m and m.group(1) in world.waypoints:
+            out.append({"callsign": cs, "type": "direct", "waypoint": m.group(1)}); i += 1; continue
+        m = re.fullmatch(r"DEV([LR]?)(\d{0,3})", tk)
+        if m:
+            ins = {"callsign": cs, "type": "deviation",
+                   "side": {"L": "left", "R": "right"}.get(m.group(1), "either")}
+            if m.group(2):
+                ins["max_nm"] = int(m.group(2))
+            out.append(ins); i += 1; continue
+        if tk in ("RES", "RESUME", "RON"):
+            out.append({"callsign": cs, "type": "resume"}); i += 1; continue
+        if tk in ("APP", "APPROVE", "APPROVED", "UNA", "UNABLE", "ROG", "ROGER"):
+            dec = "approved" if tk.startswith("APP") else "roger" if tk.startswith("ROG") else "unable"
+            rid = None
+            if i + 1 < len(toks) and re.fullmatch(r"R\d+", toks[i + 1]):
+                rid = toks[i + 1]; i += 1
+            if rid is None:
+                pend = [r for r in world.requests.values() if r.callsign == cs and r.status == "pending"]
+                if not pend:
+                    raise ValueError(f"{cs} has no pending request")
+                rid = pend[0].id
+            out.append({"callsign": cs, "type": "reply", "request_id": rid, "decision": dec}); i += 1; continue
+        raise ValueError(f"cannot parse '{tk}'. " + _CMD_HELP)
+    return out

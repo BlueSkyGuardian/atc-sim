@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Users</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<main>
+  <h1>Users and roles</h1>
+  <div class="card">
+    <div class="row">
+      <input id="newEmail" class="grow" placeholder="add an account in advance: name@gmail.com" style="max-width:340px">
+      <select id="newRole"><option value="atc">Controller</option><option value="pilot">Pseudo-pilot</option><option value="instructor">Instructor</option><option value="admin">Administrator</option></select>
+      <button id="add" class="primary">Add</button>
+      <span class="grow"></span>
+      <input id="filter" placeholder="filter by name, email, licence">
+    </div>
+    <div class="msg" id="msg"></div>
+    <table><thead><tr><th>Name</th><th>Email</th><th>Licence</th><th>Role</th><th>Active</th><th>Last sign-in</th></tr></thead><tbody id="rows"></tbody></table>
+  </div>
+  <p class="dim" style="font-size:12px">People sign in with their Google account. A new account starts as a controller until you change its role here. Disabling an account signs it out everywhere.</p>
+</main>
+<script src="/static/common.js"></script>
+<script>
+let users = [];
+function msg(t, bad) { $('#msg').className = 'msg ' + (bad ? 'bad' : 'ok'); $('#msg').textContent = t; }
+function render() {
+  const f = $('#filter').value.toLowerCase();
+  $('#rows').innerHTML = users.filter(u => !f || [u.name, u.email, u.licence].join(' ').toLowerCase().includes(f)).map(u => `<tr>
+    <td>${esc(u.first_name || u.last_name ? u.name : '')}${u.profile_complete ? '' : ' <span class="dim">(profile incomplete)</span>'}</td>
+    <td class="mono">${esc(u.email)}</td><td class="mono">${esc(u.licence)}</td>
+    <td><select data-role="${u.id}">${['atc', 'pilot', 'instructor', 'admin'].map(r => `<option value="${r}" ${r === u.role ? 'selected' : ''}>${ROLE_NAMES[r]}</option>`).join('')}</select></td>
+    <td><input type="checkbox" data-active="${u.id}" ${u.active ? 'checked' : ''}></td>
+    <td class="dim">${fmtDate(u.last_login) || 'never'}</td></tr>`).join('');
+  $$('[data-role]').forEach(s => s.onchange = () => patch(s.dataset.role, { role: s.value }));
+  $$('[data-active]').forEach(c => c.onchange = () => patch(c.dataset.active, { active: c.checked }));
+}
+async function patch(id, body) {
+  try { const u = await api(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(body) }); msg(`${u.email}: saved`); }
+  catch (e) { msg(e.message, true); }
+  load();
+}
+async function load() { users = await api('/api/users'); render(); }
+(async () => {
+  await header('/admin');
+  if (ME.role !== 'admin') { $('main').innerHTML = '<p>Administrators only.</p>'; return; }
+  $('#filter').oninput = render;
+  $('#add').onclick = async () => {
+    try { await post('/api/users', { email: $('#newEmail').value, role: $('#newRole').value }); $('#newEmail').value = ''; msg('added'); load(); }
+    catch (e) { msg(e.message, true); }
+  };
+  load();
+})();
+</script>
+</body>
+</html>

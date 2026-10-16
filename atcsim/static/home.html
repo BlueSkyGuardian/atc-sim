@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ATC Simulator</title>
+<link rel="stylesheet" href="/static/app.css">
+<style>
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .thumb { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
+  .thumb:hover { border-color: var(--sel); }
+  .thumb canvas { display: block; width: 100%; height: 180px; background: #0b1016; }
+  .thumb .bar { display: flex; gap: 6px; align-items: center; padding: 6px 9px; border-top: 1px solid var(--line); font-size: 12px; }
+  .thumb .bar .t { font-family: var(--mono); color: var(--text); }
+  .thumb .name { padding: 7px 9px 0; font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
+  .thumb .who { padding: 0 9px 2px; font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .newcard { display: flex; align-items: center; justify-content: center; min-height: 250px; border-style: dashed; color: var(--dim); font-size: 15px; }
+  .ex { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+  .ex + .ex { border-top: 1px solid var(--line); }
+  .tx { color: #fff; background: #b32d2d; border-radius: 3px; padding: 0 5px; font-size: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <section id="mine" style="display:none">
+    <h2>Your exercises</h2>
+    <div class="card" style="padding:0" id="mineList"></div>
+  </section>
+  <section id="instr" style="display:none">
+    <h2>Live exercises <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">click one to open it · status refreshes every 2 s</span></h2>
+    <div class="grid" id="thumbs"></div>
+  </section>
+  <section id="recSec">
+    <h2>Recordings <span class="grow"></span><label style="text-transform:none;letter-spacing:0;font-weight:400" class="dim"><input type="checkbox" id="showArch"> archived</label></h2>
+    <div class="card"><table><thead><tr><th>Exercise</th><th>Scenario</th><th>Date</th><th>Length</th><th>Status</th><th></th></tr></thead><tbody id="recs"></tbody></table></div>
+  </section>
+  <section id="scnSec" style="display:none">
+    <h2>Scenarios <span class="grow"></span><a href="/designer" style="text-transform:none;letter-spacing:0;font-weight:400">open the designer →</a></h2>
+    <div class="card"><table><thead><tr><th>Scenario</th><th>Airspace</th><th>Access</th><th>Owner</th><th></th></tr></thead><tbody id="scns"></tbody></table></div>
+  </section>
+</main>
+<script src="/static/common.js"></script>
+<script>
+let scenarios = [], outlines = {};
+const isInstr = () => ME && (ME.role === 'instructor' || ME.role === 'admin');
+
+// ------------------------------------------------------------ thumbnails
+function stca(pic, sep) {
+  // straight-line closest approach within 3 min, vertical from present rates
+  let worst = null;
+  for (let i = 0; i < pic.length; i++) for (let j = i + 1; j < pic.length; j++) {
+    const a = pic[i], b = pic[j]; if (a[4] < 0 && b[4] < 0) continue;
+    const va = [a[5] * Math.sin(a[6] * Math.PI / 180) / 3600, a[5] * Math.cos(a[6] * Math.PI / 180) / 3600];
+    const vb = [b[5] * Math.sin(b[6] * Math.PI / 180) / 3600, b[5] * Math.cos(b[6] * Math.PI / 180) / 3600];
+    const px = b[1] - a[1], py = b[2] - a[2], vx = vb[0] - va[0], vy = vb[1] - va[1], v2 = vx * vx + vy * vy;
+    const t = Math.min(180, v2 < 1e-12 ? 0 : Math.max(0, -(px * vx + py * vy) / v2));
+    const d = Math.hypot(px + vx * t, py + vy * t);
+    const dz = Math.abs((a[3] * 100 + a[7] * t / 60) - (b[3] * 100 + b[7] * t / 60));
+    if (d < sep && dz < 1000) worst = [a[0], b[0]];
+  }
+  return worst;
+}
+function drawThumb(cv, ex) {
+  const o = outlines[ex.id], c = cv.getContext('2d'), dpr = devicePixelRatio, W = cv.clientWidth * dpr, H = cv.clientHeight * dpr;
+  if (cv.width !== W) { cv.width = W; cv.height = H; }
+  c.fillStyle = '#0b1016'; c.fillRect(0, 0, W, H);
+  if (!o) return;
+  const poly = o.controlled, xs = poly.map(p => p[0]), ys = poly.map(p => p[1]);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const half = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 + 20, s = Math.min(W, H) / (2 * half);
+  const P = (x, y) => [W / 2 + (x - cx) * s, H / 2 - (y - cy) * s];
+  const line = (pts, col, w) => { c.beginPath(); pts.forEach((p, i) => { const [x, y] = P(...p); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.strokeStyle = col; c.lineWidth = w * dpr; c.stroke(); };
+  for (const sc of o.sectors) line(sc, '#1f4a3a', 0.8);
+  if (o.outline) line(o.outline, '#2d4258', 1);
+  line(poly, '#4a6886', 1.4);
+  const los = new Set((ex.losses || []).flat()), st = new Set(ex._stca || []);
+  c.font = `${8.5 * dpr}px ui-monospace,monospace`;
+  for (const a of ex.picture || []) {
+    const [x, y] = P(a[1], a[2]);
+    const col = los.has(a[0]) ? '#ff5a5a' : st.has(a[0]) ? '#f2b84b' : a[4] > 0 ? '#5fd3a3' : a[4] === 0 ? '#ffffff' : '#6f8191';
+    const r = a[6] * Math.PI / 180, L = a[5] / 30, [vx, vy] = P(a[1] + Math.sin(r) * L, a[2] + Math.cos(r) * L);
+    c.strokeStyle = col; c.lineWidth = 1 * dpr; c.beginPath(); c.moveTo(x, y); c.lineTo(vx, vy); c.stroke();
+    c.fillStyle = col; c.fillRect(x - 2 * dpr, y - 2 * dpr, 4 * dpr, 4 * dpr);
+    if (W > 250 * dpr) c.fillText(String(a[3]).padStart(3, '0'), x + 4 * dpr, y - 3 * dpr);
+  }
+}
+const STATUS = { running: ['LIVE', 'live'], paused: ['PAUSED', 'paused'], created: ['READY', 'paused'], finished: ['FINISHED', ''] };
+async function refreshThumbs() {
+  let list;
+  try { list = await api('/api/exercises?pictures=true'); } catch (e) { return; }
+  const live = list.filter(e => e.live && e.seat === 'instructor');
+  const box = $('#thumbs');
+  const ids = live.map(e => e.id).join(',');
+  if (box.dataset.ids !== ids) {
+    box.dataset.ids = ids;
+    box.innerHTML = live.map(e => `<div class="thumb" data-id="${e.id}"><div class="name"><span>${esc(e.name)}</span><span class="dim mono" style="font-weight:400">${e.id}</span></div>
+      <div class="who" data-who></div><canvas></canvas><div class="bar" data-bar></div></div>`).join('') +
+      `<div class="thumb card newcard" id="newEx">＋ New exercise</div>`;
+    $$('.thumb[data-id]').forEach(t => t.onclick = () => location.href = '/x/' + t.dataset.id);
+    $('#newEx').onclick = newExercise;
+  }
+  for (const e of live) {
+    const el = box.querySelector(`[data-id="${e.id}"]`); if (!el) continue;
+    if (!outlines[e.id]) api(`/api/exercises/${e.id}/outline`).then(o => { outlines[e.id] = o; }).catch(() => {});
+    e._stca = stca(e.picture || [], e.sep_h || 5);
+    drawThumb(el.querySelector('canvas'), e);
+    const [st, cls] = STATUS[e.status] || [e.status, ''];
+    const conf = e.losses && e.losses.length ? `<span class="pill los">LOSS ${e.losses[0].join('×')}</span>`
+      : e._stca ? `<span class="pill stca">CONFLICT ${e._stca.join('×')}</span>` : '<span class="pill clear">no conflict</span>';
+    el.querySelector('[data-bar]').innerHTML = `<span class="t">T+${fmtT(e.sim_time_s)}</span><span class="pill ${cls}">${st}</span>${conf}
+      <span class="grow"></span>${e.calling ? `<span class="warn" title="aircraft calling, not assumed">${e.calling} calling</span>` : ''}`;
+    const on = e.online || [];
+    el.querySelector('[data-who]').innerHTML = (on.length ? on.map(p => `${p.ptt ? '<span class="tx">TX</span> ' : ''}${esc(p.name)} <span style="opacity:.7">(${SEAT_NAMES[p.seat]})</span>`).join(' · ') : 'nobody connected') +
+      (e.calls ? ` · ☎ ${e.calls}` : '');
+  }
+  // controllers / pilots (and instructors invited to someone else's exercise)
+  const mine = list.filter(e => e.seat !== 'instructor' || !isInstr());
+  $('#mine').style.display = mine.length || !isInstr() ? '' : 'none';
+  $('#mineList').innerHTML = mine.length ? mine.map(e => `<div class="ex"><div class="grow"><b>${esc(e.name)}</b> <span class="dim">· ${esc(e.scenario)} · instructor ${esc(e.instructor)}</span><br>
+      <span class="dim" style="font-size:12px">your seat: ${SEAT_NAMES[e.seat]} · ${e.live ? (STATUS[e.status] || [e.status])[0] + ' · T+' + fmtT(e.sim_time_s) : e.status}</span></div>
+      ${e.live ? `<a href="/x/${e.id}"><button class="primary">Open</button></a>` : ''}</div>`).join('')
+    : '<div class="ex empty">No exercise yet. Your instructor invites you, or sends you a link.</div>';
+}
+
+// ------------------------------------------------------------ new exercise
+function newExercise() {
+  modal(`<h3>New exercise</h3>
+    <label class="f">Scenario</label><select id="nxScn">${scenarios.map(s => `<option value="${s.name}">${esc(s.name)} — ${esc(s.title || '')}</option>`).join('')}</select>
+    <label class="f">Name (what the trainees see)</label><input id="nxName" placeholder="e.g. Lesson 4 – crossing traffic">
+    <p class="dim" style="font-size:12px">The simulation starts paused. Invite a controller and a pseudo-pilot from the exercise page (from the user list, or by sending them a link), then press Run.</p>
+    <div class="row"><button class="primary" id="nxGo">Create</button><span class="msg" id="nxMsg"></span></div>`, (m, close) => {
+    const q = new URLSearchParams(location.search).get('scenario'); if (q) m.querySelector('#nxScn').value = q;
+    m.querySelector('#nxGo').onclick = async () => {
+      const b = m.querySelector('#nxGo'); b.disabled = true; m.querySelector('#nxMsg').textContent = 'Building the scenario (traffic, performance, weather)… this can take a few seconds';
+      try { const e = await post('/api/exercises', { scenario: m.querySelector('#nxScn').value, name: m.querySelector('#nxName').value || undefined }); location.href = '/x/' + e.id; }
+      catch (e) { m.querySelector('#nxMsg').className = 'msg bad'; m.querySelector('#nxMsg').textContent = e.message; b.disabled = false; }
+    };
+  });
+}
+
+// ------------------------------------------------------------ scenarios
+async function loadScenarios() {
+  scenarios = await api('/api/scenarios');
+  $('#scns').innerHTML = scenarios.map(s => `<tr><td><b>${esc(s.name)}</b><br><span class="dim" style="font-size:12px">${esc(s.title || '')}</span></td>
+    <td class="dim">${esc(s.airspace || '')}</td>
+    <td>${s.access === 'write' ? '<span class="ok">read/write</span>' : '<span class="dim">read-only</span>'}</td>
+    <td class="dim">${s.library ? 'library' : esc(s.owner.name)}${s.shares && s.shares.length ? `<br><span style="font-size:11px">shared with ${s.shares.map(x => esc(x.first_name + ' ' + x.last_name) + (x.perm === 'write' ? ' (rw)' : '')).join(', ')}</span>` : ''}</td>
+    <td style="white-space:nowrap;text-align:right">
+      <button class="small primary" data-run="${s.name}">Start exercise</button>
+      <a href="/designer?scenario=${encodeURIComponent(s.name)}"><button class="small">${s.access === 'write' ? 'Edit' : 'View'}</button></a>
+      <button class="small" data-copy="${s.name}">Copy</button>
+      ${!s.library && (s.owner.id === ME.id || ME.role === 'admin') ? `<button class="small" data-share="${s.name}">Share</button> <button class="small danger" data-del="${s.name}">Delete</button>` : ''}
+    </td></tr>`).join('');
+  $$('[data-run]').forEach(b => b.onclick = () => { history.replaceState(null, '', '?scenario=' + b.dataset.run); newExercise(); });
+  $$('[data-copy]').forEach(b => b.onclick = async () => {
+    const n = prompt('Name of your copy (lower-case letters, digits, _ or -)', b.dataset.copy + '_copy'); if (!n) return;
+    try { await post(`/api/scenarios/${b.dataset.copy}/copy`, { new_name: n }); loadScenarios(); } catch (e) { alert(e.message); } });
+  $$('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete scenario ${b.dataset.del}? (a copy is kept in the server's deleted_scenarios folder)`)) return;
+    try { await api(`/api/scenarios/${b.dataset.del}`, { method: 'DELETE' }); loadScenarios(); } catch (e) { alert(e.message); } });
+  $$('[data-share]').forEach(b => b.onclick = () => share(b.dataset.share));
+}
+async function share(name) {
+  const [users, s] = [await api('/api/users'), scenarios.find(x => x.name === name)];
+  const ins = users.filter(u => (u.role === 'instructor' || u.role === 'admin') && u.id !== ME.id);
+  modal(`<h3>Share ${esc(name)}</h3><div id="shList"></div>
+    <label class="f">Share with an instructor</label>
+    <div class="row"><select id="shUser" class="grow">${ins.map(u => `<option value="${u.id}">${esc(u.name)} · ${esc(u.email)}</option>`).join('')}</select>
+    <select id="shPerm"><option value="read">read-only</option><option value="write">read and write</option></select><button class="primary" id="shGo">Share</button></div>
+    <div class="msg" id="shMsg"></div>`, (m) => {
+    const list = sh => m.querySelector('#shList').innerHTML = sh.length ? `<table>${sh.map(x => `<tr><td>${esc(x.first_name + ' ' + x.last_name)}</td><td class="dim">${esc(x.email)}</td><td>${x.perm === 'write' ? 'read/write' : 'read-only'}</td><td><button class="small danger" data-un="${x.user_id}">Remove</button></td></tr>`).join('')}</table>` : '<p class="empty">Not shared.</p>';
+    const bind = () => m.querySelectorAll('[data-un]').forEach(b => b.onclick = async () => { list(await api(`/api/scenarios/${name}/shares/${b.dataset.un}`, { method: 'DELETE' })); bind(); loadScenarios(); });
+    list(s.shares || []); bind();
+    m.querySelector('#shGo').onclick = async () => {
+      try { list(await post(`/api/scenarios/${name}/shares`, { user_id: +m.querySelector('#shUser').value, perm: m.querySelector('#shPerm').value })); bind(); loadScenarios(); }
+      catch (e) { m.querySelector('#shMsg').className = 'msg bad'; m.querySelector('#shMsg').textContent = e.message; }
+    };
+  });
+}
+
+// ------------------------------------------------------------ recordings
+async function loadRecs() {
+  let recs; try { recs = await api('/api/recordings' + ($('#showArch').checked ? '?archived=true' : '')); } catch (e) { return; }
+  const mb = b => b ? (b / 1e6).toFixed(1) + ' MB' : '';
+  $('#recs').innerHTML = recs.map(r => `<tr><td><b>${esc(r.exercise || r.exercise_id)}</b>${r.title ? `<br><span class="dim" style="font-size:12px">${esc(r.title)}</span>` : ''}</td><td class="dim">${esc(r.scenario || '')}</td><td class="dim">${fmtDate(r.created_at)}</td>
+    <td class="mono">${r.duration_s ? fmtT(r.duration_s) : ''} <span class="dim">${mb(r.size_bytes)}</span></td>
+    <td>${r.status === 'ready' ? '<span class="ok">ready</span>' : r.status === 'rendering' ? '<span class="warn">rendering…</span>' : `<span class="bad" title="${esc(r.error)}">${r.status}</span>`}</td>
+    <td style="text-align:right;white-space:nowrap">${r.download ? `<a href="${r.download}"><button class="small primary">Download .mp4</button></a>` : ''}
+      ${r.can_manage ? `<button class="small" data-arch="${r.id}" data-v="${r.archived ? 0 : 1}">${r.archived ? 'Unarchive' : 'Archive'}</button>
+      ${r.status === 'failed' ? `<button class="small" data-rr="${r.id}">Render again</button>` : ''}
+      <button class="small danger" data-rdel="${r.id}">Delete</button>` : ''}</td></tr>`).join('') || `<tr><td colspan="6" class="empty">${$('#showArch').checked ? 'No archived recording.' : 'No recording yet: every exercise is recorded: the controller’s screen (traffic as they saw it, mouse, clicks, label entries, panels) with the radio and telephone audio, turned into an .mp4 when the instructor ends it.'}</td></tr>`;
+  $$('[data-arch]').forEach(b => b.onclick = async () => { await post(`/api/recordings/${b.dataset.arch}/archive`, { archived: b.dataset.v === '1' }); loadRecs(); });
+  $$('[data-rr]').forEach(b => b.onclick = async () => { await post(`/api/recordings/${b.dataset.rr}/render`); loadRecs(); });
+  $$('[data-rdel]').forEach(b => b.onclick = async () => { if (!confirm('Delete this recording permanently?')) return; await api(`/api/recordings/${b.dataset.rdel}`, { method: 'DELETE' }); loadRecs(); });
+}
+$('#showArch').onchange = loadRecs;
+
+(async () => {
+  await header('/');
+  if (isInstr()) { $('#instr').style.display = ''; $('#scnSec').style.display = ''; await loadScenarios(); }
+  refreshThumbs(); loadRecs();
+  setInterval(refreshThumbs, 2000); setInterval(loadRecs, 8000);
+  if (isInstr() && new URLSearchParams(location.search).get('scenario')) newExercise();
+})();
+</script>
+</body>
+</html>
