@@ -62,7 +62,23 @@ administrator. Complete your profile (first name, last name, licence number).
 | `ATC_SECRET_KEY` | optional: signs the session cookies (default: generated once into the data volume) |
 | `ATC_API_KEY` | optional: scripts and agents send it as `X-API-Key` and get full rights |
 | `ATC_AUTH` | `off` = the old open single-user mode (only on your own computer, never on the internet) |
+| `ATC_PRED_INTERVAL_S` | minimum seconds between two runs of the 10-minute conflict look-ahead of an exercise (default 8; it also waits 3× its own computing time). The short-term conflict alert (3 min) is a separate fast check, every second |
+| `ATC_PRED_WORKERS` | look-aheads computed at the same time over the whole server (default 1; raise it on a server with more cores) |
 | `ATC_DEV_LOGIN` | `1` = password-less test login form (automatic when no Google client is set; never online) |
+
+## Oracle Cloud (Always Free) notes
+
+* Give the instance a public IP (instance → Networking → the VNIC → IPv4 addresses → Edit → Ephemeral public IP),
+  and add ingress rules TCP 80 and 443 from `0.0.0.0/0` to the subnet's security list.
+* Oracle Linux (user `opc`) has its own firewall as well:
+  `sudo firewall-cmd --permanent --add-service=http --add-service=https && sudo firewall-cmd --reload`
+  (Ubuntu images: `iptables` rules + `netfilter-persistent save`).
+* Docker on Oracle Linux comes from Docker's RHEL repository:
+  `sudo dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo` then
+  `sudo dnf install -y --allowerasing docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin`,
+  `sudo systemctl enable --now docker`, `sudo usermod -aG docker opc`.
+* 1 OCPU / 6 GB runs a couple of exercises: the look-ahead is shared and throttled (see `ATC_PRED_*`), and the
+  recordings are rendered one at a time at low priority after the exercises.
 
 ## 6. Data, backups, updates
 

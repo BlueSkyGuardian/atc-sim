@@ -14,6 +14,7 @@ import bisect
 import json
 import math
 import os
+import shutil
 import subprocess
 import time
 import wave
@@ -480,7 +481,7 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
         w.writeframes((pcm * 32767).astype("<i2").tobytes())
     out = os.path.join(dr, f"controller_{user_id}.mp4" if user_id is not None else "controller.mp4")
     tmp = out + ".part.mp4"
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
+    cmd = (["nice", "-n", "15"] if shutil.which("nice") else []) + ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
            "-r", str(FPS), "-i", "pipe:0", "-i", wav, "-map", "0:v", "-map", "1:a", "-c:v", "libx264",
            "-preset", "veryfast", "-crf", "24", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "64k",
            "-shortest", "-movflags", "+faststart", tmp]

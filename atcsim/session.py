@@ -13,6 +13,13 @@ from .scenario import build_world, load_scenario, public_view
 from .world import World
 
 
+# the 10-minute look-ahead behind the radar pages is the heavy part of the simulator (a few seconds of CPU on a dense
+# scenario): it is shared per session, rerun every PRED_MIN_INTERVAL_S at most, PRED_WORKERS at a time server-wide
+import os as _os
+PRED_MIN_INTERVAL_S = float(_os.environ.get("ATC_PRED_INTERVAL_S", "8"))
+_pred_slots = threading.BoundedSemaphore(max(1, int(_os.environ.get("ATC_PRED_WORKERS", "1"))))
+
+
 class Session:
     def __init__(self, scenario_name: str, mode: str = "realtime", time_factor: float = 1.0,
                  autostart: bool = True, label: Optional[str] = None, auto_assume: Optional[bool] = None):
@@ -20,6 +27,7 @@ class Session:
             raise ValueError("mode must be 'realtime' or 'stepped'")
         self.id = uuid.uuid4().hex[:8]
         self.label = label or ""
+        self._shared_sep, self._shared_at, self._shared_cost = None, 0.0, 0.0
         self.multi = False                 # connected exercise: instructor + controller + pseudo-pilot seats
         self.scenario_name = scenario_name
         self.scn = load_scenario(scenario_name)
@@ -133,6 +141,34 @@ class Session:
         res = dict(cached)
         res["current_pairs"] = pairs
         return res
+
+    def separation_shared(self, lookahead_s: float = 600.0) -> Optional[dict]:
+        """The look-ahead for the live radar pages: one computation per session shared by every connected page,
+        rerun only when the previous result is older than max(PRED_MIN_INTERVAL_S, 3 x its computing time) of wall
+        time, and at most PRED_WORKERS computations at once over the whole server (a small server stays
+        responsive). Returns the latest result (possibly a few seconds old), or None before the first one."""
+        now = time.monotonic()
+        with self.lock:
+            res = getattr(self, "_shared_sep", None)
+            due = res is None or now - self._shared_at >= max(PRED_MIN_INTERVAL_S, 3 * self._shared_cost)
+            if not due or getattr(self, "_shared_busy", False) or self.status == "finished":
+                return res
+            self._shared_busy = True
+        try:
+            if not _pred_slots.acquire(timeout=0.05):
+                return res
+            try:
+                t0 = time.monotonic()
+                out = self.separation(lookahead_s)
+                with self.lock:
+                    self._shared_sep, self._shared_at = out, time.monotonic()
+                    self._shared_cost = time.monotonic() - t0
+                return out
+            finally:
+                _pred_slots.release()
+        finally:
+            with self.lock:
+                self._shared_busy = False
 
     def briefing(self) -> dict:
         """Everything a client needs when it connects: scenario, sector, waypoints, routes, areas."""

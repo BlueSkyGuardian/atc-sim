@@ -748,14 +748,18 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
             await asyncio.sleep(0.15)
 
     async def separator():
+        # the look-ahead is shared by every page on this session and rerun only every few seconds
+        # (Session.separation_shared); a new result is pushed with the next tick
+        last = None
         while separation:
-            t0 = loop.time()
             try:
-                latest_sep["msg"] = await run_in_threadpool(s.separation, lookahead_s)
+                res = await run_in_threadpool(s.separation_shared, lookahead_s)
+                if res is not None and res is not last:
+                    last = res
+                    latest_sep["msg"] = res
             except Exception as e:  # noqa: BLE001
-                latest_sep["msg"] = None
                 await send({"type": "error", "error": f"separation: {type(e).__name__}: {e}"})
-            await asyncio.sleep(max(0.5, 2.0 - (loop.time() - t0)))
+            await asyncio.sleep(1.0)
 
     async def receiver():
         while True:

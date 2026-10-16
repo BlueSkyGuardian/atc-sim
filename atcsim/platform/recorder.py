@@ -471,7 +471,7 @@ def render(eid: str) -> dict:
         w.writeframes((pcm * 32767).astype("<i2").tobytes())
     out = os.path.join(dr, "overview.mp4")
     tmp = out + ".part.mp4"
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{VW}x{VH}",
+    cmd = (["nice", "-n", "15"] if shutil.which("nice") else []) + ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{VW}x{VH}",
            "-r", str(FPS), "-i", "pipe:0", "-i", wav, "-map", "0:v", "-map", "1:a", "-c:v", "libx264",
            "-preset", "veryfast", "-crf", "26", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "64k",
            "-shortest", "-movflags", "+faststart", tmp]
@@ -546,7 +546,19 @@ def render(eid: str) -> dict:
     return {"path": out, "duration_s": round(nfr / FPS, 1), "size_bytes": os.path.getsize(out)}
 
 
+_render_lock = threading.Lock()          # one video at a time, at low priority: never slow a live exercise down
+
+
 def render_job(rid: int, eid: str, user_id=None) -> None:
+    with _render_lock:
+        try:
+            os.nice(15)                      # this thread only (Linux)
+        except OSError:
+            pass
+        _render_job(rid, eid, user_id)
+
+
+def _render_job(rid: int, eid: str, user_id=None) -> None:
     try:
         if user_id is not None or _has_ui(eid):
             from .atcview import render_controller

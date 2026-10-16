@@ -529,7 +529,8 @@ function renderAlerts() {
     const k = 'L' + p.aircraft.join('-'); keys.add(k);
     items.push(`<div class="al los" data-cs="${p.aircraft[0]}">LOSS OF SEPARATION ${p.aircraft.join(' × ')} · ${p.horizontal_nm} NM / ${p.vertical_ft} ft (min ${p.required_horizontal_nm} NM / ${p.required_vertical_ft} ft)</div>`);
   }
-  for (const c of (sep && sep.predicted_conflicts) || []) {
+  // STCA: the server's fast straight-line check, every second (state.stca); older servers: from the look-ahead
+  for (const c of (state.stca || (sep && sep.predicted_conflicts) || [])) {
     if (c.time_to_los_s == null || c.time_to_los_s <= 0 || c.time_to_los_s > STCA_S) continue;
     const k = 'S' + c.aircraft.join('-'); keys.add(k);
     items.push(`<div class="al stca" data-cs="${c.aircraft[0]}">STCA ${c.aircraft.join(' × ')} · LoS in ${fmtT(c.time_to_los_s)} · CPA ${c.cpa_horizontal_nm} NM / ${c.vertical_at_cpa_ft} ft</div>`);
@@ -989,7 +990,8 @@ function draw() {
   // conflict status per aircraft
   const status = {};
   const pairs = [];
-  if (sep && !replayMode && SEAT !== 'pilot') for (const c of sep.predicted_conflicts) { if (SEAT === 'atc' && EXID && !(c.time_to_los_s != null && c.time_to_los_s <= STCA_S)) continue; for (const cs of c.aircraft) status[cs] = status[cs] === 'los' ? 'los' : 'warn'; pairs.push(c); }
+  if (!replayMode && SEAT === 'atc' && EXID && shown.stca) for (const c of shown.stca) { for (const cs of c.aircraft) status[cs] = status[cs] === 'los' ? 'los' : 'warn'; pairs.push(c); }
+  else if (sep && !replayMode && SEAT !== 'pilot') for (const c of sep.predicted_conflicts) { if (SEAT === 'atc' && EXID && !(c.time_to_los_s != null && c.time_to_los_s <= STCA_S)) continue; for (const cs of c.aircraft) status[cs] = status[cs] === 'los' ? 'los' : 'warn'; pairs.push(c); }
   if (SEAT !== 'pilot') for (const p of shown.current_losses) for (const cs of p.aircraft) status[cs] = 'los';
   const pos = Object.fromEntries(shown.aircraft.map(a => [a.callsign, a]));
   // conflict lines

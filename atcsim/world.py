@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import itertools
+import math
 import re
 from typing import Dict, List, Optional, Tuple
 
@@ -1223,6 +1224,43 @@ class World:
             },
         }
 
+    def stca(self, look_s: float = 180.0, step_s: float = 10.0) -> List[dict]:
+        """Short-term conflict alert: pairs predicted to lose separation within `look_s`, by straight-line
+        extrapolation of track, ground speed and vertical rate (towards the cleared level). Cheap enough to run
+        every second, unlike the full look-ahead (`predict`)."""
+        act = [a for a in self.active_aircraft()]
+        out = []
+        for a, b in itertools.combinations(act, 2):
+            if not (a.on_frequency or b.on_frequency):
+                continue
+            hmin, vmin = pair_minima(a, b, h_nm=self.sep_h)
+            reach = hmin + (a.gs + b.gs) * look_s / 3600.0
+            if abs(a.x - b.x) > reach or abs(a.y - b.y) > reach:
+                continue
+            va = (a.gs * math.sin(math.radians(a.trk)) / 3600.0, a.gs * math.cos(math.radians(a.trk)) / 3600.0)
+            vb = (b.gs * math.sin(math.radians(b.trk)) / 3600.0, b.gs * math.cos(math.radians(b.trk)) / 3600.0)
+
+            def alt(ac, t):
+                z = ac.alt_ft + ac.vs_fpm * t / 60.0
+                lo, hi = sorted((ac.alt_ft, ac.cleared_alt_ft))
+                return min(max(z, lo), hi) if abs(ac.vs_fpm) > 50 else ac.alt_ft
+            t, hit, best = 0.0, None, (1e9, 0.0, 0.0)
+            while t <= look_s + 1e-6:
+                h = math.hypot(b.x - a.x + (vb[0] - va[0]) * t, b.y - a.y + (vb[1] - va[1]) * t)
+                v = abs(alt(a, t) - alt(b, t))
+                if h < best[0]:
+                    best = (h, t, v)
+                if h < hmin and v < vmin:
+                    hit = t
+                    break
+                t += step_s
+            if hit is not None:
+                out.append({"aircraft": sorted([a.callsign, b.callsign]), "time_to_los_s": round(hit),
+                            "cpa_horizontal_nm": round(best[0], 1), "vertical_at_cpa_ft": int(round(best[2], -2)),
+                            "required_horizontal_nm": hmin, "required_vertical_ft": vmin})
+        out.sort(key=lambda c: c["time_to_los_s"])
+        return out
+
     ENTRY_FIELDS = ("cfl", "speed", "heading", "direct", "note")
 
     def enter(self, callsign: str, fields: dict, who: str = "atc") -> dict:
@@ -1279,6 +1317,7 @@ class World:
             "current_losses": [p for p in self.current_pairs() if p["loss_of_separation"]],
             "separation_minimum_nm": self.sep_h,
             "entries": self.entries,
+            "stca": self.stca(),
             "aerodromes": [a.snapshot() for a in self.aerodromes.values()],
             "sequence": arrivals.sequence_status(self),
         }

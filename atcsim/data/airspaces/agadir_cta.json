@@ -1,0 +1,1485 @@
+{
+ "_source": "AIP MAROC ENR 4.4 (AIRAC AMDT 08/26) for point coordinates; ENR 6 upper/lower charts for airways, sector lines and the CTA boundary table (CTA AGADIR). ADILI is not listed in ENR 4.4: its position is read off the chart. The sector-line junctions J and V are read off the upper chart (georeferenced on 17 ENR 4.4 points, residual about 0.5 NM).",
+ "id": "agadir",
+ "name": "Agadir CTA (Casablanca FIR GMMM)",
+ "unit": "ACC AGADIR",
+ "projection": {
+  "lat0": 33.0,
+  "lon0": -11.5,
+  "lat1": 30.5,
+  "lat2": 35.5
+ },
+ "vertical": {
+  "lower_fl": 195,
+  "upper_fl": 460,
+  "note": "CTA AGADIR: FL460/UNL class G, FL195/FL460 class C (controlled, simulated), MSL/FL195 class G",
+  "classes": [
+   {
+    "from": "FL460",
+    "to": "UNL",
+    "class": "G"
+   },
+   {
+    "from": "FL195",
+    "to": "FL460",
+    "class": "C"
+   },
+   {
+    "from": "MSL",
+    "to": "FL195",
+    "class": "G"
+   }
+  ]
+ },
+ "boundary": [
+  "321500N 0143700W",
+  {
+   "insert": "B_NW"
+  },
+  "355800N 0120000W",
+  {
+   "insert": "ADILI"
+  },
+  "355800N 0072300W",
+  "355000N 0072300W",
+  "355000N 0062703W",
+  "331841N 0092623W",
+  "330334N 0092726W",
+  {
+   "insert": "DOMOG"
+  },
+  "325741N 0094344W",
+  "300000N 0123000W",
+  {
+   "insert": "B_SW"
+  },
+  "313000N 0154500W",
+  {
+   "arc": {
+    "center": "330400N 0162100W",
+    "radius_nm": 100,
+    "direction": "ccw",
+    "to": "321500N 0143700W"
+   }
+  }
+ ],
+ "points": {
+  "BEXAL": {
+   "coord": "355800N 0112654W",
+   "role": "FIR GMMM/LPPC",
+   "fra": "EX"
+  },
+  "TIGGI": {
+   "coord": "355800N 0105608W",
+   "role": "FIR GMMM/LPPC",
+   "fra": "X"
+  },
+  "BAROK": {
+   "coord": "355800N 0100124W",
+   "role": "FIR GMMM/LPPC - UN873",
+   "fra": "EX"
+  },
+  "ADILI": {
+   "coord": "355800N 0093410W",
+   "role": "FIR GMMM/LPPC (position read off the chart)",
+   "fra": "EX",
+   "estimated": true
+  },
+  "TAKAV": {
+   "coord": "355800N 0092219.24W",
+   "role": "FIR GMMM/LPPC",
+   "fra": "EX"
+  },
+  "AKUDA": {
+   "coord": "355800N 0085700W",
+   "role": "FIR GMMM/LPPC - UN858",
+   "fra": "X"
+  },
+  "OSLAD": {
+   "coord": "355800N 0081851W",
+   "role": "FIR GMMM/LPPC - R/UR724",
+   "fra": "EX"
+  },
+  "AMSEL": {
+   "coord": "355800N 0075300W",
+   "role": "FIR GMMM/LPPC - R/UR722",
+   "fra": "EX"
+  },
+  "KORNO": {
+   "coord": "355000N 0072500W",
+   "role": "FIR GMMM/LECM - A857/UN857",
+   "fra": "E"
+  },
+  "SUBAL": {
+   "coord": "353247N 0121845W",
+   "role": "FIR GMMM/LPPC",
+   "fra": "EX"
+  },
+  "ASGAM": {
+   "coord": "350000N 0124242W",
+   "role": "FIR exit NAT"
+  },
+  "OGDOR": {
+   "coord": "340000N 0132538W",
+   "role": "FIR exit NAT"
+  },
+  "NIPRI": {
+   "coord": "330000N 0140724W",
+   "role": "FIR exit NAT",
+   "fra": "EX"
+  },
+  "LEPRU": {
+   "coord": "320000N 0144804W",
+   "role": "FIR exit NAT",
+   "fra": "EX"
+  },
+  "KONBA": {
+   "coord": "311803N 0151806W",
+   "role": "FIR GMMM/GCCC - UN866",
+   "fra": "EX"
+  },
+  "SAMAR": {
+   "coord": "305359N 0142456W",
+   "role": "FIR GMMM/GCCC - UN873",
+   "fra": "EX"
+  },
+  "VASTO": {
+   "coord": "303034N 0133422W",
+   "role": "FIR GMMM/GCCC - UN858",
+   "fra": "E"
+  },
+  "DESUM": {
+   "coord": "302323.82N 0131906.78W",
+   "role": "FIR GMMM/GCCC",
+   "fra": "E"
+  },
+  "TERTO": {
+   "coord": "300615N 0124302W",
+   "role": "FIR GMMM/GCCC - A857/UN857",
+   "fra": "X"
+  },
+  "ROLRO": {
+   "coord": "314009N 0105801W",
+   "role": "transfer point sector WS / Casablanca S",
+   "fra": "EX"
+  },
+  "DOMOG": {
+   "coord": "330056N 0093446W",
+   "role": "transfer point sector WN / Casablanca S",
+   "fra": "EX"
+  },
+  "NISBA": {
+   "coord": "334046N 0090112W",
+   "role": "H/UH500 - R/UR724 (to Casablanca)",
+   "fra": "EX"
+  },
+  "LAPNO": {
+   "coord": "341008N 0082712W",
+   "role": "H/UH899 (to Casablanca)",
+   "fra": "EX"
+  },
+  "SALCA": {
+   "coord": "341913N 0081634W",
+   "role": "UA411 (to Casablanca)",
+   "fra": "EX"
+  },
+  "MARJA": {
+   "coord": "344432N 0074637W",
+   "role": "R/UR722 (to Casablanca)",
+   "fra": "EX"
+  },
+  "ABODA": {
+   "coord": "352450N 0075000W",
+   "role": "A857 - R/UR722 - UN857",
+   "fra": "I"
+  },
+  "IBALU": {
+   "coord": "342640N 0084721W",
+   "role": "A857 - UN857 - H/UH899 - R/UR724",
+   "fra": "I"
+  },
+  "ERMED": {
+   "coord": "330055N 0100811W",
+   "role": "A857 - UN857",
+   "fra": "I"
+  },
+  "TOVRA": {
+   "coord": "314514N 0111639W",
+   "role": "A857 - UN857"
+  },
+  "VEDOD": {
+   "coord": "303021N 0122224W",
+   "role": "A857 - UN857"
+  },
+  "KUBIL": {
+   "coord": "341540N 0125442W",
+   "role": "UN866",
+   "fra": "I"
+  },
+  "OSDIV": {
+   "coord": "330858N 0135010W",
+   "role": "UN866",
+   "fra": "I"
+  },
+  "BENTU": {
+   "coord": "343742N 0111437W",
+   "role": "UN873"
+  },
+  "ABTIR": {
+   "coord": "325056N 0124806W",
+   "role": "UN873",
+   "fra": "I"
+  },
+  "MITLA": {
+   "coord": "311830N 0140456W",
+   "role": "UN873"
+  },
+  "SUNID": {
+   "coord": "343711N 0100924W",
+   "role": "UN858"
+  },
+  "IBLIV": {
+   "coord": "331026N 0112422W",
+   "role": "UN858",
+   "fra": "I"
+  },
+  "DIMSA": {
+   "coord": "315819N 0122356W",
+   "role": "UN858"
+  },
+  "SULAM": {
+   "coord": "305457N 0131454W",
+   "role": "UN858"
+  },
+  "NEVTU": {
+   "coord": "325843N 0131441W",
+   "role": "FIR GMMM",
+   "fra": "I"
+  },
+  "NIDEB": {
+   "coord": "325748N 0115932W",
+   "role": "FIR GMMM",
+   "fra": "I"
+  },
+  "XELER": {
+   "coord": "330723N 0105912W",
+   "role": "FIR GMMM",
+   "fra": "I"
+  },
+  "RUNAX": {
+   "coord": "355000N 0063756W",
+   "role": "FIR GMMM/LECM - UL82",
+   "fra": "E"
+  }
+ },
+ "construction_points": {
+  "J": {
+   "coord": "324422N 0122612W",
+   "note": "junction of the OS / WS / ON sector lines (chart)"
+  },
+  "V": {
+   "coord": "331137N 0113157W",
+   "note": "junction of the ON / WN / WS sector lines just west of IBLIV (chart)"
+  },
+  "B_NW": {
+   "on_edge": [
+    "321500N 0143700W",
+    "355800N 0120000W"
+   ],
+   "line": [
+    "NEVTU",
+    "OSDIV"
+   ],
+   "note": "ON/OS line meets the NW boundary"
+  },
+  "B_SW": {
+   "on_edge": [
+    "300000N 0123000W",
+    "313000N 0154500W"
+   ],
+   "line": [
+    "J",
+    "304454N 0140105W"
+   ],
+   "note": "OS/WS line meets the SW boundary between SAMAR and VASTO"
+  }
+ },
+ "sectors": [
+  {
+   "id": "ON",
+   "name": "Oceanic North",
+   "freq": "136.000",
+   "backup_freq": "132.275",
+   "ring": [
+    "B_NW",
+    "ADILI"
+   ],
+   "line": [
+    "ADILI",
+    "V",
+    "NIDEB",
+    "J",
+    "ABTIR",
+    "NEVTU",
+    "OSDIV",
+    "B_NW"
+   ]
+  },
+  {
+   "id": "WN",
+   "name": "West North",
+   "freq": "128.800",
+   "backup_freq": "125.900",
+   "ring": [
+    "ADILI",
+    "DOMOG"
+   ],
+   "line": [
+    "DOMOG",
+    "ERMED",
+    "XELER",
+    "IBLIV",
+    "V",
+    "ADILI"
+   ]
+  },
+  {
+   "id": "WS",
+   "name": "West South",
+   "freq": "127.000",
+   "backup_freq": "125.900",
+   "ring": [
+    "DOMOG",
+    "B_SW"
+   ],
+   "line": [
+    "B_SW",
+    "J",
+    "NIDEB",
+    "V",
+    "IBLIV",
+    "XELER",
+    "ERMED",
+    "DOMOG"
+   ]
+  },
+  {
+   "id": "OS",
+   "name": "Oceanic South",
+   "freq": "124.500",
+   "backup_freq": "132.275",
+   "ring": [
+    "B_SW",
+    "B_NW"
+   ],
+   "line": [
+    "B_NW",
+    "OSDIV",
+    "NEVTU",
+    "ABTIR",
+    "J",
+    "B_SW"
+   ]
+  }
+ ],
+ "airways": {
+  "UN866": {
+   "points": [
+    "BEXAL",
+    "KUBIL",
+    "OSDIV",
+    "KONBA"
+   ],
+   "upper": true
+  },
+  "UN873": {
+   "points": [
+    "BAROK",
+    "BENTU",
+    "ABTIR",
+    "MITLA",
+    "SAMAR"
+   ],
+   "upper": true,
+   "one_way": true,
+   "note": "southbound only (BAROK to SAMAR)"
+  },
+  "UN858": {
+   "points": [
+    "VASTO",
+    "SULAM",
+    "DIMSA",
+    "IBLIV",
+    "SUNID",
+    "AKUDA"
+   ],
+   "upper": true,
+   "one_way": true,
+   "note": "northbound only (VASTO to AKUDA): VASTO is an entry point, AKUDA an exit point"
+  },
+  "UN857": {
+   "points": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "upper": true,
+   "lower": "A857"
+  },
+  "UR722": {
+   "points": [
+    "AMSEL",
+    "ABODA",
+    "MARJA"
+   ],
+   "upper": true,
+   "lower": "R722"
+  },
+  "UR724": {
+   "points": [
+    "OSLAD",
+    "IBALU",
+    "NISBA"
+   ],
+   "upper": true,
+   "lower": "R724"
+  },
+  "UH899": {
+   "points": [
+    "IBALU",
+    "LAPNO"
+   ],
+   "upper": true,
+   "lower": "H899"
+  },
+  "UA411": {
+   "points": [
+    "IBALU",
+    "SALCA"
+   ],
+   "upper": true
+  }
+ },
+ "free_route": "FRA: direct routings between FRA points (E entry, X exit, I intermediate) are allowed; the simulator accepts a direct to any named point.",
+ "aerodromes": [
+  {
+   "id": "GMMN",
+   "name": "Casablanca Mohammed V",
+   "coord": "332203N 0073523W",
+   "elev_ft": 656,
+   "runways": [
+    {
+     "id": "35R",
+     "heading": 350
+    },
+    {
+     "id": "17L",
+     "heading": 170
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GCRR",
+   "name": "Lanzarote",
+   "coord": "285644N 0133619W",
+   "elev_ft": 46,
+   "runways": [
+    {
+     "id": "03",
+     "heading": 29
+    },
+    {
+     "id": "21",
+     "heading": 209
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GMMX",
+   "name": "Marrakech Menara",
+   "coord": "313624N 0080211W",
+   "elev_ft": 1545,
+   "runways": [
+    {
+     "id": "10",
+     "heading": 100
+    },
+    {
+     "id": "28",
+     "heading": 280
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GMAD",
+   "name": "Agadir Al Massira",
+   "coord": "301930N 0092447W",
+   "elev_ft": 250,
+   "runways": [
+    {
+     "id": "09",
+     "heading": 90
+    },
+    {
+     "id": "27",
+     "heading": 270
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GCLP",
+   "name": "Gran Canaria",
+   "coord": "275555N 0152312W",
+   "elev_ft": 78,
+   "runways": [
+    {
+     "id": "03L",
+     "heading": 31
+    },
+    {
+     "id": "21R",
+     "heading": 211
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GCFV",
+   "name": "Fuerteventura",
+   "coord": "282710N 0135150W",
+   "elev_ft": 83,
+   "runways": [
+    {
+     "id": "01",
+     "heading": 2
+    },
+    {
+     "id": "19",
+     "heading": 182
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GMMI",
+   "name": "Essaouira Mogador",
+   "coord": "312351N 0094054W",
+   "elev_ft": 384,
+   "runways": [
+    {
+     "id": "16",
+     "heading": 160
+    },
+    {
+     "id": "34",
+     "heading": 340
+    }
+   ],
+   "runway_in_use": "auto"
+  }
+ ],
+ "sequencing": [
+  {
+   "fix": "TERTO",
+   "aerodrome": "GCRR",
+   "spacing_nm": 10,
+   "cross_at_fl": 250,
+   "min_fl": 250
+  },
+  {
+   "fix": "MARJA",
+   "aerodrome": "GMMN",
+   "spacing_nm": 10,
+   "cross_at_fl": 250,
+   "min_fl": 250
+  },
+  {
+   "fix": "SALCA",
+   "aerodrome": "GMMN",
+   "spacing_nm": 10,
+   "cross_at_fl": 250,
+   "min_fl": 250
+  }
+ ],
+ "_sequencing_note": "Arrivals: GCRR (Lanzarote) via TERTO, GMMN (Casablanca Mohammed V) via MARJA and SALCA. The LoA levels (FL250) and spacing (10 NM in trail) are placeholders until the real letters of agreement are entered.",
+ "rad_routes": {
+  "_note": "Direct routings published in the RAD (Route Availability Document), not drawn on the ENR charts. Listed in their published direction.",
+  "routes": [
+   [
+    "RUNAX",
+    "IBALU",
+    "SAMAR"
+   ],
+   [
+    "SUBAL",
+    "IBALU",
+    "SALCA"
+   ],
+   [
+    "TAKAV",
+    "DOMOG"
+   ],
+   [
+    "BEXAL",
+    "IBALU",
+    "SALCA"
+   ],
+   [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   [
+    "VASTO",
+    "NIDEB",
+    "TIGGI"
+   ],
+   [
+    "VASTO",
+    "BAROK"
+   ],
+   [
+    "SAMAR",
+    "BEXAL"
+   ],
+   [
+    "SAMAR",
+    "TIGGI"
+   ],
+   [
+    "NIPRI",
+    "NIDEB",
+    "ROLRO"
+   ]
+  ],
+  "two_way": [
+   [
+    "SUBAL",
+    "IBALU",
+    "SALCA"
+   ],
+   [
+    "BEXAL",
+    "IBALU",
+    "SALCA"
+   ]
+  ],
+  "_two_way_note": "SUBAL-IBALU-SALCA and BEXAL-IBALU-SALCA are also used westbound (ODAXA-SALCA-IBALU-SUBAL/BEXAL) by departures from Casablanca to the USA and Canada (user). The other RAD routings are one-way."
+ },
+ "standard_routes": {
+  "_note": "Standard routings used by default.",
+  "routes": [
+   [
+    "RUNAX",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   [
+    "DESUM",
+    "SULAM",
+    "DIMSA",
+    "IBLIV",
+    "SUNID",
+    "AKUDA"
+   ]
+  ]
+ },
+ "_entry_exit_note": "FRA designators from ENR 4.4: E = entry only (KORNO, RUNAX, VASTO, DESUM), X = exit only (TERTO, TIGGI, AKUDA), EX = both. All routes through VASTO are northbound.",
+ "external_points": {
+  "_note": "Points in the neighbouring sectors (Lisboa, Sevilla/Madrid, Casablanca, Canarias, Madeira). They are not transfer points; flight plans use them before the entry and after the exit point, and the controller can clear aircraft direct to them. Points marked provisional have estimated positions.",
+  "points": {
+   "ELVAR": {
+    "coord": "391310N 0071324W",
+    "region": "Lisboa",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "BARDI": {
+    "coord": "403501N 0061809W",
+    "region": "Lisboa/Madrid",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "AGADO": {
+    "coord": "415222N 0085536W",
+    "region": "Lisboa/Santiago",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "BALNO": {
+    "coord": "414350N 0065854W",
+    "region": "Lisboa/Madrid",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "MINTA": {
+    "coord": "370744N 0072300W",
+    "region": "Lisboa/Sevilla",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "PESAS": {
+    "coord": "370212N 0072300W",
+    "region": "Lisboa/Sevilla",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "PINEK": {
+    "coord": "415104N 0083552W",
+    "region": "Lisboa/Santiago",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "XERES": {
+    "coord": "420126N 0100405W",
+    "region": "Madrid (oceanic)",
+    "source": "opennav.com"
+   },
+   "GINAS": {
+    "coord": "293022N 0130800W",
+    "region": "Canarias",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "PEPOM": {
+    "coord": "295356N 0125854W",
+    "region": "Canarias",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "CANIS": {
+    "coord": "275959N 0143853W",
+    "region": "Canarias",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "ISORU": {
+    "coord": "283737N 0151410W",
+    "region": "Canarias",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "GURKA": {
+    "coord": "302602N 0155101W",
+    "region": "Canarias/Madeira",
+    "source": "AIP Espa\u00f1a ENR 4.4"
+   },
+   "FTV": {
+    "coord": "282551N 0135152W",
+    "region": "Canarias",
+    "source": "AIP Espa\u00f1a AD 2 GCFV (DVOR FTV 114.100)"
+   },
+   "ADM": {
+    "coord": "301919N 0092300W",
+    "region": "Agadir APP",
+    "source": "OurAirports (VOR-DME ADM 117.20)"
+   },
+   "CSD": {
+    "coord": "325601N 0080354W",
+    "region": "Casablanca",
+    "source": "OurAirports (NDB CSD Daouarat 345)"
+   },
+   "SAK": {
+    "coord": "333117N 0074038W",
+    "region": "Casablanca",
+    "source": "given by the user"
+   },
+   "LPPT": {
+    "coord": "384653N 0090809W",
+    "region": "Lisboa",
+    "source": "Lisboa aerodrome reference point"
+   },
+   "OBOLO": {
+    "coord": "363153N 0080757W",
+    "region": "Lisboa",
+    "source": "given by the user (Lisboa FIR)"
+   },
+   "TOSDI": {
+    "coord": "405927N 0061719W",
+    "region": "Lisboa/Madrid",
+    "source": "given by the user (Lisboa FIR)"
+   },
+   "ODALO": {
+    "coord": "313847N 0082929W",
+    "region": "Marrakech TMA (GMMX)",
+    "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   },
+   "VALBA": {
+    "coord": "320450N 0072958W",
+    "region": "Casablanca (UG850 / UZ801)",
+    "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   },
+   "EKTAL": {
+    "coord": "304209N 0091112W",
+    "region": "Agadir TMA (GMAD)",
+    "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   },
+   "AGALI": {
+    "coord": "304340N 0092948W",
+    "region": "Agadir TMA (GMAD)",
+    "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   },
+   "MANOX": {
+    "coord": "361140N 0152325W",
+    "region": "Lisboa/Santa Maria (Madeira)",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "NAVIX": {
+    "coord": "353114N 0161404W",
+    "region": "Lisboa/Santa Maria (Madeira)",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "KOMUT": {
+    "coord": "380000N 0150000W",
+    "region": "Lisboa/Santa Maria (Madeira)",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "GUNTI": {
+    "coord": "390000N 0150000W",
+    "region": "Lisboa/Santa Maria (Madeira)",
+    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+   },
+   "ODAXA": {
+    "coord": "335938N 0081432W",
+    "region": "Casablanca",
+    "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   }
+  }
+ },
+ "onward_routes": {
+  "_note": "Points flown before the entry / after the exit point, by transfer point and destination (exits) or departure (entries). Rules are tried in order; the first whose conditions match is used. 'options' are alternative point sequences with relative weights (picked per callsign, reproducibly). 'by_runway' picks by the runway in use at the destination. Destination groups are ICAO location-indicator prefixes (2 letters) or full codes.",
+  "groups": {
+   "north_europe": [
+    "EG",
+    "EI",
+    "EH",
+    "EB",
+    "ED",
+    "EL",
+    "EK",
+    "EN",
+    "ES",
+    "EF",
+    "BI",
+    "EP",
+    "EY",
+    "EV",
+    "EE",
+    "LF",
+    "LS",
+    "LO",
+    "LK",
+    "LZ",
+    "LEMD",
+    "LEBB",
+    "LEBL",
+    "LEVD",
+    "LESO",
+    "LEST",
+    "LEAS",
+    "LECO",
+    "LEGE",
+    "LERS",
+    "LEZG",
+    "LPPR"
+   ],
+   "south_east": [
+    "LE",
+    "LI",
+    "LG",
+    "LM",
+    "LH",
+    "LJ",
+    "LD",
+    "LR",
+    "LB",
+    "LT",
+    "LC",
+    "LL",
+    "LY",
+    "LW",
+    "LQ",
+    "LA",
+    "DA",
+    "DT",
+    "HE",
+    "OJ",
+    "OL",
+    "OS"
+   ],
+   "uk_ireland_nordic": [
+    "EG",
+    "EI",
+    "EK",
+    "EN",
+    "ES",
+    "EF",
+    "BI"
+   ],
+   "central_europe": [
+    "LF",
+    "EB",
+    "EH",
+    "ED",
+    "EL",
+    "LS",
+    "LO",
+    "EP",
+    "LK",
+    "LZ",
+    "LH"
+   ],
+   "portugal_lisbon": [
+    "LPPT"
+   ],
+   "portugal_north": [
+    "LPPR",
+    "LPBR",
+    "LPVR"
+   ],
+   "spain_med": [
+    "LE",
+    "LI",
+    "LG",
+    "LM",
+    "LJ",
+    "LD",
+    "LR",
+    "LB",
+    "LT",
+    "LC",
+    "LL",
+    "DA",
+    "DT"
+   ],
+   "north_america": [
+    "K",
+    "C",
+    "MM",
+    "TX",
+    "MY"
+   ]
+  },
+  "rules": [
+   {
+    "at": "SUBAL",
+    "side": "exit",
+    "options": [
+     {
+      "points": [
+       "MANOX"
+      ]
+     },
+     {
+      "points": [
+       "NAVIX"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "SUBAL",
+    "side": "entry",
+    "options": [
+     {
+      "points": [
+       "MANOX"
+      ]
+     },
+     {
+      "points": [
+       "NAVIX"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "BEXAL",
+    "side": "exit",
+    "dest_group": "north_america",
+    "options": [
+     {
+      "points": [
+       "KOMUT"
+      ]
+     },
+     {
+      "points": [
+       "GUNTI"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "BEXAL",
+    "side": "entry",
+    "dep_group": "north_america",
+    "options": [
+     {
+      "points": [
+       "KOMUT"
+      ]
+     },
+     {
+      "points": [
+       "GUNTI"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "SALCA",
+    "side": "entry",
+    "dep": "GMMN",
+    "options": [
+     {
+      "points": [
+       "ODAXA"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "SALCA",
+    "side": "exit",
+    "dest": "GMMN",
+    "options": [
+     {
+      "points": [
+       "ODAXA"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "AKUDA",
+    "side": "exit",
+    "dest_group": "north_europe",
+    "options": [
+     {
+      "points": [
+       "ELVAR",
+       "BARDI"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "AKUDA",
+    "side": "exit",
+    "dest_group": "south_east",
+    "options": [
+     {
+      "points": [
+       "OBOLO",
+       "PESAS"
+      ]
+     },
+     {
+      "points": [
+       "OBOLO",
+       "MINTA"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "AKUDA",
+    "side": "exit",
+    "options": [
+     {
+      "points": [
+       "OBOLO",
+       "PESAS"
+      ],
+      "w": 1
+     },
+     {
+      "points": [
+       "OBOLO",
+       "MINTA"
+      ],
+      "w": 1
+     },
+     {
+      "points": [
+       "ELVAR",
+       "BARDI"
+      ],
+      "w": 2
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "dest_group": "portugal_lisbon",
+    "options": [
+     {
+      "points": [
+       "LPPT"
+      ]
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "dest_group": "portugal_north",
+    "options": [
+     {
+      "points": [
+       "AGADO"
+      ]
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "dest_group": "uk_ireland_nordic",
+    "options": [
+     {
+      "points": [
+       "XERES"
+      ],
+      "w": 3
+     },
+     {
+      "points": [
+       "PINEK"
+      ],
+      "w": 2
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "dest_group": "central_europe",
+    "options": [
+     {
+      "points": [
+       "TOSDI"
+      ],
+      "w": 2
+     },
+     {
+      "points": [
+       "BALNO"
+      ],
+      "w": 2
+     },
+     {
+      "points": [
+       "PINEK"
+      ],
+      "w": 1
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "dest_group": "spain_med",
+    "options": [
+     {
+      "points": [
+       "BALNO"
+      ],
+      "w": 6
+     },
+     {
+      "points": [
+       "PESAS"
+      ],
+      "w": 1
+     },
+     {
+      "points": [
+       "MINTA"
+      ],
+      "w": 1
+     }
+    ]
+   },
+   {
+    "at": [
+     "TIGGI",
+     "BEXAL"
+    ],
+    "side": "exit",
+    "options": [
+     {
+      "points": [
+       "PINEK"
+      ],
+      "w": 4
+     },
+     {
+      "points": [
+       "AGADO"
+      ],
+      "w": 3
+     },
+     {
+      "points": [
+       "XERES"
+      ],
+      "w": 3
+     },
+     {
+      "points": [
+       "TOSDI"
+      ],
+      "w": 3
+     },
+     {
+      "points": [
+       "BALNO"
+      ],
+      "w": 4
+     },
+     {
+      "points": [
+       "LPPT"
+      ],
+      "w": 2
+     },
+     {
+      "points": [
+       "PESAS"
+      ],
+      "w": 0.5
+     },
+     {
+      "points": [
+       "MINTA"
+      ],
+      "w": 0.5
+     }
+    ]
+   },
+   {
+    "at": "BAROK",
+    "side": "exit",
+    "dest_group": "north_europe",
+    "options": [
+     {
+      "points": [
+       "ELVAR",
+       "BARDI"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "BAROK",
+    "side": "exit",
+    "options": [
+     {
+      "points": [
+       "ELVAR",
+       "BARDI"
+      ]
+     },
+     {
+      "points": [
+       "BALNO"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "BAROK",
+    "side": "entry",
+    "dep_group": "north_europe",
+    "options": [
+     {
+      "points": [
+       "BARDI",
+       "ELVAR"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "BAROK",
+    "side": "entry",
+    "options": [
+     {
+      "points": [
+       "BARDI",
+       "ELVAR"
+      ]
+     },
+     {
+      "points": [
+       "BALNO"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "MARJA",
+    "side": "exit",
+    "dest": "GMMX",
+    "by_runway": {
+     "10": [
+      "CSD",
+      "ODALO"
+     ],
+     "28": [
+      "SAK",
+      "VALBA"
+     ]
+    }
+   },
+   {
+    "at": "MARJA",
+    "side": "exit",
+    "dest": "GMAD",
+    "options": [
+     {
+      "points": [
+       "CSD",
+       "EKTAL"
+      ]
+     },
+     {
+      "points": [
+       "CSD",
+       "AGALI"
+      ]
+     }
+    ]
+   },
+   {
+    "at": [
+     "DOMOG",
+     "NISBA"
+    ],
+    "side": "exit",
+    "dest": "GMAD",
+    "options": [
+     {
+      "points": [
+       "ADM",
+       "AGALI"
+      ]
+     },
+     {
+      "points": [
+       "ADM",
+       "EKTAL"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "TERTO",
+    "side": "exit",
+    "dest": "GCRR",
+    "options": [
+     {
+      "points": [
+       "GINAS"
+      ]
+     },
+     {
+      "points": [
+       "PEPOM"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "TERTO",
+    "side": "exit",
+    "dest": "GCLP",
+    "options": [
+     {
+      "points": [
+       "CANIS"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "TERTO",
+    "side": "exit",
+    "dest": "GCFV",
+    "options": [
+     {
+      "points": [
+       "FTV"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "SAMAR",
+    "side": "exit",
+    "dest": "GCLP",
+    "options": [
+     {
+      "points": [
+       "ISORU"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "KONBA",
+    "side": "exit",
+    "options": [
+     {
+      "points": [
+       "GURKA"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "KONBA",
+    "side": "entry",
+    "options": [
+     {
+      "points": [
+       "GURKA"
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "separation_minima": {
+  "horizontal_nm": 7,
+  "_note": "Radar separation minimum applied in the Agadir CTA (user). Scenarios can override it with {\"separation\": {\"horizontal_nm\": N}}."
+ },
+ "descent_destinations": {
+  "aerodromes": [
+   "GMMN",
+   "GMMI",
+   "GMMX",
+   "GCRR",
+   "GCFV"
+  ],
+  "_note": "Traffic to these aerodromes descends in or just after the CTA: pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
+ }
+}
