@@ -60,9 +60,10 @@
       walk(document.querySelector(sel));
     return out;
   }
+  function selFl() { const a = state && selected && state.aircraft.find(x => x.callsign === selected); return a ? a.fl : (+$('#wxFl').value || 350); }
   function viewState() {
     return { w: cv.clientWidth, h: cv.clientHeight, cx: +view.cx.toFixed(3), cy: +view.cy.toFixed(3), s: +(view.s / devicePixelRatio).toFixed(5),
-      V: { ...V }, wx: [$('#wxMode').value, +$('#wxFl').value || 350, $('#wxCells').checked],
+      V: { ...V }, wx: [$('#wxMode').value, $('#wxMode').value === 'sel' ? selFl() : (+$('#wxFl').value || 350), $('#wxCells').checked],
       lo: labelOff, sel: selected || null, rbl: rbls.map(r => [r.a, r.b]) };
   }
   function start() {

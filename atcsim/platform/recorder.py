@@ -77,7 +77,7 @@ class Capture:
             areas = [a.snapshot(w.t) for a in w.areas.values()]
         keep = ("outline", "shape", "sectors", "waypoints", "routes", "rad_routes", "external_points",
                 "transfer_points", "controlled_sectors", "bbox_nm", "name", "unit", "airways", "provisional_points")
-        st = {"name": self.name, "scenario": self.s.scenario_name, "created": time.time(),
+        st = {"name": self.name, "scenario": self.s.scenario_name, "created": time.time(), "sep_h": w.sep_h,
               "sector": {k: sec.get(k) for k in keep}, "areas": areas}
         with open(os.path.join(self.dir, "static.json"), "w") as f:
             json.dump(st, f)
@@ -101,7 +101,10 @@ class Capture:
                                    a.icao, nav, a.next_wp if nav == "L" else None,
                                    int(round(a.target_hdg)) % 360 or 360 if nav != "L" and a.target_hdg is not None else None,
                                    spd, a.flight_plan.get("destination") or "", a.entry_wp,
-                                   (a.formation or {}).get("size"), 1 if a.military else 0])
+                                   (a.formation or {}).get("size"), 1 if a.military else 0,
+                                   [a.arr.get("tod_in_nm"), a.arr.get("loa_latest_descent_in_nm"), a.arr.get("runway"),
+                                    a.vs_fpm < -100 or a.cleared_alt_ft < a.alt_ft - 50]
+                                   if a.destination else None])
                         route = [x for x in a.route if not x.startswith("@")]
                         if self._routes.get(a.callsign) != route:
                             self._routes[a.callsign] = route
@@ -110,6 +113,21 @@ class Capture:
                           "los": [list(k) for k in w._los], "areas": [a.id for a in w.areas.values() if a.active]}
                     if rt:
                         fr["rt"] = rt
+                    stca = [c["aircraft"] for c in w.stca()]
+                    if stca:
+                        fr["stca"] = stca
+                    tr = [[a.callsign, round(a.x, 2), round(a.y, 2), int(round(a.alt_ft / 100)), int(round(a.gs)),
+                           int(round(a.trk)), a.exit_point] for a in w.aircraft.values()
+                          if a.status in ("exited", "left_sector") and w.t <= a.ghost_until]
+                    if tr:
+                        fr["tr"] = tr
+                    if w.aerodromes and (w.t - getattr(self, "_ad_t", -1e9) >= 30):
+                        from ..session import arrivals_description
+                        self._ad_t = w.t
+                        ad = json.dumps(arrivals_description(w), separators=(",", ":"), default=str)
+                        if ad != getattr(self, "_ad_last", None):
+                            self._ad_last = ad
+                            fr["ad"] = json.loads(ad)
                     # the controller's actions for the captions of the video
                     acts = []
                     for ev in w.events:
@@ -127,22 +145,33 @@ class Capture:
                     self.frames_f.write(json.dumps(fr, separators=(",", ":")) + "\n")
                     self.frames_f.flush()
                 prod = self.atc_wx or ("composite", 350)
-                if abs(t - last_wx_t) >= 20 or prod != getattr(self, "_last_prod", None):
+                every = 6 if prod[0] in ("cappi", "sel", "edr") else 15        # the radar page refreshes every 4 s
+                if abs(t - last_wx_t) >= every or prod != getattr(self, "_last_prod", None):
                     last_wx_t, self._last_prod = t, prod
                     m = 30.0 if (bb[2] - bb[0] > 200 or bb[3] - bb[1] > 200) else 10.0
                     box = (bb[0] - m, bb[1] - m, bb[2] + m, bb[3] + m)
                     res = 4.0 if box[2] - box[0] > 250 else 2.0
+                    # same encodings as /weather/radar: dBZ = v/2 - 10 ; echo tops FL = v*5 ; EDR = v/250
                     if prod[0] in ("cappi", "sel"):
                         _, _, z = wx.cappi(float(prod[1]), t, box, res)
+                        enc = np.where(z > -9.9, np.clip((z + 10) * 2, 1, 255), 0)
+                    elif prod[0] == "echo_tops":
+                        enc = np.clip(wx.volume(t, box, max(res, 2.0), 20)["echo_tops"] / 5.0, 0, 255)
+                    elif prod[0] == "edr":
+                        _, _, X, Y = wx.grid(box, res)
+                        enc = np.clip(wx.edr(X, Y, float(prod[1]), t) * 250, 0, 255)
                     else:
                         z = wx.volume(t, box, res, 20)["composite"]
-                    enc = np.where(z > -9.9, np.clip((z + 10) * 2, 1, 255), 0).astype(np.uint8)
+                        enc = np.where(z > -9.9, np.clip((z + 10) * 2, 1, 255), 0)
+                    enc = enc.astype(np.uint8)
+                    cells = [[c["x_nm"], c["y_nm"], c["echo_top_fl"], c["max_dbz"], c["stage"][0]]
+                             for c in wx.cells_summary(t)]
                     fn = f"wx_{nwx:05d}.npy"
                     np.save(os.path.join(self.dir, fn), enc)
                     nwx += 1
                     with self.lock:
                         self.wx_f.write(json.dumps({"w": round(time.time(), 2), "t": t, "file": fn, "bbox": box,
-                                                    "res": res, "product": list(prod)}) + "\n")
+                                                    "res": res, "product": list(prod), "cells": cells}) + "\n")
                         self.wx_f.flush()
             except Exception as e:  # noqa: BLE001 - recording must never break the exercise
                 self.event({"type": "recorder_error", "wall": time.time(), "error": f"{type(e).__name__}: {e}"})
