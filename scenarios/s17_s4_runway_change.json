@@ -110,6 +110,18 @@
       "reach": {
         "waypoint": "S4",
         "time": 520
+      },
+      "dep": "EDDF",
+      "fpl": {
+        "ssr": "5352",
+        "reg": "CN-RPA",
+        "code": "022E39",
+        "eobt": "1041",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 158,
+        "rmk": "TCAS"
       }
     },
     {
@@ -124,6 +136,17 @@
       "reach": {
         "waypoint": "S4",
         "time": 640
+      },
+      "dep": "LFPG",
+      "fpl": {
+        "ssr": "4463",
+        "reg": "G-KBPF",
+        "code": "42E96A",
+        "eobt": "0957",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 237
       }
     },
     {
@@ -137,6 +160,17 @@
       "reach": {
         "waypoint": "S4",
         "time": 900
+      },
+      "dep": "EGLL",
+      "fpl": {
+        "ssr": "2370",
+        "reg": "PH-FUR",
+        "code": "481E08",
+        "eobt": "1117",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 138
       }
     },
     {
@@ -151,6 +185,17 @@
       "reach": {
         "waypoint": "S4",
         "time": 1060
+      },
+      "dep": "EGLL",
+      "fpl": {
+        "ssr": "2530",
+        "reg": "A6-ENL",
+        "code": "896E8B",
+        "eobt": "1038",
+        "altn": "",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EMIRATES",
+        "pob": 316
       }
     }
   ],
@@ -201,5 +246,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "13:00"
 }

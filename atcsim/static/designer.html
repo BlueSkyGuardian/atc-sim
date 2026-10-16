@@ -130,6 +130,7 @@
           <label>duration</label><span><input id="f-dur" type="number" step="60" style="width:90px"> s</span>
           <label>pilot delay</label><span><input id="f-pd" type="number" step="1" style="width:90px"> s</span>
           <label>separation</label><span><input id="f-sep" type="number" step="0.5" min="3" max="20" style="width:90px" placeholder="default"> NM <span class="c-dim" id="f-sepd"></span></span>
+          <label>start (UTC)</label><span><input id="f-utc" placeholder="12:00" style="width:90px"> <span class="c-dim">clock at T+0: flight plans, estimates</span></span>
         </div>
         <div style="margin-top:8px"><label class="c-dim" style="font-size:12px">description (briefing, visible to the controller)</label>
           <textarea id="f-desc" rows="3"></textarea></div>
@@ -270,7 +271,7 @@ function renderScenarioForm() {
   const act = document.activeElement;
   const set = (id, v) => { const el = $(id); if (el !== act) el.value = v == null ? '' : v; };
   set('#f-name', scn.name); set('#f-title', scn.title); set('#f-desc', scn.description); set('#f-notes', scn.design_notes);
-  set('#f-dur', scn.duration_s); set('#f-pd', scn.pilot_delay_s ?? 4); set('#f-sep', (scn.separation || {}).horizontal_nm ?? '');
+  set('#f-dur', scn.duration_s); set('#f-pd', scn.pilot_delay_s ?? 4); set('#f-utc', scn.start_utc || ''); set('#f-sep', (scn.separation || {}).horizontal_nm ?? '');
   $('#f-sepd').textContent = `airspace default ${scn.airspace === 'agadir' ? 7 : 5} NM`;
   $('#f-asp').textContent = `${scn.airspace || 'training'}${scn.control ? ' · ' + [].concat(scn.control).join('+') : ''}`;
   const w = scn.weather;
@@ -289,6 +290,7 @@ bindField('#f-desc', v => scn.description = v, false);
 bindField('#f-notes', v => scn.design_notes = v, false);
 bindField('#f-dur', v => scn.duration_s = Math.max(300, +v || 1800));
 bindField('#f-pd', v => scn.pilot_delay_s = Math.max(0, +v || 0));
+bindField('#f-utc', v => { v = v.trim(); if (/^\d{1,2}:?\d{2}$/.test(v)) { const d = v.replace(':', '').padStart(4, '0'); scn.start_utc = d.slice(0, 2) + ':' + d.slice(2); } else delete scn.start_utc; });
 bindField('#f-sep', v => { if (v === '') delete scn.separation; else scn.separation = { horizontal_nm: +v }; });
 bindField('#w-seed', v => scn.weather.seed = +v || 0);
 // weather = a list of storm patterns (squall lines, convection areas) + placed cells + stratiform rain areas
@@ -1196,6 +1198,13 @@ function renderSel() {
       ${info ? `<small class="note">${info.southbound ? 'southbound (odd levels)' : 'northbound (even levels)'} · appears T+${fmtT(info.appear_s)} · enters ${info.entry} T+${fmtT(info.entry_s)} · exits ${info.exit} T+${fmtT(info.exit_s)}${info.arrival ? ' · arrival ' + info.arrival : ''}${fp ? '<br>FPL: ' + esc(fp.route) : ''}</small>` : ''}
       ${myConf.map(k => `<div class="c-los" style="font-family:var(--mono);font-size:12px;margin-top:4px">planned conflict ${k.aircraft.join(' × ')} T+${fmtT(k.start_s)} min ${k.min_nm} NM</div>`).join('')}
       </section>
+      <section><h2>Flight plan <span class="c-dim" style="text-transform:none;letter-spacing:0;font-weight:400">empty = generated</span></h2>
+        <div class="grid">
+          ${['ssr', 'reg', 'eobt', 'altn', 'equipment', 'opr', 'pob', 'rmk'].map(k => field({ ssr: 'SSR code', reg: 'registration', eobt: 'EOBT (UTC)', altn: 'alternate', equipment: 'equipment (10)', opr: 'operator', pob: 'persons on board', rmk: 'remarks (RMK/)' }[k],
+            `<input data-fpl="${k}" value="${esc((a.fpl || {})[k] ?? '')}" placeholder="${esc(fp ? ({ ssr: fp.ssr, reg: fp.registration, eobt: fp.eobt, altn: fp.alternate, equipment: fp.equipment, opr: fp.operator, pob: fp.pob, rmk: fp.remarks }[k] ?? '') : '')}" style="font-family:var(--mono)">`)).join('')}
+        </div>
+        ${fp && fp.message ? `<pre style="font:11px/1.4 var(--mono);white-space:pre-wrap;background:#0b1117;border:1px solid var(--line);border-radius:4px;padding:6px;margin:6px 0 0">${esc(fp.message)}</pre>` : ''}
+      </section>
       <section><h2>Pilot requests &amp; events</h2>
         ${reqs.map(([r, i]) => `<div class="item ${sel.kind === 'req' && sel.i === i ? 'c-ok' : ''}" data-req="${i}">T+${fmtT(r.time)} <b>${r.type === 'weather_deviation' ? 'wx deviation' : r.type}</b> ${esc(reqValueText(r))} <span class="c-dim">${esc(r.reason || '')}</span> <button data-rdel="${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`).join('')}
         ${evs.map(([r, i]) => `<div class="item c-warn ${sel.kind === 'evt' && sel.i === i ? 'c-ok' : ''}" data-evt="${i}">T+${fmtT(r.time)} <b>${r.type}</b> <span class="c-dim">${esc(r.reason || '')}</span> <button data-edel="${i}" style="float:right;font-size:10px;padding:0 5px">×</button></div>`).join('')}
@@ -1219,6 +1228,9 @@ function renderSel() {
     set('#a-rvsm', v => { if (v === '') delete a.rvsm; else a.rvsm = v === 'true'; });
     set('#a-form', v => { if (+v >= 2) { a.formation = { size: +v }; a.rvsm = false; } else delete a.formation; });
     set('#a-dir', v => { if (v) a.direction = v; else delete a.direction; });
+    b.querySelectorAll('[data-fpl]').forEach(inp => inp.addEventListener('change', e => { snapshot(); const k = inp.dataset.fpl, v = e.target.value.trim();
+      a.fpl = a.fpl || {}; if (v === '') delete a.fpl[k]; else a.fpl[k] = k === 'pob' ? +v : k === 'rmk' || k === 'opr' ? v.toUpperCase() : v.toUpperCase().replace(/\s/g, '');
+      if (!Object.keys(a.fpl).length) delete a.fpl; changed(); }));
     $('#a-reachT').onclick = () => {
       snapshot(); const p = positionsAt(T).find(q => q.cs === a.callsign);
       if (a.start) a.start.time = Math.round(T);

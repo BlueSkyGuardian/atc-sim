@@ -84,7 +84,19 @@
       ],
       "fl": 370,
       "arrival": false,
-      "entry_time": 0
+      "entry_time": 0,
+      "dep": "LFPG",
+      "dest": "GCLP",
+      "fpl": {
+        "ssr": "3627",
+        "reg": "PH-EPJ",
+        "code": "482F9D",
+        "eobt": "0645",
+        "altn": "GCXO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "KLM",
+        "pob": 255
+      }
     },
     {
       "callsign": "SAS9",
@@ -94,7 +106,20 @@
         "E2"
       ],
       "fl": 330,
-      "entry_time": 40
+      "entry_time": 40,
+      "dep": "EBBR",
+      "dest": "DIAP",
+      "fpl": {
+        "ssr": "4653",
+        "reg": "SE-RXY",
+        "code": "4ADDAE",
+        "eobt": "0647",
+        "altn": "GLRB",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "SAS",
+        "pob": 168,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "DAH2",
@@ -110,6 +135,18 @@
           20
         ],
         "time": 560
+      },
+      "dep": "LFPG",
+      "dest": "GCLP",
+      "fpl": {
+        "ssr": "3417",
+        "reg": "7T-VXK",
+        "code": "0A3E59",
+        "eobt": "0627",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR ALGERIE",
+        "pob": 245
       }
     }
   ],
@@ -150,5 +187,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "09:00"
 }

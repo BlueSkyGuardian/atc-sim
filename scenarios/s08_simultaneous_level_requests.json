@@ -90,6 +90,17 @@
           30.0
         ],
         "time": 620
+      },
+      "dep": "LFPG",
+      "fpl": {
+        "ssr": "4373",
+        "reg": "A6-ESW",
+        "code": "896829",
+        "eobt": "1344",
+        "altn": "",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EMIRATES",
+        "pob": 264
       }
     },
     {
@@ -107,6 +118,18 @@
           30.0
         ],
         "time": 620
+      },
+      "dep": "EGLL",
+      "dest": "GMMX",
+      "fpl": {
+        "ssr": "2560",
+        "reg": "A7-BBP",
+        "code": "06AE4B",
+        "eobt": "1353",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "QATAR AIRWAYS",
+        "pob": 262
       }
     },
     {
@@ -117,7 +140,19 @@
         "W1"
       ],
       "fl": 380,
-      "entry_time": 200
+      "entry_time": 200,
+      "dep": "SBGR",
+      "dest": "LSZH",
+      "fpl": {
+        "ssr": "3764",
+        "reg": "SU-GBW",
+        "code": "017720",
+        "eobt": "1132",
+        "altn": "LIMC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EGYPTAIR",
+        "pob": 169
+      }
     }
   ],
   "requests": [
@@ -149,5 +184,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "16:00"
 }

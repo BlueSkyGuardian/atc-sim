@@ -148,6 +148,16 @@
       "reach": {
         "waypoint": "BEXAL",
         "time": 1400
+      },
+      "fpl": {
+        "ssr": "5221",
+        "reg": "CN-JWS",
+        "code": "0205F6",
+        "eobt": "2020",
+        "altn": "GCTS",
+        "equipment": "SDFGHIUY/S",
+        "opr": "",
+        "pob": 2
       }
     },
     {
@@ -163,6 +173,16 @@
       "reach": {
         "waypoint": "BEXAL",
         "time": 1400
+      },
+      "fpl": {
+        "ssr": "4457",
+        "reg": "PR-GPS",
+        "code": "E64F2A",
+        "eobt": "1950",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "GOL",
+        "pob": 151
       }
     },
     {
@@ -178,7 +198,18 @@
       "rvsm": false,
       "equipment": "SDFGRY/S",
       "remarks": "FERRY FLT NON-RVSM",
-      "entry_time": 300
+      "entry_time": 300,
+      "fpl": {
+        "ssr": "4047",
+        "reg": "N650GA",
+        "code": "A7E5E2",
+        "eobt": "2004",
+        "altn": "LPFR",
+        "equipment": "SDFGRY/S",
+        "opr": "",
+        "pob": 10,
+        "rmk": "FERRY FLT NON-RVSM"
+      }
     },
     {
       "callsign": "AZU8743",
@@ -194,6 +225,16 @@
       "reach": {
         "waypoint": "TIGGI",
         "time": 2600
+      },
+      "fpl": {
+        "ssr": "2646",
+        "reg": "PR-AGG",
+        "code": "E6DC4D",
+        "eobt": "1447",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AZUL",
+        "pob": 195
       }
     },
     {
@@ -210,6 +251,16 @@
       "reach": {
         "waypoint": "TIGGI",
         "time": 2660
+      },
+      "fpl": {
+        "ssr": "3612",
+        "reg": "EC-FSF",
+        "code": "36AD9D",
+        "eobt": "1219",
+        "altn": "LEVC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA",
+        "pob": 278
       }
     },
     {
@@ -228,6 +279,17 @@
       "reach": {
         "waypoint": "OSDIV",
         "time": 1500
+      },
+      "fpl": {
+        "ssr": "2266",
+        "reg": "PH-BEW",
+        "code": "480EC5",
+        "eobt": "1757",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "KLM",
+        "pob": 302,
+        "rmk": "TCAS"
       }
     },
     {
@@ -247,7 +309,17 @@
       "dest": "SBGR",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2764",
+        "reg": "PR-GWC",
+        "code": "E68350",
+        "eobt": "1746",
+        "altn": "SBKP",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "GOL",
+        "pob": 121
+      }
     },
     {
       "callsign": "TOM9465",
@@ -266,7 +338,17 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2317",
+        "reg": "G-THMS",
+        "code": "406706",
+        "eobt": "1750",
+        "altn": "SBRF",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "TUI AIRWAYS",
+        "pob": 144
+      }
     },
     {
       "callsign": "AZU5495",
@@ -285,7 +367,17 @@
       "dest": "SVMI",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5634",
+        "reg": "PR-AEN",
+        "code": "E472BE",
+        "eobt": "1801",
+        "altn": "SKBO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AZUL",
+        "pob": 167
+      }
     },
     {
       "callsign": "TAM8723",
@@ -304,7 +396,17 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4400",
+        "reg": "PT-MHE",
+        "code": "E4DB69",
+        "eobt": "1619",
+        "altn": "SBRF",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM BRASIL",
+        "pob": 166
+      }
     },
     {
       "callsign": "IBE9555",
@@ -323,7 +425,17 @@
       "dest": "GCTS",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4347",
+        "reg": "EC-ECC",
+        "code": "377BE8",
+        "eobt": "1810",
+        "altn": "GCXO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA",
+        "pob": 284
+      }
     },
     {
       "callsign": "AFR5837",
@@ -342,7 +454,17 @@
       "dest": "GCLP",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5363",
+        "reg": "F-GVBU",
+        "code": "3AF679",
+        "eobt": "1653",
+        "altn": "GCXO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIR FRANCE",
+        "pob": 268
+      }
     },
     {
       "callsign": "TAP2818",
@@ -361,7 +483,17 @@
       "dest": "SVMI",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2113",
+        "reg": "CS-TDE",
+        "code": "495702",
+        "eobt": "2000",
+        "altn": "SKBO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 119
+      }
     },
     {
       "callsign": "AFR615",
@@ -380,7 +512,17 @@
       "dest": "SBKP",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5427",
+        "reg": "F-GZVR",
+        "code": "39583A",
+        "eobt": "2010",
+        "altn": "SBGR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIR FRANCE",
+        "pob": 253
+      }
     },
     {
       "callsign": "TVF2427K",
@@ -399,7 +541,17 @@
       "dest": "SBGR",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4167",
+        "reg": "F-HEKZ",
+        "code": "3BD4A4",
+        "eobt": "1730",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 101
+      }
     },
     {
       "callsign": "DLH7811X",
@@ -418,7 +570,17 @@
       "dest": "GCLA",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2434",
+        "reg": "D-AJCZ",
+        "code": "3CB189",
+        "eobt": "1900",
+        "altn": "GCTS",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 197
+      }
     },
     {
       "callsign": "BAW8202",
@@ -437,7 +599,17 @@
       "dest": "SKBO",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4212",
+        "reg": "G-QRRA",
+        "code": "41D2E5",
+        "eobt": "1900",
+        "altn": "SVMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 130
+      }
     },
     {
       "callsign": "GLO1944",
@@ -456,7 +628,17 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3556",
+        "reg": "PR-GQK",
+        "code": "E7B81C",
+        "eobt": "2033",
+        "altn": "SBRF",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "GOL",
+        "pob": 220
+      }
     },
     {
       "callsign": "AEA6608",
@@ -475,7 +657,17 @@
       "dest": "GVAC",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4503",
+        "reg": "EC-BUZ",
+        "code": "350CAB",
+        "eobt": "1841",
+        "altn": "GOBD",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR EUROPA",
+        "pob": 156
+      }
     },
     {
       "callsign": "LAN6275",
@@ -494,7 +686,18 @@
       "dest": "SAEZ",
       "direction": "southbound",
       "flow": "un873",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5200",
+        "reg": "CC-BKA",
+        "code": "E80975",
+        "eobt": "1727",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM CHILE",
+        "pob": 178,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AZU501A",
@@ -512,7 +715,17 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4572",
+        "reg": "PR-AAU",
+        "code": "E739ED",
+        "eobt": "1756",
+        "altn": "SBRF",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AZUL",
+        "pob": 197
+      }
     },
     {
       "callsign": "DLH7431P",
@@ -530,7 +743,17 @@
       "dest": "SAEZ",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3034",
+        "reg": "D-AJCH",
+        "code": "3F7891",
+        "eobt": "1747",
+        "altn": "SCEL",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 238
+      }
     },
     {
       "callsign": "BAW1766",
@@ -548,7 +771,17 @@
       "dest": "SKBO",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4574",
+        "reg": "G-SENU",
+        "code": "423CED",
+        "eobt": "1939",
+        "altn": "SVMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 348
+      }
     },
     {
       "callsign": "LAN8199P",
@@ -566,7 +799,17 @@
       "dest": "SCEL",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3176",
+        "reg": "CC-BCE",
+        "code": "E80F54",
+        "eobt": "1751",
+        "altn": "SAEZ",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM CHILE",
+        "pob": 221
+      }
     },
     {
       "callsign": "LAN2660",
@@ -584,7 +827,18 @@
       "dest": "SVMI",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4271",
+        "reg": "CC-BLU",
+        "code": "E808A7",
+        "eobt": "2010",
+        "altn": "SKBO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "LATAM CHILE",
+        "pob": 225,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "BAW20K",
@@ -602,7 +856,17 @@
       "dest": "SBGR",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5412",
+        "reg": "G-GCKD",
+        "code": "43333A",
+        "eobt": "1817",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 175
+      }
     },
     {
       "callsign": "GLO4231K",
@@ -620,7 +884,18 @@
       "dest": "SKBO",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5115",
+        "reg": "PR-GUP",
+        "code": "E535F4",
+        "eobt": "1822",
+        "altn": "SVMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "GOL",
+        "pob": 195,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AVA8397X",
@@ -638,7 +913,18 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2076",
+        "reg": "N473AV",
+        "code": "A806C2",
+        "eobt": "1837",
+        "altn": "SBRF",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "AVIANCA",
+        "pob": 252,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "TAM1700A",
@@ -656,7 +942,18 @@
       "dest": "SBKP",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5402",
+        "reg": "PT-MZY",
+        "code": "E4CC79",
+        "eobt": "1841",
+        "altn": "SBGR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM BRASIL",
+        "pob": 194,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AVA8877",
@@ -674,7 +971,17 @@
       "dest": "SBGR",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5277",
+        "reg": "N771AV",
+        "code": "A7C8F7",
+        "eobt": "1827",
+        "altn": "SBKP",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AVIANCA",
+        "pob": 163
+      }
     },
     {
       "callsign": "ARG5096K",
@@ -692,7 +999,18 @@
       "dest": "SAEZ",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4405",
+        "reg": "LV-YEA",
+        "code": "E11B29",
+        "eobt": "1847",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 226,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AFR6183",
@@ -710,7 +1028,17 @@
       "dest": "SBRF",
       "direction": "southbound",
       "flow": "un866",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3447",
+        "reg": "F-GKDK",
+        "code": "3845DA",
+        "eobt": "1904",
+        "altn": "SBFZ",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIR FRANCE",
+        "pob": 214
+      }
     },
     {
       "callsign": "ARG7222",
@@ -728,7 +1056,17 @@
       "dest": "EBBR",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4101",
+        "reg": "LV-FAZ",
+        "code": "E13363",
+        "eobt": "1423",
+        "altn": "EHAM",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 203
+      }
     },
     {
       "callsign": "ARG4390X",
@@ -746,7 +1084,17 @@
       "dest": "LEMD",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3354",
+        "reg": "LV-XQR",
+        "code": "E11018",
+        "eobt": "1212",
+        "altn": "LEVC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 200
+      }
     },
     {
       "callsign": "ARG5536X",
@@ -764,7 +1112,17 @@
       "dest": "EKCH",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2552",
+        "reg": "LV-VMA",
+        "code": "E0AB0B",
+        "eobt": "1404",
+        "altn": "ENGM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 241
+      }
     },
     {
       "callsign": "AEA3420P",
@@ -782,7 +1140,17 @@
       "dest": "EGCC",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4700",
+        "reg": "EC-HEP",
+        "code": "36206F",
+        "eobt": "1523",
+        "altn": "EGNM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIR EUROPA",
+        "pob": 332
+      }
     },
     {
       "callsign": "IBE7552P",
@@ -800,7 +1168,17 @@
       "dest": "EHAM",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5677",
+        "reg": "EC-KHA",
+        "code": "3718FF",
+        "eobt": "1327",
+        "altn": "EBBR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA",
+        "pob": 226
+      }
     },
     {
       "callsign": "DLH1791",
@@ -818,7 +1196,17 @@
       "dest": "EGCC",
       "direction": "northbound",
       "flow": "konba_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4402",
+        "reg": "D-AHEJ",
+        "code": "3E07E9",
+        "eobt": "1053",
+        "altn": "EGNM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 217
+      }
     },
     {
       "callsign": "RAM154",
@@ -835,7 +1223,17 @@
       "dest": "KIAD",
       "direction": "northbound",
       "flow": "gmmn_dep_nat",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4511",
+        "reg": "CN-RCD",
+        "code": "02276B",
+        "eobt": "2018",
+        "altn": "KJFK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 175
+      }
     },
     {
       "callsign": "RAM4292",
@@ -852,7 +1250,17 @@
       "dest": "KIAD",
       "direction": "northbound",
       "flow": "gmmn_dep_nat_b",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4053",
+        "reg": "CN-RDA",
+        "code": "022DA2",
+        "eobt": "2024",
+        "altn": "KJFK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 231
+      }
     },
     {
       "callsign": "RAM5345X",
@@ -868,7 +1276,17 @@
       "dep": "CYUL",
       "dest": "GMMN",
       "direction": "southbound",
-      "flow": "subal_nat"
+      "flow": "subal_nat",
+      "fpl": {
+        "ssr": "3473",
+        "reg": "CN-RLC",
+        "code": "0224DA",
+        "eobt": "1435",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 238
+      }
     },
     {
       "callsign": "EZY7887A",
@@ -885,7 +1303,17 @@
       "dest": "SBFZ",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2375",
+        "reg": "G-EVAH",
+        "code": "403D48",
+        "eobt": "1701",
+        "altn": "SBRF",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EASYJET",
+        "pob": 128
+      }
     },
     {
       "callsign": "EXS7614P",
@@ -902,7 +1330,18 @@
       "dest": "SKBO",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2527",
+        "reg": "G-JFYH",
+        "code": "410F8B",
+        "eobt": "1709",
+        "altn": "SVMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "JET2",
+        "pob": 197,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "TVF3171",
@@ -919,7 +1358,17 @@
       "dest": "SAEZ",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4230",
+        "reg": "F-HKEC",
+        "code": "3BE0E5",
+        "eobt": "1734",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 136
+      }
     },
     {
       "callsign": "VLG9152A",
@@ -936,7 +1385,17 @@
       "dest": "SBKP",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3166",
+        "reg": "EC-ESB",
+        "code": "356994",
+        "eobt": "1734",
+        "altn": "SBGR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "VUELING",
+        "pob": 229
+      }
     },
     {
       "callsign": "BAW8618K",
@@ -953,7 +1412,17 @@
       "dest": "SAEZ",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2103",
+        "reg": "G-NEVU",
+        "code": "43F302",
+        "eobt": "1725",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 216
+      }
     },
     {
       "callsign": "TVF8974",
@@ -970,7 +1439,17 @@
       "dest": "SBGL",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3701",
+        "reg": "F-HGCX",
+        "code": "3BC6DF",
+        "eobt": "1732",
+        "altn": "SBGR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 122
+      }
     },
     {
       "callsign": "KLM7897X",
@@ -987,7 +1466,17 @@
       "dest": "SBGL",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2512",
+        "reg": "PH-GCR",
+        "code": "485FCA",
+        "eobt": "1820",
+        "altn": "SBGR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "KLM",
+        "pob": 220
+      }
     },
     {
       "callsign": "GLO5716X",
@@ -1004,7 +1493,17 @@
       "dest": "GCTS",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5204",
+        "reg": "PR-GLS",
+        "code": "E529B5",
+        "eobt": "1835",
+        "altn": "GCXO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "GOL",
+        "pob": 238
+      }
     },
     {
       "callsign": "EWG2565",
@@ -1021,7 +1520,17 @@
       "dest": "SBKP",
       "direction": "southbound",
       "flow": "runax_samar",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4155",
+        "reg": "D-ADAN",
+        "code": "3F1164",
+        "eobt": "1830",
+        "altn": "SBGR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EUROWINGS",
+        "pob": 203
+      }
     },
     {
       "callsign": "TAM1972A",
@@ -1037,7 +1546,17 @@
       "dest": "LEMD",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2025",
+        "reg": "PT-MGJ",
+        "code": "E6C1C0",
+        "eobt": "1210",
+        "altn": "LEVC",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM BRASIL",
+        "pob": 240
+      }
     },
     {
       "callsign": "ARG8429P",
@@ -1053,7 +1572,17 @@
       "dest": "EGLL",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4676",
+        "reg": "LV-NND",
+        "code": "E37CEF",
+        "eobt": "1431",
+        "altn": "EGKK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 219
+      }
     },
     {
       "callsign": "AVA2092",
@@ -1069,7 +1598,17 @@
       "dest": "LPPT",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5175",
+        "reg": "N003AV",
+        "code": "A948F5",
+        "eobt": "1213",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AVIANCA",
+        "pob": 232
+      }
     },
     {
       "callsign": "TAP8454P",
@@ -1085,7 +1624,17 @@
       "dest": "EHAM",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3532",
+        "reg": "CS-TFQ",
+        "code": "49465B",
+        "eobt": "0929",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 172
+      }
     },
     {
       "callsign": "AVA9855P",
@@ -1101,7 +1650,17 @@
       "dest": "EHAM",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2070",
+        "reg": "N308AV",
+        "code": "AFE981",
+        "eobt": "1217",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AVIANCA",
+        "pob": 216
+      }
     },
     {
       "callsign": "AEA5552P",
@@ -1117,7 +1676,17 @@
       "dest": "EIDW",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4224",
+        "reg": "EC-CUL",
+        "code": "34D225",
+        "eobt": "1231",
+        "altn": "EGCC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR EUROPA",
+        "pob": 214
+      }
     },
     {
       "callsign": "ARG1613A",
@@ -1133,7 +1702,17 @@
       "dest": "EGCC",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5537",
+        "reg": "LV-TBQ",
+        "code": "E16DFC",
+        "eobt": "1249",
+        "altn": "EGNM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 198
+      }
     },
     {
       "callsign": "KLM8599P",
@@ -1149,7 +1728,17 @@
       "dest": "LFPG",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5026",
+        "reg": "PH-KFU",
+        "code": "483132",
+        "eobt": "1106",
+        "altn": "LFPO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "KLM",
+        "pob": 272
+      }
     },
     {
       "callsign": "AFR4999A",
@@ -1165,7 +1754,17 @@
       "dest": "ENGM",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2176",
+        "reg": "F-GLBC",
+        "code": "3BB844",
+        "eobt": "1404",
+        "altn": "ESSA",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 235
+      }
     },
     {
       "callsign": "IBE305X",
@@ -1181,7 +1780,17 @@
       "dest": "LPPT",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4670",
+        "reg": "EC-SNW",
+        "code": "364B6F",
+        "eobt": "1300",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA",
+        "pob": 222
+      }
     },
     {
       "callsign": "AVA840A",
@@ -1197,7 +1806,17 @@
       "dest": "EGKK",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2371",
+        "reg": "N204AV",
+        "code": "A44648",
+        "eobt": "1321",
+        "altn": "EGLL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AVIANCA",
+        "pob": 235
+      }
     },
     {
       "callsign": "ARG6892K",
@@ -1213,7 +1832,18 @@
       "dest": "EDDF",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3340",
+        "reg": "LV-WYF",
+        "code": "E33CD7",
+        "eobt": "1027",
+        "altn": "EDDK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 188,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AZU6418",
@@ -1229,7 +1859,17 @@
       "dest": "LFPG",
       "direction": "northbound",
       "flow": "samar_bexal",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5661",
+        "reg": "PR-AMF",
+        "code": "E54EFF",
+        "eobt": "1553",
+        "altn": "LFPO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AZUL",
+        "pob": 310
+      }
     },
     {
       "callsign": "SWR3772",
@@ -1245,7 +1885,17 @@
       "dest": "EGLL",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2277",
+        "reg": "HB-JER",
+        "code": "4B7506",
+        "eobt": "1945",
+        "altn": "EGKK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "SWISS",
+        "pob": 268
+      }
     },
     {
       "callsign": "EZY4853",
@@ -1261,7 +1911,17 @@
       "dest": "ENGM",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5170",
+        "reg": "G-EDGR",
+        "code": "428E75",
+        "eobt": "1952",
+        "altn": "ESSA",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EASYJET",
+        "pob": 274
+      }
     },
     {
       "callsign": "BAW9683X",
@@ -1277,7 +1937,17 @@
       "dest": "ENGM",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2572",
+        "reg": "G-SVNW",
+        "code": "43628C",
+        "eobt": "1213",
+        "altn": "ESSA",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 189
+      }
     },
     {
       "callsign": "RYR4801",
@@ -1293,7 +1963,17 @@
       "dest": "LEBL",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4137",
+        "reg": "EI-YAP",
+        "code": "4CAB24",
+        "eobt": "1206",
+        "altn": "LEPA",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "RYANAIR",
+        "pob": 148
+      }
     },
     {
       "callsign": "TAM6412",
@@ -1309,7 +1989,17 @@
       "dest": "ESSA",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4064",
+        "reg": "PT-MWM",
+        "code": "E59C22",
+        "eobt": "1522",
+        "altn": "ENGM",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "LATAM BRASIL",
+        "pob": 177
+      }
     },
     {
       "callsign": "EWG2568P",
@@ -1325,7 +2015,18 @@
       "dest": "LPPT",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3310",
+        "reg": "D-AMUU",
+        "code": "3C55D6",
+        "eobt": "1539",
+        "altn": "LPFR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EUROWINGS",
+        "pob": 220,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "EWG4982X",
@@ -1341,7 +2042,18 @@
       "dest": "EGLL",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4647",
+        "reg": "D-AQCP",
+        "code": "3EC06E",
+        "eobt": "0948",
+        "altn": "EGKK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EUROWINGS",
+        "pob": 150,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "BTI6807",
@@ -1357,7 +2069,18 @@
       "dest": "ESSA",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2503",
+        "reg": "YL-AKR",
+        "code": "502E4A",
+        "eobt": "2052",
+        "altn": "ENGM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIRBALTIC",
+        "pob": 191,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "EZY8037X",
@@ -1373,7 +2096,18 @@
       "dest": "EBBR",
       "direction": "northbound",
       "flow": "samar_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5611",
+        "reg": "G-ERJF",
+        "code": "402AFE",
+        "eobt": "1421",
+        "altn": "EHAM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EASYJET",
+        "pob": 174,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "DLH1945X",
@@ -1389,7 +2123,17 @@
       "dest": "ENGM",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3550",
+        "reg": "D-ACZA",
+        "code": "3E075C",
+        "eobt": "1118",
+        "altn": "ESSA",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 172
+      }
     },
     {
       "callsign": "TAP9727P",
@@ -1405,7 +2149,18 @@
       "dest": "EHAM",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4175",
+        "reg": "CS-TKJ",
+        "code": "491EE5",
+        "eobt": "1306",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 211,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "AEA5580A",
@@ -1421,7 +2176,17 @@
       "dest": "EBBR",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2235",
+        "reg": "EC-NTK",
+        "code": "36FC05",
+        "eobt": "1947",
+        "altn": "EHAM",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR EUROPA",
+        "pob": 145
+      }
     },
     {
       "callsign": "EXS2752X",
@@ -1437,7 +2202,18 @@
       "dest": "LPPT",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4234",
+        "reg": "G-JSZC",
+        "code": "431166",
+        "eobt": "1823",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "JET2",
+        "pob": 172,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "KLM5731X",
@@ -1453,7 +2229,17 @@
       "dest": "EDDM",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2413",
+        "reg": "PH-JFW",
+        "code": "485B88",
+        "eobt": "1502",
+        "altn": "LSZH",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 180
+      }
     },
     {
       "callsign": "ARG8705",
@@ -1469,7 +2255,17 @@
       "dest": "EDDF",
       "direction": "northbound",
       "flow": "vasto_barok",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5556",
+        "reg": "LV-PAE",
+        "code": "E011FD",
+        "eobt": "1246",
+        "altn": "EDDK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AEROLINEAS ARGENTINAS",
+        "pob": 229
+      }
     },
     {
       "callsign": "SAS6365",
@@ -1486,7 +2282,17 @@
       "dest": "EHAM",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "3145",
+        "reg": "SE-RXQ",
+        "code": "4A99D3",
+        "eobt": "1935",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "SAS",
+        "pob": 164
+      }
     },
     {
       "callsign": "RYR4323",
@@ -1503,7 +2309,17 @@
       "dest": "EDDM",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4246",
+        "reg": "EI-ZBT",
+        "code": "4CAD26",
+        "eobt": "1935",
+        "altn": "LSZH",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "RYANAIR",
+        "pob": 177
+      }
     },
     {
       "callsign": "IBS9747X",
@@ -1520,7 +2336,17 @@
       "dest": "LFPG",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4071",
+        "reg": "EC-VSS",
+        "code": "35CFE2",
+        "eobt": "1956",
+        "altn": "LFPO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA EXPRESS",
+        "pob": 119
+      }
     },
     {
       "callsign": "DLH1113",
@@ -1537,7 +2363,17 @@
       "dest": "ENGM",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5366",
+        "reg": "D-AURT",
+        "code": "3D6AB9",
+        "eobt": "2000",
+        "altn": "ESSA",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 173
+      }
     },
     {
       "callsign": "KLM1672P",
@@ -1554,7 +2390,18 @@
       "dest": "LFPG",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4533",
+        "reg": "PH-ULN",
+        "code": "485D6C",
+        "eobt": "2017",
+        "altn": "LFPO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 186,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "IBE4384P",
@@ -1571,7 +2418,18 @@
       "dest": "LPPT",
       "direction": "northbound",
       "flow": "vasto_tiggi",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2115",
+        "reg": "EC-XBK",
+        "code": "3702C2",
+        "eobt": "2050",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA",
+        "pob": 162,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "RAM3278",
@@ -1587,7 +2445,17 @@
       "dep": "CYUL",
       "dest": "GMMN",
       "direction": "southbound",
-      "flow": "salca_nat"
+      "flow": "salca_nat",
+      "fpl": {
+        "ssr": "3077",
+        "reg": "CN-RCE",
+        "code": "022592",
+        "eobt": "1445",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 197
+      }
     },
     {
       "callsign": "TAP3548",
@@ -1604,7 +2472,18 @@
       "dest": "GMAD",
       "direction": "southbound",
       "flow": "nipri_rolro",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "2544",
+        "reg": "CS-THJ",
+        "code": "49314B",
+        "eobt": "1918",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 146,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "RAM6488K",
@@ -1621,7 +2500,17 @@
       "dest": "GMMX",
       "direction": "southbound",
       "flow": "nipri_rolro",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "5420",
+        "reg": "CN-RAG",
+        "code": "02147A",
+        "eobt": "1944",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 160
+      }
     },
     {
       "callsign": "RAM4218A",
@@ -1638,7 +2527,17 @@
       "dest": "GMAD",
       "direction": "southbound",
       "flow": "nipri_rolro",
-      "arrival": false
+      "arrival": false,
+      "fpl": {
+        "ssr": "4564",
+        "reg": "CN-RSP",
+        "code": "02322D",
+        "eobt": "2004",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 146
+      }
     }
   ],
   "design_notes": "R90 activates at T+15:00 across UN866: KLM705 and the UN866 stream need a reroute (passive = infringement). FALCO41 (2xEUFI formation, FL310, non-RVSM) enters at BEXAL as GLO7720 (northbound FL320) leaves it: 1000 ft is not enough against a formation. N650GA (C550 ferry, not RVSM approved) asks FL380. AZU8743 asks Mach .76 with IBE6041 8 NM behind at FL360 on SAMAR-TIGGI. The embedded cells are hard to see on the composite: use the CAPPI at flight level.",
@@ -1666,5 +2565,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "21:00"
 }

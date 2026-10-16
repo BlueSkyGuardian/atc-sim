@@ -92,6 +92,9 @@ class Aircraft:
     route_after: List[str] = field(default_factory=list)   # flight plan after the exit (next sectors)
     route_before: List[str] = field(default_factory=list)  # flight plan before the entry
     flight_plan: dict = field(default_factory=dict)          # keeps being drawn (dead reckoning) after leaving, until this time
+    prev_unit: str = ""                # unit (or sector) handing the aircraft over to us
+    next_unit: str = ""                # unit (or sector) we hand it over to
+    mag_var: float = 0.0               # magnetic variation (deg, east +) for the Mode S magnetic heading
     entry_wp: str = ""                 # boundary waypoint where it enters the sector
     boundary_time: float = 0.0         # planned time at the entry waypoint
     checkin_nm: float = 10.0           # calls on frequency this far before the entry waypoint
@@ -467,7 +470,19 @@ class Aircraft:
         return self.perf.max_fl(mode, val, self.mass)
 
     # ---------------------------------------------------------------- snapshot
+    def to_exit_nm(self, wps: Dict[str, Point]) -> Optional[float]:
+        """Distance to the exit point along the planned route (from the present position)."""
+        rest = [w for w in self.route[self.next_index:] if w in wps]
+        if not rest:
+            return None
+        d, p = 0.0, self.pos
+        for w in rest:
+            d += dist(p, wps[w])
+            p = wps[w]
+        return d
+
     def snapshot(self, with_trail: bool = False) -> dict:
+        from .flightplan import mode_s
         mode, val = self.speed_target()
         wind = describe_uv(*self.wind_uv)
         d = {
@@ -516,6 +531,10 @@ class Aircraft:
             "arrival": ({k: v for k, v in self.arr.items() if not k.startswith("_")} if self.destination else None),
             "speedbrake": self.speedbrake,
             "flight_plan": self.flight_plan,
+            "squawk": (self.flight_plan or {}).get("ssr"),
+            "mode_s": mode_s(self, self.mag_var),
+            "fp_next": self.next_wp,
+            "prev_unit": self.prev_unit, "next_unit": self.next_unit,
             "route_before_entry": self.route_before, "route_after_exit": self.route_after,
             "category": "military" if self.military else "civil",
             "formation": self.formation,

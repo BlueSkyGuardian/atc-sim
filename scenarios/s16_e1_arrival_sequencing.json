@@ -125,6 +125,18 @@
       "reach": {
         "waypoint": "E1",
         "time": 700
+      },
+      "dep": "EHAM",
+      "fpl": {
+        "ssr": "4335",
+        "reg": "F-GLXZ",
+        "code": "3A4428",
+        "eobt": "1021",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 131,
+        "rmk": "TCAS"
       }
     },
     {
@@ -138,6 +150,17 @@
       "reach": {
         "waypoint": "E1",
         "time": 745
+      },
+      "dep": "EDDF",
+      "fpl": {
+        "ssr": "5172",
+        "reg": "CS-TPQ",
+        "code": "497135",
+        "eobt": "1013",
+        "altn": "",
+        "equipment": "SDE2FGHIRWY/S",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 85
       }
     },
     {
@@ -151,6 +174,18 @@
       "reach": {
         "waypoint": "E1",
         "time": 790
+      },
+      "dep": "EDDM",
+      "fpl": {
+        "ssr": "2157",
+        "reg": "CN-RZK",
+        "code": "020B03",
+        "eobt": "1105",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 141,
+        "rmk": "TCAS"
       }
     },
     {
@@ -164,6 +199,18 @@
       "reach": {
         "waypoint": "E1",
         "time": 840
+      },
+      "dep": "GMMX",
+      "fpl": {
+        "ssr": "4306",
+        "reg": "EC-FJZ",
+        "code": "36A427",
+        "eobt": "1130",
+        "altn": "",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA",
+        "pob": 135,
+        "rmk": "TCAS"
       }
     },
     {
@@ -177,6 +224,17 @@
       "reach": {
         "waypoint": "E1",
         "time": 880
+      },
+      "dep": "EDDM",
+      "fpl": {
+        "ssr": "5537",
+        "reg": "G-ESHG",
+        "code": "426ABC",
+        "eobt": "1118",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EASYJET",
+        "pob": 125
       }
     },
     {
@@ -188,7 +246,19 @@
       ],
       "fl": 360,
       "load": 0.35,
-      "entry_time": 100
+      "entry_time": 100,
+      "dep": "GVAC",
+      "dest": "LEMD",
+      "fpl": {
+        "ssr": "2011",
+        "reg": "D-ABTS",
+        "code": "3C3740",
+        "eobt": "1102",
+        "altn": "LEVC",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 153
+      }
     }
   ],
   "requests": [],
@@ -339,5 +409,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "13:00"
 }

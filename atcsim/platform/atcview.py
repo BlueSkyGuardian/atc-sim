@@ -295,8 +295,26 @@ class Renderer:
         return self._wx
 
     # ---------------------------------------------------------------- one picture
+    def label_lines(self, img, d, bx: float, by: float, lab: dict, f, lh: float) -> None:
+        """Draws a label recorded as drawn on the controller's screen: lines of [text, colour] segments, the
+        callsign line (index k) at by, the last x lines (extended label) on a dark box."""
+        lines, k1, nx = lab.get("l") or [], int(lab.get("k") or 0), int(lab.get("x") or 0)
+        if nx:                                          # extended label: the whole block on a dark box
+            w = max((sum(d.textlength(str(t), font=f) for t, _ in ln) for ln in lines), default=0)
+            y0 = by - k1 * lh - lh * 0.95
+            y1 = by + (len(lines) - k1 - 1) * lh + lh * 0.35
+            d.rectangle([bx - 4, y0, bx + w + 4, y1], fill=(11, 16, 22),
+                        outline=tuple(int(c * 0.6) for c in hexc(lab.get("c"))[:3]))
+        for i, ln in enumerate(lines):
+            x = bx
+            y = by + (i - k1) * lh - 10 * (lh / 12.1)
+            for t, c in ln:
+                t = str(t)
+                text(img, (x, y), t, hexc(c)[:3], f)
+                x += d.textlength(t, font=f)
+
     def layer(self, vw: View, fr: dict, trail: dict, routes: dict, wx_meta, overlay: list, captions: list,
-              blink: bool, ad: Optional[dict] = None) -> Image.Image:
+              blink: bool, ad: Optional[dict] = None, labels: Optional[dict] = None) -> Image.Image:
         img = self.map_layer(vw).copy()
         wx_on = (vw.wx[0] if vw.wx else "cappi") != "off"
         if wx_meta is not None and wx_on:
@@ -384,9 +402,12 @@ class Renderer:
                 dashed(d, [vw.P(A[1], A[2]), vw.P(B[1], B[2])], (150, 60, 60) if both_los else (140, 110, 50),
                        1, 3 * k, 4 * k)
         # aircraft already handed to the next sector: grey for a few minutes
+        labels = labels or {}
         for g in fr.get("tr", []):
             gcs, gx, gy, gfl, ggs, gtrk, gexit = g
             gcol = (86, 99, 111)
+            if gcs in labels and labels[gcs]:
+                gcol = hexc(labels[gcs].get("c"), gcol + (255,))[:3]
             px, py = vw.P(gx, gy)
             a = math.radians(gtrk)
             vx, vy = vw.P(gx + math.sin(a) * ggs / 30, gy + math.cos(a) * ggs / 30)
@@ -394,9 +415,13 @@ class Renderer:
             d.rectangle([px - 3 * k, py - 3 * k, px + 3 * k, py + 3 * k], outline=gcol)
             o = vw.lo.get(gcs) or [10, -14]
             bx, by = px + o[0] * k, py + o[1] * k
+            if gcs in labels and labels[gcs]:
+                self.label_lines(img, d, bx, by, labels[gcs], f10, (fs - 0.5) * 1.1 * k)
+                continue
             text(img, (bx, by - 10 * k), gcs, gcol, f10)
             text(img, (bx, by + 2 * k), f"{gfl:03d} {'via ' + gexit if gexit else 'off route'}", gcol, f10)
         sep_h = self.sep_h
+        deferred = []
         for r in acs:
             cs, x, y, fl, cfl, gs, trk, vs, onf, asm, ent = r[:11]
             typ, nav, nxt, ahdg, spd, dest, entry, form, mil, arr = (r[11:21] + [None] * 10)[:10]
@@ -406,6 +431,9 @@ class Renderer:
                 (vw.c("calling", COL["white"]) if blink else COL["calling2"]) if calling else \
                 vw.c("assumed", COL["assumed"]) if onf else vw.c("other", COL["other"])
             plain = cs not in los and cs not in warn and cs != sel
+            lab = labels.get(cs)
+            if lab:
+                col = hexc(lab.get("c"), col + (255,))[:3]
             cur_hdg, asg_spd = ((r[21] if len(r) > 21 and r[21] else None) or [None, None])[:2]
             px, py = vw.P(x, y)
             if not (-200 < px < self.W + 200 and -200 < py < self.H + 200):
@@ -439,6 +467,27 @@ class Renderer:
                         left -= L
             h = vw.n("symbol", 7.0) / 2 * k
             d.rectangle([px - h, py - h, px + h, py + h], outline=col, width=max(1, round(1.5 * k)))
+            if lab:
+                if lab.get("m"):                        # medium-term conflict: a diamond around the symbol
+                    q = h + 4 * k
+                    d.polygon([(px, py - q), (px + q, py), (px, py + q), (px - q, py)], outline=vw.c("mtcd", (195, 140, 255)))
+                if lab.get("t"):                        # transfer due: a chevron ahead of the symbol
+                    q, rr = h + 5 * k, math.radians(trk)
+                    cx_, cy_ = px + math.sin(rr) * q, py - math.cos(rr) * q
+                    xc = vw.c("xfer", (90, 209, 230))
+                    d.line([(cx_ - math.cos(rr) * 4 * k - math.sin(rr) * 3 * k, cy_ - math.sin(rr) * 4 * k + math.cos(rr) * 3 * k),
+                            (cx_, cy_), (cx_ + math.cos(rr) * 4 * k - math.sin(rr) * 3 * k, cy_ + math.sin(rr) * 4 * k + math.cos(rr) * 3 * k)],
+                           fill=xc, width=max(1, round(1.6 * k)))
+                o = vw.lo.get(cs) or [10, -14]
+                bx, by = px + o[0] * k, py + o[1] * k
+                if cs in vw.lo:
+                    d.line([(px, py), (bx + (60 * k if o[0] < 0 else -2 * k), by + (26 * k if o[1] < 0 else -10 * k))],
+                           fill=tuple(int(c * 0.7) for c in col))
+                if lab.get("x"):
+                    deferred.append((bx, by, lab))      # extended label: above the others
+                else:
+                    self.label_lines(img, d, bx, by, lab, f11, lh)
+                continue
             # data block, as on the controller's seat
             e = ent if isinstance(ent, list) else [None] * 5
             ecfl, espd, ehdg, edct, enote = (e + [None] * 5)[:5]
@@ -499,6 +548,8 @@ class Renderer:
                 x3 += d.textlength(t, font=f11)
             if l4:
                 text(img, (bx, top + 3 * lh), l4, pc("lblInfo", tuple(int(c * 0.8) for c in col)), f11)
+        for bx, by, lab in deferred:
+            self.label_lines(img, d, bx, by, lab, f11, lh)
         # the route shown by a long press on a label
         rs = vw.v.get("rs")
         if rs and rs in {r[0] for r in acs}:
@@ -522,7 +573,9 @@ class Renderer:
         by_cs = {r[0]: r for r in acs}
         for pair in vw.v.get("rbl") or []:
             ends = []
-            for e_ in pair:
+            off = pair[2] if len(pair) > 2 and isinstance(pair[2], list) and len(pair[2]) == 2 and \
+                all(isinstance(v, (int, float)) for v in pair[2]) else [0, 0]
+            for e_ in pair[:2]:
                 if isinstance(e_, str):
                     ends.append(by_cs.get(e_))
                 elif isinstance(e_, list) and len(e_) >= 2:
@@ -536,7 +589,10 @@ class Renderer:
             (ax, ay), (bx2, by2) = vw.P(A[1], A[2]), vw.P(B[1], B[2])
             c = vw.c("rbl", (215, 155, 255))
             d.line([(ax, ay), (bx2, by2)], fill=c, width=max(1, round(1.3 * k)))
-            mx, my = (ax + bx2) / 2, (ay + by2) / 2
+            cmx, cmy = (ax + bx2) / 2, (ay + by2) / 2
+            mx, my = cmx + off[0] * k, cmy + off[1] * k
+            if off[0] or off[1]:
+                dashed(d, [(cmx, cmy), (mx, my - 4 * k)], c, 1, 2 * k, 3 * k)
             moving = A[5] or B[5]
             t1 = f"{int(round(brg)):03d}° {rng:.1f} NM" + (f"  ΔFL {abs(A[3] - B[3])}" if A[3] is not None and B[3] is not None else "")
             t2 = (f"CPA {dd:.1f} NM in {int(t // 60):02d}:{int(t % 60):02d}" if t > 0 else "diverging") if moving else ""
@@ -619,6 +675,8 @@ def _entry_text(cs: str, e: dict) -> str:
         parts.append(f"HDG {int(e['heading']):03d}")
     if e.get("direct"):
         parts.append(f"DCT {e['direct']}")
+    if e.get("wx"):
+        parts.append(f"WX {e['wx']}")
     if e.get("note"):
         parts.append(f"note “{e['note']}”")
     return f"{cs}: " + " · ".join(parts)
@@ -640,6 +698,7 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
     overlays = [(r["w"], r["d"]) for r in ui if r["k"] == "o"]
     mouse = [(r["w"], r["d"]) for r in ui if r["k"] == "m"]
     clicks = [(r["w"], r["d"]) for r in ui if r["k"] in ("c", "d") and isinstance(r["d"], dict)]
+    label_ev = [(r["w"], r["d"]) for r in ui if r["k"] == "L" and isinstance(r["d"], dict)]
     dbl = {i for i, r in enumerate([r for r in ui if r["k"] in ("c", "d") and isinstance(r["d"], dict)]) if r["k"] == "d"}
     myconns = {r["c"] for r in ui} | {e["conn"] for e in events if e["type"] == "join" and e.get("user_id") == user_id
                                        and e.get("seat") == "atc"}
@@ -732,6 +791,8 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
     routes: Dict[str, list] = {}
     ad_state: Optional[dict] = None
     route_upto = -1
+    lab_state: Dict[str, dict] = {}
+    lab_upto = -1
     view_cache: Dict[int, View] = {}
     last_key, last_img = None, None
     try:
@@ -743,6 +804,13 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
                 routes.update(frames[route_upto].get("rt") or {})
                 if frames[route_upto].get("ad"):
                     ad_state = frames[route_upto]["ad"]
+            while lab_upto + 1 < len(label_ev) and label_ev[lab_upto + 1][0] <= wall:
+                lab_upto += 1
+                for cs_, v_ in label_ev[lab_upto][1].items():
+                    if v_ is None:
+                        lab_state.pop(cs_, None)
+                    else:
+                        lab_state[cs_] = v_
             vi = max(0, bisect.bisect_right(v_walls, wall) - 1)
             if vi not in view_cache:
                 view_cache.clear()
@@ -760,7 +828,7 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
                                     1.0 if age < 10 else round(max(0.0, (14 - age) / 4) * 4) / 4))
             calling = any(r[8] and not r[9] for r in frames[j]["ac"])
             blink = calling and int(wall * 2) % 2 == 0
-            key = (j, vi, oi, wi, blink, tuple((c[1], round(c[2], 1)) for c in cap_now))
+            key = (j, vi, oi, wi, blink, lab_upto, tuple((c[1], round(c[2], 1)) for c in cap_now))
             if key != last_key:
                 trail = {}
                 for back in range(10, 121, 10):
@@ -769,7 +837,7 @@ def render_controller(eid: str, user_id, rid: Optional[int] = None) -> dict:
                     for r in frames[j - back]["ac"]:
                         trail.setdefault(r[0], []).append((r[1], r[2]))
                 last_img = R.layer(vw, frames[j], trail, routes, wxs[wi] if wi >= 0 else None,
-                                   overlays[oi][1] if oi >= 0 else [], cap_now, blink, ad_state)
+                                   overlays[oi][1] if oi >= 0 else [], cap_now, blink, ad_state, lab_state)
                 last_key = key
             img = last_img.copy()
             d = ImageDraw.Draw(img)

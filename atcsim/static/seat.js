@@ -145,34 +145,37 @@
   function menuPos(e) {
     const r = $('#scope').getBoundingClientRect(), m = $('#lblMenu');
     let x = e.clientX - r.left + 14, y = e.clientY - r.top - 20;
-    if (x + 250 > r.width) x = e.clientX - r.left - 260;
-    if (y + 330 > r.height) y = r.height - 335;
+    if (x + 270 > r.width) x = e.clientX - r.left - 280;
+    if (y + 470 > r.height) y = r.height - 475;
     m.style.left = Math.max(4, x) + 'px'; m.style.top = Math.max(40, y) + 'px';
   }
   function refreshMenuHead() {
     const a = allAc().find(x => x.callsign === menuCs); if (!a) { closeMenu(); return; }
-    const calling = !a.assumed && (a.on_frequency || a.released);     // first call, or taking it back after a decontrol
+    const calling = !a.assumed;          // any track can be assumed: first call, early (forced) assume, taking it back
     $('#lmRelease').style.display = a.assumed ? '' : 'none';
     $('#lmHead').innerHTML = `${a.callsign} <span class="c-dim" style="font-weight:400">${a.type} · FL${a.fl}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ''} · ${a.flight_plan && a.flight_plan.departure || ''}→${a.flight_plan && a.flight_plan.destination || ''}</span>`;
     $('#lmAssume').style.display = calling ? '' : 'none';
   }
-  function openMenu(cs, e) {
+  function openMenu(cs, e, field) {
     const a = state && allAc().find(x => x.callsign === cs); if (!a) return;
     menuCs = cs; const ent = (state.entries || {})[cs] || {}, m = $('#lblMenu');
-    const base = Math.round((ent.cfl != null ? ent.cfl : a.cleared_fl) / 10) * 10, lv = [];
+    const sys = ent.cfl != null ? ent.cfl : (state.system_cfl && state.system_cfl[cs] != null ? state.system_cfl[cs] : a.cleared_fl);
+    const base = Math.round(sys / 10) * 10, lv = [];
     for (let d = -40; d <= 40; d += 10) if (d && base + d >= 100 && base + d <= 460) lv.push(base + d);
     const route = realPoints(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint))).concat(a.route_after_exit || []));
-    m.innerHTML = `<div class="h"><span id="lmHead"></span><button id="lmX" style="padding:0 6px">✕</button></div>
+    m.innerHTML = `<div class="h"><span id="lmHead"></span><span><button id="lmFpl" style="padding:0 6px" title="flight plan (F)">FPL</button> <button id="lmX" style="padding:0 6px">✕</button></span></div>
       <div id="lmAssume" style="margin-bottom:7px"><button class="on" id="lmAsBtn" style="width:100%;padding:4px">ASSUME ${cs}</button></div>
       <div id="lmRelease" style="margin-bottom:7px"><button id="lmRelBtn" style="width:100%;padding:4px" title="hand it off: it keeps flying as another sector's traffic">DECONTROL ${cs}</button></div>
-      <div class="f"><span class="c-dim">CFL</span><input data-f="cfl" value="${ent.cfl != null ? ent.cfl : a.cleared_fl}" inputmode="numeric"><button data-ok="cfl">OK</button></div>
+      <div class="f"><span class="c-dim">CFL</span><input data-f="cfl" value="${sys}" inputmode="numeric"><button data-ok="cfl">OK</button></div>
       <div class="lv">${lv.map(l => `<button data-lv="${l}">${l}</button>`).join('')}</div>
       <div class="f"><span class="c-dim">Speed</span><input data-f="speed" value="${h(ent.speed || '')}" placeholder="M78 · 280 · SN"><button data-ok="speed">OK</button></div>
       <div class="f"><span class="c-dim">Heading</span><input data-f="heading" value="${ent.heading || ''}" placeholder="e.g. 250" inputmode="numeric"><button data-ok="heading">OK</button></div>
       <div class="f"><span class="c-dim">Direct</span><input data-f="direct" value="${h(ent.direct || '')}" list="lmPts" placeholder="point"><button data-ok="direct">OK</button></div>
       <div class="lv">${[...new Set(route)].slice(0, 10).map(n => `<button data-dct="${n}">${n}</button>`).join('')}</div>
+      <div class="f"><span class="c-dim">WX dev</span><input data-f="wx" value="${h(ent.wx || '')}" placeholder="L · R · L20 · Y"><button data-ok="wx">OK</button></div>
+      <div class="lv wxb"><button data-wx="L" class="${ent.wx === 'L' ? 'on' : ''}">L</button><button data-wx="R" class="${ent.wx === 'R' ? 'on' : ''}">R</button><button data-wx="Y" class="${ent.wx === 'Y' ? 'on' : ''}">either</button><button data-wx="">end</button></div>
       <div class="f"><span class="c-dim">Note</span><input data-f="note" value="${h(ent.note || '')}" style="text-transform:none"><button data-ok="note">OK</button></div>
-      <div class="row" style="margin:6px 0 0"><button id="lmClr">clear speed/heading/direct</button></div>
+      <div class="row" style="margin:6px 0 0"><button id="lmClr">clear speed/heading/direct/WX</button><button id="lmProbe" title="conflicts (20 min) with the level / heading / direct typed above, before clearing it">Probe</button></div>
       <div id="lmMsg" style="min-height:14px;font-size:11px;margin-top:4px"></div>
       <datalist id="lmPts">${realPoints(Object.keys(sector.waypoints)).map(n => `<option value="${n}">`).join('')}</datalist>`;
     refreshMenuHead(); menuPos(e); m.classList.add('on');
@@ -186,12 +189,34 @@
     m.querySelectorAll('input[data-f]').forEach(i => i.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') send(i.dataset.f, i.value.trim()); if (ev.key === 'Escape') closeMenu(); });
     m.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { m.querySelector('[data-f=cfl]').value = b.dataset.lv; send('cfl', +b.dataset.lv); });
     m.querySelectorAll('[data-dct]').forEach(b => b.onclick = () => { m.querySelector('[data-f=direct]').value = b.dataset.dct; m.querySelector('[data-f=heading]').value = ''; send({ direct: b.dataset.dct, heading: '' }); });
-    $('#lmClr').onclick = () => { for (const f of ['speed', 'heading', 'direct']) m.querySelector(`[data-f=${f}]`).value = ''; send({ speed: '', heading: '', direct: '' }); };
+    $('#lmClr').onclick = () => { for (const f of ['speed', 'heading', 'direct', 'wx']) m.querySelector(`[data-f=${f}]`).value = ''; send({ speed: '', heading: '', direct: '', wx: '' }); };
+    m.querySelectorAll('[data-wx]').forEach(b => b.onclick = () => { m.querySelector('[data-f=wx]').value = b.dataset.wx; send('wx', b.dataset.wx);
+      m.querySelectorAll('[data-wx]').forEach(x => x.classList.toggle('on', x === b && !!b.dataset.wx)); });
+    $('#lmFpl').onclick = () => { if (window.openFpl) openFpl(cs); };
+    // level probe: each proposed level coloured green (no conflict in 20 min) or red (conflict), from the system trajectories
+    api(`/sessions/${SID}/mtcd`, { method: 'POST', body: JSON.stringify({ callsign: cs, levels: lv }) }).then(r => {
+      if (menuCs !== cs) return;
+      m.querySelectorAll('[data-lv]').forEach(b => { const c = (r.levels || {})[b.dataset.lv]; if (!c) return;
+        b.classList.toggle('cf', c.length > 0); b.classList.toggle('ok', c.length === 0);
+        b.title = c.length ? 'conflict: ' + c.map(x => `${x.with} in ${Math.round(x.in_s / 60)} min (${x.min_nm} NM)`).join(', ') : 'no conflict in the next 20 minutes'; });
+    }).catch(() => {});
+    $('#lmProbe').onclick = async () => {
+      const v = k => m.querySelector(`[data-f=${k}]`).value.trim(), body = { callsign: cs };
+      if (v('cfl')) body.cfl = +v('cfl'); if (v('heading')) body.heading = +v('heading'); else if (v('direct')) body.direct = v('direct').toUpperCase();
+      try { const r = await api(`/sessions/${SID}/mtcd`, { method: 'POST', body: JSON.stringify(body) }), c = r.conflicts || [];
+        $('#lmMsg').className = c.length ? 'c-los' : 'c-ok';
+        $('#lmMsg').textContent = c.length ? 'probe: ' + c.map(x => `${x.aircraft.find(y => y !== cs)} in ${Math.round(x.time_to_conflict_s / 60)} min, ${x.min_horizontal_nm} NM / ${x.vertical_ft} ft`).join(' · ') : 'probe: no conflict in the next 20 minutes';
+      } catch (er) { $('#lmMsg').className = 'c-los'; $('#lmMsg').textContent = er.message; } };
     $('#lmRelBtn').onclick = async () => { try { await api(`/sessions/${SID}/release/${cs}`, { method: 'POST' }); closeMenu(); } catch (er) { $('#lmMsg').textContent = er.message; } };
     $('#lmAsBtn').onclick = async () => { try { await api(`/sessions/${SID}/assume/${cs}`, { method: 'POST' }); $('#lmAssume').style.display = 'none'; } catch (er) { $('#lmMsg').textContent = er.message; } };
     $('#lmX').onclick = closeMenu;
-    const f = m.querySelector('[data-f=cfl]'); f.focus(); f.select();
+    const f = m.querySelector(`[data-f=${field || 'cfl'}]`) || m.querySelector('[data-f=cfl]'); f.focus(); f.select();
   }
+  window.openLabelMenu = (cs, field) => {            // keyboard: open the selected aircraft's label input on a field
+    const a = allAc().find(x => x.callsign === cs); if (!a) return;
+    const r = $('#scope').getBoundingClientRect(), [px, py] = toPx(a.x_nm, a.y_nm);
+    openMenu(cs, { clientX: r.left + px / devicePixelRatio + 20, clientY: r.top + py / devicePixelRatio }, field);
+  };
   function closeMenu() { $('#lblMenu').classList.remove('on'); menuCs = null; document.activeElement && document.activeElement.blur(); }
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
   $('#cv').addEventListener('mousedown', () => { if (SEAT === 'atc') closeMenu(); });

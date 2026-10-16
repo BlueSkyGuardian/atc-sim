@@ -28,7 +28,7 @@ class Session:
         self.id = uuid.uuid4().hex[:8]
         self.label = label or ""
         self._shared_sep, self._shared_at, self._shared_cost = None, 0.0, 0.0
-        self.multi = False                 # connected exercise: instructor + controller + pseudo-pilot seats
+        self._multi = False                # connected exercise: instructor + controller + pseudo-pilot seats
         self.scenario_name = scenario_name
         self.scn = load_scenario(scenario_name)
         if auto_assume is not None:
@@ -47,6 +47,15 @@ class Session:
             self.status = "running"
         elif mode == "stepped":
             self.status = "paused"
+
+    @property
+    def multi(self) -> bool:
+        return self._multi
+
+    @multi.setter
+    def multi(self, v: bool) -> None:
+        self._multi = bool(v)
+        self.world.multi = self._multi
 
     # ------------------------------------------------------------------ clock
     def _run(self) -> None:
@@ -101,6 +110,7 @@ class Session:
                         break
             elif action == "restart":
                 self.world = build_world(self.scn)
+                self.world.multi = self._multi
                 self.status = "running" if self.mode == "realtime" else "paused"
             else:
                 raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart")

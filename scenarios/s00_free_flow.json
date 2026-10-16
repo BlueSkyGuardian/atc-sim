@@ -1,6 +1,6 @@
 {
   "name": "s00_free_flow",
-  "title": "Free flow \u2013 nothing to do",
+  "title": "Free flow – nothing to do",
   "description": "Seven flights, all procedurally separated (different levels or well spaced). Three routine requests.",
   "design_notes": "Tests over-control. No conflicts exist and every request can be approved safely. A good agent approves all three and issues no other instruction.",
   "duration_s": 1500,
@@ -84,7 +84,19 @@
         "S3"
       ],
       "fl": 350,
-      "entry_time": 30
+      "entry_time": 30,
+      "dep": "EHAM",
+      "dest": "GMMX",
+      "fpl": {
+        "ssr": "4405",
+        "reg": "CN-RTW",
+        "code": "0239A9",
+        "eobt": "1150",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 128
+      }
     },
     {
       "callsign": "AFR611",
@@ -94,7 +106,19 @@
         "S2"
       ],
       "fl": 370,
-      "entry_time": 60
+      "entry_time": 60,
+      "dep": "EGLL",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "4124",
+        "reg": "F-GZVZ",
+        "code": "38AF63",
+        "eobt": "0606",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 150
+      }
     },
     {
       "callsign": "DLH4KL",
@@ -105,7 +129,19 @@
       ],
       "fl": 390,
       "load": 0.3,
-      "entry_time": 120
+      "entry_time": 120,
+      "dep": "EGLL",
+      "dest": "GVAC",
+      "fpl": {
+        "ssr": "2660",
+        "reg": "D-AWVE",
+        "code": "3E128D",
+        "eobt": "0905",
+        "altn": "GOBD",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 174
+      }
     },
     {
       "callsign": "IBE3271",
@@ -115,7 +151,19 @@
         "W2"
       ],
       "fl": 350,
-      "entry_time": 200
+      "entry_time": 200,
+      "dep": "LPPT",
+      "dest": "DIAP",
+      "fpl": {
+        "ssr": "5545",
+        "reg": "EC-HSW",
+        "code": "3510BD",
+        "eobt": "1037",
+        "altn": "GLRB",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA",
+        "pob": 148
+      }
     },
     {
       "callsign": "TAP1462",
@@ -125,7 +173,19 @@
         "N2"
       ],
       "fl": 380,
-      "entry_time": 90
+      "entry_time": 90,
+      "dep": "GOBD",
+      "dest": "EGLL",
+      "fpl": {
+        "ssr": "4540",
+        "reg": "CS-TSY",
+        "code": "493CAC",
+        "eobt": "0915",
+        "altn": "EGKK",
+        "equipment": "SDE2FGHIRWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 75
+      }
     },
     {
       "callsign": "EZY45QF",
@@ -135,7 +195,20 @@
         "N4"
       ],
       "fl": 360,
-      "entry_time": 400
+      "entry_time": 400,
+      "dep": "GVAC",
+      "dest": "EDDM",
+      "fpl": {
+        "ssr": "5401",
+        "reg": "G-EDPW",
+        "code": "411E39",
+        "eobt": "1053",
+        "altn": "LSZH",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EASYJET",
+        "pob": 143,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "CNTKA",
@@ -145,7 +218,20 @@
         "W1"
       ],
       "fl": 400,
-      "entry_time": 150
+      "entry_time": 150,
+      "dep": "GVAC",
+      "dest": "LEBL",
+      "fpl": {
+        "ssr": "3531",
+        "reg": "CN-TKA",
+        "code": "02345B",
+        "eobt": "0949",
+        "altn": "LEPA",
+        "equipment": "SDE2FGHIRWY/LB1",
+        "opr": "",
+        "pob": 12,
+        "rmk": "TCAS"
+      }
     }
   ],
   "requests": [
@@ -178,5 +264,6 @@
     "naive_approve": {
       "los": false
     }
-  }
+  },
+  "start_utc": "13:00"
 }

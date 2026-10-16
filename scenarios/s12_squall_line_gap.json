@@ -84,7 +84,19 @@
       ],
       "fl": 350,
       "arrival": false,
-      "entry_time": 0
+      "entry_time": 0,
+      "dep": "EGKK",
+      "dest": "GCRR",
+      "fpl": {
+        "ssr": "4634",
+        "reg": "F-GHJT",
+        "code": "399A6E",
+        "eobt": "0715",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 169
+      }
     },
     {
       "callsign": "RAM44",
@@ -94,7 +106,19 @@
         "E2"
       ],
       "fl": 350,
-      "entry_time": 80
+      "entry_time": 80,
+      "dep": "EBBR",
+      "dest": "GMMN",
+      "fpl": {
+        "ssr": "3607",
+        "reg": "CN-RKR",
+        "code": "0200DD",
+        "eobt": "0756",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 128
+      }
     },
     {
       "callsign": "UAE61",
@@ -105,7 +129,19 @@
       ],
       "fl": 370,
       "load": 0.4,
-      "entry_time": 60
+      "entry_time": 60,
+      "dep": "LEMD",
+      "dest": "GOBD",
+      "fpl": {
+        "ssr": "2500",
+        "reg": "A6-EZY",
+        "code": "89604A",
+        "eobt": "0706",
+        "altn": "GQNO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EMIRATES",
+        "pob": 470
+      }
     },
     {
       "callsign": "ETH5",
@@ -115,7 +151,20 @@
         "W1"
       ],
       "fl": 380,
-      "entry_time": 160
+      "entry_time": 160,
+      "dep": "GCLP",
+      "dest": "EGLL",
+      "fpl": {
+        "ssr": "4314",
+        "reg": "ET-AAJ",
+        "code": "0406E7",
+        "eobt": "0741",
+        "altn": "EGKK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ETHIOPIAN AIRLINES",
+        "pob": 228,
+        "rmk": "TCAS"
+      }
     }
   ],
   "requests": [],
@@ -176,5 +225,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "09:00"
 }

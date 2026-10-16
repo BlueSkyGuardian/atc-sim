@@ -141,7 +141,19 @@
         "N3"
       ],
       "fl": 340,
-      "entry_time": 0
+      "entry_time": 0,
+      "dep": "GMAD",
+      "dest": "EDDM",
+      "fpl": {
+        "ssr": "3255",
+        "reg": "CN-RSP",
+        "code": "023416",
+        "eobt": "0949",
+        "altn": "LSZH",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 133
+      }
     },
     {
       "callsign": "AEA38",
@@ -157,6 +169,18 @@
           -20.0
         ],
         "time": 306
+      },
+      "dep": "GCRR",
+      "dest": "EIDW",
+      "fpl": {
+        "ssr": "5672",
+        "reg": "EC-PYG",
+        "code": "379CFF",
+        "eobt": "0902",
+        "altn": "EGCC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR EUROPA",
+        "pob": 169
       }
     }
   ],
@@ -192,5 +216,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "12:00"
 }

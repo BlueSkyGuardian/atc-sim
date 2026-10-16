@@ -90,6 +90,19 @@
           -15.0
         ],
         "time": 820
+      },
+      "dep": "EGLL",
+      "dest": "DNMM",
+      "fpl": {
+        "ssr": "3000",
+        "reg": "F-GASK",
+        "code": "3A8150",
+        "eobt": "0619",
+        "altn": "DIAP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 160,
+        "rmk": "TCAS"
       }
     },
     {
@@ -106,6 +119,18 @@
           8.335
         ],
         "time": 646
+      },
+      "dep": "EGLL",
+      "dest": "GVAC",
+      "fpl": {
+        "ssr": "3510",
+        "reg": "F-HFAD",
+        "code": "3BB35B",
+        "eobt": "0607",
+        "altn": "GOBD",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 177
       }
     },
     {
@@ -117,7 +142,19 @@
       ],
       "fl": 380,
       "load": 0.35,
-      "entry_time": 150
+      "entry_time": 150,
+      "dep": "GVAC",
+      "dest": "EDDF",
+      "fpl": {
+        "ssr": "5235",
+        "reg": "G-YTEE",
+        "code": "42CBF6",
+        "eobt": "0702",
+        "altn": "EDDK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 234
+      }
     }
   ],
   "requests": [
@@ -136,5 +173,6 @@
     "naive_approve": {
       "los": true
     }
-  }
+  },
+  "start_utc": "10:00"
 }

@@ -1252,5 +1252,7 @@ if __name__ == "__main__":
         bad += bool(probs)
         with open(os.path.join(OUT, s["name"] + ".json"), "w") as f:
             json.dump(s, f, indent=2)
+        from tools.fill_flightplans import fill          # complete flight plans (SSR, registration, EOBT, ...)
+        fill(os.path.join(OUT, s["name"] + ".json"))
     print(f"\n{done} scenarios written, {bad} with problems")
     sys.exit(1 if bad else 0)

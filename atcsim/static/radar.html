@@ -77,6 +77,36 @@
   #dispPanel .sw { display: flex; gap: 4px; align-items: center; }
   #dispPanel .sw button { padding: 0 5px; font-size: 10px; }
   #alerts { top: 40px; }
+  #utcClock { font: 600 12px var(--mono); color: var(--text); background: #0d141ccc; border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; }
+  #utcClock:empty { display: none; }
+  #mtBtn.hit { border-color: #8a5fd0; color: #d9c2ff; }
+  /* floating windows: flight plan, flight list, MTCD, help */
+  .win { position: absolute; z-index: 8; background: #101820f7; border: 1px solid #34506a; border-radius: 6px; box-shadow: 0 10px 30px #000b; font-size: 12px; min-width: 260px; max-height: calc(100% - 70px); display: flex; flex-direction: column; }
+  .win .wh { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); cursor: move; user-select: none; font-weight: 600; }
+  .win .wh b { font-family: var(--mono); font-size: 13px; }
+  .win .wh button { padding: 0 6px; }
+  .win .wb { padding: 8px 10px; overflow: auto; }
+  .win pre { margin: 0; font: 11.5px/1.45 var(--mono); white-space: pre-wrap; color: #dfe9f2; background: #0b1117; border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; }
+  .win table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 11.5px; }
+  .win th { text-align: left; color: var(--dim); font: 600 10px system-ui; text-transform: uppercase; letter-spacing: .05em; padding: 3px 5px; position: sticky; top: 0; background: #101820; }
+  .win td { padding: 3px 5px; border-top: 1px solid #18242f; white-space: nowrap; }
+  .win tr[data-cs] { cursor: pointer; } .win tr[data-cs]:hover td { background: #16222e; }
+  .win .kv { display: grid; grid-template-columns: 34px 170px 1fr; gap: 2px 8px; font-size: 11.5px; margin: 8px 0; }
+  .win .kv span:nth-child(3n+1) { color: var(--dim); font-family: var(--mono); }
+  .win .kv span:nth-child(3n+2) { color: var(--dim); }
+  .win .kv span:nth-child(3n) { font-family: var(--mono); white-space: normal; word-break: break-word; }
+  .win .sub { color: var(--dim); font: 600 10px system-ui; text-transform: uppercase; letter-spacing: .07em; margin: 10px 0 4px; }
+  .win .st { font: 600 10px system-ui; padding: 0 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim); }
+  .win .st.assumed { color: var(--accent); border-color: #2f7a5f; } .win .st.calling { color: #fff; border-color: #aaa; }
+  .win .st.inbound { color: #9db8d0; } .win .st.transferred, .win .st.gone { color: #56636f; }
+  .win input.flt { width: 100%; margin-bottom: 6px; font-family: var(--mono); text-transform: uppercase; }
+  .win .mt { padding: 5px 6px; border: 1px solid var(--line); border-left: 3px solid #8a5fd0; border-radius: 4px; margin-bottom: 5px; cursor: pointer; font-family: var(--mono); }
+  .win .mt:hover, .win .mt.on { background: #1a1630; }
+  .win .mt small { display: block; color: var(--dim); font-family: system-ui; }
+  .win kbd { font: 600 11px var(--mono); background: #1a2633; border: 1px solid #2c3e50; border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; color: #e6eef5; }
+  .win .keys { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; align-items: center; }
+  #lblMenu .wxb button.on { border-color: #c9a227; color: #ffe08a; }
+  #lblMenu .lv button.cf { border-color: #a33; color: #ffb3b3; } #lblMenu .lv button.ok { border-color: #2f7a5f; color: #bff5dc; }
   /* seats */
   body.seat-atc #app { grid-template-columns: 1fr; } body.seat-atc aside { display: none; }
   body.exercise #tl, body.exercise .legend-help { display: none; }
@@ -151,9 +181,10 @@
   .callbox button { margin-right: 6px; }
   .callbox button.ans { background: #1d4d3d; border-color: #2f7a5f; color: #e6fff4; }
   .callbox button.hang { background: #5a1d1d; border-color: #a33; color: #ffdede; }
-  #lblMenu { position: absolute; z-index: 7; background: #111922f8; border: 1px solid #3b6e93; border-radius: 6px; padding: 8px 10px; display: none; width: 236px; font-size: 12px; box-shadow: 0 8px 26px #000a; }
+  #lblMenu { position: absolute; z-index: 7; background: #111922f8; border: 1px solid #3b6e93; border-radius: 6px; padding: 8px 10px; display: none; width: 262px; font-size: 12px; box-shadow: 0 8px 26px #000a; }
   #lblMenu.on { display: block; }
-  #lblMenu .h { font-family: var(--mono); font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  #lblMenu .h { font-family: var(--mono); font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 6px; align-items: flex-start; }
+  #lblMenu .h > span:last-child { white-space: nowrap; }
   #lblMenu .f { display: grid; grid-template-columns: 54px 1fr auto; gap: 5px; align-items: center; margin-bottom: 5px; }
   #lblMenu input { width: 100%; font-family: var(--mono); text-transform: uppercase; padding: 3px 6px; }
   #lblMenu button { padding: 2px 7px; font-size: 11px; }
@@ -193,10 +224,14 @@
       <span class="sep"></span>
       <button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button>
       <span class="sep"></span>
-      <button id="rblBtn" title="Range/bearing line between two aircraft: click the button, then two aircraft (or shift-click two aircraft). Right-click an RBL label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines">✕ RBL</button><button id="homeBtn" title="Reset the view">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
+      <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
+      <span class="sep"></span>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection: conflicts over the next 20 minutes (M)">MTCD</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
     <div id="dispPanel"></div>
+    <div id="wins"></div>
     <div id="hud"></div>
     <div id="pauseBanner"></div>
     <div id="ptt" class="ex-only"><span class="k" id="pttKey" title="Hold the space bar (or this button) to transmit on the frequency">🎙 hold SPACE to transmit</span><span id="rxBox"></span></div>
@@ -209,7 +244,7 @@
       <div class="bar"><div class="fill" id="busyF"></div></div><div class="e"><span id="busyE"></span><span id="busyH"></span></div></div></div>
     <canvas id="tl" style="position:absolute;left:0;right:0;bottom:28px;height:46px;width:100%;cursor:pointer"></canvas>
     <div id="tltip" style="position:absolute;display:none;background:#0b1016ee;border:1px solid #1f2b38;padding:3px 6px;font:11px ui-monospace,monospace;color:#c9d6e2;pointer-events:none;white-space:nowrap"></div>
-    <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · shift-click two aircraft for an RBL, right-click its label to remove</span></div>
+    <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · right-drag between two aircraft / points for an RBL, drag its label to move it, right-click it to remove · hover a label (or middle-click) for the extended label · ? for shortcuts</span></div>
   </div>
   <aside>
     <nav id="asideTabs" class="ex-only instr-only"><button data-t="pilot">✈ Aircraft</button><button data-t="exercise">Exercise</button><button data-t="monitor">Monitor</button></nav>
@@ -284,8 +319,10 @@ const TH_DEF = {
   bg: '#0b1016', outline: '#2d4258', sector: '#4a6886', sectorLines: '#2f7a5f', freqs: '#3f9c7a', airways: '#1b2835',
   airwayNames: '#3a5068', rad: '#2a3f33', fpRoute: '#24394d', points: '#5c7a96', extPoints: '#41586e', aerodromes: '#7fa8c9',
   approach: '#3b6e93', cellTops: '#e9eef3',
-  assumed: '#5fd3a3', calling: '#ffffff', other: '#6f8191', handedOff: '#56636f', selected: '#7fb8ff', stca: '#f2b84b', los: '#ff5a5a',
+  assumed: '#5fd3a3', calling: '#ffffff', inbound: '#9db8d0', other: '#6f8191', handedOff: '#56636f', selected: '#7fb8ff', stca: '#f2b84b', los: '#ff5a5a',
+  xfer: '#5ad1e6', mtcd: '#c38cff',
   lblCallsign: '', lblLevel: '', lblSpeed: '', lblInfo: '', changed: '#ffd166', sfl: '#f2b84b', tags: '#7fb8ff',
+  hTag: '#ffd84a', wxTag: '#ffd84a', alertInfo: '#8fd3ff', alertWarn: '#f2b84b', alertBad: '#ff5a5a', extLabel: '#b9c8d8',
   rbl: '#d79bff', routeShow: '#ff4fd8',
   lblFont: 11, nameFont: 10.5, symbol: 7, vectorMin: 2, trail: 12, wxAlpha: 1,
 };
@@ -312,16 +349,18 @@ async function api(path, opts = {}) {
     bg: 'Background', outline: 'CTA outline', sector: 'Controlled area border', sectorLines: 'Sector lines', freqs: 'Sector names / frequencies',
     airways: 'Airways', airwayNames: 'Airway names', rad: 'RAD routings', fpRoute: 'Flight-plan routes', points: 'Points', extPoints: 'Points outside',
     aerodromes: 'Aerodromes', approach: 'Approach paths', cellTops: 'Cloud tops',
-    assumed: 'Assumed', calling: 'Calling (to assume)', other: 'Not concerned', handedOff: 'Handed off', selected: 'Selected', stca: 'Conflict (STCA)', los: 'Loss of separation',
+    assumed: 'Assumed', calling: 'Calling (to assume)', inbound: 'Inbound (previous sector)', other: 'Not concerned', handedOff: 'Handed off / decontrolled', selected: 'Selected', stca: 'Conflict (STCA)', los: 'Loss of separation',
+    xfer: 'Transfer due / to decontrol', mtcd: 'MTCD (medium-term conflict)',
     routeShow: 'Route (long press)', rbl: 'Range / bearing lines',
     lblCallsign: 'Callsign line', lblLevel: 'Level line', lblSpeed: 'Speed / heading line', lblInfo: 'Destination / info line',
     changed: 'Value changing (current›assigned)', sfl: 'Mode S level ≠ CFL', tags: 'Tags (REQ, TURB…)',
+    hTag: 'Assigned heading tag (H)', wxTag: 'Weather deviation tag (WX)', alertInfo: 'Special track (MIL, NRVSM)', alertWarn: 'Alert (NSL, route deviation)', alertBad: 'Alert (level bust)', extLabel: 'Extended label (Mode S)',
   };
   const SIZES = [['lblFont', 'Label font', 8, 18, 0.5], ['nameFont', 'Point names', 7, 16, 0.5], ['symbol', 'Aircraft symbol', 4, 14, 1],
                  ['vectorMin', 'Speed vector (min)', 0, 6, 1], ['trail', 'History dots', 0, 12, 1], ['wxAlpha', 'Weather opacity', 0.1, 1, 0.05]];
   const GROUPS = [['Scope', ['bg', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'cellTops']],
-                  ['Aircraft', ['assumed', 'calling', 'other', 'handedOff', 'selected', 'stca', 'los', 'routeShow', 'rbl']],
-                  ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'tags']]];
+                  ['Aircraft', ['assumed', 'calling', 'inbound', 'xfer', 'handedOff', 'selected', 'stca', 'los', 'mtcd', 'routeShow', 'rbl']],
+                  ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'tags', 'hTag', 'wxTag', 'alertInfo', 'alertWarn', 'alertBad', 'extLabel']]];
   const box = document.getElementById('dispPanel');
   function build() {
     let h = `<h4 data-g="zoom">Zoom <span>▾</span></h4><div class="grid" data-gg="zoom"><span class="zoom"><button id="dpOut">−</button><input type="range" id="dpZoom" min="${Math.log(0.3)}" max="${Math.log(20)}" step="0.01" value="${Math.log(userZoom)}"><button id="dpIn">+</button></span><button id="dpHome">Reset view</button></div>`;
@@ -588,7 +627,7 @@ async function pollSelected() {
       ['Control', a.control],
     ];
     if (a.assumed && SEAT !== 'pilot') rows.unshift(['Control', `<button onclick="release('${a.callsign}')">Decontrol ${a.callsign}</button> <span class="c-dim" style="font-size:11px">${a.status !== 'active' ? 'has left the sector, still yours' : 'hand it off by hand'} · or type ${a.callsign} REL</span>`]);
-    if (!a.assumed && (a.on_frequency || a.released) && SEAT !== 'pilot') rows.unshift(['First contact', `<button class="on" onclick="assume('${a.callsign}')">Assume ${a.callsign}</button> <span class="c-dim" style="font-size:11px">or double-click it, or type ${a.callsign} AS</span>`]);
+    if (!a.assumed && SEAT !== 'pilot') rows.unshift([a.on_frequency && !a.released ? 'First contact' : 'Not yours', `<button class="on" onclick="assume('${a.callsign}')">Assume ${a.callsign}</button> <span class="c-dim" style="font-size:11px">or double-click it, or type ${a.callsign} AS</span>`]);
     const ahead = a.route.slice(a.route.indexOf(a.next_waypoint) >= 0 ? a.route.indexOf(a.next_waypoint) : 0).filter(n => !n.startsWith('@'));
     const dct = realPoints([...new Set([...ahead, ...(a.route_after_exit || [])])]);
     rows.push(['Direct to', `<span class="dct">${dct.map(n => `<button data-dct="${n}" style="padding:0 5px;font-size:11px;margin:1px">${n}</button>`).join('')}</span>
@@ -634,9 +673,9 @@ function renderSide() {
     : '<div class="empty">none pending</div>';
 }
 function COPS() { return new Set((sector && sector.coordination_points) || []); }
-function nextReal(a) {                   // next published point (skips generated coordination points)
-  const cops = COPS(), r = a.route || [], i = r.indexOf(a.next_waypoint);
-  if (!a.next_waypoint || !cops.has(a.next_waypoint)) return a.next_waypoint || '';
+function nextReal(a) {                   // next published point of the route (skips generated coordination points)
+  const nw = a.next_waypoint || a.fp_next, cops = COPS(), r = a.route || [], i = r.indexOf(nw);
+  if (!nw || !cops.has(nw)) return nw || '';
   for (let k = i + 1; k < r.length; k++) if (!cops.has(r[k])) return r[k];
   return (a.route_after_exit || [])[0] || '';
 }
@@ -862,9 +901,18 @@ cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(userZoom * (e.de
 const labelOff = {}, labelRects = [];
 let drag = null;
 function canvasPt(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; }
-function labelAt(e) { const [x, y] = canvasPt(e); return labelRects.find(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1); }
+function labelAt(e) {                 // the label under the mouse: the extended one first, else the one drawn last (on top)
+  const [x, y] = canvasPt(e), hit = labelRects.filter(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1);
+  return hit.find(l => l.cs === hoverLbl || extPinned.has(l.cs)) || hit[hit.length - 1];
+}
+let rblDrag = null;                                  // right-drag: a range/bearing line from one end to the other
 cv.addEventListener('mousedown', e => {
+  if (e.button === 2) { e.preventDefault(); rblDrag = { from: rblTarget(e), x: e.clientX, y: e.clientY, cur: canvasPt(e), moved: false }; return; }
+  if (e.button === 1) { e.preventDefault(); const l = labelAt(e), cs = l ? l.cs : nearestAircraft(e);   // middle click: pin the extended label
+    if (cs) { extPinned.has(cs) ? extPinned.delete(cs) : extPinned.add(cs); } return; }
   if (e.button !== 0) return;
+  const [qx, qy] = canvasPt(e), rh = rblRects.find(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1);
+  if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false }; return; }
   const l = labelAt(e);
   if (l) { const o = labelOff[l.cs] || [10, -14]; drag = { label: l.cs, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; }
   else drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, ac: nearestAircraft(e) };
@@ -874,6 +922,14 @@ cv.addEventListener('mousedown', e => {
     pressTimer = setTimeout(() => { if (drag === d0 && !d0.moved) { d0.long = true; routeShow = { cs, until: Infinity }; } }, 450);
 });
 window.addEventListener('mouseup', e => {
+  if (e.button === 2 && rblDrag) {
+    const d0 = rblDrag; rblDrag = null;
+    if (d0.moved) { const t = rblTarget(e); if (d0.from && t && !sameEnd(d0.from, t)) addRbl(d0.from, t); }
+    else { const [x, y] = canvasPt(e), hit = rblRects.find(r => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1); if (hit) rbls.splice(hit.i, 1); }
+    return;
+  }
+  if (e.button !== 0) return;
+  if (drag && drag.rbl) { drag = null; return; }
   clearTimeout(pressTimer);
   if (drag && drag.long) { if (routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
   if (drag && !drag.moved && drag.label && (rblMode || e.shiftKey)) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e) || drag.label); drag = null; return; }
@@ -883,15 +939,21 @@ window.addEventListener('mouseup', e => {
   drag = null;
 });
 window.addEventListener('mousemove', e => {
-  if (!drag) { cv.style.cursor = labelAt(e) ? 'move' : 'crosshair'; return; }
+  if (rblDrag) { rblDrag.cur = canvasPt(e); if (Math.abs(e.clientX - rblDrag.x) + Math.abs(e.clientY - rblDrag.y) > 6) rblDrag.moved = true; return; }
+  if (!drag) {
+    const l = e.target === cv ? labelAt(e) : null;
+    if ((l && l.cs) !== hoverLbl) { hoverLbl = l ? l.cs : null; hoverT = performance.now(); }
+    const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
+    cv.style.cursor = l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
+  if (drag.rbl) { drag.rbl.ox = drag.ox + dx; drag.rbl.oy = drag.oy + dy; return; }
   if (drag.label) { labelOff[drag.label] = [drag.ox + dx, drag.oy + dy]; return; }
   view.cx = drag.cx - dx * devicePixelRatio / view.s; view.cy = drag.cy + dy * devicePixelRatio / view.s;
 });
 cv.addEventListener('dblclick', e => {
   const cs = nearestAircraft(e), a = cs && state && state.aircraft.concat(state.transferred || []).find(x => x.callsign === cs);
-  if (a && !a.assumed && (a.on_frequency || a.released) && !replayMode && SEAT !== 'pilot') { assume(cs); return; }   // first contact, or taking it back
+  if (a && !a.assumed && !replayMode && SEAT !== 'pilot') { assume(cs); return; }   // assume any track, any time (first call, early, taking it back)
   const l = labelAt(e); if (l) { delete labelOff[l.cs]; return; } if (!EXID) fitView(); });
 $('#homeBtn').onclick = fitView;
 // ---------- label line 3: ground speed, speed, heading/next point; while a value is changing: current›assigned
@@ -903,24 +965,60 @@ function entSpeed(e) {                              // the controller's entry 'M
   if ((m = v.match(/^[SK]?(\d{3})(KT)?$/))) return 'I' + m[1];
   return null;
 }
+const angDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
+// line 3: ground speed · speed (current, or current›assigned while changing) · heading (always the present heading,
+// current›assigned while turning to an assigned heading) · H tag when a heading is assigned · WX tag when a weather
+// deviation is approved · next point (or the direct) when no heading. On the controller's seat everything assigned
+// comes from what the controller entered; on the other seats, from what the aircraft is doing.
 function labelLine3(a, ent) {
-  const segs = [[`${a.gs_kt} `, false]];
+  const segs = [[`${a.gs_kt} `, 0]];
   const cur = a.speed_mode === 'mach' ? 'M' + pad(a.mach * 100, 2) : 'I' + a.ias_kt;
-  let tgt = ent && ent.speed ? entSpeed(ent.speed) : (a.speed_assigned_by_atc ? spdText(a.speed_mode, a.speed_target) : null);
+  let tgt = ent ? (ent.speed ? entSpeed(ent.speed) : null) : (a.speed_assigned_by_atc ? spdText(a.speed_mode, a.speed_target) : null);
   if (tgt && tgt !== cur) {
     const same = tgt[0] === cur[0], diff = Math.abs(+tgt.slice(1) - +cur.slice(1));
-    if (same && diff <= (cur[0] === 'M' ? 0 : 3)) segs.push([tgt, false]);
-    else segs.push([`${cur}›${same ? tgt.slice(1) : tgt}`, true]);
-  } else segs.push([cur, false]);
+    if (same && diff <= (cur[0] === 'M' ? 0 : 3)) segs.push([tgt, 0]);
+    else segs.push([`${cur}›${same ? tgt.slice(1) : tgt}`, 'chg']);
+  } else segs.push([cur, 0]);
   const sr = a.speed_restriction;
-  if (!ent && sr && sr.conversion_kt) segs.push([`/K${sr.conversion_kt}`, false]);
-  let hdg = ent && ent.heading ? +ent.heading : (a.nav_mode !== 'lnav' && a.assigned_heading != null ? a.assigned_heading : null);
-  if (hdg != null) {
-    const d = Math.abs(((a.heading - hdg + 540) % 360) - 180);
-    const pre = a.nav_mode === 'wxdev' && !(ent && ent.heading) ? ' DEV' : ' H';
-    segs.push(d <= 3 ? [`${pre}${pad(hdg, 3)}`, false] : [` ${pad(a.heading, 3)}›${pad(hdg, 3)}`, true]);
-  } else segs.push([` >${ent && ent.direct ? ent.direct : nextReal(a)}`, !!(ent && ent.direct && ent.direct !== nextReal(a))]);
+  if (!ent && sr && sr.conversion_kt) segs.push([`/K${sr.conversion_kt}`, 0]);
+  const hdg = Math.round(a.heading) || 360;
+  const asg = ent ? (ent.heading ? +ent.heading : null) : (a.nav_mode !== 'lnav' && a.assigned_heading != null ? a.assigned_heading : null);
+  if (asg != null && angDiff(hdg, asg) > 3) segs.push([` ${pad(hdg, 3)}›${pad(asg, 3)}`, 'chg']);
+  else segs.push([` ${pad(asg != null ? asg : hdg, 3)}`, 0]);
+  if (asg != null) segs.push([' H', 'htag']);
+  const wx = ent ? ent.wx : (a.nav_mode === 'wxdev' ? 'DEV' : null);
+  if (wx) segs.push([' WX' + (ent ? (wx === 'Y' ? '' : wx) : ''), 'wxtag']);
+  if (asg == null) {
+    const nx = ent && ent.direct ? ent.direct : nextReal(a);
+    segs.push([` >${nx}`, ent && ent.direct && ent.direct !== nextReal(a) ? 'chg' : 0]);
+  }
   return segs;
+}
+// control state of a track on this screen (colours and transfer cues)
+const XFR_S = 180;
+function ctlState(a) {
+  if (a.status && a.status !== 'active') return a.assumed ? 'leftAssumed' : 'handedOff';
+  if (a.released) return 'handedOff';
+  if (a.assumed) return a.to_exit_s != null && a.to_exit_s < XFR_S ? 'xfer' : 'assumed';
+  if (a.on_frequency) return 'calling';
+  return 'inbound';
+}
+const extPinned = new Set(); let hoverLbl = null, hoverT = 0;
+function isExt(cs) { return extPinned.has(cs) || extAll || (hoverLbl === cs && performance.now() - hoverT > 350); }
+let extAll = false;
+const sgn = v => (v > 0 ? '+' : '') + v;
+function extLines(a, ent) {           // extended label: flight-plan data and the Mode S downlinked parameters
+  const fp = a.flight_plan || {}, ms = a.mode_s, out = [];
+  out.push(`A${a.squawk || fp.ssr || '----'} ${fp.registration || ''} ${a.type}/${fp.wake || ''} ${fp.surveillance ? fp.surveillance.replace('Mode S ', '').replace('Mode ', '') : ''}`);
+  out.push(`${fp.departure || '----'}→${fp.destination || '----'} RFL${(fp.rfl || fp.cruise || '').replace('F', '')}${ent && ent.cfl != null ? ' CFL' + ent.cfl : ''}${a.next_unit ? ' →' + a.next_unit : ''}`);
+  if (ms && ms.ehs) {
+    out.push(`SFL${pad(ms.selected_fl, 3)} HDG${pad(ms.mag_heading, 3)} IAS${ms.ias_kt} M${pad(ms.mach * 100, 2)}`);
+    out.push(`TAS${ms.tas_kt} GS${ms.gs_kt} TRK${pad(ms.track_deg, 3)} ${sgn(ms.baro_rate_fpm)}fpm`);
+    out.push(`ROLL ${ms.roll_deg < -0.5 ? 'L' : ms.roll_deg > 0.5 ? 'R' : ''}${Math.abs(Math.round(ms.roll_deg))}° TR ${ms.track_rate_deg_s.toFixed(1)}°/s ${ms.baro_setting} ${ms.address || ''}`);
+  } else if (ms) out.push(`Mode S ${ms.address || ''} ELS · no aircraft parameters`);
+  else out.push('Mode A/C · no Mode S data');
+  if (a.planned_exit && a.to_exit_s != null && a.status === 'active') out.push(`XPT ${a.planned_exit} +${Math.round(a.to_exit_s / 60)}' ${a.to_exit_nm} NM`);
+  return out;
 }
 // ---------- long press on a label (or an aircraft): its route from the present position, with times
 let routeShow = null, pressTimer = null;
@@ -929,13 +1027,19 @@ function drawRoute(byCs) {
   if (routeShow.until < performance.now()) { routeShow = null; return; }
   const a = byCs[routeShow.cs]; if (!a) return;
   const wp = sector.waypoints, dpr = devicePixelRatio, cops = COPS();
-  const i = Math.max(0, a.route.indexOf(a.next_waypoint));
-  let names = a.nav_mode === 'lnav' ? a.route.slice(i) : [];
+  // the flight-plan route ahead is always drawn (also while vectored or deviating: the route to rejoin), from the
+  // direct point the controller entered if any
+  const ent = SEAT === 'atc' && EXID && state && state.entries ? (state.entries[a.callsign] || {}) : {};
+  let i = Math.max(0, a.route.indexOf(a.next_waypoint || a.fp_next));
+  if (ent.direct && a.route.indexOf(ent.direct) >= i) i = a.route.indexOf(ent.direct);
+  let names = a.route.slice(i).filter(n => !n.startsWith('@'));
+  if (ent.direct && !names.includes(ent.direct)) { const ra = a.route_after_exit || []; names = ra.includes(ent.direct) ? ra.slice(ra.indexOf(ent.direct)) : [ent.direct]; }
   for (const n of a.route_after_exit || []) if (!names.includes(n)) names.push(n);
   names = names.filter(n => wp[n]);
   const pts = [[a.x_nm, a.y_nm]].concat(names.map(n => wp[n]));
   ctx.strokeStyle = TH.routeShow; ctx.lineWidth = 2.5 * dpr; ctx.setLineDash([]);
-  if (a.nav_mode !== 'lnav') {                       // on a heading: the heading line, then nothing known
+  const offRoute = SEAT === 'atc' && EXID ? !!(ent.heading || ent.wx) : a.nav_mode !== 'lnav';
+  if (offRoute) {                                    // on a heading / deviating: the heading line too
     const r = a.track_deg * Math.PI / 180, [x2, y2] = toPx(a.x_nm + Math.sin(r) * 60, a.y_nm + Math.cos(r) * 60), [x1, y1] = toPx(a.x_nm, a.y_nm);
     ctx.setLineDash([8 * dpr, 6 * dpr]); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
   }
@@ -974,14 +1078,13 @@ function rblTarget(e) {
 function rblPick(t) {
   if (!t) return;
   if (!rblFirst) { rblFirst = t; $('#rblHint').textContent = `${endName(t)} → click the second aircraft or point`; return; }
-  if (!sameEnd(t, rblFirst) && !rbls.some(r => (sameEnd(r.a, rblFirst) && sameEnd(r.b, t)) || (sameEnd(r.a, t) && sameEnd(r.b, rblFirst))))
-    rbls.push({ a: rblFirst, b: t });
+  if (!sameEnd(t, rblFirst)) addRbl(rblFirst, t);
   setRblMode(false);
 }
-cv.addEventListener('contextmenu', e => {
-  const [x, y] = canvasPt(e), hit = rblRects.find(r => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1);
-  if (hit) { e.preventDefault(); rbls.splice(hit.i, 1); }
-});
+function addRbl(p, q) {
+  if (!rbls.some(r => (sameEnd(r.a, p) && sameEnd(r.b, q)) || (sameEnd(r.a, q) && sameEnd(r.b, p)))) rbls.push({ a: p, b: q, ox: 0, oy: 0 });
+}
+cv.addEventListener('contextmenu', e => e.preventDefault());       // right button: RBL (drag) / remove an RBL (click its label)
 function rblEnd(t, byCs) {
   if (typeof t === 'string') return byCs[t] || null;
   return { callsign: t.name || '', x_nm: t.x, y_nm: t.y, gs_kt: 0, track_deg: 0, fl: null, point: true };
@@ -1018,7 +1121,8 @@ function drawRbls(byCs) {
         ctx.fillStyle = col; ctx.font = `${9.5 * dpr}px ui-monospace,monospace`; ctx.fillText(P.callsign, qx + 6 * dpr, qy + 3 * dpr);
       }
     }
-    const mx = (ax + bx) / 2, my = (ay + by) / 2;
+    const cmx = (ax + bx) / 2, cmy = (ay + by) / 2, mx = cmx + (r.ox || 0) * dpr, my = cmy + (r.oy || 0) * dpr;
+    if (r.ox || r.oy) { ctx.strokeStyle = col + '99'; ctx.lineWidth = 1 * dpr; ctx.setLineDash([2 * dpr, 3 * dpr]); ctx.beginPath(); ctx.moveTo(cmx, cmy); ctx.lineTo(mx, my - 4 * dpr); ctx.stroke(); ctx.setLineDash([]); }
     const l1 = `${String(Math.round(c.brg)).padStart(3, '0')}° ${c.range.toFixed(1)} NM` + (both ? `  ΔFL ${Math.abs(A.fl - B.fl)}` : '');
     const l2 = !c.moving ? '' : c.t > 0 ? `CPA ${c.d.toFixed(1)} NM in ${fmtT(c.t)}` : 'diverging';
     ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
@@ -1059,6 +1163,23 @@ function legArrows(pts, col) {          // direction arrows at the middle of eac
   }
 }
 const AREA_COL = { danger: '#e08a3c', restricted: '#e0c13c', prohibited: '#ff5a5a' };
+// draws label lines (each a list of [text, colour] segments); the callsign line (index k1) is at y = by.
+// The last nExt lines are the extended label, on a dark box. Returns the width drawn.
+function paintLabel(lines, k1, bx, by, lh, nExt, col) {
+  const dpr = devicePixelRatio, H = lh * dpr;
+  let w = 0;
+  for (const ln of lines) w = Math.max(w, ln.reduce((s, sg) => s + ctx.measureText(sg[0]).width, 0));
+  if (nExt) {                                       // extended label: the whole block on a dark box, over the rest
+    const y0 = by - k1 * H - H * 0.85, y1 = by + (lines.length - k1 - 1) * H + H * 0.35;
+    ctx.fillStyle = '#0b1016f0'; ctx.fillRect(bx - 4 * dpr, y0, w + 8 * dpr, y1 - y0);
+    ctx.strokeStyle = (col || '#888888').slice(0, 7) + '99'; ctx.lineWidth = 1 * dpr; ctx.strokeRect(bx - 4 * dpr, y0, w + 8 * dpr, y1 - y0);
+    const ys = by + (lines.length - nExt - k1) * H - H * 0.85;
+    ctx.strokeStyle = (col || '#888888').slice(0, 7) + '44'; ctx.beginPath(); ctx.moveTo(bx, ys); ctx.lineTo(bx + w, ys); ctx.stroke();
+  }
+  lines.forEach((ln, i) => { let x = bx; const y = by + (i - k1) * H;
+    for (const [t, c] of ln) { ctx.fillStyle = c; ctx.fillText(t, x, y); x += ctx.measureText(t).width; } });
+  return w;
+}
 function draw() {
   shown = replayMode ? replayState() : state;
   const W = cv.width, H = cv.height, dpr = devicePixelRatio;
@@ -1209,10 +1330,16 @@ function draw() {
     const [ax, ay] = toPx(a.x_nm, a.y_nm), [bx, by] = toPx(b.x_nm, b.y_nm);
     ctx.strokeStyle = (status[a.callsign] === 'los' && status[b.callsign] === 'los') ? '#ff5a5a66' : '#f2b84b55'; ctx.setLineDash([3 * dpr, 4 * dpr]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]); }
-  // transferred traffic (already with the next sector): grey, still painted for a few minutes
   labelRects.length = 0;
-  // aircraft gone to the next sectors: still the controller's (full label) until decontrolled by hand, then grey
-  const outAssumed = (shown.transferred || []).filter(a => a.assumed);
+  const drawn = {}, deferred = [];                    // labels as drawn: recorded with the controller's screen
+  const atcSeat = SEAT === 'atc' && EXID && !replayMode;
+  const seeAlerts = SEAT !== 'pilot' && !replayMode;
+  const special = seeAlerts ? (shown.special || {}) : {};
+  const mtBy = {};
+  if (seeAlerts) for (const c of (shown.mtcd || []).filter(c => !c.current)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
+  const blink = (Date.now() / 500 | 0) % 2;
+  const fs = +TH.lblFont, lh = fs * 1.1;
+  // aircraft decontrolled, in the next sectors: grey, short label (callsign, level, next unit)
   for (const a of (shown.transferred || []).filter(a => !a.assumed)) {
     const [px, py] = toPx(a.x_nm, a.y_nm), col = TH.handedOff;
     ctx.fillStyle = col; if (V.trails) for (const t of a.trail || []) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1 * dpr, ty - 1 * dpr, 2 * dpr, 2 * dpr); }
@@ -1220,16 +1347,18 @@ function draw() {
     ctx.strokeStyle = col; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(vx, vy); ctx.stroke();
     ctx.strokeRect(px - 3 * dpr, py - 3 * dpr, 6 * dpr, 6 * dpr);
     const o = labelOff[a.callsign] || [10, -14], bx = px + o[0] * dpr, by = py + o[1] * dpr;
-    ctx.font = `${(TH.lblFont - 0.5) * dpr}px ui-monospace,monospace`; ctx.fillStyle = col;
-    ctx.fillText(a.callsign, bx, by); ctx.fillText(`${String(a.fl).padStart(3, '0')} ${a.exit_point ? 'via ' + a.exit_point : 'off route'}`, bx, by + 12 * dpr);
+    const lines = [[[a.callsign, col]], [[`${pad(a.fl, 3)} →${a.next_unit || (a.exit_point ? 'via ' + a.exit_point : '')}`, col]]];
+    ctx.font = `${(fs - 0.5) * dpr}px ui-monospace,monospace`;
+    paintLabel(lines, 0, bx, by, (fs - 0.5) * 1.1, 0);
+    drawn[a.callsign] = { c: col, k: 0, x: 0, l: lines, s: 1 };
     labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - 11 * dpr, x1: bx + 90 * dpr, y1: by + 15 * dpr });
   }
-  // aircraft
+  // aircraft (and those gone to the next sectors still assumed: full label until decontrolled by hand)
+  const outAssumed = (shown.transferred || []).filter(a => a.assumed);
   for (const a of shown.aircraft.concat(outAssumed)) {
-    const st = status[a.callsign];
-    const calling = a.on_frequency && a.assumed === false && !a.released && a.status === 'active';   // has called, not assumed yet
+    const st = status[a.callsign], cst = ctlState(a);
     const col = st === 'los' ? TH.los : st === 'warn' ? TH.stca : (a.callsign === selected ? TH.selected :
-                calling ? ((Date.now() / 500 | 0) % 2 ? TH.calling : TH.calling + 'aa') : (a.on_frequency && !a.released ? TH.assumed : TH.other));
+                cst === 'calling' ? (blink ? TH.calling : TH.calling + 'aa') : cst === 'inbound' ? TH.inbound : cst === 'handedOff' ? TH.handedOff : TH.assumed);
     const plain = !st && a.callsign !== selected;           // label part colours apply outside alerts and selection
     // top of descent (T) and latest descent for the letter of agreement (L) along the route ahead
     if (a.callsign === selected && a.arrival && a.nav_mode === 'lnav' && a.next_waypoint) {
@@ -1245,59 +1374,86 @@ function draw() {
     ctx.fillStyle = col + '88';
     if (V.trails) for (const t of (a.trail || []).slice(-Math.max(0, +TH.trail))) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1.2 * dpr, ty - 1.2 * dpr, 2.4 * dpr, 2.4 * dpr); }
     const [px, py] = toPx(a.x_nm, a.y_nm);
-    // 2-minute speed vector
+    // speed vector
     const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 60 * +TH.vectorMin;
     const [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
     ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(vx, vy); ctx.stroke();
     // half-minimum halo when in conflict (two halos touching = the separation minimum)
     if (st) { ctx.strokeStyle = col + '55'; ctx.beginPath(); ctx.arc(px, py, SEPH() / 2 * view.s, 0, Math.PI * 2); ctx.stroke(); }
     const hs = +TH.symbol / 2; ctx.strokeStyle = col; ctx.lineWidth = 1.5 * dpr; ctx.strokeRect(px - hs * dpr, py - hs * dpr, 2 * hs * dpr, 2 * hs * dpr);
-    // data block
+    if (mtBy[a.callsign] && !st) {                          // medium-term conflict: a diamond around the symbol
+      const q = (hs + 4) * dpr; ctx.strokeStyle = TH.mtcd; ctx.lineWidth = 1.2 * dpr; ctx.beginPath();
+      ctx.moveTo(px, py - q); ctx.lineTo(px + q, py); ctx.lineTo(px, py + q); ctx.lineTo(px - q, py); ctx.closePath(); ctx.stroke();
+    }
+    if (cst === 'xfer' || cst === 'leftAssumed') {          // transfer due: a chevron ahead of the symbol, towards the next unit
+      const q = (hs + 5) * dpr, rr = a.track_deg * Math.PI / 180, cx = px + Math.sin(rr) * q, cy = py - Math.cos(rr) * q;
+      ctx.strokeStyle = cst === 'leftAssumed' && !blink ? TH.xfer + '66' : TH.xfer; ctx.lineWidth = 1.6 * dpr; ctx.beginPath();
+      ctx.moveTo(cx - Math.cos(rr) * 4 * dpr - Math.sin(rr) * 3 * dpr, cy - Math.sin(rr) * 4 * dpr + Math.cos(rr) * 3 * dpr); ctx.lineTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(rr) * 4 * dpr - Math.sin(rr) * 3 * dpr, cy + Math.sin(rr) * 4 * dpr + Math.cos(rr) * 3 * dpr); ctx.stroke();
+    }
+    // ---- data block. The controller's seat shows what the controller entered (CFL, speed, heading, direct, weather
+    // deviation) and, in amber, the level the aircraft has selected when it differs (Mode S EHS only)
+    const ent = atcSeat ? ((state && state.entries && state.entries[a.callsign]) || {}) : null;
+    const pc = (k, dflt) => plain && TH[k] ? TH[k] : dflt;
+    const lines = [];
+    const l0 = [];                                          // alerts: special tracks, monitoring, MTCD
+    for (const [code, sev] of special[a.callsign] || []) l0.push([code + ' ', sev === 'alert' ? (blink ? TH.alertBad : TH.alertBad + '77') : sev === 'warn' ? TH.alertWarn : TH.alertInfo]);
+    if (mtBy[a.callsign]) l0.push([`MTC${Math.max(0, Math.floor(mtBy[a.callsign].time_to_conflict_s / 60))}' `, TH.mtcd]);
+    if (l0.length) lines.push(l0);
+    const k1 = lines.length;
+    const l1 = [[a.callsign + (a.formation ? ` x${a.formation.size}` : ''), pc('lblCallsign', col)]];
+    if (cst === 'calling') l1.push(['  CALL', pc('lblCallsign', col)]);
+    let tag = '';
+    const pq = atcSeat ? [] : shown.pending_requests.filter(q => q.callsign === a.callsign);   // the controller hears requests on the frequency
+    if (pq.length) tag = pq.some(q => q.type === 'weather_deviation') ? 'WXREQ' : pq.some(q => q.kind === 'descent') ? 'DESC?' : pq.some(q => q.type === 'report') ? 'RPT' : 'REQ';
+    if (!atcSeat && (a.turbulence === 'moderate' || a.turbulence === 'severe')) tag += (tag ? ' ' : '') + (a.turbulence === 'severe' ? 'SEV TURB' : 'MOD TURB');
+    if (tag) l1.push(['  ' + tag, TH.tags]);
+    lines.push(l1);
     const arrow = a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' ';
-    const l1 = a.callsign + (a.formation ? ` x${a.formation.size}` : '') + (a.on_frequency && a.assumed === false ? '  CALL' : '');
+    const sysCfl = ent && shown.system_cfl ? shown.system_cfl[a.callsign] : null;     // controller: the level the system knows
+    const cflShown = ent && ent.cfl != null ? ent.cfl : sysCfl != null ? sysCfl : a.cleared_fl;
     const rv = a.rvsm.status === 'unable' ? ' RVSM✗' : a.rvsm.status === 'non_approved' ? ' NRVSM' : '';
-    // the controller's seat shows what the controller entered (CFL, speed, heading, direct) and, in amber, the level
-    // the aircraft has actually selected when it differs (Mode S SFL) - a readback/execution error shows up there
-    const ent = SEAT === 'atc' && EXID && !replayMode ? ((state && state.entries && state.entries[a.callsign]) || {}) : null;
-    const cflShown = ent && ent.cfl != null ? ent.cfl : a.cleared_fl;
-    const sfl = ent && ent.cfl != null && ent.cfl !== a.cleared_fl ? ` S${a.cleared_fl}` : '';
-    const l2 = `${String(a.fl).padStart(3, '0')}${arrow}${cflShown !== a.fl ? cflShown : ''} ${a.type}${a.category === 'military' ? ' MIL' : ''}${rv}`;
-    // line 3: ground speed · speed (current, or current›assigned while changing) · heading (assigned, or current›assigned)
-    const l3seg = labelLine3(a, ent), l3 = l3seg.map(x => x[0]).join('');
+    const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''} ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col)]];
+    const ms = a.mode_s;
+    if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl]);
+    lines.push(l2);
+    lines.push(labelLine3(a, ent).map(([t, rl]) => [t, rl === 'chg' ? TH.changed : rl === 'htag' ? TH.hTag : rl === 'wxtag' ? TH.wxTag : pc('lblSpeed', col)]));
     const dest = (a.flight_plan && a.flight_plan.destination) || '';
-    let l4 = dest && dest !== 'ZZZZ' ? `→${dest}` : '';
-    if (a.arrival && a.arrival.tod_in_nm != null) l4 = `→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`;
-    if (!a.on_frequency) l4 = `prev sector → ${a.entry_waypoint}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : '');
-    if (a.status && a.status !== 'active') l4 = `left sector${a.exit_point ? ' via ' + a.exit_point : ''} · decontrol`;
-    if (ent && ent.note) l4 = (l4 ? l4 + ' ' : '') + ent.note;
-    const fs = +TH.lblFont, lh = fs * 1.1;
-    ctx.fillStyle = col; ctx.font = `${fs * dpr}px ui-monospace,monospace`;
+    const info = pc('lblInfo', col + 'bb'), l4 = [];
+    if (cst === 'inbound') l4.push([`${a.entry_waypoint} ←${a.prev_unit || 'prev'}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : ''), info]);
+    else if (cst === 'leftAssumed') l4.push([`DECONTROL →${a.next_unit || a.exit_point || ''}`, blink ? TH.xfer : TH.xfer + '88']);
+    else if (cst === 'xfer') l4.push([`XFR →${a.next_unit || ''} ${nextReal(a) === a.planned_exit ? '' : a.planned_exit || ''}`.trim(), TH.xfer]);
+    else if (a.arrival && a.arrival.tod_in_nm != null) l4.push([`→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`, info]);
+    else if (dest && dest !== 'ZZZZ') l4.push([`→${dest}`, info]);
+    if (ent && ent.note) l4.push([(l4.length ? ' ' : '') + ent.note, info]);
+    if (l4.length) lines.push(l4);
+    const ext = seeAlerts && isExt(a.callsign) ? extLines(a, ent) : [];
+    for (const t of ext) lines.push([[t, TH.extLabel]]);
+    ctx.font = `${fs * dpr}px ui-monospace,monospace`;
     const o = labelOff[a.callsign] || [10, -14];
     const bx = px + o[0] * dpr, by = py + o[1] * dpr;
     if (labelOff[a.callsign]) {                              // leader line to a moved label
       ctx.strokeStyle = col + '99'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py);
       ctx.lineTo(bx + (o[0] < 0 ? 60 * dpr : -2 * dpr), by + (o[1] < 0 ? 26 * dpr : -10 * dpr)); ctx.stroke();
     }
-    const pc = (k, dflt) => plain && TH[k] ? TH[k] : dflt;
-    ctx.fillStyle = pc('lblCallsign', col); ctx.fillText(l1, bx, by);
-    ctx.fillStyle = pc('lblLevel', col); ctx.fillText(l2, bx, by + lh * dpr);
-    if (sfl) { ctx.fillStyle = TH.sfl; ctx.fillText(sfl, bx + ctx.measureText(l2).width, by + lh * dpr); }
-    let x3 = bx;
-    for (const [t, chg] of l3seg) { ctx.fillStyle = chg ? TH.changed : pc('lblSpeed', col); ctx.fillText(t, x3, by + 2 * lh * dpr); x3 += ctx.measureText(t).width; }
-    if (l4) { ctx.fillStyle = pc('lblInfo', col + 'bb'); ctx.fillText(l4, bx, by + 3 * lh * dpr); }
-    ctx.fillStyle = col;
-    const lw = Math.max(ctx.measureText(l2).width, ctx.measureText(l3).width, ctx.measureText(l4).width, ctx.measureText(l1).width + 50 * dpr);
-    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - fs * dpr, x1: bx + lw, y1: by + (l4 ? 3 * lh + 3 : 2 * lh + 3) * dpr });
-    let tag = '';
-    const pq = SEAT === 'atc' && EXID ? [] : shown.pending_requests.filter(q => q.callsign === a.callsign);   // the controller hears requests on the frequency
-    if (pq.length) tag = pq.some(q => q.type === 'weather_deviation') ? 'WXREQ' : pq.some(q => q.kind === 'descent') ? 'DESC?' : pq.some(q => q.type === 'report') ? 'RPT' : 'REQ';
-    else if (a.nav_mode === 'wxdev') tag = 'WXDEV';
-    if ((!EXID || SEAT !== 'atc') && (a.turbulence === 'moderate' || a.turbulence === 'severe')) tag += (tag ? ' ' : '') + (a.turbulence === 'severe' ? 'SEV TURB' : 'MOD TURB');
-    if (tag) { ctx.fillStyle = TH.tags; ctx.fillText(tag, bx + ctx.measureText(l1).width + 6 * dpr, by); }
+    let lw;
+    if (ext.length) { lw = 0; for (const ln of lines) lw = Math.max(lw, ln.reduce((q, sg) => q + ctx.measureText(sg[0]).width, 0));
+      deferred.push([lines, k1, bx, by, lh, ext.length, col]); }      // drawn last, above the other labels
+    else lw = paintLabel(lines, k1, bx, by, lh, 0, col);
+    drawn[a.callsign] = { c: col, k: k1, x: ext.length, l: lines, ...(mtBy[a.callsign] && !st ? { m: 1 } : {}), ...(cst === 'xfer' || cst === 'leftAssumed' ? { t: 1 } : {}) };
+    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - (k1 + 1) * lh * dpr, x1: bx + Math.max(lw, 90 * dpr), y1: by + (lines.length - k1 - 1) * lh * dpr + 4 * dpr });
   }
+  ctx.font = `${fs * dpr}px ui-monospace,monospace`;
+  for (const d of deferred) paintLabel(...d);
+  window.__drawnLabels = drawn;
   const byCs = Object.fromEntries(shown.aircraft.concat(shown.transferred || []).map(a => [a.callsign, a]));
   drawRoute(byCs);
+  if (window.drawMtcd) drawMtcd(byCs);
   drawRbls(byCs);
+  if (rblDrag && rblDrag.moved && rblDrag.from) { const f = rblEnd(rblDrag.from, byCs); if (f) { const [fx, fy] = toPx(f.x_nm, f.y_nm);
+    ctx.strokeStyle = TH.rbl; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(rblDrag.cur[0], rblDrag.cur[1]); ctx.stroke(); ctx.setLineDash([]);
+    const [wx_, wy_] = fromPx(...rblDrag.cur), dd = Math.hypot(wx_ - f.x_nm, wy_ - f.y_nm), bb = (Math.atan2(wx_ - f.x_nm, wy_ - f.y_nm) * 180 / Math.PI + 360) % 360;
+    ctx.fillStyle = TH.rbl; ctx.font = `${10.5 * dpr}px ui-monospace,monospace`; ctx.fillText(`${pad(bb, 3)}° ${dd.toFixed(1)} NM`, rblDrag.cur[0] + 10 * dpr, rblDrag.cur[1] - 6 * dpr); } }
   if (rblMode && rblFirst) { const f = rblEnd(rblFirst, byCs); if (f) { const [fx, fy] = toPx(f.x_nm, f.y_nm);
     ctx.strokeStyle = TH.rbl; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(fx, fy, 9 * dpr, 0, Math.PI * 2); ctx.stroke(); } }
   // scale bar
@@ -1312,6 +1468,7 @@ requestAnimationFrame(draw);
 </script>
 <script src="/static/comms.js"></script>
 <script src="/static/seat.js"></script>
+<script src="/static/atctools.js"></script>
 <script src="/static/uirec.js"></script>
 </body>
 </html>

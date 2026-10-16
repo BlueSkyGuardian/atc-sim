@@ -103,6 +103,9 @@ class World:
         # controller's label entries (connected mode): what the controller has entered in the system for each
         # aircraft (cleared level, speed, heading, direct). They do not move the aircraft - the pseudo-pilot does.
         self.entries: Dict[str, dict] = {}
+        self.multi = False                 # connected exercise (controller enters, pseudo-pilot flies)
+        self.start_utc_min = 720.0         # UTC time of day at T+0, minutes
+        self.mag_var = 0.0
         self.events: List[dict] = []
         self._seq = 0
         self._instr_seq = 0
@@ -180,8 +183,7 @@ class World:
                 raise InstructionError(f"unknown callsign {cs}")
             if ac.assumed:
                 raise InstructionError(f"{cs} is already assumed")
-            if not (ac.on_frequency or ac.released or ac.outside):
-                raise InstructionError(f"{cs} is not on your frequency yet (still with the previous sector)")
+            # any track can be assumed at any time (early / forced assume, taking it back after a decontrol)
             return {"type": "assume", "callsign": cs}
         if itype == "release":                       # the controller decontrols the aircraft (by hand)
             ac = self.aircraft.get(cs)
@@ -1325,7 +1327,7 @@ class World:
         out.sort(key=lambda c: c["time_to_los_s"])
         return out
 
-    ENTRY_FIELDS = ("cfl", "speed", "heading", "direct", "note")
+    ENTRY_FIELDS = ("cfl", "speed", "heading", "direct", "note", "wx")
 
     def enter(self, callsign: str, fields: dict, who: str = "atc") -> dict:
         """Controller's label input (connected mode): cleared level, speed, heading, direct, free note.
@@ -1353,6 +1355,10 @@ class World:
                 v = str(v).upper()
                 if v not in self.waypoints or v.startswith("@"):
                     raise InstructionError(f"unknown point {v}")
+            elif k == "wx":                       # weather deviation approved on the frequency: L / R / L20 / R15
+                v = str(v).upper().replace(" ", "")
+                if not re.match(r"^(L|R|Y|LR)?\d{0,3}$", v) or v == "":
+                    raise InstructionError("weather deviation: L, R, L20 (left up to 20 NM) or Y (either side)")
             elif k == "speed":
                 v = str(v).upper().replace(" ", "")
                 if not re.match(r"^(M0?\.?\d{2}|\d{3}(KT)?|S\d{3}|K\d{3}|SN|MIN|MAX)$", v):
@@ -1366,11 +1372,22 @@ class World:
         return e
 
     def state(self, trails: bool = False) -> dict:
+        from . import atctools
+        acs = [a.snapshot(trails) for a in self.aircraft.values() if a.active]
+        for d in acs:
+            a = self.aircraft[d["callsign"]]
+            nm = a.to_exit_nm(self.waypoints)
+            d["to_exit_nm"] = None if nm is None else round(nm, 1)
+            d["to_exit_s"] = None if nm is None or a.gs < 50 else round(nm / a.gs * 3600)
         return {
             "sim_time_s": round(self.t, 1),
+            "utc": atctools.utc(self),
+            "mtcd": atctools.mtcd(self),
+            "special": atctools.special_tracks(self),
+            "system_cfl": atctools.system_cfls(self),
             "duration_s": self.duration_s,
             "finished": self.finished,
-            "aircraft": [a.snapshot(trails) for a in self.aircraft.values() if a.active],
+            "aircraft": acs,
             "transferred": [a.snapshot(trails) for a in self.aircraft.values() if a.outside],
             "inbound": self.inbound(),
             "pending_requests": self.requests_list("pending"),

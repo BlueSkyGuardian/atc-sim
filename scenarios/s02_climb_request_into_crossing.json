@@ -90,6 +90,18 @@
           0.0
         ],
         "time": 600
+      },
+      "dep": "EIDW",
+      "dest": "DNMM",
+      "fpl": {
+        "ssr": "3216",
+        "reg": "CN-RWZ",
+        "code": "020F15",
+        "eobt": "0602",
+        "altn": "DIAP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 173
       }
     },
     {
@@ -106,6 +118,19 @@
           0.0
         ],
         "time": 600
+      },
+      "dep": "EBBR",
+      "dest": "GMAD",
+      "fpl": {
+        "ssr": "3657",
+        "reg": "F-GMPX",
+        "code": "38A51E",
+        "eobt": "0734",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 126,
+        "rmk": "TCAS"
       }
     },
     {
@@ -122,6 +147,18 @@
           0.0
         ],
         "time": 615
+      },
+      "dep": "EDDM",
+      "dest": "GVAC",
+      "fpl": {
+        "ssr": "5627",
+        "reg": "G-EYBD",
+        "code": "428FBE",
+        "eobt": "0739",
+        "altn": "GOBD",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EASYJET",
+        "pob": 153
       }
     }
   ],
@@ -147,5 +184,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "10:00"
 }

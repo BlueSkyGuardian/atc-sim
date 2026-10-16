@@ -57,6 +57,7 @@ from .geometry import (
 )
 from .model import AREA_KINDS, Area
 from . import routing
+from . import flightplan
 from .weather import Weather
 from .world import World
 
@@ -230,6 +231,7 @@ def build_world(scn: dict) -> World:
     seqfixes = {k: v for k, v in seqfixes.items() if k in asp.boundary_points}
     pre_entry_nm = float(scn.get("pre_entry_nm", 30.0))     # aircraft appear this far before their entry point
     checkin_nm = float(scn.get("checkin_nm", 10.0))         # and call on frequency this far before it
+    start_min = flightplan.parse_hhmm(scn.get("start_utc"), 12 * 60)   # UTC time of day at T+0 (flight plans, ETOs)
     aircraft: List[Aircraft] = []
     seen = set()
     for i, a in enumerate(scn.get("aircraft", [])):
@@ -401,7 +403,20 @@ def build_world(scn: dict) -> World:
         }
         ac.route_after = after_exit
         ac.route_before = [w for w in filed[:filed.index(route[0])] if w in waypoints] if route[0] in filed else []
+        ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints)
+        ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
         aircraft.append(ac)
+
+    # SSR codes: one per flight (the code correlates the track with its flight plan)
+    used = set()
+    for ac in aircraft:
+        code = ac.flight_plan.get("ssr", "2000")
+        while code in used or code in ("2000", "7000", "7500", "7600", "7700", "1200"):
+            code = f"{(int(code, 8) + 1) % 0o10000:04o}"
+        used.add(code)
+        if code != ac.flight_plan.get("ssr"):
+            ac.flight_plan["ssr"] = code
+            ac.flight_plan["message"] = flightplan.message(ac.flight_plan)
 
     areas: List[Area] = []
     for a in scn.get("areas", []):
@@ -472,6 +487,10 @@ def build_world(scn: dict) -> World:
               duration_s=float(scn.get("duration_s", 1800)), pilot_delay_s=float(scn.get("pilot_delay_s", 4)),
               lower_fl=lower_fl, upper_fl=upper_fl, aerodromes=aerodromes, seq=seqfixes, events=events)
     w.persist_s = float(scn.get("post_exit_display_s", 240.0))
+    w.start_utc_min = start_min
+    w.mag_var = float(scn.get("magnetic_variation", -1.0 if asp.projection is not None else 0.0))
+    for ac in aircraft:
+        ac.mag_var = w.mag_var
     w.auto_assume = bool(scn.get("auto_assume", False))
     # horizontal radar separation: the scenario's own, else the airspace's (Agadir CTA 7 NM), else 5 NM
     sep = scn.get("separation") or {}

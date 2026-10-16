@@ -21,6 +21,17 @@
           0.0
         ],
         "time": 660
+      },
+      "dep": "EIDW",
+      "fpl": {
+        "ssr": "5266",
+        "reg": "CN-RBE",
+        "code": "0203F7",
+        "eobt": "1049",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 178
       }
     },
     {
@@ -37,6 +48,18 @@
           0.0
         ],
         "time": 660
+      },
+      "dep": "EHAM",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "2365",
+        "reg": "F-GJHK",
+        "code": "3A66C7",
+        "eobt": "0726",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 162
       }
     },
     {
@@ -48,7 +71,18 @@
       ],
       "fl": 370,
       "load": 0.4,
-      "entry_time": 180
+      "entry_time": 180,
+      "dep": "LFPG",
+      "fpl": {
+        "ssr": "5467",
+        "reg": "D-AZZN",
+        "code": "3D173B",
+        "eobt": "1052",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 222
+      }
     }
   ],
   "requests": [],
@@ -59,5 +93,6 @@
     "naive_approve": {
       "los": true
     }
-  }
+  },
+  "start_utc": "14:00"
 }

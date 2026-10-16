@@ -90,7 +90,19 @@
         "S2"
       ],
       "fl": 370,
-      "entry_time": 60
+      "entry_time": 60,
+      "dep": "EHAM",
+      "dest": "GCLP",
+      "fpl": {
+        "ssr": "2041",
+        "reg": "N318VC",
+        "code": "AF4081",
+        "eobt": "1608",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "",
+        "pob": 178
+      }
     },
     {
       "callsign": "ETD33",
@@ -101,7 +113,19 @@
       ],
       "fl": 390,
       "load": 0.3,
-      "entry_time": 90
+      "entry_time": 90,
+      "dep": "EDDF",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "2332",
+        "reg": "A6-BQP",
+        "code": "896487",
+        "eobt": "1038",
+        "altn": "SBKP",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ETIHAD",
+        "pob": 217
+      }
     },
     {
       "callsign": "RAM330",
@@ -111,7 +135,19 @@
         "E2"
       ],
       "fl": 250,
-      "entry_time": 30
+      "entry_time": 30,
+      "dep": "LEBL",
+      "dest": "GOBD",
+      "fpl": {
+        "ssr": "3141",
+        "reg": "CN-RGG",
+        "code": "022153",
+        "eobt": "1425",
+        "altn": "GQNO",
+        "equipment": "SDE2FGHIRWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 70
+      }
     }
   ],
   "requests": [
@@ -139,5 +175,6 @@
       "los": false,
       "infringement": true
     }
-  }
+  },
+  "start_utc": "18:00"
 }

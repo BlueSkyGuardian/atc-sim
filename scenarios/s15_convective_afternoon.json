@@ -102,7 +102,19 @@
         "S3"
       ],
       "fl": 370,
-      "entry_time": 0
+      "entry_time": 0,
+      "dep": "EIDW",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "4152",
+        "reg": "CN-RGP",
+        "code": "020FA4",
+        "eobt": "0323",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 156
+      }
     },
     {
       "callsign": "AFR77",
@@ -112,7 +124,19 @@
         "E2"
       ],
       "fl": 350,
-      "entry_time": 60
+      "entry_time": 60,
+      "dep": "LFPG",
+      "dest": "DIAP",
+      "fpl": {
+        "ssr": "4127",
+        "reg": "F-GLQB",
+        "code": "3907A3",
+        "eobt": "0827",
+        "altn": "GLRB",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR FRANCE",
+        "pob": 139
+      }
     },
     {
       "callsign": "DLH2T",
@@ -123,7 +147,20 @@
       ],
       "fl": 370,
       "load": 0.35,
-      "entry_time": 90
+      "entry_time": 90,
+      "dep": "EIDW",
+      "dest": "GOBD",
+      "fpl": {
+        "ssr": "4536",
+        "reg": "D-AHJJ",
+        "code": "3E336C",
+        "eobt": "0943",
+        "altn": "GQNO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 157,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "IBE12",
@@ -133,7 +170,19 @@
         "N4"
       ],
       "fl": 340,
-      "entry_time": 150
+      "entry_time": 150,
+      "dep": "GCLP",
+      "dest": "EGKK",
+      "fpl": {
+        "ssr": "3600",
+        "reg": "EC-MUD",
+        "code": "37675C",
+        "eobt": "0947",
+        "altn": "EGLL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA",
+        "pob": 123
+      }
     },
     {
       "callsign": "EZY8K",
@@ -143,7 +192,20 @@
         "S1"
       ],
       "fl": 390,
-      "entry_time": 220
+      "entry_time": 220,
+      "dep": "LSZH",
+      "dest": "DIAP",
+      "fpl": {
+        "ssr": "4416",
+        "reg": "G-EEPA",
+        "code": "409729",
+        "eobt": "0910",
+        "altn": "GLRB",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EASYJET",
+        "pob": 97,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "UAE8",
@@ -154,7 +216,18 @@
       ],
       "fl": 340,
       "load": 0.4,
-      "entry_time": 280
+      "entry_time": 280,
+      "dep": "GCLP",
+      "fpl": {
+        "ssr": "2064",
+        "reg": "A6-ENF",
+        "code": "8964C1",
+        "eobt": "0939",
+        "altn": "",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EMIRATES",
+        "pob": 264
+      }
     },
     {
       "callsign": "TAP15",
@@ -165,7 +238,19 @@
       ],
       "fl": 400,
       "load": 0.35,
-      "entry_time": 330
+      "entry_time": 330,
+      "dep": "GMAD",
+      "dest": "EHAM",
+      "fpl": {
+        "ssr": "4351",
+        "reg": "CS-TRE",
+        "code": "491568",
+        "eobt": "0944",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 214
+      }
     },
     {
       "callsign": "RYR4",
@@ -175,7 +260,19 @@
         "S4"
       ],
       "fl": 350,
-      "entry_time": 420
+      "entry_time": 420,
+      "dep": "LEBL",
+      "fpl": {
+        "ssr": "4665",
+        "reg": "EI-BNR",
+        "code": "4CAA6F",
+        "eobt": "1102",
+        "altn": "",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "RYANAIR",
+        "pob": 171,
+        "rmk": "TCAS"
+      }
     },
     {
       "callsign": "KLM3",
@@ -186,7 +283,19 @@
       ],
       "fl": 360,
       "load": 0.35,
-      "entry_time": 500
+      "entry_time": 500,
+      "dep": "GMAD",
+      "dest": "EHAM",
+      "fpl": {
+        "ssr": "3325",
+        "reg": "PH-LRN",
+        "code": "485F17",
+        "eobt": "1022",
+        "altn": "EBBR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "KLM",
+        "pob": 220
+      }
     },
     {
       "callsign": "SVA9",
@@ -197,7 +306,19 @@
       ],
       "fl": 380,
       "load": 0.35,
-      "entry_time": 580
+      "entry_time": 580,
+      "dep": "GOBD",
+      "dest": "EGLL",
+      "fpl": {
+        "ssr": "5020",
+        "reg": "HZ-ANL",
+        "code": "717E32",
+        "eobt": "0832",
+        "altn": "EGKK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "SAUDIA",
+        "pob": 223
+      }
     },
     {
       "callsign": "CNTKB",
@@ -207,7 +328,18 @@
         "E1"
       ],
       "fl": 410,
-      "entry_time": 650
+      "entry_time": 650,
+      "dep": "EHAM",
+      "fpl": {
+        "ssr": "2201",
+        "reg": "CN-TKB",
+        "code": "0201C4",
+        "eobt": "1014",
+        "altn": "",
+        "equipment": "SDE2FGHIRWY/S",
+        "opr": "",
+        "pob": 12
+      }
     },
     {
       "callsign": "JAF4",
@@ -217,7 +349,19 @@
         "N1"
       ],
       "fl": 340,
-      "entry_time": 700
+      "entry_time": 700,
+      "dep": "GCTS",
+      "dest": "EBBR",
+      "fpl": {
+        "ssr": "4765",
+        "reg": "OO-JZZ",
+        "code": "449771",
+        "eobt": "1034",
+        "altn": "EHAM",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TUI FLY BELGIUM",
+        "pob": 145
+      }
     }
   ],
   "requests": [],
@@ -228,5 +372,6 @@
     "passive": {
       "allow_left_sector": true
     }
-  }
+  },
+  "start_utc": "12:00"
 }

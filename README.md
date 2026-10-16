@@ -43,20 +43,57 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     the pseudo-pilot's aircraft panel and command line, the telephone as any unit. **End exercise** closes it for
     everybody and produces the recording.
 - **Controller** (seat *atc*): only the radar. The toolbar changes the view only: weather product and level, cloud
-  tops, areas, routes, RAD, sector borders, sector names/frequencies, point names, trails, RBL, reset view.
-  - **Assume** a calling aircraft (blinking, *CALL*) by double-click or from its label.
-  - **Click a label** to enter what was cleared: CFL (with quick levels), speed (M78, 280, SN), heading, direct
-    (points of the route or any point), a free note. This is what the label then shows. The aircraft does not move:
-    the pseudo-pilot flies what was said on the frequency. When the level the aircraft actually selected differs
-    from the controller's CFL it appears in amber after the CFL (`S300`), as Mode S selected level does, so a wrong
-    readback or execution is visible.
-  - **Label line 3:** ground speed, speed and heading. A value being changed shows current›assigned in a highlight
-    colour (`M78›76`, `127›250`) until the aircraft reaches it; then only the assigned value (`M76`, `H250`). On the
-    controller's seat "assigned" is what the controller entered; elsewhere it is what the aircraft was told.
-  - **Long press** on a label (or an aircraft): its route from the present position, every point with the minutes to
-    it, in a bright colour, while held and 4 s after.
-  - **RBL** between two aircraft, an aircraft and any point of the map (snapped to a fix when close to one), or two
-    points. A point stands still: the CPA is the aircraft's closest approach to it.
+  tops, areas, routes, RAD, sector borders, sector names/frequencies, point names, trails, RBL, reset view, the
+  flight-plan list (**FPL**), the **MTCD** list, **?** (shortcuts) and the UTC clock.
+  - **Assume any track, any time:** a calling aircraft (blinking, *CALL*), one still with the previous sector (early
+    assume; it then calls already assumed), or one decontrolled earlier. Double-click it, ASSUME in its label menu,
+    or key **A**. **Decontrol** (label menu, key **X**, `CS REL`) and take back as often as needed.
+  - **Click a label** to enter what was cleared: CFL (with quick levels, coloured by the level probe: green = no
+    conflict in 20 min, red = conflict, hover for which), speed (M78, 280, SN), heading, direct (points of the route
+    or any point), **weather deviation** (L, R, L20, either side) and a free note; **Probe** checks the level / heading
+    / direct typed before giving it. This is what the label then shows. The aircraft does not move: the pseudo-pilot
+    flies what was said on the frequency.
+  - **System cleared level:** the CFL on the label is the one the system knows: what the controller entered, or
+    else the coordinated level. When the level the aircraft has selected differs it appears in amber after it
+    (`S300`) — only for aircraft with Mode S enhanced surveillance, as on a real system.
+  - **Label line 3:** ground speed, speed, the **present heading (always)** and the next point of the route (or the
+    direct entered). A speed or heading being changed shows current›assigned in a highlight colour (`M78›76`,
+    `127›250`). An assigned heading adds a yellow **H**, an approved weather deviation a yellow **WX** (`WXL20`).
+    On the controller's seat these come only from what the controller entered — a pilot on a heading or deviating
+    by himself shows nothing until the controller enters it (the route-deviation alert then shows). Elsewhere they
+    are what the aircraft is doing.
+  - **Line above the callsign — special tracks and alerts (visual only):** `NRVSM` (amber inside FL290–410), `MIL`,
+    `NSL` non-standard level (against the semicircular rule, or not a flight level), `RDEV` route deviation (more than
+    3 NM from the flight-plan route, or not flying the direct entered, with no heading / WX entered), `LVL` level bust
+    (leaving the cleared level, or levelled more than 300 ft from it; red, flashing), and `MTC7'` medium-term conflict
+    in 7 minutes.
+  - **Transfer cues:** inbound traffic still with the previous sector in its own colour with *entry point
+    ←previous unit*; calling in white, blinking, *CALL*; assumed in green; **3 minutes before the exit** a chevron
+    ahead of the symbol and *XFR →next unit* (LPPC, GCCC, LECS, GMMM, MADEIRA, or the Agadir sector not controlled);
+    after the exit, still assumed, *DECONTROL →unit* blinking; decontrolled in grey with the next unit.
+  - **Extended label:** hover a label (or middle-click / key **E** to pin it, Shift+E for all): SSR code,
+    registration, type / wake, surveillance, departure → destination, requested level, next unit, and the **Mode S
+    downlinked parameters** when the aircraft has enhanced surveillance (selected level, magnetic heading, IAS, Mach,
+    TAS, ground speed, track, vertical rate, roll, track rate, pressure setting, 24-bit address). Elementary
+    surveillance gives the address only; Mode A/C transponders nothing more.
+  - **Flight plans** (key **F** for the selected aircraft, **G** or *FPL* for the list): every flight has an ICAO flight
+    plan, correlated with its track by the SSR code and the Mode S address. The window shows the FPL message, the
+    decoded items, the coordination (entry point, ETO, level, from which unit; exit point, ETO, level, to which unit)
+    and the estimates over the points ahead. The list holds every flight of the session (planned, inbound, calling,
+    assumed, transferred) with filters.
+  - **MTCD** (key **M**): medium-term conflict detection over 20 minutes, from the system trajectories (the
+    flight-plan route, or the heading / direct entered, at the system cleared level), so it warns long before the
+    STCA. Click a conflict (or select one of the aircraft) to see where both will be when it starts. The aircraft
+    gets a violet diamond and `MTCn'` in its label.
+  - **Long press** on a label (or an aircraft, or key **R**): its flight-plan route from the present position — also
+    while vectored or deviating, with the heading line — every point with the minutes to it.
+  - **RBL:** right-drag from an aircraft or any point to another (no button needed; points snap to a fix), or
+    shift-click two, or the RBL button. A point stands still: the CPA is the aircraft's closest approach to it. Drag
+    an RBL label to move it; right-click it to remove it.
+  - **Keyboard** (outside text fields): Tab / Shift+Tab next aircraft, C or L cleared level, H heading, S speed,
+    D direct, W weather deviation, N note, A assume, X decontrol, F flight plan, E extended label, R route, B RBL
+    from it, Delete last RBL (Shift+Delete all), G flight list, M MTCD, + / − zoom, arrows pan, 0 reset, Esc,
+    ? help; Space (held) transmits.
   - **⚙ Display:** zoom, label font, point-name font, aircraft symbol, speed vector length, history dots, weather
     opacity, and the colours of the scope (background, boundaries, sector lines, airways, RAD, points, aerodromes…),
     of each aircraft state (assumed, calling, not concerned, handed off, selected, STCA, loss) and of each label line
@@ -68,8 +105,7 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     **DECONTROL**, or `CS REL`); it then turns grey as another sector's traffic and leaves the picture once well
     clear. Decontrolling earlier, inside the sector, is possible too. The pseudo-pilot keeps flying the aircraft
     either way (headings, levels, speeds from the next sector), with level limits FL50–FL600 once it is gone.
-  - STCA (3 min) and loss-of-separation alarms; no medium-term conflict list, no pilot request list: requests come
-    by voice.
+  - STCA (3 min) and loss-of-separation alarms; no pilot request list: requests come by voice.
 - **Pseudo-pilot** (seat *pilot*): the radar and a workspace in three parts.
   - **To do:** what to say on the frequency, oldest first: first calls (*“RAM101 FL350, checking in”*, until the
     controller assumes) and pilot requests or reports to read out, with **Approved** (the aircraft does it) /
@@ -120,7 +156,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   boxes, push-to-talk; the mouse 20 times a second; every click and what was clicked) over the voice connection,
   and the server keeps the traffic every second and all audio. When the exercise ends, the server renders one
   **.mp4 per controller** (their scope size up to 1600 px wide, 10 frames/s, H.264 + AAC): the traffic exactly as
-  their seat showed it (their entered CFL / speed / heading / direct, Mode S level in amber), their panels, the
+  their seat showed it (every label as drawn, extended labels, alert and transfer tags, RBLs where they put them),
+  their panels and windows (flight plans, MTCD, display menu), the
   mouse pointer with click rings, a caption log of their actions (assume, label entries, buttons, transmissions,
   calls), and the audio they heard and said (the frequency and their own telephone calls). An hour takes about
   10 minutes to render. Without a controller connected, a plain radar overview is rendered instead. The videos
@@ -136,12 +173,12 @@ microphone needs HTTPS (or `localhost`).
 - **What's drawn:** sector lines with frequencies, airways (solid), RAD routings (dashed, toggled with the RAD box),
   and transfer points (filled triangles).
 - **Traffic:** transferred aircraft stay grey for a few minutes. There are no range rings.
-- **RBL tool:** click **RBL** and then two aircraft (or shift-click two aircraft) to draw a range and bearing line.
+- **RBL tool:** right-drag between two aircraft or points, shift-click two, or click **RBL** then two, to draw a range and bearing line.
   - Its label shows the bearing, the current distance and ΔFL, then the CPA distance and the time to CPA.
   - Both aircraft's projected positions at CPA are drawn as circles, joined to the aircraft by dashed lines.
   - The CPA comes from straight-line extrapolation of the present track and ground speed.
   - The line turns red when the CPA is below the horizontal minimum (5 or 7 NM) and the vertical gap is below the applicable minimum.
-  - Right-click a label to remove that line; Esc cancels; **Clear RBLs** removes all.
+  - Drag a label to move it; right-click it to remove that line; Esc cancels; **✕ RBL** removes all.
 - **Alarms** (top of the scope): a flashing red **LOSS OF SEPARATION** banner per pair below the minimum (distance,
   vertical, and the minimum that applies), and an amber **STCA** banner per pair predicted to lose separation within
   3 minutes. Click a banner to select the aircraft. A sound for each new alarm can be switched on (off by default).
@@ -474,18 +511,29 @@ scripted) assume on first contact. Losses, area infringements and weather penetr
 - **Formations:** `"formation": {"size": 4, "types": "4xF16", "extent_nm": 1}`. Only the leader is shown, labelled
   `VIPER11 x4 … F16 MIL NRVSM`.
 
-### Flight plan
-Every aircraft has a `flight_plan` with these fields:
-- callsign, type, wake category, flight type (S or M);
-- departure and destination;
-- cruise level and speed;
-- the ICAO route string (e.g. `KORNO UN857 TERTO`, `BEXAL DCT IBALU DCT SALCA`);
-- equipment and RVSM status;
-- formation and remarks (e.g. `STS/STATE`).
+### Flight plan (`atcsim/flightplan.py`)
+Every aircraft has a complete ICAO flight plan, correlated with its radar track by the SSR code (unique in the
+session) and the Mode S address:
+- item 7 callsign and SSR code; 8 flight rules and type of flight (S scheduled, N charter, G general aviation,
+  M military); 9 number (formations), type, wake; 10 equipment and surveillance;
+- 13 departure and EOBT; 15 speed, requested level and the ICAO route (e.g. `KORNO UN857 TERTO`, `BEXAL DCT IBALU
+  DCT SALCA`) over the sector and the neighbouring ones; 16 destination, total EET, alternate;
+- 18 STS, PBN, DOF, REG, EET at the FIR boundaries, SEL, CODE (Mode S address), OPR, PER, TYP, RMK;
+  19 endurance, persons on board.
+EOBT and EETs are worked out so that the flight is at its entry point at the planned time (great-circle distances
+from the aerodromes, present speed). The UTC clock of the session starts at the scenario's `start_utc` (12:00 by
+default). Each flight also knows the unit it comes from and the one it goes to (the Agadir sector not controlled,
+or Lisboa, Madeira, Sevilla, Canarias, Casablanca, by the points of its route), shown in labels, flight plans and
+the coordination. The surveillance part of item 10 decides what the radar gets: `L`/`H` = Mode S enhanced
+surveillance (downlinked parameters), `S`/`E`/`P`/`I`/`X` = elementary (address only), `A`/`C` = Mode A/C only.
 
-Scenario keys: `dep`, `dest`, `rvsm`, `military`, `formation`, `equipment`, `remarks`. Arrivals take their
-destination from the sequencing fix. The radar shows the destination in the label and the whole flight plan in
-the selected-aircraft panel.
+Scenario keys: `dep`, `dest`, `rvsm`, `military`, `formation`, `equipment`, `remarks`, and `"fpl": {"ssr", "reg",
+"code", "eobt", "altn", "equipment", "opr", "pob", "rmk", "sts", "pbn"}`. Whatever is missing is generated
+(deterministic from the callsign: operator, registration and Mode S block by country, type of flight, equipment by
+type and operator). Every scenario of the library carries its flight plans (`python -m tools.fill_flightplans`
+writes them; `tools/build_scenarios.py` does it after generating); the designer edits them in the *Flight plan* part
+of the selected aircraft and the scenario's start time in the Scenario tab. Arrivals take their destination from the
+sequencing fix.
 
 ---
 
@@ -502,6 +550,8 @@ the selected-aircraft panel.
 | GET | `/sessions/{id}/state` · `/positions` · `/aircraft/{cs}` | Picture. Aircraft detail includes performance at present weight and the weather phase |
 | GET | `/sessions/{id}/separation` | Current pairs and **predicted** conflicts, area infringements and **weather penetrations** |
 | POST | `/sessions/{id}/probe` | What-if for candidate instructions (including replies to requests); changes nothing |
+| GET / POST | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories (20 min) / probe one aircraft: `{"callsign", "cfl"\|"heading"\|"direct"}` or `{"callsign", "levels": [...]}` |
+| GET | `/sessions/{id}/flightplans` · `/flightplans/{cs}` | Every flight plan / one: FPL message, decoded items, estimates over the points ahead, coordination, correlation |
 | POST | `/sessions/{id}/instructions` · `/command` | Issue instructions / controller shorthand |
 | GET | `/sessions/{id}/requests` · `/events` · `/metrics` · `/instructions` | Logs and scores |
 | GET / PATCH | `/sessions/{id}/areas[/{id}]` | Area status / manual activation |
@@ -734,7 +784,7 @@ baseline on track miles, fuel, instruction count, response time and approving mo
 - **Performance data:** OpenAP plus calibration gives realistic, consistent magnitudes per type, but it is not manufacturer data.
 - **Pilot model:** pilots are deterministic. There is no variability in reaction time or deviation choice, and no reports of the weather they see.
 - **Radar display:** no radar position noise or attenuation.
-- **Agadir:** headings are grid/true, not magnetic. The letters of agreement are placeholders. Below FL195 (class G) is not simulated. Sector lines through the two chart junctions are accurate to about 1 NM.
+- **Agadir:** headings are grid/true, not magnetic (the Mode S magnetic heading applies a fixed variation, `magnetic_variation`, default 1° W). The letters of agreement are placeholders. Below FL195 (class G) is not simulated. Sector lines through the two chart junctions are accurate to about 1 NM.
 - **Weather lifecycle:** storm life cycles are scripted from the seed rather than produced by a numerical weather model, so storms don't react to each other.
 - **Radio:** two people can transmit at the same time and both are heard (no blocked transmissions). Mic levels are whatever the browser's automatic gain gives.
 - **Recording:** the controller video re-draws the screen from what the browser reported, so it matches the page closely but is not a pixel copy (fonts, emoji); weather echo-top and turbulence products appear as reflectivity.
@@ -779,6 +829,11 @@ atcsim/static/login.html, profile.html, admin.html
 tests/test_platform.py           accounts, rights, voice relay, recording (python -m tests.test_platform)
 tests/e2e_platform.py            three browsers with fake microphones through a whole exercise
 tests/test_stats.py              evaluations both ways, acknowledgement, statistics
+tests/test_atctools.py           flight plans, MTCD and probe, special-track alerts, early assume
+atcsim/flightplan.py             ICAO flight plans (generator, message, items), surveillance and Mode S data
+atcsim/atctools.py               MTCD and probe, special tracks / monitoring alerts, flight-plan list and estimates
+atcsim/static/atctools.js        flight-plan window and list, MTCD list and display, keyboard shortcuts, UTC clock
+tools/fill_flightplans.py        writes complete flight plans into the scenario files
 atcsim/platform/stats.py         evaluations and statistics API, /stats page
 atcsim/static/stats.html, vendor/chart.umd.min.js   statistics charts (Chart.js 4.4.1, MIT)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)

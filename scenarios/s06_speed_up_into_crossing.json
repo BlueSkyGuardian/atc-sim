@@ -69,6 +69,18 @@
           0.0
         ],
         "time": 640
+      },
+      "dep": "EGKK",
+      "dest": "GMMN",
+      "fpl": {
+        "ssr": "4024",
+        "reg": "PH-DDK",
+        "code": "483F21",
+        "eobt": "1325",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 152
       }
     },
     {
@@ -87,6 +99,18 @@
           0.0
         ],
         "time": 700
+      },
+      "dep": "LSZH",
+      "dest": "GOBD",
+      "fpl": {
+        "ssr": "4446",
+        "reg": "EC-TRB",
+        "code": "3602EA",
+        "eobt": "1257",
+        "altn": "GQNO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA",
+        "pob": 160
       }
     },
     {
@@ -98,7 +122,19 @@
       ],
       "fl": 400,
       "load": 0.3,
-      "entry_time": 100
+      "entry_time": 100,
+      "dep": "GCLP",
+      "dest": "EHAM",
+      "fpl": {
+        "ssr": "4410",
+        "reg": "G-MBQE",
+        "code": "4189E9",
+        "eobt": "1331",
+        "altn": "EBBR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRITISH AIRWAYS",
+        "pob": 219
+      }
     }
   ],
   "requests": [
@@ -130,5 +166,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "15:00"
 }

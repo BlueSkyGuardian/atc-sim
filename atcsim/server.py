@@ -402,6 +402,7 @@ class Entry(BaseModel):
     heading: Optional[Union[int, str]] = None
     direct: Optional[str] = None
     note: Optional[str] = None
+    wx: Optional[str] = None
 
 
 @app.post("/sessions/{sid}/entries")
@@ -417,6 +418,57 @@ def entries(sid: str, body: Entry, request: Request):
             return s.world.enter(body.callsign, fields, who=pex.db.public_user(u)["name"] if u["id"] else "atc")
         except (InstructionError, ValueError) as e:
             raise HTTPException(400, str(e))
+
+
+class MtcdProbe(BaseModel):
+    callsign: str
+    cfl: Optional[int] = None
+    heading: Optional[int] = None
+    direct: Optional[str] = None
+    levels: Optional[List[int]] = None
+
+
+@app.get("/sessions/{sid}/mtcd")
+def mtcd_list(sid: str):
+    """Medium-term conflict detection: conflicts between the system trajectories over the next 20 minutes."""
+    from . import atctools
+    s = _session(sid)
+    with s.lock:
+        return {"utc": atctools.utc(s.world), "look_ahead_s": atctools.MTCD_LOOK_S, "conflicts": atctools.mtcd(s.world)}
+
+
+@app.post("/sessions/{sid}/mtcd")
+def mtcd_probe(sid: str, body: MtcdProbe):
+    """What-if probe for one aircraft: conflicts with another cleared level, heading or direct (20 minutes);
+    "levels": [...] checks a list of levels at once (the label menu colours them)."""
+    from . import atctools
+    s = _session(sid)
+    with s.lock:
+        try:
+            return atctools.probe(s.world, body.callsign, body.cfl, body.heading, body.direct, body.levels)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+
+@app.get("/sessions/{sid}/flightplans")
+def flightplans(sid: str):
+    """Every flight plan of the session (planned, inbound, on frequency, transferred)."""
+    from . import atctools
+    s = _session(sid)
+    with s.lock:
+        return {"utc": atctools.utc(s.world), "flights": atctools.flight_list(s.world)}
+
+
+@app.get("/sessions/{sid}/flightplans/{callsign}")
+def flightplan_one(sid: str, callsign: str):
+    """One flight plan: the ICAO FPL message, decoded items, estimates over the points ahead, coordination."""
+    from . import atctools
+    s = _session(sid)
+    with s.lock:
+        try:
+            return atctools.flight_detail(s.world, callsign)
+        except KeyError:
+            raise HTTPException(404, f"no flight plan for {callsign}")
 
 
 @app.post("/sessions/{sid}/release/{callsign}")

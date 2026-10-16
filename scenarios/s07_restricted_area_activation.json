@@ -151,7 +151,19 @@
         "E2"
       ],
       "fl": 350,
-      "entry_time": 200
+      "entry_time": 200,
+      "dep": "LEBL",
+      "dest": "GOBD",
+      "fpl": {
+        "ssr": "5201",
+        "reg": "9H-AKJ",
+        "code": "4D20F5",
+        "eobt": "1337",
+        "altn": "GQNO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR MALTA",
+        "pob": 160
+      }
     },
     {
       "callsign": "JAF412",
@@ -167,6 +179,18 @@
           46.4
         ],
         "time": 420
+      },
+      "dep": "EBBR",
+      "dest": "GMMN",
+      "fpl": {
+        "ssr": "2323",
+        "reg": "OO-JBS",
+        "code": "44C0C6",
+        "eobt": "1516",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TUI FLY BELGIUM",
+        "pob": 162
       }
     },
     {
@@ -177,7 +201,19 @@
         "N1"
       ],
       "fl": 380,
-      "entry_time": 250
+      "entry_time": 250,
+      "dep": "GMMX",
+      "dest": "EDDM",
+      "fpl": {
+        "ssr": "2212",
+        "reg": "CN-REY",
+        "code": "023B44",
+        "eobt": "1445",
+        "altn": "LSZH",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 201
+      }
     }
   ],
   "requests": [],
@@ -190,5 +226,6 @@
       "los": false,
       "infringement": true
     }
-  }
+  },
+  "start_utc": "17:00"
 }

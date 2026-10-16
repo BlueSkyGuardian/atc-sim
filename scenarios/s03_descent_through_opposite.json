@@ -70,6 +70,18 @@
           0.0
         ],
         "time": 600
+      },
+      "dep": "EGLL",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "2620",
+        "reg": "D-AWZW",
+        "code": "3F7D8C",
+        "eobt": "2341",
+        "altn": "SBKP",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 180
       }
     },
     {
@@ -86,6 +98,18 @@
           0.0
         ],
         "time": 600
+      },
+      "dep": "GVAC",
+      "dest": "EBBR",
+      "fpl": {
+        "ssr": "2771",
+        "reg": "CN-RVK",
+        "code": "023750",
+        "eobt": "0422",
+        "altn": "EHAM",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 164
       }
     },
     {
@@ -96,7 +120,19 @@
         "E2"
       ],
       "fl": 330,
-      "entry_time": 700
+      "entry_time": 700,
+      "dep": "EGLL",
+      "dest": "GCTS",
+      "fpl": {
+        "ssr": "5600",
+        "reg": "PH-NXP",
+        "code": "487D3D",
+        "eobt": "0643",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 126
+      }
     }
   ],
   "requests": [
@@ -121,5 +157,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "08:00"
 }

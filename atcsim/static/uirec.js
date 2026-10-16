@@ -56,7 +56,7 @@
         } else if (n.nodeType === 1) walk(n);
       }
     }
-    for (const sel of ['#viewbar', '#hud', '#alerts', '#pauseBanner', '#ptt', '#phoneBtn', '#phonePanel', '#callHud', '#lblMenu'])
+    for (const sel of ['#viewbar', '#hud', '#alerts', '#pauseBanner', '#ptt', '#phoneBtn', '#phonePanel', '#callHud', '#lblMenu', '#wins', '#dispPanel'])
       walk(document.querySelector(sel));
     return out;
   }
@@ -65,7 +65,7 @@
     return { w: cv.clientWidth, h: cv.clientHeight, cx: +view.cx.toFixed(3), cy: +view.cy.toFixed(3), s: +(view.s / devicePixelRatio).toFixed(5),
       V: { ...V }, wx: [$('#wxMode').value, $('#wxMode').value === 'sel' ? selFl() : (+$('#wxFl').value || 350), $('#wxCells').checked],
       lo: labelOff, sel: selected || null,
-      rbl: rbls.map(r => [r.a, r.b].map(t => typeof t === 'string' ? t : [+t.x.toFixed(2), +t.y.toFixed(2), t.name || ''])),
+      rbl: rbls.map(r => [r.a, r.b].map(t => typeof t === 'string' ? t : [+t.x.toFixed(2), +t.y.toFixed(2), t.name || '']).concat([[Math.round(r.ox || 0), Math.round(r.oy || 0)]])),
       rs: routeShow && routeShow.until > performance.now() ? routeShow.cs : null, th: TH };
   }
   function start() {
@@ -80,6 +80,15 @@
       const v = viewState(), sv = JSON.stringify(v); if (sv !== lastV) { lastV = sv; push('v', v); }
       const o = overlay(), so = JSON.stringify(o); if (so !== lastO) { lastO = so; push('o', o); }
     }, 200);
+    // the labels exactly as drawn (lines of [text, colour], extended labels, alert tags): changes only, every second
+    let lastL = {};
+    setInterval(() => {
+      const cur = window.__drawnLabels; if (!cur) return;
+      const diff = {}; let n = 0;
+      for (const [cs, v] of Object.entries(cur)) { const sv = JSON.stringify(v); if (lastL[cs] !== sv) { diff[cs] = v; lastL[cs] = sv; n++; } }
+      for (const cs of Object.keys(lastL)) if (!(cs in cur)) { diff[cs] = null; delete lastL[cs]; n++; }
+      if (n) push('L', diff);
+    }, 1000);
     setInterval(() => {
       const voice = window.__voice;
       if (!q.length || !voice || !voice.ws || voice.ws.readyState !== 1) return;

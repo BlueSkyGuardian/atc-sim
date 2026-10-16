@@ -87,6 +87,18 @@
       "reach": {
         "waypoint": "S2",
         "time": 1060
+      },
+      "dep": "EIDW",
+      "dest": "GMMN",
+      "fpl": {
+        "ssr": "5102",
+        "reg": "CN-RAB",
+        "code": "023EB3",
+        "eobt": "0921",
+        "altn": "GMME",
+        "equipment": "SDE2FGHIRWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 93
       }
     },
     {
@@ -100,6 +112,18 @@
       "reach": {
         "waypoint": "S2",
         "time": 1140
+      },
+      "dep": "LEBL",
+      "dest": "GCFV",
+      "fpl": {
+        "ssr": "3525",
+        "reg": "HZ-ABJ",
+        "code": "71105B",
+        "eobt": "0945",
+        "altn": "GCRR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "SAUDIA",
+        "pob": 121
       }
     },
     {
@@ -111,7 +135,19 @@
       ],
       "fl": 390,
       "load": 0.3,
-      "entry_time": 300
+      "entry_time": 300,
+      "dep": "EHAM",
+      "dest": "SBGR",
+      "fpl": {
+        "ssr": "2565",
+        "reg": "A6-ETY",
+        "code": "89694C",
+        "eobt": "0252",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EMIRATES",
+        "pob": 276
+      }
     }
   ],
   "requests": [
@@ -136,5 +172,6 @@
         ]
       ]
     }
-  }
+  },
+  "start_utc": "11:00"
 }

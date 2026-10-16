@@ -101,7 +101,18 @@
         "S4"
       ],
       "fl": 370,
-      "entry_time": 0
+      "entry_time": 0,
+      "dep": "EBBR",
+      "fpl": {
+        "ssr": "5043",
+        "reg": "CN-RFN",
+        "code": "021772",
+        "eobt": "1409",
+        "altn": "",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 128
+      }
     },
     {
       "callsign": "IBE45",
@@ -117,6 +128,18 @@
           19.005
         ],
         "time": 335
+      },
+      "dep": "EGLL",
+      "dest": "DNMM",
+      "fpl": {
+        "ssr": "3770",
+        "reg": "EC-UZY",
+        "code": "36D5A0",
+        "eobt": "1233",
+        "altn": "DIAP",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "IBERIA",
+        "pob": 113
       }
     },
     {
@@ -127,7 +150,19 @@
         "W2"
       ],
       "fl": 350,
-      "entry_time": 120
+      "entry_time": 120,
+      "dep": "LFPG",
+      "dest": "GCLP",
+      "fpl": {
+        "ssr": "3517",
+        "reg": "F-HVYM",
+        "code": "3863DB",
+        "eobt": "1433",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 177
+      }
     }
   ],
   "requests": [],
@@ -189,5 +224,6 @@
         }
       ]
     }
-  ]
+  ],
+  "start_utc": "17:00"
 }
