@@ -149,6 +149,7 @@ class Renderer:
             {tuple(reversed(r)) for r in (self.sec.get("rad_routes") or [])}
         self._map_key, self._map = None, None
         self.sep_h = float(static.get("sep_h") or 5.0)
+        self.cops = set(self.sec.get("coordination_points") or [])
         self._wx_key, self._wx = None, None
 
     # ---------------------------------------------------------------- static map for a view
@@ -203,10 +204,14 @@ class Renderer:
                 if aw.get("one_way") and all(n in wp for n in p):
                     arrows(d, [vw.P(*wp[n]) for n in p], (58, 80, 104), 6 * k)
         ext, xfer = set(sec.get("external_points") or []), set(sec.get("transfer_points") or [])
+        cops = set(sec.get("coordination_points") or [])
         f = font(10.5 * k)
         for n, p in wp.items():
             x, y = vw.P(*p)
             if not (-20 < x < self.W + 20 and -20 < y < self.H + 20):
+                continue
+            if n in cops:                         # generated coordination point: a small tick, no name
+                d.line([(x - 3 * k, y), (x + 3 * k, y)], fill=(61, 85, 108))
                 continue
             if n in ext:
                 c = (65, 88, 110)
@@ -413,6 +418,9 @@ class Renderer:
             l1 = cs + (f" x{form}" if form else "") + ("  CALL" if calling else "")
             l2 = f"{fl:03d}{arrow}{shown_cfl if shown_cfl != fl else ''} {typ or ''}{' MIL' if mil else ''}"
             sfl = f" S{cfl}" if ecfl is not None and ecfl != cfl else ""
+            if nxt in self.cops:
+                rt = routes.get(cs, [])
+                nxt = next((n for n in rt[rt.index(nxt) + 1:] if n not in self.cops), "") if nxt in rt else ""
             l3 = f"{gs}" + (f" {espd}" if espd else "") + (f" H{int(ehdg):03d}" if ehdg else f" >{edct}" if edct else f" >{nxt or ''}")
             l4 = (f"→{dest}" if dest and dest != "ZZZZ" else "") if onf else f"prev sector → {entry or ''}"
             if onf and arr and arr[0] is not None:

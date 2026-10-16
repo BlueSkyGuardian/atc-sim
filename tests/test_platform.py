@@ -97,6 +97,13 @@ ok(r["status"] != "rejected", f"pilot executes before the controller assumed ({r
 ok(pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "assume"}).status_code == 403, "pilot cannot assume")
 r = atc.post(f"/sessions/{eid}/assume/{cs}"); print(r.text); ok(r.status_code == 200, "controller assumes")
 ok(pil.post(f"/sessions/{eid}/control", json={"action": "pause"}).status_code == 403, "pilot cannot pause")
+ok(pil.post(f"/sessions/{eid}/release/{cs}").status_code == 403, "pilot cannot decontrol")
+ok(atc.post(f"/sessions/{eid}/release/{cs}").status_code == 200, "controller decontrols by hand")
+snap = atc.get(f"/sessions/{eid}/aircraft/{cs}").json()
+ok(snap["released"] and not snap["assumed"] and "assignable_fl" in snap, "decontrolled; performance ranges served")
+r = pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "heading", "heading": 200}).json()[0]
+ok(r["status"] != "rejected", f"pilot still flies a decontrolled aircraft ({r.get('reason', r['status'])})")
+ok(atc.post(f"/sessions/{eid}/assume/{cs}").status_code == 200, "controller can assume it again")
 
 # dashboard data
 lst = ins.get("/api/exercises?pictures=true").json()

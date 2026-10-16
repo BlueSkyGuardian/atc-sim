@@ -226,6 +226,9 @@ def sector_description(w: Optional[World] = None) -> dict:
         "; grid north = true north on the central meridian, within about 2 deg elsewhere" if asp.projection else
         " (true)")
     d["separation_minima"] = minima(w)
+    # transfer points generated where a route crosses the boundary of the controlled sectors between two published
+    # points (e.g. CIBSA between IBLIV and SAMAR on an internal sector line): used internally, not drawn as points
+    d["coordination_points"] = sorted(getattr(asp, "cop_points", ()) or ())
     return {
         **d,
         "pilot_delay_s": w.pilot_delay_s if w else None,
@@ -276,7 +279,7 @@ class SessionManager:
 # --- free-text command parser (used by the radar page and POST /command) -------------
 _CMD_HELP = ("CALLSIGN then commands: FL360 [V1500] | H270 / L270 / R270 (turn left/right) | D S2 | "
              "M76 (Mach) | K280 (on conversion 280 kt) | S280 (280 kt now) | SN (resume normal speed) | DEV / DEVL20 / DEVR (weather deviation) | "
-             "RES | APP [Rxxx] | UNA [Rxxx] | ROG [Rxxx] (acknowledge a report) | AS (assume on first contact).  "
+             "RES | APP [Rxxx] | UNA [Rxxx] | ROG [Rxxx] (acknowledge a report) | AS (assume on first contact) | REL (decontrol).  "
              "e.g. 'RAM101 FL370 H250'")
 
 
@@ -315,6 +318,8 @@ def parse_command(text: str, world: World) -> List[dict]:
             i += 1; continue
         if tk in ("ASSUME", "AS", "ASS", "RC"):
             out.append({"callsign": cs, "type": "assume"}); i += 1; continue
+        if tk in ("REL", "RELEASE", "DECONTROL", "DECON"):
+            out.append({"callsign": cs, "type": "release"}); i += 1; continue
         if tk in ("SN", "RNS", "NORMAL"):
             out.append({"callsign": cs, "type": "speed", "resume_normal": True}); i += 1; continue
         m = re.fullmatch(r"(?:D|DCT)([A-Z]{1,5}\d*)", tk)

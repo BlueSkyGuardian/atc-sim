@@ -193,6 +193,8 @@ def _add_cops(names: List[str], asp, waypoints: Dict[str, tuple]) -> List[str]:
             cop = f"C{a.lstrip('@')[:2]}{b.lstrip('@')[:2]}" + (str(k + 1) if k else "")
             waypoints[cop] = p
             asp.boundary_points[cop] = p
+            if hasattr(asp, "cop_points"):
+                asp.cop_points.add(cop)
             out.append(cop)
         out.append(b)
     return out
@@ -202,6 +204,7 @@ def build_world(scn: dict) -> World:
     import copy as _copy
     asp = _copy.copy(_airspace_for(scn))           # per-world copy: coordination points are added to it
     asp.boundary_points = dict(asp.boundary_points)
+    asp.cop_points = set()                          # generated coordination points (not published points)
     asp.waypoints = dict(asp.waypoints)
     waypoints: Dict[str, tuple] = asp.waypoints
     for k, v in (scn.get("extra_waypoints") or {}).items():

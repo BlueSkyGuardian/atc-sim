@@ -25,7 +25,7 @@ SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
 WRITE_RIGHTS = {
     "pilot": (r"^/(instructions|command|probe)$",),
-    "atc": (r"^/(probe|entries|assume/[A-Z0-9]+)$",),
+    "atc": (r"^/(probe|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
 }
 
 

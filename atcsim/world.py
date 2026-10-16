@@ -15,7 +15,7 @@ import numpy as np
 from . import arrivals, pilot
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
-INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume")
+INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release")
 MAX_EVENTS = 20000
 PREDICT_DT = 4.0
 
@@ -174,13 +174,26 @@ class World:
         if itype not in INSTRUCTION_TYPES:
             raise InstructionError(f"unknown instruction type '{itype}', expected one of {INSTRUCTION_TYPES}")
         cs = str(instr.get("callsign", "")).upper()
-        ac = self.get_active(cs)
-        if not ac.on_frequency:
+        if itype == "release":                       # the controller decontrols the aircraft (by hand)
+            ac = self.aircraft.get(cs)
+            if ac is None or not (ac.active or ac.outside):
+                raise InstructionError(f"unknown callsign {cs}")
+            if not ac.assumed:
+                raise InstructionError(f"{cs} is not under your control")
+            return {"type": "release", "callsign": cs}
+        ac = self.aircraft.get(cs)
+        if by_pilot and ac is not None and ac.outside:
+            pass                                     # gone to the next sector: the pseudo-pilot still flies it
+        else:
+            ac = self.get_active(cs)
+        if not ac.on_frequency and not by_pilot:
             d = dist(ac.pos, self.waypoints[ac.entry_wp])
             raise InstructionError(f"{cs} is not on your frequency yet (still with the previous sector, "
                                    f"{d:.0f} NM before {ac.entry_wp})")
         p = ac.perf
         out = {"type": itype, "callsign": cs}
+        if itype == "assume" and ac.outside:
+            raise InstructionError(f"{cs} has left the sector")
         if itype == "assume":
             if ac.assumed:
                 raise InstructionError(f"{cs} is already assumed")
@@ -197,8 +210,12 @@ class World:
             # arrivals: the LoA level is what is normally given, but a lower level can be coordinated with the next
             # sector (to avoid levelling off too long) - allowed down to FL100, with a reminder to coordinate
             low = ARRIVAL_FLOOR_FL                 # below the sector floor / LoA: allowed, with a reminder
-            if not (low <= fl <= self.upper_fl):
-                raise InstructionError(f"FL{fl} is outside the levels you can assign to {cs} (FL{low}-FL{self.upper_fl})")
+            if by_pilot and (ac.outside or ac.released or not ac.on_frequency):
+                low, top = 50, 600                 # another sector's instruction: any sensible level
+            else:
+                top = self.upper_fl
+            if not (low <= fl <= top):
+                raise InstructionError(f"FL{fl} is outside the levels you can assign to {cs} (FL{low}-FL{top})")
             climbing = fl * 100 > ac.alt_ft + 50
             if climbing:
                 mode, val = ac.speed_target(fl * 100.0)
@@ -373,13 +390,21 @@ class World:
             self._event("instruction_rejected", instruction_id=rec["id"], reason=str(e), request=instr)
             return rec
         rec["instruction"] = norm
-        if norm["type"] != "assume":
+        if norm["type"] not in ("assume", "release"):
             self.m["instructions_issued"] += 1
         cs = norm["callsign"]
 
         rec["warnings"] = self._warnings(norm)
         if rec["warnings"] and norm["type"] == "altitude":
             self.m["wrong_direction_clearances"] += sum(1 for x in rec["warnings"] if "direction" in x)
+        if norm["type"] == "release":
+            a = self.aircraft[cs]
+            a.assumed, a.released = False, True
+            rec.update(status="executed", execute_at_s=round(self.t, 1))
+            self.instructions.append(rec)
+            self._event("released", callsign=cs, outside=a.outside,
+                        text=f"{cs} decontrolled" + ("" if a.outside else " (still inside the sector)"))
+            return rec
         if norm["type"] == "assume":
             self._assume(self.aircraft[cs], rec["id"])
             rec.update(status="executed", execute_at_s=round(self.t, 1))
@@ -468,7 +493,7 @@ class World:
 
     def _assume(self, ac: Aircraft, by: str) -> None:
         """The controller assumes the aircraft (accepts the transfer): from now on it is under our control."""
-        ac.assumed = True
+        ac.assumed, ac.released = True, False
         ac.assumed_t = self.t
         wait = round(self.t - (ac.first_contact_t if ac.first_contact_t is not None else self.t), 1)
         if self.record:
@@ -705,14 +730,14 @@ class World:
             for rec in due:
                 n = rec["instruction"]
                 ac = self.aircraft.get(n["callsign"])
-                if ac and ac.active:
+                if ac and (ac.active or ac.outside):
                     self._apply(ac, n)
                     rec["status"] = "executed"
                     self._event("instruction_executed", instruction_id=rec["id"], callsign=n["callsign"])
                 else:
                     rec["status"] = "dropped"
         # 5. dynamics (winds for all airborne aircraft evaluated in one vectorised call)
-        act = [a for a in self.aircraft.values() if a.active]
+        act = [a for a in self.aircraft.values() if a.active or a.outside]
         if act:
             u, v = self.env.weather.wind_at(np.array([a.x for a in act]), np.array([a.y for a in act]),
                                             np.array([a.alt_ft / 100.0 for a in act]), self.t)
@@ -727,6 +752,15 @@ class World:
                             text=f"{ac.callsign} clear of weather, proceeding direct {ac.wx_plan['then_direct']}")
             if res in ("exited", "left_sector"):
                 ac.ghost_until = self.t + self.persist_s
+                # keeps flying its flight plan in the next sectors; stays assumed until the controller decontrols it
+                onward = [w for w in ac.route_after if w in self.waypoints and not w.startswith("@")]
+                rest = [w for w in ac.route[ac.next_index:] if w in self.waypoints]
+                if onward:
+                    if res == "exited" and ac.nav_mode == "lnav" and rest and rest[-1] == ac.exit_point:
+                        ac.route = ac.route[:ac.next_index] + rest + [w for w in onward if w not in rest]
+                    elif ac.nav_mode == "lnav":
+                        ac.route = ac.route[:ac.next_index] + [w for w in onward if w not in rest[:1]]
+                        ac.leg_from = ac.pos
             if res == "exited":
                 if self.record:
                     arrivals.on_fix_crossing(self, ac)
@@ -747,6 +781,14 @@ class World:
                 self._event("aircraft_left_sector", callsign=ac.callsign, x_nm=round(ac.x, 1), y_nm=round(ac.y, 1),
                             note="left the sector away from any exit waypoint")
                 self._expire_requests(ac.callsign)
+        # 5a. aircraft far away in the next sectors leave the picture (sooner once decontrolled)
+        b = self.airspace.bbox
+        for ac in self.aircraft.values():
+            if ac.outside:
+                out_nm = max(b[0] - ac.x, ac.x - b[2], b[1] - ac.y, ac.y - b[3], 0.0)
+                if out_nm > (40.0 if ac.released else 150.0):
+                    ac.gone = True
+                    self._event("aircraft_gone", callsign=ac.callsign)
         # 5b. transfer of communication from the previous sector
         for ac in self.aircraft.values():
             if ac.active and not ac.on_frequency:
@@ -791,7 +833,7 @@ class World:
         rv = {"approved": "A", "non_approved": "N", "unable": "U"}
         acs = []
         for a in self.aircraft.values():
-            ghost = a.status in ("exited", "left_sector") and self.t <= a.ghost_until
+            ghost = a.outside
             if not (a.active or ghost):
                 continue
             if a.callsign not in self.recording["meta"]:
@@ -1003,6 +1045,9 @@ class World:
         w.m = copy.deepcopy(self.m)          # probes must never touch the real metrics
         w._wx_in = {}
         w._los, w._inf = {}, {}
+        for a in w.aircraft.values():           # the look-ahead is about our sector: aircraft gone out are not flown
+            if a.outside:
+                a.gone = True
         return w
 
     def predict(self, horizon_s: float = 600.0, dt: float = PREDICT_DT, extra: Optional[List[dict]] = None,
@@ -1200,7 +1245,7 @@ class World:
                 "never_assumed": never,
                 "note": "time between the aircraft's first call and the controller assuming it"})(
                 self.m.get("assume_times_s", []),
-                [a.callsign for a in self.aircraft.values() if a.on_frequency and not a.assumed]),
+                [a.callsign for a in self.aircraft.values() if a.on_frequency and not a.assumed and not a.released]),
             "requests": {
                 "total": len(reqs),
                 "by_status": {s: sum(1 for r in reqs if r.status == s)
@@ -1268,7 +1313,7 @@ class World:
         A field set to "" or None clears it. Only checks that the value is well formed."""
         cs = callsign.upper()
         ac = self.aircraft.get(cs)
-        if ac is None or not (ac.active or ac.status == "scheduled"):
+        if ac is None or not (ac.active or ac.outside or ac.status == "scheduled"):
             raise InstructionError(f"unknown callsign {cs}")
         e = dict(self.entries.get(cs, {}))
         for k, v in fields.items():
@@ -1307,8 +1352,7 @@ class World:
             "duration_s": self.duration_s,
             "finished": self.finished,
             "aircraft": [a.snapshot(trails) for a in self.aircraft.values() if a.active],
-            "transferred": [a.snapshot(trails) for a in self.aircraft.values()
-                            if a.status in ("exited", "left_sector") and self.t <= a.ghost_until],
+            "transferred": [a.snapshot(trails) for a in self.aircraft.values() if a.outside],
             "inbound": self.inbound(),
             "pending_requests": self.requests_list("pending"),
             "pending_instructions": [{"id": p["id"], "text": self.phrase(p["instruction"]),

@@ -61,7 +61,7 @@ class SessionCreate(BaseModel):
 
 class Instruction(BaseModel):
     callsign: str
-    type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume"]
+    type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release"]
     fl: Optional[int] = Field(None, description="altitude: target flight level, e.g. 360")
     rate_fpm: Optional[float] = Field(None, description="altitude: optional vertical rate")
     heading: Optional[float] = Field(None, description="heading: 1-360")
@@ -318,8 +318,9 @@ def aircraft_one(sid: str, callsign: str):
         if a is None:
             raise HTTPException(404, "unknown callsign")
         d = a.snapshot(True)
-        if a.active:
+        if a.active or a.outside:
             d["performance"] = a.performance_snapshot()
+            d["assignable_fl"] = [100, s.world.upper_fl] if a.active and not a.released else [50, 600]
         return d
 
 
@@ -369,7 +370,7 @@ def instructions(sid: str, body: Union[Instruction, List[Instruction]], request:
     s = _session(sid)
     items = body if isinstance(body, list) else [body]
     pilot = _pilot_exec(s, request)
-    if s.multi and seat_for(sid, _user(request)) == "pilot" and any(i.type == "assume" for i in items):
+    if s.multi and seat_for(sid, _user(request)) == "pilot" and any(i.type in ("assume", "release") for i in items):
         raise HTTPException(403, "the controller assumes aircraft (label or double-click), not the pilot")
     with s.lock:
         if s.status == "finished":
@@ -388,7 +389,7 @@ def command(sid: str, body: Command, request: Request):
             parsed = parse_command(body.text, s.world)
         except ValueError as e:
             raise HTTPException(400, str(e))
-        if s.multi and seat_for(sid, _user(request)) == "pilot" and any(p.get("type") == "assume" for p in parsed):
+        if s.multi and seat_for(sid, _user(request)) == "pilot" and any(p.get("type") in ("assume", "release") for p in parsed):
             raise HTTPException(403, "the controller assumes aircraft, not the pilot")
         return [s.world.issue(p, source="pilot" if pilot else "command", by_pilot=pilot) for p in parsed]
 
@@ -415,6 +416,17 @@ def entries(sid: str, body: Entry, request: Request):
             return s.world.enter(body.callsign, fields, who=pex.db.public_user(u)["name"] if u["id"] else "atc")
         except (InstructionError, ValueError) as e:
             raise HTTPException(400, str(e))
+
+
+@app.post("/sessions/{sid}/release/{callsign}")
+def release(sid: str, callsign: str):
+    """The controller decontrols an aircraft (by hand). It keeps flying, as another sector's traffic."""
+    s = _session(sid)
+    with s.lock:
+        rec = s.world.issue({"callsign": callsign.upper(), "type": "release"}, source="atc")
+    if rec["status"] == "rejected":
+        raise HTTPException(400, rec["reason"])
+    return rec
 
 
 @app.post("/sessions/{sid}/assume/{callsign}")
@@ -705,7 +717,7 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
             if kind == "entry":
                 with s.lock:
                     return s.world.enter(op.pop("callsign", ""), op, who="atc")
-            if kind == "instruction" and op.get("type") == "assume":
+            if kind == "instruction" and op.get("type") in ("assume", "release"):
                 with s.lock:
                     return s.world.issue(op, source="atc")
             raise PermissionError("the controller's seat enters clearances in the labels; the pilot executes them")

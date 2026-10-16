@@ -50,6 +50,11 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     the pseudo-pilot flies what was said on the frequency. When the level the aircraft actually selected differs
     from the controller's CFL it appears in amber after the CFL (`S300`), as Mode S selected level does, so a wrong
     readback or execution is visible.
+  - **Decontrol by hand:** an aircraft that leaves the sector stays assumed (full label, *left sector · decontrol*)
+    and keeps flying its flight plan in the next sectors until the controller decontrols it (label menu
+    **DECONTROL**, or `CS REL`); it then turns grey as another sector's traffic and leaves the picture once well
+    clear. Decontrolling earlier, inside the sector, is possible too. The pseudo-pilot keeps flying the aircraft
+    either way (headings, levels, speeds from the next sector), with level limits FL50–FL600 once it is gone.
   - STCA (3 min) and loss-of-separation alarms; no medium-term conflict list, no pilot request list: requests come
     by voice.
 - **Pseudo-pilot** (seat *pilot*): the radar and a workspace in three parts.
@@ -62,6 +67,11 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     **Heading** (left / right / shortest, resume own navigation), **Speed** (Mach, knots now, on conversion, resume
     normal), **Direct** (the next points of the route as buttons, or any point), **Weather** deviation. The result,
     or the aircraft's *unable …*, shows under it. Enter validates a field.
+  - **Can do now:** the deck shows the aircraft's present limits and refreshes them every 10 s: the levels it may
+    be given (FL100 to the sector's top, or FL50–FL600 once it is in another sector) and its maximum level at this
+    weight, climb rate available now, idle descent rate (and with speed brakes), turn radius, assignable Mach and
+    IAS range and its own speed schedule (Mach / IAS / conversion level); rates it cannot fly are greyed out. Use them
+    to request something realistic when going off script.
   - **Aircraft:** every aircraft with level, speed, navigation and status (calling, request, on frequency,
     previous sector), those needing something first. The *Shorthand* line still takes the command syntax.
 - **Instructor's side panel** is in tabs: **Aircraft** (the pseudo-pilot workspace and telephone), **Exercise**
@@ -378,6 +388,11 @@ A 120 × 120 NM square, FL250–FL460, coordinates in NM from the centre (x east
   crosses the boundary between two named points, the simulator adds a coordination point (COP) there, named `C`
   plus two letters of each neighbour, e.g. `CTAVE` on TAKAV–VEDOD. A route may start before the controlled area
   and continue after it; the part outside is flown by the previous or next sector.
+
+Coordination points: in a scenario that controls only some sectors, a route that crosses the boundary of the
+controlled area between two published points gets a generated transfer point there, named C + two letters of each
+neighbour (e.g. CIBSA between IBLIV and SAMAR). They are not AIP points: the scope draws them as a small tick
+without a name, labels show the next published point, and they are not offered as directs.
 
 ### Common to both
 - **Traffic before entry:** aircraft appear `pre_entry_nm` (default 30 NM) before their entry waypoint, on the extension of their first leg. They are still with the previous sector (shown dimmed) and refuse your instructions. They **call you** `checkin_nm` (default 10 NM) before the boundary (*"RAM101 FL350, checking in"*, a pending request

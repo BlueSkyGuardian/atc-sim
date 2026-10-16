@@ -97,6 +97,8 @@ class Aircraft:
     checkin_nm: float = 10.0           # calls on frequency this far before the entry waypoint
     on_frequency: bool = False         # has called us (before: previous sector)
     assumed: bool = False              # the controller has assumed it (accepted the transfer): under our control
+    released: bool = False             # the controller has decontrolled it (by hand): no longer ours on the screen
+    gone: bool = False                 # out of the picture (far away): no longer simulated
     first_contact_t: Optional[float] = None
     assumed_t: Optional[float] = None
     entered: bool = False              # has been inside the sector square
@@ -153,6 +155,11 @@ class Aircraft:
     @property
     def active(self) -> bool:
         return self.status == "active"
+
+    @property
+    def outside(self) -> bool:
+        """Left the sector but still flying (next sectors) and still on the picture."""
+        return self.status in ("exited", "left_sector") and not self.gone
 
     @property
     def next_wp(self) -> Optional[str]:
@@ -256,21 +263,14 @@ class Aircraft:
 
     # ---------------------------------------------------------------- dynamics
     def step(self, dt: float, env: Env, t_now: float) -> Optional[str]:
-        if not self.active:
-            if self.status in ("exited", "left_sector") and t_now <= self.ghost_until:
-                # transferred: next sector's traffic, still painted on the radar (straight on, level, same speed)
-                r = math.radians(self.trk)
-                step_nm = self.gs * dt / 3600.0
-                self.x += step_nm * math.sin(r)
-                self.y += step_nm * math.cos(r)
-                self.vs_fpm = 0.0
-                self._trail(dt)
+        if not self.active and not self.outside:
             return None
+        outside = self.outside        # gone to the next sectors: keeps flying (onward route, pilot's instructions)
         u, v = self.wind_uv            # evaluated for all aircraft at once by the world (vectorised)
 
         # ---- lateral guidance
         if self.nav_mode == "lnav":
-            res = self._lnav(env, u, v)
+            res = self._lnav(env, u, v, outside=outside)
             if res:
                 return res
             hdg_cmd, forced = self._lnav_heading_cmd, None
@@ -304,7 +304,7 @@ class Aircraft:
         step_nm = self.gs * dt / 3600.0
         self.x += step_nm * math.sin(r)
         self.y += step_nm * math.cos(r)
-        if self.entered:
+        if self.entered and not outside:
             self.distance_flown += step_nm            # track miles inside the sector
         if self.nav_mode == "wxdev":
             self.wx_flown += step_nm
@@ -312,6 +312,8 @@ class Aircraft:
                 self._finish_wx_deviation()
 
         self._trail(dt)
+        if outside:
+            return None
 
         if env.airspace.inside(self.pos):
             self.entered = True
@@ -339,7 +341,7 @@ class Aircraft:
             if len(self.trail) > TRAIL_LEN:
                 self.trail.pop(0)
 
-    def _lnav(self, env: Env, u: float, v: float) -> Optional[str]:
+    def _lnav(self, env: Env, u: float, v: float, outside: bool = False) -> Optional[str]:
         wps = env.waypoints
         while True:
             to_name = self.next_wp
@@ -355,6 +357,12 @@ class Aircraft:
             to_go = dist(A, B) - along_from_A
             final = self.next_index >= len(self.route) - 1
             if final:
+                if outside:
+                    if to_go <= 0.0:                # end of the known route: carry on, same heading
+                        self.nav_mode, self.target_hdg, self.turn_dir = "heading", self.hdg, None
+                        self._lnav_heading_cmd = self.hdg
+                        return None
+                    break
                 if to_go <= 0.0 and abs(self.xte_nm) <= EXIT_CAPTURE_NM:
                     self.status, self.exit_point = "exited", to_name
                     self.end_time = None
@@ -440,7 +448,8 @@ class Aircraft:
         self.thrust_n = T
         burn = p.fuel_flow(T, self.tas) * dt
         self.mass -= burn
-        self.fuel_used += burn
+        if self.active:                    # the sector's fuel metric: what was burnt while in our sector
+            self.fuel_used += burn
 
     # ---------------------------------------------------------------- performance queries
     def climb_rate_available(self, alt_ft: Optional[float] = None) -> float:
@@ -497,8 +506,9 @@ class Aircraft:
             "weather_ahead_nm": self.wx["hazard_ahead_nm"],
             "turbulence": self.wx["turb_level"],
             "route": [w for w in self.route if not w.startswith("@")],
-            "on_frequency": self.on_frequency, "assumed": self.assumed,
-            "control": ("next sector" if self.status in ("exited", "left_sector") else
+            "on_frequency": self.on_frequency, "assumed": self.assumed, "released": self.released,
+            "control": ("left the sector, still assumed (decontrol it)" if self.outside and self.assumed else
+                        "next sector" if self.status in ("exited", "left_sector") or self.released else
                         "you" if self.assumed else "calling you, not assumed" if self.on_frequency else "previous sector"),
             "exit_point": self.exit_point,
             "entry_waypoint": self.entry_wp,

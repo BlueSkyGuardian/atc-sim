@@ -76,7 +76,8 @@ class Capture:
             sec = sector_description(w)
             areas = [a.snapshot(w.t) for a in w.areas.values()]
         keep = ("outline", "shape", "sectors", "waypoints", "routes", "rad_routes", "external_points",
-                "transfer_points", "controlled_sectors", "bbox_nm", "name", "unit", "airways", "provisional_points")
+                "transfer_points", "controlled_sectors", "bbox_nm", "name", "unit", "airways", "provisional_points",
+                "coordination_points")
         st = {"name": self.name, "scenario": self.s.scenario_name, "created": time.time(), "sep_h": w.sep_h,
               "sector": {k: sec.get(k) for k in keep}, "areas": areas}
         with open(os.path.join(self.dir, "static.json"), "w") as f:
@@ -89,14 +90,15 @@ class Capture:
                 with self.s.lock:
                     w, wall = self.s.world, time.time()
                     ac, rt = [], {}
-                    for a in w.active_aircraft():
+                    for a in [x for x in w.aircraft.values() if x.active or (x.outside and x.assumed)]:
                         e = w.entries.get(a.callsign)
                         mode, val = a.speed_target()
                         spd = f"M{int(round(a.mach() * 100))}" if mode == "mach" else f"I{int(round(a.cas()))}"
                         nav = {"lnav": "L", "heading": "H", "wxdev": "W"}.get(a.nav_mode, "L")
                         ac.append([a.callsign, round(a.x, 2), round(a.y, 2), int(round(a.alt_ft / 100)),
                                    int(round(a.cleared_alt_ft / 100)), int(round(a.gs)), int(round(a.trk)),
-                                   int(round(a.vs_fpm, -2)), 1 if a.on_frequency else 0, 1 if a.assumed else 0,
+                                   int(round(a.vs_fpm, -2)), 1 if a.on_frequency and not a.released else 0,
+                                   1 if a.assumed else 0,
                                    [e.get("cfl"), e.get("speed"), e.get("heading"), e.get("direct"), e.get("note")] if e else None,
                                    a.icao, nav, a.next_wp if nav == "L" else None,
                                    int(round(a.target_hdg)) % 360 or 360 if nav != "L" and a.target_hdg is not None else None,
@@ -118,7 +120,7 @@ class Capture:
                         fr["stca"] = stca
                     tr = [[a.callsign, round(a.x, 2), round(a.y, 2), int(round(a.alt_ft / 100)), int(round(a.gs)),
                            int(round(a.trk)), a.exit_point] for a in w.aircraft.values()
-                          if a.status in ("exited", "left_sector") and w.t <= a.ghost_until]
+                          if a.outside and not a.assumed]
                     if tr:
                         fr["tr"] = tr
                     if w.aerodromes and (w.t - getattr(self, "_ad_t", -1e9) >= 30):

@@ -95,7 +95,11 @@
   .dk-x { padding: 1px 7px; }
   .dk-now { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; font-family: var(--mono); padding: 6px 8px; background: #0d141c; border: 1px solid var(--line); border-radius: 5px; }
   .dk-pend { width: 100%; color: #9fc3e6; font-family: system-ui; font-size: 11.5px; }
-  .dk-lim { font-size: 11px; margin: 4px 0 8px; min-height: 14px; }
+  .dk-lim { font-size: 11.5px; margin: 6px 0 8px; min-height: 14px; padding: 5px 7px; border-radius: 4px; background: #101a24; color: #9fb4c8; }
+  .dk-lim b { color: var(--text); font-weight: 600; }
+  .dk-hint { width: 100%; font-size: 11px; color: var(--dim); line-height: 1.35; }
+  .badge.b-out { color: #8a9bb0; border-style: dashed; }
+  table.fleet tr.st-out td { color: #6c7f92; }
   .dk-row { display: grid; grid-template-columns: 62px 1fr; gap: 8px; align-items: start; padding: 7px 0; border-top: 1px dashed var(--line); }
   .dk-row > label { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding-top: 5px; }
   .dk-ctl { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
@@ -381,6 +385,11 @@ async function assume(cs) {
   pollState();
 }
 window.assume = assume;
+async function release(cs) {
+  try { await api(`/sessions/${SID}/release/${cs}`, { method: 'POST' }); msg(`${cs} decontrolled`); } catch (e) { msg(e.message, true); }
+  pollState(); pollSelected();
+}
+window.release = release;
 
 // ---------- weather layer
 const DBZ_BINS = [[15,'#0300f4'],[20,'#02fd02'],[25,'#01c501'],[30,'#008e00'],[35,'#fdf802'],[40,'#e5bc00'],
@@ -484,7 +493,7 @@ async function pollSelected() {
   if (!SID || !selected) { $('#selSec').style.display = 'none'; return; }
   try {
     const a = await api(`/sessions/${SID}/aircraft/${selected}`);
-    if (a.status !== 'active') { $('#selSec').style.display = 'none'; return; }
+    if (a.status !== 'active' && !(a.status === 'exited' || a.status === 'left_sector')) { $('#selSec').style.display = 'none'; return; }
     const p = a.performance || {};
     $('#selSec').style.display = '';
     $('#selName').textContent = `${a.callsign} · ${a.type_name}`;
@@ -514,9 +523,10 @@ async function pollSelected() {
                        ['LoA latest descent', a.arrival.loa_latest_descent_in_nm != null ? `${a.arrival.loa_latest_descent_in_nm} NM` : 'at/below LoA level']] : []),
       ['Control', a.control],
     ];
-    if (a.on_frequency && !a.assumed && SEAT !== 'pilot') rows.unshift(['First contact', `<button class="on" onclick="assume('${a.callsign}')">Assume ${a.callsign}</button> <span class="c-dim" style="font-size:11px">or double-click it, or type ${a.callsign} AS</span>`]);
+    if (a.assumed && SEAT !== 'pilot') rows.unshift(['Control', `<button onclick="release('${a.callsign}')">Decontrol ${a.callsign}</button> <span class="c-dim" style="font-size:11px">${a.status !== 'active' ? 'has left the sector, still yours' : 'hand it off by hand'} · or type ${a.callsign} REL</span>`]);
+    if (a.on_frequency && !a.assumed && !a.released && a.status === 'active' && SEAT !== 'pilot') rows.unshift(['First contact', `<button class="on" onclick="assume('${a.callsign}')">Assume ${a.callsign}</button> <span class="c-dim" style="font-size:11px">or double-click it, or type ${a.callsign} AS</span>`]);
     const ahead = a.route.slice(a.route.indexOf(a.next_waypoint) >= 0 ? a.route.indexOf(a.next_waypoint) : 0).filter(n => !n.startsWith('@'));
-    const dct = [...new Set([...ahead, ...(a.route_after_exit || [])])];
+    const dct = realPoints([...new Set([...ahead, ...(a.route_after_exit || [])])]);
     rows.push(['Direct to', `<span class="dct">${dct.map(n => `<button data-dct="${n}" style="padding:0 5px;font-size:11px;margin:1px">${n}</button>`).join('')}</span>
       <span class="c-dim" style="font-size:11px">or type ${a.callsign} D &lt;point&gt;</span>`]);
     $('#selInfo').innerHTML = rows.map(([k, v]) => `<span class="c-dim">${k}</span><span>${v}</span>`).join('');
@@ -559,6 +569,14 @@ function renderSide() {
       `<button onclick="reply('${r.callsign}','${r.id}','approved')">Approve</button> <button onclick="reply('${r.callsign}','${r.id}','unable')">Unable</button>`}</div></div>`).join('')
     : '<div class="empty">none pending</div>';
 }
+function COPS() { return new Set((sector && sector.coordination_points) || []); }
+function nextReal(a) {                   // next published point (skips generated coordination points)
+  const cops = COPS(), r = a.route || [], i = r.indexOf(a.next_waypoint);
+  if (!a.next_waypoint || !cops.has(a.next_waypoint)) return a.next_waypoint || '';
+  for (let k = i + 1; k < r.length; k++) if (!cops.has(r[k])) return r[k];
+  return (a.route_after_exit || [])[0] || '';
+}
+function realPoints(list) { const c = COPS(); return list.filter(n => !c.has(n) && !n.startsWith('@')); }
 function SEPH() { return (state && state.separation_minimum_nm) || (sector && sector.separation_minima && sector.separation_minima.horizontal_nm) || 5; }
 // ---------- alarms: loss of separation (red, flashing) and short-term conflict alert (amber, LoS within 3 min)
 const STCA_S = 180; let alertKeys = new Set(), muted = true, actx = null;
@@ -880,7 +898,7 @@ function pick(e) {
   const r = cv.getBoundingClientRect();
   const [x, y] = fromPx((e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio);
   let best = null, bd = 4 / (view.s / devicePixelRatio) * 4;
-  for (const a of shown.aircraft) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < bd) { bd = d; best = a.callsign; } }
+  for (const a of shown.aircraft.concat(shown.transferred || [])) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < bd) { bd = d; best = a.callsign; } }
   selected = best;
   if (best && window.onSelectAircraft && onSelectAircraft(best, e, false)) return;
   if (best) { $('#cmd').value = best + ' '; $('#cmd').focus(); }
@@ -1017,9 +1035,12 @@ function draw() {
   ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
   const xfer = new Set(sector.transfer_points || []);
   const sq = sector.shape.type === 'square' ? sector.shape.half_size_nm : null;
-  const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []);
+  const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []), copSet = COPS();
   for (const [n, p] of Object.entries(wp)) {
     const [px, py] = toPx(...p);
+    if (copSet.has(n)) {                 // generated coordination point on a sector line: a small tick, no name
+      ctx.strokeStyle = '#3d556c'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px - 3 * dpr, py); ctx.lineTo(px + 3 * dpr, py); ctx.stroke(); continue;
+    }
     if (extSet.has(n)) {                 // neighbouring-sector point: small diamond, '?' = provisional position
       ctx.strokeStyle = ctx.fillStyle = '#41586e'; ctx.lineWidth = 1 * dpr; ctx.beginPath();
       ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
@@ -1047,7 +1068,9 @@ function draw() {
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]); }
   // transferred traffic (already with the next sector): grey, still painted for a few minutes
   labelRects.length = 0;
-  for (const a of shown.transferred || []) {
+  // aircraft gone to the next sectors: still the controller's (full label) until decontrolled by hand, then grey
+  const outAssumed = (shown.transferred || []).filter(a => a.assumed);
+  for (const a of (shown.transferred || []).filter(a => !a.assumed)) {
     const [px, py] = toPx(a.x_nm, a.y_nm), col = '#56636f';
     ctx.fillStyle = col; if (V.trails) for (const t of a.trail || []) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1 * dpr, ty - 1 * dpr, 2 * dpr, 2 * dpr); }
     const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 30, [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
@@ -1059,11 +1082,11 @@ function draw() {
     labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - 11 * dpr, x1: bx + 90 * dpr, y1: by + 15 * dpr });
   }
   // aircraft
-  for (const a of shown.aircraft) {
+  for (const a of shown.aircraft.concat(outAssumed)) {
     const st = status[a.callsign];
-    const calling = a.on_frequency && a.assumed === false;          // has called, not assumed yet
+    const calling = a.on_frequency && a.assumed === false && !a.released && a.status === 'active';   // has called, not assumed yet
     const col = st === 'los' ? '#ff5a5a' : st === 'warn' ? '#f2b84b' : (a.callsign === selected ? '#7fb8ff' :
-                calling ? ((Date.now() / 500 | 0) % 2 ? '#ffffff' : '#c9d6e2') : (a.on_frequency ? '#5fd3a3' : '#6f8191'));
+                calling ? ((Date.now() / 500 | 0) % 2 ? '#ffffff' : '#c9d6e2') : (a.on_frequency && !a.released ? '#5fd3a3' : '#6f8191'));
     // top of descent (T) and latest descent for the letter of agreement (L) along the route ahead
     if (a.callsign === selected && a.arrival && a.nav_mode === 'lnav' && a.next_waypoint) {
       const idx = a.route.indexOf(a.next_waypoint), pts = [[a.x_nm, a.y_nm]].concat(a.route.slice(idx).map(n => wp[n]));
@@ -1097,15 +1120,16 @@ function draw() {
     const l2 = `${String(a.fl).padStart(3, '0')}${arrow}${cflShown !== a.fl ? cflShown : ''} ${a.type}${a.category === 'military' ? ' MIL' : ''}${rv}`;
     const spd = a.speed_mode === 'mach' ? 'M' + String(Math.round(a.mach * 100)).padStart(2, '0') : 'I' + a.ias_kt;
     const nav = a.nav_mode === 'heading' ? ' H' + String(a.assigned_heading).padStart(3, '0')
-              : a.nav_mode === 'wxdev' ? ' DEV' + String(a.assigned_heading).padStart(3, '0') : ' >' + (a.next_waypoint || '');
+              : a.nav_mode === 'wxdev' ? ' DEV' + String(a.assigned_heading).padStart(3, '0') : ' >' + nextReal(a);
     const sr = a.speed_restriction;
     const rest = sr ? ' ' + (sr.ias_kt ? 'S' + sr.ias_kt : (sr.mach ? 'M' + Math.round(sr.mach * 100) : '') + (sr.conversion_kt ? '/K' + sr.conversion_kt : '')) : '';
     let l3 = `${a.gs_kt} ${spd}${rest}${nav}`;
-    if (ent) l3 = `${a.gs_kt}${ent.speed ? ' ' + ent.speed : ''}${ent.heading ? ' H' + String(ent.heading).padStart(3, '0') : ent.direct ? ' >' + ent.direct : ' >' + (a.next_waypoint || '')}`;
+    if (ent) l3 = `${a.gs_kt}${ent.speed ? ' ' + ent.speed : ''}${ent.heading ? ' H' + String(ent.heading).padStart(3, '0') : ent.direct ? ' >' + ent.direct : ' >' + nextReal(a)}`;
     const dest = (a.flight_plan && a.flight_plan.destination) || '';
     let l4 = dest && dest !== 'ZZZZ' ? `→${dest}` : '';
     if (a.arrival && a.arrival.tod_in_nm != null) l4 = `→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`;
     if (!a.on_frequency) l4 = `prev sector → ${a.entry_waypoint}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : '');
+    if (a.status && a.status !== 'active') l4 = `left sector${a.exit_point ? ' via ' + a.exit_point : ''} · decontrol`;
     if (ent && ent.note) l4 = (l4 ? l4 + ' ' : '') + ent.note;
     ctx.fillStyle = col; ctx.font = `${11 * dpr}px ui-monospace,monospace`;
     const o = labelOff[a.callsign] || [10, -14];
