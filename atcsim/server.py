@@ -71,6 +71,9 @@ app.include_router(pstats.router)
 @app.on_event("startup")
 def _startup():
     prec.recover()
+    import threading
+    from . import docs_gen                     # build the documentation's generated reference in the background
+    threading.Thread(target=docs_gen.reference_md, daemon=True).start()
 
 
 # ------------------------------------------------------------------ models

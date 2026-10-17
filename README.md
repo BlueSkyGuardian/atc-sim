@@ -670,6 +670,11 @@ Agents never see future requests.
 
 ## Scenario format
 
+The complete reference, with every field, the rules, examples, a prompt template for writing scenarios with a
+language model and generated tables of every point, route and aircraft type, is the in-app page
+*Help → Scenario JSON reference* (`atcsim/docs/scenario-json.md`, public at `/help/scenario-json`). The JSON Schema
+is served at `/api/help/scenario.schema.json` and the reference data at `/api/help/reference.json`. In short:
+
 ```json
 {
   "name": "...", "title": "...", "description": "shown to agents", "design_notes": "the trap (hidden)",
@@ -899,6 +904,7 @@ tools/fill_flightplans.py        writes complete flight plans into the scenario 
 atcsim/platform/stats.py         evaluations and statistics API, /stats page
 atcsim/static/stats.html, vendor/chart.umd.min.js   statistics charts (Chart.js 4.4.1, MIT)
 atcsim/capacity.py               declared sector capacities, traffic load of a scenario, density bands
+atcsim/docs_gen.py               generated documentation: reference tables, reference.json, scenario JSON Schema
 atcsim/docs/*.md, static/help.html, vendor/marked.min.js   in-app documentation (Markdown, rendered with marked 12, MIT)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)
 scenarios/*.json                 scenario library

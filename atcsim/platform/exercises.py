@@ -54,7 +54,8 @@ DOC_PAGES = [  # (slug, title, group)
     ("controller", "Controller manual", "User manuals"),
     ("pilot", "Pseudo-pilot manual", "User manuals"),
     ("instructor", "Instructor and admin manual", "User manuals"),
-    ("designer", "Scenario designer and JSON format", "Scenarios"),
+    ("designer", "Scenario designer", "Scenarios"),
+    ("scenario-json", "Scenario JSON reference", "Scenarios"),
     ("scenarios", "Scenario library and progression", "Scenarios"),
     ("weather", "Weather modelling", "Models"),
     ("aircraft", "Aircraft, pilots and airspace", "Models"),
@@ -74,13 +75,31 @@ def help_index(request: Request):
     return [{"slug": s, "title": t, "group": g} for s, t, g in DOC_PAGES]
 
 
+@router.get("/api/help/scenario.schema.json")
+def help_schema():
+    """JSON Schema of a scenario file."""
+    from .. import docs_gen
+    return docs_gen.SCHEMA
+
+
+@router.get("/api/help/reference.json")
+def help_reference():
+    """Reference data for writing scenarios: airspaces (points, routes, sectors, capacities, aerodromes), types."""
+    from .. import docs_gen
+    return docs_gen.reference()
+
+
 @router.get("/api/help/{slug}")
 def help_doc(slug: str, request: Request):
     """One documentation page, as Markdown."""
     if slug not in {s for s, _, _ in DOC_PAGES}:
         raise HTTPException(404, "no such page")
     with open(os.path.join(DOCS_DIR, slug + ".md"), encoding="utf-8") as f:
-        return {"slug": slug, "markdown": f.read()}
+        md = f.read()
+    if "<!-- REFERENCE -->" in md:                 # generated tables: points, routes, types
+        from .. import docs_gen
+        md = md.replace("<!-- REFERENCE -->", docs_gen.reference_md())
+    return {"slug": slug, "markdown": md}
 
 
 @router.get("/radar", include_in_schema=False)

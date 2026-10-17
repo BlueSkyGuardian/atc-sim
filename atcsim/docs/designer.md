@@ -1,4 +1,4 @@
-# Scenario designer and JSON format
+# Scenario designer
 
 A scenario is one JSON file. You can build it three ways, and mix them freely:
 
@@ -73,7 +73,7 @@ undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the curs
 | description | The briefing (shown to the controller and to agents) |
 | design notes | The traps (hidden from agents) |
 | Weather | Seed, intensity of the next storm drawn, surface temperature, tropopause, wind at FL350, the list of storm patterns, cells and rain areas, and the full weather JSON (*Apply JSON*) |
-| Expected results | The `expected` block (see [Expected results](#expected-results-and-checks)); *from previews* fills it from the last preview runs |
+| Expected results | The `expected` block (see [Expected and solution](scenario-json.md#expected-and-solution)); *from previews* fills it from the last preview runs |
 
 ### Selected tab
 
@@ -213,172 +213,12 @@ python tools/build_scenarios.py p01 p02        # rebuild and check some scenario
 python -m tools.fill_flightplans               # complete the flight plans of every scenario file
 ```
 
-## File format reference
+## File format
 
-Everything is optional unless marked **required**. Coordinates in the training airspace are NM from the centre
-(x east, y north). In Agadir, use point names, or `[x, y]` in the airspace's NM plane, `{"lat": …, "lon": …}`, or
-an AIP string such as `"320500N 0145000W"` where noted.
-
-### Top level
-
-| Key | Type | Meaning |
-|---|---|---|
-| `name` **required** | string | File name, `[a-z0-9_-]{2,64}` |
-| `title` | string | Short title |
-| `author` | string | Designer's name |
-| `complexity` | 1–5 | Designer's rating; absent = estimated |
-| `density` | 1–5 | Designer's rating; absent = estimated from `traffic_load` |
-| `traffic_load` | object | Written by the server when saving: `{"config", "unit_name", "capacity", "flights_per_hour", "ratio", "density"}` |
-| `description` | string | Briefing for the controller / agents |
-| `design_notes` | string | The traps (hidden from agents) |
-| `airspace` | `"training"` \| `"agadir"` | Default `training` |
-| `control` | list of sector ids | Agadir: the sectors controlled (`WN`, `WS`, `ON`, `OS`); default all four band-boxed |
-| `duration_s` | number | Default 1800 |
-| `pilot_delay_s` | number | Seconds before an instruction is executed (default 4) |
-| `start_utc` | `"HH:MM"` | Clock at T+0 (default 12:00) |
-| `magnetic_variation` | degrees | For the Mode S magnetic heading; negative = west (Agadir default −1) |
-| `separation` | `{"horizontal_nm": 6}` | Overrides the airspace's horizontal minimum |
-| `oldi` | `{"abi_s": 1200, "act_s": 600, "rev_limit_s": 180}` | OLDI timings |
-| `auto_assume` | bool | Assume aircraft automatically on first contact (default false) |
-| `auto_routes` | bool | Agadir: complete routes beyond the CTA from the airspace's onward-route rules (default true) |
-| `pre_entry_nm` / `checkin_nm` | NM | Aircraft appear 30 NM before their entry point and call 10 NM before it (defaults) |
-| `post_exit_display_s` | s | How long a transferred aircraft stays painted (default 240) |
-| `sector` | `{"lower_fl", "upper_fl"}` | Training airspace: vertical limits |
-| `extra_waypoints` | `{"NAME": [x, y]}` | Training airspace: extra points |
-| `weather` | object | See [Weather](#weather) and the [weather modelling](weather.md) page |
-| `areas` | list | See [Areas](#areas) |
-| `aircraft` **required** | list | See [Aircraft](#aircraft) |
-| `requests` | list | See [Requests](#requests) |
-| `events` | list | See [Events](#events) |
-| `aerodromes`, `sequencing` | lists | Arrival aerodromes and sequencing fixes; Agadir has defaults (GCRR via TERTO, GMMN via MARJA and SALCA). See [Arrivals](aircraft.md#arrivals-and-sequencing) |
-| `expected` | object | What the reference policies must produce (see [Expected results](#expected-results-and-checks)) |
-| `solution` | list | A scripted reference solution (see below) |
-
-### Aircraft
-
-```json
-{"callsign": "RAM205", "type": "B789", "route": ["BEXAL", "IBALU", "SALCA"], "fl": 370,
- "mach": 0.84, "load": 0.4, "reach": {"point": [12.3, 140.2], "time": 700},
- "dep": "CYUL", "dest": "GMMN", "rvsm": true, "equipment": "SDE2E3FGHIJ2J3J4J5M1RWXY/LB1D1",
- "remarks": "TCAS", "fpl": {"ssr": "4231", "reg": "CNRGA"}}
-```
-
-| Key | Meaning |
-|---|---|
-| `callsign` **required** | Unique |
-| `type` **required** | ICAO type (see `GET /types`): 36 civil and 12 military types |
-| `route` **required** | Point names, in flying order. At least two, or one with `start` |
-| `fl` **required** | Filed / cruise level. It must follow the semicircular rule: odd levels southbound (090–269), even northbound |
-| timing, **exactly one of** | `"entry_time": s` (at the first point), `"reach": {"waypoint": "IBALU", "time": s}`, `"reach": {"point": [x, y], "time": s}` (a point on the route), or `"start": {"point": [x, y], "time": s}` (anywhere, then the route). Negative times put the aircraft further along at T+0 |
-| `mach` | Filed cruise Mach (default: the type's typical one) |
-| `load` / `mass_kg` | Mass: OEW + load × (MTOW − OEW), default 0.5 |
-| `arrival` | `false` = overflight even if it exits at a sequencing fix |
-| `direction` | `"southbound"` / `"northbound"`: overrides the direction from the route (semicircular rule) |
-| `dep`, `dest` | ICAO aerodromes |
-| `rvsm` | `false` = not RVSM approved (item 10 without `W`) |
-| `military` | `true` = state / military (`MIL` tag) |
-| `formation` | `{"size": 4, "types": "4xF16", "extent_nm": 1.0}`: only the leader is shown; 2000 ft from everyone |
-| `equipment`, `remarks` | Item 10 and RMK |
-| `route_after` | Points after the CTA exit (flight plan only) |
-| `auto_route` | `false` = do not complete the route outside the CTA |
-| `pre_entry_nm`, `checkin_nm` | Per aircraft |
-| `fpl` | Flight-plan fields: `ssr`, `reg`, `code` (Mode S address), `eobt`, `altn`, `equipment`, `opr`, `pob`, `rmk`, `sts`, `pbn`. Anything missing is generated deterministically from the callsign |
-
-### Requests
-
-```json
-{"time": 1240, "callsign": "RAM1416", "type": "altitude", "value": 380, "reason": "requesting cruise level"}
-```
-
-| `type` | `value` |
-|---|---|
-| `altitude` | Flight level (it must follow the semicircular rule, unless descending to destination) |
-| `direct` | Point name |
-| `speed` | Mach if under 2, else IAS in kt |
-| `descent` | Optional level used if simply approved (default: the LoA level, or about 4000 ft lower); any descent clearance answers it |
-| `weather_deviation` | Instead of `value`: `{"side": "either"\|"left"\|"right"}` (the pilot's own plan around the real weather), or `{"side": "left", "offset_deg": 30, "distance_nm": 20}`, or `{"heading": 250, "distance_nm": 15}`; optional `"then_direct": "IBALU"` |
-
-A scripted request is made only once the aircraft is assumed. If it is due earlier, the pilot asks right after
-the assume. The simulated pilots add their own requests (weather, turbulence, descent).
-
-### Events
-
-```json
-{"time": 900, "callsign": "RYR7HB", "type": "rvsm_unable", "reason": "altimeter disagreement"}
-```
-
-`rvsm_unable` (the pilot reports it; the pair minimum becomes 2000 ft in RVSM airspace) and `rvsm_restored`.
-
-### Areas
-
-```json
-{"id": "R90", "name": "Naval exercise", "kind": "restricted",
- "polygon": ["320500N 0145000W", "322500N 0141500W", "315000N 0135500W", "313000N 0143000W"],
- "lower_fl": 0, "upper_fl": 450, "active": false,
- "schedule": [{"time": 900, "active": true}, {"time": 3300, "active": false}]}
-```
-
-`kind`: `danger`, `restricted` or `prohibited`. Use `polygon` (points as `[x, y]`, `{"lat", "lon"}` or AIP
-strings) or `"circle": {"center": …, "radius_nm": 8}`. The instructor can also switch areas by hand during an
-exercise.
-
-### Weather
-
-```json
-"weather": {
-  "seed": 101,
-  "temperature": {"surface_c": 24, "tropopause_fl": 390, "lapse_c_per_kft": 2.1},
-  "wind": {"profile": [{"fl": 0, "dir": 200, "kt": 10}, {"fl": 350, "dir": 250, "kt": 55}, {"fl": 800, "dir": 90, "kt": 20}],
-           "jet": {"core_fl": 340, "dir": 268, "kt": 65, "axis_point": [0, 120], "half_width_nm": 90,
-                   "depth_below_ft": 11000, "depth_above_ft": 8000},
-           "noise_kt": 5, "noise_scale_nm": 40},
-  "convection": [{"regime": "scattered", "intensity": "strong", "count": 8, "region": [-40, -120, 60, -40]},
-                 {"regime": "squall_line", "intensity": "severe",
-                  "line": {"center": [-20, -95], "length_nm": 170, "orient_deg": 120, "gaps": 0,
-                           "gap_list": [[-35, 22], [40, 20]], "spacing_nm": 8}}],
-  "cells": [{"id": "CB1", "x": -5, "y": 0, "at_time": 300, "top_fl": 460, "dbz": 59, "radius_nm": 5,
-             "lifetime_s": 6000, "age_s": 1800, "motion": {"toward": 85, "kt": 20}}],
-  "stratiform": [{"center": [-140, -60], "radius_nm": [60, 30], "orient_deg": 30, "dbz": 32}],
-  "pilot": {"hazard_dbz": 30, "margin_nm": 6, "severe_dbz": 40, "severe_margin_nm": 10,
-            "request_range_nm": 60, "self_deviation_range_nm": 15}
-}
-```
-
-Every field is explained on the [weather modelling](weather.md) page. `convection` may be one pattern or a list.
-Regimes are `isolated`, `scattered`, `squall_line` and `embedded`; intensities are `moderate`, `strong` and
-`severe`. The `seed` makes the random parts reproducible: the same seed gives the same storms.
-
-### Expected results and checks
-
-```json
-"expected": {
-  "passive": {"los": true, "pairs": [["EXS64M", "TOM3KD"]], "allow_left_sector": true},
-  "naive_approve": {"los": true, "pairs": [["CFG7RA", "RAM1416"]], "rvsm_violation": true}
-}
-```
-
-For each policy (`passive`, `naive_approve`):
-
-| Key | Checked |
-|---|---|
-| `los` | Whether there is any loss of separation |
-| `pairs` | These pairs must lose separation (others may too) |
-| `infringement` | Whether an active area is infringed |
-| `seq_level` / `seq_spacing` | Whether LoA level / spacing violations occur at the sequencing fixes |
-| `rvsm_violation` | Whether a non-approved aircraft enters RVSM airspace |
-| `wx_request` | A callsign that must make a weather / ride request |
-| `allow_left_sector` | Aircraft may leave the sector off their planned exit (dense traffic, weather) |
-
-A `solution` is a scripted reference controller. The build checks that it gives no loss, no penetration, no
-infringement and no violation:
-
-```json
-"solution": [
-  {"at": 600, "do": [{"callsign": "KLM81", "type": "altitude", "fl": 250}]},
-  {"on_request": "RAM508", "type": "altitude", "do": [{"reply": "approved"}]},
-  {"on_checkin": "BAW3J", "delay_s": 30, "do": [{"callsign": "BAW3J", "type": "speed", "mach": 0.76}]}
-]
-```
+Every field of a scenario file — types, defaults, limits, the rules the builder checks, timing and how to plant
+conflicts, complete examples, a prompt template for language models, and the generated list of every point, route
+and aircraft type — is on its own page: **[Scenario JSON reference](scenario-json.md)**. The JSON Schema is at
+[/api/help/scenario.schema.json](/api/help/scenario.schema.json).
 
 ## Difficulty ratings
 

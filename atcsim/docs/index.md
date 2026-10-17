@@ -13,7 +13,7 @@ model, simulated pilots, flight plans, OLDI coordination, radio and telephone, r
 | **Pseudo-pilot** | [Pseudo-pilot manual](pilot.md) | The pilot seat: the *To do* list, the control deck, the aircraft list, the radio and the telephone (as the adjacent units). |
 | **Instructor** | [Instructor and admin manual](instructor.md) | Exercises (start, invite, run, monitor, end), scenarios, recordings, evaluations, statistics. |
 | **Administrator** | [Instructor and admin manual](instructor.md#administrator) | User roles. |
-| **Scenario designer** | [Scenario designer and JSON format](designer.md) | The visual designer, and the scenario file format for building scenarios with JSON tools and scripts. |
+| **Scenario designer** | [Scenario designer](designer.md) and the [Scenario JSON reference](scenario-json.md) | The visual designer; every field of a scenario file, with examples and a prompt template for writing scenarios with a language model |
 | **Developer / agent builder** | [API reference](api.md) | The HTTP and WebSocket API: sessions, instructions, the picture, prediction, weather products. |
 
 The [weather modelling](weather.md) and [aircraft, pilots and airspace](aircraft.md) pages describe how the

@@ -220,4 +220,14 @@ for n in ("w01_west_scattered_cb", "w02_west_squall_line", "o01_oceanic_light_wx
           "c01_cta_moderate_wx", "c02_cta_severe_wx"):
     r = load_scenario(n)["traffic_load"]["ratio"]
     ok(0.9 <= r <= 1.15, f"{n}: {r:.0%} of the declared capacity (slight overshoot at most)")
+try:                                                       # the documented JSON Schema accepts the whole library
+    import glob as _glob, json as _json, jsonschema
+    from atcsim.docs_gen import SCHEMA
+    _v = jsonschema.Draft202012Validator(SCHEMA)
+    bad = [f for f in _glob.glob("scenarios/*.json") if list(_v.iter_errors(_json.load(open(f))))]
+    ok(not bad, f"every library scenario matches the JSON Schema {bad}")
+    ok(list(_v.iter_errors({"name": "x", "aircraft": [{"callsign": "A1", "type": "B738", "route": ["N1", "S1"], "fl": 350}]})),
+       "the schema refuses an aircraft without timing")
+except ImportError:
+    print("  (jsonschema not installed: schema check skipped)")
 print("atc tools checks passed")

@@ -78,6 +78,15 @@ ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_red
    and anon.get("/help/api").status_code == 200 and anon.get("/api/help/controller").status_code == 200,
    "help pages are public")
 ok(atc.get("/api/help/nope").status_code == 404, "unknown doc page")
+sj = anon.get("/api/help/scenario-json").json()["markdown"]
+ok("<!-- REFERENCE -->" not in sj and "| VEDOD |" in sj and "| B738 |" in sj and "Prompt template" in sj,
+   "scenario JSON reference with the generated appendix (points, types)")
+sch = anon.get("/api/help/scenario.schema.json").json()
+ok(sch["required"] == ["name", "aircraft"] and "aircraft" in sch["$defs"], "JSON Schema served")
+ref = anon.get("/api/help/reference.json").json()
+ok(any(p["name"] == "IBALU" for p in ref["airspaces"]["agadir"]["points"]) and
+   ref["airspaces"]["agadir"]["capacity_per_hour"]["WN+WS"] == 48 and len(ref["aircraft_types"]) >= 40,
+   "reference data served")
 ins2 = client("ins2@gmail.com")
 boss.patch(f"/api/users/{db.user_by_email('ins2@gmail.com')['id']}", json={"role": "instructor"})
 ok(not any(s["name"] == COPY for s in ins2.get("/api/scenarios").json()), "other instructor does not see it")

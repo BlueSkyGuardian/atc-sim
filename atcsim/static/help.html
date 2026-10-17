@@ -43,7 +43,8 @@
 <body>
 <div class="docs">
   <nav class="side" id="side"><input id="q" placeholder="Search the documentation" autocomplete="off"><div class="hits" id="hits"></div><div id="nav"></div></nav>
-  <article id="doc"><p class="dim">Loading…</p></article>
+  <div style="min-width:0"><div class="row" id="tools" style="justify-content:flex-end;gap:6px;margin-bottom:-4px"></div>
+  <article id="doc"><p class="dim">Loading…</p></article></div>
   <aside class="toc" id="toc"></aside>
 </div>
 <script src="/static/common.js"></script>
@@ -88,6 +89,10 @@ async function show(slug, hash, push) {
     b.onclick = () => { navigator.clipboard && navigator.clipboard.writeText(pre.querySelector('code').innerText); b.textContent = 'copied'; setTimeout(() => b.textContent = 'copy', 1200); };
     pre.appendChild(b);
   });
+  const extra = slug === 'scenario-json' ? `<a href="/api/help/scenario.schema.json" download="scenario.schema.json"><button class="small">⤓ JSON Schema</button></a>
+      <a href="/api/help/reference.json" download="atcsim-reference.json"><button class="small">⤓ Reference data</button></a>` : '';
+  $('#tools').innerHTML = `${extra}<button class="small" id="cpMd" title="Copy this page as Markdown (e.g. to paste into a language model)">⧉ Copy page as Markdown</button>`;
+  $('#cpMd').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(md); $('#cpMd').textContent = '✓ copied'; setTimeout(() => { const b = $('#cpMd'); if (b) b.textContent = '⧉ Copy page as Markdown'; }, 1500); };
   const t = PAGES.find(p => p.slug === slug);
   document.title = (t ? t.title : 'Help') + ' · ATC SIM';
   renderNav(slug);
