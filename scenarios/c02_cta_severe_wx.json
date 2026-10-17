@@ -236,7 +236,6 @@
       "type": "F16",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 350,
@@ -250,8 +249,8 @@
       "remarks": "STS/STATE",
       "reach": {
         "point": [
-          -14.682,
-          -17.206
+          -35.921,
+          -47.472
         ],
         "time": 1600
       },
@@ -259,7 +258,7 @@
         "ssr": "4662",
         "reg": "CN-YHK",
         "code": "0208EF",
-        "eobt": "1237",
+        "eobt": "1238",
         "altn": "",
         "equipment": "SDFGHIUY/S",
         "opr": "",
@@ -282,8 +281,8 @@
       "dest": "ENGM",
       "reach": {
         "point": [
-          -14.682,
-          -17.206
+          -35.921,
+          -47.472
         ],
         "time": 1600
       },
@@ -291,7 +290,7 @@
         "ssr": "3740",
         "reg": "LN-NJB",
         "code": "47F220",
-        "eobt": "1445",
+        "eobt": "1450",
         "altn": "ESSA",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "NORWEGIAN",
@@ -541,7 +540,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 370,
+      "fl": 330,
       "load": 0.41,
       "entry_time": 601,
       "dep": "EDDF",
@@ -553,7 +552,7 @@
         "ssr": "4677",
         "reg": "LN-KRT",
         "code": "47B62F",
-        "eobt": "1244",
+        "eobt": "1246",
         "altn": "GCXO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "NORWEGIAN AIR SHUTTLE",
@@ -941,7 +940,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 330,
+      "fl": 350,
       "load": 0.45,
       "entry_time": -551,
       "dep": "EDDF",
@@ -953,7 +952,7 @@
         "ssr": "3066",
         "reg": "EC-LMU",
         "code": "35F3D2",
-        "eobt": "1237",
+        "eobt": "1238",
         "altn": "SVMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "VUELING",
@@ -1022,7 +1021,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 310,
+      "fl": 370,
       "load": 0.48,
       "entry_time": 587,
       "dep": "EDDF",
@@ -1034,7 +1033,7 @@
         "ssr": "3652",
         "reg": "D-AVUP",
         "code": "3E5A9E",
-        "eobt": "1247",
+        "eobt": "1244",
         "altn": "SVMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "DEUTSCHE LUFTHANSA",
@@ -1286,10 +1285,9 @@
       "type": "A320",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
-      "fl": 310,
+      "fl": 330,
       "load": 0.51,
       "entry_time": 1530,
       "dep": "LPAZ",
@@ -1301,7 +1299,7 @@
         "ssr": "5653",
         "reg": "CS-TVD",
         "code": "49737F",
-        "eobt": "1409",
+        "eobt": "1408",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TAP AIR PORTUGAL",
@@ -1604,7 +1602,7 @@
       }
     }
   ],
-  "design_notes": "EZY39WK (northbound UN858, FL380) reports unable RVSM at T+11:40 and crosses DLH512 (RUNAX-IBALU-SAMAR, FL390) in West South at T+25:00. RMF4425 (C130 state aircraft, non-RVSM, FL250) asks FL290: allowed for a state aircraft, but it needs 2000 ft and BTI6JW at FL270 is ahead on UN857 - check who it climbs through. VIPER31 (4xF16, NIPRI-NIDEB-ROLRO at FL350) crosses NOZ5KX northbound on UN858 at FL340. GMMN arrivals: RAM761 and RAM213 reach SALCA 40 s apart; GCRR arrivals EXS59R and TOM88J reach TERTO 45 s apart; RAM767 at MARJA. The squall line forces deviations through three gaps across UN873, UN858, UN857 and the TERTO arrivals.",
+  "design_notes": "EZY39WK (northbound UN858, FL380) reports unable RVSM at T+11:40 and crosses DLH512 (RUNAX-IBALU-SAMAR, FL390) in West South at T+25:00. RMF4425 (C130 state aircraft, non-RVSM, FL250) asks FL290: allowed for a state aircraft, but it needs 2000 ft and BTI6JW at FL270 is ahead on UN857 - check who it climbs through. VIPER31 (4xF16, NIPRI-ROLRO at FL350) crosses NOZ5KX northbound on UN858 at FL340. GMMN arrivals: RAM761 and RAM213 reach SALCA 40 s apart; GCRR arrivals EXS59R and TOM88J reach TERTO 45 s apart; RAM767 at MARJA. The squall line forces deviations through three gaps across UN873, UN858, UN857 and the TERTO arrivals.",
   "expected": {
     "passive": {
       "allow_left_sector": true,

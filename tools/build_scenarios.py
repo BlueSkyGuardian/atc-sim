@@ -912,7 +912,7 @@ def w01():
             ac("BEL5AT", "A332", UN858, 360, None, at=AT_BEXAL_UN858, t=700, dep="GOBD", dest="EBBR", load=0.4),
             ac("RYR81DQ", "B38M", UN858, 340, None, at="IBLIV", t=1800, dep="GCTS", dest="EGSS"),
             ac("EZY64LK", "A20N", UN858, 340, None, at="IBLIV", t=1870, dep="GCTS", dest="EGKK"),
-            ac("RAM1307", "B738", ["NIPRI", "NIDEB", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1300, dep="LPAZ",
+            ac("RAM1307", "B738", ["NIPRI", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1300, dep="LPAZ",
                dest="GMAD"),
             ac("TAP1462", "A20N", ["TAKAV", "VEDOD", "TERTO"], 350, None, at=AT_ROLRO_TKV, t=1300, dep="LPPT",
                dest="GCXO"),
@@ -927,8 +927,8 @@ def w01():
                   req(1440, "RAM1402", "altitude", 380, "requesting cruise level"),
                   req(560, "RAM205", "altitude", 250, "descent for Casablanca")],
         design_notes="Planted conflicts (passive): EWG7TB (standard route) and IBE3215 (UN857) merge at IBALU at "
-                     "FL350 18 s apart; RAM1307 (NIPRI-NIDEB-ROLRO) crosses TAP1462 on TAKAV-VEDOD at FL350 soon "
-                     "after entering at NIDEB; EXS82H (UN857, GCRR arrival) and TOM5LX (TAKAV-VEDOD) merge at VEDOD at "
+                     "FL350 18 s apart; RAM1307 (NIPRI-ROLRO) crosses TAP1462 on TAKAV-VEDOD at FL350 in "
+                     "West South; EXS82H (UN857, GCRR arrival) and TOM5LX (TAKAV-VEDOD) merge at VEDOD at "
                      "FL370 25 s apart. Request traps (naive): RAM205 (SALCA arrival from BEXAL, FL370) asks descent "
                      "and would descend through BEL5AT (northbound on UN858) where the tracks cross; RYR81DQ "
                      "(northbound UN858, FL340) asks Mach .74 with EZY64LK 9 NM behind at the same level; GMMN departure RAM1402 asks FL380 "
@@ -954,8 +954,8 @@ def w02():
         title="West sectors, severe squall line, unable RVSM, formation, arrival sequences",
         description="West sectors band-boxed (WW = WN+WS), about 10 % over the declared capacity (48 flights/h). A severe squall line (tops FL450-500) "
                     "lies across West South with two gaps, drifting north-east. GCRR arrivals via TERTO and GMMN "
-                    "arrivals via MARJA (LoA FL250, 10 NM in trail). A Moroccan F-16 four-ship leaves ROLRO for "
-                    "the oceanic area via NIDEB.",
+                    "arrivals via MARJA (LoA FL250, 10 NM in trail). A Moroccan F-16 four-ship crosses West "
+                    "South on NIPRI-ROLRO.",
         control=["WN", "WS"], weather=WX_W_SEV,
         aircraft=[
             ac("RYR4WJ", "B738", UN858, 380, None, at=AT_BEXAL_UN858, t=1300, dep="GVAC", dest="EGSS"),
@@ -963,7 +963,7 @@ def w02():
                dest="GMMX"),
             ac("N215CJ", "C550", ["VASTO", "BAROK"], 280, None, entry=200, dep="GCLP", dest="LPPT", rvsm=False,
                equipment="SDFGRY/S", remarks="FERRY FLT NON-RVSM"),
-            ac("VIPER21", "F16", ["NIPRI", "NIDEB", "ROLRO"], 310, None, at=AT_ROLRO_UN858, t=330, dep="GMSL",
+            ac("VIPER21", "F16", ["NIPRI", "ROLRO"], 310, None, at=AT_ROLRO_UN858, t=330, dep="GMSL",
                dest="GMSL", formation={"size": 4, "types": "4xF16", "extent_nm": 1.0}, remarks="STS/STATE"),
             # early, so that SWR2NK is already north of the squall line at T+0
             ac("SWR2NK", "A320", UN858, 320, None, at=AT_ROLRO_UN858, t=330, dep="GCTS", dest="LSZH"),
@@ -981,7 +981,7 @@ def w02():
         design_notes="RYR4WJ (northbound UN858, FL380) reports unable RVSM at T+15:00; at T+21:40 it crosses "
                      "RAM1201 (BEXAL-IBALU-SALCA to Marrakech, FL370) in West North: legal with RVSM, a loss of separation without "
                      "(2000 ft needed). N215CJ (C550 ferry, not RVSM approved) asks FL400: approving it is "
-                     "an RVSM airspace violation. VIPER21 (4xF16, NIPRI-NIDEB-ROLRO at FL310, non-RVSM formation, 2000 ft "
+                     "an RVSM airspace violation. VIPER21 (4xF16, NIPRI-ROLRO at FL310, non-RVSM formation, 2000 ft "
                      "from everyone) crosses SWR2NK northbound on UN858 at FL320. Three GCRR arrivals reach TERTO 50 s apart "
                      "(FL350-390) and two GMMN arrivals reach MARJA 45 s apart: spacing and LoA level. The squall "
                      "line funnels the West South traffic through two gaps.",
@@ -1002,7 +1002,7 @@ def o01():
         description="Oceanic sectors band-boxed (OCE = OCN+OCS), at the declared capacity (51 flights/h): southbound Europe-South America and "
                     "Canaries traffic on UN873, UN866 and RUNAX-IBALU-SAMAR, northbound South America / Canaries "
                     "traffic on the SAMAR-BEXAL, SAMAR-TIGGI, VASTO-BAROK and VASTO-NIDEB-TIGGI RAD routings, "
-                    "NIPRI-NIDEB-ROLRO traffic from the Azores. A few isolated moderate storms in Oceanic North.",
+                    "NIPRI-ROLRO traffic from the Azores. A few isolated moderate storms in Oceanic North.",
         control=["ON", "OS"], weather=WX_O_LIGHT,
         aircraft=[
             ac("AZU8711", "A332", ["SAMAR", "TIGGI"], 380, None, at="TIGGI", t=2200, dep="SBKP", dest="LPPT", load=0.4),
@@ -1015,7 +1015,7 @@ def o01():
             ac("TAM8065", "B77W", UN866, 370, 0.86, at="KUBIL", t=990, dep="LFPG", dest="SBGR", load=0.4),
             ac("TAP104", "A332", ["SAMAR", "BEXAL"], 340, None, at="BEXAL", t=1300, dep="SBGL", dest="LPPT", load=0.4),
             ac("KLM793", "B789", UN866, 350, None, entry=0, dep="EHAM", dest="SBGR", load=0.4),
-            ac("RZO131", "A321", ["NIPRI", "NIDEB", "ROLRO"], 330, None, at=AT_NIPRI_UN873, t=2500, dep="LPPD",
+            ac("RZO131", "A321", ["NIPRI", "ROLRO"], 330, None, at=AT_NIPRI_UN873, t=2500, dep="LPPD",
                dest="GMMX"),
             ac("VLG7831", "A320", UN873, 330, None, at=AT_NIPRI_UN873, t=2500, dep="LEBL", dest="GCLA"),
             ac("TVF7724", "B738", UN873, 370, None, at=tvf_pt, t=2300, dep="LFPO", dest="GVAC"),
@@ -1027,7 +1027,7 @@ def o01():
         design_notes="Planted: AZU8711 (SAMAR-TIGGI) and VLG6703 (VASTO-NIDEB-TIGGI) merge at TIGGI at FL380 22 s "
                      "apart; IBE6011 (UN873) and DLH518 (RUNAX-IBALU-SAMAR) merge at SAMAR at FL350; TAM8065 (M.86) "
                      "overtakes AFR418 (M.80) on UN866 at FL370, 12 NM behind at KUBIL (a sleeper: the loss comes "
-                     "about 15 minutes later); RZO131 (NIPRI-NIDEB-ROLRO) crosses VLG7831 on UN873 at FL330; TVF7724 "
+                     "about 15 minutes later); RZO131 (NIPRI-ROLRO) crosses VLG7831 on UN873 at FL330; TVF7724 "
                      "(UN873, FL370) reports unable RVSM at T+30:00 and passes AVA10 (northbound FL380) 2-3 NM "
                      "abeam 20 NM before SAMAR. Request trap: TAP104 (northbound, FL340) asks FL380 when KLM793 is "
                      "leaving BEXAL southbound at FL350 on the same line.",
@@ -1162,7 +1162,7 @@ def c02():
             ac("RMF4425", "C130", UN857, 250, None, at="IBALU", t=500, dep="GMME", dest="GMML", load=0.15,
                remarks="STS/STATE"),
             ac("BTI6JW", "A320", UN857, 270, None, entry=0, dep="EBBR", dest="GCFV"),
-            ac("VIPER31", "F16", ["NIPRI", "NIDEB", "ROLRO"], 350, None, at=AT_ROLRO_UN858, t=1600, dep="GMSL",
+            ac("VIPER31", "F16", ["NIPRI", "ROLRO"], 350, None, at=AT_ROLRO_UN858, t=1600, dep="GMSL",
                dest="GMSL", formation={"size": 4, "types": "4xF16", "extent_nm": 1.0}, remarks="STS/STATE"),
             ac("NOZ5KX", "B38M", UN858, 340, None, at=AT_ROLRO_UN858, t=1600, dep="GCLP", dest="ENGM"),
             ac("RAM767", "B738", ["AMSEL", "ABODA", "MARJA"], 310, None, at="MARJA", t=1700, dep="EHAM",
@@ -1179,7 +1179,7 @@ def c02():
         design_notes="EZY39WK (northbound UN858, FL380) reports unable RVSM at T+11:40 and crosses DLH512 "
                      "(RUNAX-IBALU-SAMAR, FL390) in West South at T+25:00. RMF4425 (C130 state aircraft, non-RVSM, FL250) asks FL290: "
                      "allowed for a state aircraft, but it needs 2000 ft and BTI6JW at FL270 is ahead on UN857 - "
-                     "check who it climbs through. VIPER31 (4xF16, NIPRI-NIDEB-ROLRO at FL350) crosses NOZ5KX northbound on UN858 at FL340. GMMN "
+                     "check who it climbs through. VIPER31 (4xF16, NIPRI-ROLRO at FL350) crosses NOZ5KX northbound on UN858 at FL340. GMMN "
                      "arrivals: RAM761 and RAM213 reach SALCA 40 s apart; GCRR arrivals EXS59R and TOM88J reach "
                      "TERTO 45 s apart; RAM767 at MARJA. The squall line forces deviations through three gaps "
                      "across UN873, UN858, UN857 and the TERTO arrivals.",
@@ -1201,11 +1201,11 @@ def p01():
         title="Step 1 - West South alone, light traffic, two merges",
         description="West South (WS) open on its own, traffic about half its declared capacity (43 flights/h). "
                     "Settled northerly weather, no storms. Southbound Europe-Canaries flows on UN857, the RUNAX "
-                    "standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-NIDEB-ROLRO "
+                    "standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-ROLRO "
                     "traffic from the Azores.",
         control=["WS"], duration_s=2700, complexity=2, weather=wx(NORTHERLY, seed=201),
         aircraft=[
-            ac("RAM1311", "B738", ["NIPRI", "NIDEB", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPAZ",
+            ac("RAM1311", "B738", ["NIPRI", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPAZ",
                dest="GMAD"),
             ac("TAP1478", "A20N", ["TAKAV", "VEDOD", "TERTO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPPT",
                dest="GCXO"),
@@ -1213,8 +1213,8 @@ def p01():
             ac("TOM3KD", "B38M", ["TAKAV", "VEDOD", "TERTO"], 370, None, at="VEDOD", t=2125, dep="EGGW",
                dest="GCFV", overflight=True),
         ],
-        design_notes="Two planted conflicts, each with a single obvious fix: RAM1311 (NIPRI-NIDEB-ROLRO, FL350) "
-                     "crosses TAP1478 (TAKAV-VEDOD, FL350) soon after NIDEB; EXS64M (UN857) and TOM3KD (TAKAV-VEDOD) "
+        design_notes="Two planted conflicts, each with a single obvious fix: RAM1311 (NIPRI-ROLRO, FL350) "
+                     "crosses TAP1478 (TAKAV-VEDOD, FL350) in mid-sector; EXS64M (UN857) and TOM3KD (TAKAV-VEDOD) "
                      "merge at VEDOD at FL370 25 s apart. A level change or a few degrees of heading solves each.",
         expected={"passive": {"allow_left_sector": True, "los": True,
                               "pairs": [["RAM1311", "TAP1478"], ["EXS64M", "TOM3KD"]]}},
@@ -1381,10 +1381,10 @@ def p06():
 
 AT_BEXAL_UN858 = XA(["BEXAL", "IBALU"], ["AKUDA", "SUNID"])
 AT_SUBAL_UN858 = XA(["SUBAL", "IBALU"], ["AKUDA", "SUNID"])
-AT_ROLRO_TKV = XA(["NIDEB", "ROLRO"], ["TAKAV", "VEDOD"])
-AT_ROLRO_UN858 = XA(["NIDEB", "ROLRO"], ["DIMSA", "IBLIV"])
+AT_ROLRO_TKV = XA(["NIPRI", "ROLRO"], ["TAKAV", "VEDOD"])
+AT_ROLRO_UN858 = XA(["NIPRI", "ROLRO"], ["DIMSA", "IBLIV"])
 AT_SAMAR_UN858 = XA(["IBALU", "SAMAR"], ["IBLIV", "DIMSA"])
-AT_NIPRI_UN873 = XA(["NIPRI", "NIDEB"], ["BENTU", "ABTIR"])
+AT_NIPRI_UN873 = XA(["NIPRI", "ROLRO"], ["ABTIR", "MITLA"])
 
 # ---------------------------------------------------------------------------------------------
 def check(s: dict) -> list:

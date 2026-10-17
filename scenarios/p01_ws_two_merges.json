@@ -8,7 +8,7 @@
   "requests": [],
   "events": [],
   "title": "Step 1 - West South alone, light traffic, two merges",
-  "description": "West South (WS) open on its own, traffic about half its declared capacity (43 flights/h). Settled northerly weather, no storms. Southbound Europe-Canaries flows on UN857, the RUNAX standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-NIDEB-ROLRO traffic from the Azores.",
+  "description": "West South (WS) open on its own, traffic about half its declared capacity (43 flights/h). Settled northerly weather, no storms. Southbound Europe-Canaries flows on UN857, the RUNAX standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-ROLRO traffic from the Azores.",
   "control": [
     "WS"
   ],
@@ -66,7 +66,6 @@
       "type": "B738",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 350,
@@ -74,8 +73,8 @@
       "dest": "GMAD",
       "reach": {
         "point": [
-          2.828,
-          -43.348
+          -5.968,
+          -62.792
         ],
         "time": 1100
       },
@@ -83,7 +82,7 @@
         "ssr": "4510",
         "reg": "CN-RCD",
         "code": "0233AB",
-        "eobt": "0712",
+        "eobt": "0713",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "ROYAL AIR MAROC",
@@ -103,8 +102,8 @@
       "dest": "GCXO",
       "reach": {
         "point": [
-          2.828,
-          -43.348
+          -5.968,
+          -62.792
         ],
         "time": 1100
       },
@@ -112,7 +111,7 @@
         "ssr": "3662",
         "reg": "CS-TFV",
         "code": "49031E",
-        "eobt": "0757",
+        "eobt": "0755",
         "altn": "GCTS",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TAP AIR PORTUGAL",
@@ -500,7 +499,6 @@
       "type": "A320",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 390,
@@ -515,7 +513,7 @@
         "ssr": "5412",
         "reg": "CS-TXT",
         "code": "4962BA",
-        "eobt": "0214",
+        "eobt": "0217",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TAP AIR PORTUGAL",
@@ -577,7 +575,7 @@
       }
     }
   ],
-  "design_notes": "Two planted conflicts, each with a single obvious fix: RAM1311 (NIPRI-NIDEB-ROLRO, FL350) crosses TAP1478 (TAKAV-VEDOD, FL350) soon after NIDEB; EXS64M (UN857) and TOM3KD (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart. A level change or a few degrees of heading solves each.",
+  "design_notes": "Two planted conflicts, each with a single obvious fix: RAM1311 (NIPRI-ROLRO, FL350) crosses TAP1478 (TAKAV-VEDOD, FL350) in mid-sector; EXS64M (UN857) and TOM3KD (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart. A level change or a few degrees of heading solves each.",
   "expected": {
     "passive": {
       "allow_left_sector": true,

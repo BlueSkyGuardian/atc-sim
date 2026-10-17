@@ -723,7 +723,7 @@
         "SUNID",
         "AKUDA"
       ],
-      "fl": 300,
+      "fl": 320,
       "load": 0.43,
       "entry_time": 2923,
       "dep": "GCLP",
@@ -1073,7 +1073,6 @@
       "type": "B788",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 350,
@@ -1088,7 +1087,7 @@
         "ssr": "5636",
         "reg": "CN-RLQ",
         "code": "021CBE",
-        "eobt": "0902",
+        "eobt": "0904",
         "altn": "GMMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",
@@ -1100,10 +1099,9 @@
       "type": "A320",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
-      "fl": 350,
+      "fl": 290,
       "load": 0.48,
       "entry_time": 2760,
       "dep": "KJFK",
@@ -1115,7 +1113,7 @@
         "ssr": "4602",
         "reg": "CS-TYN",
         "code": "49536D",
-        "eobt": "0435",
+        "eobt": "0445",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "SATA AIR ACORES",

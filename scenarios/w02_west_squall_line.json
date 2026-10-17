@@ -37,7 +37,7 @@
     }
   ],
   "title": "West sectors, severe squall line, unable RVSM, formation, arrival sequences",
-  "description": "West sectors band-boxed (WW = WN+WS), about 10 % over the declared capacity (48 flights/h). A severe squall line (tops FL450-500) lies across West South with two gaps, drifting north-east. GCRR arrivals via TERTO and GMMN arrivals via MARJA (LoA FL250, 10 NM in trail). A Moroccan F-16 four-ship leaves ROLRO for the oceanic area via NIDEB.",
+  "description": "West sectors band-boxed (WW = WN+WS), about 10 % over the declared capacity (48 flights/h). A severe squall line (tops FL450-500) lies across West South with two gaps, drifting north-east. GCRR arrivals via TERTO and GMMN arrivals via MARJA (LoA FL250, 10 NM in trail). A Moroccan F-16 four-ship crosses West South on NIPRI-ROLRO.",
   "control": [
     "WN",
     "WS"
@@ -208,7 +208,6 @@
       "type": "F16",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 310,
@@ -222,8 +221,8 @@
       "remarks": "STS/STATE",
       "reach": {
         "point": [
-          -14.682,
-          -17.206
+          -35.921,
+          -47.472
         ],
         "time": 330
       },
@@ -231,7 +230,7 @@
         "ssr": "4717",
         "reg": "CN-ZEC",
         "code": "02256F",
-        "eobt": "1522",
+        "eobt": "1521",
         "altn": "",
         "equipment": "SDFGHIUY/S",
         "opr": "",
@@ -254,8 +253,8 @@
       "dest": "LSZH",
       "reach": {
         "point": [
-          -14.682,
-          -17.206
+          -35.921,
+          -47.472
         ],
         "time": 330
       },
@@ -263,7 +262,7 @@
         "ssr": "2346",
         "reg": "HB-JWE",
         "code": "4B63C7",
-        "eobt": "1550",
+        "eobt": "1554",
         "altn": "LIMC",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "SWISS",
@@ -698,7 +697,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 310,
+      "fl": 330,
       "load": 0.38,
       "entry_time": 453,
       "dep": "LPPT",
@@ -710,7 +709,7 @@
         "ssr": "2447",
         "reg": "SE-RCZ",
         "code": "4ADD49",
-        "eobt": "1612",
+        "eobt": "1611",
         "altn": "GCTS",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "SAS",
@@ -1398,10 +1397,9 @@
       "type": "B738",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
-      "fl": 370,
+      "fl": 310,
       "load": 0.45,
       "entry_time": 244,
       "dep": "KJFK",
@@ -1413,7 +1411,7 @@
         "ssr": "3402",
         "reg": "CN-RQZ",
         "code": "0223D8",
-        "eobt": "0951",
+        "eobt": "1002",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "ROYAL AIR MAROC",
@@ -1425,10 +1423,9 @@
       "type": "B788",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
-      "fl": 350,
+      "fl": 390,
       "load": 0.43,
       "entry_time": 1577,
       "dep": "KJFK",
@@ -1440,7 +1437,7 @@
         "ssr": "3112",
         "reg": "CN-RDW",
         "code": "021A52",
-        "eobt": "1048",
+        "eobt": "1049",
         "altn": "GMMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",
@@ -1452,7 +1449,6 @@
       "type": "B788",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 390,
@@ -1467,7 +1463,7 @@
         "ssr": "2412",
         "reg": "CN-RSB",
         "code": "023D48",
-        "eobt": "1105",
+        "eobt": "1107",
         "altn": "GMMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",
@@ -1636,7 +1632,7 @@
       }
     }
   ],
-  "design_notes": "RYR4WJ (northbound UN858, FL380) reports unable RVSM at T+15:00; at T+21:40 it crosses RAM1201 (BEXAL-IBALU-SALCA to Marrakech, FL370) in West North: legal with RVSM, a loss of separation without (2000 ft needed). N215CJ (C550 ferry, not RVSM approved) asks FL400: approving it is an RVSM airspace violation. VIPER21 (4xF16, NIPRI-NIDEB-ROLRO at FL310, non-RVSM formation, 2000 ft from everyone) crosses SWR2NK northbound on UN858 at FL320. Three GCRR arrivals reach TERTO 50 s apart (FL350-390) and two GMMN arrivals reach MARJA 45 s apart: spacing and LoA level. The squall line funnels the West South traffic through two gaps.",
+  "design_notes": "RYR4WJ (northbound UN858, FL380) reports unable RVSM at T+15:00; at T+21:40 it crosses RAM1201 (BEXAL-IBALU-SALCA to Marrakech, FL370) in West North: legal with RVSM, a loss of separation without (2000 ft needed). N215CJ (C550 ferry, not RVSM approved) asks FL400: approving it is an RVSM airspace violation. VIPER21 (4xF16, NIPRI-ROLRO at FL310, non-RVSM formation, 2000 ft from everyone) crosses SWR2NK northbound on UN858 at FL320. Three GCRR arrivals reach TERTO 50 s apart (FL350-390) and two GMMN arrivals reach MARJA 45 s apart: spacing and LoA level. The squall line funnels the West South traffic through two gaps.",
   "expected": {
     "passive": {
       "allow_left_sector": true,

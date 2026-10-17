@@ -731,7 +731,7 @@
         "KUBIL",
         "BEXAL"
       ],
-      "fl": 340,
+      "fl": 360,
       "load": 0.53,
       "entry_time": 1368,
       "dep": "SBRF",
@@ -743,7 +743,7 @@
         "ssr": "4700",
         "reg": "EC-HEP",
         "code": "36206F",
-        "eobt": "1523",
+        "eobt": "1520",
         "altn": "EGNM",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AIR EUROPA",
@@ -1579,7 +1579,6 @@
       "type": "A320",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 390,

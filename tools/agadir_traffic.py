@@ -88,7 +88,7 @@ FLOWS = {
                       ops=["RAM"], dep=["KJFK", "KMIA", "KBOS", "KORD", "CYUL"], dest=["GMMN"], arrival=True),
     "salca_nat": dict(route=["BEXAL", "IBALU", "SALCA"], rate=2, levels=range(330, 400, 10), types=["B788", "B789"],
                       ops=["RAM"], dep=["KJFK", "KMIA", "KIAD", "CYUL", "KBOS"], dest=["GMMN"], arrival=True),
-    "nipri_rolro": dict(route=["NIPRI", "NIDEB", "ROLRO"], rate=2, levels=range(310, 400, 10), types=["B738", "A320", "B788"],
+    "nipri_rolro": dict(route=["NIPRI", "ROLRO"], rate=2, levels=range(310, 400, 10), types=["B738", "A320", "B788"],
                         ops=["RAM", "TAP", "SAT"], dep=["LPPD", "LPAZ", "KJFK"], dest=["GMMX", "GMAD"]),
     # northbound
     "konba_bexal": dict(route=UN866[::-1], rate=3, levels=range(300, 420, 10), types=LONG, ops=LONG_OPS,

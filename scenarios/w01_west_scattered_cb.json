@@ -297,7 +297,6 @@
       "type": "B738",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 350,
@@ -305,8 +304,8 @@
       "dest": "GMAD",
       "reach": {
         "point": [
-          2.828,
-          -43.348
+          -5.968,
+          -62.792
         ],
         "time": 1300
       },
@@ -314,7 +313,7 @@
         "ssr": "5066",
         "reg": "CN-RYY",
         "code": "020673",
-        "eobt": "0813",
+        "eobt": "0815",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "ROYAL AIR MAROC",
@@ -335,8 +334,8 @@
       "dest": "GCXO",
       "reach": {
         "point": [
-          2.828,
-          -43.348
+          -5.968,
+          -62.792
         ],
         "time": 1300
       },
@@ -344,7 +343,7 @@
         "ssr": "4344",
         "reg": "CS-TZL",
         "code": "4969A8",
-        "eobt": "0856",
+        "eobt": "0853",
         "altn": "GCTS",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TAP AIR PORTUGAL",
@@ -899,7 +898,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 370,
+      "fl": 290,
       "load": 0.43,
       "entry_time": 409,
       "dep": "EGLL",
@@ -911,7 +910,7 @@
         "ssr": "5001",
         "reg": "EC-XLF",
         "code": "367AB1",
-        "eobt": "0721",
+        "eobt": "0724",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA EXPRESS",
@@ -1170,7 +1169,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 290,
+      "fl": 410,
       "load": 0.46,
       "entry_time": 3384,
       "dep": "LIMC",
@@ -1182,7 +1181,7 @@
         "ssr": "4360",
         "reg": "EC-ZJC",
         "code": "379BA8",
-        "eobt": "0827",
+        "eobt": "0834",
         "altn": "SVMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "IBERIA EXPRESS",
@@ -1483,7 +1482,7 @@
       }
     }
   ],
-  "design_notes": "Planted conflicts (passive): EWG7TB (standard route) and IBE3215 (UN857) merge at IBALU at FL350 18 s apart; RAM1307 (NIPRI-NIDEB-ROLRO) crosses TAP1462 on TAKAV-VEDOD at FL350 soon after entering at NIDEB; EXS82H (UN857, GCRR arrival) and TOM5LX (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart. Request traps (naive): RAM205 (SALCA arrival from BEXAL, FL370) asks descent and would descend through BEL5AT (northbound on UN858) where the tracks cross; RYR81DQ (northbound UN858, FL340) asks Mach .74 with EZY64LK 9 NM behind at the same level; GMMN departure RAM1402 asks FL380 climbing through CFG4MT (RUNAX standard route, level set to the one RAM1402 climbs through there) at the MARJA-ABODA crossing. Weather deviations around the West South cells add the rest.",
+  "design_notes": "Planted conflicts (passive): EWG7TB (standard route) and IBE3215 (UN857) merge at IBALU at FL350 18 s apart; RAM1307 (NIPRI-ROLRO) crosses TAP1462 on TAKAV-VEDOD at FL350 in West South; EXS82H (UN857, GCRR arrival) and TOM5LX (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart. Request traps (naive): RAM205 (SALCA arrival from BEXAL, FL370) asks descent and would descend through BEL5AT (northbound on UN858) where the tracks cross; RYR81DQ (northbound UN858, FL340) asks Mach .74 with EZY64LK 9 NM behind at the same level; GMMN departure RAM1402 asks FL380 climbing through CFG4MT (RUNAX standard route, level set to the one RAM1402 climbs through there) at the MARJA-ABODA crossing. Weather deviations around the West South cells add the rest.",
   "expected": {
     "passive": {
       "allow_left_sector": true,

@@ -92,7 +92,7 @@ Madeira, Sevilla, Canarias, Casablanca), which OLDI and the labels use.
 - **Standard routes:** RUNAX–IBALU–ERMED–TOVRA–VEDOD–TERTO and DESUM–SULAM–UN858–AKUDA.
 - **RAD routings** (one way, dashed on the radar): RUNAX–IBALU–SAMAR, SUBAL–IBALU–SALCA, TAKAV–DOMOG,
   BEXAL–IBALU–SALCA, TAKAV–VEDOD–TERTO, VASTO–NIDEB–TIGGI, VASTO–BAROK, SAMAR–BEXAL, SAMAR–TIGGI and
-  NIPRI–NIDEB–ROLRO.
+  NIPRI–ROLRO.
 - **Entry / exit points:** KORNO, RUNAX, VASTO and DESUM are entry only; TERTO, TIGGI and AKUDA are exit only.
 - **Transfer points:** named points on the controlled boundary. Where a route crosses it between two points, a
   coordination point is generated, named C + two letters of each neighbour (e.g. `CTAVE` on TAKAV–VEDOD).

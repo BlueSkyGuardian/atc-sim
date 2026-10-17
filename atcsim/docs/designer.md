@@ -118,8 +118,8 @@ approved as asked, it must cause a loss.
   "control": ["WS"],
   "duration_s": 1800,
   "aircraft": [
-    {"callsign": "RAM1311", "type": "B738", "route": ["NIPRI", "NIDEB", "ROLRO"], "fl": 350,
-     "reach": {"waypoint": "NIDEB", "time": 900}},
+    {"callsign": "RAM1311", "type": "B738", "route": ["NIPRI", "ROLRO"], "fl": 350,
+     "reach": {"waypoint": "ROLRO", "time": 1300}},
     {"callsign": "TAP1478", "type": "A20N", "route": ["TAKAV", "VEDOD", "TERTO"], "fl": 350,
      "reach": {"waypoint": "VEDOD", "time": 1020}}
   ]

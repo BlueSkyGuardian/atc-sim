@@ -467,7 +467,7 @@ A 120 × 120 NM square, FL250–FL460, coordinates in NM from the centre (x east
   - VASTO–BAROK
   - SAMAR–BEXAL
   - SAMAR–TIGGI
-  - NIPRI–NIDEB–ROLRO
+  - NIPRI–ROLRO
 - **Neighbouring-sector points** (`external_points` in the JSON; small diamonds on the radar, `?` = provisional):
   Lisboa / Sevilla / Madrid (ELVAR, BARDI, AGADO, BALNO, MINTA, PESAS, PINEK, XERES, OBOLO, TOSDI, LPPT), Madeira
   on the Lisboa / Santa Maria boundary (MANOX, NAVIX, KOMUT, GUNTI), Casablanca and the approaches (ODAXA, CSD, SAK,

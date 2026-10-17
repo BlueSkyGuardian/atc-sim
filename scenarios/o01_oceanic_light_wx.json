@@ -23,7 +23,7 @@
     }
   ],
   "title": "Oceanic sectors, isolated storms, merges at TIGGI and SAMAR",
-  "description": "Oceanic sectors band-boxed (OCE = OCN+OCS), at the declared capacity (51 flights/h): southbound Europe-South America and Canaries traffic on UN873, UN866 and RUNAX-IBALU-SAMAR, northbound South America / Canaries traffic on the SAMAR-BEXAL, SAMAR-TIGGI, VASTO-BAROK and VASTO-NIDEB-TIGGI RAD routings, NIPRI-NIDEB-ROLRO traffic from the Azores. A few isolated moderate storms in Oceanic North.",
+  "description": "Oceanic sectors band-boxed (OCE = OCN+OCS), at the declared capacity (51 flights/h): southbound Europe-South America and Canaries traffic on UN873, UN866 and RUNAX-IBALU-SAMAR, northbound South America / Canaries traffic on the SAMAR-BEXAL, SAMAR-TIGGI, VASTO-BAROK and VASTO-NIDEB-TIGGI RAD routings, NIPRI-ROLRO traffic from the Azores. A few isolated moderate storms in Oceanic North.",
   "control": [
     "ON",
     "OS"
@@ -341,7 +341,6 @@
       "type": "A321",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 330,
@@ -349,8 +348,8 @@
       "dest": "GMMX",
       "reach": {
         "point": [
-          -59.885,
-          -0.901
+          -78.186,
+          -25.855
         ],
         "time": 2500
       },
@@ -358,7 +357,7 @@
         "ssr": "3740",
         "reg": "CS-TQN",
         "code": "490620",
-        "eobt": "0039",
+        "eobt": "0040",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AZORES AIRLINES",
@@ -381,8 +380,8 @@
       "dest": "GCLA",
       "reach": {
         "point": [
-          -59.885,
-          -0.901
+          -78.186,
+          -25.855
         ],
         "time": 2500
       },
@@ -390,7 +389,7 @@
         "ssr": "4624",
         "reg": "EC-JWM",
         "code": "35F92E",
-        "eobt": "0011",
+        "eobt": "0007",
         "altn": "GCTS",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "VUELING",
@@ -1472,7 +1471,6 @@
       "type": "B788",
       "route": [
         "NIPRI",
-        "NIDEB",
         "ROLRO"
       ],
       "fl": 330,
@@ -1495,7 +1493,7 @@
       }
     }
   ],
-  "design_notes": "Planted: AZU8711 (SAMAR-TIGGI) and VLG6703 (VASTO-NIDEB-TIGGI) merge at TIGGI at FL380 22 s apart; IBE6011 (UN873) and DLH518 (RUNAX-IBALU-SAMAR) merge at SAMAR at FL350; TAM8065 (M.86) overtakes AFR418 (M.80) on UN866 at FL370, 12 NM behind at KUBIL (a sleeper: the loss comes about 15 minutes later); RZO131 (NIPRI-NIDEB-ROLRO) crosses VLG7831 on UN873 at FL330; TVF7724 (UN873, FL370) reports unable RVSM at T+30:00 and passes AVA10 (northbound FL380) 2-3 NM abeam 20 NM before SAMAR. Request trap: TAP104 (northbound, FL340) asks FL380 when KLM793 is leaving BEXAL southbound at FL350 on the same line.",
+  "design_notes": "Planted: AZU8711 (SAMAR-TIGGI) and VLG6703 (VASTO-NIDEB-TIGGI) merge at TIGGI at FL380 22 s apart; IBE6011 (UN873) and DLH518 (RUNAX-IBALU-SAMAR) merge at SAMAR at FL350; TAM8065 (M.86) overtakes AFR418 (M.80) on UN866 at FL370, 12 NM behind at KUBIL (a sleeper: the loss comes about 15 minutes later); RZO131 (NIPRI-ROLRO) crosses VLG7831 on UN873 at FL330; TVF7724 (UN873, FL370) reports unable RVSM at T+30:00 and passes AVA10 (northbound FL380) 2-3 NM abeam 20 NM before SAMAR. Request trap: TAP104 (northbound, FL340) asks FL380 when KLM793 is leaving BEXAL southbound at FL350 on the same line.",
   "expected": {
     "passive": {
       "allow_left_sector": true,

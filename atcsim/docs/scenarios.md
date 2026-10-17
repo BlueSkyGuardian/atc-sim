@@ -21,14 +21,14 @@ Density is the traffic in the controlled sectors during the first hour against t
 
 | Step | Scenario | Sectors | Traffic / capacity | Complexity | Weather | What it trains |
 |---|---|---|---|---|---|---|
-| 1 | `p01_ws_two_merges` | WS | ~24/h · 55 % · density 2 | 2 | Settled northerly, no storms | Two planted conflicts with one obvious fix each: a crossing after NIDEB, a merge at VEDOD (45 min) |
+| 1 | `p01_ws_two_merges` | WS | ~24/h · 55 % · density 2 | 2 | Settled northerly, no storms | Two planted conflicts with one obvious fix each: the NIPRI–ROLRO crossing, a merge at VEDOD (45 min) |
 | 2 | `p02_wn_merges_and_climbs` | WN | ~40/h · 69 % · density 2 | 2 | Westerly jet | IBALU merge (standard route × UN857); a GMMN departure's climb request that crosses RUNAX traffic; Casablanca departures asking for cruise levels (45 min) |
 | 3 | `p03_ocn_isolated_storms` | OCN | ~44/h · 79 % · density 3 | 3 | Isolated moderate storms | TIGGI merge; a **sleeper**: M.86 catching M.80 on UN866, the loss 15 min later; a northbound climb request into southbound traffic leaving BEXAL; weather deviation requests |
 | 4 | `p04_ocs_embedded_unable_rvsm` | OCS | ~55/h · 85 % · density 3 | 3 | **Embedded** storms around MITLA | SAMAR merge; an aircraft reporting **unable RVSM** that later passes northbound traffic 1000 ft away; reading embedded cells on the CAPPI |
 | 5 | `p05_ws_storms_arrivals` | WS | ~41/h · 95 % · density 4 | 4 | Scattered strong storms | VEDOD merge next to the storms; **GCRR arrivals** at TERTO (FL250, 10 NM in trail); a non-RVSM ferry asking FL400; weather deviations |
 | 6 | `p06_wn_capacity_sequencing` | WN | ~58/h · 100 % · density 4 | 4 | Westerly jet | At capacity: unable RVSM crossing a Casablanca arrival; **GMMN arrivals** at MARJA 45 s apart; a descent request through northbound traffic |
 | 7 | `o01_oceanic_light_wx` | OCE (ON+OS) | ~50/h · 98 % · density 4 | 4 | Isolated moderate storms, jet | Merges at TIGGI and SAMAR, an overtaking sleeper, a crossing from the Azores, unable RVSM near SAMAR, a climb trap at BEXAL |
-| 8 | `w01_west_scattered_cb` | WW (WN+WS) | ~48/h · 100 % · density 4 | 4 | Scattered strong storms over WS | Merges at IBALU and VEDOD, a crossing after NIDEB; a descent trap, a Mach trap with a follower 9 NM behind, a departure climb trap |
+| 8 | `w01_west_scattered_cb` | WW (WN+WS) | ~48/h · 100 % · density 4 | 4 | Scattered strong storms over WS | Merges at IBALU and VEDOD, the NIPRI–ROLRO crossing; a descent trap, a Mach trap with a follower 9 NM behind, a departure climb trap |
 | 9 | `o02_oceanic_embedded_cb` | OCE | ~54/h · 106 % · density 5 | 5 | Embedded storms | Restricted area **R90** activating across UN866; a fighter pair (formation) against a northbound flight; non-RVSM ferry; Mach trap |
 | 10 | `w02_west_squall_line` | WW | ~53/h · 110 % · density 5 | 5 | **Severe squall line**, two gaps | Unable RVSM, a 4×F16 formation crossing UN858, TERTO and MARJA arrival sequences, a non-RVSM ferry asking FL400, traffic funnelled through the gaps |
 | 11 | `c01_cta_moderate_wx` | WW-OCE (all) | ~48/h · 102 % · density 4 | 5 | Scattered strong storms | The whole CTA: a TIGGI merge and five request traps across sectors; GCRR arrivals merging at VEDOD |
