@@ -20,6 +20,37 @@ def ok(c, m):
         raise SystemExit(1)
 
 
+def check_key_rbl(pg, who):
+    """Key B with nothing selected: from an aircraft under the mouse and from a point in space; the line follows the
+    mouse while it is drawn; a click places it."""
+    pg.evaluate("selected = null; rbls.length = 0; document.activeElement && document.activeElement.blur()")
+    pts = pg.evaluate("""() => { const c = cv.getBoundingClientRect(), d = devicePixelRatio, out = {};
+        const vis = (x, y) => x > c.left + 40 && x < c.right - 40 && y > c.top + 60 && y < c.bottom - 90 && document.elementFromPoint(x, y) === cv;
+        for (const a of state.aircraft) { const [x, y] = toPx(a.x_nm, a.y_nm), X = c.left + x / d, Y = c.top + y / d;
+          if (vis(X, Y) && rblTargetAt([x, y]) === a.callsign) { out.ac = [X, Y, a.callsign]; break; } }
+        for (let gx = 0.2; gx < 0.8 && !out.sp; gx += 0.05) for (let gy = 0.25; gy < 0.75 && !out.sp; gy += 0.05) {
+          const X = c.left + c.width * gx, Y = c.top + c.height * gy, q = [(X - c.left) * d, (Y - c.top) * d], t = rblTargetAt(q);
+          if (vis(X, Y) && typeof t === 'object' && !t.name && !labelRects.some(l => q[0] >= l.x0 - 20 && q[0] <= l.x1 + 20 && q[1] >= l.y0 - 20 && q[1] <= l.y1 + 20)) out.sp = [X, Y]; }
+        return out; }""")
+    ok(pts.get("ac") and pts.get("sp"), f"{who}: aircraft and empty space on the radar " + str(pts))
+    x, y, cs = pts["ac"]
+    pg.mouse.move(x, y); pg.wait_for_timeout(100); pg.keyboard.press("b")
+    ok(pg.evaluate("!!(rblDrag && rblDrag.key) && rblDrag.from") == cs, f"{who}: B over {cs} (nothing selected) starts the line from it")
+    pg.mouse.move(x - 90, y + 60, steps=4); c1 = pg.evaluate("rblDrag.cur.slice()")
+    pg.mouse.move(x - 150, y + 110, steps=4); c2 = pg.evaluate("rblDrag.cur.slice()")
+    ok(c1 != c2, f"{who}: the line follows the mouse")
+    pg.mouse.down(); pg.mouse.up()
+    ok(pg.evaluate("rbls.length") == 1 and pg.evaluate("rbls[0].a") == cs and not pg.evaluate("rblDrag"), f"{who}: a click places it")
+    sx, sy = pts["sp"]
+    pg.mouse.move(sx, sy); pg.wait_for_timeout(100); pg.keyboard.press("B")
+    ok(pg.evaluate("!!(rblDrag && rblDrag.key) && typeof rblDrag.from === 'object'"), f"{who}: B in empty space starts the line there")
+    pg.mouse.move(sx + 120, sy + 40, steps=4); pg.keyboard.press("b")          # B again also places it
+    ok(pg.evaluate("rbls.length") == 2 and pg.evaluate("typeof rbls[1].a === 'object'"), f"{who}: B again places it")
+    pg.mouse.move(sx, sy); pg.keyboard.press("b"); pg.keyboard.press("Escape")
+    ok(not pg.evaluate("rblDrag") and pg.evaluate("rbls.length") == 2, f"{who}: Escape cancels")
+    pg.evaluate("rbls.length = 0")
+
+
 with sync_playwright() as p:
     br = p.chromium.launch(args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream",
                                  "--autoplay-policy=no-user-gesture-required"])
@@ -299,7 +330,8 @@ with sync_playwright() as p:
     if atc.evaluate(f"document.elementFromPoint({bp[0]}, {bp[1]}) === cv"):
         atc.evaluate("document.activeElement && document.activeElement.blur()")
         atc.mouse.move(*bp); atc.keyboard.press("b"); atc.mouse.move(bp[0] - 120, bp[1] + 80, steps=5); atc.mouse.down(); atc.mouse.up()
-        ok(atc.evaluate("rbls.length") == n0 + 1 and atc.evaluate("rbls[rbls.length - 1].a") == calling, "B over an aircraft: RBL from it, placed by a click")
+        ok(atc.evaluate("rbls.length") == n0 + 1 and atc.evaluate("rbls[rbls.length - 1].a") == calling, "B over an aircraft: RBL from it, placed by a click " + atc.evaluate("JSON.stringify({r: rbls.slice(-1), d: rblDrag, sel: selected})"))
+    check_key_rbl(atc, "controller")
     # RBL by right-drag (no button), then its label moved
     n0 = atc.evaluate("rbls.length")
     ap = atc.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
@@ -312,6 +344,7 @@ with sync_playwright() as p:
     atc.mouse.move(*r); atc.mouse.down(); atc.mouse.move(r[0] + 50, r[1] + 70, steps=6); atc.mouse.up()
     ok(atc.evaluate("rbls[rbls.length - 1].ox") != 0, "RBL label moved")
     atc.screenshot(path=f"{OUT}/07h_rbl_drag.png")
+    check_key_rbl(pil, "pilot")
     # the pilot selects the aircraft on the radar: the keyboard stays free for the space bar (no jump into the shorthand)
     pp = pil.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
         c = cv.getBoundingClientRect(), d = devicePixelRatio; return [c.left + x / d, c.top + y / d]; }}""")
@@ -375,6 +408,8 @@ with sync_playwright() as p:
     ins.wait_for_url(f"**/x/{eid}")
     ins.wait_for_function("() => typeof state !== 'undefined' && state && state.aircraft", timeout=30000)
     ins.screenshot(path=f"{OUT}/12_instructor_seat.png")
+    ins.wait_for_timeout(1500)
+    check_key_rbl(ins, "instructor")
     ins.once("dialog", lambda d: d.accept())
     ins.click("#endBtn")
     ins.wait_for_url(BASE + "/#evaluations", timeout=60000)

@@ -32,6 +32,30 @@ from .platform.access import AccessMiddleware, seat_for
 if pconfig.AUTH == "off":
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.add_middleware(AccessMiddleware)
+
+
+class NoStaleMiddleware:
+    """Pages and /static files: the browser revalidates every time (ETag -> 304), so an update is never hidden
+    behind a cached old radar.html / script."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def send2(msg):
+            if msg["type"] == "http.response.start":
+                hs = [(k, v) for k, v in msg.get("headers", []) if k.lower() != b"cache-control"]
+                ctype = next((v for k, v in hs if k.lower() == b"content-type"), b"")
+                if scope["path"].startswith("/static/") or ctype.startswith(b"text/html"):
+                    hs.append((b"cache-control", b"no-cache"))
+                    msg = dict(msg, headers=hs)
+            await send(msg)
+        await self.app(scope, receive, send2)
+
+
+app.add_middleware(NoStaleMiddleware)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 manager = SessionManager()
 pex.manager = manager

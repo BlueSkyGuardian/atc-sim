@@ -950,6 +950,7 @@ let rblDrag = null;                                  // right-drag: a range/bear
 function rblFromKey() {
   if (rblDrag && rblDrag.key) { finishKeyRbl(mouseCv); return; }
   let from = mouseCv ? rblTargetAt(mouseCv) : (selected || null);
+  if (mouseCv && typeof from !== 'string' && hoverLbl) from = hoverLbl;          // over a label: that aircraft
   if (!from) return;
   const cur = mouseCv || (() => { const a = shown && shown.aircraft.concat(shown.transferred || []).find(x => x.callsign === from); return a ? toPx(a.x_nm, a.y_nm) : [0, 0]; })();
   rblDrag = { from, cur, moved: true, key: true };
