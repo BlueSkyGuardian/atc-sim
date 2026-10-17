@@ -150,4 +150,32 @@ d = atctools.flight_detail(w, cs)
 ok(d["coordination"]["exit"]["level"] == cv[cs]["cfl"] and d["oldi"], "flight plan shows the exit level and the messages")
 inb = [m for m in w.oldi if m["dir"] == "in" and m["type"] == "ACT"]
 ok(all(m["unit"] in ("GMMM", "LPPC", "GCCC", "LECS", "MADEIRA") for m in inb), "inbound ACTs from the adjacent units")
+# ---- re-routing: the route entered by the controller (system), the route flown (pseudo-pilot)
+w = build_world(load_scenario("c01_cta_moderate_wx"))
+w.multi = True
+for _ in range(400):
+    w.step(1)
+a = next(x for x in w.aircraft.values() if x.active and x.assumed and len(x.route[x.next_index:]) >= 2)
+pos = [a.x + 20, a.y - 10]
+w.enter(a.callsign, {"route": [pos, a.route[-1]]})
+rt = w.entries[a.callsign]["route"]
+ok(re.fullmatch(r"\d{4}[NS]\d{5}[EW]", rt[0]) and rt[0] in w.dyn_points, f"a position becomes a named point: {rt}")
+ok(oldi.coord_view(w)[a.callsign]["route_ahead"][:2] == rt, "system route ahead = the route entered")
+for _ in range(150):
+    w.step(1)
+ok("RDEV" in {t[0] for t in atctools.special_tracks(w).get(a.callsign, [])}, "route deviation while the aircraft does not fly the route entered")
+r = w.issue({"callsign": a.callsign, "type": "reroute", "points": rt}, by_pilot=True)
+for _ in range(10):
+    w.step(1)
+ok(r["status"] != "rejected" and a.route[a.next_index] == rt[0], f"the pilot flies it: {a.route[a.next_index:]}")
+for _ in range(200):
+    w.step(1)
+    atctools.special_tracks(w)
+ok("RDEV" not in {t[0] for t in atctools.special_tracks(w).get(a.callsign, [])}, "no route deviation once flying the route entered")
+ok(w.issue({"callsign": a.callsign, "type": "reroute", "points": ["NOWHERE"]}, by_pilot=True)["status"] == "rejected", "unknown point refused")
+from atcsim import pilot as pilot_mod  # noqa: E402
+w.auto_wx = False
+nav = a.nav_mode
+pilot_mod._self_deviate(w, a, 5.0, None)
+ok(a.nav_mode == nav, "automatic weather deviations switched off: the aircraft does not deviate by itself")
 print("atc tools checks passed")

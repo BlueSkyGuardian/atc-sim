@@ -54,7 +54,7 @@
       b.textContent = st === 'finished' ? 'Scenario finished' : st === 'created' ? (SEAT === 'instructor' ? 'Ready · press Run to start' : 'Waiting for the instructor to start the exercise') : 'PAUSED';
     } else b.style.display = 'none';
     if (SEAT !== 'atc') renderPilot();
-    if (SEAT === 'atc' && $('#lblMenu').classList.contains('on')) refreshMenuHead();
+    if (SEAT === 'atc' && $('#lblMenu').classList.contains('on') && !$('#lblMenu').classList.contains('fm')) refreshMenuHead();
   }
 
   // ------------------------------------------------------------------ side panel tabs (instructor: Aircraft · Exercise · Monitor)
@@ -135,8 +135,12 @@
   setInterval(() => document.querySelectorAll('[data-since]').forEach(el => el.textContent = since(+el.dataset.since)), 1000);
 
   // ------------------------------------------------------------------ controller: label input
-  window.onSelectAircraft = (cs, e, isLabel) => {
-    if (SEAT === 'atc') { openMenu(cs, e); return true; }
+  window.onSelectAircraft = (cs, e, isLabel, field) => {
+    if (SEAT === 'atc') {                 // a click selects; a click on a value of the label opens that value's menu
+      closeMenu();
+      if (isLabel && field && field !== 'cs') openFieldMenu(cs, field, e);
+      return true;
+    }
     pilotSel = cs; renderPilot(true);
     if (SEAT === 'instructor') showTab('pilot');
     return false;
@@ -226,7 +230,83 @@
     const r = $('#scope').getBoundingClientRect(), [px, py] = toPx(a.x_nm, a.y_nm);
     openMenu(cs, { clientX: r.left + px / devicePixelRatio + 20, clientY: r.top + py / devicePixelRatio }, field);
   };
-  function closeMenu() { $('#lblMenu').classList.remove('on'); menuCs = null; document.activeElement && document.activeElement.blur(); }
+  function closeMenu() { $('#lblMenu').classList.remove('on', 'fm'); menuCs = null; document.activeElement && document.activeElement.blur(); }
+  // long press on a value of the label: the full label menu, on that value
+  window.onLongPressLabel = (cs, field, e) => {
+    if (SEAT !== 'atc') return false;
+    const map = { cfl: 'cfl', xfl: 'xfl', spd: 'speed', hdg: 'heading', wx: 'wx', note: 'note' };
+    openMenu(cs, e, map[field] || 'cfl'); return true;
+  };
+  // ---- small menus, one per value of the label (flat buttons in the label)
+  const sendEntry = async (cs, f) => {
+    await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify({ callsign: cs, ...f }) });
+    if (state.entries && !f.route) state.entries[cs] = { ...(state.entries[cs] || {}), ...f };
+  };
+  const p3 = v => String(Math.round(v)).padStart(3, '0');
+  function openFieldMenu(cs, f, e) {
+    const a = allAc().find(x => x.callsign === cs); if (!a) return;
+    const m = $('#lblMenu'), ent = (state.entries || {})[cs] || {}, co = (state.coord || {})[cs] || {};
+    const sys = ent.cfl != null ? ent.cfl : (co.cfl != null ? co.cfl : a.cleared_fl);
+    menuCs = cs;
+    const title = { cfl: 'Cleared level', xfl: 'Exit level (coordination)', spd: 'Speed', hdg: 'Heading', route: 'Route', wx: 'Weather deviation', note: 'Note' }[f] || f;
+    let body = '';
+    const levels = base => { const out = []; for (let l = Math.round(base / 10) * 10 + 60; l >= Math.round(base / 10) * 10 - 60; l -= 10) if (l >= 50 && l <= 600) out.push(l); return out; };
+    if (f === 'cfl' || f === 'xfl') {
+      const cur = f === 'cfl' ? sys : (co.xfl != null ? co.xfl : sys);
+      body = `<input data-v value="${f === 'xfl' && !co.xfl_entered ? '' : cur}" placeholder="${f === 'xfl' ? '= CFL ' + sys : ''}" inputmode="numeric">
+        <div class="fl">${f === 'xfl' ? `<button data-x="">= CFL (F${p3(sys)})</button>` : ''}${levels(cur).map(l => `<button data-x="${l}" class="${l === cur ? 'cur' : ''}">F${p3(l)}</button>`).join('')}</div>`;
+    } else if (f === 'spd') {
+      const mach = Math.round(a.mach * 100), ias = Math.round(a.ias_kt / 10) * 10;
+      body = `<input data-v value="${h(ent.speed || '')}" placeholder="M78 · 280 · SN">
+        <div class="fg">${[-3, -2, -1, 0, 1, 2, 3].map(d => `<button data-x="M${mach + d}">M${mach + d}</button>`).join('')}<button data-x="SN">SN</button>
+        ${[-30, -20, -10, 0, 10, 20, 30].map(d => `<button data-x="${ias + d}">${ias + d}</button>`).join('')}<button data-x="">clear</button></div>`;
+    } else if (f === 'hdg') {
+      const h0 = Math.round(a.heading / 5) * 5;
+      body = `<input data-v value="${ent.heading || ''}" placeholder="${p3(a.heading)}" inputmode="numeric">
+        <div class="fg">${[-40, -30, -20, -10, 10, 20, 30, 40].map(d => { const v = ((h0 + d) % 360 + 360) % 360 || 360; return `<button data-x="${v}">${d < 0 ? 'L' : 'R'}${p3(v)}</button>`; }).join('')}</div>
+        <div class="fl"><button data-x="">own navigation (clear)</button></div>`;
+    } else if (f === 'route') {
+      const pts = realPoints(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint || a.fp_next))).concat(a.route_after_exit || []));
+      body = `<div class="c-dim" style="font-size:11px">direct to</div><div class="fg">${[...new Set(pts)].slice(0, 12).map(n => `<button data-x="${n}">${n}</button>`).join('')}</div>
+        <div class="fl"><button data-edit>Edit route… (E)</button><button data-show>Show route (long press)</button>${ent.direct || ent.route ? '<button data-x="">back to the filed route</button>' : ''}</div>`;
+    } else if (f === 'wx') {
+      body = `<div class="fg"><button data-x="L">L</button><button data-x="R">R</button><button data-x="Y">either</button><button data-x="">end</button></div><input data-v value="${h(ent.wx || '')}" placeholder="L20 · R15" style="margin-top:4px">`;
+    } else { openMenu(cs, e, f); return; }
+    m.innerHTML = `<div class="h"><span>${cs} <span class="c-dim" style="font-weight:400">${title}</span></span><button id="fmX" style="padding:0 6px">✕</button></div>${body}<div id="lmMsg" style="min-height:12px;font-size:11px;margin-top:3px"></div>`;
+    m.classList.add('on', 'fm'); menuPos(e);
+    const key = { cfl: 'cfl', xfl: 'xfl', spd: 'speed', hdg: 'heading', wx: 'wx' }[f];
+    const go = async v => { try {
+        if (f === 'route') await sendEntry(cs, v ? { direct: v, heading: '' } : { direct: '', route: '' });
+        else if (f === 'hdg' && v) await sendEntry(cs, { heading: +v, direct: '' });
+        else await sendEntry(cs, { [key]: v === '' ? '' : (f === 'cfl' || f === 'xfl') ? +v : v });
+        closeMenu(); } catch (er) { $('#lmMsg').className = 'c-los'; $('#lmMsg').textContent = er.message; } };
+    m.querySelectorAll('[data-x]').forEach(b => b.onclick = () => go(b.dataset.x));
+    const inp = m.querySelector('[data-v]');
+    if (inp) { inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') { let v = inp.value.trim().toUpperCase(); if (f === 'cfl' || f === 'xfl') v = v.replace(/^FL?/, ''); go(v); } if (ev.key === 'Escape') closeMenu(); };
+      setTimeout(() => { inp.focus(); inp.select(); }, 0); }
+    const ed = m.querySelector('[data-edit]'); if (ed) ed.onclick = () => { closeMenu(); editRoute(cs); };
+    const sh = m.querySelector('[data-show]'); if (sh) sh.onclick = () => { closeMenu(); routeShow = { cs, until: performance.now() + 8000 }; };
+    $('#fmX').onclick = closeMenu;
+    if (f === 'cfl') api(`/sessions/${SID}/mtcd`, { method: 'POST', body: JSON.stringify({ callsign: cs, levels: [...m.querySelectorAll('[data-x]')].map(b => +b.dataset.x).filter(Boolean) }) }).then(r => {
+      if (menuCs !== cs) return;
+      m.querySelectorAll('[data-x]').forEach(b => { const c = (r.levels || {})[b.dataset.x]; if (!c) return;
+        b.style.borderColor = c.length ? '#a33' : '#2f7a5f'; b.style.color = c.length ? '#ffb3b3' : '#bff5dc';
+        b.title = c.length ? 'conflict: ' + c.map(x => `${x.with} in ${Math.round(x.in_s / 60)} min (${x.min_nm} NM)`).join(', ') : 'no conflict in the next 20 minutes'; }); }).catch(() => {});
+  }
+  window.openFieldMenuAt = (cs, f) => {                // keyboard: the value's menu at the label
+    const r = $('#scope').getBoundingClientRect(), d = devicePixelRatio;
+    const fr = fieldRects.find(x => x.cs === cs && x.f === f) || fieldRects.find(x => x.cs === cs);
+    let px, py;
+    if (fr) { px = fr.x0 / d; py = fr.y1 / d; } else { const a = allAc().find(x => x.callsign === cs); if (!a) return; [px, py] = toPx(a.x_nm, a.y_nm).map(v => v / d); }
+    openFieldMenu(cs, f, { clientX: r.left + px, clientY: r.top + py + 6 });
+  };
+  // re-routing: the controller enters the new route in the system; a pseudo-pilot / instructor makes the aircraft fly it
+  window.editRoute = cs => {
+    if (SEAT === 'atc') openRouteEditor(cs, { title: 'system route (re-routing)', apply: 'Enter route',
+      onApply: pts => sendEntry(cs, { route: pts, direct: '' }), onReset: () => sendEntry(cs, { route: '', direct: '' }) });
+    else openRouteEditor(cs, { title: 'the aircraft flies it', apply: 'Fly this route',
+      onApply: async pts => { const r = await fly(cs, { type: 'reroute', points: pts }, $('#deck [data-out]')); if (r && r.status === 'rejected') throw new Error(r.reason); } });
+  };
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
   $('#cv').addEventListener('mousedown', () => { if (SEAT === 'atc') closeMenu(); });
   // the controller assumes by double-click too; it goes through /assume
@@ -325,6 +405,9 @@
       <div class="dk-row"><label>Direct</label><div class="dk-ctl dk-wrap">
         ${route.slice(0, 10).map(n => `<button class="pt" data-d="${n}">${n}</button>`).join('')}
         <span class="dk-any"><input data-i="dct" list="plPts" placeholder="any point" style="width:96px"><button class="go" data-go="dct">Direct</button></span></div></div>
+      <div class="dk-row"><label>Route</label><div class="dk-ctl">
+        <input data-i="via" placeholder="via points, e.g. IBALU TERTO" style="width:170px">
+        <button class="go" data-go="via" title="re-routing via these points, then the rest of the route">Fly via</button><button data-go="redit" title="pick the points on the map (fixes or positions)">Edit on map…</button></div></div>
       <div class="dk-row"><label>Weather</label><div class="dk-ctl">
         <select data-i="side"><option value="either">either side</option><option value="left">left</option><option value="right">right</option></select>
         <button data-go="dev">Deviate around weather</button></div></div>
@@ -347,10 +430,12 @@
       else if (k === 'sn') await fly(cs, { type: 'speed', resume_normal: true }, out);
       else if (k === 'dct') { const v = val('dct').toUpperCase(); if (v) await fly(cs, { type: 'direct', waypoint: v }, out); }
       else if (k === 'dev') await fly(cs, { type: 'deviation', side: val('side') }, out);
+      else if (k === 'via') { const v = val('via').toUpperCase().split(/[\s,]+/).filter(x => x && x !== 'DCT'); if (v.length) await fly(cs, { type: 'reroute', points: v }, out); }
+      else if (k === 'redit') editRoute(cs);
     };
     box.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
     box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => fly(cs, { type: 'direct', waypoint: b.dataset.d }, out));
-    const enterMap = { fl: 'fl', hdg: 'h', mach: 'mach', kt: 'kt', dct: 'dct' };
+    const enterMap = { fl: 'fl', hdg: 'h', mach: 'mach', kt: 'kt', dct: 'dct', via: 'via' };
     box.querySelectorAll('input[data-i]').forEach(i => i.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter' && enterMap[i.dataset.i]) go(enterMap[i.dataset.i]); });
     box.querySelector('.dk-x').onclick = () => { pilotSel = null; selected = null; renderPilot(); };
     loadPerf(cs);
@@ -415,6 +500,10 @@
       const url = EXINFO.links[b.dataset.link];
       try { await navigator.clipboard.writeText(url); $('#exMsg').textContent = 'link copied: ' + url; } catch (e) { prompt('Invitation link', url); }
     });
+    const aw = $('#autoWx');
+    if (aw) aw.onchange = async () => { try { await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: 'auto_wx', value: aw.checked }) });
+      $('#exMsg').textContent = aw.checked ? 'simulated pilots deviate around weather by themselves' : 'aircraft deviate only when a pseudo-pilot makes them'; } catch (e) { $('#exMsg').textContent = e.message; } };
+    setInterval(() => { if (aw && state && state.session && document.activeElement !== aw) aw.checked = state.session.auto_wx !== false; }, 2000);
     $('#endBtn').onclick = async () => {
       if (!confirm('End this exercise for everybody? The recording (radar + all audio) is then turned into an .mp4 on the home page.')) return;
       try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); showEnded(); setTimeout(() => location.href = '/#evaluations', 1500); } catch (e) { $('#exMsg').textContent = e.message; }

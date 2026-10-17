@@ -108,12 +108,16 @@ class Session:
                     if self.world.finished:
                         self.status = "finished"
                         break
+            elif action == "auto_wx":          # simulated pilots deviate around weather by themselves (or not)
+                self.world.auto_wx = bool(time_factor if time_factor is not None else True)
             elif action == "restart":
+                auto = getattr(self.world, "auto_wx", True)
                 self.world = build_world(self.scn)
                 self.world.multi = self._multi
+                self.world.auto_wx = auto
                 self.status = "running" if self.mode == "realtime" else "paused"
             else:
-                raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart")
+                raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart|auto_wx")
             return self.summary()
 
     # ------------------------------------------------------------------ views
@@ -124,6 +128,7 @@ class Session:
             "title": self.scn.get("title", ""), "status": self.status, "mode": self.mode,
             "time_factor": self.time_factor, "sim_time_s": round(w.t, 1), "duration_s": w.duration_s,
             "active_aircraft": len(w.active_aircraft()),
+            "auto_wx": getattr(w, "auto_wx", True),
             "pending_requests": sum(1 for r in w.requests.values() if r.status == "pending"),
             "clients": len(self.clients),
         }

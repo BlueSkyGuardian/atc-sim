@@ -47,8 +47,13 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   flight-plan list (**FPL**), the **MTCD** list, **?** (shortcuts) and the UTC clock.
   - **Assume any track, any time:** a calling aircraft (blinking, *CALL*), one still with the previous sector (early
     assume; it then calls already assumed), or one decontrolled earlier. Double-click it, ASSUME in its label menu,
-    or key **A**. **Decontrol** (label menu, **Shift+X**, `CS REL`) and take back as often as needed.
-  - **Click a label** to enter what was cleared: CFL (with quick levels, coloured by the level probe: green = no
+    or key **A**. **Decontrol** (label menu, key **U**, `CS REL`) and take back as often as needed.
+  - **The label's values are flat buttons.** A click on the label selects the aircraft. A click on a value opens
+    the small menu of that value: the level (levels list, coloured by the probe), the exit level (with *= CFL*),
+    the speed, the heading (left / right steps, own navigation), the route (directs, *Edit route…*, back to the filed
+    route), the WX tag. A **long press on a value** opens the full label menu; a long press on the **route** value
+    (the next point) shows the route. The value under the mouse is underlined.
+  - **Full label menu** (long press) to enter what was cleared: CFL (with quick levels, coloured by the level probe: green = no
     conflict in 20 min, red = conflict, hover for which), speed (M78, 280, SN), heading, direct (points of the route
     or any point), **exit level** (XFL), **weather deviation** (L, R, L20, either side) and a free note; **Probe** checks the level / heading
     / direct typed before giving it. This is what the label then shows. The aircraft does not move: the pseudo-pilot
@@ -66,7 +71,7 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     sent: `COORD` blinks on the label, the OLDI button shows ⚠, and the label menu says what to coordinate with whom
     by phone, with a *✓ coordinated by phone* button. The previous units send their ABI / ACT for incoming traffic:
     an inbound label shows the entry point, the coordinated entry level and the unit (`KORNO F350 ←GMMM`). The
-    **OLDI** window (key **O**) lists every message sent and received; the label menu, the extended label and the
+    **OLDI** window (key **O**) lists every message sent and received; the label menu, the track info window and the
     flight-plan window show the coordination state. Times per scenario: `"oldi": {"abi_s": 1200, "act_s": 600,
     "rev_limit_s": 180}`. Pseudo-pilots and instructors, who play the adjacent units, see the same messages and the
     level coordinated for the selected aircraft.
@@ -85,27 +90,37 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     ←previous unit*; calling in white, blinking, *CALL*; assumed in green; **3 minutes before the exit** a chevron
     ahead of the symbol and *XFR →next unit* (LPPC, GCCC, LECS, GMMM, MADEIRA, or the Agadir sector not controlled);
     after the exit, still assumed, *DECONTROL →unit* blinking; decontrolled in grey with the next unit.
-  - **Extended label:** hover a label (or middle-click / key **E** to pin it, Shift+E for all): SSR code,
-    registration, type / wake, surveillance, departure → destination, requested level, next unit, and the **Mode S
-    downlinked parameters** when the aircraft has enhanced surveillance (selected level, magnetic heading, IAS, Mach,
-    TAS, ground speed, track, vertical rate, roll, track rate, pressure setting, 24-bit address). Elementary
-    surveillance gives the address only; Mode A/C transponders nothing more.
+  - **Track info window** (*INFO*, key **I**; movable, on or off): the aircraft under the mouse (or the selected
+    one; middle-click an aircraft or 📌 to keep one): SSR code, Mode S address, type, registration, operator,
+    departure → destination and requested level, current / cleared / exit levels and the coordination state, the
+    **Mode S downlinked parameters** when the aircraft has enhanced surveillance (selected level, magnetic heading,
+    IAS, Mach, TAS, ground speed, track, vertical rate, roll, track rate, pressure setting), the next points, units,
+    exit point and time, and its alerts. Elementary surveillance gives the address only; Mode A/C nothing more.
+  - **Re-routing** (route value → *Edit route…*, or key **E**): the route from the aircraft onwards as a list of
+    points. Click on the map to insert a point after the highlighted one: a fix when its name or its symbol is
+    clicked, otherwise the position itself (named from its coordinates, e.g. `3103N01244W`); × removes a point;
+    names can be typed. *Enter route* puts it in the system: the label's next point, the route display, MTCD, route
+    adherence and the estimates follow it. The pseudo-pilot makes the aircraft fly a re-routing from the deck's
+    **Route** row (*Fly via* the points typed, or *Edit on map…*), as `{"type": "reroute", "points": [...]}`: the new
+    points, then the rest of the route from the last one if it is on it (else the planned exit).
   - **Flight plans** (key **F** for the selected aircraft, **G** or *FPL* for the list): every flight has an ICAO flight
     plan, correlated with its track by the SSR code and the Mode S address. The window shows the FPL message, the
     decoded items, the coordination (entry point, ETO, level, from which unit; exit point, ETO, level, to which unit)
     and the estimates over the points ahead. The list holds every flight of the session (planned, inbound, calling,
     assumed, transferred) with filters.
-  - **MTCD** (key **M**): medium-term conflict detection over 20 minutes, from the system trajectories (the
+  - **MTCD** (button or key **M**, on / off, off by default): medium-term conflict detection over 20 minutes, from the system trajectories (the
     flight-plan route, or the heading / direct entered, at the system cleared level), so it warns long before the
     STCA. Click a conflict (or select one of the aircraft) to see where both will be when it starts. The aircraft
     gets a violet diamond and `MTCn'` in its label.
   - **Long press** on a label (or an aircraft, or key **R**): its flight-plan route from the present position — also
     while vectored or deviating, with the heading line — every point with the minutes to it.
-  - **RBL:** right-drag from an aircraft or any point to another (no button needed; points snap to a fix), or
-    shift-click two, or the RBL button. A point stands still: the CPA is the aircraft's closest approach to it. Drag
+  - **RBL:** right-drag from an aircraft or any point to another (no button needed), or shift-click two, or the RBL
+    button. An end snaps to a fix only when the click is within 10 px of the fix symbol (a ring shows what it snaps
+    to). While dragging, the line already shows bearing, range, ΔFL and the CPA. A point stands still: the CPA is the aircraft's closest approach to it. Drag
     an RBL label to move it; right-click it to remove it.
-  - **Keyboard** (outside text fields): Tab / Shift+Tab next aircraft, C or L cleared level, X exit level,
-    H heading, S speed, D direct, W weather deviation, N note, A assume, Shift+X decontrol, O OLDI, F flight plan, E extended label, R route, B RBL
+  - **Keyboard** (outside text fields; capitals or not): Tab / Shift+Tab next aircraft, C or L cleared level,
+    X exit level, H heading, S speed, D direct / route, W weather deviation (each opens that value's menu), N note,
+    E edit route, A assume, U decontrol, I track info, O OLDI, F flight plan, R route, B RBL
     from it, Delete last RBL (Shift+Delete all), G flight list, M MTCD, + / − zoom, arrows pan, 0 reset, Esc,
     ? help; Space (held) transmits.
   - **⚙ Display:** zoom, label font, point-name font, aircraft symbol, speed vector length, history dots, weather
@@ -139,6 +154,12 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     to request something realistic when going off script.
   - **Aircraft:** every aircraft with level, speed, navigation and status (calling, request, on frequency,
     previous sector), those needing something first. The *Shorthand* line still takes the command syntax.
+- **Weather deviations by the simulated pilots:** an aircraft deviates around weather by itself in two cases,
+  whatever the scenario: while it is still with the previous sector (it flies the deviation coordinated there), and
+  when its own weather-deviation request (made at about 60 NM) is still unanswered once the weather is 15 NM ahead
+  (*deviating without clearance*). The instructor can switch this off in the Exercise tab (*simulated pilots deviate
+  around weather by themselves*): aircraft then deviate only when a pseudo-pilot makes them. The requests still
+  appear in the pseudo-pilot's To do.
 - **Instructor's side panel** is in tabs: **Aircraft** (the pseudo-pilot workspace and telephone), **Exercise**
   (members, invitations, links, run / pause / speed / restart / replay, end), **Monitor** (selected aircraft details,
   requests, sequence, predicted conflicts, events, metrics).
@@ -170,8 +191,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   boxes, push-to-talk; the mouse 20 times a second; every click and what was clicked) over the voice connection,
   and the server keeps the traffic every second and all audio. When the exercise ends, the server renders one
   **.mp4 per controller** (their scope size up to 1600 px wide, 10 frames/s, H.264 + AAC): the traffic exactly as
-  their seat showed it (every label as drawn, extended labels, alert and transfer tags, RBLs where they put them),
-  their panels and windows (flight plans, MTCD, display menu), the
+  their seat showed it (every label as drawn, alert and transfer tags, RBLs where they put them, the route editor),
+  their panels and windows (track info, flight plans, MTCD, OLDI, display menu), the
   mouse pointer with click rings, a caption log of their actions (assume, label entries, buttons, transmissions,
   calls), and the audio they heard and said (the frequency and their own telephone calls). An hour takes about
   10 minutes to render. Without a controller connected, a plain radar overview is rendered instead. The videos

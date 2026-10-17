@@ -46,6 +46,47 @@ def system_cfls(w) -> Dict[str, int]:
             for a in w.aircraft.values() if a.active or a.outside}
 
 
+def entered_route(w, a, ent: dict) -> Optional[Tuple[List[str], bool]]:
+    """The route the controller entered (re-routing), followed by the rest of the filed route: (the points still
+    ahead of the aircraft, whether it is still flying to the first of them)."""
+    wps = w.waypoints
+    names = [n for n in (ent.get("route") or []) if n in wps]
+    if not names:
+        return None
+    rem = list(a.route[a.next_index:])
+    last = names[-1]
+    if last in rem:
+        tail = rem[rem.index(last) + 1:] + list(a.route_after)
+    elif last in a.route_after:
+        tail = a.route_after[a.route_after.index(last) + 1:]
+    else:
+        tail = ([a.route[-1]] if a.route[-1] not in names else []) + list(a.route_after)
+    full = [n for n in names + tail if n in wps and not n.startswith("@")]
+    pts = [wps[n] for n in full]
+    # progress along it, kept per aircraft: a point is passed when the aircraft comes within 3 NM of it, or is
+    # established on the following leg
+    prog = w.__dict__.setdefault("_route_prog", {})
+    key = tuple(names)
+    k, i = prog.get(a.callsign, (None, 0))
+    if k != key:
+        i = 0
+    while i < len(pts):
+        if dist(a.pos, pts[i]) < 3.0:
+            i += 1
+            continue
+        if i + 1 < len(pts):
+            (ax, ay), (bx, by) = pts[i], pts[i + 1]
+            dx, dy = bx - ax, by - ay
+            L2 = dx * dx + dy * dy or 1e-9
+            f = ((a.x - ax) * dx + (a.y - ay) * dy) / L2
+            if 0.0 < f < 1.0 and math.hypot(a.x - ax - f * dx, a.y - ay - f * dy) < 2.0:
+                i += 1
+                continue
+        break
+    prog[a.callsign] = (key, i)
+    return full[i:], i == 0
+
+
 def _path(w, a, ent: dict, heading: Optional[float] = None, direct: Optional[str] = None) -> Tuple[List[tuple], Optional[float]]:
     """Polyline the system expects the aircraft to fly (and a straight-line heading, if any)."""
     wps = w.waypoints
@@ -61,6 +102,9 @@ def _path(w, a, ent: dict, heading: Optional[float] = None, direct: Optional[str
     if heading is not None:
         return [a.pos], heading
     rest = list(a.route[a.next_index:]) + list(a.route_after)
+    er = entered_route(w, a, ent) if direct is None else None
+    if er is not None:
+        rest = er[0]
     if direct is not None and direct in wps:
         if direct in rest:
             rest = rest[rest.index(direct):]
@@ -271,7 +315,20 @@ def special_tracks(w) -> Dict[str, list]:
             wps = w.waypoints
             dct = ent.get("direct") if ent.get("direct") in wps else None
             passed = dct is not None and dct in a.route[:a.next_index]
-            if dct and not passed:
+            er = entered_route(w, a, ent) if not dct else None
+            if er is not None:                           # the re-routing entered by the controller
+                ahead, to_first = er
+                if to_first and ahead:
+                    tgt = wps[ahead[0]]
+                    off = abs(((a.trk - bearing(a.pos, tgt)) + 540) % 360 - 180)
+                    if w.t - float(ent.get("t", w.t)) > 90 and off > 30 and dist(a.pos, tgt) > 5:
+                        tags.append(["RDEV", "warn", f"not flying the route entered (to {ahead[0]}, track {off:.0f}° off)"])
+                elif ahead:
+                    full = [n for n in (ent.get("route") or []) if n in wps] + ahead
+                    d = _dist_to_polyline(a.pos, [wps[n] for n in full])
+                    if d > RDEV_NM:
+                        tags.append(["RDEV", "warn", f"{d:.1f} NM off the route entered"])
+            elif dct and not passed:
                 tgt = wps[dct]
                 off = abs(((a.trk - bearing(a.pos, tgt)) + 540) % 360 - 180)
                 if w.t - float(ent.get("t", w.t)) > 90 and off > 30 and dist(a.pos, tgt) > 5:

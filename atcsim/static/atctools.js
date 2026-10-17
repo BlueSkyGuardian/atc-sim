@@ -39,7 +39,7 @@
     if (!SID || !cs) return;
     fpCs = cs;
     let d; try { d = await api(`/sessions/${SID}/flightplans/${cs}`); } catch (e) { return; }
-    if (fpCs !== cs) return;
+    if (fpCs !== cs) return;                              // closed (or another one) meanwhile
     const el = win('fpWin', `<b>${esc(d.callsign)}</b> <span class="st ${d.status.split(',')[0].replace(' ', '')}">${esc(d.status)}</span> <span class="c-dim" style="font-weight:400">flight plan · ${esc(d.utc)} UTC</span>`, 60, 60, 520);
     const c = d.correlation, co = d.coordination, ent = d.entries || {};
     const fp = d.flight_plan || {};
@@ -61,9 +61,10 @@
 
   // ------------------------------------------------------------------ flight list
   let flFilter = '';
-  async function openFlightList() {
+  async function openFlightList(refresh) {
     if (!SID) return;
     let d; try { d = await api(`/sessions/${SID}/flightplans`); } catch (e) { return; }
+    if (refresh && !isOpen('flWin')) return;
     const first = !isOpen('flWin');
     const el = win('flWin', `Flight plans <span class="c-dim" style="font-weight:400">${d.flights.length} · ${esc(d.utc)} UTC</span>`, 420, 50, 640);
     const body = el.querySelector('.wb');
@@ -82,15 +83,15 @@
     };
     render();
   }
-  setInterval(() => { if (isOpen('flWin')) openFlightList(); }, 8000);
+  setInterval(() => { if (isOpen('flWin')) openFlightList(true); }, 8000);
 
   // ------------------------------------------------------------------ MTCD list and display
   let mtFocus = null;                     // 'A|B' pair shown on the scope
   function renderMtcd() {
-    const list = (state && state.mtcd) || [];
+    const list = mtcdOn ? (state && state.mtcd) || [] : [];
     const b = document.getElementById('mtBtn');
-    if (b) { b.textContent = list.length ? `MTCD ${list.length}` : 'MTCD'; b.classList.toggle('hit', list.length > 0); }
-    if (!isOpen('mtWin')) return;
+    if (b) { b.textContent = !mtcdOn ? 'MTCD off' : list.length ? `MTCD ${list.length}` : 'MTCD on'; b.classList.toggle('on', mtcdOn); b.classList.toggle('hit', mtcdOn && list.length > 0); }
+    if (!isOpen('mtWin') || !mtcdOn) return;
     const el = win('mtWin', `MTCD <span class="c-dim" style="font-weight:400">conflicts in the next 20 min · system trajectories</span>`, 60, 50, 380);
     const body = el.querySelector('.wb');
     const html = list.length ? list.map(c => { const k = c.aircraft.join('|');
@@ -102,8 +103,13 @@
   }
   setInterval(renderMtcd, 1000);
   // on the scope: the focused pair (or the selected aircraft's conflicts): where each will be when the conflict starts
+  function setMtcd(on) {               // the MTCD function on / off (tags, diamonds, conflict display and list)
+    mtcdOn = on; try { localStorage.setItem('atc_mtcd', on ? '1' : '0'); } catch (e) {}
+    if (on) { win('mtWin', 'MTCD', 60, 50, 380); } else closeWin('mtWin');
+    renderMtcd();
+  }
   window.drawMtcd = function (byCs) {
-    if (!state || !state.mtcd || SEAT === 'pilot' || replayMode) return;
+    if (!mtcdOn || !state || !state.mtcd || SEAT === 'pilot' || replayMode) return;
     const dpr = devicePixelRatio;
     for (const c of state.mtcd) {
       const k = c.aircraft.join('|');
@@ -133,6 +139,7 @@
     if (b) { b.textContent = man ? `OLDI ⚠${man}` : 'OLDI'; b.classList.toggle('hit', man > 0); b.title = man ? `${man} coordination(s) to do by phone (O)` : 'OLDI: coordination messages with the adjacent units (O)'; }
     if (!isOpen('olWin') || !SID) return;
     let d; try { d = await api(`/sessions/${SID}/oldi`); } catch (e) { return; }
+    if (!isOpen('olWin')) return;                       // closed while the request was out
     const el = win('olWin', `OLDI <span class="c-dim" style="font-weight:400">coordination with the adjacent units · ABI ${Math.round(d.abi_s / 60)}' · ACT ${Math.round(d.act_s / 60)}' · REV until ${Math.round(d.rev_limit_s / 60)}' before the point</span>`, 80, 60, 660);
     const body = el.querySelector('.wb');
     const ms = d.messages.slice().reverse().filter(m => olFilter === 'all' || m.dir === olFilter);
@@ -149,25 +156,143 @@
   setInterval(() => renderOldi(false), 2000);
   function toggleOldi() { if (isOpen('olWin')) closeWin('olWin'); else { win('olWin', 'OLDI', 80, 60, 660); renderOldi(true); } }
 
+  // ------------------------------------------------------------------ track info window (the aircraft under the mouse)
+  let pinned = null, infoH = '';
+  const infoOn = () => isOpen('tiWin');
+  function toggleInfo() { if (infoOn()) closeWin('tiWin'); else { infoH = ''; win('tiWin', 'Track info', document.getElementById('scope').clientWidth - 320, 300, 300); renderInfo(); } try { localStorage.setItem('atc_info', infoOn() ? '1' : '0'); } catch (e) {} }
+  window.pinInfo = cs => { pinned = pinned === cs ? null : cs; if (!infoOn()) toggleInfo(); renderInfo(); };
+  const P3 = v => v == null ? '—' : String(Math.round(v)).padStart(3, '0');
+  function renderInfo() {
+    if (!infoOn()) return;
+    const cs = pinned || hoverAc || selected, a = cs && allAc().find(x => x.callsign === cs);
+    const el = win('tiWin', a ? `<b>${esc(a.callsign)}</b> <span class="c-dim" style="font-weight:400">${pinned ? 'pinned' : hoverAc === cs ? 'under the mouse' : 'selected'}</span> <button data-pin title="keep this aircraft (middle-click another)" style="padding:0 5px;font-size:10px" class="${pinned ? 'on' : ''}">📌</button>` : 'Track info', document.getElementById('scope').clientWidth - 320, 300, 300);
+    let html;
+    if (!a) html = '<div class="empty">Move the mouse over an aircraft or its label (middle-click one to keep it here).</div>';
+    else {
+      const fp = a.flight_plan || {}, ms = a.mode_s, co = (state.coord || {})[cs] || {}, ent = (state.entries || {})[cs] || {};
+      const sp = (state.special || {})[cs] || [], mt = mtcdOn ? (state.mtcd || []).filter(c => c.aircraft.includes(cs)) : [];
+      const row = (k, v) => `<span>${k}</span><span>${v}</span>`;
+      const sec = t => `<div class="sub" style="grid-column:1/-1;margin:6px 0 1px">${t}</div>`;
+      html = `<div class="ti">` +
+        row('SSR / Mode S', `A${esc(a.squawk || fp.ssr || '----')} · ${esc((ms && ms.address) || fp.mode_s_address || '—')}`) +
+        row('Type', `${esc(a.type)}/${esc(fp.wake || '')} · ${esc(fp.registration || '')}`) +
+        row('Operator', esc(fp.operator || fp.telephony || '—')) +
+        row('Flight', `${esc(fp.departure || '----')} → ${esc(fp.destination || '----')} · RFL ${esc((fp.rfl || fp.cruise || '').replace('F', ''))}`) +
+        sec('Levels') +
+        row('Current / cleared', `${P3(a.fl)}${a.vertical_speed_fpm > 0 ? ' ↑' : a.vertical_speed_fpm < 0 ? ' ↓' : ''} / ${P3(co.cfl != null ? co.cfl : a.cleared_fl)}`) +
+        row('Exit level', co.xfl != null ? `${P3(co.xfl)} ${co.xfl_entered ? '' : '(= CFL)'} ${co.state ? '· ' + co.state.toUpperCase() + (co.coordinated != null ? ' F' + P3(co.coordinated) : '') : ''}` : '—') +
+        (co.entry_level ? row('Entry (coord.)', `F${P3(co.entry_level)} from ${esc(a.prev_unit)}`) : '') +
+        sec(ms ? (ms.ehs ? 'Mode S enhanced surveillance' : 'Mode S elementary surveillance') : 'Mode A/C (no Mode S)') +
+        (ms && ms.ehs ? row('Selected level', `${P3(ms.selected_fl)} · ${esc(ms.baro_setting)}`) + row('Mag heading / track', `${P3(ms.mag_heading)} / ${P3(ms.track_deg)}`) +
+          row('IAS / Mach', `${ms.ias_kt} kt / M${String(Math.round(ms.mach * 100)).padStart(2, '0')}`) + row('TAS / GS', `${ms.tas_kt} / ${ms.gs_kt} kt`) +
+          row('Vertical rate', `${ms.baro_rate_fpm > 0 ? '+' : ''}${ms.baro_rate_fpm} ft/min`) + row('Roll / track rate', `${ms.roll_deg < -0.5 ? 'L' : ms.roll_deg > 0.5 ? 'R' : ''}${Math.abs(Math.round(ms.roll_deg))}° / ${ms.track_rate_deg_s.toFixed(1)}°/s`)
+          : row('Radar', `GS ${a.gs_kt} kt · track ${P3(a.track_deg)}`)) +
+        sec('Route and transfer') +
+        row('Next points', esc(((ent.route && co.route_ahead) || (a.route || []).slice(Math.max(0, (a.route || []).indexOf(a.next_waypoint || a.fp_next))).concat(a.route_after_exit || []).filter(n => !COPS().has(n) && !n.startsWith('@'))).slice(0, 6).join(' '))) +
+        row('Units', `${esc(a.prev_unit || '?')} → ${esc(a.next_unit || '?')}`) +
+        (a.to_exit_s != null && a.status === 'active' ? row('Exit', `${esc(a.planned_exit)} in ${Math.round(a.to_exit_s / 60)}' (${a.to_exit_nm} NM)`) : '') +
+        (sp.length || mt.length ? sec('Alerts') + sp.map(t => row(esc(t[0]), esc(t[2] || ''))).join('') + mt.map(c => row('MTCD', `${esc(c.aircraft.find(x => x !== cs))} in ${Math.floor(c.time_to_conflict_s / 60)}' · ${c.min_horizontal_nm} NM`)).join('') : '') +
+        `</div>`;
+    }
+    if (html !== infoH) { el.querySelector('.wb').innerHTML = html; infoH = html; }
+    const pb = el.querySelector('[data-pin]'); if (pb) pb.onclick = () => { pinned = pinned ? null : (a && a.callsign); infoH = ''; renderInfo(); };
+  }
+  setInterval(renderInfo, 300);
+  try { if (localStorage.getItem('atc_info') === '1') setTimeout(() => { if (!infoOn()) toggleInfo(); }, 1500); } catch (e) {}
+
+  // ------------------------------------------------------------------ route editor (re-routing)
+  // The route from the aircraft onwards as a list of points; click the map to insert a point after the cursor:
+  // a fix when its name or symbol is clicked, else the position itself. Apply = the controller's system route
+  // (or, on the pseudo-pilot's deck, the route the aircraft flies).
+  let RE = null;
+  window.routeEditActive = () => !!RE;
+  function routeAhead(a) {
+    const co = (state.coord || {})[a.callsign], ent = (state.entries || {})[a.callsign] || {};
+    if (ent.route && co && co.route_ahead) return co.route_ahead.slice();
+    const r = a.route || [], i = Math.max(0, r.indexOf(a.next_waypoint || a.fp_next));
+    return [...new Set(r.slice(i).concat(a.route_after_exit || []).filter(n => !COPS().has(n) && !n.startsWith('@')))];
+  }
+  window.openRouteEditor = function (cs, opts) {
+    const a = allAc().find(x => x.callsign === cs); if (!a) return;
+    RE = { cs, pts: (opts.initial || routeAhead(a)).map(n => ({ n })), cur: 0, opts };
+    renderRE();
+  };
+  function closeRE() { RE = null; closeWin('reWin'); }
+  const ptName = p => p.n || `pos ${p.x.toFixed(0)},${p.y.toFixed(0)}`;
+  function renderRE() {
+    if (!RE) return;
+    const el = win('reWin', `Route <b>${esc(RE.cs)}</b> <span class="c-dim" style="font-weight:400">${esc(RE.opts.title || 're-routing')}</span>`, 340, 60, 430);
+    el.querySelector('[data-close]').onclick = closeRE;
+    const chips = [`<span class="rc ${RE.cur === 0 ? 'cur' : ''}" data-c="0" title="insert at the start">▸ ${esc(RE.cs)}</span>`]
+      .concat(RE.pts.map((p, i) => `<span class="rc ${RE.cur === i + 1 ? 'cur' : ''}" data-c="${i + 1}" title="insert after it">${esc(ptName(p))}<b data-del="${i}" title="remove">×</b></span>`));
+    el.querySelector('.wb').innerHTML = `<div class="rcs">${chips.join('')}</div>
+      <div class="c-dim" style="font-size:11px;margin:6px 0">Click on the map to insert a point after the highlighted one: a fix (click its symbol or its name) or any position. Click a point to move the insertion mark.</div>
+      <div class="row" style="display:flex;gap:4px"><input class="flt" data-add placeholder="type a point and Enter" style="flex:1;margin:0"><button data-apply class="on">${esc(RE.opts.apply || 'Apply')}</button><button data-cancel>Cancel</button></div>
+      ${RE.opts.onReset ? '<div style="margin-top:6px"><button data-reset>Back to the filed route</button></div>' : ''}<div data-msg class="c-los" style="font-size:11px;min-height:14px;margin-top:4px"></div>`;
+    el.querySelectorAll('[data-c]').forEach(c => c.onclick = ev => { if (ev.target.dataset.del != null) { RE.pts.splice(+ev.target.dataset.del, 1); RE.cur = Math.min(RE.cur, RE.pts.length); } else RE.cur = +c.dataset.c; renderRE(); });
+    const inp = el.querySelector('[data-add]');
+    inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Escape') closeRE();
+      if (ev.key === 'Enter') { const v = inp.value.trim().toUpperCase(); if (!v) return;
+        for (const n of v.split(/[\s,]+/)) { if (!(sector.waypoints[n])) { el.querySelector('[data-msg]').textContent = 'unknown point ' + n; return; } RE.pts.splice(RE.cur, 0, { n }); RE.cur++; }
+        renderRE(); setTimeout(() => { const i2 = document.querySelector('#reWin [data-add]'); if (i2) i2.focus(); }, 0); } };
+    el.querySelector('[data-apply]').onclick = async () => {
+      if (!RE.pts.length) { el.querySelector('[data-msg]').textContent = 'the route is empty'; return; }
+      const pts = RE.pts.map(p => p.n || [+p.x.toFixed(3), +p.y.toFixed(3)]);
+      try { await RE.opts.onApply(pts); closeRE(); } catch (er) { el.querySelector('[data-msg]').textContent = er.message; } };
+    el.querySelector('[data-cancel]').onclick = closeRE;
+    const rs = el.querySelector('[data-reset]'); if (rs) rs.onclick = async () => { try { await RE.opts.onReset(); closeRE(); } catch (er) {} };
+  }
+  window.routeEditClick = function (e) {
+    if (!RE) return;
+    const [x, y] = canvasPt(e), dpr = devicePixelRatio;
+    let pt = null;
+    const nr = nameRects.find(r => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1);
+    if (nr) pt = { n: nr.n };
+    else {
+      const [wx, wy] = fromPx(x, y); let bd = 8 * dpr / view.s;
+      for (const [n, p] of Object.entries(sector.waypoints)) { if (COPS().has(n) || n.startsWith('@')) continue; const d = Math.hypot(p[0] - wx, p[1] - wy); if (d < bd) { bd = d; pt = { n }; } }
+      if (!pt) pt = { x: wx, y: wy };
+    }
+    RE.pts.splice(RE.cur, 0, pt); RE.cur++; renderRE();
+  };
+  window.drawRouteEdit = function (byCs) {
+    if (!RE) return;
+    const a = byCs[RE.cs]; if (!a) return;
+    const dpr = devicePixelRatio, xy = p => p.n ? sector.waypoints[p.n] : [p.x, p.y];
+    const pts = [[a.x_nm, a.y_nm]].concat(RE.pts.map(xy).filter(Boolean));
+    ctx.strokeStyle = TH.routeShow; ctx.lineWidth = 2.2 * dpr; ctx.setLineDash([7 * dpr, 4 * dpr]); ctx.beginPath();
+    pts.forEach((p, k) => { const [px, py] = toPx(p[0], p[1]); k ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke(); ctx.setLineDash([]);
+    ctx.font = `bold ${(TH.nameFont + 0.5) * dpr}px ui-monospace,monospace`;
+    RE.pts.forEach((p, i) => { const q = xy(p); if (!q) return; const [px, py] = toPx(q[0], q[1]);
+      ctx.fillStyle = TH.routeShow;
+      if (p.n) { ctx.beginPath(); ctx.arc(px, py, 4 * dpr, 0, Math.PI * 2); ctx.fill(); }
+      else { ctx.strokeStyle = TH.routeShow; ctx.beginPath(); ctx.moveTo(px - 5 * dpr, py - 5 * dpr); ctx.lineTo(px + 5 * dpr, py + 5 * dpr); ctx.moveTo(px + 5 * dpr, py - 5 * dpr); ctx.lineTo(px - 5 * dpr, py + 5 * dpr); ctx.stroke(); }
+      ctx.fillText(`${i + 1}${RE.cur === i + 1 ? '▸' : ''} ${p.n || ''}`, px + 7 * dpr, py - 7 * dpr); });
+    if (mouseCv) { const [mx, my] = mouseCv, pv = RE.cur === 0 ? pts[0] : xy(RE.pts[RE.cur - 1]);   // where a click would go
+      if (pv) { const [px, py] = toPx(pv[0], pv[1]); ctx.strokeStyle = TH.routeShow + '88'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(mx, my); ctx.stroke(); } }
+  };
+
   // ------------------------------------------------------------------ help
   const KEYS = [
-    ['click', 'select an aircraft (controller: opens its label input)'], ['Tab / Shift+Tab', 'next / previous aircraft (calling first)'],
-    ['C or L', 'cleared level of the selected aircraft'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct'], ['W', 'weather deviation (WX tag)'], ['N', 'note'],
-    ['X', 'exit level (XFL) for the coordination'], ['A', 'assume the selected aircraft'], ['Shift+X', 'decontrol it'], ['F', 'its flight plan'], ['E', 'pin its extended label (Shift+E: all)'],
-    ['R', 'show its route for 8 s (or long-press the label)'], ['B', 'range/bearing line from it (then click the other end)'],
+    ['click label', 'select it; a value (level, XFL, speed, heading, route, WX) opens its menu'], ['long press', 'on a value: the full label menu; on the route: the route'],
+    ['Tab / Shift+Tab', 'next / previous aircraft (calling first)'],
+    ['C or L', 'cleared level of the selected aircraft'], ['X', 'exit level (XFL)'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct / route'], ['W', 'weather deviation (WX tag)'], ['N', 'note (full menu)'],
+    ['E', 'edit its route (re-routing)'], ['A', 'assume the selected aircraft'], ['U', 'decontrol it'], ['F', 'its flight plan'], ['I', 'track info window'],
+    ['R', 'show its route for 8 s'], ['B', 'range/bearing line from it (then click the other end)'],
     ['right-drag', 'range/bearing line between two aircraft or points'], ['Delete', 'remove the last RBL (Shift+Delete: all)'],
-    ['G', 'flight plan list'], ['M', 'MTCD list'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
+    ['G', 'flight plan list'], ['M', 'MTCD on / off'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
     ['Space (hold)', 'transmit on the frequency'], ['Esc', 'close the menu / windows, cancel'], ['?', 'this help'],
   ];
   function openHelp() {
     const el = win('helpWin', 'Keyboard shortcuts', 120, 60, 470);
     el.querySelector('.wb').innerHTML = `<div class="keys">${KEYS.map(([k, t]) => `<span><kbd>${esc(k)}</kbd></span><span>${esc(t)}</span>`).join('')}</div>
-      <div class="c-dim" style="margin-top:8px;font-size:11px">Hover a label (or middle-click it) for the extended label: SSR code, registration, flight-plan data and the Mode S downlinked parameters when the aircraft has enhanced surveillance.</div>`;
+      <div class="c-dim" style="margin-top:8px;font-size:11px">Letters work in capitals too. The track info window (I) shows the aircraft under the mouse: SSR code, registration, flight plan, levels and coordination, and the Mode S downlinked parameters when it has enhanced surveillance; middle-click an aircraft to keep it there.</div>`;
   }
 
   // ------------------------------------------------------------------ toolbar
   document.getElementById('flBtn').onclick = () => isOpen('flWin') ? closeWin('flWin') : openFlightList();
-  document.getElementById('mtBtn').onclick = () => { if (isOpen('mtWin')) closeWin('mtWin'); else { win('mtWin', 'MTCD', 60, 50, 380); renderMtcd(); } };
+  document.getElementById('mtBtn').onclick = () => setMtcd(!mtcdOn);
+  document.getElementById('infoBtn').onclick = toggleInfo;
   document.getElementById('olBtn').onclick = toggleOldi;
   document.getElementById('helpBtn').onclick = () => isOpen('helpWin') ? closeWin('helpWin') : openHelp();
   setInterval(() => {
@@ -190,8 +315,8 @@
   window.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || typing()) return;
     const k = e.key, cs = selected, atc = SEAT === 'atc' && EXID;
-    const field = e.shiftKey ? null : { c: 'cfl', l: 'cfl', x: 'xfl', h: 'heading', s: 'speed', d: 'direct', w: 'wx', n: 'note' }[k.toLowerCase()];
-    if (k === 'Escape') { for (const id of ['helpWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
+    const low = k.length === 1 ? k.toLowerCase() : k;           // letters: capitals or not, Caps Lock or not
+    if (k === 'Escape') { if (RE) { closeRE(); return; } for (const id of ['helpWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
     if (k === '?') { isOpen('helpWin') ? closeWin('helpWin') : openHelp(); e.preventDefault(); return; }
     if (k === 'Tab') { e.preventDefault(); cycle(e.shiftKey ? -1 : 1); return; }
     if (k === '+' || k === '=') { setZoom(userZoom * 1.25); return; }
@@ -200,22 +325,23 @@
     if (k.startsWith('Arrow')) { e.preventDefault(); const st = 60 * devicePixelRatio / view.s;
       if (k === 'ArrowLeft') view.cx -= st; if (k === 'ArrowRight') view.cx += st; if (k === 'ArrowUp') view.cy += st; if (k === 'ArrowDown') view.cy -= st; return; }
     if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); if (e.shiftKey) rbls.length = 0; else rbls.pop(); return; }
-    const low = k.toLowerCase();
     if (low === 'g' && SEAT !== 'pilot') { isOpen('flWin') ? closeWin('flWin') : openFlightList(); return; }
-    if (low === 'm' && SEAT !== 'pilot') { document.getElementById('mtBtn').click(); return; }
+    if (low === 'm' && SEAT !== 'pilot') { setMtcd(!mtcdOn); return; }
     if (low === 'o') { toggleOldi(); return; }
-    if (low === 'e' && e.shiftKey) { extAll = !extAll; return; }
+    if (low === 'i') { toggleInfo(); return; }
     if (!cs) return;
+    const field = { c: 'cfl', l: 'cfl', x: 'xfl', h: 'hdg', s: 'spd', d: 'route', w: 'wx', n: 'note' }[low];
     if (field) {
       e.preventDefault();
-      if (atc && window.openLabelMenu) openLabelMenu(cs, field);
-      else if (field !== 'xfl') focusDeck({ cfl: 'fl', heading: 'hdg', speed: 'mach', direct: 'dct' }[field] || 'fl');
+      if (atc && field === 'note' && window.openLabelMenu) openLabelMenu(cs, 'note');
+      else if (atc && window.openFieldMenuAt) openFieldMenuAt(cs, field);
+      else focusDeck({ cfl: 'fl', hdg: 'hdg', spd: 'mach', route: 'dct' }[field] || 'fl');
       return;
     }
     if (low === 'a' && SEAT !== 'pilot') { assume(cs); return; }
-    if (low === 'x' && e.shiftKey && SEAT !== 'pilot') { release(cs); return; }
+    if (low === 'u' && SEAT !== 'pilot') { release(cs); return; }
     if (low === 'f') { openFpl(cs); return; }
-    if (low === 'e') { extPinned.has(cs) ? extPinned.delete(cs) : extPinned.add(cs); return; }
+    if (low === 'e') { if (window.editRoute) editRoute(cs); return; }
     if (low === 'r') { routeShow = routeShow && routeShow.cs === cs ? null : { cs, until: performance.now() + 8000 }; return; }
     if (low === 'b') { setRblMode(true); rblPick(cs); return; }
   });

@@ -62,7 +62,8 @@ class SessionCreate(BaseModel):
 
 class Instruction(BaseModel):
     callsign: str
-    type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release"]
+    type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
+                  "reroute"]
     fl: Optional[int] = Field(None, description="altitude: target flight level, e.g. 360")
     rate_fpm: Optional[float] = Field(None, description="altitude: optional vertical rate")
     heading: Optional[float] = Field(None, description="heading: 1-360")
@@ -77,6 +78,7 @@ class Instruction(BaseModel):
     side: Optional[Literal["left", "right", "either"]] = Field(None, description="deviation: side of track")
     max_nm: Optional[float] = Field(None, description="deviation: maximum lateral offset from track")
     then_direct: Optional[str] = Field(None, description="deviation: waypoint to proceed to afterwards")
+    points: Optional[list] = Field(None, description="reroute: points to fly via (names, or [x, y] positions in NM)")
 
 
 class Command(BaseModel):
@@ -84,8 +86,9 @@ class Command(BaseModel):
 
 
 class Control(BaseModel):
-    action: Literal["start", "resume", "pause", "set_speed", "set_mode", "step", "restart"]
+    action: Literal["start", "resume", "pause", "set_speed", "set_mode", "step", "restart", "auto_wx"]
     seconds: float = 1.0
+    value: Optional[bool] = None
     time_factor: Optional[float] = None
     mode: Optional[Literal["realtime", "stepped"]] = None
 
@@ -288,6 +291,8 @@ def delete_session(sid: str):
 def control(sid: str, body: Control):
     s = _session(sid)
     try:
+        if body.action == "auto_wx":
+            return s.control("auto_wx", time_factor=1.0 if body.value is not False else 0.0)
         return s.control(body.action, seconds=body.seconds, time_factor=body.time_factor, mode=body.mode)
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -405,6 +410,7 @@ class Entry(BaseModel):
     note: Optional[str] = None
     wx: Optional[str] = None
     coord: Optional[str] = None
+    route: Optional[Union[str, list]] = None
 
 
 @app.post("/sessions/{sid}/entries")

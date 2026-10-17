@@ -370,7 +370,7 @@ def _weather_scan(world: "World", ac: "Aircraft") -> None:
     st["hazard_ahead_nm"] = None if d is None else round(d, 1)
     if not ac.assumed:
         # still with the previous sector (or calling us, not yet assumed): its deviation is coordinated there, it simply flies it
-        if d is not None and d <= P["request_range_nm"] and st["phase"] != "deviating":
+        if d is not None and d <= P["request_range_nm"] and st["phase"] != "deviating" and getattr(world, "auto_wx", True):
             plan = plan_deviation(world, ac)
             if plan is not None:
                 ac.start_wx_deviation(plan)
@@ -439,6 +439,8 @@ def _make_request(world: "World", ac: "Aircraft", d: float, further: bool = Fals
 
 def _self_deviate(world: "World", ac: "Aircraft", d: float, req) -> None:
     st = ac.wx
+    if not getattr(world, "auto_wx", True):
+        return                      # pseudo-pilots only: the aircraft deviates when the pseudo-pilot makes it
     if world.t - st.get("last_self_dev", -1e9) < 30.0:
         return
     st["last_self_dev"] = world.t

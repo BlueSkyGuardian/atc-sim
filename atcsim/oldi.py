@@ -197,6 +197,12 @@ def coord_view(w) -> Dict[str, dict]:
                 d["warn"] = c["warn"]
             if c.get("tte_s") is not None and c["state"] in (None, "abi"):
                 d["act_in_s"] = max(0, round(c["tte_s"] - settings(w)[1]))
+        e = w.entries.get(a.callsign, {})
+        if e.get("route"):
+            from .atctools import entered_route
+            er = entered_route(w, a, e)
+            if er is not None:
+                d["route_ahead"] = er[0][:15]
         ci = getattr(w, "coord_in", {}).get(a.callsign)
         if ci and ci.get("level") is not None and not a.assumed:
             d["entry_level"] = ci["level"]

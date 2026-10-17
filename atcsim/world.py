@@ -15,7 +15,8 @@ import numpy as np
 from . import arrivals, pilot
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
-INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release")
+INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
+                     "reroute")
 MAX_EVENTS = 20000
 PREDICT_DT = 4.0
 
@@ -108,6 +109,8 @@ class World:
         self.coord: Dict[str, dict] = {}   # outbound coordination per aircraft
         self.coord_in: Dict[str, dict] = {}
         self.oldi_cfg: dict = {}
+        self.dyn_points: Dict[str, Point] = {}   # points created during the session (re-routings via coordinates)
+        self.auto_wx = True                # simulated pilots deviate around weather by themselves when needed
         self.start_utc_min = 720.0         # UTC time of day at T+0, minutes
         self.mag_var = 0.0
         self.events: List[dict] = []
@@ -171,6 +174,32 @@ class World:
         if not ac.active:
             raise InstructionError(f"{ac.callsign} is not in the sector (status: {ac.status})")
         return ac
+
+    def point_ref(self, spec) -> str:
+        """A route point: a known point name, or a position [x, y] (NM) / {"x", "y"} / {"lat", "lon"}, which gets a
+        name from its coordinates (ICAO style, e.g. 3012N01045W) and is added to the session's points."""
+        if isinstance(spec, str):
+            n = spec.strip().upper()
+            if n not in self.waypoints or n.startswith("@"):
+                raise InstructionError(f"unknown point {n}")
+            return n
+        if isinstance(spec, dict):
+            if "lat" in spec:
+                x, y = self.airspace.to_xy(float(spec["lat"]), float(spec["lon"]))
+            else:
+                x, y = float(spec["x"]), float(spec["y"])
+        else:
+            x, y = float(spec[0]), float(spec[1])
+        ll = self.airspace.to_latlon(x, y)
+        if ll is not None:
+            la, lo = ll
+            name = (f"{int(abs(la)):02d}{int(round(abs(la) % 1 * 60)) % 60:02d}{'N' if la >= 0 else 'S'}"
+                    f"{int(abs(lo)):03d}{int(round(abs(lo) % 1 * 60)) % 60:02d}{'E' if lo >= 0 else 'W'}")
+        else:
+            name = f"X{x:+.0f}Y{y:+.0f}"
+        self.waypoints[name] = (x, y)
+        self.dyn_points[name] = (round(x, 3), round(y, 3))
+        return name
 
     # ------------------------------------------------------------------ instructions
     def validate(self, instr: dict, by_pilot: bool = False) -> dict:
@@ -281,6 +310,11 @@ class World:
                     raise InstructionError(f"{cs} unable direct {wp}, weather on the direct track")
                 out["wx_note"] = f"weather on the direct track to {wp}"
             out["waypoint"] = wp
+        elif itype == "reroute":
+            pts = instr.get("points") or []
+            if not isinstance(pts, list) or not pts:
+                raise InstructionError("reroute: a list of points (names or [x, y])")
+            out["points"] = [self.point_ref(p) for p in pts[:30]]
         elif itype == "deviation":
             side = str(instr.get("side", "either")).lower()
             if side not in ("left", "right", "either"):
@@ -555,6 +589,8 @@ class World:
             return f"{cs} {self.speed_phrase(n['speed'])}"
         if t == "resume":
             return f"{cs} resume own navigation"
+        if t == "reroute":
+            return f"{cs} cleared via " + " ".join(n["points"])
         if t == "wx_plan":
             p = n["plan"]
             return (f"{cs} deviation approved, heading {int(p['heading']):03d} for {p['distance_nm']} miles, "
@@ -643,7 +679,7 @@ class World:
                             text=f"{ac.callsign} deviating {plan['side']}, heading {plan['heading']:03d} for "
                                  f"{plan['distance_nm']} miles, then direct {plan['then_direct']}")
             return
-        if t in ("heading", "direct", "resume") and ac.nav_mode == "wxdev":
+        if t in ("heading", "direct", "resume", "reroute") and ac.nav_mode == "wxdev":
             ac.wx["phase"] = "clear"
         if t == "altitude":
             ac.cleared_alt_ft = n["fl"] * 100.0
@@ -664,6 +700,22 @@ class World:
         elif t == "resume":
             ac.nav_mode = "lnav"            # direct to the next waypoint of the route from present position
             ac.leg_from = ac.pos
+            ac.turn_dir = None
+        elif t == "reroute":
+            pts = list(n["points"])
+            prefix, remaining = ac.route[:ac.next_index], ac.route[ac.next_index:]
+            last = pts[-1]
+            if last in remaining:                 # rejoins the route: the rest of it follows
+                tail = remaining[remaining.index(last) + 1:]
+            elif last in ac.route_after:           # ends in the next sector: the onward route follows
+                ac.route_after = ac.route_after[ac.route_after.index(last) + 1:]
+                tail = []
+            else:                                  # then the planned exit point
+                tail = [] if ac.route[-1] in pts else [ac.route[-1]]
+            ac.route = prefix + pts + tail
+            ac.next_index = len(prefix)
+            ac.leg_from = ac.pos
+            ac.nav_mode = "lnav"
             ac.turn_dir = None
         elif t == "direct":
             wp = n["waypoint"]
@@ -1333,7 +1385,7 @@ class World:
         out.sort(key=lambda c: c["time_to_los_s"])
         return out
 
-    ENTRY_FIELDS = ("cfl", "xfl", "speed", "heading", "direct", "note", "wx", "coord")
+    ENTRY_FIELDS = ("cfl", "xfl", "speed", "heading", "direct", "note", "wx", "coord", "route")
 
     def enter(self, callsign: str, fields: dict, who: str = "atc") -> dict:
         """Controller's label input (connected mode): cleared level, speed, heading, direct, free note.
@@ -1361,6 +1413,13 @@ class World:
                 v = str(v).upper()
                 if v not in self.waypoints or v.startswith("@"):
                     raise InstructionError(f"unknown point {v}")
+            elif k == "route":                    # the route entered in the system (re-routing): names or [x, y]
+                if not isinstance(v, list):
+                    v = str(v).replace(",", " ").split()
+                v = [self.point_ref(p) for p in v[:30]]
+                if not v:
+                    e.pop(k, None)
+                    continue
             elif k == "coord":                    # "phone": the controller coordinated the exit by telephone
                 v = str(v).lower()
                 if v != "phone":
@@ -1396,6 +1455,7 @@ class World:
             "special": atctools.special_tracks(self),
             "system_cfl": atctools.system_cfls(self),
             "coord": oldi.coord_view(self),
+            "dyn_points": self.dyn_points,
             "oldi_last": self.oldi[-1]["id"] if self.oldi else 0,
             "duration_s": self.duration_s,
             "finished": self.finished,

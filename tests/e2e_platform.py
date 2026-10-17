@@ -104,7 +104,7 @@ with sync_playwright() as p:
     pil.keyboard.up("Space")
     ok(True, "radio: pilot transmits, controller and instructor see who is talking")
     # controller assumes (label menu) and enters a level
-    atc.evaluate(f"onSelectAircraft('{calling}', {{clientX: 700, clientY: 400}}, true)")
+    atc.evaluate(f"onLongPressLabel('{calling}', 'cfl', {{clientX: 700, clientY: 400}})")
     atc.wait_for_selector("#lblMenu.on")
     atc.screenshot(path=f"{OUT}/06_label_menu.png")
     atc.click("#lmAsBtn")
@@ -120,23 +120,44 @@ with sync_playwright() as p:
     atc.keyboard.down("Space"); atc.wait_for_timeout(1500); atc.keyboard.up("Space")
     ok(True, f"controller enters CFL {newfl} and transmits")
     # decontrol, then take it back (label menu)
-    atc.evaluate(f"onSelectAircraft('{calling}', {{clientX: 700, clientY: 400}}, true)")
+    atc.evaluate(f"onLongPressLabel('{calling}', 'cfl', {{clientX: 700, clientY: 400}})")
     atc.click("#lmRelBtn")
     atc.wait_for_function(f"() => state.aircraft.concat(state.transferred).find(a => a.callsign === '{calling}').released")
-    atc.evaluate(f"onSelectAircraft('{calling}', {{clientX: 700, clientY: 400}}, true)")
+    atc.evaluate(f"onLongPressLabel('{calling}', 'cfl', {{clientX: 700, clientY: 400}})")
     atc.wait_for_selector("#lmAssume:visible")
     atc.click("#lmAsBtn")
     atc.wait_for_function(f"() => state.aircraft.find(a => a.callsign === '{calling}').assumed")
     atc.keyboard.press("Escape")
     ok(True, "controller decontrols and assumes again")
-    # long press on the label: the route
-    box = atc.evaluate(f"""() => {{ const l = labelRects.find(r => r.cs === '{calling}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
-        return l ? [c.left + (l.x0 + l.x1) / 2 / d, c.top + (l.y0 + l.y1) / 2 / d] : null; }}""")
+    # the label's values are flat buttons: move the label clear of the others, then find a value on screen
+    def field_pt(cs, f):
+        atc.evaluate(f"""(() => {{ const a = state.aircraft.find(x => x.callsign === '{cs}'), [x, y] = toPx(a.x_nm, a.y_nm);
+            labelOff['{cs}'] = [x / devicePixelRatio < cv.clientWidth / 2 ? 90 : -200, y / devicePixelRatio < cv.clientHeight / 2 ? 70 : -120]; }})()""")
+        atc.wait_for_timeout(300)
+        return atc.evaluate(f"""() => {{ const r = fieldRects.find(q => q.cs === '{cs}' && q.f === '{f}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
+            return r ? [c.left + (r.x0 + r.x1) / 2 / d, c.top + (r.y0 + r.y1) / 2 / d] : null; }}""")
+    # a click on the label selects; a click on the level opens the level menu
+    lp = field_pt(calling, "cs")
+    atc.mouse.click(*lp)
+    atc.wait_for_timeout(300)
+    ok(atc.evaluate("selected") == calling and not atc.is_visible("#lblMenu.on"), "a click on the label selects it, no menu")
+    atc.mouse.click(*field_pt(calling, "cfl"))
+    atc.wait_for_selector("#lblMenu.on.fm [data-x]")
+    atc.wait_for_timeout(800)
+    atc.screenshot(path=f"{OUT}/07a_level_menu.png")
+    ok(atc.locator("#lblMenu.fm [data-x]").count() >= 8, "a click on the level opens the level menu")
+    atc.keyboard.press("Escape")
+    # long press on the route value: the route; long press on another value: the full menu
+    box = field_pt(calling, "route")
     atc.mouse.move(*box); atc.mouse.down(); atc.wait_for_timeout(800)
-    ok(bool(atc.evaluate("routeShow && routeShow.cs")), f"long press shows the route ({atc.evaluate('routeShow && routeShow.cs')})")
+    ok(bool(atc.evaluate("routeShow && routeShow.cs")), f"long press on the route shows it ({atc.evaluate('routeShow && routeShow.cs')})")
     atc.screenshot(path=f"{OUT}/07b_route_longpress.png")
     atc.mouse.up()
-    ok(not atc.is_visible("#lblMenu.on"), "a long press does not open the label menu")
+    ok(not atc.is_visible("#lblMenu.on"), "a long press on the route does not open a menu")
+    hp = field_pt(calling, "hdg")
+    atc.mouse.move(*hp); atc.mouse.down(); atc.wait_for_timeout(800); atc.mouse.up()
+    ok(atc.is_visible("#lblMenu.on") and not atc.evaluate("document.querySelector('#lblMenu').classList.contains('fm')"), "long press on a value opens the full label menu")
+    atc.keyboard.press("Escape")
     # RBL between two map points / a point and an aircraft
     atc.click("#rblBtn"); atc.mouse.click(1000, 520); atc.mouse.click(1100, 640)
     ok(atc.evaluate("rbls.length === 1 && typeof rbls[0].a === 'object' && typeof rbls[0].b === 'object'"), "RBL between two points " + atc.evaluate("JSON.stringify(rbls)"))
@@ -179,7 +200,6 @@ with sync_playwright() as p:
     atc.wait_for_function(f"() => state.coord && state.coord['{calling}'] && state.coord['{calling}'].xfl === {xfl} && state.coord['{calling}'].xfl_entered")
     atc.wait_for_timeout(700)
     ok(any(f" X{xfl}" in ln for ln in texts(calling)), f"label shows CFL and XFL: {texts(calling)[1:3]}")
-    ok("→" in atc.inner_text("#lmCoord"), "label menu shows the coordination: " + atc.inner_text("#lmCoord"))
     atc.keyboard.press("Escape")
     atc.evaluate("document.activeElement && document.activeElement.blur()")
     atc.keyboard.press("o")
@@ -200,21 +220,40 @@ with sync_playwright() as p:
     ok(atc.locator("#flWin tr[data-cs]").count() > 5, "G: flight plan list")
     atc.screenshot(path=f"{OUT}/07f_flight_list.png")
     atc.keyboard.press("Escape")
-    atc.keyboard.press("m")
+    ok(not atc.evaluate("mtcdOn"), "MTCD off by default")
+    atc.keyboard.press("M")                     # capitals work too
     atc.wait_for_selector("#mtWin")
-    ok(True, "M: MTCD list (" + str(atc.evaluate("(state.mtcd || []).length")) + " conflicts)")
+    ok(atc.evaluate("mtcdOn"), "M: MTCD on (" + str(atc.evaluate("(state.mtcd || []).length")) + " conflicts)")
     atc.keyboard.press("Escape")
-    # extended label on hover (Mode S data); the label moved away from the others first
-    atc.evaluate(f"""(() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm);
-        labelOff['{calling}'] = [x / devicePixelRatio < cv.clientWidth / 2 ? 90 : -200, y / devicePixelRatio < cv.clientHeight / 2 ? 70 : -120]; }})()""")
-    atc.wait_for_timeout(300)
-    box = atc.evaluate(f"""() => {{ const l = labelRects.find(r => r.cs === '{calling}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
-        return l ? [c.left + (l.x0 + 12) / d, c.top + (l.y0 + l.y1) / 2 / d] : null; }}""")
-    atc.mouse.move(*box); atc.wait_for_timeout(900)
-    hv = atc.evaluate("hoverLbl")              # the label under the mouse (another one may lie on top in dense traffic)
-    ok(bool(hv) and atc.evaluate(f"window.__drawnLabels['{hv}'].x") > 0, f"extended label on hover ({hv}): " + " | ".join(texts(hv)[-4:]))
-    atc.screenshot(path=f"{OUT}/07g_extended_label.png")
+    # track info window (I): the aircraft under the mouse
+    atc.keyboard.press("i")
+    atc.wait_for_selector("#tiWin")
+    atc.evaluate(f"(() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'); view.cx = a.x_nm; view.cy = a.y_nm; }})()")   # centred
+    box = field_pt(calling, "cs")
+    atc.evaluate(f"""(() => {{ const w = document.getElementById('tiWin'), a = state.aircraft.find(x => x.callsign === '{calling}'), [x] = toPx(a.x_nm, a.y_nm);
+        w.style.left = (x / devicePixelRatio > cv.clientWidth / 2 ? 8 : cv.clientWidth - 320) + 'px'; }})()""")   # the window away from it
+    cands = [box, atc.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
+            c = cv.getBoundingClientRect(), d = devicePixelRatio; return [c.left + x / d, c.top + y / d]; }}""")]
+    box = next((b for b in cands if atc.evaluate(f"document.elementFromPoint({b[0]}, {b[1]}) === cv")), cands[1])
+    atc.mouse.move(box[0] - 30, box[1] - 30); atc.mouse.move(*box, steps=4); atc.wait_for_timeout(900)
+    hv = atc.evaluate("hoverAc")
+    ok(bool(hv) and hv in atc.inner_text("#tiWin .wh") and "Mode" in atc.inner_text("#tiWin"),
+       f"track info window shows {hv} (" + str(atc.evaluate(f"(() => {{ const el = document.elementFromPoint({box[0]}, {box[1]}); return [el.tagName, el.className, el.parentElement && el.parentElement.id, (el.textContent || '').slice(0, 40), {box[0]}, {box[1]}]; }})()")) + ")")
+    atc.screenshot(path=f"{OUT}/07g_track_info.png")
     atc.mouse.move(40, 700)
+    # route editor (E): a fix and a position, entered as the system route
+    atc.evaluate(f"selected = '{calling}'; document.activeElement && document.activeElement.blur()")
+    atc.keyboard.press("e")
+    atc.wait_for_selector("#reWin .rc")
+    n_before = atc.locator("#reWin .rc").count()
+    spot = next((xy for xy in ((820, 470), (700, 600), (900, 300), (600, 380)) if atc.evaluate(f"document.elementFromPoint({xy[0]}, {xy[1]}) === cv")), (820, 470))
+    atc.mouse.click(*spot)
+    atc.wait_for_timeout(300)
+    ok(atc.locator("#reWin .rc").count() == n_before + 1, f"route editor: a click on the map adds a point ({atc.locator('#reWin .rc').count()} / {n_before}, {atc.evaluate(f'document.elementFromPoint({spot[0]}, {spot[1]}).id')})")
+    atc.screenshot(path=f"{OUT}/07j_route_editor.png")
+    atc.click("#reWin [data-apply]")
+    atc.wait_for_function(f"() => state.entries['{calling}'] && (state.entries['{calling}'].route || []).length > 0 && state.entries['{calling}'].route.every(p => typeof p === 'string')", timeout=10000)
+    ok(True, "re-routing entered: " + " ".join(atc.evaluate(f"state.entries['{calling}'].route")))
     # any track can be assumed: one still with the previous sector
     inb = atc.evaluate("(state.aircraft.find(a => !a.on_frequency && !a.assumed) || {}).callsign")
     if inb:
@@ -249,6 +288,13 @@ with sync_playwright() as p:
     pt.click()
     pil.wait_for_function(f"() => state.aircraft.find(a => a.callsign === '{calling}').next_waypoint === '{ptname}'", timeout=30000)
     ok(True, f"pilot flies direct {ptname} from the deck")
+    via = pil.evaluate(f"""(() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}');
+        return realPoints((a.route || []).slice(Math.max(0, a.route.indexOf(a.next_waypoint || a.fp_next))).concat(a.route_after_exit || [])).slice(-2).join(' '); }})()""")
+    if via:
+        pil.fill("#deck [data-i=via]", via)
+        pil.click("#deck [data-go=via]")
+        pil.wait_for_function("() => { const o = document.querySelector('#deck [data-out]'); return o && /done|executing|✗/.test(o.textContent); }", timeout=20000)
+        ok("✓" in pil.inner_text("#deck [data-out]"), f"pilot re-routes via {via}: " + pil.inner_text("#deck [data-out]"))
     pil.screenshot(path=f"{OUT}/08b_pilot_deck.png")
     # phone: the pilot calls the controller as Casablanca
     pil.click("#pilotUnits [data-unit=GMMM]")

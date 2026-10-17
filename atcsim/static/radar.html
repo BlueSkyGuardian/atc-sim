@@ -108,6 +108,17 @@
   .win .mt small { display: block; color: var(--dim); font-family: system-ui; }
   .win kbd { font: 600 11px var(--mono); background: #1a2633; border: 1px solid #2c3e50; border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; color: #e6eef5; }
   .win .keys { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; align-items: center; }
+  .win .ti { display: grid; grid-template-columns: 112px 1fr; gap: 2px 8px; font-size: 11.5px; }
+  .win .ti > span:nth-child(odd) { color: var(--dim); } .win .ti > span:nth-child(even) { font-family: var(--mono); }
+  .win .rcs { display: flex; flex-wrap: wrap; gap: 4px; }
+  .win .rc { font: 600 11.5px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; cursor: pointer; background: #0d141c; }
+  .win .rc b { color: #ff8f8f; margin-left: 5px; font-weight: 400; } .win .rc.cur { border-color: var(--routeShow, #ff4fd8); box-shadow: 3px 0 0 #ff4fd8; }
+  #lblMenu.fm { width: auto; min-width: 150px; max-width: 280px; padding: 6px 8px; }
+  #lblMenu .fl { display: flex; flex-direction: column; gap: 2px; max-height: 260px; overflow: auto; margin-top: 4px; }
+  #lblMenu .fl button { text-align: left; font-family: var(--mono); padding: 2px 8px; }
+  #lblMenu .fl button.cur { border-color: var(--sel); color: var(--sel); }
+  #lblMenu .fg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 4px; }
+  #lblMenu .fg button { font-family: var(--mono); padding: 2px 4px; }
   #lblMenu .wxb button.on { border-color: #c9a227; color: #ffe08a; }
   #lblMenu .lv button.cf { border-color: #a33; color: #ffb3b3; } #lblMenu .lv button.ok { border-color: #2f7a5f; color: #bff5dc; }
   /* seats */
@@ -229,7 +240,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection: conflicts over the next 20 minutes (M)">MTCD</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the next 20 minutes (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -257,6 +268,7 @@
       <div id="exMembers" style="margin-bottom:6px"></div>
       <div class="row"><select id="invUser" style="flex:1"></select><select id="invSeat"><option value="atc">Controller</option><option value="pilot">Pseudo-pilot</option><option value="instructor">Instructor</option></select><button id="invBtn">Invite</button></div>
       <div class="row" style="font-size:11px"><span class="c-dim">Links:</span><button data-link="atc" style="font-size:11px;padding:1px 6px">copy controller link</button><button data-link="pilot" style="font-size:11px;padding:1px 6px">copy pilot link</button><button data-link="instructor" style="font-size:11px;padding:1px 6px">co-instructor</button></div>
+      <div class="row" style="font-size:12px"><label title="On: an aircraft whose weather-deviation request is not answered deviates by itself when the weather is close (15 NM), and aircraft still with the previous sector deviate as coordinated there. Off: only what the pseudo-pilots do."><input type="checkbox" id="autoWx" checked> simulated pilots deviate around weather by themselves</label></div>
       <div class="row"><span id="exMsg" class="c-dim" style="font-size:11px;flex:1"></span><button id="endBtn" style="border-color:#6b2b2b;color:#ffb3b3">End exercise</button></div>
     </section>
     <section id="todoSec" class="ex-only" data-tab="pilot">
@@ -334,6 +346,7 @@ const TH = { ...TH_DEF };
 try { Object.assign(TH, JSON.parse(localStorage.getItem('atc_theme') || '{}')); } catch (e) {}
 function saveTheme() { try { localStorage.setItem('atc_theme', JSON.stringify(TH)); } catch (e) {} }
 if (EXID) SID = EXID;
+let mtcdOn = false; try { mtcdOn = localStorage.getItem('atc_mtcd') === '1'; } catch (e) {}
 let sector = null, state = null, sep = null, selected = null, lastSeq = 0, eventsBuf = [], weather = null, ws = null, wsOk = false;
 let wxImg = null, wxMeta = null, wxCellsData = [], arrInfo = null;
 async function pollArrivals() { if (!SID) return; try { arrInfo = await api(`/sessions/${SID}/aerodromes`); } catch (e) {} }
@@ -560,7 +573,7 @@ function openStream(id) {
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type !== 'tick' || id !== SID) return;
-    state = m.state; renderSide(); gotPicture();
+    state = m.state; mergeDyn(); renderSide(); gotPicture();
     if (m.separation) { sep = m.separation; renderConfl(); }
     if (m.events.length) { lastSeq = m.events[m.events.length - 1].seq; eventsBuf = eventsBuf.concat(m.events).slice(-200); renderEvents(); }
   };
@@ -568,7 +581,8 @@ function openStream(id) {
 }
 
 // ---------- polling
-async function pollState() { if (!SID) return; try { state = await api(`/sessions/${SID}/state?trails=true`); renderSide(); gotPicture(); } catch (e) {} }
+async function pollState() { if (!SID) return; try { state = await api(`/sessions/${SID}/state?trails=true`); mergeDyn(); renderSide(); gotPicture(); } catch (e) {} }
+function mergeDyn() { if (sector && state && state.dyn_points) Object.assign(sector.waypoints, state.dyn_points); }
 async function pollSep() { if (!SID) return; try { sep = await api(`/sessions/${SID}/separation?lookahead_s=600`); renderConfl(); } catch (e) {} }
 async function pollEvents() {
   if (!SID) return;
@@ -906,25 +920,41 @@ cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(userZoom * (e.de
 const labelOff = {}, labelRects = [];
 let drag = null;
 function canvasPt(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; }
-function labelAt(e) {                 // the label under the mouse: the extended one first, else the one drawn last (on top)
+function labelAt(e) {                 // the label under the mouse: the one drawn last (on top)
   const [x, y] = canvasPt(e), hit = labelRects.filter(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1);
-  return hit.find(l => l.cs === hoverLbl || extPinned.has(l.cs)) || hit[hit.length - 1];
+  return hit.find(l => l.cs === hoverLbl) || hit[hit.length - 1];
 }
+// label fields: each value of a label is a flat button (level, exit level, speed, heading, route, weather, callsign)
+const fieldRects = [], nameRects = [];
+let hoverLbl = null, hoverField = null, hoverAc = null, mouseCv = null;
+function fieldAt(e) {
+  const [x, y] = canvasPt(e), l = labelAt(e);
+  if (!l) return null;
+  for (let i = fieldRects.length - 1; i >= 0; i--) { const f = fieldRects[i];
+    if (f.cs === l.cs && x >= f.x0 && x <= f.x1 && y >= f.y0 && y <= f.y1) return f; }
+  return null;
+}
+window.fieldAt = fieldAt;
 let rblDrag = null;                                  // right-drag: a range/bearing line from one end to the other
 cv.addEventListener('mousedown', e => {
   if (e.button === 2) { e.preventDefault(); rblDrag = { from: rblTarget(e), x: e.clientX, y: e.clientY, cur: canvasPt(e), moved: false }; return; }
-  if (e.button === 1) { e.preventDefault(); const l = labelAt(e), cs = l ? l.cs : nearestAircraft(e);   // middle click: pin the extended label
-    if (cs) { extPinned.has(cs) ? extPinned.delete(cs) : extPinned.add(cs); } return; }
+  if (e.button === 1) { e.preventDefault(); const l = labelAt(e), cs = l ? l.cs : nearestAircraft(e);   // middle click: info window on it
+    if (cs && window.pinInfo) pinInfo(cs); return; }
   if (e.button !== 0) return;
+  if (window.routeEditActive && routeEditActive()) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true }; return; }
   const [qx, qy] = canvasPt(e), rh = rblRects.find(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1);
   if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false }; return; }
-  const l = labelAt(e);
-  if (l) { const o = labelOff[l.cs] || [10, -14]; drag = { label: l.cs, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; }
+  const l = labelAt(e), fld = l ? fieldAt(e) : null;
+  if (l) { const o = labelOff[l.cs] || [10, -14]; drag = { label: l.cs, field: fld && fld.f, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; }
   else drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, ac: nearestAircraft(e) };
   const cs = l ? l.cs : drag.ac, d0 = drag;
   clearTimeout(pressTimer);
-  if (cs && !rblMode && !e.shiftKey)                 // long press: show the route ahead while held
-    pressTimer = setTimeout(() => { if (drag === d0 && !d0.moved) { d0.long = true; routeShow = { cs, until: Infinity }; } }, 450);
+  // long press: on the route field (or the aircraft) shows the route ahead while held; on another field of the
+  // controller's label, opens the full label menu
+  if (cs && !rblMode && !e.shiftKey)
+    pressTimer = setTimeout(() => { if (drag !== d0 || d0.moved) return; d0.long = true;
+      if (l && d0.field !== 'route' && window.onLongPressLabel && onLongPressLabel(cs, d0.field, e)) { d0.menu = true; return; }
+      routeShow = { cs, until: Infinity }; }, 450);
 });
 window.addEventListener('mouseup', e => {
   if (e.button === 2 && rblDrag) {
@@ -936,20 +966,23 @@ window.addEventListener('mouseup', e => {
   if (e.button !== 0) return;
   if (drag && drag.rbl) { drag = null; return; }
   clearTimeout(pressTimer);
-  if (drag && drag.long) { if (routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
+  if (drag && drag.re) { const d0 = drag; drag = null; if (!d0.moved && window.routeEditClick) routeEditClick(e); return; }
+  if (drag && drag.long) { if (!drag.menu && routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
   if (drag && !drag.moved && drag.label && (rblMode || e.shiftKey)) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e) || drag.label); drag = null; return; }
   if (drag && !drag.moved) { if (drag.label) { selected = drag.label;
-      if (window.onSelectAircraft && onSelectAircraft(selected, e, true)) { drag = null; return; }
+      if (window.onSelectAircraft && onSelectAircraft(selected, e, true, drag.field)) { drag = null; return; }
       $('#cmd').value = selected + ' '; $('#cmd').focus(); pollSelected(); } else pick(e); }
   drag = null;
 });
 window.addEventListener('mousemove', e => {
+  mouseCv = e.target === cv ? canvasPt(e) : null;
   if (rblDrag) { rblDrag.cur = canvasPt(e); if (Math.abs(e.clientX - rblDrag.x) + Math.abs(e.clientY - rblDrag.y) > 6) rblDrag.moved = true; return; }
   if (!drag) {
-    const l = e.target === cv ? labelAt(e) : null;
-    if ((l && l.cs) !== hoverLbl) { hoverLbl = l ? l.cs : null; hoverT = performance.now(); }
+    const l = e.target === cv ? labelAt(e) : null, f = l ? fieldAt(e) : null;
+    hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
     const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
-    cv.style.cursor = l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) ? 'move' : 'crosshair'; return; }
+    cv.style.cursor = window.routeEditActive && routeEditActive() ? 'copy' : f && f.f !== 'cs' && SEAT === 'atc' ? 'pointer'
+      : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
   if (drag.rbl) { drag.rbl.ox = drag.ox + dx; drag.rbl.oy = drag.oy + dy; return; }
@@ -976,27 +1009,29 @@ const angDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 // deviation is approved · next point (or the direct) when no heading. On the controller's seat everything assigned
 // comes from what the controller entered; on the other seats, from what the aircraft is doing.
 function labelLine3(a, ent) {
-  const segs = [[`${a.gs_kt} `, 0]];
+  const segs = [[`${a.gs_kt} `, 0, 'spd']];
   const cur = a.speed_mode === 'mach' ? 'M' + pad(a.mach * 100, 2) : 'I' + a.ias_kt;
   let tgt = ent ? (ent.speed ? entSpeed(ent.speed) : null) : (a.speed_assigned_by_atc ? spdText(a.speed_mode, a.speed_target) : null);
   if (tgt && tgt !== cur) {
     const same = tgt[0] === cur[0], diff = Math.abs(+tgt.slice(1) - +cur.slice(1));
-    if (same && diff <= (cur[0] === 'M' ? 0 : 3)) segs.push([tgt, 0]);
-    else segs.push([`${cur}›${same ? tgt.slice(1) : tgt}`, 'chg']);
-  } else segs.push([cur, 0]);
+    if (same && diff <= (cur[0] === 'M' ? 0 : 3)) segs.push([tgt, 0, 'spd']);
+    else segs.push([`${cur}›${same ? tgt.slice(1) : tgt}`, 'chg', 'spd']);
+  } else segs.push([cur, 0, 'spd']);
   const sr = a.speed_restriction;
-  if (!ent && sr && sr.conversion_kt) segs.push([`/K${sr.conversion_kt}`, 0]);
+  if (!ent && sr && sr.conversion_kt) segs.push([`/K${sr.conversion_kt}`, 0, 'spd']);
   const hdg = Math.round(a.heading) || 360;
   const asg = ent ? (ent.heading ? +ent.heading : null) : (a.nav_mode !== 'lnav' && a.assigned_heading != null ? a.assigned_heading : null);
-  if (asg != null && angDiff(hdg, asg) > 3) segs.push([` ${pad(hdg, 3)}›${pad(asg, 3)}`, 'chg']);
-  else segs.push([` ${pad(asg != null ? asg : hdg, 3)}`, 0]);
-  if (asg != null) segs.push([' H', 'htag']);
+  if (asg != null && angDiff(hdg, asg) > 3) segs.push([` ${pad(hdg, 3)}›${pad(asg, 3)}`, 'chg', 'hdg']);
+  else segs.push([` ${pad(asg != null ? asg : hdg, 3)}`, 0, 'hdg']);
+  if (asg != null) segs.push([' H', 'htag', 'hdg']);
   const wx = ent ? ent.wx : (a.nav_mode === 'wxdev' ? 'DEV' : null);
-  if (wx) segs.push([' WX' + (ent ? (wx === 'Y' ? '' : wx) : ''), 'wxtag']);
+  if (wx) segs.push([' WX' + (ent ? (wx === 'Y' ? '' : wx) : ''), 'wxtag', 'wx']);
   if (asg == null) {
-    const nx = ent && ent.direct ? ent.direct : nextReal(a);
-    segs.push([` >${nx}`, ent && ent.direct && ent.direct !== nextReal(a) ? 'chg' : 0]);
-  }
+    const co = ent && shown && shown.coord ? shown.coord[a.callsign] : null;
+    const rt = ent && ent.route && co && co.route_ahead && co.route_ahead.length ? co.route_ahead[0] : null;
+    const nx = ent && ent.direct ? ent.direct : rt || nextReal(a);
+    segs.push([` >${nx}`, ent && ent.direct && ent.direct !== nextReal(a) ? 'chg' : 0, 'route']);
+  } else segs.push([' >', 0, 'route']);
   return segs;
 }
 // control state of a track on this screen (colours and transfer cues)
@@ -1008,9 +1043,6 @@ function ctlState(a) {
   if (a.on_frequency) return 'calling';
   return 'inbound';
 }
-const extPinned = new Set(); let hoverLbl = null, hoverT = 0;
-function isExt(cs) { return extPinned.has(cs) || extAll || (hoverLbl === cs && performance.now() - hoverT > 350); }
-let extAll = false;
 const sgn = v => (v > 0 ? '+' : '') + v;
 function extLines(a, ent) {           // extended label: flight-plan data and the Mode S downlinked parameters
   const fp = a.flight_plan || {}, ms = a.mode_s, out = [];
@@ -1041,6 +1073,8 @@ function drawRoute(byCs) {
   if (ent.direct && a.route.indexOf(ent.direct) >= i) i = a.route.indexOf(ent.direct);
   let names = a.route.slice(i).filter(n => !n.startsWith('@'));
   if (ent.direct && !names.includes(ent.direct)) { const ra = a.route_after_exit || []; names = ra.includes(ent.direct) ? ra.slice(ra.indexOf(ent.direct)) : [ent.direct]; }
+  const co = state && state.coord ? state.coord[a.callsign] : null;
+  if (!ent.direct && ent.route && co && co.route_ahead) names = co.route_ahead.slice();   // the re-routing entered
   for (const n of a.route_after_exit || []) if (!names.includes(n)) names.push(n);
   names = names.filter(n => wp[n]);
   const pts = [[a.x_nm, a.y_nm]].concat(names.map(n => wp[n]));
@@ -1075,12 +1109,23 @@ $('#rblClear').onclick = () => { rbls.length = 0; setRblMode(false); };
 window.addEventListener('keydown', e => { if (e.key === 'Escape') setRblMode(false); });
 const endName = t => typeof t === 'string' ? t : (t.name || `${t.x.toFixed(0)},${t.y.toFixed(0)}`);
 const sameEnd = (p, q) => typeof p === 'string' ? p === q : typeof q !== 'string' && Math.hypot(p.x - q.x, p.y - q.y) < 0.2;
-function rblTarget(e) {
-  const cs = nearestAircraft(e); if (cs) return cs;
-  const r = cv.getBoundingClientRect(), [x, y] = fromPx((e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio);
-  let best = null, bd = 8 * devicePixelRatio / view.s;          // snap to a fix within 8 px
-  for (const [n, p] of Object.entries((sector && sector.waypoints) || {})) { const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd && !COPS().has(n)) { bd = d; best = { x: p[0], y: p[1], name: n }; } }
+function rblTarget(e) { return rblTargetAt(canvasPt(e)); }
+// what an RBL end at this screen point is: an aircraft, a fix (snapped when the click is within 10 px of the fix
+// symbol), or the map position itself
+function rblTargetAt(q) {
+  const [x, y] = fromPx(q[0], q[1]), dpr = devicePixelRatio;
+  let ac = null, ad = 12 * dpr / view.s;
+  if (shown) for (const a of shown.aircraft.concat(shown.transferred || [])) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < ad) { ad = d; ac = a.callsign; } }
+  if (ac) return ac;
+  let best = null, bd = 10 * dpr / view.s;
+  for (const [n, p] of Object.entries((sector && sector.waypoints) || {})) { const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd && !COPS().has(n) && !n.startsWith('@')) { bd = d; best = { x: p[0], y: p[1], name: n }; } }
   return best || { x, y };
+}
+function snapMark(t, byCs) {                          // ring around what the RBL end would snap to
+  if (!t || (typeof t === 'object' && !t.name)) return;
+  const P = rblEnd(t, byCs); if (!P) return;
+  const [x, y] = toPx(P.x_nm, P.y_nm), dpr = devicePixelRatio;
+  ctx.strokeStyle = TH.rbl; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(x, y, 8 * dpr, 0, Math.PI * 2); ctx.stroke();
 }
 function rblPick(t) {
   if (!t) return;
@@ -1110,8 +1155,13 @@ function cpa(A, B) {
 function drawRbls(byCs) {
   const dpr = devicePixelRatio; rblRects.length = 0;
   for (let i = rbls.length - 1; i >= 0; i--) if (!rblEnd(rbls[i].a, byCs) || !rblEnd(rbls[i].b, byCs)) rbls.splice(i, 1);   // aircraft gone
-  rbls.forEach((r, i) => {
-    const A = rblEnd(r.a, byCs), B = rblEnd(r.b, byCs), c = cpa(A, B), both = !A.point && !B.point;
+  rbls.forEach((r, i) => drawRblPair(rblEnd(r.a, byCs), rblEnd(r.b, byCs), r, i));
+}
+// one range/bearing line with its label; i = null for the line being dragged (live, not yet placed)
+function drawRblPair(A, B, r, i) {
+  const dpr = devicePixelRatio;
+  {
+    const c = cpa(A, B), both = !A.point && !B.point;
     const vmin = 1000, dv = both ? Math.abs(A.fl - B.fl) * 100 : 1e9;
     const col = both && c.d < SEPH() + (A.formation || B.formation ? 1 : 0) && dv < vmin * (A.rvsm && A.rvsm.needs_2000ft || B.rvsm && B.rvsm.needs_2000ft ? 2 : 1) ? '#ff6b9a' : TH.rbl;
     const [ax, ay] = toPx(A.x_nm, A.y_nm), [bx, by] = toPx(B.x_nm, B.y_nm);
@@ -1136,8 +1186,8 @@ function drawRbls(byCs) {
     const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 8 * dpr, h = (l2 ? 28 : 16) * dpr;
     ctx.fillStyle = '#0b1016cc'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, h);
     ctx.fillStyle = col; ctx.fillText(l1, mx, my); if (l2) ctx.fillText(l2, mx, my + 13 * dpr);
-    rblRects.push({ i, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my - 12 * dpr + h });
-  });
+    if (i != null) rblRects.push({ i, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my - 12 * dpr + h });
+  }
 }
 function nearestAircraft(e) {
   if (!shown) return null; const r = cv.getBoundingClientRect();
@@ -1172,7 +1222,7 @@ function legArrows(pts, col) {          // direction arrows at the middle of eac
 const AREA_COL = { danger: '#e08a3c', restricted: '#e0c13c', prohibited: '#ff5a5a' };
 // draws label lines (each a list of [text, colour] segments); the callsign line (index k1) is at y = by.
 // The last nExt lines are the extended label, on a dark box. Returns the width drawn.
-function paintLabel(lines, k1, bx, by, lh, nExt, col) {
+function paintLabel(lines, k1, bx, by, lh, nExt, col, cs) {
   const dpr = devicePixelRatio, H = lh * dpr;
   let w = 0;
   for (const ln of lines) w = Math.max(w, ln.reduce((s, sg) => s + ctx.measureText(sg[0]).width, 0));
@@ -1184,7 +1234,17 @@ function paintLabel(lines, k1, bx, by, lh, nExt, col) {
     ctx.strokeStyle = (col || '#888888').slice(0, 7) + '44'; ctx.beginPath(); ctx.moveTo(bx, ys); ctx.lineTo(bx + w, ys); ctx.stroke();
   }
   lines.forEach((ln, i) => { let x = bx; const y = by + (i - k1) * H;
-    for (const [t, c] of ln) { ctx.fillStyle = c; ctx.fillText(t, x, y); x += ctx.measureText(t).width; } });
+    for (const [t, c, f] of ln) {
+      const tw = ctx.measureText(t).width;
+      ctx.fillStyle = c; ctx.fillText(t, x, y);
+      if (f && cs) {
+        const lead = t.length - t.trimStart().length, x0 = x + ctx.measureText(t.slice(0, lead)).width;
+        fieldRects.push({ cs, f, x0: x0 - 1 * dpr, y0: y - H * 0.85, x1: x + tw + 1 * dpr, y1: y + H * 0.2 });
+        if (hoverField && hoverField.cs === cs && hoverField.f === f && SEAT === 'atc' && f !== 'cs') {   // flat button: underline
+          ctx.fillRect(x0, y + 2 * dpr, x + tw - x0, 1 * dpr); }
+      }
+      x += tw;
+    } });
   return w;
 }
 function draw() {
@@ -1307,7 +1367,11 @@ function draw() {
   const xfer = new Set(sector.transfer_points || []);
   const sq = sector.shape.type === 'square' ? sector.shape.half_size_nm : null;
   const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []), copSet = COPS();
+  const dynSet = new Set(Object.keys((state && state.dyn_points) || {}));
+  nameRects.length = 0;
+  const nameRect = (n, x, y) => { if (V.names) nameRects.push({ n, x0: x - 2 * dpr, y0: y - TH.nameFont * dpr, x1: x + ctx.measureText(n).width + 2 * dpr, y1: y + 3 * dpr }); };
   for (const [n, p] of Object.entries(wp)) {
+    if (dynSet.has(n) || n.startsWith('@')) continue;    // positions used in re-routings: drawn with their route only
     const [px, py] = toPx(...p);
     if (copSet.has(n)) {                 // generated coordination point on a sector line: a small tick, no name
       ctx.strokeStyle = '#3d556c'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px - 3 * dpr, py); ctx.lineTo(px + 3 * dpr, py); ctx.stroke(); continue;
@@ -1315,14 +1379,14 @@ function draw() {
     if (extSet.has(n)) {                 // neighbouring-sector point: small diamond, '?' = provisional position
       ctx.strokeStyle = ctx.fillStyle = TH.extPoints; ctx.lineWidth = 1 * dpr; ctx.beginPath();
       ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
-      if (V.names) ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); continue;
+      if (V.names) { ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); nameRect(n, px + 6 * dpr, py + 4 * dpr); } continue;
     }
     ctx.fillStyle = ctx.strokeStyle = TH.points; ctx.lineWidth = 1 * dpr; ctx.beginPath();
     ctx.moveTo(px, py - 5 * dpr); ctx.lineTo(px + 4.5 * dpr, py + 3.5 * dpr); ctx.lineTo(px - 4.5 * dpr, py + 3.5 * dpr); ctx.closePath();
     xfer.has(n) ? ctx.fill() : ctx.stroke();
     let off = 4, offx = 7;
     if (sq) { off = p[1] >= sq - 1 ? -10 : p[1] <= -sq + 1 ? 18 : 4; offx = p[0] <= -sq + 1 ? -24 : p[0] >= sq - 1 ? 8 : -8; }
-    if (V.names) ctx.fillText(n, px + offx * dpr, py + off * dpr);
+    if (V.names) { ctx.fillText(n, px + offx * dpr, py + off * dpr); nameRect(n, px + offx * dpr, py + off * dpr); }
   }
   if (!shown) return requestAnimationFrame(draw);
   // conflict status per aircraft
@@ -1338,12 +1402,13 @@ function draw() {
     ctx.strokeStyle = (status[a.callsign] === 'los' && status[b.callsign] === 'los') ? '#ff5a5a66' : '#f2b84b55'; ctx.setLineDash([3 * dpr, 4 * dpr]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]); }
   labelRects.length = 0;
-  const drawn = {}, deferred = [];                    // labels as drawn: recorded with the controller's screen
+  const drawn = {};
+  fieldRects.length = 0;                    // labels as drawn: recorded with the controller's screen
   const atcSeat = SEAT === 'atc' && EXID && !replayMode;
   const seeAlerts = SEAT !== 'pilot' && !replayMode;
   const special = seeAlerts ? (shown.special || {}) : {};
   const mtBy = {};
-  if (seeAlerts) for (const c of (shown.mtcd || []).filter(c => !c.current && c.time_to_conflict_s >= 120)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
+  if (seeAlerts && mtcdOn) for (const c of (shown.mtcd || []).filter(c => !c.current && c.time_to_conflict_s >= 120)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
   const blink = (Date.now() / 500 | 0) % 2;
   const fs = +TH.lblFont, lh = fs * 1.1;
   // aircraft decontrolled, in the next sectors: grey, short label (callsign, level, next unit)
@@ -1410,8 +1475,8 @@ function draw() {
     if (mtBy[a.callsign]) l0.push([`MTC${Math.max(0, Math.floor(mtBy[a.callsign].time_to_conflict_s / 60))}' `, TH.mtcd]);
     if (l0.length) lines.push(l0);
     const k1 = lines.length;
-    const l1 = [[a.callsign + (a.formation ? ` x${a.formation.size}` : ''), pc('lblCallsign', col)]];
-    if (cst === 'calling') l1.push(['  CALL', pc('lblCallsign', col)]);
+    const l1 = [[a.callsign + (a.formation ? ` x${a.formation.size}` : ''), pc('lblCallsign', col), 'cs']];
+    if (cst === 'calling') l1.push(['  CALL', pc('lblCallsign', col), 'cs']);
     let tag = '';
     const pq = atcSeat ? [] : shown.pending_requests.filter(q => q.callsign === a.callsign);   // the controller hears requests on the frequency
     if (pq.length) tag = pq.some(q => q.type === 'weather_deviation') ? 'WXREQ' : pq.some(q => q.kind === 'descent') ? 'DESC?' : pq.some(q => q.type === 'report') ? 'RPT' : 'REQ';
@@ -1425,28 +1490,26 @@ function draw() {
     // level line: current level (Mode C/S), vertical arrow, cleared level, Mode S selected level when it differs (amber),
     // exit level when entered or different from the cleared level (green once coordinated by ACT, amber when it needs
     // a phone coordination or breaks the LoA / semicircular rule), type
-    const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''}`, pc('lblLevel', col)]];
+    const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''}`, pc('lblLevel', col), 'cfl']];
     const ms = a.mode_s;
-    if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl]);
-    if (co && a.assumed && (co.xfl_entered || co.xfl !== cflShown)) {
+    if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl, 'cfl']);
+    if (co && a.assumed) {                                   // the exit level: always on the label of an assumed aircraft
       const xc = co.manual ? (blink ? TH.alertWarn : TH.alertWarn + '77') : co.warn ? TH.alertWarn
         : co.state && co.state !== 'transferred' && co.coordinated === co.xfl ? (co.state === 'act' ? TH.xflOk : TH.xflAbi) : TH.xflPend;
-      l2.push([` X${co.xfl}`, xc]);
+      l2.push([` X${co.xfl}`, xc, 'xfl']);
     }
-    l2.push([` ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col)]);
+    l2.push([` ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col), 'cs']);
     lines.push(l2);
-    lines.push(labelLine3(a, ent).map(([t, rl]) => [t, rl === 'chg' ? TH.changed : rl === 'htag' ? TH.hTag : rl === 'wxtag' ? TH.wxTag : pc('lblSpeed', col)]));
+    lines.push(labelLine3(a, ent).map(([t, rl, f]) => [t, rl === 'chg' ? TH.changed : rl === 'htag' ? TH.hTag : rl === 'wxtag' ? TH.wxTag : pc('lblSpeed', col), f]));
     const dest = (a.flight_plan && a.flight_plan.destination) || '';
     const info = pc('lblInfo', col + 'bb'), l4 = [];
-    if (cst === 'inbound') l4.push([`${a.entry_waypoint}${co && co.entry_level ? ' F' + pad(co.entry_level, 3) : ''} ←${a.prev_unit || 'prev'}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : ''), info]);
+    if (cst === 'inbound') l4.push([`${a.entry_waypoint}${co && co.entry_level ? ' F' + pad(co.entry_level, 3) : ''} ←${a.prev_unit || 'prev'}` + (dest && dest !== 'ZZZZ' ? ` →${dest}` : ''), info, 'route']);
     else if (cst === 'leftAssumed') l4.push([`DECONTROL →${a.next_unit || a.exit_point || ''}`, blink ? TH.xfer : TH.xfer + '88']);
     else if (cst === 'xfer') l4.push([`XFR →${a.next_unit || ''} ${nextReal(a) === a.planned_exit ? '' : a.planned_exit || ''}`.trim(), TH.xfer]);
     else if (a.arrival && a.arrival.tod_in_nm != null) l4.push([`→${a.destination} ${a.arrival.runway} TOD ${Math.round(a.arrival.tod_in_nm)}`, info]);
-    else if (dest && dest !== 'ZZZZ') l4.push([`→${dest}`, info]);
-    if (ent && ent.note) l4.push([(l4.length ? ' ' : '') + ent.note, info]);
+    else if (dest && dest !== 'ZZZZ') l4.push([`→${dest}`, info, 'route']);
+    if (ent && ent.note) l4.push([(l4.length ? ' ' : '') + ent.note, info, 'note']);
     if (l4.length) lines.push(l4);
-    const ext = seeAlerts && isExt(a.callsign) ? extLines(a, ent) : [];
-    for (const t of ext) lines.push([[t, TH.extLabel]]);
     ctx.font = `${fs * dpr}px ui-monospace,monospace`;
     const o = labelOff[a.callsign] || [10, -14];
     const bx = px + o[0] * dpr, by = py + o[1] * dpr;
@@ -1454,24 +1517,21 @@ function draw() {
       ctx.strokeStyle = col + '99'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py);
       ctx.lineTo(bx + (o[0] < 0 ? 60 * dpr : -2 * dpr), by + (o[1] < 0 ? 26 * dpr : -10 * dpr)); ctx.stroke();
     }
-    let lw;
-    if (ext.length) { lw = 0; for (const ln of lines) lw = Math.max(lw, ln.reduce((q, sg) => q + ctx.measureText(sg[0]).width, 0));
-      deferred.push([lines, k1, bx, by, lh, ext.length, col]); }      // drawn last, above the other labels
-    else lw = paintLabel(lines, k1, bx, by, lh, 0, col);
-    drawn[a.callsign] = { c: col, k: k1, x: ext.length, l: lines, ...(mtBy[a.callsign] && !st ? { m: 1 } : {}), ...(cst === 'xfer' || cst === 'leftAssumed' ? { t: 1 } : {}) };
+    const lw = paintLabel(lines, k1, bx, by, lh, 0, col, a.callsign);
+    drawn[a.callsign] = { c: col, k: k1, x: 0, l: lines.map(ln => ln.map(sg => [sg[0], sg[1]])), ...(mtBy[a.callsign] && !st ? { m: 1 } : {}), ...(cst === 'xfer' || cst === 'leftAssumed' ? { t: 1 } : {}) };
     labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - (k1 + 1) * lh * dpr, x1: bx + Math.max(lw, 90 * dpr), y1: by + (lines.length - k1 - 1) * lh * dpr + 4 * dpr });
   }
-  ctx.font = `${fs * dpr}px ui-monospace,monospace`;
-  for (const d of deferred) paintLabel(...d);
   window.__drawnLabels = drawn;
   const byCs = Object.fromEntries(shown.aircraft.concat(shown.transferred || []).map(a => [a.callsign, a]));
   drawRoute(byCs);
   if (window.drawMtcd) drawMtcd(byCs);
+  if (window.drawRouteEdit) drawRouteEdit(byCs);
   drawRbls(byCs);
-  if (rblDrag && rblDrag.moved && rblDrag.from) { const f = rblEnd(rblDrag.from, byCs); if (f) { const [fx, fy] = toPx(f.x_nm, f.y_nm);
-    ctx.strokeStyle = TH.rbl; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(rblDrag.cur[0], rblDrag.cur[1]); ctx.stroke(); ctx.setLineDash([]);
-    const [wx_, wy_] = fromPx(...rblDrag.cur), dd = Math.hypot(wx_ - f.x_nm, wy_ - f.y_nm), bb = (Math.atan2(wx_ - f.x_nm, wy_ - f.y_nm) * 180 / Math.PI + 360) % 360;
-    ctx.fillStyle = TH.rbl; ctx.font = `${10.5 * dpr}px ui-monospace,monospace`; ctx.fillText(`${pad(bb, 3)}° ${dd.toFixed(1)} NM`, rblDrag.cur[0] + 10 * dpr, rblDrag.cur[1] - 6 * dpr); } }
+  if (rblDrag && rblDrag.from) {                      // the line being dragged: bearing, range, ΔFL and CPA live
+    snapMark(rblDrag.from, byCs);
+    const A = rblEnd(rblDrag.from, byCs), t = rblTargetAt(rblDrag.cur), B = rblDrag.moved ? rblEnd(t, byCs) : null;
+    if (A && B && !sameEnd(rblDrag.from, t)) { snapMark(t, byCs); drawRblPair(A, B, { ox: 12, oy: -18 }, null); }
+  } else if (mouseCv && rblMode) snapMark(rblTargetAt(mouseCv), byCs);
   if (rblMode && rblFirst) { const f = rblEnd(rblFirst, byCs); if (f) { const [fx, fy] = toPx(f.x_nm, f.y_nm);
     ctx.strokeStyle = TH.rbl; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(fx, fy, 9 * dpr, 0, Math.PI * 2); ctx.stroke(); } }
   // scale bar
