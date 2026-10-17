@@ -48,6 +48,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   - **Assume any track, any time:** a calling aircraft (blinking, *CALL*), one still with the previous sector (early
     assume; it then calls already assumed), or one decontrolled earlier. Double-click it, ASSUME in its label menu,
     or key **A**. **Decontrol** (label menu, key **U**, `CS REL`) and take back as often as needed.
+  - **Decontrolled aircraft** have a short label of their own (a diamond symbol, the callsign, level and type, next
+    unit, in grey); its callsign is a button too: *Assume* takes the aircraft back.
   - **The label's values are flat buttons.** A click on the **callsign** selects the aircraft and offers assume or
     decontrol, flight plan, track info, type performance, edit / show route and the full menu. A click on the
     **aircraft type** opens its performance window (type data, speed schedule, assignable Mach / IAS, mass now, and
@@ -113,7 +115,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     assumed, transferred) with filters.
   - **MTCD** (button or key **M**, on / off, off by default): medium-term conflict detection over 20 minutes, from the system trajectories (the
     flight-plan route, or the heading / direct entered, at the system cleared level), so it warns long before the
-    STCA. Click a conflict (or select one of the aircraft) to see where both will be when it starts. The aircraft
+    STCA. Click a conflict (or select one of the aircraft) to see where both will be when it starts; drag that label
+    away if it is in the way. The aircraft
     gets a violet diamond and `MTCn'` in its label.
   - **Long press** on a label (or an aircraft, or key **R**): its flight-plan route from the present position — also
     while vectored or deviating, with the heading line — every point with the minutes to it.
@@ -157,12 +160,16 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     to request something realistic when going off script.
   - **Aircraft:** every aircraft with level, speed, navigation and status (calling, request, on frequency,
     previous sector), those needing something first. The *Shorthand* line still takes the command syntax.
-- **Weather deviations by the simulated pilots:** an aircraft deviates around weather by itself in two cases,
-  whatever the scenario: while it is still with the previous sector (it flies the deviation coordinated there), and
-  when its own weather-deviation request (made at about 60 NM) is still unanswered once the weather is 15 NM ahead
-  (*deviating without clearance*). The instructor can switch this off in the Exercise tab (*simulated pilots deviate
-  around weather by themselves*): aircraft then deviate only when a pseudo-pilot makes them. The requests still
-  appear in the pseudo-pilot's To do.
+- **Weather in exercises:** aircraft never deviate by themselves: only the pseudo-pilot makes them deviate. A
+  weather-deviation request (the simulated pilot asks at about 60 NM) still unanswered when the weather is 15 NM
+  ahead is closed as **not answered** and counted as a task not handled (metrics, the controller's statistics).
+  The system keeps track of every aircraft **dealing with weather** (it asked for a deviation, was cleared one, the
+  controller entered a WX tag, or the pseudo-pilot made it deviate): weather it flies through meanwhile is not
+  counted as a penetration (it is kept apart in the metrics). The pseudo-pilot's To do shows a *WX* item for each,
+  and the deck a **Clear of weather** button: once reported clear, weather is counted again. The instructor can
+  give back the old behaviour in the Exercise tab (*simulated pilots deviate around weather by themselves*: an
+  unanswered request then ends in a deviation without clearance, and aircraft still with the previous sector deviate
+  as coordinated there). Solo sessions and the agent API keep the simulated pilots' own deviations.
 - **Instructor's side panel** is in tabs: **Aircraft** (the pseudo-pilot workspace and telephone), **Exercise**
   (members, invitations, links, run / pause / speed / restart / replay, end), **Monitor** (selected aircraft details,
   requests, sequence, predicted conflicts, events, metrics).

@@ -344,6 +344,7 @@ def summarize_metrics(w) -> dict:
         "assume_mean_delay_s": asm.get("mean_delay_s"), "never_assumed": len(asm.get("never_assumed") or []),
         "requests": req.get("total", 0), "request_mean_response_s": req.get("mean_response_time_s"),
         "requests_expired": (req.get("by_status") or {}).get("expired", 0),
+        "wx_requests_unanswered": len((m.get("weather") or {}).get("requests_unanswered_before_weather", [])),
         "extra_track_miles": (m.get("traffic") or {}).get("extra_track_miles", 0),
         "aircraft": (m.get("traffic") or {}).get("total", 0),
         "atc_entries": sum(1 for e in w.events if e.get("type") == "atc_entry"),

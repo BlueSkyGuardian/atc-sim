@@ -269,7 +269,7 @@
       <div id="exMembers" style="margin-bottom:6px"></div>
       <div class="row"><select id="invUser" style="flex:1"></select><select id="invSeat"><option value="atc">Controller</option><option value="pilot">Pseudo-pilot</option><option value="instructor">Instructor</option></select><button id="invBtn">Invite</button></div>
       <div class="row" style="font-size:11px"><span class="c-dim">Links:</span><button data-link="atc" style="font-size:11px;padding:1px 6px">copy controller link</button><button data-link="pilot" style="font-size:11px;padding:1px 6px">copy pilot link</button><button data-link="instructor" style="font-size:11px;padding:1px 6px">co-instructor</button></div>
-      <div class="row" style="font-size:12px"><label title="On: an aircraft whose weather-deviation request is not answered deviates by itself when the weather is close (15 NM), and aircraft still with the previous sector deviate as coordinated there. Off: only what the pseudo-pilots do."><input type="checkbox" id="autoWx" checked> simulated pilots deviate around weather by themselves</label></div>
+      <div class="row" style="font-size:12px"><label title="Off (default in exercises): aircraft deviate only when a pseudo-pilot makes them; a weather-deviation request not answered before the weather is 15 NM ahead is counted as a task not handled. On: such an aircraft deviates by itself, and aircraft still with the previous sector deviate as coordinated there."><input type="checkbox" id="autoWx"> simulated pilots deviate around weather by themselves</label></div>
       <div class="row"><span id="exMsg" class="c-dim" style="font-size:11px;flex:1"></span><button id="endBtn" style="border-color:#6b2b2b;color:#ffb3b3">End exercise</button></div>
     </section>
     <section id="todoSec" class="ex-only" data-tab="pilot">
@@ -921,8 +921,13 @@ cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(userZoom * (e.de
 const labelOff = {}, labelRects = [];
 let drag = null;
 function canvasPt(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; }
-function labelAt(e) {                 // the label under the mouse: the one drawn last (on top)
+function labelAt(e) {                 // the label under the mouse: one whose text is right there, else the one on top
   const [x, y] = canvasPt(e), hit = labelRects.filter(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1);
+  if (hit.length > 1) {
+    const onText = new Set(fieldRects.filter(f => x >= f.x0 && x <= f.x1 && y >= f.y0 && y <= f.y1).map(f => f.cs));
+    const t = hit.filter(l => onText.has(l.cs));
+    if (t.length) return t.find(l => l.cs === hoverLbl) || t[t.length - 1];
+  }
   return hit.find(l => l.cs === hoverLbl) || hit[hit.length - 1];
 }
 // label fields: each value of a label is a flat button (level, exit level, speed, heading, route, weather, callsign)
@@ -945,6 +950,8 @@ cv.addEventListener('mousedown', e => {
   if (window.routeEditActive && routeEditActive()) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true }; return; }
   const [qx, qy] = canvasPt(e), rh = rblRects.find(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1);
   if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false }; return; }
+  const mh = window.mtcdLabelAt && mtcdLabelAt(qx, qy);              // an MTCD label: drag it away
+  if (mh) { const o = mtOff[mh.k] || [0, 0]; drag = { mt: mh.k, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; return; }
   const l = labelAt(e), fld = l ? fieldAt(e) : null;
   if (l) { const o = labelOff[l.cs] || [10, -14]; drag = { label: l.cs, field: fld && fld.f, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; }
   else drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, ac: nearestAircraft(e) };
@@ -965,7 +972,7 @@ window.addEventListener('mouseup', e => {
     return;
   }
   if (e.button !== 0) return;
-  if (drag && drag.rbl) { drag = null; return; }
+  if (drag && (drag.rbl || drag.mt)) { drag = null; return; }
   clearTimeout(pressTimer);
   if (drag && drag.re) { const d0 = drag; drag = null; if (!d0.moved && window.routeEditClick) routeEditClick(e); return; }
   if (drag && drag.long) { if (!drag.menu && routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
@@ -983,10 +990,11 @@ window.addEventListener('mousemove', e => {
     hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
     const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
     cv.style.cursor = window.routeEditActive && routeEditActive() ? 'copy' : f && (SEAT === 'atc' || f.f === 'type') ? 'pointer'
-      : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) ? 'move' : 'crosshair'; return; }
+      : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) || (window.mtcdLabelAt && mtcdLabelAt(qx, qy)) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
   if (drag.rbl) { drag.rbl.ox = drag.ox + dx; drag.rbl.oy = drag.oy + dy; return; }
+  if (drag.mt) { mtOff[drag.mt] = [drag.ox + dx, drag.oy + dy]; return; }
   if (drag.label) { labelOff[drag.label] = [drag.ox + dx, drag.oy + dy]; return; }
   view.cx = drag.cx - dx * devicePixelRatio / view.s; view.cy = drag.cy + dy * devicePixelRatio / view.s;
 });
@@ -1412,23 +1420,32 @@ function draw() {
   if (seeAlerts && mtcdOn) for (const c of (shown.mtcd || []).filter(c => !c.current && c.time_to_conflict_s >= 120)) for (const cs of c.aircraft) if (!mtBy[cs] || mtBy[cs].time_to_conflict_s > c.time_to_conflict_s) mtBy[cs] = c;
   const blink = (Date.now() / 500 | 0) % 2;
   const fs = +TH.lblFont, lh = fs * 1.1;
-  // aircraft decontrolled, in the next sectors: grey, short label (callsign, level, next unit)
-  for (const a of (shown.transferred || []).filter(a => !a.assumed)) {
-    const [px, py] = toPx(a.x_nm, a.y_nm), col = TH.handedOff;
-    ctx.fillStyle = col; if (V.trails) for (const t of a.trail || []) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1 * dpr, ty - 1 * dpr, 2 * dpr, 2 * dpr); }
-    const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 30, [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
+  // decontrolled aircraft (in the next sectors, or handed off inside ours): a short label of their own - a diamond
+  // symbol, the callsign as a button (to assume it again), level and type, next unit
+  const decon = (shown.transferred || []).filter(a => !a.assumed).concat(shown.aircraft.filter(a => a.released && !a.assumed));
+  const deconSet = new Set(decon.map(a => a.callsign));
+  for (const a of decon) {
+    const st = status[a.callsign];
+    const [px, py] = toPx(a.x_nm, a.y_nm), col = st === 'los' ? TH.los : st === 'warn' ? TH.stca : a.callsign === selected ? TH.selected : TH.handedOff;
+    ctx.fillStyle = col; if (V.trails) for (const t of (a.trail || []).slice(-Math.max(0, +TH.trail))) { const [tx, ty] = toPx(t[0], t[1]); ctx.fillRect(tx - 1 * dpr, ty - 1 * dpr, 2 * dpr, 2 * dpr); }
+    const r = a.track_deg * Math.PI / 180, L = a.gs_kt / 60 * +TH.vectorMin, [vx, vy] = toPx(a.x_nm + Math.sin(r) * L, a.y_nm + Math.cos(r) * L);
     ctx.strokeStyle = col; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(vx, vy); ctx.stroke();
-    ctx.strokeRect(px - 3 * dpr, py - 3 * dpr, 6 * dpr, 6 * dpr);
+    const q = (+TH.symbol / 2 + 1) * dpr;
+    ctx.beginPath(); ctx.moveTo(px, py - q); ctx.lineTo(px + q, py); ctx.lineTo(px, py + q); ctx.lineTo(px - q, py); ctx.closePath(); ctx.stroke();
     const o = labelOff[a.callsign] || [10, -14], bx = px + o[0] * dpr, by = py + o[1] * dpr;
-    const lines = [[[a.callsign, col]], [[`${pad(a.fl, 3)} →${a.next_unit || (a.exit_point ? 'via ' + a.exit_point : '')}`, col]]];
+    if (labelOff[a.callsign]) { ctx.strokeStyle = col + '77'; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(bx - 2 * dpr, by - 4 * dpr); ctx.stroke(); }
+    const lines = [[[a.callsign, col === TH.handedOff ? '#8d9aa7' : col, 'cs']],
+                   [[`${pad(a.fl, 3)}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' '}`, col, 'cfl'], [` ${a.type}`, col, 'type'],
+                    [` →${a.next_unit || (a.exit_point ? 'via ' + a.exit_point : '')}`, col]]];
     ctx.font = `${(fs - 0.5) * dpr}px ui-monospace,monospace`;
-    paintLabel(lines, 0, bx, by, (fs - 0.5) * 1.1, 0);
-    drawn[a.callsign] = { c: col, k: 0, x: 0, l: lines, s: 1 };
-    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - 11 * dpr, x1: bx + 90 * dpr, y1: by + 15 * dpr });
+    const lw = paintLabel(lines, 0, bx, by, (fs - 0.5) * 1.1, 0, col, a.callsign);
+    drawn[a.callsign] = { c: col, k: 0, x: 0, l: lines.map(ln => ln.map(sg => [sg[0], sg[1]])), s: 1 };
+    labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - (fs + 1) * dpr, x1: bx + Math.max(lw, 70 * dpr), y1: by + (fs + 4) * dpr });
   }
   // aircraft (and those gone to the next sectors still assumed: full label until decontrolled by hand)
   const outAssumed = (shown.transferred || []).filter(a => a.assumed);
   for (const a of shown.aircraft.concat(outAssumed)) {
+    if (deconSet.has(a.callsign)) continue;
     const st = status[a.callsign], cst = ctlState(a);
     const col = st === 'los' ? TH.los : st === 'warn' ? TH.stca : (a.callsign === selected ? TH.selected :
                 cst === 'calling' ? (blink ? TH.calling : TH.calling + 'aa') : cst === 'inbound' ? TH.inbound : cst === 'handedOff' ? TH.handedOff : TH.assumed);

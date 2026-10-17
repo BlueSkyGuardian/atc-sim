@@ -63,7 +63,7 @@ class SessionCreate(BaseModel):
 class Instruction(BaseModel):
     callsign: str
     type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
-                  "reroute"]
+                  "reroute", "wx_clear"]
     fl: Optional[int] = Field(None, description="altitude: target flight level, e.g. 360")
     rate_fpm: Optional[float] = Field(None, description="altitude: optional vertical rate")
     heading: Optional[float] = Field(None, description="heading: 1-360")

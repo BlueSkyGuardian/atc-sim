@@ -368,6 +368,8 @@
         : `<button class="yes" data-rep="${q.id}" data-dec="approved" data-cs="${q.callsign}" title="the controller approved: the aircraft does it">Approved</button><button class="no" data-rep="${q.id}" data-dec="unable" data-cs="${q.callsign}">Refused</button>`;
       return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s</small></div><div class="bt">${btns}</div></div>`;
     });
+    // aircraft dealing with weather (they asked for a deviation, were cleared one, or deviate): report clear of it
+    for (const a of allAc().filter(x => x.wx_handling)) items.push(`<div class="todo req" data-cs="${a.callsign}"><span class="tg">WX</span><div class="tx"><b>${a.callsign}</b> is dealing with weather · when clear, say <i>“${a.callsign} clear of weather”</i><small>its weather is not counted as a penetration until then</small></div><div class="bt"><button class="yes" data-wxclear="${a.callsign}">Clear of weather</button></div></div>`);
     const html = items.join('') || '<div class="empty">Nothing to say right now. Fly what the controller gives you.</div>';
     if (html !== todoH) { $('#todo').innerHTML = html; todoH = html; }
     $('#todoN').textContent = items.length ? `(${items.length})` : '';
@@ -375,6 +377,8 @@
   // one listener each (the lists are re-drawn every second; mousedown survives a re-draw between press and release)
   function bindLists() {
     $('#todo').addEventListener('mousedown', e => {
+      const wc = e.target.closest('[data-wxclear]');
+      if (wc) { e.preventDefault(); fly(wc.dataset.wxclear, { type: 'wx_clear' }, $('#deck .dk-out')); select(wc.dataset.wxclear); return; }
       const b = e.target.closest('[data-rep]');
       if (b) { e.preventDefault(); const out = $('#deck .dk-out'); fly(b.dataset.cs, { type: 'reply', request_id: b.dataset.rep, decision: b.dataset.dec }, out); select(b.dataset.cs); return; }
       const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
@@ -427,7 +431,7 @@
         <button class="go" data-go="via" title="re-routing via these points, then the rest of the route">Fly via</button><button data-go="redit" title="pick the points on the map (fixes or positions)">Edit on map…</button></div></div>
       <div class="dk-row"><label>Weather</label><div class="dk-ctl">
         <select data-i="side"><option value="either">either side</option><option value="left">left</option><option value="right">right</option></select>
-        <button data-go="dev">Deviate around weather</button></div></div>
+        <button data-go="dev">Deviate around weather</button><button data-go="wxclear" title="the pilot reports clear of the weather: from now on, weather it flies through counts as a penetration">Clear of weather</button></div></div>
       <div class="dk-out" data-out></div>`;
     const val = k => box.querySelector(`[data-i=${k}]`).value.trim(), out = box.querySelector('[data-out]');
     const flBtn = box.querySelector('[data-go=fl]'), flIn = box.querySelector('[data-i=fl]');
@@ -447,6 +451,7 @@
       else if (k === 'sn') await fly(cs, { type: 'speed', resume_normal: true }, out);
       else if (k === 'dct') { const v = val('dct').toUpperCase(); if (v) await fly(cs, { type: 'direct', waypoint: v }, out); }
       else if (k === 'dev') await fly(cs, { type: 'deviation', side: val('side') }, out);
+      else if (k === 'wxclear') await fly(cs, { type: 'wx_clear' }, out);
       else if (k === 'via') { const v = val('via').toUpperCase().split(/[\s,]+/).filter(x => x && x !== 'DCT'); if (v.length) await fly(cs, { type: 'reroute', points: v }, out); }
       else if (k === 'redit') editRoute(cs);
     };

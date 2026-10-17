@@ -16,7 +16,7 @@ from . import arrivals, pilot
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
-                     "reroute")
+                     "reroute", "wx_clear")
 MAX_EVENTS = 20000
 PREDICT_DT = 4.0
 
@@ -132,6 +132,7 @@ class World:
             "left_sector": [],
             "wx_seconds": {"30dbz": 0.0, "40dbz": 0.0, "50dbz": 0.0}, "wx_penetrations": [],
             "wx_self_deviations": 0, "turb_seconds": {"moderate": 0.0, "severe": 0.0},
+            "wx_excused": [], "wx_requests_unanswered": [],
             "sequencing": {}, "seq_spacing_violations": 0, "seq_level_violations": 0,
             "rvsm_violations": [], "rvsm_violation_seconds": 0.0,
             "wrong_direction_exits": [], "wrong_direction_clearances": 0,
@@ -218,6 +219,11 @@ class World:
                 raise InstructionError(f"{cs} is already assumed")
             # any track can be assumed at any time (early / forced assume, taking it back after a decontrol)
             return {"type": "assume", "callsign": cs}
+        if itype == "wx_clear":                      # the pilot reports clear of the weather
+            ac = self.aircraft.get(cs)
+            if ac is None or not (ac.active or ac.outside):
+                raise InstructionError(f"unknown callsign {cs}")
+            return {"type": "wx_clear", "callsign": cs}
         if itype == "release":                       # the controller decontrols the aircraft (by hand)
             ac = self.aircraft.get(cs)
             if ac is None or not (ac.active or ac.outside):
@@ -443,7 +449,7 @@ class World:
             self._event("instruction_rejected", instruction_id=rec["id"], reason=str(e), request=instr)
             return rec
         rec["instruction"] = norm
-        if norm["type"] not in ("assume", "release"):
+        if norm["type"] not in ("assume", "release", "wx_clear"):
             self.m["instructions_issued"] += 1
         cs = norm["callsign"]
 
@@ -452,6 +458,11 @@ class World:
             rec["warnings"].append(norm.pop("wx_note"))
         if rec["warnings"] and norm["type"] == "altitude":
             self.m["wrong_direction_clearances"] += sum(1 for x in rec["warnings"] if "direction" in x)
+        if norm["type"] == "wx_clear":
+            self._wx_clear(self.aircraft[cs])
+            rec.update(status="executed", execute_at_s=round(self.t, 1))
+            self.instructions.append(rec)
+            return rec
         if norm["type"] == "release":
             a = self.aircraft[cs]
             a.assumed, a.released = False, True
@@ -545,6 +556,33 @@ class World:
             out.append(f"{ac.callsign} is non-RVSM ({'formation' if ac.formation else ac.rvsm_status}): "
                        "2000 ft vertical separation applies in RVSM airspace")
         return out
+
+    def wx_handling(self, ac: Aircraft) -> bool:
+        """The aircraft is dealing with weather (it asked for a deviation, was cleared one, or is deviating) and has
+        not reported clear of it yet: weather it goes through meanwhile is not counted as a penetration."""
+        ct = ac.wx.get("clear_t", -1e9)
+        if ac.nav_mode == "wxdev" or ac.wx.get("dev_t", -1e9) > ct:
+            return True
+        e = self.entries.get(ac.callsign, {})
+        if e.get("wx") and float(e.get("t", 0)) > ct:
+            return True
+        return any(r.callsign == ac.callsign and r.type == "weather_deviation" and r.time > ct and r.status != "cancelled"
+                   for r in self.requests.values())
+
+    def _wx_clear(self, ac: Aircraft) -> None:
+        """The pilot reports clear of the weather: its handling of the weather ends; a penetration in progress is
+        not counted (it was flying around the weather)."""
+        ac.wx["clear_t"] = self.t
+        ac.wx["phase"] = "clear"
+        for r in self.requests.values():
+            if r.callsign == ac.callsign and r.type == "weather_deviation" and r.status == "pending":
+                self._resolve_request(r, "cancelled", "pilot")
+        for src in (self._wx_in, self.__dict__.get("_wx_exc", {})):
+            cur = src.pop(ac.callsign, None)
+            if cur is not None:
+                self.m["wx_excused"].append({"callsign": ac.callsign, "start_s": cur["start"], "end_s": self.t,
+                                             "max_dbz": round(cur["max"], 1), "reason": "reported clear of weather"})
+        self._event("pilot_report", callsign=ac.callsign, text=f"{ac.callsign} clear of weather")
 
     def _assume(self, ac: Aircraft, by: str) -> None:
         """The controller assumes the aircraft (accepts the transfer): from now on it is under our control."""
@@ -666,6 +704,8 @@ class World:
 
     def _apply(self, ac: Aircraft, n: dict) -> None:
         t = n["type"]
+        if t in ("wx_plan", "deviation"):
+            ac.wx["dev_t"] = self.t
         if t == "wx_plan":
             ac.start_wx_deviation(n["plan"])
             ac.wx.update(phase="deviating", plan=n["plan"])
@@ -1063,6 +1103,24 @@ class World:
         z = np.atleast_1d(wx.reflectivity(np.array([a.x for a in act]), np.array([a.y for a in act]),
                                           np.array([a.alt_ft / 100.0 for a in act]), self.t))
         for a, dbz in zip(act, z):
+            if self.wx_handling(a):
+                # dealing with the weather it reported: not a penetration (until it reports clear of weather);
+                # kept apart, for the record
+                cur = self._wx_in.pop(a.callsign, None)
+                exc = self.__dict__.setdefault("_wx_exc", {})
+                if cur is not None:
+                    exc[a.callsign] = cur
+                e = exc.get(a.callsign)
+                if dbz >= 30:
+                    if e is None:
+                        exc[a.callsign] = {"start": self.t, "max": float(dbz)}
+                    else:
+                        e["max"] = max(e["max"], float(dbz))
+                elif e is not None:
+                    self.m["wx_excused"].append({"callsign": a.callsign, "start_s": e["start"], "end_s": self.t,
+                                                 "max_dbz": round(e["max"], 1), "reason": "dealing with the weather it reported"})
+                    exc.pop(a.callsign)
+                continue
             for thr, key in ((30, "30dbz"), (40, "40dbz"), (50, "50dbz")):
                 if dbz >= thr:
                     self.m["wx_seconds"][key] += dt
@@ -1298,6 +1356,8 @@ class World:
                     {"callsign": k, "start_s": v["start"], "ongoing": True, "max_dbz": round(v["max"], 1)}
                     for k, v in self._wx_in.items()],
                 "deviations_without_clearance": self.m["wx_self_deviations"],
+                "requests_unanswered_before_weather": self.m["wx_requests_unanswered"],
+                "not_counted_while_deviating": self.m["wx_excused"],
                 "turbulence_seconds": {k: round(v, 1) for k, v in self.m["turb_seconds"].items()},
             },
             "sequencing": {
@@ -1448,6 +1508,7 @@ class World:
             nm = a.to_exit_nm(self.waypoints)
             d["to_exit_nm"] = None if nm is None else round(nm, 1)
             d["to_exit_s"] = None if nm is None or a.gs < 50 else round(nm / a.gs * 3600)
+            d["wx_handling"] = self.wx_handling(a)
         return {
             "sim_time_s": round(self.t, 1),
             "utc": atctools.utc(self),

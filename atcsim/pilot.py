@@ -440,7 +440,16 @@ def _make_request(world: "World", ac: "Aircraft", d: float, further: bool = Fals
 def _self_deviate(world: "World", ac: "Aircraft", d: float, req) -> None:
     st = ac.wx
     if not getattr(world, "auto_wx", True):
-        return                      # pseudo-pilots only: the aircraft deviates when the pseudo-pilot makes it
+        # pseudo-pilots only: the aircraft does not deviate by itself. A weather-deviation request still unanswered
+        # when the weather is this close is a task the controller did not handle
+        if req is not None and req.status == "pending" and world.record:
+            world.cancel_request(req, "not answered before reaching the weather", status="expired")
+            world.m["wx_requests_unanswered"].append({"callsign": ac.callsign, "request_id": req.id,
+                                                      "time_s": round(world.t, 1), "weather_nm": round(d, 1)})
+            world._event("request_unanswered", callsign=ac.callsign, request_id=req.id,
+                         text=f"{ac.callsign}: weather-deviation request {req.id} not answered, weather {int(d)} NM ahead")
+            st["phase"] = "refused"
+        return
     if world.t - st.get("last_self_dev", -1e9) < 30.0:
         return
     st["last_self_dev"] = world.t

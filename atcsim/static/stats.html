@@ -98,7 +98,8 @@ function drawController(Cc, dims) {
   chart('cOther', { type: 'bar', data: { labels, datasets: [
     { label: 'area infringements', data: M('area_infringements'), backgroundColor: '#e0c13c' }, { label: 'RVSM', data: M('rvsm_violations'), backgroundColor: '#ff8a8a' },
     { label: 'wrong-direction exits', data: M('wrong_direction_exits'), backgroundColor: '#d79bff' }, { label: 'weather penetrations', data: M('weather_penetrations'), backgroundColor: '#9ae6e6' },
-    { label: 'requests expired', data: M('requests_expired'), backgroundColor: '#7fb8ff' }] },
+    { label: 'requests expired', data: M('requests_expired'), backgroundColor: '#7fb8ff' },
+    { label: 'weather requests not answered', data: M('wx_requests_unanswered'), backgroundColor: '#f2b84b' }] },
     options: { ...lineOpts(''), scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } } });
   chart('cTimes', { type: 'line', data: { labels, datasets: [
     { label: 'assume (mean s)', data: s.map(x => x.metrics.assume_mean_delay_s), borderColor: C.a, backgroundColor: C.a, spanGaps: true, tension: .25 },

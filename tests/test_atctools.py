@@ -178,4 +178,23 @@ w.auto_wx = False
 nav = a.nav_mode
 pilot_mod._self_deviate(w, a, 5.0, None)
 ok(a.nav_mode == nav, "automatic weather deviations switched off: the aircraft does not deviate by itself")
+# ---- weather in exercises: no automatic deviation; an unanswered request is a task not handled; an aircraft
+# dealing with weather is not counted as penetrating it until it reports clear of weather
+w = build_world(load_scenario("s11_weather_deviation_into_traffic"))
+w.multi = True
+w.auto_wx = False
+for _ in range(1500):
+    w.step(1)
+mw = w.metrics()["weather"]
+ok(mw["requests_unanswered_before_weather"] and mw["deviations_without_clearance"] == 0,
+   f"unanswered weather request recorded, no deviation by itself: {mw['requests_unanswered_before_weather']}")
+cs_req = mw["requests_unanswered_before_weather"][0]["callsign"]
+ok(cs_req not in [p["callsign"] for p in mw["penetrations"]] and cs_req in [p["callsign"] for p in mw["not_counted_while_deviating"]],
+   f"{cs_req} asked for a deviation: its weather kept apart, not a penetration")
+st = w.state()
+ac = w.aircraft[cs_req]
+if ac.active:
+    ok(any(x["callsign"] == cs_req and x["wx_handling"] for x in st["aircraft"]), "state: dealing with weather")
+r = w.issue({"callsign": cs_req, "type": "wx_clear"}, by_pilot=True)
+ok(r["status"] == "executed" and not w.wx_handling(ac), "pilot reports clear of weather")
 print("atc tools checks passed")

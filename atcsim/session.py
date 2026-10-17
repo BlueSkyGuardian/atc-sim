@@ -56,6 +56,8 @@ class Session:
     def multi(self, v: bool) -> None:
         self._multi = bool(v)
         self.world.multi = self._multi
+        if self._multi:                    # exercises: aircraft deviate only when a pseudo-pilot makes them
+            self.world.auto_wx = False
 
     # ------------------------------------------------------------------ clock
     def _run(self) -> None:

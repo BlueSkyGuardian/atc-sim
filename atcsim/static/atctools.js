@@ -108,7 +108,10 @@
     if (on) { win('mtWin', 'MTCD', 60, 50, 380); } else closeWin('mtWin');
     renderMtcd();
   }
+  const mtOff = window.mtOff = {}, mtRects = window.__mtRects = [];
+  window.mtcdLabelAt = (x, y) => mtRects.find(r => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1);
   window.drawMtcd = function (byCs) {
+    mtRects.length = 0;
     if (!mtcdOn || !state || !state.mtcd || SEAT === 'pilot' || replayMode) return;
     const dpr = devicePixelRatio;
     for (const c of state.mtcd) {
@@ -125,9 +128,12 @@
       for (const [x, y] of [[ax, ay], [bx, by]]) { ctx.beginPath(); ctx.arc(x, y, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); }
       ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
       const t = `MTCD ${Math.floor(c.time_to_conflict_s / 60)}' ${c.min_horizontal_nm} NM FL${c.levels[0]}/${c.levels[1]}`;
-      const mx = (ax + bx) / 2 + 8 * dpr, my = (ay + by) / 2 - 8 * dpr, w = ctx.measureText(t).width;
+      const off = mtOff[k] || [0, 0];                       // the label can be dragged away (leader line)
+      const cx0 = (ax + bx) / 2 + 8 * dpr, cy0 = (ay + by) / 2 - 8 * dpr, mx = cx0 + off[0] * dpr, my = cy0 + off[1] * dpr, w = ctx.measureText(t).width;
+      if (off[0] || off[1]) { ctx.strokeStyle = TH.mtcd + '99'; ctx.lineWidth = 1 * dpr; ctx.setLineDash([2 * dpr, 3 * dpr]); ctx.beginPath(); ctx.moveTo(cx0 - 8 * dpr, cy0 + 8 * dpr); ctx.lineTo(mx, my - 4 * dpr); ctx.stroke(); ctx.setLineDash([]); }
       ctx.fillStyle = '#0b1016cc'; ctx.fillRect(mx - 3 * dpr, my - 11 * dpr, w + 6 * dpr, 15 * dpr);
       ctx.fillStyle = TH.mtcd; ctx.fillText(t, mx, my);
+      mtRects.push({ k, x0: mx - 3 * dpr, y0: my - 11 * dpr, x1: mx + w + 3 * dpr, y1: my + 4 * dpr });
     }
   };
 

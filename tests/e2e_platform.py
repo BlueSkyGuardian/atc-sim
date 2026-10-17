@@ -131,8 +131,8 @@ with sync_playwright() as p:
     ok(True, "controller decontrols and assumes again")
     # the label's values are flat buttons: move the label clear of the others, then find a value on screen
     def field_pt(cs, f):
-        atc.evaluate(f"""(() => {{ const a = state.aircraft.find(x => x.callsign === '{cs}'), [x, y] = toPx(a.x_nm, a.y_nm);
-            labelOff['{cs}'] = [x / devicePixelRatio < cv.clientWidth / 2 ? 90 : -200, y / devicePixelRatio < cv.clientHeight / 2 ? 70 : -120]; }})()""")
+        atc.evaluate(f"""(() => {{ const a = state.aircraft.concat(state.transferred || []).find(x => x.callsign === '{cs}');
+            setZoom(4); view.cx = a.x_nm + 6; view.cy = a.y_nm - 4; labelOff['{cs}'] = [40, 60]; }})()""")   # zoomed in, clear of the others
         atc.wait_for_timeout(300)
         return atc.evaluate(f"""() => {{ const r = fieldRects.find(q => q.cs === '{cs}' && q.f === '{f}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
             return r ? [c.left + (r.x0 + r.x1) / 2 / d, c.top + (r.y0 + r.y1) / 2 / d] : null; }}""")
@@ -143,6 +143,17 @@ with sync_playwright() as p:
     ok(atc.evaluate("selected") == calling and atc.locator("#lblMenu [data-c=rel], #lblMenu [data-c=asm]").count() == 1
        and atc.locator("#lblMenu [data-c=fpl]").count() == 1, "a click on the callsign selects it and offers assume/decontrol, flight plan")
     atc.keyboard.press("Escape")
+    # decontrol from the callsign menu; the decontrolled label's callsign takes it back
+    atc.mouse.click(*field_pt(calling, "cs"))
+    atc.wait_for_selector("#lblMenu [data-c=rel]"); atc.click("#lblMenu [data-c=rel]")
+    atc.wait_for_function(f"() => state.aircraft.concat(state.transferred).find(a => a.callsign === '{calling}').released")
+    atc.wait_for_timeout(600)
+    ok(atc.evaluate(f"window.__drawnLabels['{calling}'].s") == 1, "decontrolled: its own short label")
+    atc.screenshot(path=f"{OUT}/07l_decontrolled.png")
+    atc.mouse.click(*field_pt(calling, "cs"))
+    atc.wait_for_selector("#lblMenu [data-c=asm]"); atc.click("#lblMenu [data-c=asm]")
+    atc.wait_for_function(f"() => state.aircraft.find(a => a.callsign === '{calling}').assumed")
+    ok(True, "the decontrolled label's callsign assumes it again")
     atc.mouse.click(*field_pt(calling, "type"))
     atc.wait_for_selector("#tyWin table tr td")
     ok("Ceiling" in atc.inner_text("#tyWin") and atc.locator("#tyWin table tr").count() > 5, "a click on the type opens its performance: " + atc.inner_text("#tyWin .wh").replace("\n", " "))
@@ -232,6 +243,18 @@ with sync_playwright() as p:
     atc.wait_for_selector("#mtWin")
     ok(atc.evaluate("mtcdOn"), "M: MTCD on (" + str(atc.evaluate("(state.mtcd || []).length")) + " conflicts)")
     atc.keyboard.press("Escape")
+    mc = atc.evaluate("(state.mtcd || [])[0] ? state.mtcd[0].aircraft[0] : null")
+    if mc:                                      # its conflict label on the scope can be dragged away
+        atc.evaluate(f"(() => {{ selected = '{mc}'; const c = state.mtcd[0]; view.cx = (c.at[0][0] + c.at[1][0]) / 2 - 10; view.cy = (c.at[0][1] + c.at[1][1]) / 2; setZoom(1.5); }})()")
+        atc.wait_for_timeout(400)
+        r = atc.evaluate("""() => { const r = window.__mtRects[0]; if (!r) return null; const c = cv.getBoundingClientRect(), d = devicePixelRatio;
+            return [c.left + (r.x0 + 6) / d, c.top + (r.y0 + r.y1) / 2 / d]; }""")
+        if r and atc.evaluate(f"document.elementFromPoint({r[0]}, {r[1]}) === cv"):
+            atc.mouse.move(*r); atc.mouse.down(); atc.mouse.move(r[0] + 60, r[1] + 50, steps=5); atc.mouse.up()
+            ok(any(v != [0, 0] for v in atc.evaluate("Object.values(mtOff)")), "MTCD label moved")
+        else:
+            ok(False, f"MTCD label not found on the scope: {r}")
+        atc.evaluate("selected = null")
     # track info window (I): the aircraft under the mouse
     atc.keyboard.press("i")
     atc.wait_for_selector("#tiWin")
