@@ -979,7 +979,7 @@ window.addEventListener('mouseup', e => {
   if (drag && !drag.moved && drag.label && (rblMode || e.shiftKey)) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e) || drag.label); drag = null; return; }
   if (drag && !drag.moved) { if (drag.label) { selected = drag.label;
       if (window.onSelectAircraft && onSelectAircraft(selected, e, true, drag.field)) { drag = null; return; }
-      $('#cmd').value = selected + ' '; $('#cmd').focus(); pollSelected(); } else pick(e); }
+      prefillCmd(selected); pollSelected(); } else pick(e); }
   drag = null;
 });
 window.addEventListener('mousemove', e => {
@@ -1198,6 +1198,14 @@ function drawRblPair(A, B, r, i) {
     if (i != null) rblRects.push({ i, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my - 12 * dpr + h });
   }
 }
+// selecting an aircraft fills the shorthand line with its callsign; only the solo radar puts the cursor there -
+// in an exercise the keyboard stays free (space bar = push-to-talk), click the line to type in it
+function prefillCmd(cs) {
+  $('#cmd').value = cs + ' ';
+  if (!EXID) { $('#cmd').focus(); return; }
+  const a = document.activeElement;
+  if (a && a !== document.body && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT')) a.blur();
+}
 function nearestAircraft(e) {
   if (!shown) return null; const r = cv.getBoundingClientRect();
   const [x, y] = fromPx((e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio);
@@ -1214,7 +1222,7 @@ function pick(e) {
   for (const a of shown.aircraft.concat(shown.transferred || [])) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < bd) { bd = d; best = a.callsign; } }
   selected = best;
   if (best && window.onSelectAircraft && onSelectAircraft(best, e, false)) return;
-  if (best) { $('#cmd').value = best + ' '; $('#cmd').focus(); }
+  if (best) prefillCmd(best);
   pollSelected();
 }
 

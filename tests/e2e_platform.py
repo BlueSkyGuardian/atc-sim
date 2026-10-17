@@ -304,6 +304,13 @@ with sync_playwright() as p:
     atc.mouse.move(*r); atc.mouse.down(); atc.mouse.move(r[0] + 50, r[1] + 70, steps=6); atc.mouse.up()
     ok(atc.evaluate("rbls[rbls.length - 1].ox") != 0, "RBL label moved")
     atc.screenshot(path=f"{OUT}/07h_rbl_drag.png")
+    # the pilot selects the aircraft on the radar: the keyboard stays free for the space bar (no jump into the shorthand)
+    pp = pil.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
+        c = cv.getBoundingClientRect(), d = devicePixelRatio; return [c.left + x / d, c.top + y / d]; }}""")
+    if pil.evaluate(f"document.elementFromPoint({pp[0]}, {pp[1]}) === cv"):
+        pil.mouse.click(*pp); pil.wait_for_timeout(400)
+        ok(pil.evaluate("selected") == calling and pil.evaluate("document.activeElement.tagName") != "INPUT",
+           "pilot selects on the radar, the shorthand line does not take the keyboard")
     # the pilot executes
     pil.click(f"#fleet tr[data-cs='{calling}']")
     pil.wait_for_selector(f"#deck .dk-cs:has-text('{calling}')")
