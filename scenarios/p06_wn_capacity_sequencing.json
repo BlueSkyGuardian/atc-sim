@@ -1,0 +1,1821 @@
+{
+  "name": "p06_wn_capacity_sequencing",
+  "complexity": 4,
+  "airspace": "agadir",
+  "duration_s": 3600,
+  "pilot_delay_s": 4,
+  "areas": [],
+  "requests": [
+    {
+      "time": 560,
+      "callsign": "RAM221",
+      "type": "altitude",
+      "value": 250,
+      "reason": "descent for Casablanca"
+    },
+    {
+      "time": 172,
+      "callsign": "RAM5372",
+      "type": "altitude",
+      "value": 360,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 2511,
+      "callsign": "RAM6465X",
+      "type": "altitude",
+      "value": 340,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 497,
+      "callsign": "RAM8596K",
+      "type": "altitude",
+      "value": 340,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 168,
+      "callsign": "RAM1435X",
+      "type": "altitude",
+      "value": 380,
+      "reason": "requesting cruise level"
+    },
+    {
+      "time": 2830,
+      "callsign": "RAM5238K",
+      "type": "altitude",
+      "value": 340,
+      "reason": "requesting cruise level"
+    }
+  ],
+  "events": [
+    {
+      "time": 900,
+      "callsign": "RYR7HB",
+      "type": "rvsm_unable",
+      "reason": "altimeter disagreement"
+    }
+  ],
+  "title": "Step 6 - West North alone at capacity, Casablanca sequences, unable RVSM",
+  "description": "West North (WN) open on its own, traffic at its declared capacity (58 flights/h). Westerly jet. Casablanca arrivals via MARJA and SALCA (LoA FL250, 10 NM in trail), departures climbing, UN857 / RUNAX merging at IBALU, UN858 northbound.",
+  "control": [
+    "WN"
+  ],
+  "weather": {
+    "seed": 206,
+    "temperature": {
+      "surface_c": 13,
+      "tropopause_fl": 340
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 250,
+          "kt": 12
+        },
+        {
+          "fl": 100,
+          "dir": 260,
+          "kt": 28
+        },
+        {
+          "fl": 200,
+          "dir": 265,
+          "kt": 42
+        },
+        {
+          "fl": 300,
+          "dir": 270,
+          "kt": 55
+        },
+        {
+          "fl": 400,
+          "dir": 275,
+          "kt": 42
+        },
+        {
+          "fl": 500,
+          "dir": 280,
+          "kt": 25
+        },
+        {
+          "fl": 650,
+          "dir": 90,
+          "kt": 8
+        },
+        {
+          "fl": 800,
+          "dir": 90,
+          "kt": 20
+        }
+      ],
+      "jet": {
+        "core_fl": 340,
+        "dir": 268,
+        "kt": 65,
+        "axis_point": [
+          0,
+          120
+        ],
+        "half_width_nm": 90,
+        "depth_below_ft": 11000,
+        "depth_above_ft": 8000,
+        "streak_length_nm": 600,
+        "streak_speed_kt": 30,
+        "meander_amp_nm": 10,
+        "meander_wavelength_nm": 500
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 45
+    }
+  },
+  "aircraft": [
+    {
+      "callsign": "RYR7HB",
+      "type": "B738",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "dep": "GVAC",
+      "dest": "EGSS",
+      "reach": {
+        "point": [
+          83.909,
+          122.585
+        ],
+        "time": 1300
+      },
+      "fpl": {
+        "ssr": "4027",
+        "reg": "EI-TTQ",
+        "code": "4CA521",
+        "eobt": "1255",
+        "altn": "EGGW",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "RYANAIR",
+        "pob": 151,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "RAM1219",
+      "type": "B738",
+      "route": [
+        "BEXAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "dep": "KJFK",
+      "dest": "GMMX",
+      "reach": {
+        "point": [
+          83.909,
+          122.585
+        ],
+        "time": 1300
+      },
+      "fpl": {
+        "ssr": "2454",
+        "reg": "CN-RLV",
+        "code": "021A89",
+        "eobt": "0859",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 138
+      }
+    },
+    {
+      "callsign": "RAM781",
+      "type": "B738",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 310,
+      "dep": "LFPG",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "MARJA",
+        "time": 1900
+      },
+      "fpl": {
+        "ssr": "5417",
+        "reg": "CN-RGS",
+        "code": "0222BA",
+        "eobt": "1351",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 128
+      }
+    },
+    {
+      "callsign": "RAM787",
+      "type": "E190",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 290,
+      "dep": "LPPT",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "MARJA",
+        "time": 1945
+      },
+      "fpl": {
+        "ssr": "4510",
+        "reg": "CN-RWJ",
+        "code": "023DAB",
+        "eobt": "1530",
+        "altn": "GMME",
+        "equipment": "SDE2FGHIRWY/S",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 95
+      }
+    },
+    {
+      "callsign": "RAM221",
+      "type": "B788",
+      "route": [
+        "BEXAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "dep": "CYUL",
+      "dest": "GMMN",
+      "load": 0.4,
+      "reach": {
+        "point": [
+          83.909,
+          122.585
+        ],
+        "time": 700
+      },
+      "fpl": {
+        "ssr": "2375",
+        "reg": "CN-RMD",
+        "code": "020748",
+        "eobt": "0932",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 233
+      }
+    },
+    {
+      "callsign": "BEL5QX",
+      "type": "A332",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "dep": "GOBD",
+      "dest": "EBBR",
+      "load": 0.4,
+      "reach": {
+        "point": [
+          83.909,
+          122.586
+        ],
+        "time": 698
+      },
+      "fpl": {
+        "ssr": "3126",
+        "reg": "OO-SJV",
+        "code": "44F993",
+        "eobt": "1257",
+        "altn": "EHAM",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "BRUSSELS AIRLINES",
+        "pob": 188
+      }
+    },
+    {
+      "callsign": "BTI8825P",
+      "type": "A319",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.31,
+      "entry_time": -1254,
+      "dep": "LPPT",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2532",
+        "reg": "YL-AXJ",
+        "code": "502C4B",
+        "eobt": "1445",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIRBALTIC",
+        "pob": 113,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "IBE8999",
+      "type": "A21N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.49,
+      "entry_time": -1008,
+      "dep": "LEBL",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4547",
+        "reg": "EC-NJQ",
+        "code": "36CDAC",
+        "eobt": "1359",
+        "altn": "GCTS",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA",
+        "pob": 140
+      }
+    },
+    {
+      "callsign": "NOZ3007",
+      "type": "A21N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.32,
+      "entry_time": 1511,
+      "dep": "LEBL",
+      "dest": "GCLA",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2624",
+        "reg": "LN-NYL",
+        "code": "47EA8D",
+        "eobt": "1441",
+        "altn": "GCTS",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "NORWEGIAN",
+        "pob": 182
+      }
+    },
+    {
+      "callsign": "TAP1659X",
+      "type": "A321",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.52,
+      "entry_time": 2111,
+      "dep": "LSZH",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4415",
+        "reg": "CS-TCD",
+        "code": "496369",
+        "eobt": "1351",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 138
+      }
+    },
+    {
+      "callsign": "BTI389K",
+      "type": "A321",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.56,
+      "entry_time": 2662,
+      "dep": "LPPT",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "un857",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4501",
+        "reg": "YL-AAJ",
+        "code": "502DEB",
+        "eobt": "1551",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIRBALTIC",
+        "pob": 156
+      }
+    },
+    {
+      "callsign": "EZY5115A",
+      "type": "A20N",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.52,
+      "entry_time": -813,
+      "dep": "EGNM",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr",
+      "fpl": {
+        "ssr": "3222",
+        "reg": "G-ENUT",
+        "code": "4344D5",
+        "eobt": "1245",
+        "altn": "GCFV",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "EASYJET",
+        "pob": 123
+      }
+    },
+    {
+      "callsign": "TOM8377",
+      "type": "B738",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.36,
+      "entry_time": -168,
+      "dep": "EGCC",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr",
+      "fpl": {
+        "ssr": "4051",
+        "reg": "G-TSXA",
+        "code": "40FBE2",
+        "eobt": "1301",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TUI AIRWAYS",
+        "pob": 169
+      }
+    },
+    {
+      "callsign": "RYR60K",
+      "type": "A319",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.45,
+      "entry_time": 1320,
+      "dep": "EGBB",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr",
+      "fpl": {
+        "ssr": "3763",
+        "reg": "EI-MPF",
+        "code": "4CA160",
+        "eobt": "1331",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "RYANAIR",
+        "pob": 104,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "TOM7166K",
+      "type": "B738",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.48,
+      "entry_time": 2643,
+      "dep": "EGCC",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "un857_gcrr",
+      "fpl": {
+        "ssr": "5525",
+        "reg": "G-TAYL",
+        "code": "43063C",
+        "eobt": "1347",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TUI AIRWAYS",
+        "pob": 180
+      }
+    },
+    {
+      "callsign": "RYR9058X",
+      "type": "B38M",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.3,
+      "entry_time": -1537,
+      "dep": "ENGM",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5611",
+        "reg": "EI-XLQ",
+        "code": "4CA6FE",
+        "eobt": "1123",
+        "altn": "GCXO",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "RYANAIR",
+        "pob": 147
+      }
+    },
+    {
+      "callsign": "IBS947",
+      "type": "A320",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 370,
+      "load": 0.48,
+      "entry_time": -676,
+      "dep": "EDDF",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3201",
+        "reg": "EC-AKB",
+        "code": "37C254",
+        "eobt": "1251",
+        "altn": "GCRR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "IBERIA EXPRESS",
+        "pob": 119
+      }
+    },
+    {
+      "callsign": "NAX3821",
+      "type": "A319",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.49,
+      "entry_time": 150,
+      "dep": "EBBR",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3742",
+        "reg": "LN-KPK",
+        "code": "47FD20",
+        "eobt": "1312",
+        "altn": "GCTS",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "NORWEGIAN AIR SHUTTLE",
+        "pob": 137
+      }
+    },
+    {
+      "callsign": "AEA728",
+      "type": "A321",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.54,
+      "entry_time": 1844,
+      "dep": "LFPG",
+      "dest": "GCTS",
+      "direction": "southbound",
+      "flow": "runax_std",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2461",
+        "reg": "EC-KTA",
+        "code": "35D409",
+        "eobt": "1401",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIR EUROPA",
+        "pob": 132,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "CFG7749X",
+      "type": "B38M",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.35,
+      "entry_time": -689,
+      "dep": "EDDL",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "runax_gcrr",
+      "fpl": {
+        "ssr": "5433",
+        "reg": "D-ARQK",
+        "code": "3CA83A",
+        "eobt": "1250",
+        "altn": "GCFV",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "CONDOR",
+        "pob": 152
+      }
+    },
+    {
+      "callsign": "CFG362",
+      "type": "A320",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 390,
+      "load": 0.34,
+      "entry_time": 1902,
+      "dep": "EDDF",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "runax_gcrr",
+      "fpl": {
+        "ssr": "2020",
+        "reg": "D-AQPP",
+        "code": "3E2B40",
+        "eobt": "1334",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "CONDOR",
+        "pob": 157
+      }
+    },
+    {
+      "callsign": "SWR4689",
+      "type": "A319",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 300,
+      "load": 0.56,
+      "entry_time": 1169,
+      "dep": "GCLP",
+      "dest": "ENGM",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5361",
+        "reg": "HB-JQL",
+        "code": "4B1D39",
+        "eobt": "1501",
+        "altn": "ESSA",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "SWISS",
+        "pob": 115,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "CFG4964",
+      "type": "A320",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "load": 0.53,
+      "entry_time": 1768,
+      "dep": "GUCY",
+      "dest": "LPPT",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4335",
+        "reg": "D-AMHN",
+        "code": "3D3CE8",
+        "eobt": "1244",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "CONDOR",
+        "pob": 159
+      }
+    },
+    {
+      "callsign": "KQA3925X",
+      "type": "A21N",
+      "route": [
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "load": 0.42,
+      "entry_time": 3144,
+      "dep": "GLRB",
+      "dest": "LEVC",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5505",
+        "reg": "N313EG",
+        "code": "ABFBFC",
+        "eobt": "1240",
+        "altn": "LEAL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "",
+        "pob": 165
+      }
+    },
+    {
+      "callsign": "IBS8760K",
+      "type": "A21N",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 300,
+      "load": 0.54,
+      "entry_time": -180,
+      "dep": "GCTS",
+      "dest": "EGCC",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3115",
+        "reg": "EC-JEZ",
+        "code": "346253",
+        "eobt": "1435",
+        "altn": "EGNM",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA EXPRESS",
+        "pob": 201
+      }
+    },
+    {
+      "callsign": "BTI7837",
+      "type": "A319",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "load": 0.45,
+      "entry_time": 513,
+      "dep": "GCFV",
+      "dest": "EDDM",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5232",
+        "reg": "YL-ADU",
+        "code": "502DF6",
+        "eobt": "1458",
+        "altn": "LSZH",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIRBALTIC",
+        "pob": 92,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "TVF7062A",
+      "type": "A319",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 320,
+      "load": 0.33,
+      "entry_time": 1399,
+      "dep": "GCFV",
+      "dest": "LTFM",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5556",
+        "reg": "F-HNGM",
+        "code": "3873FD",
+        "eobt": "1513",
+        "altn": "LGAV",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 108
+      }
+    },
+    {
+      "callsign": "TAP2912K",
+      "type": "A321",
+      "route": [
+        "DESUM",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
+      ],
+      "fl": 380,
+      "load": 0.43,
+      "entry_time": 3232,
+      "dep": "GCFV",
+      "dest": "EIDW",
+      "direction": "northbound",
+      "flow": "desum_akuda",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2244",
+        "reg": "CS-TDB",
+        "code": "490905",
+        "eobt": "1544",
+        "altn": "EGCC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 134
+      }
+    },
+    {
+      "callsign": "BTI639P",
+      "type": "A321",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.53,
+      "entry_time": 449,
+      "dep": "EGLL",
+      "dest": "GCFV",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2014",
+        "reg": "YL-AXB",
+        "code": "502FC0",
+        "eobt": "1322",
+        "altn": "GCRR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AIRBALTIC",
+        "pob": 142,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "RYR6457",
+      "type": "A320",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.49,
+      "entry_time": 867,
+      "dep": "ESSA",
+      "dest": "GCLP",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4434",
+        "reg": "EI-WYA",
+        "code": "4CA76A",
+        "eobt": "1142",
+        "altn": "GCXO",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "RYANAIR",
+        "pob": 157
+      }
+    },
+    {
+      "callsign": "CFG4866X",
+      "type": "A20N",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.54,
+      "entry_time": 1581,
+      "dep": "LPPR",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4733",
+        "reg": "D-APLW",
+        "code": "3EE030",
+        "eobt": "1516",
+        "altn": "GCTS",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "CONDOR",
+        "pob": 160
+      }
+    },
+    {
+      "callsign": "KLM9014",
+      "type": "A321",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.45,
+      "entry_time": 2020,
+      "dep": "ENGM",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2155",
+        "reg": "PH-ZJT",
+        "code": "486243",
+        "eobt": "1217",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "KLM",
+        "pob": 138
+      }
+    },
+    {
+      "callsign": "DLH5106",
+      "type": "A319",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "load": 0.41,
+      "entry_time": 2815,
+      "dep": "EGCC",
+      "dest": "GCRR",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3357",
+        "reg": "D-ARDT",
+        "code": "3F3158",
+        "eobt": "1347",
+        "altn": "GCFV",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "DEUTSCHE LUFTHANSA",
+        "pob": 106
+      }
+    },
+    {
+      "callsign": "AZU3790A",
+      "type": "B772",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 390,
+      "load": 0.49,
+      "entry_time": -1622,
+      "dep": "EDDM",
+      "dest": "SBGL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5205",
+        "reg": "PR-APF",
+        "code": "E78875",
+        "eobt": "1243",
+        "altn": "SBGR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "AZUL",
+        "pob": 270,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "AEA1605K",
+      "type": "A359",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.58,
+      "entry_time": -31,
+      "dep": "LSZH",
+      "dest": "SBKP",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5047",
+        "reg": "EC-VVG",
+        "code": "376AB2",
+        "eobt": "1324",
+        "altn": "SBGR",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "AIR EUROPA",
+        "pob": 271
+      }
+    },
+    {
+      "callsign": "TAM9136",
+      "type": "B38M",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 370,
+      "load": 0.43,
+      "entry_time": 119,
+      "dep": "EDDF",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3061",
+        "reg": "PT-MMF",
+        "code": "E42792",
+        "eobt": "1305",
+        "altn": "SBFZ",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "LATAM BRASIL",
+        "pob": 177
+      }
+    },
+    {
+      "callsign": "TOM3501P",
+      "type": "B789",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.51,
+      "entry_time": 886,
+      "dep": "EDDM",
+      "dest": "SKBO",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4304",
+        "reg": "G-TAKV",
+        "code": "421427",
+        "eobt": "1322",
+        "altn": "SVMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "TUI AIRWAYS",
+        "pob": 220
+      }
+    },
+    {
+      "callsign": "TAM1772A",
+      "type": "B772",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 370,
+      "load": 0.54,
+      "entry_time": 1354,
+      "dep": "LSZH",
+      "dest": "SBKP",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4410",
+        "reg": "PT-MNV",
+        "code": "E7BCE9",
+        "eobt": "1350",
+        "altn": "SBGR",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "LATAM BRASIL",
+        "pob": 231
+      }
+    },
+    {
+      "callsign": "TAP5310A",
+      "type": "B739",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 370,
+      "load": 0.44,
+      "entry_time": 1549,
+      "dep": "EDDF",
+      "dest": "SBGR",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4517",
+        "reg": "CS-TEQ",
+        "code": "49766B",
+        "eobt": "1328",
+        "altn": "SBKP",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 123
+      }
+    },
+    {
+      "callsign": "NOZ2786X",
+      "type": "B789",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 310,
+      "load": 0.37,
+      "entry_time": 2197,
+      "dep": "LIMC",
+      "dest": "SCEL",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2546",
+        "reg": "LN-NEL",
+        "code": "47EB8B",
+        "eobt": "1410",
+        "altn": "SAEZ",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "NORWEGIAN",
+        "pob": 246
+      }
+    },
+    {
+      "callsign": "EWG5077K",
+      "type": "B739",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 370,
+      "load": 0.4,
+      "entry_time": 2687,
+      "dep": "EDDF",
+      "dest": "SBRF",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4612",
+        "reg": "D-AGTW",
+        "code": "3E6BAD",
+        "eobt": "1347",
+        "altn": "SBFZ",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "EUROWINGS",
+        "pob": 176
+      }
+    },
+    {
+      "callsign": "IBS5076",
+      "type": "A359",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "SAMAR"
+      ],
+      "fl": 390,
+      "load": 0.56,
+      "entry_time": 3229,
+      "dep": "LIMC",
+      "dest": "SAEZ",
+      "direction": "southbound",
+      "flow": "runax_samar",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5147",
+        "reg": "EC-MFC",
+        "code": "342774",
+        "eobt": "1430",
+        "altn": "SCEL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "IBERIA EXPRESS",
+        "pob": 278
+      }
+    },
+    {
+      "callsign": "RAM6360",
+      "type": "B38M",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 330,
+      "load": 0.59,
+      "entry_time": -1014,
+      "dep": "LSZH",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3040",
+        "reg": "CN-RPL",
+        "code": "023F51",
+        "eobt": "1251",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 125,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "RYR2975X",
+      "type": "B38M",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 330,
+      "load": 0.48,
+      "entry_time": 310,
+      "dep": "EGKK",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5066",
+        "reg": "EI-LLF",
+        "code": "4CAB73",
+        "eobt": "1322",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "RYANAIR",
+        "pob": 175
+      }
+    },
+    {
+      "callsign": "TVF3266P",
+      "type": "A20N",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 390,
+      "load": 0.34,
+      "entry_time": 1573,
+      "dep": "ENGM",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4167",
+        "reg": "F-HFCD",
+        "code": "3BDC24",
+        "eobt": "1209",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 175
+      }
+    },
+    {
+      "callsign": "RAM9743X",
+      "type": "A21N",
+      "route": [
+        "TAKAV",
+        "DOMOG"
+      ],
+      "fl": 370,
+      "load": 0.38,
+      "entry_time": 3157,
+      "dep": "EGKK",
+      "dest": "GMAD",
+      "direction": "southbound",
+      "flow": "takav_domog",
+      "arrival": false,
+      "fpl": {
+        "ssr": "3543",
+        "reg": "CN-RXH",
+        "code": "02259B",
+        "eobt": "1407",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 144,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "RAM8329K",
+      "type": "B739",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 310,
+      "load": 0.46,
+      "entry_time": 1991,
+      "dep": "EHAM",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "marja_arr",
+      "fpl": {
+        "ssr": "4710",
+        "reg": "CN-RUX",
+        "code": "021EEF",
+        "eobt": "1334",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 145
+      }
+    },
+    {
+      "callsign": "RAM955A",
+      "type": "B788",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 290,
+      "load": 0.56,
+      "entry_time": 2825,
+      "dep": "EHAM",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "marja_arr",
+      "fpl": {
+        "ssr": "4524",
+        "reg": "CN-RCU",
+        "code": "0224EC",
+        "eobt": "1348",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 168
+      }
+    },
+    {
+      "callsign": "TOM5527A",
+      "type": "B38M",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA"
+      ],
+      "fl": 310,
+      "load": 0.4,
+      "entry_time": 2138,
+      "dep": "EBBR",
+      "dest": "GMMX",
+      "direction": "southbound",
+      "flow": "marja_south",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2271",
+        "reg": "G-TEAX",
+        "code": "406045",
+        "eobt": "1347",
+        "altn": "GMMI",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "TUI AIRWAYS",
+        "pob": 138
+      }
+    },
+    {
+      "callsign": "RAM3126",
+      "type": "B739",
+      "route": [
+        "OSLAD",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 310,
+      "load": 0.34,
+      "entry_time": -135,
+      "dep": "LEMD",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "salca_arr",
+      "fpl": {
+        "ssr": "4715",
+        "reg": "CN-RXT",
+        "code": "02062F",
+        "eobt": "1443",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 170,
+        "rmk": "TCAS"
+      }
+    },
+    {
+      "callsign": "TAP3843X",
+      "type": "B739",
+      "route": [
+        "OSLAD",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 350,
+      "load": 0.57,
+      "entry_time": 1600,
+      "dep": "LPPT",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "salca_arr",
+      "fpl": {
+        "ssr": "2732",
+        "reg": "CS-TCT",
+        "code": "496F8F",
+        "eobt": "1536",
+        "altn": "GMME",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 181
+      }
+    },
+    {
+      "callsign": "RAM5372",
+      "type": "B789",
+      "route": [
+        "SALCA",
+        "IBALU",
+        "SUBAL"
+      ],
+      "fl": 280,
+      "load": 0.53,
+      "entry_time": -566,
+      "dep": "GMMN",
+      "dest": "KIAD",
+      "direction": "northbound",
+      "flow": "gmmn_dep_nat",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5161",
+        "reg": "CN-RQT",
+        "code": "0205F5",
+        "eobt": "1514",
+        "altn": "KJFK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 269
+      }
+    },
+    {
+      "callsign": "RAM6465X",
+      "type": "B788",
+      "route": [
+        "SALCA",
+        "IBALU",
+        "SUBAL"
+      ],
+      "fl": 260,
+      "load": 0.57,
+      "entry_time": 2463,
+      "dep": "GMMN",
+      "dest": "KBOS",
+      "direction": "northbound",
+      "flow": "gmmn_dep_nat",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4412",
+        "reg": "CN-RHM",
+        "code": "0212E9",
+        "eobt": "1605",
+        "altn": "KJFK",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 226
+      }
+    },
+    {
+      "callsign": "RAM8596K",
+      "type": "B789",
+      "route": [
+        "SALCA",
+        "IBALU",
+        "BEXAL"
+      ],
+      "fl": 280,
+      "load": 0.54,
+      "entry_time": 426,
+      "dep": "GMMN",
+      "dest": "CYYZ",
+      "direction": "northbound",
+      "flow": "gmmn_dep_nat_b",
+      "arrival": false,
+      "fpl": {
+        "ssr": "2547",
+        "reg": "CN-RGP",
+        "code": "02288B",
+        "eobt": "1531",
+        "altn": "CYUL",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 206
+      }
+    },
+    {
+      "callsign": "RAM4830",
+      "type": "B788",
+      "route": [
+        "SUBAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "load": 0.51,
+      "entry_time": 367,
+      "dep": "KMIA",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "subal_nat",
+      "fpl": {
+        "ssr": "5413",
+        "reg": "CN-RLR",
+        "code": "0200BA",
+        "eobt": "0759",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 233
+      }
+    },
+    {
+      "callsign": "RAM5534",
+      "type": "B788",
+      "route": [
+        "SUBAL",
+        "IBALU",
+        "SALCA"
+      ],
+      "fl": 370,
+      "load": 0.34,
+      "entry_time": 1398,
+      "dep": "CYUL",
+      "dest": "GMMN",
+      "direction": "southbound",
+      "flow": "subal_nat",
+      "fpl": {
+        "ssr": "5112",
+        "reg": "CN-RWJ",
+        "code": "020A33",
+        "eobt": "0946",
+        "altn": "GMME",
+        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 241
+      }
+    },
+    {
+      "callsign": "RAM1435X",
+      "type": "B738",
+      "route": [
+        "NISBA",
+        "IBALU",
+        "OSLAD"
+      ],
+      "fl": 240,
+      "load": 0.33,
+      "entry_time": -896,
+      "dep": "GMMN",
+      "dest": "EGLL",
+      "direction": "northbound",
+      "flow": "gmmn_dep_oslad",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4576",
+        "reg": "CN-RWC",
+        "code": "020D6D",
+        "eobt": "1507",
+        "altn": "EGKK",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 121
+      }
+    },
+    {
+      "callsign": "RAM5238K",
+      "type": "B738",
+      "route": [
+        "NISBA",
+        "IBALU",
+        "OSLAD"
+      ],
+      "fl": 260,
+      "load": 0.49,
+      "entry_time": 2803,
+      "dep": "GMMN",
+      "dest": "LEMD",
+      "direction": "northbound",
+      "flow": "gmmn_dep_oslad",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5352",
+        "reg": "CN-RJA",
+        "code": "022639",
+        "eobt": "1609",
+        "altn": "LEVC",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "ROYAL AIR MAROC",
+        "pob": 151
+      }
+    }
+  ],
+  "design_notes": "RYR7HB (northbound UN858, FL380) reports unable RVSM at T+15:00; at T+21:40 it crosses RAM1219 (BEXAL-IBALU-SALCA, FL370): legal with RVSM, a loss without. Two GMMN arrivals reach MARJA 45 s apart: spacing and LoA level. Request trap: RAM221 (SALCA arrival from BEXAL, FL370) asks descent and would go down through BEL5QX (northbound UN858) where the tracks cross.",
+  "expected": {
+    "passive": {
+      "allow_left_sector": true,
+      "los": true,
+      "pairs": [
+        [
+          "RAM1219",
+          "RYR7HB"
+        ]
+      ],
+      "seq_level": true
+    },
+    "naive_approve": {
+      "allow_left_sector": true,
+      "los": true,
+      "pairs": [
+        [
+          "BEL5QX",
+          "RAM221"
+        ]
+      ]
+    }
+  },
+  "author": "ATC SIM library",
+  "traffic_load": {
+    "config": "WN",
+    "unit_name": "WN",
+    "capacity": 58,
+    "flights_per_hour": 58,
+    "ratio": 1.0,
+    "density": 4
+  },
+  "density": 4,
+  "start_utc": "16:00"
+}

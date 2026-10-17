@@ -17,6 +17,10 @@ pip install -r requirements.txt
 python run.py                      # listens on 0.0.0.0:8000, prints the LAN address
 ```
 
+**Documentation:** the app has a *Help* menu (`/help`) with the user manuals (controller, pseudo-pilot,
+instructor / admin), the scenario designer and JSON format, the scenario library, the weather and aircraft models
+and the API reference. The pages are Markdown files in `atcsim/docs/`.
+
 Open `http://<machine-ip>:8000/` and sign in (without a Google client configured, a test login asks only for an
 e-mail address; the first account is administrator). `/radar` is the single-user radar of the earlier versions and
 `/docs` the interactive API reference. Scripts and agents send the `X-API-Key` header (`ATC_API_KEY`), or run the
@@ -720,8 +724,10 @@ works as for the pilots' own weather requests.
 ### Author, complexity, traffic density
 
 `author` (by default the person who saves it in the designer), `complexity` and `density` (1 very low … 5 very high) are
-set in the designer. When a rating is not set, it is estimated from the content (aircraft per hour for the density;
-density, requests, areas, events and weather for the complexity) and shown with a `~`. They appear in the instructors'
+set in the designer. When a rating is not set, it is estimated from the content and shown with a `~`: the density
+from the flights in the controlled sectors during the first hour against the declared capacity (`traffic_load`,
+written on every save; aircraft per hour in the training airspace, which has no declared capacity), the complexity
+from the density, requests, areas, events, weather and planted conflicts. They appear in the instructors'
 and admins' scenario list, and on every exercise: each exercise keeps the values the scenario had when it was run, shown
 in the controller's exercise list, statistics (sessions table) and evaluations.
 
@@ -772,46 +778,44 @@ The build fails in any of these cases:
 | **s17_s4_runway_change** | northerly | SPRT changes from runway 18 (straight-in) to 36 (reversal) mid-session. The pilots' TOD moves past the LoA descent point, so later arrivals ask too late or not at all, and you must start their descent yourself | LoA | LoA |
 | **s15_convective_afternoon** | scattered multicell storms, 12 flights, active restricted area | Open problem: deviations push aircraft into each other and into R71 | R71 | R71 |
 
-**Agadir CTA:** one hour each, traffic near sector capacity, weather always present
+**Agadir CTA: a graded progression, weather always present.** Traffic is measured against the declared sector
+capacities (flights per hour: WN 58, WS 43, ON/OCN 56, OS/OCS 65, WW = WN+WS 48, OCE = ON+OS 51, WW-OCE = all 47;
+`capacity_per_hour` in `atcsim/data/airspaces/agadir_cta.json`, `atcsim/capacity.py`). The traffic density of a
+scenario is the number of flights inside the controlled sectors during the first hour against that capacity:
+1 under 50 %, 2 50–70 %, 3 70–90 %, 4 90–105 %, 5 over 105 % (the library tops out around 112 %, a slight
+overshoot).
 
-The sector capacities are Oceanic North 56, Oceanic South 65, West North 48 and West South 52 flights an hour.
-Each scenario is played on one of three control areas:
-- the two west sectors as one (`w`);
-- the two oceanic sectors as one (`o`);
-- the whole CTA (`c`).
+| Step | Scenario | Control | Traffic / capacity | Complexity |
+|---|---|---|---|---|
+| 1 | p01_ws_two_merges | WS | 55 % | 2 |
+| 2 | p02_wn_merges_and_climbs | WN | 69 % | 2 |
+| 3 | p03_ocn_isolated_storms | ON | 79 % | 3 |
+| 4 | p04_ocs_embedded_unable_rvsm | OS | 85 % | 3 |
+| 5 | p05_ws_storms_arrivals | WS | 95 % | 4 |
+| 6 | p06_wn_capacity_sequencing | WN | 100 % | 4 |
+| 7 | o01_oceanic_light_wx | ON+OS | ~98 % | 4 |
+| 8 | w01_west_scattered_cb | WN+WS | ~100 % | 4 |
+| 9 | o02_oceanic_embedded_cb | ON+OS | ~106 % | 5 |
+| 10 | w02_west_squall_line | WN+WS | ~110 % | 5 |
+| 11 | c01_cta_moderate_wx | all | ~102 % | 5 |
+| 12 | c02_cta_severe_wx | all | ~112 % | 5 |
 
-A west run only carries traffic that crosses the west sectors, and an oceanic run only traffic that crosses the
-oceanic ones.
+What each one trains is in the in-app documentation (*Help → Scenario library and progression*,
+`atcsim/docs/scenarios.md`).
 
 Background traffic comes from `tools/agadir_traffic.py`:
 - **Flows:** published routes only, with hourly rates, type mixes, operators and city pairs.
 - **Levels:** set by the semicircular rule and the aircraft's performance.
 - **Start:** flights enter from 30 minutes before T+0, so the sectors are already busy.
+- **Thinning:** `dense(target=…)` drops background flights until the first-hour load is the target fraction of the
+  declared capacity (`scale=` raises the generator rates when a sector needs more).
 - **De-confliction:** a passive run moves background flights that lose separation to another level, so the
   conflicts left are the planted ones (plus whatever the weather causes).
 - **Cache:** the result is stored in `tools/traffic/<name>.json`.
 
-Typical loads per hour:
-
-| Run | ON | WN | WS | OS |
-|---|---|---|---|---|
-| Whole CTA | 57 | 53–56 | 47 | 44 |
-| West run | – | 54–56 | 45–47 | – |
-| Oceanic run | 56 | – | – | 45 |
-
-OS stays below its capacity because every published route through it also loads ON.
-
-| Scenario | Control | Weather | Planted conflicts (passive) | Request / event traps (naive) |
-|---|---|---|---|---|
-| w01_west_scattered_cb | WN+WS | scattered strong CBs, West South | merge at IBALU (standard route × UN857, 18 s); NIPRI–NIDEB–ROLRO × TAKAV–VEDOD; merge at VEDOD (UN857 × TAKAV–VEDOD) | SALCA arrival descent through northbound UN858 traffic; Mach .74 request with a follower 9 NM behind (UN858); GMMN departure climb through the RUNAX standard route |
-| w02_west_squall_line | WN+WS | severe squall line, 2 gaps | unable RVSM (northbound UN858 FL380) crossing a BEXAL–IBALU–SALCA FL370 in West North; 4×F16 formation FL300 × TAKAV–VEDOD FL310; TERTO and MARJA arrival sequences | non-RVSM ferry C550 asks FL400 |
-| o01_oceanic_light_wx | ON+OS | isolated moderate CBs | merges at TIGGI and SAMAR; M.86 overtaking M.80 on UN866 (sleeper); NIPRI–NIDEB × UN873; unable RVSM near SAMAR with a northbound FL380 | northbound climb FL340→380 through a southbound FL350 leaving BEXAL |
-| o02_oceanic_embedded_cb | ON+OS | embedded CBs (hidden in rain) | R90 activates across UN866; 2×EUFI formation FL310 entering BEXAL as a northbound FL320 leaves it | non-RVSM C550 asks FL380; Mach .76 request with a follower 8 NM behind |
-| c01_cta_moderate_wx | all | scattered strong CBs | TIGGI merge | descent requests through northbound UN858 traffic (RUNAX–IBALU–SAMAR and a SALCA arrival); climb near BEXAL; GMMN departure climb through the standard route; GCRR arrivals merging at VEDOD (weather may break it up when left alone) |
-| c02_cta_severe_wx | all | severe squall line, 3 gaps | unable RVSM (northbound UN858 FL380) crossing RUNAX–IBALU–SAMAR FL390; 4×F16 × TAKAV–VEDOD; SALCA, TERTO and MARJA sequences | C-130 state aircraft (non-RVSM) climb request |
-
-No reference solutions are scripted for these. The build checks that every planted conflict actually happens in
-the passive or naive run. Weather deviations and in-flight pilot requests add unplanned problems on top.
+The build writes `author`, `complexity`, `density` and `traffic_load` into every Agadir scenario. No reference
+solutions are scripted for these. The build checks that every planted conflict actually happens in the passive or
+naive run. Weather deviations and in-flight pilot requests add unplanned problems on top.
 
 ## Baseline agent
 
@@ -894,6 +898,8 @@ atcsim/static/atctools.js        flight-plan window and list, MTCD list and disp
 tools/fill_flightplans.py        writes complete flight plans into the scenario files
 atcsim/platform/stats.py         evaluations and statistics API, /stats page
 atcsim/static/stats.html, vendor/chart.umd.min.js   statistics charts (Chart.js 4.4.1, MIT)
+atcsim/capacity.py               declared sector capacities, traffic load of a scenario, density bands
+atcsim/docs/*.md, static/help.html, vendor/marked.min.js   in-app documentation (Markdown, rendered with marked 12, MIT)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)
 scenarios/*.json                 scenario library
 tools/build_scenarios.py         scenario generator + trap/solution verification (python tools/build_scenarios.py a02 s16 ...)

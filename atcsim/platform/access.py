@@ -19,7 +19,7 @@ from . import config, db
 from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/")
-PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/", "/stats")
+PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
@@ -94,7 +94,7 @@ class AccessMiddleware:
         if scope["type"] == "websocket":
             await send({"type": "websocket.close", "code": 4403})
             return
-        is_page = method == "GET" and (path in PAGES or path.startswith("/x/") or path == "/designer")
+        is_page = method == "GET" and (path in PAGES or path.startswith(("/x/", "/help/")) or path == "/designer")
         if is_page and user is None:
             resp = RedirectResponse("/login?next=" + path, status_code=303)
         else:

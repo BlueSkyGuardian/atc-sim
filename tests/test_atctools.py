@@ -197,4 +197,27 @@ if ac.active:
     ok(any(x["callsign"] == cs_req and x["wx_handling"] for x in st["aircraft"]), "state: dealing with weather")
 r = w.issue({"callsign": cs_req, "type": "wx_clear"}, by_pilot=True)
 ok(r["status"] == "executed" and not w.wx_handling(ac), "pilot reports clear of weather")
+# ---- declared capacities and traffic density
+from atcsim import capacity, airspace as asp_mod  # noqa: E402
+from atcsim.scenario import ratings  # noqa: E402
+ag = asp_mod.get("agadir")
+ok(capacity.capacity(ag, ["WN", "WS"]) == 48 and capacity.capacity(ag, ["ON", "OS"]) == 51
+   and capacity.capacity(ag, ["OS", "ON", "WN", "WS"]) == 47 and capacity.capacity(ag, ["WS"]) == 43,
+   "declared capacities: WW 48, OCE 51, WW-OCE 47, WS 43")
+ok([capacity.density_level(r) for r in (0.4, 0.6, 0.8, 1.0, 1.12)] == [1, 2, 3, 4, 5], "density bands")
+p1 = load_scenario("p01_ws_two_merges")
+tl = capacity.traffic_load(p1)
+ok(tl["capacity"] == 43 and tl["unit_name"] == "WS" and 0.45 <= tl["ratio"] <= 0.65 and tl["density"] == 2,
+   f"p01: about half the WS capacity ({tl})")
+r1 = ratings(p1)
+ok(r1["density"] == 2 and not r1["density_estimated"] and r1["complexity"] == 2 and r1["capacity"] == 43,
+   "p01 ratings set by the builder")
+loads = [load_scenario(n)["traffic_load"]["ratio"] for n in
+         ("p01_ws_two_merges", "p02_wn_merges_and_climbs", "p03_ocn_isolated_storms", "p04_ocs_embedded_unable_rvsm",
+          "p05_ws_storms_arrivals", "p06_wn_capacity_sequencing")]
+ok(loads == sorted(loads) and loads[-1] <= 1.05, f"progression: traffic rises step by step {loads}")
+for n in ("w01_west_scattered_cb", "w02_west_squall_line", "o01_oceanic_light_wx", "o02_oceanic_embedded_cb",
+          "c01_cta_moderate_wx", "c02_cta_severe_wx"):
+    r = load_scenario(n)["traffic_load"]["ratio"]
+    ok(0.9 <= r <= 1.15, f"{n}: {r:.0%} of the declared capacity (slight overshoot at most)")
 print("atc tools checks passed")

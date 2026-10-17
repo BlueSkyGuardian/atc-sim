@@ -117,6 +117,8 @@
           <button id="saveBtn" class="primary">Save</button>
           <button id="runBtn" title="Save, then open a session of it in the radar">Save &amp; open in radar</button>
           <button id="dlBtn" title="Download the JSON">⤓ JSON</button>
+          <button id="jsonBtn" title="Edit the whole scenario as JSON (paste from a script or another tool)">{ } JSON</button>
+          <button id="impBtn" title="Open a scenario .json file from your computer">⤒ Import</button><input id="impFile" type="file" accept=".json,application/json" style="display:none">
           <button id="undoBtn" title="Undo (Ctrl+Z)">↶</button>
           <button id="redoBtn" title="Redo (Ctrl+Y)">↷</button>
         </div>
@@ -276,8 +278,7 @@ function renderScenarioForm() {
   set('#f-name', scn.name); set('#f-title', scn.title); set('#f-desc', scn.description); set('#f-notes', scn.design_notes);
   set('#f-dur', scn.duration_s); set('#f-pd', scn.pilot_delay_s ?? 4); set('#f-utc', scn.start_utc || ''); set('#f-sep', (scn.separation || {}).horizontal_nm ?? '');
   set('#f-author', scn.author || ''); set('#f-cplx', scn.complexity || ''); set('#f-dens', scn.density || '');
-  const est = estimateRatings(scn);
-  $('#f-cplxe').textContent = `estimate ${est.complexity}/5`; $('#f-dense').textContent = `estimate ${est.density}/5 · ${est.perH} aircraft/h`;
+  showEstimates();
   $('#f-sepd').textContent = `airspace default ${scn.airspace === 'agadir' ? 7 : 5} NM`;
   $('#f-asp').textContent = `${scn.airspace || 'training'}${scn.control ? ' · ' + [].concat(scn.control).join('+') : ''}`;
   const w = scn.weather;
@@ -295,16 +296,6 @@ bindField('#f-title', v => scn.title = v, false);
 bindField('#f-author', v => { v = v.trim(); if (v) scn.author = v; else delete scn.author; }, false);
 bindField('#f-cplx', v => { if (v) scn.complexity = +v; else delete scn.complexity; }, false);
 bindField('#f-dens', v => { if (v) scn.density = +v; else delete scn.density; }, false);
-// same estimate as the server (scenario.ratings): shown next to the selectors, used when they are not set
-function estimateRatings(s) {
-  const n = (s.aircraft || []).length, dur = +s.duration_s || 3600, perH = n / Math.max(dur / 3600, 0.25);
-  const density = 1 + [10, 25, 50, 100].filter(t => perH >= t).length;
-  const w = s.weather || {}, conv = w.convection;
-  const c0 = Array.isArray(conv) ? conv[0] : conv, has = c0 && (!c0.regime || c0.regime !== 'none');
-  const wx = (has ? ({ light: 0.5, moderate: 1.2, severe: 2 }[c0.intensity] ?? 1) : 0) + ((w.cells || []).length ? 1 : 0);
-  const score = 0.6 * density + 0.25 * (s.requests || []).length + 0.6 * (s.areas || []).length + 0.5 * (s.events || []).length + wx;
-  return { complexity: Math.max(1, Math.min(5, Math.round(score))), density, perH: Math.round(perH) };
-}
 bindField('#f-desc', v => scn.description = v, false);
 bindField('#f-notes', v => scn.design_notes = v, false);
 bindField('#f-dur', v => scn.duration_s = Math.max(300, +v || 1800));
@@ -380,7 +371,48 @@ $('#dlBtn').onclick = () => {
   a.download = `${scn.name || 'scenario'}.json`; a.click();
 };
 $('#undoBtn').onclick = undo; $('#redoBtn').onclick = redo;
+// the whole scenario as JSON: edit / paste (scripts, other tools) or import a file; undo brings the previous one back
+async function applyScenarioJson(obj) {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) throw new Error('a scenario is a JSON object');
+  if (!Array.isArray(obj.aircraft)) throw new Error('"aircraft" must be a list');
+  const keep = scn ? [...undoStack, JSON.stringify(scn)] : [];
+  await setScenario(obj);
+  undoStack.push(...keep);
+  status(`scenario ${obj.name || ''} loaded from JSON: ${obj.aircraft.length} aircraft · checking…`, 'c-ok');
+}
+$('#jsonBtn').onclick = () => {
+  const bg = document.createElement('div');
+  bg.style.cssText = 'position:fixed;inset:0;background:#000a;z-index:50;display:flex;align-items:center;justify-content:center';
+  bg.innerHTML = `<div style="background:var(--panel,#111922);border:1px solid #2a3a4a;border-radius:8px;padding:14px;width:min(980px,94vw);height:min(86vh,900px);display:flex;flex-direction:column;gap:8px">
+    <div class="row" style="justify-content:space-between"><b>Scenario JSON</b><span class="c-dim" style="font-size:12px">format: Help → Scenario designer and JSON format</span></div>
+    <textarea id="jsTa" spellcheck="false" style="flex:1;font:12px var(--mono,monospace);white-space:pre;resize:none"></textarea>
+    <div class="row"><span id="jsMsg" class="c-dim" style="flex:1;font-size:12px"></span><button id="jsFmt">Format</button><button id="jsCopy">Copy</button><button id="jsCancel">Cancel</button><button id="jsApply" class="primary">Apply</button></div></div>`;
+  document.body.appendChild(bg);
+  const ta = bg.querySelector('#jsTa'), msg = bg.querySelector('#jsMsg');
+  ta.value = scn ? JSON.stringify(cleanScenario(), null, 1) : '{\n "name": "new_scenario",\n "aircraft": []\n}';
+  ta.addEventListener('keydown', e => e.stopPropagation());
+  const parse = () => { try { const o = JSON.parse(ta.value); msg.textContent = ''; return o; } catch (e) { msg.textContent = 'JSON error: ' + e.message; msg.className = 'c-los'; return null; } };
+  bg.querySelector('#jsFmt').onclick = () => { const o = parse(); if (o) ta.value = JSON.stringify(o, null, 1); };
+  bg.querySelector('#jsCopy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(ta.value); msg.textContent = 'copied'; msg.className = 'c-dim'; };
+  bg.querySelector('#jsCancel').onclick = () => bg.remove();
+  bg.querySelector('#jsApply').onclick = async () => { const o = parse(); if (!o) return;
+    try { await applyScenarioJson(o); bg.remove(); } catch (e) { msg.textContent = e.message; msg.className = 'c-los'; } };
+  ta.focus();
+};
+$('#impBtn').onclick = () => $('#impFile').click();
+$('#impFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try { await applyScenarioJson(JSON.parse(await f.text())); } catch (err) { status(`${f.name}: ${err.message}`, 'c-los'); }
+};
 
+// estimates computed by the server on every check (scenario.ratings, capacity.traffic_load)
+function showEstimates() {
+  const g = lastGoodComp, r = g && g.ratings, L = g && g.traffic_load;
+  $('#f-cplxe').textContent = r ? `estimate ${r.complexity}/5` : '';
+  $('#f-dense').textContent = !r ? '' : L && L.capacity
+    ? `estimate ${r.density}/5 · ${L.unit_name}: ${L.flights_per_hour} flights/h, capacity ${L.capacity} (${Math.round(L.ratio * 100)} %)`
+    : `estimate ${r.density}/5 · ${r.aircraft_per_hour} aircraft/h`;
+}
 // ============================================================ compile (plans, planned conflicts, lint)
 let compTimer = null, compSeq = 0;
 function scheduleCompile() { clearTimeout(compTimer); compTimer = setTimeout(compile, 500); $('#compState').textContent = 'checking…'; }
@@ -390,7 +422,7 @@ async function compile() {
   try {
     const r = await api('/designer/compile', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario() }) });
     if (my !== compSeq) return;
-    comp = r; if (r.ok) lastGoodComp = r;
+    comp = r; if (r.ok) { lastGoodComp = r; showEstimates(); }
     $('#compState').innerHTML = r.ok ? `<span class="c-ok">builds</span> · ${Object.keys(r.plans).length} aircraft` : '<span class="c-los">error</span>';
     status(r.ok ? `${Object.keys(r.plans).length} aircraft · ${r.planned_conflicts.length} planned conflicts · ${r.warnings.length} warnings` : r.error, r.ok ? 'c-dim' : 'c-los');
   } catch (e) { if (my === compSeq) status(e.message, 'c-los'); }

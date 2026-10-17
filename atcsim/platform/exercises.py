@@ -48,6 +48,44 @@ def admin_page():
     return page("admin.html")
 
 
+DOCS_DIR = os.path.join(os.path.dirname(STATIC), "docs")
+DOC_PAGES = [  # (slug, title, group)
+    ("index", "Overview", "Start"),
+    ("controller", "Controller manual", "User manuals"),
+    ("pilot", "Pseudo-pilot manual", "User manuals"),
+    ("instructor", "Instructor and admin manual", "User manuals"),
+    ("designer", "Scenario designer and JSON format", "Scenarios"),
+    ("scenarios", "Scenario library and progression", "Scenarios"),
+    ("weather", "Weather modelling", "Models"),
+    ("aircraft", "Aircraft, pilots and airspace", "Models"),
+    ("api", "API reference", "Developers"),
+]
+
+
+@router.get("/help", include_in_schema=False)
+@router.get("/help/{slug}", include_in_schema=False)
+def help_page(request: Request, slug: str = "index"):
+    require_user(request)
+    return page("help.html")
+
+
+@router.get("/api/help")
+def help_index(request: Request):
+    """The documentation pages (for the /help reader)."""
+    require_user(request)
+    return [{"slug": s, "title": t, "group": g} for s, t, g in DOC_PAGES]
+
+
+@router.get("/api/help/{slug}")
+def help_doc(slug: str, request: Request):
+    """One documentation page, as Markdown."""
+    require_user(request)
+    if slug not in {s for s, _, _ in DOC_PAGES}:
+        raise HTTPException(404, "no such page")
+    with open(os.path.join(DOCS_DIR, slug + ".md"), encoding="utf-8") as f:
+        return {"slug": slug, "markdown": f.read()}
+
+
 @router.get("/radar", include_in_schema=False)
 def radar_page(request: Request):
     require_user(request, roles=("instructor",))

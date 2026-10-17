@@ -79,7 +79,11 @@ def ratings(s: dict) -> dict:
     (aircraft per hour; requests, areas, events, weather) marked estimated."""
     n, dur = len(s.get("aircraft", [])), float(s.get("duration_s") or 3600)
     per_h = n / max(dur / 3600.0, 0.25)
-    dens_est = 1 + sum(per_h >= t for t in (10, 25, 50, 100))
+    load = s.get("traffic_load") or {}
+    if load.get("density"):                                      # flights per hour against the declared capacity
+        dens_est, per_h = int(load["density"]), float(load.get("flights_per_hour", per_h))
+    else:
+        dens_est = 1 + sum(per_h >= t for t in (10, 25, 50, 100))
     wx = s.get("weather") or {}
     conv = wx.get("convection") or {}
     if isinstance(conv, list):                                   # the designer keeps a list of patterns
@@ -88,7 +92,8 @@ def ratings(s: dict) -> dict:
         conv = {}
     wx_pts = ({"light": 0.5, "moderate": 1.2, "severe": 2.0}.get(conv.get("intensity"), 1.0) if conv else 0) + (1.0 if wx.get("cells") else 0)
     score = 0.6 * dens_est + 0.25 * len(s.get("requests", [])) + 0.6 * len(s.get("areas", [])) \
-        + 0.5 * len(s.get("events", [])) + wx_pts
+        + 0.5 * len(s.get("events", [])) + wx_pts \
+        + 0.3 * sum(len((v or {}).get("pairs", [])) for v in (s.get("expected") or {}).values() if isinstance(v, dict))
     cplx_est = max(1, min(5, int(round(score))))
     out = {"author": (s.get("author") or "").strip() or None}
     for k, est in (("complexity", cplx_est), ("density", dens_est)):
@@ -102,6 +107,8 @@ def ratings(s: dict) -> dict:
         else:
             out[k], out[k + "_estimated"] = est, True
     out["aircraft_per_hour"] = round(per_h)
+    if load.get("capacity"):
+        out["capacity"], out["load_ratio"], out["sector_config"] = load["capacity"], load.get("ratio"), load.get("unit_name")
     return out
 
 

@@ -324,7 +324,8 @@
   function openHelp() {
     const el = win('helpWin', 'Keyboard shortcuts', 120, 60, 470);
     el.querySelector('.wb').innerHTML = `<div class="keys">${KEYS.map(([k, t]) => `<span><kbd>${esc(k)}</kbd></span><span>${esc(t)}</span>`).join('')}</div>
-      <div class="c-dim" style="margin-top:8px;font-size:11px">Letters work in capitals too. The track info window (I) shows the aircraft under the mouse: SSR code, registration, flight plan, levels and coordination, and the Mode S downlinked parameters when it has enhanced surveillance; middle-click an aircraft to keep it there.</div>`;
+      <div class="c-dim" style="margin-top:8px;font-size:11px">Letters work in capitals too. The track info window (I) shows the aircraft under the mouse: SSR code, registration, flight plan, levels and coordination, and the Mode S downlinked parameters when it has enhanced surveillance; middle-click an aircraft to keep it there.</div>
+      <div style="margin-top:8px;font-size:12px"><a href="/help/${SEAT === 'pilot' ? 'pilot' : SEAT === 'atc' ? 'controller' : 'instructor'}" target="_blank">Full manual ↗</a></div>`;
   }
 
   // ------------------------------------------------------------------ toolbar

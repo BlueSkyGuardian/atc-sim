@@ -171,7 +171,22 @@ def compile(scn: dict) -> dict:
             "route_before": list(a.route_before), "route_after": list(a.route_after),
         }
     return {"ok": True, "duration_s": w.duration_s, "separation_horizontal_nm": w.sep_h, "plans": plans, "aircraft": info,
-            "planned_conflicts": _planned_conflicts(w, plans), "warnings": _lint(scn, w)}
+            "planned_conflicts": _planned_conflicts(w, plans), "warnings": _lint(scn, w),
+            "traffic_load": (load := _load(scn, w)),
+            "ratings": _ratings({**scn, "traffic_load": load, "complexity": None, "density": None})}
+
+
+def _ratings(scn) -> dict:
+    from .scenario import ratings
+    return ratings(scn)
+
+
+def _load(scn, w) -> dict:
+    from .capacity import traffic_load
+    try:
+        return traffic_load(scn, w)
+    except Exception:                                           # pragma: no cover - defensive
+        return {}
 
 
 # --------------------------------------------------------------------------- fast-time preview
@@ -268,6 +283,8 @@ def save(name: str, scn: dict, overwrite: bool = False) -> dict:
         raise ScenarioError(c["error"])
     out = dict(scn)
     out["name"] = name
+    if c.get("traffic_load"):
+        out["traffic_load"] = c["traffic_load"]                # flights in the first hour against the capacity
     for k in ("complexity", "density"):                        # 1-5, or not set (estimated from the content)
         v = out.get(k)
         if v in (None, ""):
@@ -276,7 +293,7 @@ def save(name: str, scn: dict, overwrite: bool = False) -> dict:
             raise ScenarioError(f"{k}: 1 to 5")
         else:
             out[k] = int(v)
-    order = ["name", "title", "author", "complexity", "density", "description", "design_notes", "airspace", "control", "duration_s", "pilot_delay_s",
+    order = ["name", "title", "author", "complexity", "density", "traffic_load", "description", "design_notes", "airspace", "control", "duration_s", "pilot_delay_s",
              "weather", "areas", "aircraft", "requests", "events", "expected"]
     out = {**{k: out[k] for k in order if k in out}, **{k: v for k, v in out.items() if k not in order}}
     with open(p, "w") as f:

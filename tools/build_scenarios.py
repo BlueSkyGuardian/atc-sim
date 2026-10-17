@@ -711,7 +711,8 @@ def s17():
 
 # =============================================================================================
 # Agadir CTA - dense traffic near sector capacity, weather always present, planted conflicts
-#   capacities (flights/hour): Oceanic North 56, Oceanic South 65, West North 48, West South 52
+#   declared capacities (flights/hour, atcsim/data/airspaces/agadir_cta.json): WN 58, WS 43, ON (OCN) 56, OS (OCS) 65,
+#   WW (WN+WS) 48, OCE (ON+OS) 51, WW-OCE (all) 47. Traffic is thinned to a target fraction of the capacity (dense(target=))
 #   w*: west sectors (WN+WS) as one   o*: oceanic sectors (ON+OS) as one   c*: the whole CTA
 # Background traffic: tools/agadir_traffic.py (published routes only, levels by the semicircular rule,
 # de-conflicted so that the conflicts left are the planted ones). Cached in tools/traffic/<name>.json.
@@ -795,13 +796,42 @@ def set_fl(scn, cs, fl):
     return scn
 
 
-def dense(scn, flows, seed, regen=False):
-    """Add cached (or freshly generated + de-conflicted) background traffic to a scenario with planted flights."""
+def thin_to(scn, keep, target, seed):
+    """Drop background flights until the flights in the controlled sectors during the first hour are `target` x the
+    declared capacity (capacity.traffic_load). Returns the load."""
+    import random as _r
+    from atcsim.capacity import flights_in_hour, capacity
+    from atcsim.scenario import build_world
+    w = build_world(scn)
+    cap = capacity(w.airspace)
+    dur = min(3600.0, float(scn.get("duration_s", 3600)))
+    inside = flights_in_hour(w, 0.0, dur)
+    want = int(round(target * cap * dur / 3600.0))              # a shorter scenario: the same hourly rate
+    bg_in = sorted(cs for cs in inside if cs not in keep)
+    drop = set()
+    if len(inside) > want:
+        drop = set(_r.Random(seed).sample(bg_in, min(len(bg_in), len(inside) - want)))
+    elif len(inside) < want:
+        print(f"    !! only {len(inside)} flights/h for a target of {want} (capacity {cap})")
+    # flights never in the controlled sectors during the scenario add nothing: drop them too
+    late = {a.callsign for a in w.aircraft.values() if a.callsign not in keep and a.callsign not in inside}
+    drop |= late
+    scn["aircraft"] = [a for a in scn["aircraft"] if a["callsign"] not in drop]
+    scn["requests"] = [r for r in scn.get("requests", []) if r["callsign"] not in drop]
+    print(f"    traffic: {len(inside) - len(drop & set(inside))} flights in the first hour, capacity {cap} "
+          f"(target {target:.0%}), {len(drop)} background flights dropped")
+    return scn
+
+
+def dense(scn, flows, seed, regen=False, target=None, scale=1.0):
+    """Add cached (or freshly generated + de-conflicted) background traffic to a scenario with planted flights.
+    target: flights in the controlled sectors during the first hour, as a fraction of the declared capacity (a
+    slight overshoot at the top of the scale, ~1.1, never an exaggerated one); scale: generator rate multiplier."""
     planted = scn["aircraft"]
     keep = {a["callsign"] for a in planted}
     sig = hashlib.md5(json.dumps([planted, scn.get("requests", []), scn.get("events", []), scn.get("control"),
                                   scn["weather"], scn.get("areas", []), flows, seed, AG_RATES,
-                                  {k: AT.FLOWS[k] for k in flows}, {"sep_h": 7}],
+                                  {k: AT.FLOWS[k] for k in flows}, {"sep_h": 7}, target, scale, "v3"],
                                  sort_keys=True, default=str).encode()).hexdigest()[:12]
     path = os.path.join(TRAFFIC_DIR, scn["name"] + ".json")
     if os.path.exists(path) and not regen:
@@ -812,10 +842,12 @@ def dense(scn, flows, seed, regen=False):
             scn["requests"] = scn.get("requests", []) + cached["requests"]
             return scn
     print(f"  generating background traffic for {scn['name']} ...")
-    bg = AT.generate(seed, flows, used=keep, rates=AG_RATES)
+    bg = AT.generate(seed, flows, used=keep, rates=AG_RATES, scale=scale)
     scn["aircraft"] = planted + bg
     base_req = list(scn.get("requests", []))
     AT.prune(scn)
+    if target:
+        thin_to(scn, keep, target, seed)
     AT.departure_requests(scn, seed=seed)
     AT.deconflict(scn, keep=keep, rounds=5)
     os.makedirs(TRAFFIC_DIR, exist_ok=True)
@@ -826,8 +858,12 @@ def dense(scn, flows, seed, regen=False):
     return scn
 
 
+AG_COMPLEXITY = {"w01_west_scattered_cb": 4, "w02_west_squall_line": 5, "o01_oceanic_light_wx": 4,
+                 "o02_oceanic_embedded_cb": 5, "c01_cta_moderate_wx": 5, "c02_cta_severe_wx": 5}
+
+
 def ag(name, **kw):
-    d = {"name": name, "airspace": "agadir", "duration_s": 3600, "pilot_delay_s": 4, "areas": [], "requests": [],
+    d = {"name": name, "complexity": AG_COMPLEXITY.get(name), "airspace": "agadir", "duration_s": 3600, "pilot_delay_s": 4, "areas": [], "requests": [],
          "events": []}
     d.update(kw)
     return d
@@ -862,7 +898,7 @@ def w01():
     scn = ag(
         "w01_west_scattered_cb",
         title="West sectors, scattered thunderstorms, IBALU and VEDOD merges",
-        description="West North + West South band-boxed, at about sector capacity. Scattered strong "
+        description="West sectors band-boxed (WW = WN+WS), at the declared capacity (48 flights/h). Scattered strong "
                     "thunderstorms (tops FL380-450) over the middle of West South. Southbound Europe-Canaries "
                     "flows (UN857, RUNAX-IBALU-TERTO standard route, TAKAV-VEDOD-TERTO), northbound Canaries-Europe "
                     "flows (UN858 from VASTO, DESUM-SULAM-UN858, VASTO-BAROK, VASTO-NIDEB-TIGGI), Casablanca arrivals "
@@ -908,7 +944,7 @@ def w01():
     scn = set_fl(put(scn, "CFG4MT", at=p, t=t), "CFG4MT", parity_level(alt, True))
     p, t, alt = meet_alt(scn, "RAM205", [("SUNID", "AKUDA")], after=560)
     scn = set_fl(put(scn, "BEL5AT", at=p, t=t), "BEL5AT", parity_level(alt, False))
-    return dense(scn, AT.WEST_FLOWS, seed=11)
+    return dense(scn, AT.WEST_FLOWS, seed=11, target=1.0)
 
 
 @scenario
@@ -916,7 +952,7 @@ def w02():
     scn = ag(
         "w02_west_squall_line",
         title="West sectors, severe squall line, unable RVSM, formation, arrival sequences",
-        description="West North + West South band-boxed, near capacity. A severe squall line (tops FL450-500) "
+        description="West sectors band-boxed (WW = WN+WS), about 10 % over the declared capacity (48 flights/h). A severe squall line (tops FL450-500) "
                     "lies across West South with two gaps, drifting north-east. GCRR arrivals via TERTO and GMMN "
                     "arrivals via MARJA (LoA FL250, 10 NM in trail). A Moroccan F-16 four-ship leaves ROLRO for "
                     "the oceanic area via NIDEB.",
@@ -953,7 +989,7 @@ def w02():
                               "seq_level": True},
                   "naive_approve": {"allow_left_sector": True, "rvsm_violation": True}},
     )
-    return dense(scn, AT.WEST_FLOWS, seed=12)
+    return dense(scn, AT.WEST_FLOWS, seed=12, target=1.1)
 
 
 @scenario
@@ -963,7 +999,7 @@ def o01():
     scn = ag(
         "o01_oceanic_light_wx",
         title="Oceanic sectors, isolated storms, merges at TIGGI and SAMAR",
-        description="Oceanic North + Oceanic South band-boxed, near capacity: southbound Europe-South America and "
+        description="Oceanic sectors band-boxed (OCE = OCN+OCS), at the declared capacity (51 flights/h): southbound Europe-South America and "
                     "Canaries traffic on UN873, UN866 and RUNAX-IBALU-SAMAR, northbound South America / Canaries "
                     "traffic on the SAMAR-BEXAL, SAMAR-TIGGI, VASTO-BAROK and VASTO-NIDEB-TIGGI RAD routings, "
                     "NIPRI-NIDEB-ROLRO traffic from the Azores. A few isolated moderate storms in Oceanic North.",
@@ -1002,7 +1038,7 @@ def o01():
     )
     t, p = when_alt(scn, "TAP104", 35000, after=1230)
     scn = put(scn, "KLM793", at=on_route(UN866, p), t=t)
-    return dense(scn, AT.OCEANIC_FLOWS, seed=21)
+    return dense(scn, AT.OCEANIC_FLOWS, seed=21, target=0.98)
 
 
 @scenario
@@ -1010,7 +1046,7 @@ def o02():
     scn = ag(
         "o02_oceanic_embedded_cb",
         title="Oceanic sectors, embedded thunderstorms, exercise area, fighter formation",
-        description="Oceanic North + Oceanic South band-boxed, near capacity. Embedded thunderstorms (hidden in "
+        description="Oceanic sectors band-boxed (OCE = OCN+OCS), slightly over the declared capacity (51 flights/h). Embedded thunderstorms (hidden in "
                     "stratiform rain) over Oceanic South around MITLA and OSDIV-KONBA. Restricted area R90 "
                     "(military exercise, surface-FL450) activates at T+15:00 across UN866 between OSDIV and KONBA. "
                     "A Spanish Typhoon pair transits south on UN866.",
@@ -1043,7 +1079,7 @@ def o02():
                   "naive_approve": {"allow_left_sector": True, "rvsm_violation": True, "infringement": True,
                                     "los": True, "pairs": [["AZU8743", "IBE6041"]]}},
     )
-    return dense(scn, AT.OCEANIC_FLOWS, seed=22)
+    return dense(scn, AT.OCEANIC_FLOWS, seed=22, target=1.06)
 
 
 @scenario
@@ -1052,7 +1088,7 @@ def c01():
     scn = ag(
         "c01_cta_moderate_wx",
         title="Whole Agadir CTA, scattered storms, cross-sector conflicts",
-        description="All four Agadir sectors band-boxed, near capacity. Scattered strong thunderstorms over West "
+        description="The whole CTA band-boxed (WW-OCE), at the declared capacity (47 flights/h). Scattered strong thunderstorms over West "
                     "South and Oceanic South. Arrivals: GCRR via TERTO, GMMN via MARJA and SALCA (LoA FL250, "
                     "10 NM in trail).",
         weather=WX_C_MOD,
@@ -1106,7 +1142,7 @@ def c01():
     # BTI8PQ at FL360 crosses SWR34E while SWR34E is descending through it (FL370 -> FL350)
     p, t, alt = meet_alt(scn, "SWR34E", [("DIMSA", "IBLIV")], after=1465)
     scn = set_fl(put(scn, "BTI8PQ", at=p, t=t), "BTI8PQ", 360)
-    return dense(scn, AT.ALL_FLOWS, seed=31)
+    return dense(scn, AT.ALL_FLOWS, seed=31, target=1.02)
 
 
 @scenario
@@ -1114,7 +1150,7 @@ def c02():
     scn = ag(
         "c02_cta_severe_wx",
         title="Whole Agadir CTA, severe squall line, everything at once",
-        description="All four Agadir sectors band-boxed, near capacity. A severe squall line (tops FL450-500) "
+        description="The whole CTA band-boxed (WW-OCE), about 10 % over the declared capacity (47 flights/h). A severe squall line (tops FL450-500) "
                     "stretches from Oceanic South across West South with three gaps. A Royal Moroccan Air Force "
                     "C-130 (state aircraft, not RVSM approved) is southbound on UN857. Arrivals: GCRR via TERTO, "
                     "GMMN via MARJA and SALCA (LoA FL250, 10 NM in trail).",
@@ -1150,7 +1186,197 @@ def c02():
         expected={"passive": {"allow_left_sector": True, "los": True, "pairs": [["DLH512", "EZY39WK"], ["NOZ5KX", "VIPER31"]],
                               "seq_level": True}},
     )
-    return dense(scn, AT.ALL_FLOWS, seed=32)
+    return dense(scn, AT.ALL_FLOWS, seed=32, target=1.12)
+
+
+# =============================================================================================
+# Progression on the real Agadir sectors: one sector at a time, traffic and difficulty rising step by step
+# (density from ~55 % of the declared capacity to ~100 %, complexity 2 to 4), before the band-boxed w*/o*/c*
+# scenarios (WW, OCE, WW-OCE at 100-112 % of capacity, complexity 4-5).
+# =============================================================================================
+@scenario
+def p01():
+    scn = ag(
+        "p01_ws_two_merges",
+        title="Step 1 - West South alone, light traffic, two merges",
+        description="West South (WS) open on its own, traffic about half its declared capacity (43 flights/h). "
+                    "Settled northerly weather, no storms. Southbound Europe-Canaries flows on UN857, the RUNAX "
+                    "standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-NIDEB-ROLRO "
+                    "traffic from the Azores.",
+        control=["WS"], duration_s=2700, complexity=2, weather=wx(NORTHERLY, seed=201),
+        aircraft=[
+            ac("RAM1311", "B738", ["NIPRI", "NIDEB", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPAZ",
+               dest="GMAD"),
+            ac("TAP1478", "A20N", ["TAKAV", "VEDOD", "TERTO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPPT",
+               dest="GCXO"),
+            ac("EXS64M", "B738", UN857, 370, None, at="VEDOD", t=2100, dep="EGCC", dest="GCRR"),
+            ac("TOM3KD", "B38M", ["TAKAV", "VEDOD", "TERTO"], 370, None, at="VEDOD", t=2125, dep="EGGW",
+               dest="GCFV", overflight=True),
+        ],
+        design_notes="Two planted conflicts, each with a single obvious fix: RAM1311 (NIPRI-NIDEB-ROLRO, FL350) "
+                     "crosses TAP1478 (TAKAV-VEDOD, FL350) soon after NIDEB; EXS64M (UN857) and TOM3KD (TAKAV-VEDOD) "
+                     "merge at VEDOD at FL370 25 s apart. A level change or a few degrees of heading solves each.",
+        expected={"passive": {"allow_left_sector": True, "los": True,
+                              "pairs": [["RAM1311", "TAP1478"], ["EXS64M", "TOM3KD"]]}},
+    )
+    return dense(scn, AT.WEST_FLOWS, seed=41, target=0.55)
+
+
+@scenario
+def p02():
+    scn = ag(
+        "p02_wn_merges_and_climbs",
+        title="Step 2 - West North alone, merges at IBALU, a departure climbing",
+        description="West North (WN) open on its own, traffic about two thirds of its declared capacity "
+                    "(58 flights/h). Westerly jet north of the sector, no storms. UN857 and the RUNAX standard route "
+                    "merge at IBALU; Casablanca arrivals via MARJA and SALCA, departures climbing to cruise.",
+        control=["WN"], duration_s=2700, complexity=2, weather=_jet(202),
+        aircraft=[
+            ac("EWG3KP", "A320", STD, 350, None, at="IBALU", t=800, dep="EDDK", dest="GCFV", overflight=True),
+            ac("IBE3247", "A21N", UN857, 350, None, at="IBALU", t=818, dep="LEMD", dest="GCLP", overflight=True),
+            ac("RAM1416", "B738", ["MARJA", "ABODA", "AMSEL"], 260, None, at="MARJA", t=1300, dep="GMMN",
+               dest="LPPT"),
+            ac("CFG7RA", "A321", STD, 330, None, entry=0, dep="EDDF", dest="GCTS", load=0.4),
+        ],
+        requests=[req(1240, "RAM1416", "altitude", 380, "requesting cruise level")],
+        design_notes="EWG3KP (RUNAX standard route) and IBE3247 (UN857) merge at IBALU at FL350 18 s apart. "
+                     "Request trap: GMMN departure RAM1416 asks FL380 and, approved at once, climbs through CFG7RA "
+                     "(RUNAX standard route) where MARJA-ABODA crosses RUNAX-IBALU.",
+        expected={"passive": {"allow_left_sector": True, "los": True, "pairs": [["EWG3KP", "IBE3247"]]},
+                  "naive_approve": {"allow_left_sector": True, "los": True, "pairs": [["CFG7RA", "RAM1416"]]}},
+    )
+    p, t, alt = meet_alt(scn, "RAM1416", [("RUNAX", "IBALU")], after=1240)
+    scn = set_fl(put(scn, "CFG7RA", at=p, t=t), "CFG7RA", parity_level(alt, True))
+    return dense(scn, AT.WEST_FLOWS, seed=42, target=0.68)
+
+
+@scenario
+def p03():
+    scn = ag(
+        "p03_ocn_isolated_storms",
+        title="Step 3 - Oceanic North alone, isolated storms, overtaking and a merge",
+        description="Oceanic North (OCN) open on its own, traffic about 80 % of its declared capacity "
+                    "(56 flights/h). A few isolated moderate storms. Europe-South America traffic on UN866 and UN873, "
+                    "northbound RAD routings SAMAR-BEXAL, SAMAR-TIGGI and VASTO-NIDEB-TIGGI.",
+        control=["ON"], complexity=3, weather=WX_O_LIGHT,
+        aircraft=[
+            ac("AZU8735", "A332", ["SAMAR", "TIGGI"], 380, None, at="TIGGI", t=2200, dep="SBKP", dest="LPPT", load=0.4),
+            ac("VLG6719", "A320", ["VASTO", "NIDEB", "TIGGI"], 380, None, at="TIGGI", t=2222, dep="GCTS", dest="LEBL",
+               load=0.35),
+            ac("AFR442", "A332", UN866, 370, 0.80, at="KUBIL", t=900, dep="LFPG", dest="SBGL", load=0.45),
+            ac("TAM8091", "B77W", UN866, 370, 0.86, at="KUBIL", t=990, dep="LFPG", dest="SBGR", load=0.4),
+            ac("TAP110", "A332", ["SAMAR", "BEXAL"], 340, None, at="BEXAL", t=1300, dep="SBGL", dest="LPPT", load=0.4),
+            ac("KLM799", "B789", UN866, 350, None, entry=0, dep="EHAM", dest="SBGR", load=0.4),
+        ],
+        requests=[req(1230, "TAP110", "altitude", 380, "optimum level")],
+        design_notes="AZU8735 (SAMAR-TIGGI) and VLG6719 (VASTO-NIDEB-TIGGI) merge at TIGGI at FL380 22 s apart; "
+                     "TAM8091 (M.86) catches AFR442 (M.80) on UN866 at FL370, 12 NM behind at KUBIL (the loss comes "
+                     "about 15 minutes later: a sleeper). Request trap: TAP110 (northbound, FL340) asks FL380 when "
+                     "KLM799 is leaving BEXAL southbound at FL350 on the same line. The storms bring a few weather "
+                     "deviation requests.",
+        expected={"passive": {"allow_left_sector": True, "los": True,
+                              "pairs": [["AZU8735", "VLG6719"], ["AFR442", "TAM8091"]]},
+                  "naive_approve": {"allow_left_sector": True, "los": True, "pairs": [["KLM799", "TAP110"]]}},
+    )
+    t, p = when_alt(scn, "TAP110", 35000, after=1230)
+    scn = put(scn, "KLM799", at=on_route(UN866, p), t=t)
+    return dense(scn, AT.OCEANIC_FLOWS, seed=43, target=0.78)
+
+
+@scenario
+def p04():
+    tvf_pt = along_route(UN873, "SAMAR", 20)
+    scn = ag(
+        "p04_ocs_embedded_unable_rvsm",
+        title="Step 4 - Oceanic South alone, embedded storms, an aircraft unable RVSM",
+        description="Oceanic South (OCS) open on its own, traffic about 85 % of its declared capacity "
+                    "(65 flights/h). Embedded thunderstorms (hidden in rain) around MITLA. UN873 and RUNAX-IBALU-SAMAR "
+                    "southbound, SAMAR-BEXAL / SAMAR-TIGGI / VASTO-BAROK northbound.",
+        control=["OS"], complexity=3, weather=WX_O_EMB,
+        aircraft=[
+            ac("IBE6027", "A333", UN873, 350, None, at="SAMAR", t=1600, dep="LEMD", dest="SBGR", load=0.45),
+            ac("DLH526", "B748", ["RUNAX", "IBALU", "SAMAR"], 350, None, at="SAMAR", t=1615, dep="EDDF", dest="SBGR",
+               load=0.4),
+            ac("TVF7736", "B738", UN873, 370, None, at=tvf_pt, t=2300, dep="LFPO", dest="GVAC"),
+            ac("AVA18", "B788", ["SAMAR", "TIGGI"], 380, None, at=on_route(["SAMAR", "TIGGI"], tvf_pt), t=2300,
+               dep="SKBO", dest="LEMD"),
+        ],
+        events=[{"time": 1800, "callsign": "TVF7736", "type": "rvsm_unable", "reason": "loss of both autopilots"}],
+        design_notes="IBE6027 (UN873) and DLH526 (RUNAX-IBALU-SAMAR) merge at SAMAR at FL350. TVF7736 (UN873, "
+                     "FL370) reports unable RVSM at T+30:00 and passes AVA18 (northbound FL380) 2-3 NM abeam 20 NM "
+                     "before SAMAR: legal with RVSM, a loss of separation without. The embedded cells are hard to see "
+                     "on the composite: use the CAPPI at flight level.",
+        expected={"passive": {"allow_left_sector": True, "los": True,
+                              "pairs": [["DLH526", "IBE6027"], ["AVA18", "TVF7736"]]}},
+    )
+    return dense(scn, AT.OCEANIC_FLOWS, seed=44, target=0.85, scale=1.5)
+
+
+@scenario
+def p05():
+    scn = ag(
+        "p05_ws_storms_arrivals",
+        title="Step 5 - West South alone at capacity, storms, GCRR arrivals, a non-RVSM ferry",
+        description="West South (WS) open on its own, traffic close to its declared capacity (43 flights/h). "
+                    "Scattered strong thunderstorms (tops FL380-450) over the middle of the sector. GCRR arrivals via "
+                    "TERTO (LoA FL250, 10 NM in trail).",
+        control=["WS"], complexity=4, weather=WX_W_MOD,
+        aircraft=[
+            ac("EXS85N", "B738", UN857, 370, None, at="VEDOD", t=2500, dep="EGCC", dest="GCRR"),
+            ac("TOM5QT", "B38M", ["TAKAV", "VEDOD", "TERTO"], 370, None, at="VEDOD", t=2525, dep="EGGW",
+               dest="GCFV", overflight=True),
+            ac("EXS97B", "B738", UN857, 350, None, at="TERTO", t=3000, dep="EGNM", dest="GCRR"),
+            ac("TOM68W", "B38M", ["TAKAV", "VEDOD", "TERTO"], 390, None, at="TERTO", t=3050, dep="EGKK",
+               dest="GCRR"),
+            ac("N227CJ", "C550", ["VASTO", "SULAM", "DIMSA", "IBLIV", "SUNID", "AKUDA"], 280, None, entry=200,
+               dep="GCLP", dest="LPPT", rvsm=False, equipment="SDFGRY/S", remarks="FERRY FLT NON-RVSM"),
+        ],
+        requests=[req(700, "N227CJ", "altitude", 400, "fuel, ferry flight")],
+        design_notes="EXS85N (UN857, GCRR arrival) and TOM5QT (TAKAV-VEDOD) merge at VEDOD at FL370 25 s apart, "
+                     "next to the storms. Two GCRR arrivals reach TERTO 50 s apart at FL350/FL390: FL250 and 10 NM "
+                     "in trail at TERTO (LoA). N227CJ (C550 ferry, not RVSM approved) asks FL400: approving it is an "
+                     "RVSM airspace violation. Weather deviations around the cells add the rest.",
+        expected={"passive": {"allow_left_sector": True, "los": True, "pairs": [["EXS85N", "TOM5QT"]],
+                              "seq_level": True},
+                  "naive_approve": {"allow_left_sector": True, "rvsm_violation": True}},
+    )
+    return dense(scn, AT.WEST_FLOWS, seed=45, target=0.95)
+
+
+@scenario
+def p06():
+    scn = ag(
+        "p06_wn_capacity_sequencing",
+        title="Step 6 - West North alone at capacity, Casablanca sequences, unable RVSM",
+        description="West North (WN) open on its own, traffic at its declared capacity (58 flights/h). Westerly "
+                    "jet. Casablanca arrivals via MARJA and SALCA (LoA FL250, 10 NM in trail), departures climbing, "
+                    "UN857 / RUNAX merging at IBALU, UN858 northbound.",
+        control=["WN"], complexity=4, weather=_jet(206),
+        aircraft=[
+            ac("RYR7HB", "B738", UN858, 380, None, at=AT_BEXAL_UN858, t=1300, dep="GVAC", dest="EGSS"),
+            ac("RAM1219", "B738", ["BEXAL", "IBALU", "SALCA"], 370, None, at=AT_BEXAL_UN858, t=1300, dep="KJFK",
+               dest="GMMX"),
+            ac("RAM781", "B738", ["AMSEL", "ABODA", "MARJA"], 310, None, at="MARJA", t=1900, dep="LFPG",
+               dest="GMMN"),
+            ac("RAM787", "E190", ["AMSEL", "ABODA", "MARJA"], 290, None, at="MARJA", t=1945, dep="LPPT",
+               dest="GMMN"),
+            ac("RAM221", "B788", ["BEXAL", "IBALU", "SALCA"], 370, None, at=AT_BEXAL_UN858, t=700, dep="CYUL",
+               dest="GMMN", load=0.4),
+            ac("BEL5QX", "A332", UN858, 360, None, at=AT_BEXAL_UN858, t=700, dep="GOBD", dest="EBBR", load=0.4),
+        ],
+        requests=[req(560, "RAM221", "altitude", 250, "descent for Casablanca")],
+        events=[{"time": 900, "callsign": "RYR7HB", "type": "rvsm_unable", "reason": "altimeter disagreement"}],
+        design_notes="RYR7HB (northbound UN858, FL380) reports unable RVSM at T+15:00; at T+21:40 it crosses "
+                     "RAM1219 (BEXAL-IBALU-SALCA, FL370): legal with RVSM, a loss without. Two GMMN arrivals reach "
+                     "MARJA 45 s apart: spacing and LoA level. Request trap: RAM221 (SALCA arrival from BEXAL, FL370) "
+                     "asks descent and would go down through BEL5QX (northbound UN858) where the tracks cross.",
+        expected={"passive": {"allow_left_sector": True, "los": True, "pairs": [["RAM1219", "RYR7HB"]],
+                              "seq_level": True},
+                  "naive_approve": {"allow_left_sector": True, "los": True, "pairs": [["BEL5QX", "RAM221"]]}},
+    )
+    p, t, alt = meet_alt(scn, "RAM221", [("SUNID", "AKUDA")], after=560)
+    scn = set_fl(put(scn, "BEL5QX", at=p, t=t), "BEL5QX", parity_level(alt, False))
+    return dense(scn, AT.WEST_FLOWS, seed=46, target=1.0, scale=1.3)
 
 
 AT_BEXAL_UN858 = XA(["BEXAL", "IBALU"], ["AKUDA", "SUNID"])
@@ -1246,6 +1472,14 @@ if __name__ == "__main__":
         done += 1
         s = fn()
         print(f"{s['name']}")
+        s.setdefault("author", "ATC SIM library")
+        if s.get("complexity") is None:
+            s.pop("complexity", None)
+        from atcsim.capacity import traffic_load
+        s["traffic_load"] = traffic_load(s)
+        if s["traffic_load"].get("density"):
+            s["density"] = s["traffic_load"]["density"]
+        print(f"   traffic: {s['traffic_load']}")
         probs = check(s)
         for p in probs:
             print("   !!", p)

@@ -727,12 +727,12 @@
    "PESAS": {
     "coord": "370212N 0072300W",
     "region": "Lisboa/Sevilla",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "PINEK": {
     "coord": "415104N 0083552W",
     "region": "Lisboa/Santiago",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "XERES": {
     "coord": "420126N 0100405W",
@@ -742,32 +742,32 @@
    "GINAS": {
     "coord": "293022N 0130800W",
     "region": "Canarias",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "PEPOM": {
     "coord": "295356N 0125854W",
     "region": "Canarias",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "CANIS": {
     "coord": "275959N 0143853W",
     "region": "Canarias",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "ISORU": {
     "coord": "283737N 0151410W",
     "region": "Canarias",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "GURKA": {
     "coord": "302602N 0155101W",
     "region": "Canarias/Madeira",
-    "source": "AIP Espa\u00f1a ENR 4.4"
+    "source": "AIP España ENR 4.4"
    },
    "FTV": {
     "coord": "282551N 0135152W",
     "region": "Canarias",
-    "source": "AIP Espa\u00f1a AD 2 GCFV (DVOR FTV 114.100)"
+    "source": "AIP España AD 2 GCFV (DVOR FTV 114.100)"
    },
    "ADM": {
     "coord": "301919N 0092300W",
@@ -1481,5 +1481,15 @@
    "GCFV"
   ],
   "_note": "Traffic to these aerodromes descends in or just after the CTA: pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
+ },
+ "capacity_per_hour": {
+  "_note": "Declared sector capacities, Agadir ACC (flights per hour). Keys: controlled sectors, sorted, joined with '+'. WW = West band-boxed (WN+WS), OCE = Oceanic band-boxed (ON+OS = OCN+OCS), WW-OCE = the whole CTA.",
+  "WN+WS": 48,
+  "ON+OS": 51,
+  "WN": 58,
+  "WS": 43,
+  "ON": 56,
+  "OS": 65,
+  "ON+OS+WN+WS": 47
  }
 }

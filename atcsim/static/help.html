@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help</title>
+<link rel="stylesheet" href="/static/app.css">
+<script src="/static/vendor/marked.min.js"></script>
+<style>
+  .docs { display: grid; grid-template-columns: 230px minmax(0, 1fr) 210px; gap: 28px; max-width: 1400px; margin: 0 auto; padding: 18px 20px 80px; }
+  .side { position: sticky; top: 64px; align-self: start; max-height: calc(100vh - 80px); overflow: auto; font-size: 13px; }
+  .side .grp { color: var(--dim); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin: 16px 0 6px; font-weight: 600; }
+  .side a { display: block; padding: 4px 8px; border-radius: 4px; color: var(--text); }
+  .side a.cur { background: #16283a; color: #fff; }
+  .side input { width: 100%; margin-bottom: 4px; }
+  .toc { position: sticky; top: 64px; align-self: start; max-height: calc(100vh - 80px); overflow: auto; font-size: 12px; border-left: 1px solid var(--line); padding-left: 12px; }
+  .toc .t { color: var(--dim); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+  .toc a { display: block; color: var(--dim); padding: 2px 0; } .toc a.h3 { padding-left: 10px; } .toc a.on { color: var(--text); }
+  article { min-width: 0; line-height: 1.6; font-size: 14.5px; }
+  article h1 { font-size: 26px; margin: 4px 0 6px; }
+  article h2 { font-size: 19px; letter-spacing: 0; text-transform: none; color: var(--text); margin: 34px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); display: block; }
+  article h3 { font-size: 15.5px; margin: 24px 0 8px; color: #e3ecf4; }
+  article h4 { font-size: 14px; margin: 18px 0 6px; color: var(--dim); }
+  article p, article li { color: #c9d6e2; }
+  article code { font: 12.5px var(--mono); background: #0f1a24; border: 1px solid #1c2a37; border-radius: 3px; padding: 0 4px; color: #e6d3a3; }
+  article pre { background: #0a131b; border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow: auto; position: relative; }
+  article pre code { background: none; border: 0; padding: 0; color: #d6e2ee; font-size: 12.5px; line-height: 1.5; }
+  article pre .cp { position: absolute; top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; opacity: .6; }
+  article pre:hover .cp { opacity: 1; }
+  article table { margin: 10px 0 16px; display: block; overflow-x: auto; }
+  article th { white-space: nowrap; }
+  article td { vertical-align: top; }
+  article blockquote { margin: 12px 0; padding: 8px 14px; border-left: 3px solid var(--accent); background: #0f1d1a; color: #bfe9d6; border-radius: 0 6px 6px 0; }
+  article blockquote p { margin: 4px 0; color: inherit; }
+  article kbd { font: 12px var(--mono); border: 1px solid #3a4b5c; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #142230; color: #fff; }
+  article hr { border: 0; border-top: 1px solid var(--line); margin: 26px 0; }
+  article a.anchor { opacity: 0; margin-left: 6px; font-size: .8em; } article h2:hover a.anchor, article h3:hover a.anchor { opacity: .6; }
+  mark { background: #6d5a12; color: #fff; padding: 0 2px; border-radius: 2px; }
+  .hits { font-size: 12px; margin: 6px 0 0; } .hits a { font-size: 12px; padding: 3px 8px; } .hits .s { color: var(--dim); display: block; font-size: 11px; }
+  @media (max-width: 1100px) { .docs { grid-template-columns: 210px minmax(0, 1fr); } .toc { display: none; } }
+  @media (max-width: 760px) { .docs { grid-template-columns: 1fr; padding: 12px 16px 60px; } .side { position: static; max-height: none; } }
+</style>
+</head>
+<body>
+<div class="docs">
+  <nav class="side" id="side"><input id="q" placeholder="Search the documentation" autocomplete="off"><div class="hits" id="hits"></div><div id="nav"></div></nav>
+  <article id="doc"><p class="dim">Loading…</p></article>
+  <aside class="toc" id="toc"></aside>
+</div>
+<script src="/static/common.js"></script>
+<script>
+let PAGES = [], CACHE = {};
+const slugOf = () => (location.pathname.split('/')[2] || 'index');
+const idOf = t => t.toLowerCase().replace(/<[^>]+>/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+async function getDoc(slug) {
+  if (!CACHE[slug]) CACHE[slug] = (await api('/api/help/' + slug)).markdown;
+  return CACHE[slug];
+}
+function renderNav(cur) {
+  let html = '', g = null;
+  for (const p of PAGES) {
+    if (p.group !== g) { g = p.group; html += `<div class="grp">${esc(g)}</div>`; }
+    html += `<a href="/help/${p.slug}" data-slug="${p.slug}" class="${p.slug === cur ? 'cur' : ''}">${esc(p.title)}</a>`;
+  }
+  $('#nav').innerHTML = html;
+}
+async function show(slug, hash, push) {
+  const md = await getDoc(slug);
+  if (push) history.pushState(null, '', '/help/' + slug + (hash || ''));
+  const doc = $('#doc');
+  doc.innerHTML = marked.parse(md, { gfm: true });
+  // links between pages: (designer.md#x) -> /help/designer#x
+  doc.querySelectorAll('a[href]').forEach(a => {
+    const h = a.getAttribute('href');
+    const m = h.match(/^([a-z]+)\.md(#.*)?$/);
+    if (m) a.setAttribute('href', '/help/' + m[1] + (m[2] || ''));
+    else if (/^https?:/.test(h)) a.target = '_blank';
+  });
+  const toc = [];
+  doc.querySelectorAll('h2, h3').forEach(h => {
+    h.id = idOf(h.textContent);
+    h.insertAdjacentHTML('beforeend', `<a class="anchor" href="#${h.id}">#</a>`);
+    toc.push(`<a href="#${h.id}" class="${h.tagName.toLowerCase()}">${esc(h.textContent.replace(/#$/, ''))}</a>`);
+  });
+  $('#toc').innerHTML = toc.length ? '<div class="t">On this page</div>' + toc.join('') : '';
+  doc.querySelectorAll('pre').forEach(pre => {
+    const b = document.createElement('button'); b.className = 'small cp'; b.textContent = 'copy';
+    b.onclick = () => { navigator.clipboard && navigator.clipboard.writeText(pre.querySelector('code').innerText); b.textContent = 'copied'; setTimeout(() => b.textContent = 'copy', 1200); };
+    pre.appendChild(b);
+  });
+  const t = PAGES.find(p => p.slug === slug);
+  document.title = (t ? t.title : 'Help') + ' · ATC SIM';
+  renderNav(slug);
+  const target = hash && document.getElementById(decodeURIComponent(hash.slice(1)));
+  if (target) target.scrollIntoView(); else if (push) window.scrollTo(0, 0);
+}
+// search over every page (headings and paragraphs)
+async function search(q) {
+  q = q.trim().toLowerCase();
+  if (q.length < 2) { $('#hits').innerHTML = ''; return; }
+  await Promise.all(PAGES.map(p => getDoc(p.slug)));
+  const out = [];
+  for (const p of PAGES) {
+    let head = p.title, n = 0;
+    for (const line of CACHE[p.slug].split('\n')) {
+      const h = line.match(/^#{2,3}\s+(.*)/); if (h) head = h[1];
+      const i = line.toLowerCase().indexOf(q);
+      if (i >= 0 && n < 4) {
+        n++;
+        const snip = line.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1').replace(/<\/?kbd>/g, '').replace(/[`*|#>]/g, '').trim();
+        const k = snip.toLowerCase().indexOf(q), a = Math.max(0, k - 30);
+        if (k < 0) { n--; continue; }
+        out.push(`<a href="/help/${p.slug}#${idOf(head)}" data-slug="${p.slug}" data-hash="#${idOf(head)}">${esc(head)}<span class="s">${esc(p.title)} · …${esc(snip.slice(a, k))}<mark>${esc(snip.slice(k, k + q.length))}</mark>${esc(snip.slice(k + q.length, k + q.length + 40))}…</span></a>`);
+      }
+    }
+  }
+  $('#hits').innerHTML = out.slice(0, 30).join('') || '<span class="dim">nothing found</span>';
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="/help/"]');
+  if (!a || e.ctrlKey || e.metaKey) return;
+  e.preventDefault();
+  const [path, hash] = a.getAttribute('href').split('#');
+  show(path.split('/')[2] || 'index', hash ? '#' + hash : '', true);
+});
+window.addEventListener('popstate', () => show(slugOf(), location.hash, false));
+let qt = null;
+$('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => search(e.target.value), 200); });
+(async () => {
+  await header('/help');
+  PAGES = await api('/api/help');
+  await show(PAGES.some(p => p.slug === slugOf()) ? slugOf() : 'index', location.hash, false);
+})();
+</script>
+</body>
+</html>

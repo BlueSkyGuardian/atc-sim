@@ -465,7 +465,9 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
                          "provisional_points": sorted(k for k, v in ext.items() if v.get("provisional")),
                          "onward_routes": d.get("onward_routes"),
                          "separation_horizontal_nm": (d.get("separation_minima") or {}).get("horizontal_nm"),
-                         "descent_destinations": (d.get("descent_destinations") or {}).get("aerodromes", [])})
+                         "descent_destinations": (d.get("descent_destinations") or {}).get("aerodromes", []),
+                         "capacity_per_hour": {k: v for k, v in (d.get("capacity_per_hour") or {}).items()
+                                               if not k.startswith("_")}})
     sp.construction_points = cons
     return sp
 

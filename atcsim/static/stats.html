@@ -79,12 +79,18 @@ function controllerPane(Cc, dims) {
     box('cOther', 'Other mistakes', 'area infringements, RVSM, wrong-direction exits, weather penetrations, requests left unanswered') +
     box('cTimes', 'Reaction times', 'seconds to assume an aircraft calling, and to answer a pilot request') +
     box('cDims', 'Your profile', 'average of each dimension over all graded sessions') + `</div>`;
-  h += `<h2>Sessions</h2><div class="card"><table><thead><tr><th>Date</th><th>Exercise</th><th>Instructor</th><th>Hours</th><th>Losses</th><th>Infr.</th><th>Assume (s)</th><th>Requests (s)</th><th>Grade</th></tr></thead><tbody>` +
-    s.slice().reverse().map(x => `<tr><td>${fmtDate(x.date)}</td><td>${esc(x.exercise)} <span class="dim">${esc(x.scenario)}${x.solo ? ' · solo' : ''}</span><br>${scnBadge(x.scenario_info)}</td><td>${esc(x.solo ? '–' : x.instructor)}</td>
+  h += `<h2>Sessions</h2><div class="card"><table><thead><tr><th>Date</th><th>Exercise</th><th>Difficulty</th><th>Instructor</th><th>Hours</th><th>Losses</th><th>Infr.</th><th>Assume (s)</th><th>Requests (s)</th><th>Grade</th></tr></thead><tbody>` +
+    s.slice().reverse().map(x => `<tr><td>${fmtDate(x.date)}</td><td>${esc(x.exercise)} <span class="dim">${esc(x.scenario)}${x.solo ? ' · solo' : ''}</span>${x.scenario_info && x.scenario_info.author ? `<br><span class="dim" style="font-size:11px">by ${esc(x.scenario_info.author)}</span>` : ''}</td>
+      <td style="white-space:nowrap">${difficulty(x.scenario_info)}</td><td>${esc(x.solo ? '–' : x.instructor)}</td>
       <td class="num">${x.sim_hours}</td><td class="num ${x.los ? 'bad' : ''}">${x.los}</td><td class="num">${x.metrics.area_infringements}</td>
       <td class="num">${x.metrics.assume_mean_delay_s ?? '–'}</td><td class="num">${x.metrics.request_mean_response_s ?? '–'}</td><td class="num">${x.grade ?? '–'}</td></tr>`).join('') + `</tbody></table></div>
     <p class="dim" style="font-size:12px">The instructors' written evaluations, and your acknowledgements, are on the home page (Evaluations).</p>`;
   return h;
+}
+function difficulty(i) {        // complexity and density stacked, with the sector load when known
+  if (!i || !i.complexity) return '<span class="dim">–</span>';
+  return `${pips(i.complexity, i.complexity_estimated, 'complexity')}<br>${pips(i.density, i.density_estimated, 'density')}` +
+    (i.load_ratio ? `<br><span class="dim" style="font-size:11px">${esc(i.sector_config || '')} ${Math.round(i.load_ratio * 100)} % of capacity</span>` : '');
 }
 function drawController(Cc, dims) {
   const s = Cc.sessions, labels = s.map((x, i) => `#${i + 1} ${d8(x.date)}`);

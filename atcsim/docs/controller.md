@@ -1,0 +1,273 @@
+# Controller manual
+
+This manual is for the **controller seat** of an exercise. On this seat you have the radar and nothing else, as
+in the ops room: you give clearances on the frequency and enter them in the labels. The aircraft do what the
+pseudo-pilot makes them do. They never react to what you type.
+
+> **The rule of the seat:** what you *say* moves the aircraft (through the pseudo-pilot); what you *enter* informs
+> the system: labels, MTCD, route adherence, OLDI coordination. Enter what you cleared, as you would on a real
+> system.
+
+## Joining an exercise
+
+Your instructor invites you from the user list, or sends you a link (`/join/…`). The exercise then appears on your
+home page under *Your exercises*, with its seat and status. **Open** takes you to the radar.
+
+The microphone needs HTTPS, and the browser asks once for permission. Hold the **space bar** to transmit. It works
+anywhere except inside a text field.
+
+## The radar picture
+
+### Toolbar
+
+The toolbar changes **your view only**, never the simulation:
+
+| Control | What it does |
+|---|---|
+| Weather product and FL | Composite reflectivity, or a CAPPI at a flight level (to see embedded cells at your level) |
+| Tops | Echo tops |
+| Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: restricted / danger areas, airways, RAD routings (dashed, one-way arrows), sector lines with frequencies, point names, history dots |
+| RBL | Range-and-bearing mode (you rarely need it, see [RBL](#range-and-bearing-lines-rbl)) |
+| Reset view | Fit the airspace |
+| **FPL** | The flight-plan list (key <kbd>G</kbd>) |
+| **MTCD** | Medium-term conflict detection on/off (key <kbd>M</kbd>) |
+| **INFO** | Track info window on/off (key <kbd>I</kbd>) |
+| **OLDI** | OLDI messages window (key <kbd>O</kbd>) |
+| **?** | Keyboard shortcuts |
+| UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
+| ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
+
+Map: drag the background to pan, use the wheel to zoom, double-click the background to refit.
+
+### Aircraft states and colours
+
+| State | Look |
+|---|---|
+| Inbound, still with the previous unit | Its own colour, label with *entry point ←previous unit* and the coordinated entry level (`KORNO F350 ←GMMM`) |
+| **Calling** you | White, blinking, `CALL` |
+| **Assumed** (yours) | Green, full label |
+| About to leave (3 min before the exit) | A chevron ahead of the symbol and `XFR →next unit` |
+| Left the sector, still assumed | `DECONTROL →unit` blinking: decontrol it |
+| Decontrolled / other sector's traffic | Grey, short label with a ◇ symbol: callsign, level, type, next unit |
+
+The default colours can all be changed in ⚙ Display.
+
+### The label
+
+```
+NRVSM MTC7'                 ← alerts line (special tracks, MTCD)
+RAM101                      ← callsign
+350↓330 S350 X310 B738      ← current level, arrow, cleared level, Mode S selected level, exit level, type
+451 M78 026›066 H >IBALU    ← ground speed, speed, heading, tags, next point (or the direct entered)
+→LPPC                       ← info line (next unit, coordination, notes)
+```
+
+**Three levels.** Real systems work with three levels, and so does this one:
+
+- **Current level (AFL)**: what the transponder gives (Mode C / Mode S).
+- **Cleared level (CFL)**: what you entered. Until you enter one it is the level coordinated with the previous
+  unit.
+- **Exit level (XFL)**: what you enter for the coordination with the next unit. Left empty, the cleared level is
+  coordinated. The label shows `X310` when an XFL is entered or differs from the CFL. The colour gives its OLDI
+  state: white not yet sent, light blue after the ABI, cyan once coordinated by the ACT. Amber means it breaks the
+  LoA or the semicircular rule, or needs a phone coordination.
+
+The **Mode S selected level** (`S350`) appears in amber when it differs from your CFL. You only get it for aircraft
+with enhanced surveillance. It is how you catch a crew that set the wrong level.
+
+**Line 3** always shows the **present heading**, whether or not a heading was given. A speed or heading that is
+changing shows *current›assigned* (`M78›76`, `026›066`). A yellow **H** means you entered a heading. A yellow
+**WX** (`WXL20`) means you entered a weather deviation. These tags come **only from your entries**: a pilot who
+deviates by himself shows nothing until you enter it. The route-deviation alert shows instead.
+
+**The route stays displayed** while an aircraft is vectored or deviating: a long press on the route value (or key
+<kbd>R</kbd>) draws the flight-plan route from the present position with the minutes to each point, and the
+heading line.
+
+### Alerts line (visual only)
+
+| Tag | Meaning |
+|---|---|
+| `NRVSM` | Not RVSM approved, or unable RVSM (amber inside FL290–410) |
+| `MIL` | Military / state aircraft (formations: `x4` after the callsign) |
+| `NSL` | Non-standard level: against the semicircular rule, or not a flight level |
+| `RDEV` | Route deviation: more than 3 NM off the flight-plan route, or not flying the direct / route you entered, with no heading or WX entered |
+| `LVL` | Level bust: leaving the cleared level, or levelled more than 300 ft from it (red, flashing) |
+| `MTC7'` | Medium-term conflict in 7 minutes (MTCD on) |
+| `COORD` | A change too close to the boundary for an OLDI revision: coordinate by phone |
+
+Alarms at the top of the scope: an amber **STCA** banner per pair predicted to lose separation within 3 minutes,
+and a red flashing **LOSS OF SEPARATION** banner per pair below the minimum (7 NM in the Agadir CTA, 5 NM in the
+training sector; 1000 ft, or 2000 ft for non-RVSM pairs in RVSM airspace, above FL410 and against formations).
+Click a banner to select the aircraft.
+
+## Working with labels: flat buttons
+
+Every value in the label is a **flat button**. It looks like ordinary label text and is underlined when the mouse
+is over it.
+
+| Click on… | Opens |
+|---|---|
+| **Callsign** | Assume / Decontrol, Flight plan, Track info, Type performance, Edit route, Show route, Full menu |
+| **Aircraft type** | The type performance window: type data, speed schedule, assignable Mach / IAS, mass now, and by level at the present weight the speeds, climb rate, idle descent, and whether the level can be reached |
+| **Cleared level** | Levels list, coloured by the level probe (green = no conflict in 20 min, red = conflict, hover for which) |
+| **Exit level** | Levels list with *= CFL* |
+| **Speed** | Mach / IAS values, *SN* (resume normal speed) |
+| **Heading** | Left / right steps, *own navigation* |
+| **Next point** | Directs (points of the route, or any point), *Edit route…*, back to the filed route |
+| **WX** | Weather deviation left / right / either side, with a distance, or clear |
+
+A **long press** on any value opens the **full label menu** with every field together, the level probe and the
+phone-coordination button. A long press on the **route** value shows the route instead. Drag a label to move it
+(a leader line appears), and double-click it to put it back.
+
+Clicking a label or a symbol **selects** the aircraft. The selection drives the keyboard shortcuts and the track
+info window.
+
+### The full label menu
+
+The full menu holds the CFL (with quick levels coloured by the probe), XFL, speed (`M78`, `280`, `SN`), heading,
+direct, weather deviation (`L`, `R`, `L20`, either side) and a free note. **Probe** checks the level, heading or
+direct you typed against the system trajectories before you give it. The coordination part shows the OLDI state
+and, when needed, *✓ coordinated by phone*.
+
+## Assume, transfer, decontrol
+
+- **Assume any track, at any time**: an aircraft calling you, one still with the previous sector (early assume:
+  it then calls already assumed), or one you decontrolled earlier. Use a double-click, *Assume* in the callsign
+  menu, or <kbd>A</kbd>.
+- **Decontrol** with *Decontrol* in the callsign menu, <kbd>U</kbd>, or `CS REL` in a shorthand. An aircraft that
+  leaves the sector stays assumed, with a full label and *DECONTROL →unit* blinking, until you decontrol it. It
+  then turns grey as another sector's traffic.
+- **Re-assume** a decontrolled aircraft: its grey label's callsign is a button with *Assume*.
+
+Losses of separation, area infringements and weather penetrations count only for aircraft on your frequency.
+
+## OLDI coordination
+
+For every aircraft you control, the system coordinates automatically with the unit it goes to next:
+
+| Message | When |
+|---|---|
+| **ABI** (advance boundary information) | 20 min before the coordination point, and again if the exit level changes |
+| **ACT** (activation) | 10 min before: point, estimate and exit level are now binding |
+| **REV** (revision) | After the ACT, when the exit level changes, or the estimate by more than 3 min |
+| **LAM** | The receiving system's acknowledgement of each message, a couple of seconds later |
+
+A change **closer than 3 minutes** to the point is not sent. `COORD` blinks on the label, the OLDI button shows ⚠,
+and the label menu tells you what to coordinate with whom. Phone the unit, then press *✓ coordinated by phone*.
+
+The previous units send their ABI / ACT for traffic coming to you. The inbound label shows the entry point, level
+and unit. The **OLDI window** (<kbd>O</kbd>) lists every message sent and received.
+
+## Tools
+
+### Track info window
+
+Turn it on with *INFO* or <kbd>I</kbd>. It is movable and shows the aircraft under the mouse, else the selected
+one, else the last one under the mouse. Middle-click an aircraft or use 📌 to keep one. It shows the SSR code,
+Mode S address, type, registration, operator, departure → destination, requested level, the current / cleared /
+exit levels with the coordination state, the **Mode S downlinked parameters** when available, the next points,
+the units, the exit point and time, and its alerts.
+
+The Mode S parameters are the selected level, magnetic heading, IAS, Mach, TAS, ground speed, track, vertical
+rate, roll, track rate and pressure setting. You get them for aircraft with enhanced surveillance only (`L`/`H` in
+item 10). Elementary surveillance gives the address only; Mode A/C gives nothing more.
+
+### Flight plans
+
+Every aircraft has an ICAO flight plan, correlated with its track by the SSR code and the Mode S address.
+
+- <kbd>F</kbd> opens the selected aircraft's flight plan. It shows the FPL message, the decoded items, the
+  coordination (entry point / ETO / level / from which unit, exit point / ETO / level / to which unit) and the
+  estimates over the points ahead.
+- <kbd>G</kbd> or *FPL* opens the list of every flight of the session (planned, inbound, calling, assumed,
+  transferred), with filters.
+
+### MTCD (medium-term conflict detection)
+
+Turn it on with the *MTCD* button or <kbd>M</kbd>. It is off by default. MTCD looks **20 minutes** ahead along the
+**system trajectories**: the flight-plan route, or the heading / direct / route you entered, at the system cleared
+level. It warns well before the STCA and finds conflicts you have not yet cleared into.
+
+- The list shows each pair, the time to the conflict, and the minimum distance and level difference.
+- Click a conflict (or select one of its aircraft) to see where both will be when it starts. Drag that label away
+  if it is in the way.
+- The aircraft gets a violet diamond and `MTCn'` in its label.
+
+The **level probe** in the level menus uses the same trajectories: green levels are clear for 20 minutes, red ones
+are not (hover to see with whom).
+
+### Range and bearing lines (RBL)
+
+- **Key <kbd>B</kbd>** with the mouse over an aircraft, a fix, or anywhere in space starts a line there. The line
+  follows the mouse and shows its values. A click (or <kbd>B</kbd> again) places the other end, and <kbd>Esc</kbd>
+  cancels. You need no selection and no button.
+- **Right-drag** from an aircraft or a point to another.
+- Shift-click two aircraft, or click *RBL* and then two ends.
+
+An end snaps to a fix only when you click within 10 px of the fix symbol. A ring shows what it will snap to.
+Otherwise it is the position itself. The label gives the bearing, range and ΔFL, then the **CPA** (closest point
+of approach) distance and time, from straight-line extrapolation of the tracks. The positions at CPA are drawn as
+circles. A fixed point stands still, so the CPA is the aircraft's closest approach to it. The line turns red when
+the CPA is below the minima. Drag an RBL label to move it, right-click it to remove it, use
+<kbd>Delete</kbd> to remove the last line and <kbd>Shift</kbd>+<kbd>Delete</kbd> to remove them all.
+
+### Re-routing
+
+Open the editor with the route value → *Edit route…* or <kbd>E</kbd>. It lists the route from the aircraft
+onwards. Click on the map to insert a point after the highlighted one. Clicking a fix's name or symbol inserts
+the fix. Clicking anywhere else inserts the position itself, named from its coordinates (e.g. `3103N01244W`).
+× removes a point, and you can also type names. *Enter route* puts it in the system: the label's next point, the
+route display, MTCD, route adherence and the estimates all follow it. The pseudo-pilot flies what you said.
+
+### Weather
+
+Use the weather product menu: composite reflectivity, or the **CAPPI at a flight level**. Embedded
+thunderstorms hidden in rain only show clearly on a CAPPI at their level. *Tops* shows echo tops. Aircraft ask for
+deviations by themselves, typically about 60 NM before the weather (*"request heading 170 for 65 miles due
+weather, then direct SAMAR"*), or ask to climb over the tops.
+
+In exercises, aircraft do **not** deviate by themselves. A request you leave unanswered until the weather is
+15 NM ahead is closed as **not answered** and counted as a task not handled. When you approve a deviation, enter
+the **WX** tag, so the system knows the aircraft is dealing with weather and the label does not show `RDEV`.
+
+## Radio and telephone
+
+- **Radio:** hold the **space bar** (outside text fields) or the on-screen button. Everyone in the exercise hears
+  you. The scope shows who is transmitting.
+- **Telephone ☎:** call GMMM, LPPC, GCCC, LECS or MADEIRA. The pseudo-pilots (and instructors) answer as that
+  unit. When they call you, a ringing box shows the unit: answer it. Calls are full duplex until you hang up.
+
+## Keyboard shortcuts
+
+Shortcuts work outside text fields, with or without capitals.
+
+| Key | Action | Key | Action |
+|---|---|---|---|
+| <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> | Next / previous aircraft | <kbd>A</kbd> | Assume |
+| <kbd>C</kbd> or <kbd>L</kbd> | Cleared level menu | <kbd>U</kbd> | Decontrol |
+| <kbd>X</kbd> | Exit level menu | <kbd>F</kbd> | Flight plan |
+| <kbd>H</kbd> | Heading menu | <kbd>G</kbd> | Flight-plan list |
+| <kbd>S</kbd> | Speed menu | <kbd>I</kbd> | Track info window |
+| <kbd>D</kbd> | Direct / route menu | <kbd>O</kbd> | OLDI window |
+| <kbd>W</kbd> | Weather deviation menu | <kbd>M</kbd> | MTCD on/off |
+| <kbd>N</kbd> | Note | <kbd>R</kbd> | Show route |
+| <kbd>E</kbd> | Edit route | <kbd>B</kbd> | RBL from the mouse |
+| <kbd>Delete</kbd> | Remove last RBL (<kbd>Shift</kbd>: all) | <kbd>+</kbd> / <kbd>−</kbd> | Zoom |
+| Arrows | Pan | <kbd>0</kbd> | Reset view |
+| <kbd>Esc</kbd> | Close / cancel / deselect | <kbd>?</kbd> | Help |
+| <kbd>Space</kbd> (held) | Transmit | | |
+
+## After the exercise
+
+- **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your
+  windows, your mouse and clicks, a caption log of your actions) with the frequency and your telephone calls. It
+  appears under *Recordings* on your home page, ready to download.
+- **Evaluation:** your instructor rates you (phraseology, conflict detection, conflict resolution, anticipation and
+  planning, coordination, overall grade). Read it on the home page under *Evaluations*, then acknowledge it with a
+  comment. You rate the pseudo-pilot there too.
+- **Statistics** (*Stats*, *As controller*): losses of separation per session and per hour, your grades over time,
+  other mistakes (infringements, RVSM, wrong-direction exits, weather penetrations, unanswered requests), reaction
+  times, your profile per dimension, and the list of sessions. Each session shows the scenario's **complexity** and
+  **density** as they were when you flew it, so you can see your results against the difficulty.

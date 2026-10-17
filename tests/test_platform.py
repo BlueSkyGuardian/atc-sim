@@ -68,6 +68,15 @@ ok(mine["author"] == "Ina Structor" and mine["complexity"] == 4 and not mine["co
    f"author defaults to the designer, ratings kept: {mine['author']} {mine['complexity']}/{mine['density']}")
 ok(ins.post("/designer/save", json={"scenario": dict(cp, complexity=9), "name": COPY, "overwrite": True}).status_code == 400,
    "complexity outside 1-5 refused")
+# documentation pages
+pages = atc.get("/api/help").json()
+ok({"controller", "pilot", "designer", "weather", "api"} <= {p["slug"] for p in pages}, "documentation index")
+for pg in pages:
+    md = atc.get(f"/api/help/{pg['slug']}").json()["markdown"]
+    ok(md.startswith("# ") and len(md) > 1500, f"doc page {pg['slug']} ({len(md)} chars)")
+ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_redirects=False).status_code == 303,
+   "help pages for signed-in users")
+ok(atc.get("/api/help/nope").status_code == 404, "unknown doc page")
 ins2 = client("ins2@gmail.com")
 boss.patch(f"/api/users/{db.user_by_email('ins2@gmail.com')['id']}", json={"role": "instructor"})
 ok(not any(s["name"] == COPY for s in ins2.get("/api/scenarios").json()), "other instructor does not see it")
