@@ -52,7 +52,7 @@
   </section>
   <section id="scnSec" style="display:none">
     <h2>Scenarios <span class="grow"></span><a href="/designer" style="text-transform:none;letter-spacing:0;font-weight:400">open the designer →</a></h2>
-    <div class="card"><table><thead><tr><th>Scenario</th><th>Airspace</th><th>Access</th><th>Owner</th><th></th></tr></thead><tbody id="scns"></tbody></table></div>
+    <div class="card"><table><thead><tr><th>Scenario</th><th>Author</th><th>Complexity · density</th><th>Airspace</th><th>Access</th><th>Owner</th><th></th></tr></thead><tbody id="scns"></tbody></table></div>
   </section>
 </main>
 <script src="/static/common.js"></script>
@@ -132,7 +132,7 @@ async function refreshThumbs() {
   // controllers / pilots (and instructors invited to someone else's exercise)
   const mine = list.filter(e => e.seat !== 'instructor' || !isInstr());
   $('#mine').style.display = mine.length || !isInstr() ? '' : 'none';
-  $('#mineList').innerHTML = mine.length ? mine.map(e => `<div class="ex"><div class="grow"><b>${esc(e.name)}</b> <span class="dim">· ${esc(e.scenario)} · instructor ${esc(e.instructor)}</span><br>
+  $('#mineList').innerHTML = mine.length ? mine.map(e => `<div class="ex"><div class="grow"><b>${esc(e.name)}</b> <span class="dim">· ${esc(e.scenario)} · instructor ${esc(e.instructor)}</span><br>${scnBadge(e.scenario_info)}<br>
       <span class="dim" style="font-size:12px">your seat: ${SEAT_NAMES[e.seat]} · ${e.live ? (STATUS[e.status] || [e.status])[0] + ' · T+' + fmtT(e.sim_time_s) : e.status}</span></div>
       ${e.live ? `<a href="/x/${e.id}"><button class="primary">Open</button></a>` : ''}</div>`).join('')
     : '<div class="ex empty">No exercise yet. Your instructor invites you, or sends you a link.</div>';
@@ -141,7 +141,7 @@ async function refreshThumbs() {
 // ------------------------------------------------------------ new exercise
 function newExercise() {
   modal(`<h3>New exercise</h3>
-    <label class="f">Scenario</label><select id="nxScn">${scenarios.map(s => `<option value="${s.name}">${esc(s.name)} — ${esc(s.title || '')}</option>`).join('')}</select>
+    <label class="f">Scenario</label><select id="nxScn">${scenarios.map(s => `<option value="${s.name}">${esc(s.name)} — ${esc(s.title || '')} (C${s.complexity}${s.complexity_estimated ? '~' : ''} D${s.density}${s.density_estimated ? '~' : ''})</option>`).join('')}</select>
     <label class="f">Name (what the trainees see)</label><input id="nxName" placeholder="e.g. Lesson 4 – crossing traffic">
     <p class="dim" style="font-size:12px">The simulation starts paused. Invite a controller and a pseudo-pilot from the exercise page (from the user list, or by sending them a link), then press Run.</p>
     <div class="row"><button class="primary" id="nxGo">Create</button><span class="msg" id="nxMsg"></span></div>`, (m, close) => {
@@ -158,6 +158,8 @@ function newExercise() {
 async function loadScenarios() {
   scenarios = await api('/api/scenarios');
   $('#scns').innerHTML = scenarios.map(s => `<tr><td><b>${esc(s.name)}</b><br><span class="dim" style="font-size:12px">${esc(s.title || '')}</span></td>
+    <td>${esc(s.author || (s.library ? 'library' : ''))}</td>
+    <td>${scnBadge(s, false)}<br><span class="dim" style="font-size:11px">${s.aircraft_per_hour} aircraft/h · ${Math.round((s.duration_s || 0) / 60)} min</span></td>
     <td class="dim">${esc(s.airspace || '')}</td>
     <td>${s.access === 'write' ? '<span class="ok">read/write</span>' : '<span class="dim">read-only</span>'}</td>
     <td class="dim">${s.library ? 'library' : esc(s.owner.name)}${s.shares && s.shares.length ? `<br><span style="font-size:11px">shared with ${s.shares.map(x => esc(x.first_name + ' ' + x.last_name) + (x.perm === 'write' ? ' (rw)' : '')).join(', ')}</span>` : ''}</td>
@@ -223,7 +225,7 @@ async function loadEvals(force) {
   $('#evalPending').innerHTML = EV.pending.map((p, i) => `<div class="todo-ev"><span class="grow"><b>Evaluate ${esc(p.ratee)}</b> (${p.role})
       <span class="dim">· ${esc(p.exercise)} · ${esc(p.scenario)} · ${fmtDate(p.date)}</span></span><button class="primary" data-ev="${i}">Evaluate</button></div>`).join('');
   $$('[data-ev]').forEach(b => b.onclick = () => evalForm(EV.pending[+b.dataset.ev]));
-  const card = (r, mine) => `<div class="card ev"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span></span>
+  const card = (r, mine) => `<div class="card ev"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span> ${scnBadge(r.scenario_info)}</span>
       <span class="dim">${mine ? 'from ' + esc(r.rater) : 'to ' + esc(r.ratee)} · ${r.kind === 'atc' ? 'controller' : 'pseudo-pilot'} evaluation</span></div>
       <div class="sc">${dimsOf(r.kind).map(d => `<span>${d.label} <b>${r.scores[d.key]}/5</b></span>`).join('')}<span>Overall <b>${r.grade}/5</b> <span class="warn">${stars(r.grade)}</span></span></div>
       ${r.comment ? `<div class="cm">${esc(r.comment)}</div>` : ''}

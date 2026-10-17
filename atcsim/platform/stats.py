@@ -54,7 +54,7 @@ def pending_for(u: dict) -> List[dict]:
         for m in db.members(e["id"]):
             if m["seat"] == "atc" and not db.q1("SELECT 1 FROM evaluations WHERE exercise_id=? AND kind='atc' AND "
                                                 "rater_id=? AND ratee_id=?", (e["id"], u["id"], m["user_id"])):
-                out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "date": e["ended_at"],
+                out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "scenario_info": db.scenario_info(e), "date": e["ended_at"],
                             "kind": "atc", "ratee_id": m["user_id"], "ratee": f"{m['first_name']} {m['last_name']}".strip(),
                             "role": "controller"})
     for e in db.q("SELECT e.* FROM exercises e JOIN exercise_members m ON m.exercise_id=e.id WHERE m.user_id=? AND "
@@ -63,7 +63,7 @@ def pending_for(u: dict) -> List[dict]:
             if m["seat"] == "pilot" and m["user_id"] != u["id"] and not db.q1(
                     "SELECT 1 FROM evaluations WHERE exercise_id=? AND kind='pilot' AND rater_id=? AND ratee_id=?",
                     (e["id"], u["id"], m["user_id"])):
-                out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "date": e["ended_at"],
+                out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "scenario_info": db.scenario_info(e), "date": e["ended_at"],
                             "kind": "pilot", "ratee_id": m["user_id"], "ratee": f"{m['first_name']} {m['last_name']}".strip(),
                             "role": "pseudo-pilot"})
     return out
@@ -71,7 +71,7 @@ def pending_for(u: dict) -> List[dict]:
 
 def _eval_row(r: dict) -> dict:
     e = db.exercise(r["exercise_id"]) or {}
-    return {"id": r["id"], "exercise_id": r["exercise_id"], "exercise": e.get("name"), "scenario": e.get("scenario"),
+    return {"id": r["id"], "exercise_id": r["exercise_id"], "exercise": e.get("name"), "scenario": e.get("scenario"), "scenario_info": db.scenario_info(e) if e else {},
             "date": e.get("ended_at") or r["created_at"], "kind": r["kind"], "rater": _name(r["rater_id"]),
             "ratee": _name(r["ratee_id"]), "scores": json.loads(r["scores"]), "grade": r["grade"],
             "comment": r["comment"], "created_at": r["created_at"], "ack_at": r["ack_at"], "ack_comment": r["ack_comment"]}
@@ -160,7 +160,7 @@ def controller_sessions(uid: int, instructor: Optional[int] = None) -> List[dict
             continue                                    # ended before statistics existed, or after a restart
         g = _grade(e["id"], "atc", uid)
         h = _hours(e)
-        out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "date": e["ended_at"],
+        out.append({"exercise_id": e["id"], "exercise": e["name"], "scenario": e["scenario"], "scenario_info": db.scenario_info(e), "date": e["ended_at"],
                     "solo": e.get("multi") == 0, "instructor": _name(e["instructor_id"]), "sim_hours": h,
                     "los": m.get("los_events", 0), "los_per_hour": round(m.get("los_events", 0) / h, 2) if h > 0.05 else None,
                     "metrics": m, "grade": g["grade"] if g else None, "scores": g["scores"] if g else None})

@@ -97,6 +97,8 @@ def scenarios(request: Request):
         if acc is None:
             continue
         meta = _scn_meta(s["name"])
+        if not s.get("author"):
+            s["author"] = meta["owner"]["name"] if meta["owner"] else None
         out.append({**s, "access": acc, **meta,
                     "shares": db.shares(s["name"]) if (meta["owner"] and meta["owner"]["id"] == u["id"])
                     or u["role"] == "admin" else []})
@@ -196,7 +198,7 @@ def _summary(e: dict, u: dict, with_picture: bool = False) -> dict:
            "ended_at": e["ended_at"], "seat": seat_for(e["id"], u), "members": db.members(e["id"]),
            "instructor": db.public_user(db.user_by_id(e["instructor_id"]) or {
                "id": 0, "email": "?", "first_name": "", "last_name": "", "licence": "", "role": "", "active": 0})["name"],
-           "live": s is not None}
+           "live": s is not None, "scenario_info": db.scenario_info(e)}
     from . import comms
     room = comms.hub.rooms.get(e["id"])
     out["online"] = [{"name": c.name, "seat": c.seat, "ptt": c.ptt} for c in room.conns.values()] if room else []
@@ -266,9 +268,10 @@ def register(s, u: dict, name: str, multi: bool = True) -> None:
     """Record a simulator session as an exercise of this instructor; start its radio/phone room and recording."""
     from . import recorder
     s.multi = multi
-    db.x("INSERT INTO exercises (id, name, scenario, instructor_id, created_at, atc_token, pilot_token, observer_token) "
-         "VALUES (?,?,?,?,?,?,?,?)", (s.id, name, s.scenario_name, u["id"], time.time(),
-                                      secrets.token_urlsafe(12), secrets.token_urlsafe(12), secrets.token_urlsafe(12)))
+    db.x("INSERT INTO exercises (id, name, scenario, instructor_id, created_at, atc_token, pilot_token, observer_token, "
+         "scn_info) VALUES (?,?,?,?,?,?,?,?,?)", (s.id, name, s.scenario_name, u["id"], time.time(),
+                                                 secrets.token_urlsafe(12), secrets.token_urlsafe(12),
+                                                 secrets.token_urlsafe(12), db.dumps(db.scenario_snapshot(s.scenario_name))))
     if multi:
         recorder.start(s.id, s, name)
 

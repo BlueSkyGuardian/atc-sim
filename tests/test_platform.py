@@ -57,6 +57,17 @@ raw = ins.get("/scenarios/s01_basic_crossing/raw").json()
 raw.pop("_access", None)
 ok(ins.post("/designer/save", json={"scenario": raw, "name": "s01_basic_crossing", "overwrite": True}).status_code == 403,
    "library scenario cannot be overwritten")
+# author, complexity, density: set in the designer (the author defaults to whoever saves), else estimated
+s01 = next(s for s in lib if s["name"] == "s01_basic_crossing")
+ok(s01["complexity_estimated"] and 1 <= s01["complexity"] <= 5 and 1 <= s01["density"] <= 5, f"library: estimated ratings {s01['complexity']}/{s01['density']}")
+cp = ins.get(f"/scenarios/{COPY}/raw").json(); cp.pop("_access", None); cp.pop("author", None)
+cp.update(complexity=4, density=2)
+ok(ins.post("/designer/save", json={"scenario": cp, "name": COPY, "overwrite": True}).status_code == 200, "designer saves ratings")
+mine = next(s for s in ins.get("/api/scenarios").json() if s["name"] == COPY)
+ok(mine["author"] == "Ina Structor" and mine["complexity"] == 4 and not mine["complexity_estimated"] and mine["density"] == 2,
+   f"author defaults to the designer, ratings kept: {mine['author']} {mine['complexity']}/{mine['density']}")
+ok(ins.post("/designer/save", json={"scenario": dict(cp, complexity=9), "name": COPY, "overwrite": True}).status_code == 400,
+   "complexity outside 1-5 refused")
 ins2 = client("ins2@gmail.com")
 boss.patch(f"/api/users/{db.user_by_email('ins2@gmail.com')['id']}", json={"role": "instructor"})
 ok(not any(s["name"] == COPY for s in ins2.get("/api/scenarios").json()), "other instructor does not see it")
@@ -109,6 +120,7 @@ ok(atc.post(f"/sessions/{eid}/assume/{cs}").status_code == 200, "controller can 
 lst = ins.get("/api/exercises?pictures=true").json()
 ok(lst[0]["id"] == eid and "picture" in lst[0] and lst[0]["status"] == "running", "dashboard: picture and status")
 ok(atc.get("/api/exercises").json()[0]["seat"] == "atc", "controller's exercise list")
+ok(atc.get("/api/exercises").json()[0]["scenario_info"].get("complexity") in range(1, 6), "controller's list shows the scenario's complexity")
 
 # voice
 frame = bytes(np.full(640, 0x10, np.uint8))           # some mu-law samples

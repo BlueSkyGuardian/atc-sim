@@ -95,7 +95,7 @@ def conn() -> sqlite3.Connection:
                     _conn.execute(f"ALTER TABLE recordings ADD COLUMN {col}")
                 except sqlite3.OperationalError:
                     pass
-            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1"):   # added with the statistics
+            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT"):   # added with the statistics
                 try:
                     _conn.execute(f"ALTER TABLE exercises ADD COLUMN {col}")
                 except sqlite3.OperationalError:
@@ -200,6 +200,32 @@ def members(eid: str) -> List[dict]:
 def add_member(eid: str, uid: int, seat: str) -> None:
     x("INSERT OR REPLACE INTO exercise_members (exercise_id, user_id, seat, added_at) VALUES (?,?,?,?)",
       (eid, uid, seat, time.time()))
+
+
+def scenario_info(e: dict) -> dict:
+    """The scenario's title, author, complexity and density as they were when the exercise was run (older
+    exercises: the scenario as it is now)."""
+    import json as _json
+    if e.get("scn_info"):
+        try:
+            return _json.loads(e["scn_info"])
+        except ValueError:
+            pass
+    return scenario_snapshot(e.get("scenario", ""))
+
+
+def scenario_snapshot(name: str) -> dict:
+    from ..scenario import load_scenario, ratings, ScenarioError
+    try:
+        s = load_scenario(name)
+    except (ScenarioError, OSError, ValueError):
+        return {}
+    r = ratings(s)
+    if not r["author"]:
+        m = q1("SELECT u.first_name, u.last_name FROM scenario_meta s JOIN users u ON u.id=s.owner_id WHERE s.name=?", (name,))
+        r["author"] = f"{m['first_name']} {m['last_name']}".strip() if m else None
+    r["title"] = s.get("title", "")
+    return r
 
 
 def dumps(o) -> str:

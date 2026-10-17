@@ -268,7 +268,15 @@ def save(name: str, scn: dict, overwrite: bool = False) -> dict:
         raise ScenarioError(c["error"])
     out = dict(scn)
     out["name"] = name
-    order = ["name", "title", "description", "design_notes", "airspace", "control", "duration_s", "pilot_delay_s",
+    for k in ("complexity", "density"):                        # 1-5, or not set (estimated from the content)
+        v = out.get(k)
+        if v in (None, ""):
+            out.pop(k, None)
+        elif not (isinstance(v, (int, float)) and 1 <= int(v) <= 5):
+            raise ScenarioError(f"{k}: 1 to 5")
+        else:
+            out[k] = int(v)
+    order = ["name", "title", "author", "complexity", "density", "description", "design_notes", "airspace", "control", "duration_s", "pilot_delay_s",
              "weather", "areas", "aircraft", "requests", "events", "expected"]
     out = {**{k: out[k] for k in order if k in out}, **{k: v for k, v in out.items() if k not in order}}
     with open(p, "w") as f:

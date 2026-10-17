@@ -126,6 +126,9 @@
         <div class="grid">
           <label>name</label><input id="f-name" placeholder="lower_case_name">
           <label>title</label><input id="f-title">
+          <label>author</label><input id="f-author" placeholder="you (when saved)">
+          <label>complexity</label><span><select id="f-cplx"><option value="">not set — estimate</option><option value="1">1 — very low</option><option value="2">2 — low</option><option value="3">3 — moderate</option><option value="4">4 — high</option><option value="5">5 — very high</option></select> <span class="c-dim" id="f-cplxe"></span></span>
+          <label>traffic density</label><span><select id="f-dens"><option value="">not set — estimate</option><option value="1">1 — very low</option><option value="2">2 — low</option><option value="3">3 — moderate</option><option value="4">4 — high</option><option value="5">5 — very high</option></select> <span class="c-dim" id="f-dense"></span></span>
           <label>airspace</label><span id="f-asp" style="font-family:var(--mono)"></span>
           <label>duration</label><span><input id="f-dur" type="number" step="60" style="width:90px"> s</span>
           <label>pilot delay</label><span><input id="f-pd" type="number" step="1" style="width:90px"> s</span>
@@ -272,6 +275,9 @@ function renderScenarioForm() {
   const set = (id, v) => { const el = $(id); if (el !== act) el.value = v == null ? '' : v; };
   set('#f-name', scn.name); set('#f-title', scn.title); set('#f-desc', scn.description); set('#f-notes', scn.design_notes);
   set('#f-dur', scn.duration_s); set('#f-pd', scn.pilot_delay_s ?? 4); set('#f-utc', scn.start_utc || ''); set('#f-sep', (scn.separation || {}).horizontal_nm ?? '');
+  set('#f-author', scn.author || ''); set('#f-cplx', scn.complexity || ''); set('#f-dens', scn.density || '');
+  const est = estimateRatings(scn);
+  $('#f-cplxe').textContent = `estimate ${est.complexity}/5`; $('#f-dense').textContent = `estimate ${est.density}/5 · ${est.perH} aircraft/h`;
   $('#f-sepd').textContent = `airspace default ${scn.airspace === 'agadir' ? 7 : 5} NM`;
   $('#f-asp').textContent = `${scn.airspace || 'training'}${scn.control ? ' · ' + [].concat(scn.control).join('+') : ''}`;
   const w = scn.weather;
@@ -286,6 +292,19 @@ function renderScenarioForm() {
 const bindField = (id, fn, recompile = true) => $(id).addEventListener('change', e => { if (!scn) return; snapshot(); fn(e.target.value); changed(recompile); });
 bindField('#f-name', v => scn.name = v.trim(), false);
 bindField('#f-title', v => scn.title = v, false);
+bindField('#f-author', v => { v = v.trim(); if (v) scn.author = v; else delete scn.author; }, false);
+bindField('#f-cplx', v => { if (v) scn.complexity = +v; else delete scn.complexity; }, false);
+bindField('#f-dens', v => { if (v) scn.density = +v; else delete scn.density; }, false);
+// same estimate as the server (scenario.ratings): shown next to the selectors, used when they are not set
+function estimateRatings(s) {
+  const n = (s.aircraft || []).length, dur = +s.duration_s || 3600, perH = n / Math.max(dur / 3600, 0.25);
+  const density = 1 + [10, 25, 50, 100].filter(t => perH >= t).length;
+  const w = s.weather || {}, conv = w.convection;
+  const c0 = Array.isArray(conv) ? conv[0] : conv, has = c0 && (!c0.regime || c0.regime !== 'none');
+  const wx = (has ? ({ light: 0.5, moderate: 1.2, severe: 2 }[c0.intensity] ?? 1) : 0) + ((w.cells || []).length ? 1 : 0);
+  const score = 0.6 * density + 0.25 * (s.requests || []).length + 0.6 * (s.areas || []).length + 0.5 * (s.events || []).length + wx;
+  return { complexity: Math.max(1, Math.min(5, Math.round(score))), density, perH: Math.round(perH) };
+}
 bindField('#f-desc', v => scn.description = v, false);
 bindField('#f-notes', v => scn.design_notes = v, false);
 bindField('#f-dur', v => scn.duration_s = Math.max(300, +v || 1800));

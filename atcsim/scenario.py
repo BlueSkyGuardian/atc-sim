@@ -71,6 +71,40 @@ class ScenarioError(ValueError):
     pass
 
 
+LEVELS = {1: "very low", 2: "low", 3: "moderate", 4: "high", 5: "very high"}
+
+
+def ratings(s: dict) -> dict:
+    """Author, complexity and traffic density (1-5) set by the designer; when not set, an estimate from the content
+    (aircraft per hour; requests, areas, events, weather) marked estimated."""
+    n, dur = len(s.get("aircraft", [])), float(s.get("duration_s") or 3600)
+    per_h = n / max(dur / 3600.0, 0.25)
+    dens_est = 1 + sum(per_h >= t for t in (10, 25, 50, 100))
+    wx = s.get("weather") or {}
+    conv = wx.get("convection") or {}
+    if isinstance(conv, list):                                   # the designer keeps a list of patterns
+        conv = conv[0] if conv else {}
+    if conv.get("regime") == "none":
+        conv = {}
+    wx_pts = ({"light": 0.5, "moderate": 1.2, "severe": 2.0}.get(conv.get("intensity"), 1.0) if conv else 0) + (1.0 if wx.get("cells") else 0)
+    score = 0.6 * dens_est + 0.25 * len(s.get("requests", [])) + 0.6 * len(s.get("areas", [])) \
+        + 0.5 * len(s.get("events", [])) + wx_pts
+    cplx_est = max(1, min(5, int(round(score))))
+    out = {"author": (s.get("author") or "").strip() or None}
+    for k, est in (("complexity", cplx_est), ("density", dens_est)):
+        v = s.get(k)
+        try:
+            v = int(v) if v not in (None, "") else None
+        except (TypeError, ValueError):
+            v = None
+        if v is not None and 1 <= v <= 5:
+            out[k], out[k + "_estimated"] = v, False
+        else:
+            out[k], out[k + "_estimated"] = est, True
+    out["aircraft_per_hour"] = round(per_h)
+    return out
+
+
 def list_scenarios(directory: str = SCENARIO_DIR) -> List[dict]:
     out = []
     for fn in sorted(os.listdir(directory)):
@@ -82,7 +116,7 @@ def list_scenarios(directory: str = SCENARIO_DIR) -> List[dict]:
                             "description": s.get("description", ""), "aircraft": len(s.get("aircraft", [])),
                             "requests": len(s.get("requests", [])), "areas": len(s.get("areas", [])),
                             "airspace": s.get("airspace", "training"), "control": s.get("control"),
-                            "duration_s": s.get("duration_s")})
+                            "duration_s": s.get("duration_s"), **ratings(s)})
             except Exception as e:  # pragma: no cover
                 out.append({"name": fn[:-5], "error": str(e)})
     return out

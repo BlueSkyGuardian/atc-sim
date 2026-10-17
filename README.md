@@ -669,6 +669,7 @@ Agents never see future requests.
 ```json
 {
   "name": "...", "title": "...", "description": "shown to agents", "design_notes": "the trap (hidden)",
+  "author": "who designed it", "complexity": 3, "density": 4,
   "duration_s": 1500, "pilot_delay_s": 4,
   "weather": {
     "seed": 31,
@@ -715,6 +716,14 @@ works as for the pilots' own weather requests.
 - **Mass:** `load` (0–1 between OEW and MTOW) or `mass_kg`.
 
 ---
+
+### Author, complexity, traffic density
+
+`author` (by default the person who saves it in the designer), `complexity` and `density` (1 very low … 5 very high) are
+set in the designer. When a rating is not set, it is estimated from the content (aircraft per hour for the density;
+density, requests, areas, events and weather for the complexity) and shown with a `~`. They appear in the instructors'
+and admins' scenario list, and on every exercise: each exercise keeps the values the scenario had when it was run, shown
+in the controller's exercise list, statistics (sessions table) and evaluations.
 
 ## Scenario library
 

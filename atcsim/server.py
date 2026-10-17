@@ -246,6 +246,9 @@ def designer_save(body: DesignerBody, request: Request):
     from . import designer
     body.scenario.pop("_access", None)
     name = body.name or body.scenario.get("name", "")
+    u = _user(request)
+    if not (body.scenario.get("author") or "").strip():               # the designer who saves it, by default
+        body.scenario["author"] = f"{u.get('first_name', '')} {u.get('last_name', '')}".strip() or u.get("email", "")
     if designer.NAME_RE.match(name or ""):
         pex.check_scenario_write(name, _user(request))
     try:

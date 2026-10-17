@@ -13,6 +13,21 @@ const post = (p, b) => api(p, { method: 'POST', body: JSON.stringify(b || {}) })
 const fmtT = s => { s = Math.max(0, Math.round(s || 0)); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60;
   return (h ? h + ':' + String(m).padStart(2, '0') : String(m).padStart(2, '0')) + ':' + String(x).padStart(2, '0'); };
 const fmtDate = t => t ? new Date(t * 1000).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
+// scenario complexity / traffic density (1-5) as five pips; "~" = estimated (not set by the designer)
+const LEVEL_NAMES = ['', 'very low', 'low', 'moderate', 'high', 'very high'];
+function pips(v, est, what) {
+  if (!v) return '';
+  const col = ['', '#4caf7a', '#8bc34a', '#e0b84a', '#e8873a', '#e05252'][v];
+  return `<span class="pips" title="${what}: ${LEVEL_NAMES[v]} (${v}/5)${est ? ' — estimated from the content, not set by the designer' : ''}" style="white-space:nowrap">` +
+    `<span style="opacity:.75">${what}</span> ` + [1, 2, 3, 4, 5].map(i => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:2px;background:${i <= v ? col : '#33404d'}"></span>`).join('') +
+    `${est ? '<span style="opacity:.6">~</span>' : ''}</span>`;
+}
+function scnBadge(i, withAuthor = true) {
+  if (!i) return '';
+  const parts = [pips(i.complexity, i.complexity_estimated, 'complexity'), pips(i.density, i.density_estimated, 'density')];
+  if (withAuthor && i.author) parts.push(`<span style="opacity:.75">by</span> ${esc(i.author)}`);
+  return `<span class="scnb dim" style="font-size:11px;display:inline-flex;gap:10px;flex-wrap:wrap;align-items:center">${parts.filter(Boolean).join('')}</span>`;
+}
 const ROLE_NAMES = { admin: 'Administrator', instructor: 'Instructor', atc: 'Controller', pilot: 'Pseudo-pilot' };
 const SEAT_NAMES = { instructor: 'Instructor', atc: 'Controller', pilot: 'Pseudo-pilot' };
 let ME = null;
