@@ -292,6 +292,14 @@ with sync_playwright() as p:
         atc.evaluate(f"assume('{inb}')")
         atc.wait_for_function(f"() => (state.aircraft.find(a => a.callsign === '{inb}') || {{}}).assumed", timeout=10000)
         ok(True, f"assumes {inb} before it calls (early assume)")
+    # key B over an aircraft: the line follows the mouse, a click places it
+    n0 = atc.evaluate("rbls.length")
+    bp = atc.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
+        c = cv.getBoundingClientRect(), d = devicePixelRatio; return [c.left + x / d, c.top + y / d]; }}""")
+    if atc.evaluate(f"document.elementFromPoint({bp[0]}, {bp[1]}) === cv"):
+        atc.evaluate("document.activeElement && document.activeElement.blur()")
+        atc.mouse.move(*bp); atc.keyboard.press("b"); atc.mouse.move(bp[0] - 120, bp[1] + 80, steps=5); atc.mouse.down(); atc.mouse.up()
+        ok(atc.evaluate("rbls.length") == n0 + 1 and atc.evaluate("rbls[rbls.length - 1].a") == calling, "B over an aircraft: RBL from it, placed by a click")
     # RBL by right-drag (no button), then its label moved
     n0 = atc.evaluate("rbls.length")
     ap = atc.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),

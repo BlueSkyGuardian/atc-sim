@@ -316,7 +316,7 @@
     ['Tab / Shift+Tab', 'next / previous aircraft (calling first)'],
     ['C or L', 'cleared level of the selected aircraft'], ['X', 'exit level (XFL)'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct / route'], ['W', 'weather deviation (WX tag)'], ['N', 'note (full menu)'],
     ['E', 'edit its route (re-routing)'], ['A', 'assume the selected aircraft'], ['U', 'decontrol it'], ['F', 'its flight plan'], ['I', 'track info window'],
-    ['R', 'show its route for 8 s'], ['B', 'range/bearing line from it (then click the other end)'],
+    ['R', 'show its route for 8 s'], ['B', 'range/bearing line from the aircraft or point under the mouse; it follows the mouse, click (or B) to place it'],
     ['right-drag', 'range/bearing line between two aircraft or points'], ['Delete', 'remove the last RBL (Shift+Delete: all)'],
     ['G', 'flight plan list'], ['M', 'MTCD on / off'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
     ['Space (hold)', 'transmit on the frequency'], ['Esc', 'close the menu / windows, cancel'], ['?', 'this help'],
@@ -367,6 +367,7 @@
     if (low === 'm' && SEAT !== 'pilot') { setMtcd(!mtcdOn); return; }
     if (low === 'o') { toggleOldi(); return; }
     if (low === 'i') { toggleInfo(); return; }
+    if (low === 'b') { rblFromKey(); return; }          // RBL from the aircraft / point under the mouse
     if (!cs) return;
     const field = { c: 'cfl', l: 'cfl', x: 'xfl', h: 'hdg', s: 'spd', d: 'route', w: 'wx', n: 'note' }[low];
     if (field) {
@@ -381,6 +382,5 @@
     if (low === 'f') { openFpl(cs); return; }
     if (low === 'e') { if (window.editRoute) editRoute(cs); return; }
     if (low === 'r') { routeShow = routeShow && routeShow.cs === cs ? null : { cs, until: performance.now() + 8000 }; return; }
-    if (low === 'b') { setRblMode(true); rblPick(cs); return; }
   });
 })();

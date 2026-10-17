@@ -259,7 +259,7 @@
       <div class="bar"><div class="fill" id="busyF"></div></div><div class="e"><span id="busyE"></span><span id="busyH"></span></div></div></div>
     <canvas id="tl" style="position:absolute;left:0;right:0;bottom:28px;height:46px;width:100%;cursor:pointer"></canvas>
     <div id="tltip" style="position:absolute;display:none;background:#0b1016ee;border:1px solid #1f2b38;padding:3px 6px;font:11px ui-monospace,monospace;color:#c9d6e2;pointer-events:none;white-space:nowrap"></div>
-    <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · right-drag between two aircraft / points for an RBL, drag its label to move it, right-click it to remove · hover a label (or middle-click) for the extended label · ? for shortcuts</span></div>
+    <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · right-drag between two aircraft / points (or B over one) for an RBL, drag its label to move it, right-click it to remove · I: track info · ? for shortcuts</span></div>
   </div>
   <aside>
     <nav id="asideTabs" class="ex-only instr-only"><button data-t="pilot">✈ Aircraft</button><button data-t="exercise">Exercise</button><button data-t="monitor">Monitor</button></nav>
@@ -915,6 +915,9 @@ function fitView() {
   }
   view.cx = home.cx; view.cy = home.cy; userZoom = 1;
 }
+// keep the HUD, alarms and panels below the toolbar when it wraps onto a second line (narrow windows)
+setInterval(() => { const vb = document.getElementById('viewbar'); if (!vb) return; const t = vb.offsetTop + vb.offsetHeight + 6 + 'px';
+  for (const id of ['hud', 'alerts', 'dispPanel']) { const el = document.getElementById(id); if (el && el.style.top !== t) el.style.top = t; } }, 500);
 function setZoom(z) { userZoom = Math.max(0.3, Math.min(20, z)); const sl = document.getElementById('dpZoom'); if (sl) sl.value = Math.log(userZoom); }
 cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(userZoom * (e.deltaY < 0 ? 1.1 : 0.9)); }, { passive: false });
 // labels: offsets in CSS px per callsign; rectangles of the last frame for hit testing
@@ -942,7 +945,24 @@ function fieldAt(e) {
 }
 window.fieldAt = fieldAt;
 let rblDrag = null;                                  // right-drag: a range/bearing line from one end to the other
+// key B: a range/bearing line from where the mouse is (the aircraft under it, a fix within 10 px, or the position);
+// it follows the mouse with its bearing, range and CPA, and is placed by a click (or B again); Esc cancels
+function rblFromKey() {
+  if (rblDrag && rblDrag.key) { finishKeyRbl(mouseCv); return; }
+  let from = mouseCv ? rblTargetAt(mouseCv) : (selected || null);
+  if (!from) return;
+  const cur = mouseCv || (() => { const a = shown && shown.aircraft.concat(shown.transferred || []).find(x => x.callsign === from); return a ? toPx(a.x_nm, a.y_nm) : [0, 0]; })();
+  rblDrag = { from, cur, moved: true, key: true };
+}
+window.rblFromKey = rblFromKey;
+function finishKeyRbl(q) {
+  const d0 = rblDrag; rblDrag = null;
+  if (!d0 || !q) return;
+  const t = rblTargetAt(q);
+  if (t && !sameEnd(d0.from, t)) addRbl(d0.from, t);
+}
 cv.addEventListener('mousedown', e => {
+  if (rblDrag && rblDrag.key) { e.preventDefault(); if (e.button === 0) finishKeyRbl(canvasPt(e)); else rblDrag = null; return; }
   if (e.button === 2) { e.preventDefault(); rblDrag = { from: rblTarget(e), x: e.clientX, y: e.clientY, cur: canvasPt(e), moved: false }; return; }
   if (e.button === 1) { e.preventDefault(); const l = labelAt(e), cs = l ? l.cs : nearestAircraft(e);   // middle click: info window on it
     if (cs && window.pinInfo) pinInfo(cs); return; }
@@ -984,7 +1004,7 @@ window.addEventListener('mouseup', e => {
 });
 window.addEventListener('mousemove', e => {
   mouseCv = e.target === cv ? canvasPt(e) : null;
-  if (rblDrag) { rblDrag.cur = canvasPt(e); if (Math.abs(e.clientX - rblDrag.x) + Math.abs(e.clientY - rblDrag.y) > 6) rblDrag.moved = true; return; }
+  if (rblDrag) { if (e.target === cv || !rblDrag.key) rblDrag.cur = canvasPt(e); if (!rblDrag.key && Math.abs(e.clientX - rblDrag.x) + Math.abs(e.clientY - rblDrag.y) > 6) rblDrag.moved = true; return; }
   if (!drag) {
     const l = e.target === cv ? labelAt(e) : null, f = l ? fieldAt(e) : null;
     hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
@@ -1115,7 +1135,7 @@ function setRblMode(on) {
 }
 $('#rblBtn').onclick = () => setRblMode(!rblMode);
 $('#rblClear').onclick = () => { rbls.length = 0; setRblMode(false); };
-window.addEventListener('keydown', e => { if (e.key === 'Escape') setRblMode(false); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape') { setRblMode(false); if (rblDrag && rblDrag.key) rblDrag = null; } });
 const endName = t => typeof t === 'string' ? t : (t.name || `${t.x.toFixed(0)},${t.y.toFixed(0)}`);
 const sameEnd = (p, q) => typeof p === 'string' ? p === q : typeof q !== 'string' && Math.hypot(p.x - q.x, p.y - q.y) < 0.2;
 function rblTarget(e) { return rblTargetAt(canvasPt(e)); }

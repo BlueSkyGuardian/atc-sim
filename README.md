@@ -120,14 +120,15 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     gets a violet diamond and `MTCn'` in its label.
   - **Long press** on a label (or an aircraft, or key **R**): its flight-plan route from the present position — also
     while vectored or deviating, with the heading line — every point with the minutes to it.
-  - **RBL:** right-drag from an aircraft or any point to another (no button needed), or shift-click two, or the RBL
-    button. An end snaps to a fix only when the click is within 10 px of the fix symbol (a ring shows what it snaps
+  - **RBL:** right-drag from an aircraft or any point to another (no button needed); or press **B** with the mouse
+    over an aircraft, a fix or anywhere in space: the line starts there and follows the mouse, a click (or B again)
+    places its other end, Esc cancels; or shift-click two, or the RBL button. An end snaps to a fix only when the click is within 10 px of the fix symbol (a ring shows what it snaps
     to). While dragging, the line already shows bearing, range, ΔFL and the CPA. A point stands still: the CPA is the aircraft's closest approach to it. Drag
     an RBL label to move it; right-click it to remove it.
   - **Keyboard** (outside text fields; capitals or not): Tab / Shift+Tab next aircraft, C or L cleared level,
     X exit level, H heading, S speed, D direct / route, W weather deviation (each opens that value's menu), N note,
     E edit route, A assume, U decontrol, I track info, O OLDI, F flight plan, R route, B RBL
-    from it, Delete last RBL (Shift+Delete all), G flight list, M MTCD, + / − zoom, arrows pan, 0 reset, Esc,
+    from the mouse, Delete last RBL (Shift+Delete all), G flight list, M MTCD, + / − zoom, arrows pan, 0 reset, Esc,
     ? help; Space (held) transmits.
   - **⚙ Display:** zoom, label font, point-name font, aircraft symbol, speed vector length, history dots, weather
     opacity, and the colours of the scope (background, boundaries, sector lines, airways, RAD, points, aerodromes…),
