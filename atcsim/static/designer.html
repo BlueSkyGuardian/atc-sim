@@ -214,10 +214,11 @@ const undoStack = [], redoStack = [];
 const AIRLINES = ['RAM', 'AFR', 'IBE', 'EZY', 'RYR', 'TAP', 'DLH', 'BAW', 'KLM', 'TVF', 'VLG', 'TOM', 'EXS', 'SWR', 'BEL', 'NAX'];
 const DEFAULT_WIND = [[0, 0.25], [100, 0.5], [200, 0.75], [300, 0.95], [350, 1], [400, 0.85], [500, 0.5]];
 
-function snapshot() { undoStack.push(JSON.stringify(scn)); if (undoStack.length > 80) undoStack.shift(); redoStack.length = 0; }
-function changed(recompile = true) { renderScenarioForm(); renderSel(); if (recompile) scheduleCompile(); scheduleWx(); }
-function undo() { if (!undoStack.length) return; redoStack.push(JSON.stringify(scn)); scn = JSON.parse(undoStack.pop()); fixSel(); changed(); }
-function redo() { if (!redoStack.length) return; undoStack.push(JSON.stringify(scn)); scn = JSON.parse(redoStack.pop()); fixSel(); changed(); }
+let scnVersion = 0;                       // bumped by every edit: preview runs are only shown for the version they flew
+function snapshot() { scnVersion++; undoStack.push(JSON.stringify(scn)); if (undoStack.length > 80) undoStack.shift(); redoStack.length = 0; }
+function changed(recompile = true) { renderScenarioForm(); renderSel(); renderPreview(); if (recompile) scheduleCompile(); scheduleWx(); }
+function undo() { if (!undoStack.length) return; scnVersion++; redoStack.push(JSON.stringify(scn)); scn = JSON.parse(undoStack.pop()); fixSel(); changed(); }
+function redo() { if (!redoStack.length) return; scnVersion++; undoStack.push(JSON.stringify(scn)); scn = JSON.parse(redoStack.pop()); fixSel(); changed(); }
 function fixSel() {
   if (!sel) return;
   if (sel.kind === 'ac' && !scn.aircraft.some(a => a.callsign === sel.cs)) sel = null;
@@ -450,7 +451,9 @@ async function runPreview(policy) {
   $('#pvState').textContent = `running ${policy}…`;
   const t0 = performance.now();
   try {
+    const v = scnVersion;
     const r = await api('/designer/preview', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario(), policy }) });
+    r._v = v;
     if (!r.ok) { $('#pvState').innerHTML = `<span class="c-los">${esc(r.error)}</span>`; return; }
     prev[policy] = r; $('#showPreview').checked = true; previewPolicy = policy;
     $('#pvState').textContent = `${policy} done in ${((performance.now() - t0) / 1000).toFixed(1)} s`;
@@ -458,10 +461,14 @@ async function runPreview(policy) {
   renderPreview();
 }
 let previewPolicy = 'passive';
+// a preview run is drawn only while the scenario is the one it flew; after any edit the planned trajectories show
+// again (otherwise a dragged aircraft seems to jump back to where the old run had it)
+function pvShown() { const r = prev[previewPolicy]; return $('#showPreview').checked && r && r._v === scnVersion ? r : null; }
 function renderPreview() {
   const out = [];
   for (const [pol, r] of Object.entries(prev)) {
     if (!r) continue;
+    if (r._v !== scnVersion) { out.push(`<div style="margin:6px 0 2px"><b>${pol}</b> <span class="c-warn">out of date: the scenario changed since this run — run it again</span></div>`); continue; }
     out.push(`<div style="margin:6px 0 2px"><b>${pol}</b> ${r.losses.length ? `<span class="c-los">${r.losses.length} losses</span>` : '<span class="c-ok">no loss</span>'}</div>`);
     for (const l of r.losses) out.push(`<div class="item c-los" data-t="${l.start_s}" data-cs="${l.aircraft[0]}">${fmtT(l.start_s)} ${l.aircraft.join(' × ')} min ${l.min_nm} NM / ${l.min_ft} ft</div>`);
     for (const q of r.scenario_requests || []) out.push(`<div class="item" data-t="${q[0]}" data-cs="${q[1]}">${fmtT(q[0])} ${esc(q[2])} <span class="c-dim">→ ${q[3]}</span></div>`);
@@ -522,7 +529,7 @@ function trackPos(tr, t) {           // preview tracks: [t, x, y, fl, on_freq]
            trk: (Math.atan2(b[1] - a[1], b[2] - a[2]) * 180 / Math.PI + 360) % 360, onf: a[4] };
 }
 function positionsAt(t) {
-  const out = [], g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  const out = [], g = lastGoodComp, pv = pvShown();
   if (!g) return out;
   for (const [cs, info] of Object.entries(g.aircraft)) {
     let p = null;
@@ -534,7 +541,7 @@ function positionsAt(t) {
 }
 
 function posOf(cs, t) {
-  const g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  const g = lastGoodComp, pv = pvShown();
   if (!g || !g.aircraft[cs]) return null;
   if (pv && pv.tracks) return trackPos(pv.tracks[cs], t);
   const p = planPos(g.plans[cs], t); if (p) p.fl = g.aircraft[cs].fl; return p;
@@ -1003,10 +1010,10 @@ function draw() {
   // traffic at T
   const pos = positionsAt(T), byCs = Object.fromEntries(pos.map(p => [p.cs, p]));
   const conflicts = new Set(), confLines = [];
-  if (lastGoodComp && !($('#showPreview').checked && prev[previewPolicy])) for (const k of lastGoodComp.planned_conflicts) {
+  if (lastGoodComp && !(pvShown())) for (const k of lastGoodComp.planned_conflicts) {
     if (T >= k.start_s - 120 && T <= k.end_s + 30 && byCs[k.aircraft[0]] && byCs[k.aircraft[1]]) { k.aircraft.forEach(c => conflicts.add(c)); confLines.push(k); }
   }
-  const pv = $('#showPreview').checked && prev[previewPolicy];
+  const pv = pvShown();
   if (pv) for (const l of pv.losses) if (T >= l.start_s - 60 && T <= (l.end_s || l.start_s) + 10 && byCs[l.aircraft[0]] && byCs[l.aircraft[1]]) { l.aircraft.forEach(c => conflicts.add(c)); confLines.push(l); }
   for (const k of confLines) { const A = byCs[k.aircraft[0]], B = byCs[k.aircraft[1]], [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y), d = dist([A.x, A.y], [B.x, B.y]);
     ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = dpr; ctx.setLineDash([4 * dpr, 3 * dpr]); ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
@@ -1085,7 +1092,7 @@ function drawTimeline() {
   // lanes
   const ctx2 = tctx; ctx2.setTransform(dpr, 0, 0, dpr, 0, 0); ctx2.clearRect(0, 0, Wc, Hc);
   tlHits = [];
-  const g = lastGoodComp, pv = $('#showPreview').checked && prev[previewPolicy];
+  const g = lastGoodComp, pv = pvShown();
   const confBy = {};
   if (g) for (const k of g.planned_conflicts) for (const c of k.aircraft) (confBy[c] = confBy[c] || []).push(k);
   const lossBy = {};
@@ -1181,7 +1188,7 @@ window.addEventListener('mousemove', e => {
     else if (h.kind === 'sched') scn.areas[h.i].schedule[h.k].time = Math.max(0, scn.areas[h.i].schedule[h.k].time + dt);
   } else if (tdrag.kind === 'bar') {
     const a = scn.aircraft.find(q => q.callsign === tdrag.cs);
-    if (a.reach) a.reach.time += dt; else if (a.entry_time != null) a.entry_time += dt;
+    if (a.reach) a.reach.time += dt; else if (a.start) a.start.time += dt; else if (a.entry_time != null) a.entry_time += dt;
     const g = lastGoodComp; if (g && g.plans[a.callsign]) { for (const q of g.plans[a.callsign]) q[0] += dt; const i = g.aircraft[a.callsign]; for (const f of ['appear_s', 'entry_s', 'exit_s']) if (i[f] != null) i[f] += dt; }
   }
   renderSel();
