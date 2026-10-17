@@ -127,7 +127,14 @@ window.addEventListener('popstate', () => show(slugOf(), location.hash, false));
 let qt = null;
 $('#q').addEventListener('input', e => { clearTimeout(qt); qt = setTimeout(() => search(e.target.value), 200); });
 (async () => {
-  await header('/help');
+  // public page: the full header for signed-in users, a sign-in link otherwise
+  const me = await fetch('/api/me', { credentials: 'same-origin' }).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (me) await header('/help');
+  else {
+    const h = document.createElement('header'); h.className = 'top';
+    h.innerHTML = `<div class="brand">ATC <span>SIM</span></div><nav><a href="/help" class="cur">Help</a></nav><div class="who"><a href="/login"><button class="small primary">Sign in</button></a></div>`;
+    document.body.prepend(h);
+  }
   PAGES = await api('/api/help');
   await show(PAGES.some(p => p.slug === slugOf()) ? slugOf() : 'index', location.hash, false);
 })();

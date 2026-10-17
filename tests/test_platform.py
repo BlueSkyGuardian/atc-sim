@@ -74,8 +74,9 @@ ok({"controller", "pilot", "designer", "weather", "api"} <= {p["slug"] for p in 
 for pg in pages:
     md = atc.get(f"/api/help/{pg['slug']}").json()["markdown"]
     ok(md.startswith("# ") and len(md) > 1500, f"doc page {pg['slug']} ({len(md)} chars)")
-ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_redirects=False).status_code == 303,
-   "help pages for signed-in users")
+ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_redirects=False).status_code == 200
+   and anon.get("/help/api").status_code == 200 and anon.get("/api/help/controller").status_code == 200,
+   "help pages are public")
 ok(atc.get("/api/help/nope").status_code == 404, "unknown doc page")
 ins2 = client("ins2@gmail.com")
 boss.patch(f"/api/users/{db.user_by_email('ins2@gmail.com')['id']}", json={"role": "instructor"})

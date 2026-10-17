@@ -19,7 +19,7 @@ python run.py                      # listens on 0.0.0.0:8000, prints the LAN add
 
 **Documentation:** the app has a *Help* menu (`/help`) with the user manuals (controller, pseudo-pilot,
 instructor / admin), the scenario designer and JSON format, the scenario library, the weather and aircraft models
-and the API reference. The pages are Markdown files in `atcsim/docs/`.
+and the API reference. The pages are Markdown files in `atcsim/docs/`, public (no sign-in needed).
 
 Open `http://<machine-ip>:8000/` and sign in (without a Google client configured, a test login asks only for an
 e-mail address; the first account is administrator). `/radar` is the single-user radar of the earlier versions and

@@ -65,21 +65,18 @@ DOC_PAGES = [  # (slug, title, group)
 @router.get("/help", include_in_schema=False)
 @router.get("/help/{slug}", include_in_schema=False)
 def help_page(request: Request, slug: str = "index"):
-    require_user(request)
     return page("help.html")
 
 
 @router.get("/api/help")
 def help_index(request: Request):
     """The documentation pages (for the /help reader)."""
-    require_user(request)
     return [{"slug": s, "title": t, "group": g} for s, t, g in DOC_PAGES]
 
 
 @router.get("/api/help/{slug}")
 def help_doc(slug: str, request: Request):
     """One documentation page, as Markdown."""
-    require_user(request)
     if slug not in {s for s, _, _ in DOC_PAGES}:
         raise HTTPException(404, "no such page")
     with open(os.path.join(DOCS_DIR, slug + ".md"), encoding="utf-8") as f:
