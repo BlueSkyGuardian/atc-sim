@@ -906,6 +906,8 @@ atcsim/static/stats.html, vendor/chart.umd.min.js   statistics charts (Chart.js 
 atcsim/capacity.py               declared sector capacities, traffic load of a scenario, density bands
 atcsim/docs_gen.py               generated documentation: reference tables, reference.json, scenario JSON Schema
 atcsim/docs/*.md, static/help.html, vendor/marked.min.js   in-app documentation (Markdown, rendered with marked 12, MIT)
+atcsim/static/docs/*.jpg         screenshots in the manuals (python tools/doc_screenshots.py <server>: three browsers through an exercise)
+atcsim/static/login.html, landing3d.js, vendor/three.module.min.js   sign-in page with the 3D Agadir CTA (three.js 0.160, MIT)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)
 scenarios/*.json                 scenario library
 tools/build_scenarios.py         scenario generator + trap/solution verification (python tools/build_scenarios.py a02 s16 ...)

@@ -22,6 +22,8 @@ the traps bite.
   entry to its exit, and is grey before the entry. The vertical line is the **cursor time**.
 - **Side panel**: the **Scenario**, **Selected** and **Check & preview** tabs.
 
+![The designer: map in the centre, timeline below, the Scenario / Selected / Check & preview tabs on the right](/static/docs/d_designer.jpg "The designer: map in the centre, timeline below, the Scenario / Selected / Check & preview tabs on the right")
+
 Timeline controls: use the wheel to move the cursor, <kbd>Ctrl</kbd>+wheel to zoom, and <kbd>Shift</kbd>+wheel to
 scroll the lanes. **▶** plays at the chosen speed (×10–×120). Markers: ◆ the aircraft's timing point, ● pilot
 requests (L level, D direct, S speed), ■ RVSM events. A red underline marks a planned conflict, a white one a loss
@@ -94,6 +96,8 @@ Then its **events**: *unable RVSM*, *RVSM restored*. Cells, rain areas and areas
 
 After every edit the server rebuilds the scenario (half a second later) and reports:
 
+![Check & preview after a naive-approve run: planned conflicts, then the losses and requests of the run, with the real trajectories on the map](/static/docs/d_check.jpg "Check & preview after a naive-approve run: planned conflicts, then the losses and requests of the run, with the real trajectories on the map")
+
 - **errors**: the scenario cannot be built (unknown point, route never entering the controlled area…);
 - **warnings**: semicircular rule, one-way airways flown backwards, entry-only / exit-only points misused,
   non-RVSM aircraft in RVSM airspace, a level above the aircraft's maximum;
@@ -135,6 +139,8 @@ traffic load. Fix the timings until the conflict is where you want it, then **Sa
 2. **Transform it** with your tool. Some examples follow.
 3. **Paste or import** it back (**{ } JSON** / **⤒ Import**), read the check, run the previews, **Save** under a new
    name.
+
+![The { } JSON editor: the whole scenario as JSON, to edit, paste or copy](/static/docs/d_json.jpg "The { } JSON editor: the whole scenario as JSON, to edit, paste or copy")
 
 Shift every flight and request by two minutes with `jq`:
 

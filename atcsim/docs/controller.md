@@ -13,10 +13,15 @@ pseudo-pilot makes them do. They never react to what you type.
 Your instructor invites you from the user list, or sends you a link (`/join/…`). The exercise then appears on your
 home page under *Your exercises*, with its seat and status. **Open** takes you to the radar.
 
+![Your exercises on the home page: Open takes you to the radar](/static/docs/c_home.jpg "Your exercises on the home page: Open takes you to the radar")
+
 The microphone needs HTTPS, and the browser asks once for permission. Hold the **space bar** to transmit. It works
 anywhere except inside a text field.
 
 ## The radar picture
+
+
+![The controller seat: the whole window is the radar. Toolbar at the top, information box top left, alarms at the top centre, the push-to-talk hint and the telephone at the bottom](/static/docs/c_radar.jpg "The controller seat: the whole window is the radar. Toolbar at the top, information box top left, alarms at the top centre, the push-to-talk hint and the telephone at the bottom")
 
 ### Toolbar
 
@@ -50,6 +55,8 @@ Map: drag the background to pan, use the wheel to zoom, double-click the backgro
 | Left the sector, still assumed | `DECONTROL →unit` blinking: decontrol it |
 | Decontrolled / other sector's traffic | Grey, short label with a ◇ symbol: callsign, level, type, next unit |
 
+![An aircraft calling you: white, blinking, CALL next to the callsign](/static/docs/c_calling.jpg "An aircraft calling you: white, blinking, CALL next to the callsign")
+
 The default colours can all be changed in ⚙ Display.
 
 ### The label
@@ -61,6 +68,8 @@ RAM101                      ← callsign
 451 M78 026›066 H >IBALU    ← ground speed, speed, heading, tags, next point (or the direct entered)
 →LPPC                       ← info line (next unit, coordination, notes)
 ```
+
+![An assumed label: NRVSM alert, callsign, current level 280, exit level X280, type, then ground speed, IAS, heading changing 032›062 with the yellow H and WXL tags entered by the controller, and the next unit](/static/docs/c_label.jpg "An assumed label: NRVSM alert, callsign, current level 280, exit level X280, type, then ground speed, IAS, heading changing 032›062 with the yellow H and WXL tags entered by the controller, and the next unit")
 
 **Three levels.** Real systems work with three levels, and so does this one:
 
@@ -106,6 +115,12 @@ Click a banner to select the aircraft.
 Every value in the label is a **flat button**. It looks like ordinary label text and is underlined when the mouse
 is over it.
 
+![A click on the callsign: assume or decontrol, flight plan, track info, type performance, route](/static/docs/c_callsign_menu.jpg "A click on the callsign: assume or decontrol, flight plan, track info, type performance, route")
+
+![A click on the cleared level: the level list, coloured by the probe (green: no conflict in 20 minutes, red: conflict)](/static/docs/c_level_menu.jpg "A click on the cleared level: the level list, coloured by the probe (green: no conflict in 20 minutes, red: conflict)")
+
+![A click on the aircraft type: its performance at the present weight, level by level](/static/docs/c_type.jpg "A click on the aircraft type: its performance at the present weight, level by level")
+
 | Click on… | Opens |
 |---|---|
 | **Callsign** | Assume / Decontrol, Flight plan, Track info, Type performance, Edit route, Show route, Full menu |
@@ -131,6 +146,8 @@ direct, weather deviation (`L`, `R`, `L20`, either side) and a free note. **Prob
 direct you typed against the system trajectories before you give it. The coordination part shows the OLDI state
 and, when needed, *✓ coordinated by phone*.
 
+![The full label menu (long press on a value): every field, the coordination state, the probe](/static/docs/c_full_menu.jpg "The full label menu (long press on a value): every field, the coordination state, the probe")
+
 ## Assume, transfer, decontrol
 
 - **Assume any track, at any time**: an aircraft calling you, one still with the previous sector (early assume:
@@ -146,6 +163,8 @@ Losses of separation, area infringements and weather penetrations count only for
 ## OLDI coordination
 
 For every aircraft you control, the system coordinates automatically with the unit it goes to next:
+
+![The OLDI window (key O): every message sent and received, with the receiving system's acknowledgement](/static/docs/c_oldi.jpg "The OLDI window (key O): every message sent and received, with the receiving system's acknowledgement")
 
 | Message | When |
 |---|---|
@@ -170,6 +189,8 @@ Mode S address, type, registration, operator, departure → destination, request
 exit levels with the coordination state, the **Mode S downlinked parameters** when available, the next points,
 the units, the exit point and time, and its alerts.
 
+![Track info window for an aircraft with Mode S enhanced surveillance: levels, downlinked parameters, route and transfer](/static/docs/c_track_info.jpg "Track info window for an aircraft with Mode S enhanced surveillance: levels, downlinked parameters, route and transfer")
+
 The Mode S parameters are the selected level, magnetic heading, IAS, Mach, TAS, ground speed, track, vertical
 rate, roll, track rate and pressure setting. You get them for aircraft with enhanced surveillance only (`L`/`H` in
 item 10). Elementary surveillance gives the address only; Mode A/C gives nothing more.
@@ -177,6 +198,10 @@ item 10). Elementary surveillance gives the address only; Mode A/C gives nothing
 ### Flight plans
 
 Every aircraft has an ICAO flight plan, correlated with its track by the SSR code and the Mode S address.
+
+![The flight-plan window (key F): the ICAO message, the decoded items, the coordination and the estimates](/static/docs/c_fpl.jpg "The flight-plan window (key F): the ICAO message, the decoded items, the coordination and the estimates")
+
+![The flight-plan list (key G): every flight of the session, with filters](/static/docs/c_flight_list.jpg "The flight-plan list (key G): every flight of the session, with filters")
 
 - <kbd>F</kbd> opens the selected aircraft's flight plan. It shows the FPL message, the decoded items, the
   coordination (entry point / ETO / level / from which unit, exit point / ETO / level / to which unit) and the
@@ -189,6 +214,8 @@ Every aircraft has an ICAO flight plan, correlated with its track by the SSR cod
 Turn it on with the *MTCD* button or <kbd>M</kbd>. It is off by default. MTCD looks **20 minutes** ahead along the
 **system trajectories**: the flight-plan route, or the heading / direct / route you entered, at the system cleared
 level. It warns well before the STCA and finds conflicts you have not yet cleared into.
+
+![MTCD on: the conflict list (top left), the violet diamonds and MTCn' tags, and where both aircraft will be when the conflict starts](/static/docs/c_mtcd.jpg "MTCD on: the conflict list (top left), the violet diamonds and MTCn' tags, and where both aircraft will be when the conflict starts")
 
 - The list shows each pair, the time to the conflict, and the minimum distance and level difference.
 - Click a conflict (or select one of its aircraft) to see where both will be when it starts. Drag that label away
@@ -206,6 +233,8 @@ are not (hover to see with whom).
 - **Right-drag** from an aircraft or a point to another.
 - Shift-click two aircraft, or click *RBL* and then two ends.
 
+![Key B over an aircraft: the line follows the mouse and already shows bearing, range and the closest point of approach](/static/docs/c_rbl.jpg "Key B over an aircraft: the line follows the mouse and already shows bearing, range and the closest point of approach")
+
 An end snaps to a fix only when you click within 10 px of the fix symbol. A ring shows what it will snap to.
 Otherwise it is the position itself. The label gives the bearing, range and ΔFL, then the **CPA** (closest point
 of approach) distance and time, from straight-line extrapolation of the tracks. The positions at CPA are drawn as
@@ -220,6 +249,8 @@ onwards. Click on the map to insert a point after the highlighted one. Clicking 
 the fix. Clicking anywhere else inserts the position itself, named from its coordinates (e.g. `3103N01244W`).
 × removes a point, and you can also type names. *Enter route* puts it in the system: the label's next point, the
 route display, MTCD, route adherence and the estimates all follow it. The pseudo-pilot flies what you said.
+
+![The route editor (key E): the route ahead as a list; click on the map to insert a fix or a position](/static/docs/c_route_editor.jpg "The route editor (key E): the route ahead as a list; click on the map to insert a fix or a position")
 
 ### Weather
 
@@ -239,9 +270,13 @@ the **WX** tag, so the system knows the aircraft is dealing with weather and the
 - **Telephone ☎:** call GMMM, LPPC, GCCC, LECS or MADEIRA. The pseudo-pilots (and instructors) answer as that
   unit. When they call you, a ringing box shows the unit: answer it. Calls are full duplex until you hang up.
 
+![An adjacent unit calling you: answer or decline](/static/docs/c_phone_ringing.jpg "An adjacent unit calling you: answer or decline")
+
 ## Keyboard shortcuts
 
 Shortcuts work outside text fields, with or without capitals.
+
+![The shortcuts window (key ?)](/static/docs/c_shortcuts.jpg "The shortcuts window (key ?)")
 
 | Key | Action | Key | Action |
 |---|---|---|---|
@@ -271,3 +306,7 @@ Shortcuts work outside text fields, with or without capitals.
   other mistakes (infringements, RVSM, wrong-direction exits, weather penetrations, unanswered requests), reaction
   times, your profile per dimension, and the list of sessions. Each session shows the scenario's **complexity** and
   **density** as they were when you flew it, so you can see your results against the difficulty.
+
+![The instructor's evaluation on your home page, to acknowledge with a comment](/static/docs/c_evaluation.jpg "The instructor's evaluation on your home page, to acknowledge with a comment")
+
+![Your statistics: losses per session, grades, other mistakes, reaction times, profile, and every session with its difficulty](/static/docs/c_stats.jpg "Your statistics: losses per session, grades, other mistakes, reaction times, profile, and every session with its difficulty")

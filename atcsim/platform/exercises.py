@@ -63,6 +63,32 @@ DOC_PAGES = [  # (slug, title, group)
 ]
 
 
+_LANDING = None
+
+
+@router.get("/api/landing", include_in_schema=False)
+def landing_geometry():
+    """Public: the Agadir CTA drawn behind the sign-in page (outline, sector lines, routes, points)."""
+    global _LANDING
+    if _LANDING is None:
+        from .. import airspace as asp_mod
+        a = asp_mod.get("agadir")
+        d = a.describe()
+        rnd = lambda p: [round(p[0], 1), round(p[1], 1)]
+        wps = {n: rnd(p) for n, p in a.waypoints.items()
+               if not n.startswith("@") and not a.point_info.get(n, {}).get("external")}
+        routes = [v["points"] for v in a.airways.values()] + (a.notes.get("rad_routes") or []) + \
+                 (a.notes.get("standard_routes") or [])
+        _LANDING = {"outline": [rnd(p) for p in d["outline"]],
+                    "sectors": [{"id": s["id"], "name": s["name"], "polygon": [rnd(p) for p in s["polygon"]]}
+                                for s in d["sectors"]],
+                    "airways": [{"points": v["points"], "one_way": bool(v.get("one_way"))} for v in a.airways.values()],
+                    "rad": a.notes.get("rad_routes") or [],
+                    "routes": [[n for n in r if n in wps] for r in routes],
+                    "points": wps}
+    return _LANDING
+
+
 @router.get("/help", include_in_schema=False)
 @router.get("/help/{slug}", include_in_schema=False)
 def help_page(request: Request, slug: str = "index"):

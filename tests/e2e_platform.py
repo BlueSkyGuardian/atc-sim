@@ -346,12 +346,15 @@ with sync_playwright() as p:
     atc.screenshot(path=f"{OUT}/07h_rbl_drag.png")
     check_key_rbl(pil, "pilot")
     # the pilot selects the aircraft on the radar: the keyboard stays free for the space bar (no jump into the shorthand)
+    pil.evaluate(f"(() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'); setZoom(5); view.cx = a.x_nm; view.cy = a.y_nm; }})()")
+    pil.wait_for_timeout(300)                       # zoomed in on it: no other aircraft under the click
     pp = pil.evaluate(f"""() => {{ const a = state.aircraft.find(x => x.callsign === '{calling}'), [x, y] = toPx(a.x_nm, a.y_nm),
         c = cv.getBoundingClientRect(), d = devicePixelRatio; return [c.left + x / d, c.top + y / d]; }}""")
     if pil.evaluate(f"document.elementFromPoint({pp[0]}, {pp[1]}) === cv"):
         pil.mouse.click(*pp); pil.wait_for_timeout(400)
         ok(pil.evaluate("selected") == calling and pil.evaluate("document.activeElement.tagName") != "INPUT",
-           "pilot selects on the radar, the shorthand line does not take the keyboard")
+           "pilot selects on the radar, the shorthand line does not take the keyboard "
+           + str([pil.evaluate("selected"), calling, pil.evaluate("document.activeElement.tagName + '#' + document.activeElement.id")]))
     # the pilot executes
     pil.click(f"#fleet tr[data-cs='{calling}']")
     pil.wait_for_selector(f"#deck .dk-cs:has-text('{calling}')")
@@ -363,7 +366,8 @@ with sync_playwright() as p:
     pil.screenshot(path=f"{OUT}/08_pilot_panel.png")
     pil.wait_for_function(f"() => state.aircraft.find(a => a.callsign === '{calling}').cleared_fl === {newfl}", timeout=30000)
     ok(True, "pilot executes the clearance")
-    pt = pil.locator("#deck button.pt").nth(1)
+    pts_ = pil.locator("#deck button.pt")
+    pt = pts_.nth(1 if pts_.count() > 1 else 0)
     ptname = pt.inner_text()
     pt.click()
     pil.wait_for_function(f"() => state.aircraft.find(a => a.callsign === '{calling}').next_waypoint === '{ptname}'", timeout=30000)

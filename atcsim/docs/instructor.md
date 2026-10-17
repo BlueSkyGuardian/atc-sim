@@ -9,9 +9,13 @@
 | **Scenarios** | Every scenario you can use, with author, complexity, density, aircraft per hour and duration |
 | **Evaluations** | The evaluations you still have to write, and the ones written |
 
+![Live exercises: a thumbnail per exercise with its status, conflicts and who is connected](/static/docs/i_dashboard.jpg "Live exercises: a thumbnail per exercise with its status, conflicts and who is connected")
+
 ## Scenarios
 
 The list shows, for each scenario:
+
+![The scenario list with author, complexity, density, airspace and access](/static/docs/i_scenarios.jpg "The scenario list with author, complexity, density, airspace and access")
 
 - **Name and title**.
 - **Author**: who designed it (*library* for the built-in ones without an author).
@@ -45,6 +49,10 @@ of capacity.
 **Start exercise** builds the scenario paused. A dense scenario takes a few seconds. The exercise page has three
 tabs on the side panel:
 
+![Start exercise: name it, and it is built paused](/static/docs/i_new_exercise.jpg "Start exercise: name it, and it is built paused")
+
+![The instructor's exercise page: the radar, the recording timeline and the side panel](/static/docs/i_seat.jpg "The instructor's exercise page: the radar, the recording timeline and the side panel")
+
 ### Exercise tab
 
 - **Members and invitations**: invite people from the user list (name, licence) as **controller**,
@@ -56,6 +64,8 @@ tabs on the side panel:
   applies: an unanswered request ends in a deviation without clearance.
 - **End exercise** closes it for everybody, keeps the results for the statistics and renders the recording.
 
+![The Exercise tab: members and invitations, run controls, the weather option, End exercise](/static/docs/i_exercise_tab.jpg "The Exercise tab: members and invitations, run controls, the weather option, End exercise")
+
 ### Aircraft tab
 
 The pseudo-pilot workspace (*To do*, control deck, aircraft list, shorthand) and the telephone. You can fly any
@@ -66,6 +76,8 @@ aircraft and call or answer as any unit. See the [pseudo-pilot manual](pilot.md)
 The selected aircraft's details, the pilot requests, the arrival sequence, the predicted conflicts, the events and
 the live metrics.
 
+![The Monitor tab: requests, sequence, predicted conflicts, events and metrics](/static/docs/i_monitor.jpg "The Monitor tab: requests, sequence, predicted conflicts, events and metrics")
+
 The radar is the same as the controller's (see the [controller manual](controller.md)), with the recording
 timeline under the scope. Click or drag the timeline to look back. **▶ Replay** plays from the cursor, and
 **Live** returns to the live picture. You hear every radio transmission and every telephone call.
@@ -75,6 +87,8 @@ The exercise page has a switcher to your other live exercises and a link back to
 ## Ending, recordings and evaluations
 
 **End exercise** asks for confirmation, then:
+
+![Rating the controller after the exercise](/static/docs/i_evaluation.jpg "Rating the controller after the exercise")
 
 1. Stops the simulation and stores the results (metrics, sim time) for the statistics.
 2. Renders one **.mp4 per controller**: their screen as their seat showed it (labels, alerts, RBLs, windows,
@@ -107,6 +121,8 @@ directly, through the shorthand line or the aircraft panel. Solo sessions count 
 
 The administrator account (`ATC_ADMIN_EMAILS`) has the **Users** page: every account with name, licence, role and
 status. Set the roles there:
+
+![The Users page: set each account's role](/static/docs/a_users.jpg "The Users page: set each account's role")
 
 | Role | Can |
 |---|---|

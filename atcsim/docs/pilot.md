@@ -4,6 +4,8 @@ The pseudo-pilot speaks for every aircraft on the frequency and flies them: you 
 listen to the controller, read back, and make the aircraft do what was cleared. You also play the **adjacent
 units** on the telephone (Casablanca, Lisboa, Canarias, Sevilla, Madeira).
 
+![The pseudo-pilot seat: the radar on the left, the workspace on the right (To do, control deck, aircraft list)](/static/docs/p_seat.jpg "The pseudo-pilot seat: the radar on the left, the workspace on the right (To do, control deck, aircraft list)")
+
 Your seat has the radar (the same as the controller's, with every display option) and a workspace in three parts:
 **To do**, the **control deck** of the selected aircraft, and the **aircraft list**.
 
@@ -13,6 +15,8 @@ Your seat has the radar (the same as the controller's, with every display option
 ## To do: what to say
 
 The list shows what to say on the frequency, oldest first:
+
+![The To do list: a weather request to read out, a first call, and two aircraft dealing with weather](/static/docs/p_todo.jpg "The To do list: a weather request to read out, a first call, and two aircraft dealing with weather")
 
 - **First calls**: *"RAM101, FL350, checking in"*. These stay until the controller assumes the aircraft.
 - **Pilot requests and reports** to read out: level, direct, speed, weather deviations (*"request heading 170 for 65
@@ -30,6 +34,8 @@ choose how to phrase them.
 
 Select an aircraft (in the list, in *To do*, or on the radar) to get its deck. The deck shows the present level,
 speed, heading and navigation, what the aircraft is executing, and its limits now. Then comes one row per action:
+
+![The control deck of the selected aircraft: what it can do now, then one row per action](/static/docs/p_deck.jpg "The control deck of the selected aircraft: what it can do now, then one row per action")
 
 | Row | What you can do |
 |---|---|

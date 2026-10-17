@@ -5,6 +5,8 @@ in a synthetic training sector or in the **real Agadir CTA**: the AIP points, ai
 sectors with their declared capacities. Around the radar it adds type-specific aircraft performance, a 3D weather
 model, simulated pilots, flight plans, OLDI coordination, radio and telephone, recording and statistics.
 
+![The sign-in page](/static/docs/landing.jpg "The sign-in page")
+
 ## Who uses what
 
 | You are… | Start here | You use |

@@ -78,6 +78,9 @@ ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_red
    and anon.get("/help/api").status_code == 200 and anon.get("/api/help/controller").status_code == 200,
    "help pages are public")
 ok(atc.get("/api/help/nope").status_code == 404, "unknown doc page")
+lg = anon.get("/api/landing").json()
+ok(len(lg["outline"]) > 10 and "IBALU" in lg["points"] and len(lg["sectors"]) == 4 and anon.get("/login").status_code == 200,
+   "sign-in page and its public map")
 sj = anon.get("/api/help/scenario-json").json()["markdown"]
 ok("<!-- REFERENCE -->" not in sj and "| VEDOD |" in sj and "| B738 |" in sj and "Prompt template" in sj,
    "scenario JSON reference with the generated appendix (points, types)")

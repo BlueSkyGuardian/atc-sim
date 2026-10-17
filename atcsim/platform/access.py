@@ -19,7 +19,7 @@ from . import config, db
 from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
-          "/help", "/help/", "/api/help", "/api/help/")       # the documentation is public
+          "/help", "/help/", "/api/help", "/api/help/", "/api/landing")       # the documentation is public
 PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 

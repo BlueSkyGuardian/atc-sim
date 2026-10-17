@@ -34,6 +34,10 @@
   article kbd { font: 12px var(--mono); border: 1px solid #3a4b5c; border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #142230; color: #fff; }
   article hr { border: 0; border-top: 1px solid var(--line); margin: 26px 0; }
   article a.anchor { opacity: 0; margin-left: 6px; font-size: .8em; } article h2:hover a.anchor, article h3:hover a.anchor { opacity: .6; }
+  article figure { margin: 18px 0 22px; }
+  article figure a { display: inline-block; max-width: 100%; }
+  article figure img { display: block; max-width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: #081018; }
+  article figure figcaption { color: var(--dim); font-size: 13px; line-height: 1.45; margin-top: 7px; max-width: 70ch; }
   mark { background: #6d5a12; color: #fff; padding: 0 2px; border-radius: 2px; }
   .hits { font-size: 12px; margin: 6px 0 0; } .hits a { font-size: 12px; padding: 3px 8px; } .hits .s { color: var(--dim); display: block; font-size: 11px; }
   @media (max-width: 1100px) { .docs { grid-template-columns: 210px minmax(0, 1fr); } .toc { display: none; } }
@@ -70,6 +74,15 @@ async function show(slug, hash, push) {
   if (push) history.pushState(null, '', '/help/' + slug + (hash || ''));
   const doc = $('#doc');
   doc.innerHTML = marked.parse(md, { gfm: true });
+  // screenshots: a figure with its caption (the image title), opening full size in a new tab
+  doc.querySelectorAll('img').forEach(im => {
+    im.loading = 'lazy';
+    const fig = document.createElement('figure'), a = document.createElement('a');
+    a.href = im.getAttribute('src'); a.target = '_blank'; a.title = 'Open full size';
+    const host = im.parentElement.tagName === 'P' && im.parentElement.childNodes.length === 1 ? im.parentElement : im;
+    host.replaceWith(fig); a.appendChild(im); fig.appendChild(a);
+    if (im.title) { const c = document.createElement('figcaption'); c.textContent = im.title; fig.appendChild(c); im.removeAttribute('title'); }
+  });
   // links between pages: (designer.md#x) -> /help/designer#x
   doc.querySelectorAll('a[href]').forEach(a => {
     const h = a.getAttribute('href');
