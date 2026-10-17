@@ -136,9 +136,10 @@
 
   // ------------------------------------------------------------------ controller: label input
   window.onSelectAircraft = (cs, e, isLabel, field) => {
+    if (isLabel && field === 'type' && window.openTypeWin) { openTypeWin(cs); if (SEAT === 'atc') { closeMenu(); return true; } }
     if (SEAT === 'atc') {                 // a click selects; a click on a value of the label opens that value's menu
       closeMenu();
-      if (isLabel && field && field !== 'cs') openFieldMenu(cs, field, e);
+      if (isLabel && field && field !== 'type') openFieldMenu(cs, field, e);
       return true;
     }
     pilotSel = cs; renderPilot(true);
@@ -248,10 +249,14 @@
     const m = $('#lblMenu'), ent = (state.entries || {})[cs] || {}, co = (state.coord || {})[cs] || {};
     const sys = ent.cfl != null ? ent.cfl : (co.cfl != null ? co.cfl : a.cleared_fl);
     menuCs = cs;
-    const title = { cfl: 'Cleared level', xfl: 'Exit level (coordination)', spd: 'Speed', hdg: 'Heading', route: 'Route', wx: 'Weather deviation', note: 'Note' }[f] || f;
+    const title = { cs: a.type + ' · ' + ((a.flight_plan || {}).departure || '') + '→' + ((a.flight_plan || {}).destination || ''), cfl: 'Cleared level', xfl: 'Exit level (coordination)', spd: 'Speed', hdg: 'Heading', route: 'Route', wx: 'Weather deviation', note: 'Note' }[f] || f;
     let body = '';
     const levels = base => { const out = []; for (let l = Math.round(base / 10) * 10 + 60; l >= Math.round(base / 10) * 10 - 60; l -= 10) if (l >= 50 && l <= 600) out.push(l); return out; };
-    if (f === 'cfl' || f === 'xfl') {
+    if (f === 'cs') {                                    // the callsign: control and data of the aircraft
+      body = `<div class="fl">${a.assumed ? `<button data-c="rel">Decontrol (U)</button>` : `<button data-c="asm" class="cur">Assume (A)</button>`}
+        <button data-c="fpl">Flight plan (F)</button><button data-c="info">Track info (I)</button><button data-c="type">Type performance</button>
+        <button data-c="edit">Edit route… (E)</button><button data-c="show">Show route (R)</button><button data-c="full">Full label menu</button></div>`;
+    } else if (f === 'cfl' || f === 'xfl') {
       const cur = f === 'cfl' ? sys : (co.xfl != null ? co.xfl : sys);
       body = `<input data-v value="${f === 'xfl' && !co.xfl_entered ? '' : cur}" placeholder="${f === 'xfl' ? '= CFL ' + sys : ''}" inputmode="numeric">
         <div class="fl">${f === 'xfl' ? `<button data-x="">= CFL (F${p3(sys)})</button>` : ''}${levels(cur).map(l => `<button data-x="${l}" class="${l === cur ? 'cur' : ''}">F${p3(l)}</button>`).join('')}</div>`;
@@ -284,6 +289,18 @@
     const inp = m.querySelector('[data-v]');
     if (inp) { inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') { let v = inp.value.trim().toUpperCase(); if (f === 'cfl' || f === 'xfl') v = v.replace(/^FL?/, ''); go(v); } if (ev.key === 'Escape') closeMenu(); };
       setTimeout(() => { inp.focus(); inp.select(); }, 0); }
+    m.querySelectorAll('[data-c]').forEach(b => b.onclick = async () => {
+      const c = b.dataset.c; closeMenu();
+      try {
+        if (c === 'asm') await api(`/sessions/${SID}/assume/${cs}`, { method: 'POST' });
+        else if (c === 'rel') await api(`/sessions/${SID}/release/${cs}`, { method: 'POST' });
+        else if (c === 'fpl') openFpl(cs);
+        else if (c === 'info') pinInfo(cs);
+        else if (c === 'type') openTypeWin(cs);
+        else if (c === 'edit') editRoute(cs);
+        else if (c === 'show') routeShow = { cs, until: performance.now() + 8000 };
+        else if (c === 'full') openMenu(cs, e, 'cfl');
+      } catch (er) { note(er.message, true); } });
     const ed = m.querySelector('[data-edit]'); if (ed) ed.onclick = () => { closeMenu(); editRoute(cs); };
     const sh = m.querySelector('[data-show]'); if (sh) sh.onclick = () => { closeMenu(); routeShow = { cs, until: performance.now() + 8000 }; };
     $('#fmX').onclick = closeMenu;

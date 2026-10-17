@@ -30,7 +30,7 @@
     el.querySelector('.wt').innerHTML = title;
     return el;
   }
-  function closeWin(id) { const el = document.getElementById(id); if (el) el.remove(); if (id === 'fpWin') fpCs = null; if (id === 'mtWin') mtFocus = null; }
+  function closeWin(id) { const el = document.getElementById(id); if (el) el.remove(); if (id === 'fpWin') fpCs = null; if (id === 'tyWin') tyCs = null; if (id === 'mtWin') mtFocus = null; }
   const isOpen = id => !!document.getElementById(id);
 
   // ------------------------------------------------------------------ flight plan window
@@ -157,15 +157,17 @@
   function toggleOldi() { if (isOpen('olWin')) closeWin('olWin'); else { win('olWin', 'OLDI', 80, 60, 660); renderOldi(true); } }
 
   // ------------------------------------------------------------------ track info window (the aircraft under the mouse)
-  let pinned = null, infoH = '';
+  let pinned = null, infoH = '', lastHover = null;
   const infoOn = () => isOpen('tiWin');
-  function toggleInfo() { if (infoOn()) closeWin('tiWin'); else { infoH = ''; win('tiWin', 'Track info', document.getElementById('scope').clientWidth - 320, 300, 300); renderInfo(); } try { localStorage.setItem('atc_info', infoOn() ? '1' : '0'); } catch (e) {} }
+  function toggleInfo() { if (infoOn()) closeWin('tiWin'); else { infoH = ''; win('tiWin', 'Track info', 10, 150, 300); renderInfo(); } try { localStorage.setItem('atc_info', infoOn() ? '1' : '0'); } catch (e) {} }
   window.pinInfo = cs => { pinned = pinned === cs ? null : cs; if (!infoOn()) toggleInfo(); renderInfo(); };
   const P3 = v => v == null ? '—' : String(Math.round(v)).padStart(3, '0');
   function renderInfo() {
     if (!infoOn()) return;
-    const cs = pinned || hoverAc || selected, a = cs && allAc().find(x => x.callsign === cs);
-    const el = win('tiWin', a ? `<b>${esc(a.callsign)}</b> <span class="c-dim" style="font-weight:400">${pinned ? 'pinned' : hoverAc === cs ? 'under the mouse' : 'selected'}</span> <button data-pin title="keep this aircraft (middle-click another)" style="padding:0 5px;font-size:10px" class="${pinned ? 'on' : ''}">📌</button>` : 'Track info', document.getElementById('scope').clientWidth - 320, 300, 300);
+    if (hoverAc) lastHover = hoverAc;
+    // the pinned aircraft, else the one under the mouse, else the selected one, else the last one under the mouse
+    const cs = pinned || hoverAc || selected || lastHover, a = cs && allAc().find(x => x.callsign === cs);
+    const el = win('tiWin', a ? `<b>${esc(a.callsign)}</b> <span class="c-dim" style="font-weight:400">${pinned ? 'pinned' : hoverAc === cs ? 'under the mouse' : selected === cs ? 'selected' : 'last under the mouse'}</span> <button data-pin title="keep this aircraft (middle-click another)" style="padding:0 5px;font-size:10px" class="${pinned ? 'on' : ''}">📌</button>` : 'Track info', 10, 150, 300);
     let html;
     if (!a) html = '<div class="empty">Move the mouse over an aircraft or its label (middle-click one to keep it here).</div>';
     else {
@@ -199,6 +201,36 @@
   }
   setInterval(renderInfo, 300);
   try { if (localStorage.getItem('atc_info') === '1') setTimeout(() => { if (!infoOn()) toggleInfo(); }, 1500); } catch (e) {}
+
+  // ------------------------------------------------------------------ aircraft type performance window
+  let tyCs = null;
+  async function openTypeWin(cs) {
+    if (!SID || !cs) return;
+    tyCs = cs;
+    let d; try { d = await api(`/sessions/${SID}/aircraft/${cs}/performance`); } catch (e) { return; }
+    if (tyCs !== cs) return;
+    const t = d.type, n = d.now, a = allAc().find(x => x.callsign === cs), fl = a ? a.fl : null;
+    const el = win('tyWin', `<b>${esc(t.icao)}</b> <span class="c-dim" style="font-weight:400">${esc(t.name)} · ${esc(cs)} · wake ${esc(d.wake || '')}</span>`, 380, 90, 470);
+    el.querySelector('[data-close]').onclick = () => { tyCs = null; closeWin('tyWin'); };
+    const row = (k, v) => `<span>${k}</span><span>${v}</span>`;
+    const tbl = d.levels.map(r => `<tr class="${fl != null && Math.abs(r.fl - fl) < 5 ? 'cur' : ''}" title="${esc(r.why || '')}"><td>FL${String(r.fl).padStart(3, '0')}</td>
+      <td>${r.mode === 'mach' ? 'M' + String(Math.round(r.mach * 100)).padStart(2, '0') : r.ias_kt + ' kt'}</td><td>${r.ias_kt}</td><td>${r.tas_kt}</td>
+      <td>${r.climb_fpm > 0 ? r.climb_fpm : '—'}</td><td>${r.idle_descent_fpm}</td><td class="${r.available ? 'c-ok' : 'c-los'}">${r.available ? '✓' : '✗'}</td></tr>`).join('');
+    el.querySelector('.wb').innerHTML = `<div class="ti">` +
+      row('Category', `${esc(t.category)}${t.rvsm_by_default ? ' · RVSM' : ''} · ${esc(t.model_source)}`) +
+      row('MTOW / OEW', `${Math.round(t.mtow_kg / 1000)} t / ${Math.round(t.oew_kg / 1000)} t`) +
+      row('Mass now', `${(d.mass_kg / 1000).toFixed(1)} t (load ${Math.round(d.load * 100)} %)`) +
+      row('Ceiling', `FL${t.ceiling_fl}`) + row('VMO / MMO', `${t.vmo_kt} kt / M${t.mmo.toFixed(2)}`) +
+      row('Speed schedule', `${t.speed_schedule.cas_kt} kt / M${t.speed_schedule.mach.toFixed(2)}, crossover FL${t.speed_schedule.crossover_fl}`) +
+      row('Assignable Mach', t.assignable_mach.map(x => x.toFixed(2)).join(' – ')) + row('Assignable IAS', t.assignable_ias_kt.map(x => Math.round(x)).join(' – ') + ' kt') +
+      (n ? row('Max level now', `FL${n.max_fl_at_present_weight}`) + row('Climb now', `${n.climb_rate_available_fpm} ft/min`) +
+        row('Idle descent now', `${n.idle_descent_rate_fpm} ft/min (×1.5 with speed brakes)`) + row('Turn radius', `${n.turn_radius_nm} NM`) : '') +
+      `</div><div class="sub">By level, at the present weight (own speed schedule)</div>
+      <table><tr><th>Level</th><th>Speed</th><th>IAS</th><th>TAS</th><th>Climb</th><th>Idle desc.</th><th>Avail.</th></tr>${tbl}</table>
+      <div class="c-dim" style="font-size:11px;margin-top:4px">ft/min · ✗ = the level cannot be reached at this weight (hover for why)</div>`;
+  }
+  window.openTypeWin = openTypeWin;
+  setInterval(() => { if (tyCs && isOpen('tyWin')) openTypeWin(tyCs); }, 15000);
 
   // ------------------------------------------------------------------ route editor (re-routing)
   // The route from the aircraft onwards as a list of points; click the map to insert a point after the cursor:
@@ -274,7 +306,7 @@
 
   // ------------------------------------------------------------------ help
   const KEYS = [
-    ['click label', 'select it; a value (level, XFL, speed, heading, route, WX) opens its menu'], ['long press', 'on a value: the full label menu; on the route: the route'],
+    ['click label', 'callsign: assume / decontrol / flight plan…; type: its performance; a value (level, XFL, speed, heading, route, WX): its menu'], ['long press', 'on a value: the full label menu; on the route: the route'],
     ['Tab / Shift+Tab', 'next / previous aircraft (calling first)'],
     ['C or L', 'cleared level of the selected aircraft'], ['X', 'exit level (XFL)'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct / route'], ['W', 'weather deviation (WX tag)'], ['N', 'note (full menu)'],
     ['E', 'edit its route (re-routing)'], ['A', 'assume the selected aircraft'], ['U', 'decontrol it'], ['F', 'its flight plan'], ['I', 'track info window'],
@@ -316,7 +348,7 @@
     if (e.ctrlKey || e.metaKey || e.altKey || typing()) return;
     const k = e.key, cs = selected, atc = SEAT === 'atc' && EXID;
     const low = k.length === 1 ? k.toLowerCase() : k;           // letters: capitals or not, Caps Lock or not
-    if (k === 'Escape') { if (RE) { closeRE(); return; } for (const id of ['helpWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
+    if (k === 'Escape') { if (RE) { closeRE(); return; } for (const id of ['helpWin', 'tyWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
     if (k === '?') { isOpen('helpWin') ? closeWin('helpWin') : openHelp(); e.preventDefault(); return; }
     if (k === 'Tab') { e.preventDefault(); cycle(e.shiftKey ? -1 : 1); return; }
     if (k === '+' || k === '=') { setZoom(userZoom * 1.25); return; }

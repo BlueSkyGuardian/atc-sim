@@ -110,6 +110,7 @@
   .win .keys { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; align-items: center; }
   .win .ti { display: grid; grid-template-columns: 112px 1fr; gap: 2px 8px; font-size: 11.5px; }
   .win .ti > span:nth-child(odd) { color: var(--dim); } .win .ti > span:nth-child(even) { font-family: var(--mono); }
+  .win tr.cur td { background: #17283a; }
   .win .rcs { display: flex; flex-wrap: wrap; gap: 4px; }
   .win .rc { font: 600 11.5px var(--mono); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; cursor: pointer; background: #0d141c; }
   .win .rc b { color: #ff8f8f; margin-left: 5px; font-weight: 400; } .win .rc.cur { border-color: var(--routeShow, #ff4fd8); box-shadow: 3px 0 0 #ff4fd8; }
@@ -981,7 +982,7 @@ window.addEventListener('mousemove', e => {
     const l = e.target === cv ? labelAt(e) : null, f = l ? fieldAt(e) : null;
     hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
     const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
-    cv.style.cursor = window.routeEditActive && routeEditActive() ? 'copy' : f && f.f !== 'cs' && SEAT === 'atc' ? 'pointer'
+    cv.style.cursor = window.routeEditActive && routeEditActive() ? 'copy' : f && (SEAT === 'atc' || f.f === 'type') ? 'pointer'
       : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
@@ -1240,7 +1241,7 @@ function paintLabel(lines, k1, bx, by, lh, nExt, col, cs) {
       if (f && cs) {
         const lead = t.length - t.trimStart().length, x0 = x + ctx.measureText(t.slice(0, lead)).width;
         fieldRects.push({ cs, f, x0: x0 - 1 * dpr, y0: y - H * 0.85, x1: x + tw + 1 * dpr, y1: y + H * 0.2 });
-        if (hoverField && hoverField.cs === cs && hoverField.f === f && SEAT === 'atc' && f !== 'cs') {   // flat button: underline
+        if (hoverField && hoverField.cs === cs && hoverField.f === f && (SEAT === 'atc' || f === 'type')) {   // flat button: underline
           ctx.fillRect(x0, y + 2 * dpr, x + tw - x0, 1 * dpr); }
       }
       x += tw;
@@ -1498,7 +1499,7 @@ function draw() {
         : co.state && co.state !== 'transferred' && co.coordinated === co.xfl ? (co.state === 'act' ? TH.xflOk : TH.xflAbi) : TH.xflPend;
       l2.push([` X${co.xfl}`, xc, 'xfl']);
     }
-    l2.push([` ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col), 'cs']);
+    l2.push([` ${a.type}${seeAlerts ? '' : (a.category === 'military' ? ' MIL' : '') + rv}`, pc('lblLevel', col), 'type']);
     lines.push(l2);
     lines.push(labelLine3(a, ent).map(([t, rl, f]) => [t, rl === 'chg' ? TH.changed : rl === 'htag' ? TH.hTag : rl === 'wxtag' ? TH.wxTag : pc('lblSpeed', col), f]));
     const dest = (a.flight_plan && a.flight_plan.destination) || '';

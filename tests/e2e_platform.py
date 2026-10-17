@@ -136,11 +136,18 @@ with sync_playwright() as p:
         atc.wait_for_timeout(300)
         return atc.evaluate(f"""() => {{ const r = fieldRects.find(q => q.cs === '{cs}' && q.f === '{f}'), c = cv.getBoundingClientRect(), d = devicePixelRatio;
             return r ? [c.left + (r.x0 + r.x1) / 2 / d, c.top + (r.y0 + r.y1) / 2 / d] : null; }}""")
-    # a click on the label selects; a click on the level opens the level menu
+    # a click on the callsign: control options; on the type: its performance; on the level: the level menu
     lp = field_pt(calling, "cs")
     atc.mouse.click(*lp)
-    atc.wait_for_timeout(300)
-    ok(atc.evaluate("selected") == calling and not atc.is_visible("#lblMenu.on"), "a click on the label selects it, no menu")
+    atc.wait_for_selector("#lblMenu.on.fm [data-c]")
+    ok(atc.evaluate("selected") == calling and atc.locator("#lblMenu [data-c=rel], #lblMenu [data-c=asm]").count() == 1
+       and atc.locator("#lblMenu [data-c=fpl]").count() == 1, "a click on the callsign selects it and offers assume/decontrol, flight plan")
+    atc.keyboard.press("Escape")
+    atc.mouse.click(*field_pt(calling, "type"))
+    atc.wait_for_selector("#tyWin table tr td")
+    ok("Ceiling" in atc.inner_text("#tyWin") and atc.locator("#tyWin table tr").count() > 5, "a click on the type opens its performance: " + atc.inner_text("#tyWin .wh").replace("\n", " "))
+    atc.screenshot(path=f"{OUT}/07k_type_performance.png")
+    atc.keyboard.press("Escape")
     atc.mouse.click(*field_pt(calling, "cfl"))
     atc.wait_for_selector("#lblMenu.on.fm [data-x]")
     atc.wait_for_timeout(800)
@@ -240,6 +247,8 @@ with sync_playwright() as p:
     ok(bool(hv) and hv in atc.inner_text("#tiWin .wh") and "Mode" in atc.inner_text("#tiWin"),
        f"track info window shows {hv} (" + str(atc.evaluate(f"(() => {{ const el = document.elementFromPoint({box[0]}, {box[1]}); return [el.tagName, el.className, el.parentElement && el.parentElement.id, (el.textContent || '').slice(0, 40), {box[0]}, {box[1]}]; }})()")) + ")")
     atc.screenshot(path=f"{OUT}/07g_track_info.png")
+    atc.evaluate("document.activeElement && document.activeElement.blur()")
+    atc.keyboard.press("I")                     # off again
     atc.mouse.move(40, 700)
     # route editor (E): a fix and a position, entered as the system route
     atc.evaluate(f"selected = '{calling}'; document.activeElement && document.activeElement.blur()")

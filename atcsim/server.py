@@ -330,6 +330,41 @@ def aircraft_one(sid: str, callsign: str):
         return d
 
 
+@app.get("/sessions/{sid}/aircraft/{callsign}/performance")
+def aircraft_performance(sid: str, callsign: str):
+    """The aircraft type's performance (type data, speed schedule, assignable speeds) and, at the present weight,
+    a table by level: speeds of the schedule, climb rate available, idle descent rate, whether the level can be
+    reached, plus the maximum level and turn radius now."""
+    from . import atmosphere as atm
+    s = _session(sid)
+    with s.lock:
+        a = s.world.aircraft.get(callsign.upper())
+        if a is None:
+            raise HTTPException(404, "unknown callsign")
+        p = a.perf
+        out = {"callsign": a.callsign, "type": p.summary(), "mass_kg": round(a.mass),
+               "load": round((a.mass - p.oew) / max(1.0, p.mtow - p.oew), 2),
+               "wake": (a.flight_plan or {}).get("wake"), "now": a.performance_snapshot() if a.status != "scheduled" else None}
+        rows = []
+        top = int(p.ceiling_ft // 100)
+        for fl in sorted(set([100, 150, 200, 250, 280, 300, 310, 320, 330, 340, 350, 360, 370, 380, 390, 400, 410, 430,
+                              450, 470, 490, 510] + ([int(round(a.alt_ft / 1000)) * 10] if a.status != "scheduled" else []))):
+            if fl > top:
+                continue
+            alt = fl * 100.0
+            mode, val = a.speed_target(alt)
+            tas = p.tas_for(mode, val, alt)
+            ok, why = p.level_available(fl, mode, val, a.mass)
+            rows.append({"fl": fl, "mode": mode, "tas_kt": round(tas),
+                         "mach": round(atm.tas_to_mach(tas * atm.KT, alt * atm.FT, p.dT), 2),
+                         "ias_kt": round(atm.tas_to_cas(tas * atm.KT, alt * atm.FT, p.dT) / atm.KT),
+                         "climb_fpm": round(p.roc_fpm(alt, mode, val, a.mass)),
+                         "idle_descent_fpm": round(-p.roc_fpm(alt, mode, val, a.mass, "idle")),
+                         "available": ok, "why": None if ok else why})
+        out["levels"] = rows
+        return out
+
+
 @app.get("/sessions/{sid}/positions")
 def positions(sid: str):
     """Compact positions only."""

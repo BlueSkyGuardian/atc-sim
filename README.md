@@ -48,8 +48,11 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
   - **Assume any track, any time:** a calling aircraft (blinking, *CALL*), one still with the previous sector (early
     assume; it then calls already assumed), or one decontrolled earlier. Double-click it, ASSUME in its label menu,
     or key **A**. **Decontrol** (label menu, key **U**, `CS REL`) and take back as often as needed.
-  - **The label's values are flat buttons.** A click on the label selects the aircraft. A click on a value opens
-    the small menu of that value: the level (levels list, coloured by the probe), the exit level (with *= CFL*),
+  - **The label's values are flat buttons.** A click on the **callsign** selects the aircraft and offers assume or
+    decontrol, flight plan, track info, type performance, edit / show route and the full menu. A click on the
+    **aircraft type** opens its performance window (type data, speed schedule, assignable Mach / IAS, mass now, and
+    by level at the present weight: speeds, climb rate, idle descent, whether the level can be reached). A click on
+    a value opens the small menu of that value: the level (levels list, coloured by the probe), the exit level (with *= CFL*),
     the speed, the heading (left / right steps, own navigation), the route (directs, *Edit route…*, back to the filed
     route), the WX tag. A **long press on a value** opens the full label menu; a long press on the **route** value
     (the next point) shows the route. The value under the mouse is underlined.
@@ -90,8 +93,8 @@ number. The **administrator** (`ATC_ADMIN_EMAILS`) gives roles on the *Users* pa
     ←previous unit*; calling in white, blinking, *CALL*; assumed in green; **3 minutes before the exit** a chevron
     ahead of the symbol and *XFR →next unit* (LPPC, GCCC, LECS, GMMM, MADEIRA, or the Agadir sector not controlled);
     after the exit, still assumed, *DECONTROL →unit* blinking; decontrolled in grey with the next unit.
-  - **Track info window** (*INFO*, key **I**; movable, on or off): the aircraft under the mouse (or the selected
-    one; middle-click an aircraft or 📌 to keep one): SSR code, Mode S address, type, registration, operator,
+  - **Track info window** (*INFO*, key **I**; movable, on or off): the aircraft under the mouse, else the selected
+    one, else the last one under the mouse (middle-click an aircraft or 📌 to keep one): SSR code, Mode S address, type, registration, operator,
     departure → destination and requested level, current / cleared / exit levels and the coordination state, the
     **Mode S downlinked parameters** when the aircraft has enhanced surveillance (selected level, magnetic heading,
     IAS, Mach, TAS, ground speed, track, vertical rate, roll, track rate, pressure setting), the next points, units,
@@ -583,6 +586,7 @@ sequencing fix.
 | WS | `/sessions/{id}/stream` | Live push of state and events every sim second; the separation look-ahead is computed in parallel (on a copy of the world, never holding up the clock) and attached to the next tick when ready; send instructions, commands or control over it |
 | POST | `/sessions/{id}/control` | `start\|pause\|resume\|set_speed\|set_mode\|step\|restart` |
 | GET | `/sessions/{id}/state` · `/positions` · `/aircraft/{cs}` | Picture. Aircraft detail includes performance at present weight and the weather phase |
+| GET | `/sessions/{id}/aircraft/{cs}/performance` | The type's performance and, at the present weight, a table by level (schedule speeds, climb, idle descent, level available) |
 | GET | `/sessions/{id}/separation` | Current pairs and **predicted** conflicts, area infringements and **weather penetrations** |
 | POST | `/sessions/{id}/probe` | What-if for candidate instructions (including replies to requests); changes nothing |
 | GET / POST | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories (20 min) / probe one aircraft: `{"callsign", "cfl"\|"heading"\|"direct"}` or `{"callsign", "levels": [...]}` |
