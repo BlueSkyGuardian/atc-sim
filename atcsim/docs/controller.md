@@ -46,6 +46,7 @@ The toolbar changes **your view only**, never the simulation:
 | **CPDLC** | CPDLC window: requests, dialogues, connections (key <kbd>J</kbd>); the count of requests waiting |
 | **CHAT** | Coordination chat with the other sectors and units (key <kbd>T</kbd>); the count of unread messages |
 | **HUD** | Show or hide the information box (saved in your browser) |
+| **Timeline** | Solo radar (and the instructor): show or hide the replay timeline under the scope |
 | **?** | Keyboard shortcuts |
 | UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
 | ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
@@ -414,6 +415,9 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 - **CPDLC**: connected aircraft send their requests by data link and answer your uplinks by themselves (WILCO, or
   UNABLE when they cannot).
 - **HUD** in the toolbar hides or shows the information box (scenario, time, traffic, wind).
+- **The timeline** under the scope records the run: click or drag it to look back (REPLAY shows in the information
+  box), **▶ Replay** plays from there, **Live** returns to the live picture. Its markers show losses of separation,
+  requests and instructions. **Timeline** in the toolbar hides or shows it.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording.
 
 ![The solo radar: the control bar top right, the radio log bottom left, the command line](/static/docs/s_radar.jpg "The solo radar: the control bar top right, the radio log bottom left, the command line")

@@ -129,7 +129,8 @@
   #lblMenu .lv button.cf { border-color: #a33; color: #ffb3b3; } #lblMenu .lv button.ok { border-color: #2f7a5f; color: #bff5dc; }
   /* seats */
   body.seat-atc #app { grid-template-columns: 1fr; } body.seat-atc aside { display: none; }
-  body.exercise #tl, body.exercise .legend-help { display: none; }
+  body.exercise:not(.seat-instructor):not(.solo) #tl, body.exercise .legend-help { display: none; }
+  body.tl-off #tl, body.tl-off #tlCtl { display: none !important; }
   body.seat-pilot #alerts { display: none; }
   body:not(.seat-instructor).exercise .instr-only { display: none !important; }
   body:not(.exercise) .ex-only { display: none !important; }
@@ -253,6 +254,17 @@
   #radioLog .rl .rb button { padding: 1px 7px; font-size: 11px; }
   #radioLog .hd { color: var(--dim); font-size: 10.5px; letter-spacing: .06em; }
   body.solo #legend { display: none; }
+  /* timeline on the solo radar: at the bottom, with its own Replay / Live buttons; what sat at the bottom moves up */
+  body.exercise:not(.seat-instructor):not(.solo) #tlBtn { display: none; }
+  #tlBtn.on { border-color: var(--chart) !important; color: var(--sel) !important; }
+  body.solo #tl { bottom: 4px !important; }
+  #tlCtl { display: none; position: absolute; right: 12px; bottom: 56px; z-index: 5; gap: 4px; }
+  body.solo #tlCtl { display: flex; }
+  #tlCtl button { padding: 3px 9px; font-size: 12px; background: rgba(13, 27, 42, .85); }
+  #tlCtl button.on { border-color: #5fd3a3; color: #5fd3a3; }
+  body.solo:not(.tl-off) #cmdBar { bottom: 62px; }
+  body.solo:not(.tl-off) #radioLog { bottom: 58px; }
+  body.solo:not(.tl-off) #chatToast { bottom: 90px; }
   /* coordination chat */
   #chatBtn.hit { border-color: #f2b84b !important; color: #f2b84b !important; }
   #chatToast { position: absolute; right: 14px; bottom: 60px; z-index: 7; display: flex; flex-direction: column; gap: 6px; width: 330px; }
@@ -343,7 +355,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -370,6 +382,7 @@
     <div id="busy"><div class="box"><div class="t" id="busyT"></div><div class="s" id="busyS"></div>
       <div class="bar"><div class="fill" id="busyF"></div></div><div class="e"><span id="busyE"></span><span id="busyH"></span></div></div></div>
     <canvas id="tl" style="position:absolute;left:0;right:0;bottom:28px;height:46px;width:100%;cursor:pointer"></canvas>
+    <div id="tlCtl"><button id="tlPlay" title="Play the recording from the cursor (or the last 5 minutes)">▶ Replay</button><button id="tlLive" title="Back to the live picture">Live</button></div>
     <div id="tltip" style="position:absolute;display:none;background:#0b1016ee;border:1px solid #1f2b38;padding:3px 6px;font:11px ui-monospace,monospace;color:#c9d6e2;pointer-events:none;white-space:nowrap"></div>
     <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · right-drag between two aircraft / points (or B over one) for an RBL, drag its label to move it, right-click it to remove · I: track info · ? for shortcuts</span></div>
   </div>

@@ -110,7 +110,7 @@ the live metrics.
 ![The Monitor tab: requests, sequence, predicted conflicts, events and metrics](/static/docs/i_monitor.jpg "The Monitor tab: requests, sequence, predicted conflicts, events and metrics")
 
 The radar is the same as the controller's (see the [controller manual](controller.md)), with the recording
-timeline under the scope. Click or drag the timeline to look back. **▶ Replay** plays from the cursor, and
+timeline under the scope (**Timeline** in the toolbar hides it). Click or drag the timeline to look back. **▶ Replay** plays from the cursor, and
 **Live** returns to the live picture. You hear every radio transmission and every telephone call.
 
 The exercise page has a switcher to your other live exercises and a link back to the grid.

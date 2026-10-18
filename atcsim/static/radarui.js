@@ -13,6 +13,18 @@
   if (hudBtn) hudBtn.onclick = () => setHud(!hudOn);
   setHud(hudOn);
 
+  // ------------------------------------------------------------------ timeline on / off (per browser); solo: Replay / Live
+  const tlBtn = $('#tlBtn');
+  let tlOn = true; try { tlOn = localStorage.getItem('atc_tl') !== '0'; } catch (e) {}
+  function setTl(on) { tlOn = on; document.body.classList.toggle('tl-off', !on); if (tlBtn) tlBtn.classList.toggle('on', on); try { localStorage.setItem('atc_tl', on ? '1' : '0'); } catch (e) {}
+    if (!on && typeof replayMode !== 'undefined' && replayMode && $('#rpLive')) $('#rpLive').click(); }   // hidden: back to live
+  if (tlBtn) tlBtn.onclick = () => setTl(!tlOn);
+  setTl(tlOn);
+  const tlPlay = $('#tlPlay'), tlLive = $('#tlLive');
+  if (tlPlay) tlPlay.onclick = () => $('#rpPlay') && $('#rpPlay').click();
+  if (tlLive) tlLive.onclick = () => $('#rpLive') && $('#rpLive').click();
+  setInterval(() => { if (!tlPlay) return; tlPlay.textContent = $('#rpPlay') ? $('#rpPlay').textContent : '▶ Replay'; tlLive.classList.toggle('on', typeof replayMode === 'undefined' || !replayMode); }, 400);
+
   // ------------------------------------------------------------------ control bar
   const bar = $('#ctrlRow');
   const canControl = () => !EXID || SEAT === 'instructor' || solo();
