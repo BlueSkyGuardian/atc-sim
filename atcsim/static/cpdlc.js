@@ -24,7 +24,11 @@
   }
   // label segments: [text, colour] after the callsign (controller, instructor, solo)
   window.cpdlcTag = function (cs, blink) {
-    const d = dl(cs); if (!d || SEAT === 'pilot') return [];
+    const d = dl(cs); if (!d) return [];
+    if (SEAT === 'pilot') {                                   // the pseudo-pilot: an uplink to answer
+      const up = d.open.find(m => m.dir === 'up');
+      return up ? [['  CPDLC↓', blink ? '#5ad1e6' : '#5ad1e688']] : [];
+    }
     const out = [];
     if (d.state === 'cda') out.push([' D', '#6fa8dc']);
     else if (d.state === 'logon') out.push([' d', '#93a7ba']);

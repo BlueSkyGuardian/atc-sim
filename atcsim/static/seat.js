@@ -371,7 +371,7 @@
           const b = m.resp === 'WU' ? `<button class="yes" data-dlid="${m.id}" data-ans="WILCO" data-cs="${cs}" title="the aircraft executes it">WILCO</button><button data-dlid="${m.id}" data-ans="STANDBY" data-cs="${cs}">Standby</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="weather" data-cs="${cs}" title="UNABLE / DUE TO WEATHER">…wx</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="performance" data-cs="${cs}" title="UNABLE / DUE TO AIRCRAFT PERFORMANCE">…perf</button>`
             : m.resp === 'AN' ? `<button class="yes" data-dlid="${m.id}" data-ans="AFFIRM" data-cs="${cs}">Affirm</button><button class="no" data-dlid="${m.id}" data-ans="NEGATIVE" data-cs="${cs}">Negative</button>`
             : `<button class="yes" data-dlid="${m.id}" data-ans="ROGER" data-cs="${cs}">Roger</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button>`;
-          out.push([m.t, `<div class="todo dl" data-cs="${cs}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>data link from the controller${m.status === 'standby' ? ' · you sent STANDBY' : ''} · ${ag} s${m.late ? ' · <span class="c-warn">answer it</span>' : ''}</small></div><div class="bt">${b}</div></div>`]);
+          out.push([m.t, `<div class="todo dl${state.sim_time_s - m.t < 12 ? ' new' : ''}" data-cs="${cs}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>data link from the controller${m.status === 'standby' ? ' · you sent STANDBY' : ''} · ${ag} s${m.late ? ' · <span class="c-warn">answer it</span>' : ''}</small></div><div class="bt">${b}</div></div>`]);
         } else out.push([m.t, `<div class="todo dl sent" data-cs="${cs}"><span class="tg">SENT</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>by data link · waiting for the controller${m.status === 'standby' ? ' (STANDBY)' : ''} · ${ag} s</small></div></div>`]);
       }
       for (const m of d.recent.filter(m => m.dir === 'up' && m.resp === 'N' && /^(UNABLE|STANDBY|ROGER|AFFIRM|NEGATIVE)/.test(m.text)))
@@ -381,7 +381,7 @@
   }
   function renderTodo() {
     const conn = cs => (DL()[cs] || {}).state === 'cda';
-    const items = cpdlcTodo().concat((state.pending_requests || []).slice().sort((a, b) => a.time_s - b.time_s).map(q => {
+    const items = [].concat((state.pending_requests || []).slice().sort((a, b) => a.time_s - b.time_s).map(q => {
       const age = Math.round(state.sim_time_s - q.time_s);
       if (q.kind === 'checkin') return `<div class="todo call" data-cs="${q.callsign}"><span class="tg">CALL</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>first call · the controller assumes it · ${age} s</small></div></div>`;
       const btns = q.type === 'report' ? `<button data-rep="${q.id}" data-dec="roger" data-cs="${q.callsign}">Acknowledged</button>`
@@ -396,8 +396,29 @@
     if (html !== todoH) { $('#todo').innerHTML = html; todoH = html; }
     $('#todoN').textContent = items.length ? `(${items.length})` : '';
   }
+  // ---- CPDLC: the uplinks to answer, the requests sent, the message log
+  let dlH = '', dlLog = [], dlLast = -1;
+  async function renderDl() {
+    const box = $('#dlBox'); if (!box) return;
+    const sec = $('#dlSec'), conns = Object.values(DL());
+    sec.style.display = conns.length ? '' : 'none';
+    const items = cpdlcTodo();
+    const nUp = Object.values(DL()).reduce((n, d) => n + d.open.filter(m => m.dir === 'up').length, 0);
+    $('#dlN').textContent = nUp ? `(${nUp} to answer)` : '';
+    sec.querySelector('h2').classList.toggle('hot', nUp > 0);
+    if ((state.cpdlc_last || 0) !== dlLast) { dlLast = state.cpdlc_last || 0;
+      try { dlLog = (await api(`/sessions/${SID}/cpdlc`)).messages.filter(m => !/^(NEXT DATA AUTHORITY|END SERVICE)/.test(m.text)).slice(-14).reverse(); } catch (e) {} }
+    const log = dlLog.length ? `<div class="dl-log2">${dlLog.map(m => `<div class="${m.dir}" data-cs="${m.callsign}"><span class="c-dim">${h(m.utc.slice(0, 5))}</span> <b>${m.callsign}</b> ${m.dir === 'up' ? '↓ from ATC' : '↑ sent'}: ${h(m.text)} <span class="st-${m.status}">${m.resp === 'N' ? '' : m.status.toUpperCase()}</span></div>`).join('')}</div>` : '';
+    const html = (items.join('') || `<div class="empty">No message to answer. Uplinks from the controller appear here with WILCO / UNABLE / STANDBY; ${conns.filter(d => d.state === 'cda').length} aircraft connected.</div>`) + log;
+    if (html !== dlH) { box.innerHTML = html; dlH = html; }
+  }
   // one listener each (the lists are re-drawn every second; mousedown survives a re-draw between press and release)
   function bindLists() {
+    $('#dlBox').addEventListener('mousedown', e => {
+      const da = e.target.closest('[data-dlid]');
+      if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
+      const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
+    });
     $('#todo').addEventListener('mousedown', e => {
       const da = e.target.closest('[data-dlid]');
       if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
@@ -554,7 +575,7 @@
     if (!$('#plPts') && sector) { const dl = document.createElement('datalist'); dl.id = 'plPts'; dl.innerHTML = realPoints(Object.keys(sector.waypoints)).map(n => `<option value="${n}">`).join(''); document.body.appendChild(dl); }
     if (!$('#todo').dataset.bound) { $('#todo').dataset.bound = 1; bindLists(); }
     if (pilotSel && !allAc().some(a => a.callsign === pilotSel)) pilotSel = null;
-    renderTodo(); renderFleet();
+    renderTodo(); renderDl(); renderFleet();
     if (pilotSel !== deckCs || !$('#deck').innerHTML) buildDeck(pilotSel);
     refreshDeck();
     if (scroll && pilotSel) $('#deckSec').scrollIntoView({ block: 'nearest' });

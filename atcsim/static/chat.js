@@ -119,7 +119,8 @@
     const go = async () => { if (!tx.value.trim()) return; const m = await send({ from: as.value, to: to.value, text: tx.value, callsign: csIn.value || null }, out); if (m) tx.value = ''; };
     sec.querySelector('[data-send]').onclick = go;
     for (const i of [tx, csIn]) i.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { if (i === tx) go(); else tx.focus(); } };
-    csIn.onfocus = () => { if (!csIn.value && selected) csIn.value = selected; };
+    let lastSel = null;                               // about: follows the selected aircraft until edited
+    setInterval(() => { if (selected !== lastSel) { lastSel = selected; if (document.activeElement !== csIn && selected) csIn.value = selected; } }, 500);
     sec.querySelector('.ch-log').addEventListener('mousedown', e => {
       const q = e.target.closest('[data-q]'); if (!q) return; e.preventDefault();
       const m = msgs.find(x => x.id === +q.dataset.ref); if (m) send({ from: m.to, to: m.from, text: q.dataset.q, ref: m.id, callsign: m.callsign }, out);

@@ -35,9 +35,12 @@ choose how to phrase them.
 Most aircraft are CPDLC equipped (J1 to J7 in item 10). The controller can send them clearances by data link
 instead of the frequency. You answer for the crew.
 
-![A CPDLC uplink on the To do list: WILCO, Standby or Unable](/static/docs/p_cpdlc.jpg "A CPDLC uplink on the To do list: WILCO, Standby or Unable")
+![The CPDLC section: an uplink to answer, then the message log](/static/docs/p_cpdlc.jpg "The CPDLC section: an uplink to answer, then the message log")
 
-- **Uplinks** appear on *To do* with a **CPDLC** tag and the message in clear (`CLIMB TO FL350 / MAINTAIN M.78`).
+- **Uplinks** appear in the **CPDLC** section of the side panel, under *To do*, with the message in clear (`CLIMB TO
+  FL350 / MAINTAIN M.78`). A new one is highlighted, the section title turns cyan with the count to answer, and the
+  aircraft's label on your radar shows `CPDLC↓` until you answer. Under them, the log of the last messages
+  (from ATC, sent), with their state.
   - **WILCO**: the aircraft does all of it, and the clearance goes in the controller's system. If the aircraft cannot
     fly it (performance, weather), WILCO is refused with the reason. Answer **Unable** instead.
   - **Standby** keeps it open. **Unable** refuses it; **…wx** and **…perf** add *due to weather* / *due to aircraft
@@ -46,7 +49,7 @@ instead of the frequency. You answer for the crew.
   - **CONTACT / MONITOR**: WILCO is the transfer to the next unit. The data link connection goes there too.
 - **Requests by data link**: on a REQ item of a connected aircraft, **By CPDLC** sends it as a downlink instead of
   saying it. The item then shows *sent by CPDLC* until the controller answers. The answer arrives as an uplink (the
-  clearance, to WILCO), or as UNABLE / STANDBY shown on *To do*.
+  clearance, to WILCO), or as UNABLE / STANDBY shown in the CPDLC section.
 - The deck has a **CPDLC** row: the connection state, and a request of your own: level, direct, speed, weather
   deviation (`L20`, `R15`, `20` either side) or free text, with an optional reason.
 
