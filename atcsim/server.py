@@ -70,6 +70,9 @@ app.include_router(pstats.router)
 
 @app.on_event("startup")
 def _startup():
+    restored = pex.restore_live()                 # exercises running when the server stopped come back, paused
+    if restored:
+        print(f"  restored {len(restored)} exercise(s): {', '.join(restored)}")
     prec.recover()
     import threading
     from . import docs_gen                     # build the documentation's generated reference in the background

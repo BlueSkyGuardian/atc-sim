@@ -77,7 +77,7 @@ class Capture:
             areas = [a.snapshot(w.t) for a in w.areas.values()]
         keep = ("outline", "shape", "sectors", "waypoints", "routes", "rad_routes", "external_points",
                 "transfer_points", "controlled_sectors", "bbox_nm", "name", "unit", "airways", "provisional_points",
-                "coordination_points")
+                "coordination_points", "coast")
         st = {"name": self.name, "scenario": self.s.scenario_name, "created": time.time(), "sep_h": w.sep_h,
               "sector": {k: sec.get(k) for k in keep}, "areas": areas}
         with open(os.path.join(self.dir, "static.json"), "w") as f:
@@ -280,7 +280,10 @@ def _render_all(eid: str, jobs: list) -> None:
 
 def recover() -> None:
     """After a restart: exercises whose session is gone are ended, and their recordings rendered."""
+    from .exercises import manager as _m
     for e in db.q("SELECT id FROM exercises WHERE ended_at IS NULL"):
+        if _m is not None and e["id"] in _m.sessions:
+            continue                                   # restored: it goes on
         db.x("UPDATE exercises SET ended_at=?, status='ended' WHERE id=?", (time.time(), e["id"]))
         if os.path.exists(os.path.join(folder(e["id"]), "frames.jsonl")):
             finish(e["id"])

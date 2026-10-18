@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import io
+import json
+import os
 import pickle
 import re
+import shutil
+import struct
 import threading
 import time
 import uuid
@@ -24,26 +28,33 @@ _pred_slots = threading.BoundedSemaphore(max(1, int(_os.environ.get("ATC_PRED_WO
 SNAP_S = 10.0                      # the timeline can rewind the simulation to any of these points
 
 
-def _shared_types():
-    """Objects that never change during a run (weather is a function of time, airspace, performance tables): the
-    snapshots refer to them instead of copying them, so a snapshot is a few tens of kB."""
+def _pid(o):
+    """Stable name of a shared object in a snapshot (the same in another process, for a restart)."""
     from .airspace import Airspace
     from .performance import TypePerformance
     from .weather import Weather
-    return (Weather, Airspace, TypePerformance)
+    if isinstance(o, Weather):
+        return ("W",)
+    if isinstance(o, Airspace):
+        return ("A",)
+    if isinstance(o, TypePerformance):
+        return ("P", o.icao, round(float(o.dT), 3))
+    return None
 
 
 class Session:
     def __init__(self, scenario_name: str, mode: str = "realtime", time_factor: float = 1.0,
-                 autostart: bool = True, label: Optional[str] = None, auto_assume: Optional[bool] = None):
+                 autostart: bool = True, label: Optional[str] = None, auto_assume: Optional[bool] = None,
+                 sid: Optional[str] = None, scn: Optional[dict] = None):
         if mode not in ("realtime", "stepped"):
             raise ValueError("mode must be 'realtime' or 'stepped'")
-        self.id = uuid.uuid4().hex[:8]
+        self.id = sid or uuid.uuid4().hex[:8]
+        self.persist_dir: Optional[str] = None     # set by the platform: the exercise survives a restart
         self.label = label or ""
         self._shared_sep, self._shared_at, self._shared_cost = None, 0.0, 0.0
         self._multi = False                # connected exercise: instructor + controller + pseudo-pilot seats
         self.scenario_name = scenario_name
-        self.scn = load_scenario(scenario_name)
+        self.scn = scn if scn is not None else load_scenario(scenario_name)
         if auto_assume is not None:
             self.scn["auto_assume"] = bool(auto_assume)
         self.world: World = build_world(self.scn)
@@ -55,8 +66,8 @@ class Session:
         self.status = "created"
         self._stop = threading.Event()
         self._snaps: List[tuple] = []     # (sim time, compressed world) every SNAP_S, for the timeline's rewind
-        self._shared: Dict[int, object] = {}
         self.rewinds = 0
+        self._persisted_frames = 0
         self._snapshot()
         self._thread = threading.Thread(target=self._run, daemon=True, name=f"session-{self.id}")
         self._thread.start()
@@ -153,33 +164,159 @@ class Session:
                 self.status = "running" if self.mode == "realtime" else "paused"
                 self._snaps = []
                 self.rewinds += 1
+                self._persisted_frames = 0
+                pd, self.persist_dir = self.persist_dir, None
                 self._snapshot()
+                self.persist_dir = pd
+                if pd:
+                    try:
+                        self._persist(rewrite=True)
+                    except OSError:
+                        pass
             elif action == "rewind":           # back to a point of the timeline; paused there
                 return self.rewind(float(seconds))
             else:
                 raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart|auto_wx|rewind")
+            self._persist_meta()
             return self.summary()
 
     # ------------------------------------------------------------------ snapshots / rewind
     def _snapshot(self) -> None:
         w = self.world
-        shared, types = self._shared, _shared_types()
         rec = w.recording
         w.recording = {"every_s": rec["every_s"], "frames": [], "meta": {}}     # the replay frames are kept apart
 
         class _P(pickle.Pickler):
             def persistent_id(self, o):
-                if isinstance(o, types):
-                    shared[id(o)] = o
-                    return id(o)
-                return None
+                return _pid(o)
         try:
             f = io.BytesIO()
             _P(f, protocol=5).dump(w)
         finally:
             w.recording = rec
         t = round(w.t, 1)
-        self._snaps = [s for s in self._snaps if s[0] < t] + [(t, zlib.compress(f.getvalue(), 1))]
+        blob = zlib.compress(f.getvalue(), 1)
+        rewrite = bool(self._snaps) and self._snaps[-1][0] >= t
+        self._snaps = [s for s in self._snaps if s[0] < t] + [(t, blob)]
+        if self.persist_dir:
+            try:
+                self._persist(rewrite)
+            except OSError:
+                pass
+
+    def _load_world(self, blob: bytes) -> World:
+        from . import performance
+        base = self.world
+
+        class _U(pickle.Unpickler):
+            def persistent_load(self, k):
+                if k[0] == "W":
+                    return base.env.weather
+                if k[0] == "A":
+                    return base.env.airspace
+                return performance.get(k[1], k[2])
+        return _U(io.BytesIO(zlib.decompress(blob))).load()
+
+    # ------------------------------------------------------------------ surviving a restart
+    def _meta(self) -> dict:
+        return {"id": self.id, "scenario": self.scenario_name, "label": self.label, "mode": self.mode,
+                "time_factor": self.time_factor, "multi": self.multi, "solo": self.solo, "rewinds": self.rewinds,
+                "created_at": self.created_at}
+
+    def _persist(self, rewrite: bool = False) -> None:
+        """Append the latest snapshot (and the replay frames since the last one) to the exercise's folder; rewrite
+        them after a rewind or a restart. The scenario itself is kept with them, as it was at the start."""
+        d = self.persist_dir
+        os.makedirs(d, exist_ok=True)
+        if not os.path.exists(os.path.join(d, "scenario.json")):
+            with open(os.path.join(d, "scenario.json"), "w") as f:
+                json.dump(self.scn, f)
+        frames = self.world.recording["frames"]
+        if rewrite:
+            with open(os.path.join(d, "snaps.bin.tmp"), "wb") as f:
+                for t, b in self._snaps:
+                    f.write(struct.pack("<dI", t, len(b)) + b)
+            os.replace(os.path.join(d, "snaps.bin.tmp"), os.path.join(d, "snaps.bin"))
+            with open(os.path.join(d, "frames.jsonl.tmp"), "w") as f:
+                for fr in frames:
+                    f.write(json.dumps(fr) + "\n")
+            os.replace(os.path.join(d, "frames.jsonl.tmp"), os.path.join(d, "frames.jsonl"))
+        else:
+            t, b = self._snaps[-1]
+            with open(os.path.join(d, "snaps.bin"), "ab") as f:
+                f.write(struct.pack("<dI", t, len(b)) + b)
+            with open(os.path.join(d, "frames.jsonl"), "a") as f:
+                for fr in frames[self._persisted_frames:]:
+                    f.write(json.dumps(fr) + "\n")
+        self._persisted_frames = len(frames)
+        self._persist_meta()
+
+    def _persist_meta(self) -> None:
+        if not self.persist_dir:
+            return
+        try:
+            os.makedirs(self.persist_dir, exist_ok=True)
+            p = os.path.join(self.persist_dir, "meta.json")
+            with open(p + ".tmp", "w") as f:
+                json.dump(self._meta(), f)
+            os.replace(p + ".tmp", p)
+        except OSError:
+            pass
+
+    def forget(self) -> None:
+        """The exercise has ended: its saved state is not needed any more."""
+        if self.persist_dir:
+            shutil.rmtree(self.persist_dir, ignore_errors=True)
+            self.persist_dir = None
+
+    @classmethod
+    def restore(cls, d: str) -> "Session":
+        """A session saved in folder d, at its last snapshot, paused (after a server restart)."""
+        with open(os.path.join(d, "meta.json")) as f:
+            meta = json.load(f)
+        with open(os.path.join(d, "scenario.json")) as f:
+            scn = json.load(f)
+        s = cls(meta["scenario"], mode=meta.get("mode", "realtime"), time_factor=meta.get("time_factor", 1.0),
+                autostart=False, label=meta.get("label"), sid=meta["id"], scn=scn)
+        snaps = []
+        with open(os.path.join(d, "snaps.bin"), "rb") as f:
+            raw = f.read()
+        i = 0
+        while i + 12 <= len(raw):
+            t, n = struct.unpack_from("<dI", raw, i)
+            if i + 12 + n > len(raw):
+                break                                  # cut short by the stop: keep the complete ones
+            snaps.append((t, raw[i + 12:i + 12 + n]))
+            i += 12 + n
+        if not snaps:
+            raise ValueError("no snapshot")
+        frames = []
+        if os.path.exists(os.path.join(d, "frames.jsonl")):
+            with open(os.path.join(d, "frames.jsonl")) as f:
+                for line in f:
+                    try:
+                        frames.append(json.loads(line))
+                    except ValueError:
+                        break
+        with s.lock:
+            w = s._load_world(snaps[-1][1])
+            w.recording = s.world.recording
+            w.recording["frames"] = [fr for fr in frames if fr["t"] <= snaps[-1][0] + 1e-6]
+            w._last_frame_t = w.recording["frames"][-1]["t"] if w.recording["frames"] else -1e9
+            s.world = w
+            s._snaps = snaps
+            if meta.get("solo"):
+                s.solo = True
+            elif meta.get("multi"):
+                s.multi = True
+            s.status = "paused"
+            s.rewinds = int(meta.get("rewinds", 0)) + 1
+            s.created_at = meta.get("created_at", s.created_at)
+            s.persist_dir = d
+            s._persisted_frames = len(w.recording["frames"])
+            s._persist(rewrite=True)
+            w._event("restored", text=f"server restarted: the exercise resumes at T+{int(w.t // 60):02d}:{int(w.t % 60):02d}, paused")
+        return s
 
     def _maybe_snapshot(self) -> None:
         if self.world.t - (self._snaps[-1][0] if self._snaps else -1e9) >= SNAP_S - 1e-6:
@@ -196,12 +333,7 @@ class Session:
             if not cand:
                 raise ValueError("nothing saved that early")
             st, blob = cand[-1]
-            shared = self._shared
-
-            class _U(pickle.Unpickler):
-                def persistent_load(self, k):
-                    return shared[k]
-            w = _U(io.BytesIO(zlib.decompress(blob))).load()
+            w = self._load_world(blob)
             old = self.world
             w.recording = old.recording
             w.recording["frames"] = [f for f in w.recording["frames"] if f["t"] <= st + 1e-6]
@@ -213,6 +345,11 @@ class Session:
             if self.status != "finished" or w.t < w.duration_s:
                 self.status = "paused"
             self.rewinds += 1
+            if self.persist_dir:
+                try:
+                    self._persist(rewrite=True)
+                except OSError:
+                    pass
             w._event("rewind", text=f"simulation rewound to T+{int(st // 60):02d}:{int(st % 60):02d}")
             out = self.summary()
             out["rewound_to_s"] = st
@@ -386,6 +523,7 @@ class SessionManager:
             s = self.sessions.pop(sid, None)
         if s:
             s.stop()
+            s.forget()
 
     def list(self) -> List[dict]:
         return [s.summary() for s in self.sessions.values()]

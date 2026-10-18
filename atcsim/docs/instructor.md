@@ -115,6 +115,13 @@ timeline under the scope (**Timeline** in the toolbar hides it). Click or drag t
 
 The exercise page has a switcher to your other live exercises and a link back to the grid.
 
+### If the server restarts
+
+Running exercises (and solo runs) are saved every 10 simulated seconds. After a restart or a redeploy they come back
+by themselves, paused at the last save (at most 10 simulated seconds earlier), with the controller's entries, CPDLC,
+chat, the replay timeline and the rewind points. Everyone reconnects, and you press **Run**. The recording video goes
+on, with a gap for the time the server was down.
+
 ## Ending, recordings and evaluations
 
 **End exercise** asks for confirmation, then:

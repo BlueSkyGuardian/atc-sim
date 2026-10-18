@@ -14,8 +14,9 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("ATC_ADMIN_EMAILS", "").split(",") if e.strip()}
 # "on" (default): accounts and roles; "off": the open single-user mode of the earlier versions (local use only)
 AUTH = os.environ.get("ATC_AUTH", "on").lower()
-# a password-less login form for testing, enabled automatically while no Google client is configured
-DEV_LOGIN = os.environ.get("ATC_DEV_LOGIN", "1" if not GOOGLE_CLIENT_ID else "0") == "1"
+# a password-less login form for testing (any e-mail, no password): only when asked for, never by default -
+# a server without its Google client must not let anyone in as anyone
+DEV_LOGIN = os.environ.get("ATC_DEV_LOGIN", "0") == "1"
 API_KEY = os.environ.get("ATC_API_KEY", "")                        # header X-API-Key = admin rights (scripts)
 COOKIE_SECURE = PUBLIC_URL.startswith("https://")
 

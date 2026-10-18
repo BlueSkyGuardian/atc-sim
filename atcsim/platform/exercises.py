@@ -380,6 +380,41 @@ def register(s, u: dict, name: str, multi: bool = True, solo: bool = False) -> N
         db.add_member(s.id, u["id"], "atc")
     if multi or solo:
         recorder.start(s.id, s, name)
+        _keep(s)
+
+
+def _keep(s) -> None:
+    """The exercise survives a server restart: its snapshots go to the data folder (data/live/<id>)."""
+    with s.lock:
+        s.persist_dir = os.path.join(config.DATA_DIR, "live", s.id)
+        s._persist(rewrite=True)
+
+
+def restore_live() -> list:
+    """At startup: the exercises that were running when the server stopped come back, paused at their last
+    snapshot (at most 10 simulated seconds back), with their recording resumed."""
+    from . import recorder
+    from ..session import Session
+    root = os.path.join(config.DATA_DIR, "live")
+    out = []
+    if not os.path.isdir(root):
+        return out
+    for sid in sorted(os.listdir(root)):
+        d = os.path.join(root, sid)
+        e = db.exercise(sid)
+        if e is None or e["ended_at"]:
+            shutil.rmtree(d, ignore_errors=True)
+            continue
+        try:
+            s = Session.restore(d)
+        except Exception as ex:  # noqa: BLE001 - a broken save must not stop the server
+            print(f"exercise {sid}: could not be restored ({type(ex).__name__}: {ex})")
+            continue
+        with manager.lock:
+            manager.sessions[s.id] = s
+        recorder.start(s.id, s, e["name"])
+        out.append(s.id)
+    return out
 
 
 @router.get("/api/exercises/{eid}")

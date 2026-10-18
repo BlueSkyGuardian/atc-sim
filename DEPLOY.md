@@ -64,7 +64,7 @@ administrator. Complete your profile (first name, last name, licence number).
 | `ATC_AUTH` | `off` = the old open single-user mode (only on your own computer, never on the internet) |
 | `ATC_PRED_INTERVAL_S` | minimum seconds between two runs of the 10-minute conflict look-ahead of an exercise (default 8; it also waits 3× its own computing time). The short-term conflict alert (3 min) is a separate fast check, every second |
 | `ATC_PRED_WORKERS` | look-aheads computed at the same time over the whole server (default 1; raise it on a server with more cores) |
-| `ATC_DEV_LOGIN` | `1` = password-less test login form (automatic when no Google client is set; never online) |
+| `ATC_DEV_LOGIN` | `1` = password-less test login form (anyone signs in as any e-mail). Off unless set; for a local test machine only, never online |
 
 ## Oracle Cloud (Always Free) notes
 
@@ -104,9 +104,15 @@ ATC_API_KEY=... python examples/baseline_agent.py --server https://atc.example.c
 ## Local test without Google
 
 ```bash
-python run.py --port 8000          # no Google client: the sign-in page offers a test login (any e-mail)
+python run.py --port 8000 --dev-login   # the sign-in page offers a test login (any e-mail): local tests only
 ```
 
 The first account created that way is administrator (unless `ATC_ADMIN_EMAILS` is set). The microphone
 works on `http://localhost`; from other computers on the network it needs HTTPS, e.g. a quick local
 certificate with Caddy: `caddy reverse-proxy --from <your-ip>.nip.io --to localhost:8000`.
+
+## Updating during an exercise
+
+Running exercises are saved in the data volume (`/data/live/<exercise>`) every 10 simulated seconds. A
+`docker compose up -d --build` (or a crash) does not lose them: when the server starts again they are back, paused
+at their last save, and the instructor presses Run. The save is removed when the exercise ends.

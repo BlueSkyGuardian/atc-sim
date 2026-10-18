@@ -21,8 +21,9 @@ python run.py                      # listens on 0.0.0.0:8000, prints the LAN add
 instructor / admin), the scenario designer and JSON format, the scenario library, the weather and aircraft models
 and the API reference. The pages are Markdown files in `atcsim/docs/`, public (no sign-in needed).
 
-Open `http://<machine-ip>:8000/` and sign in (without a Google client configured, a test login asks only for an
-e-mail address; the first account is administrator). `/radar` is the single-user radar of the earlier versions and
+Open `http://<machine-ip>:8000/` and sign in with Google (see DEPLOY.md). For a local test without Google, start
+with `python run.py --dev-login`: a test login then asks only for an e-mail address (the first account is
+administrator). It is off unless asked for, because it lets anyone in as anyone. `/radar` is the single-user radar of the earlier versions and
 `/docs` the interactive API reference. Scripts and agents send the `X-API-Key` header (`ATC_API_KEY`), or run the
 server with `ATC_AUTH=off` for the old open mode on your own machine. The first session that uses a new aircraft
 type or temperature takes about a second longer, while performance tables are built.
