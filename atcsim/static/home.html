@@ -33,8 +33,10 @@
   /* card grids inside the pages */
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
   .grid.wide { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
-  .group { margin: 22px 0 8px; display: flex; align-items: baseline; gap: 10px; font-size: 15px; font-weight: 650; color: var(--text); }
+  .group { margin: 22px 0 10px; display: flex; align-items: baseline; gap: 10px; font-size: 15px; font-weight: 650; color: var(--text); }
   .group .dim { font-size: 13px; font-weight: 400; }
+  .group .grow { flex: 1; }
+  .thumb.newcard { min-height: 0; height: 100%; min-height: 250px; }
   .xc { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth); }
   .xc .t { font-weight: 650; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
   .xc .s { color: var(--dim); font-size: 13px; }
@@ -78,14 +80,12 @@
   <!-- ======================================================= hub -->
   <section class="page" id="pg-home">
     <div class="pagehead"><h1 id="hello">Home</h1></div>
+    <div class="instr-only" id="liveSec">
+      <div class="group" style="margin-top:4px">Live exercises <span class="dim" id="liveN"></span><span class="grow"></span><span class="dim" style="font-weight:400">click one to open it · status refreshes every 2 s</span></div>
+      <div class="grid" id="thumbs"></div>
+      <div class="group" style="margin-top:30px">Workspace</div>
+    </div>
     <div class="tiles" id="tiles"></div>
-  </section>
-
-  <!-- ======================================================= live exercises (instructor) -->
-  <section class="page" id="pg-live">
-    <div class="crumb"><a href="#">Home</a> / Live exercises</div>
-    <div class="pagehead"><h1>Live exercises</h1><span class="dim">click one to open it · status refreshes every 2 s</span></div>
-    <div class="grid" id="thumbs"></div>
   </section>
 
   <!-- ======================================================= exercises: live + history, search -->
@@ -145,19 +145,20 @@ const month = t => new Date(t * 1000).toLocaleDateString([], { year: 'numeric', 
 const person = m => `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email;
 
 // ------------------------------------------------------------ router: #live, #exercises, #scenarios, #evaluations, #recordings
-const PAGES = ['home', 'live', 'exercises', 'scenarios', 'evaluations', 'recordings'];
+const PAGES = ['home', 'exercises', 'scenarios', 'evaluations', 'recordings'];
 function route() {
-  let p = location.hash.replace(/^#\/?/, '') || 'home';
-  if (!PAGES.includes(p) || ((p === 'live' || p === 'scenarios') && !isInstr())) p = 'home';
+  let p = curPage();
+  if (!PAGES.includes(p) || (p === 'scenarios' && !isInstr())) p = 'home';
   PAGES.forEach(k => $('#pg-' + k).classList.toggle('on', k === p));
   document.title = (p === 'home' ? 'ATC SIM' : $('#pg-' + p + ' h1').textContent + ' · ATC SIM');
-  if (p === 'home') renderTiles();
+  if (p === 'home') { renderTiles(); if (isInstr()) renderThumbs(); }
   if (p === 'exercises') renderExercises();
   if (p === 'scenarios') renderScenarios();
   if (p === 'recordings') renderRecs();
   window.scrollTo(0, 0);
 }
 addEventListener('hashchange', route);
+function curPage() { const p = location.hash.replace(/^#\/?/, '') || 'home'; return p === 'live' ? 'home' : p; }
 
 // ------------------------------------------------------------ hub tiles
 function renderTiles() {
@@ -168,24 +169,17 @@ function renderTiles() {
   const pend = EV ? EV.pending.length : 0, unack = EV ? EV.received.filter(r => !r.ack_at).length : 0;
   const ready = RECS.filter(r => r.status === 'ready').length, rendering = RECS.filter(r => r.status === 'rendering').length;
   const T = [];
-  if (isInstr()) {
-    T.push(`<a class="tile" href="#live" data-tile="live"><h3>Live exercises <span class="n ${conflicts ? 'hot' : ''}">${instrLive.length}</span></h3>
-      ${instrLive.length ? `<canvas data-mini></canvas><p>${conflicts ? `<span class="bad">${conflicts} with a conflict now</span>` : 'No conflict now'} · ${instrLive.map(e => esc(e.name)).slice(0, 2).join(', ')}</p>`
-        : '<p>None running. Start one from a scenario.</p>'}</a>`);
-    T.push(`<div class="tile action" data-newex role="button" tabindex="0"><h3>New exercise</h3><p>Pick a scenario; it is built paused, then you invite the controller and the pseudo-pilot.</p></div>`);
-  }
-  T.push(`<a class="tile" href="#exercises" data-tile="exercises"><h3>${isInstr() ? 'Exercises' : 'Your exercises'} <span class="n">${EXS.length}</span></h3>
+  T.push(`<div class="tile" data-href="#exercises" data-tile="exercises" role="link" tabindex="0"><h3>${isInstr() ? 'Exercises' : 'Your exercises'} <span class="n">${EXS.length}</span></h3>
     ${mineLive.length ? `<ul>${mineLive.map(e => `<li><span class="pill live">LIVE</span><span class="grow">${esc(e.name)}</span><a href="/x/${e.id}" onclick="event.stopPropagation()"><button class="small primary">Open</button></a></li>`).join('')}</ul>` : ''}
-    ${instrLive.length && !mineLive.length ? `<p><span class="pill live">LIVE</span> ${instrLive.length} running now, ${instrLive.map(e => esc(e.name)).slice(0, 3).join(', ')}</p>` : ''}
     ${recent.length ? `<ul>${recent.map(e => `<li><span class="grow">${esc(e.name)}</span><span class="dim">${fmtDay(e.ended_at || e.created_at)}</span></li>`).join('')}</ul>`
       : mineLive.length ? '' : `<p>${isInstr() ? 'Every exercise you ran or joined, with search.' : 'No exercise yet. Your instructor invites you, or sends you a link.'}</p>`}
-    <div class="foot">Search by name or date, sort by difficulty</div></a>`);
+    <div class="foot">Search by name or date, sort by difficulty</div></div>`);
   T.push(`<a class="tile" href="#evaluations" data-tile="evaluations"><h3>Evaluations ${pend ? `<span class="n hot">${pend} to write</span>` : ''}</h3>
     ${EV && EV.pending[0] ? `<p>Next: evaluate <b>${esc(EV.pending[0].ratee)}</b> (${EV.pending[0].role}), ${esc(EV.pending[0].exercise)}</p>` : ''}
     ${unack ? `<p><span class="warn">${unack} received to acknowledge</span></p>` : ''}
     ${EV && !pend && !unack ? `<p>${EV.received.length} received · ${EV.given.length} given. Nothing waiting.</p>` : ''}</a>`);
   T.push(`<a class="tile" href="#recordings" data-tile="recordings"><h3>Recordings <span class="n">${ready}</span></h3>
-    <p>${RECS[0] ? `Latest: ${esc(RECS[0].exercise || '')}, ${fmtDay(RECS[0].created_at)}` : 'Every exercise is recorded: the controller’s screen with the radio and telephone.'}</p>
+    <p>${RECS.find(r => r.status === 'ready') ? `Latest: ${esc(RECS.find(r => r.status === 'ready').exercise || '')}, ${fmtDay(RECS.find(r => r.status === 'ready').created_at)}` : 'Every exercise is recorded: the controller’s screen with the radio and telephone.'}</p>
     ${rendering ? `<p class="warn">${rendering} rendering…</p>` : ''}</a>`);
   if (isInstr()) {
     const fam = { p: 0, b: 0, s: 0, own: 0 };
@@ -199,8 +193,12 @@ function renderTiles() {
   if (ME.role === 'admin') T.push(`<a class="tile" href="/admin"><h3>Users</h3><p>Roles of every account: administrator, instructor, controller, pseudo-pilot.</p></a>`);
   T.push(`<a class="tile" href="/help"><h3>Help</h3><p>Manuals for each seat, the scenario format, the weather and aircraft models, the API.</p></a>`);
   $('#tiles').innerHTML = T.join('');
+  // tiles that hold their own links (Open) cannot be <a> themselves: nested links break the grid
+  $$('#tiles .tile[data-href]').forEach(t => {
+    t.onclick = e => { if (!e.target.closest('a, button')) location.href = t.dataset.href; };
+    t.onkeydown = e => { if (e.key === 'Enter' && e.target === t) location.href = t.dataset.href; };
+  });
   $$('[data-newex]').forEach(b => { b.onclick = newExercise; b.onkeydown = e => { if (e.key === 'Enter') newExercise(); }; });
-  const mini = $('#tiles canvas[data-mini]'); if (mini && instrLive[0]) drawThumb(mini, instrLive[0]);
 }
 
 // ------------------------------------------------------------ data
@@ -215,8 +213,8 @@ async function loadExercises(full) {
     .sort((a, b) => b.created_at - a.created_at);
   for (const e of EXS) if (e.live && e.seat === 'instructor') { e._stca = stca(e.picture || [], e.sep_h || 5);
     if (!outlines[e.id]) api(`/api/exercises/${e.id}/outline`).then(o => { outlines[e.id] = o; }).catch(() => {}); }
-  const p = location.hash.replace(/^#\/?/, '') || 'home';
-  if (p === 'home') renderTiles(); else if (p === 'live') renderThumbs(); else if (p === 'exercises' && !$('#xList').dataset.sig) renderExercises();
+  const p = curPage();
+  if (p === 'home') { renderTiles(); if (isInstr()) renderThumbs(); } else if (p === 'exercises' && !$('#xList').dataset.sig) renderExercises();
   else if (p === 'exercises') renderExercises(true);
 }
 
@@ -279,10 +277,11 @@ function renderThumbs() {
     box.dataset.ids = ids;
     box.innerHTML = live.map(e => `<div class="thumb" data-id="${e.id}"><div class="name"><span>${esc(e.name)}</span><span class="dim mono" style="font-weight:400">${e.id}</span></div>
       <div class="who" data-who></div><canvas></canvas><div class="bar" data-bar></div></div>`).join('') +
-      `<div class="thumb newcard" id="newEx" data-newex>＋ New exercise</div>`;
+      `<div class="thumb newcard" id="newEx" data-newex role="button" tabindex="0"><div style="text-align:center"><div style="font-size:30px;line-height:1">＋</div><b style="color:var(--text)">New exercise</b><br><span style="font-size:13px">pick a scenario; it is built paused</span></div></div>`;
     $$('.thumb[data-id]').forEach(t => t.onclick = () => location.href = '/x/' + t.dataset.id);
     $('#newEx').onclick = newExercise;
   }
+  $('#liveN').textContent = live.length ? live.length + ' running' : 'none running';
   for (const e of live) {
     const el = box.querySelector(`[data-id="${e.id}"]`); if (!el) continue;
     drawThumb(el.querySelector('canvas'), e);
@@ -361,7 +360,7 @@ function scnFamily(s) {
 }
 async function loadScenarios() {
   scenarios = await api('/api/scenarios');
-  if ((location.hash.replace(/^#\/?/, '') || 'home') === 'scenarios') renderScenarios();
+  if ((curPage()) === 'scenarios') renderScenarios();
 }
 function renderScenarios() {
   const q = $('#sq').value.trim().toLowerCase(), asp = $('#sAsp').value, sort = $('#sSort').value;
@@ -435,7 +434,7 @@ async function share(name) {
 // ------------------------------------------------------------ recordings page
 async function loadRecs() {
   try { RECS = await api('/api/recordings' + ($('#showArch').checked ? '?archived=true' : '')); } catch (e) { return; }
-  const p = location.hash.replace(/^#\/?/, '') || 'home';
+  const p = curPage();
   if (p === 'recordings') renderRecs(); else if (p === 'home') renderTiles();
 }
 function renderRecs() {
@@ -476,7 +475,7 @@ async function loadEvals(force) {
   $('#evalGiven').innerHTML = EV.given.length ? `<div class="group">Given <span class="dim">${EV.given.length}</span></div><div class="grid wide">` + EV.given.slice(0, 40).map(r => card(r, false)).join('') + '</div>' : '';
   $('#evalNone').innerHTML = EV.pending.length || EV.received.length || EV.given.length ? '' : '<div class="empty-card">No evaluation yet. They are written when an exercise ends.</div>';
   $$('[data-ack]').forEach(b => b.onclick = async () => { await post(`/api/evaluations/${b.dataset.ack}/ack`, { comment: $(`[data-ackc="${b.dataset.ack}"]`).value }); loadEvals(true); });
-  if ((location.hash.replace(/^#\/?/, '') || 'home') === 'home') renderTiles();
+  if ((curPage()) === 'home') renderTiles();
 }
 function evalForm(p) {
   const dims = EV.dimensions[p.kind], val = {};

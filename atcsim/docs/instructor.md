@@ -2,23 +2,27 @@
 
 ## Home page
 
-The home page is a grid of tiles. Each tile sums up one area (how many exercises are live and whether one has a
-conflict now, how many evaluations are waiting, the latest recording) and opens that area's page. Inside a page the
-content is grouped in cards. *Home* in the breadcrumb at the top of a page brings you back.
+The home page has two parts. On top, **Live exercises**: a card per running exercise and a **New exercise** card.
+Below, the **Workspace**: one tile per area, each summing it up (how many evaluations are waiting, the latest
+recording, the scenarios per group) and opening that area's page. Inside a page the content is grouped in cards.
+*Home* in the breadcrumb at the top of a page brings you back.
 
-![The home page: one tile per area](/static/docs/i_home.jpg "The home page: one tile per area")
+![The home page: live exercises on top, the other areas below](/static/docs/i_home.jpg "The home page: live exercises on top, the other areas below")
 
-| Tile | Page |
+Each live exercise card is a live thumbnail (airspace and traffic, in 3D) with a status bar: elapsed sim time,
+LIVE / PAUSED / READY, conflict state (red **LOSS**, amber **CONFLICT** within 3 min, or none), who is connected, a
+**TX** tag on whoever is transmitting, aircraft waiting to be assumed. Click one to open it. **New exercise** opens the
+scenario picker.
+
+![Live exercises: a thumbnail per exercise with its status, conflicts and who is connected](/static/docs/i_dashboard.jpg "Live exercises: a thumbnail per exercise with its status, conflicts and who is connected")
+
+| Workspace tile | Page |
 |---|---|
-| **Live exercises** | A live thumbnail of each running exercise (airspace and traffic) with a status bar: elapsed sim time, LIVE / PAUSED / READY, conflict state (red **LOSS**, amber **CONFLICT** within 3 min, or none), who is connected, a **TX** tag on whoever is transmitting, aircraft waiting to be assumed. Click one to open it. **+ New exercise** starts one |
-| **New exercise** | Opens the scenario picker straight away |
 | **Exercises** | Every exercise you ran or joined, live and past, with a search bar (see below) |
 | **Evaluations** | The evaluations you still have to write, those you received and those you gave |
 | **Recordings** | The videos of ended exercises: download, archive (hide), re-render, delete |
 | **Scenarios** | Every scenario you can use, grouped by family, with author, complexity, density, traffic and duration |
 | **Scenario designer**, **Statistics**, **Users** (admin), **Help** | Open those pages |
-
-![Live exercises: a thumbnail per exercise with its status, conflicts and who is connected](/static/docs/i_dashboard.jpg "Live exercises: a thumbnail per exercise with its status, conflicts and who is connected")
 
 ### Finding a past exercise
 

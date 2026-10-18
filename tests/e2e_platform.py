@@ -106,6 +106,9 @@ with sync_playwright() as p:
     links = ins.evaluate("EXINFO.links")
     atc.goto("/")
     atc.wait_for_selector(f"a[href='/x/{eid}']")
+    ok(atc.locator(f"#tiles > .tile[data-tile=exercises] a[href='/x/{eid}'] button").count() == 1
+       and atc.evaluate("[...document.querySelectorAll('#tiles > *')].every(t => t.classList.contains('tile'))"),
+       "controller's home: the live exercise sits inside its tile, the grid holds only tiles")
     atc.screenshot(path=f"{OUT}/03_controller_home.png")
     atc.click(f"a[href='/x/{eid}'] button")
     pil.goto(links["pilot"])
@@ -406,9 +409,9 @@ with sync_playwright() as p:
     ok(rx > 10, f"controller's browser played {rx} audio frames (fake microphones)")
     # dashboard
     ins.goto("/")
-    ins.wait_for_selector("#tiles [data-tile=live] canvas")
-    ins.click("#tiles [data-tile=live]")
-    ins.wait_for_selector(".thumb[data-id] canvas")
+    ins.wait_for_selector("#liveSec .thumb[data-id] canvas")
+    ok(ins.locator("#liveSec #newEx").count() == 1 and ins.locator("#tiles [data-tile=scenarios]").count() == 1,
+       "instructor's home: live exercises and New exercise on top, the other areas below")
     ins.wait_for_timeout(2500)
     ins.screenshot(path=f"{OUT}/11_instructor_dashboard.png")
     ok("LIVE" in ins.locator(f".thumb[data-id='{eid}'] [data-bar]").inner_text(), "dashboard thumbnail: live")
