@@ -941,6 +941,8 @@ class World:
         if self.record:
             from . import oldi
             oldi.update(self)
+            from . import cpdlc
+            cpdlc.update(self)
             self._monitor(dt)
             self._monitor_weather(dt)
             if self.t - self._last_frame_t >= self.recording["every_s"] - 1e-6 or self.finished:
@@ -1501,7 +1503,7 @@ class World:
         return e
 
     def state(self, trails: bool = False) -> dict:
-        from . import atctools, oldi
+        from . import atctools, oldi, cpdlc
         acs = [a.snapshot(trails) for a in self.aircraft.values() if a.active]
         for d in acs:
             a = self.aircraft[d["callsign"]]
@@ -1519,6 +1521,9 @@ class World:
             "coord": oldi.coord_view(self),
             "dyn_points": self.dyn_points,
             "oldi_last": self.oldi[-1]["id"] if self.oldi else 0,
+            "cpdlc": cpdlc.state_view(self),
+            "cpdlc_last": self.cpdlc_msgs[-1]["id"] if getattr(self, "cpdlc_msgs", None) else 0,
+            "chat_last": self.chat_msgs[-1]["id"] if getattr(self, "chat_msgs", None) else 0,
             "duration_s": self.duration_s,
             "finished": self.finished,
             "aircraft": acs,

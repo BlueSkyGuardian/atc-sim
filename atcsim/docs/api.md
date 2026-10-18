@@ -130,6 +130,30 @@ move aircraft):
 
 Entries drive the labels, MTCD, route adherence and OLDI. An empty string clears a field.
 
+## CPDLC
+
+| Method | Path | What |
+|---|---|---|
+| GET | `/sessions/{id}/cpdlc?since=0&callsign=` | Messages since an id (one aircraft's or all), our address (`own`), and per equipped aircraft its connection: `state` (`none`, `logon`, `cda`, `transferred`), `cda`, `nda`, `open` dialogues, `recent` ones |
+| POST | `/sessions/{id}/cpdlc/parse` | `{"text": "CL350 D ROLRO", "callsign": "RAM201"}` → the elements in clear, whether it would be sent by data link |
+| POST | `/sessions/{id}/cpdlc/command` | The controller's command line: `{"text", "callsign", "voice": false}`. An uplink to a connected, assumed aircraft (or an answer to its request: `APP`, `UNA`, `SBY`, `ROG`); `voice: true` or no connection = only the system entries. Also `NDA GCCC`, `EOS` |
+| POST | `/sessions/{id}/cpdlc/respond` | The pilot answers an uplink: `{"message_id", "answer": "WILCO" | "UNABLE" | "STANDBY" | "ROGER" | "AFFIRM" | "NEGATIVE", "reason": "weather" | "performance"}`. WILCO executes it (400 if the aircraft cannot) |
+| POST | `/sessions/{id}/cpdlc/downlink` | A pilot request: `{"callsign", "kind": "level" | "climb" | "descent" | "direct" | "speed" | "deviation" | "text", "value", "reason"}`, or `{"callsign", "request_id"}` to send one of its pending requests |
+
+### Coordination chat
+
+| Method | Path | What |
+|---|---|---|
+| GET | `/sessions/{id}/chat?since=0&station=` | The stations (`own`: our sector, the other sectors, the adjacent units), the quick answers and the messages, each with `from`, `to`, `text`, `callsign`, `ref` (the message it answers) |
+| POST | `/sessions/{id}/chat` | `{"from", "to", "text", "callsign", "ref"}`. The controller writes as our sector (`from` may be left out); the pseudo-pilot as another station; the instructor as any. A sector can be given by its id (`WN` → `GMAC WN`) |
+
+The state carries `chat_last` (the last message id).
+
+The state (`GET /state`, the stream) carries `cpdlc` (the connections and their open or recent dialogues, as above)
+and `cpdlc_last` (the last message id). On the solo radar the simulated pilot answers uplinks by itself after 8 to
+25 seconds: WILCO, or UNABLE when the aircraft cannot fly it. Message elements carry their ICAO number (`UM20`
+CLIMB TO, `UM74` PROCEED DIRECT TO, `UM117` CONTACT, `DM9` REQUEST CLIMB TO, …; FANS 1/A numbering).
+
 ## Prediction and tools
 
 | Method | Path | What |
@@ -200,8 +224,8 @@ In a connected exercise:
 | Seat | May |
 |---|---|
 | **instructor** | Everything on the session, including control |
-| **atc** | Read everything; `entries`, assume / release, MTCD probe and look-ahead. Instructions do not move aircraft (the pilot executes) |
-| **pilot** | Read everything; instructions (the aircraft executes them whether or not the controller assumed it), MTCD probe |
+| **atc** | Read everything; `entries`, assume / release, MTCD probe and look-ahead, CPDLC `parse` and `command`, chat as our sector. Instructions do not move aircraft (the pilot executes) |
+| **pilot** | Read everything; instructions (the aircraft executes them whether or not the controller assumed it), MTCD probe, CPDLC `respond` and `downlink`, chat as another station |
 
 The WebSocket `/sessions/{id}/comms` carries the radio and telephone audio (16 kHz G.711 μ-law). It is used by the
 pages, not by agents.

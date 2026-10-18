@@ -43,6 +43,8 @@ The toolbar changes **your view only**, never the simulation:
 | **MTCD** | Medium-term conflict detection on/off (key <kbd>M</kbd>) |
 | **INFO** | Track info window on/off (key <kbd>I</kbd>) |
 | **OLDI** | OLDI messages window (key <kbd>O</kbd>) |
+| **CPDLC** | CPDLC window: requests, dialogues, connections (key <kbd>J</kbd>); the count of requests waiting |
+| **CHAT** | Coordination chat with the other sectors and units (key <kbd>T</kbd>); the count of unread messages |
 | **?** | Keyboard shortcuts |
 | UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
 | ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
@@ -273,7 +275,77 @@ In exercises, aircraft do **not** deviate by themselves. A request you leave una
 15 NM ahead is closed as **not answered** and counted as a task not handled. When you approve a deviation, enter
 the **WX** tag, so the system knows the aircraft is dealing with weather and the label does not show `RDEV`.
 
-## Radio and telephone
+## CPDLC and the command line
+
+### The command line
+
+Press <kbd>Enter</kbd> (outside a text field) to open the command line at the bottom of the scope, and type the
+clearance for the selected aircraft. Several items make one clearance: `CL350 M78 D ROLRO`. You can also start with
+the callsign (`RAM201 H270`) without selecting the aircraft.
+
+![The command line: the selected aircraft and its CPDLC state on the left, what will be sent above, suggestions as you type](/static/docs/c_cpdlc_typing.jpg "The command line: the selected aircraft and its CPDLC state on the left, what will be sent above, suggestions as you type")
+
+- **Enter** sends it by **CPDLC** when the aircraft is connected (`CPDLC` next to the callsign). The clearance goes in
+  the system only when the pilot answers **WILCO**.
+- **Shift+Enter** only puts it in the system, for a clearance you give **by voice** (cleared level, heading, direct,
+  speed, route, weather deviation, as with the label menus).
+- An aircraft with no data link (`VOICE`) or not yet connected (`LOGON`): Enter puts the clearance in the system and
+  reminds you to give it by voice.
+- Above the line you see the message in clear (`↑ CLIMB TO FL350 · MAINTAIN M.78`) or what is wrong. Suggestions
+  follow what you type: after `D` the next points of the aircraft's route, then points and keywords. <kbd>Tab</kbd>
+  takes the highlighted one, the arrows move between them, <kbd>Esc</kbd> closes the line.
+
+| Type | Sends | Type | Sends |
+|---|---|---|---|
+| `CL350`, `C350` | CLIMB TO FL350 | `DES240` | DESCEND TO FL240 |
+| `350`, `FL350` | climb / descend / maintain, from the present level | `V1500` after a level | AT 1500 FT/MIN MINIMUM |
+| `H270` | FLY HEADING 270 | `L270` / `R270` | TURN LEFT / RIGHT HEADING 270 |
+| `D ROLRO`, `DROLRO`, `ROLRO` | PROCEED DIRECT TO ROLRO | `VIA IBALU TERTO` | CLEARED TO TERTO VIA IBALU TERTO |
+| `M78` | MAINTAIN M.78 | `S280` / `K280` | MAINTAIN 280 KT / ON CONVERSION |
+| `SN` | RESUME NORMAL SPEED | `RES` | RESUME OWN NAVIGATION |
+| `DEV`, `DEVL20`, `DEVR15` | CLEARED TO DEVIATE UP TO 20 NM (EITHER SIDE / LEFT / RIGHT) OF ROUTE | `TXT …` or `"…"` | free text |
+| `CT` / `MON` | CONTACT / MONITOR the next unit on its frequency (`CT GCCC 128.6` to choose) | `NDA GCCC` | NEXT DATA AUTHORITY |
+| `APP` | approves the pilot's request as asked | `UNA`, `SBY`, `ROG`, `AFF`, `NEG` | UNABLE, STANDBY, ROGER, AFFIRM, NEGATIVE |
+| `EOS` | END SERVICE (ends the connection) | | |
+
+The level, heading and speed shortcuts are those of the solo radar's command box.
+
+### Connection and data authority
+
+An aircraft is CPDLC equipped when its flight plan item 10 has J1 to J7. It logs on to GMAC about 15 minutes before
+it enters, while the previous unit is still the **current data authority** (label: a dim `d`). At the transfer of
+communication GMAC becomes the current data authority (label: `D`), and you can exchange messages once you have
+assumed it.
+
+When the coordination with the next unit is activated (OLDI ACT), the system sends **NEXT DATA AUTHORITY** to that
+unit; `NDA` changes it. Transfer the aircraft with `CT` (or `MON`): when the pilot answers WILCO the aircraft is
+decontrolled and the connection goes to the next unit with END SERVICE. Between our own sectors the connection stays
+with GMAC. An aircraft you decontrol by voice has its connection transferred by the system.
+
+### Dialogues on the label and in the CPDLC window
+
+The label shows the dialogue after the callsign:
+
+| Tag | Meaning |
+|---|---|
+| `D` / `d` | connected (we are the current data authority) / logged on, not yet ours |
+| `↑CL350` (white) | your uplink, waiting for the pilot |
+| `↑CL350 SBY` (amber) | the pilot answered STANDBY |
+| `↑CL350?` (blinking amber) | no answer after 2 minutes |
+| `↑UNABLE` (red) | the pilot answered UNABLE (shown for 40 s) |
+| `✓` (green) | WILCO (a few seconds) |
+| `↓RQ370`, `↓RQ ROLRO`, `↓RQ WX` (blinking cyan) | a request from the pilot: answer it |
+
+The **CPDLC** button (key <kbd>J</kbd>) opens the CPDLC window. It counts the requests waiting for you.
+
+![The CPDLC window: requests to answer, uplinks waiting for the pilot, the selected aircraft's connection and dialogue](/static/docs/c_cpdlc_window.jpg "The CPDLC window: requests to answer, uplinks waiting for the pilot, the selected aircraft's connection and dialogue")
+
+- **Requests**: each pilot request with **Approve** (the clearance as asked), **Standby** and **Unable**. You can
+  also answer on the command line: `APP`, `SBY`, `UNA`, or any clearance (`CL360` to give less than asked).
+- **Waiting for the pilot**: your uplinks not answered yet.
+- **The selected aircraft**: its connection (current and next data authority) and its messages.
+
+## Radio, telephone and chat
 
 - **Radio:** hold the **space bar** (outside text fields) or the on-screen button. Everyone in the exercise hears
   you. The scope shows who is transmitting.
@@ -281,6 +353,23 @@ the **WX** tag, so the system knows the aircraft is dealing with weather and the
   unit. When they call you, a ringing box shows the unit: answer it. Calls are full duplex until you hang up.
 
 ![An adjacent unit calling you: answer or decline](/static/docs/c_phone_ringing.jpg "An adjacent unit calling you: answer or decline")
+
+### Coordination chat
+
+Written coordination with the other sectors and the adjacent units, next to the telephone. Every message shows its
+**sender and its destination**: you are our sector (`GMAC WS`, or `GMAC WN+WS` when band-boxed); the others are the
+Agadir sectors not controlled in the exercise (`GMAC WN`, `GMAC ON`…) and the adjacent units (`GMMM`, `LPPC`,
+`GCCC`, `LECS`, `MADEIRA`). The pseudo-pilots and the instructor write as those stations.
+
+![The coordination chat: conversations by station, each message with sender → destination, the aircraft it is about, and quick answers](/static/docs/c_chat.jpg "The coordination chat: conversations by station, each message with sender → destination, the aircraft it is about, and quick answers")
+
+- A message to you pops up at the bottom right for a few seconds (click it to open the conversation). The **CHAT**
+  button (key <kbd>T</kbd>) counts the messages not read yet.
+- The window lists the conversations by station. Pick the destination in *To*, the aircraft in *about* (the selected
+  one by default), type and press Enter.
+- A message to you has quick answers: **APPROVED**, **UNABLE**, **STANDBY**, **ROGER**. They go back to its sender,
+  about the same aircraft.
+
 
 ## Keyboard shortcuts
 
@@ -302,7 +391,8 @@ Shortcuts work outside text fields, with or without capitals.
 | <kbd>Delete</kbd> | Remove last RBL (<kbd>Shift</kbd>: all) | <kbd>+</kbd> / <kbd>−</kbd> | Zoom |
 | Arrows | Pan | <kbd>0</kbd> | Reset view |
 | <kbd>Esc</kbd> | Close / cancel / deselect | <kbd>?</kbd> | Help |
-| <kbd>Space</kbd> (held) | Transmit | | |
+| <kbd>Space</kbd> (held) | Transmit | <kbd>Enter</kbd> | Command line (CPDLC, voice entry) |
+| <kbd>J</kbd> | CPDLC window | <kbd>T</kbd> | Coordination chat |
 
 ## After the exercise
 

@@ -115,7 +115,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `rvsm` | boolean | type's default | RVSM approval. `false` for an aircraft not approved (ferry flights, old aircraft). In RVSM airspace (FL290–FL410) it needs 2000 ft and its presence there is a violation |
 | `military` | boolean | type's category | State / military flight (`MIL` tag, `STS/STATE`) |
 | `formation` | integer or object | — | `{"size": 4, "types": "4xF16", "extent_nm": 1.0}`, or just `4`. A formation is shown as one track (the leader), is military, is never RVSM approved, and needs 2000 ft (or the horizontal minimum + `extent_nm`) from everyone |
-| `equipment` | string | generated | ICAO item 10 (`"SDE2E3FGHIJ1RWY/LB1"`). If the aircraft is RVSM approved the part before `/` **must contain `W`**. The part after `/` gives the surveillance: `L`/`H` = Mode S enhanced (downlinked data), `S`/`E`/`P`/`I`/`X` = elementary, `A`/`C` = Mode A/C |
+| `equipment` | string | generated | ICAO item 10 (`"SDE2E3FGHIJ1RWY/LB1"`). If the aircraft is RVSM approved the part before `/` **must contain `W`**. A data link code `J1`…`J7` makes it CPDLC equipped (leave them out for a voice-only aircraft). The part after `/` gives the surveillance: `L`/`H` = Mode S enhanced (downlinked data), `S`/`E`/`P`/`I`/`X` = elementary, `A`/`C` = Mode A/C |
 | `remarks` | string | `""` | ICAO item 18 RMK text |
 | `route_after` | list of names | — | Points after the CTA exit, for the flight plan only |
 | `auto_route` | boolean | `auto_routes` | `false` = do not complete this route beyond the CTA |

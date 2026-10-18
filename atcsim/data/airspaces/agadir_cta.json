@@ -1481,6 +1481,18 @@
   ],
   "_note": "Traffic to these aerodromes descends in or just after the CTA: pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
  },
+ "cpdlc": {
+  "_note": "CPDLC data link: our ATSU address and the adjacent units (name for CONTACT / MONITOR, frequency, data link address). The frequencies of the adjacent units are training values, not the published ones: replace them with yours.",
+  "address": "GMAC",
+  "name": "AGADIR",
+  "units": {
+   "GMMM": {"name": "CASABLANCA CONTROL", "freq": "125.300", "address": "GMMM"},
+   "LPPC": {"name": "LISBOA CONTROL", "freq": "132.150", "address": "LPPC"},
+   "GCCC": {"name": "CANARIAS CONTROL", "freq": "128.600", "address": "GCCC"},
+   "LECS": {"name": "SEVILLA CONTROL", "freq": "133.900", "address": "LECS"},
+   "MADEIRA": {"name": "LISBOA CONTROL", "freq": "125.700", "address": "LPPC"}
+  }
+ },
  "capacity_per_hour": {
   "_note": "Declared sector capacities, Agadir ACC (flights per hour). Keys: controlled sectors, sorted, joined with '+'. WW = West band-boxed (WN+WS), OCE = Oceanic band-boxed (ON+OS = OCN+OCS), WW-OCE = the whole CTA.",
   "WN+WS": 48,

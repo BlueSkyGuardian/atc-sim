@@ -28,7 +28,7 @@ aside h2, #app > aside h2 { font-size: 12.5px !important; letter-spacing: 0 !imp
 #asideTabs button.on, #tabs button.on { border-bottom-color: var(--magenta) !important; color: var(--text) !important; }
 
 /* everything that floats over the scope / map */
-.win, #lblMenu, #dispPanel, #phonePanel, .callbox, #busy .box, #hud, #hint, #pauseBanner {
+.win, #lblMenu, #dispPanel, #cmdBar .cb-pv, #phonePanel, .callbox, #busy .box, #hud, #hint, #pauseBanner {
   background: rgba(16, 33, 51, .88) !important; backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
   border-color: #33557a !important; border-radius: 10px !important; box-shadow: var(--depth) !important; }
 .win .wh { background: linear-gradient(180deg, rgba(111, 168, 220, .10), rgba(111, 168, 220, 0)); border-bottom-color: #2a4767 !important; border-radius: 10px 10px 0 0; }

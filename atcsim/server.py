@@ -543,6 +543,145 @@ def mtcd_probe(sid: str, body: MtcdProbe):
             raise HTTPException(400, str(e))
 
 
+class CpdlcText(BaseModel):
+    text: str
+    callsign: Optional[str] = None
+    voice: bool = False
+
+
+class CpdlcAnswer(BaseModel):
+    message_id: int
+    answer: str
+    reason: Optional[str] = None
+
+
+class CpdlcDown(BaseModel):
+    callsign: str
+    kind: Optional[str] = None
+    value: Optional[object] = None
+    reason: Optional[str] = None
+    request_id: Optional[str] = None
+
+
+def _who(request: Request, dflt: str) -> str:
+    u = _user(request)
+    return pex.db.public_user(u)["name"] if u and u.get("id") else dflt
+
+
+@app.get("/sessions/{sid}/cpdlc")
+def cpdlc_messages(sid: str, since: int = 0, callsign: Optional[str] = None):
+    """CPDLC: every message since an id (optionally one aircraft's), and the connection of each equipped aircraft
+    (logon, cda = current data authority, transferred; nda = next data authority) with its open dialogues."""
+    from . import cpdlc
+    s = _session(sid)
+    with s.lock:
+        return {"utc": cpdlc._utc(s.world), "own": cpdlc.own(s.world), "messages": cpdlc.messages(s.world, since, callsign),
+                "connections": cpdlc.state_view(s.world)}
+
+
+@app.post("/sessions/{sid}/cpdlc/parse")
+def cpdlc_parse(sid: str, body: CpdlcText):
+    """What a command line would send (the elements in clear), for the suggestions as the controller types."""
+    from . import cpdlc
+    s = _session(sid)
+    with s.lock:
+        return cpdlc.preview(s.world, body.text, body.callsign)
+
+
+@app.post("/sessions/{sid}/cpdlc/command")
+def cpdlc_command(sid: str, body: CpdlcText, request: Request):
+    """The controller's command line, e.g. {"callsign": "RAM201", "text": "CL350 DCT ROLRO"}: an uplink to a connected
+    aircraft (or an answer to its request: APP, UNA, SBY, ROG). voice=true, or an aircraft without an active
+    connection: only puts the clearance in the system (cleared level, heading, direct, speed...) for a voice clearance."""
+    from . import cpdlc
+    from .world import InstructionError
+    s = _session(sid)
+    with s.lock:
+        try:
+            return cpdlc.command(s.world, body.text, body.callsign, voice=body.voice, who=_who(request, "atc"))
+        except (InstructionError, ValueError) as e:
+            raise HTTPException(400, str(e))
+
+
+@app.post("/sessions/{sid}/cpdlc/respond")
+def cpdlc_respond(sid: str, body: CpdlcAnswer, request: Request):
+    """The pilot answers an uplink: WILCO (the aircraft executes it and the system takes it), UNABLE (reason
+    weather / performance), STANDBY, ROGER, AFFIRM, NEGATIVE."""
+    from . import cpdlc
+    from .world import InstructionError
+    s = _session(sid)
+    with s.lock:
+        try:
+            return cpdlc.respond(s.world, body.message_id, body.answer, body.reason, who=_who(request, "pilot"))
+        except (InstructionError, ValueError) as e:
+            raise HTTPException(400, str(e))
+
+
+@app.post("/sessions/{sid}/cpdlc/downlink")
+def cpdlc_downlink(sid: str, body: CpdlcDown, request: Request):
+    """A pilot request by data link: kind level | climb | descent | direct | speed | deviation | text, with value;
+    or request_id = one of the aircraft's pending requests, sent by CPDLC instead of the frequency."""
+    from . import cpdlc
+    from .world import InstructionError
+    s = _session(sid)
+    with s.lock:
+        try:
+            return cpdlc.downlink(s.world, body.callsign, body.kind or "", body.value, body.reason, body.request_id,
+                                  who=_who(request, "pilot"))
+        except (InstructionError, ValueError) as e:
+            raise HTTPException(400, str(e))
+
+
+class ChatIn(BaseModel):
+    text: str
+    to: Optional[str] = None
+    sender: Optional[str] = Field(None, alias="from")
+    callsign: Optional[str] = None
+    ref: Optional[int] = None
+
+    model_config = {"populate_by_name": True}
+
+
+@app.get("/sessions/{sid}/chat")
+def chat_messages(sid: str, since: int = 0, station: Optional[str] = None):
+    """Coordination chat: the stations (ours, the other sectors, the adjacent units) and the messages since an id,
+    each with its sender ("from") and destination ("to"); station= keeps one station's messages."""
+    from . import chat
+    s = _session(sid)
+    with s.lock:
+        try:
+            return {"own": chat.own_station(s.world), "stations": chat.stations(s.world), "quick": chat.QUICK,
+                    "messages": chat.messages(s.world, since, station)}
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+
+@app.post("/sessions/{sid}/chat")
+def chat_send(sid: str, body: ChatIn, request: Request):
+    """Send a coordination message: {"from": station, "to": station, "text", "callsign", "ref"}. The controller writes
+    as our sector (from may be left out) to another station; the pseudo-pilot writes as another sector or unit."""
+    from . import chat
+    s = _session(sid)
+    seat = seat_for(sid, _user(request)) if getattr(s, "multi", False) else "instructor"
+    with s.lock:
+        w = s.world
+        try:
+            own = chat.own_station(w)
+            frm = chat.resolve(w, body.sender) if body.sender else (own if seat == "atc" else None)
+            if frm is None:
+                raise ValueError("from: which station are you writing as?")
+            to = chat.resolve(w, body.to) if body.to else (own if frm != own else None)
+            if to is None:
+                raise ValueError("to: which station?")
+            if seat == "atc" and frm != own:
+                raise HTTPException(403, f"the controller writes as {own}")
+            if seat == "pilot" and frm == own:
+                raise HTTPException(403, f"the pseudo-pilot writes as another sector or unit, not as {own}")
+            return chat.send(w, frm, to, body.text, body.callsign, body.ref, by=_who(request, seat or ""))
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+
 @app.get("/sessions/{sid}/oldi")
 def oldi_messages(sid: str, since: int = 0, callsign: Optional[str] = None):
     """OLDI messages exchanged with the adjacent units (ABI, ACT, REV; dir out = sent by us, in = received),

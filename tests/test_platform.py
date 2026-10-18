@@ -136,6 +136,38 @@ ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sess
 ok(atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 90}).status_code == 400, "MTCD look-ahead over 60 min refused")
 ok(pil.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 10}).status_code == 403, "pilot cannot change the MTCD look-ahead")
 ok(ins.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 20}).status_code == 200, "instructor resets it to 20 min")
+# CPDLC: the controller types, the pseudo-pilot answers
+dl = ins.get(f"/sessions/{eid}/cpdlc").json()
+conn_cs = [c for c, d in dl["connections"].items() if d["state"] == "cda"]
+ok(dl["own"]["address"] and isinstance(dl["messages"], list), f"CPDLC: {len(conn_cs)} connected aircraft")
+if conn_cs:
+    ccs = conn_cs[0]
+    atc.post(f"/sessions/{eid}/assume/{ccs}")
+    ok(atc.post(f"/sessions/{eid}/cpdlc/parse", json={"text": "H250", "callsign": ccs}).json()["elements"] == ["FLY HEADING 250"],
+       "command line preview")
+    r = atc.post(f"/sessions/{eid}/cpdlc/command", json={"text": "H250", "callsign": ccs})
+    ok(r.status_code == 200 and r.json()["kind"] == "uplink", "controller uplinks FLY HEADING 250")
+    mid = r.json()["message"]["id"]
+    ok(atc.post(f"/sessions/{eid}/cpdlc/respond", json={"message_id": mid, "answer": "WILCO"}).status_code == 403,
+       "the controller cannot answer for the pilot")
+    ok(pil.post(f"/sessions/{eid}/cpdlc/command", json={"text": "H250", "callsign": ccs}).status_code == 403,
+       "the pilot cannot uplink")
+    ok(pil.post(f"/sessions/{eid}/cpdlc/respond", json={"message_id": mid, "answer": "WILCO"}).status_code == 200
+       and atc.get(f"/sessions/{eid}/state").json()["entries"][ccs]["heading"] == 250, "pilot WILCO: the heading is in the system")
+    ok(pil.post(f"/sessions/{eid}/cpdlc/downlink", json={"callsign": ccs, "kind": "text", "value": "REQUEST HIGHER WHEN AVAILABLE"}).status_code == 200,
+       "pilot sends free text")
+    ok(atc.post(f"/sessions/{eid}/cpdlc/command", json={"text": "ROG", "callsign": ccs}).status_code == 200, "controller ROGER")
+# coordination chat
+ch = atc.get(f"/sessions/{eid}/chat").json()
+own = ch["own"]
+other = next(k for k, v in ch["stations"].items() if v["kind"] != "own")
+r = pil.post(f"/sessions/{eid}/chat", json={"from": other, "to": own, "text": "REQUEST FL360"})
+ok(r.status_code == 200 and r.json()["from"] == other and r.json()["to"] == own, f"pilot writes as {other} to {own}")
+ok(pil.post(f"/sessions/{eid}/chat", json={"from": own, "to": other, "text": "x"}).status_code == 403, "the pilot cannot write as our sector")
+ok(atc.post(f"/sessions/{eid}/chat", json={"from": other, "to": own, "text": "x"}).status_code == 403, "the controller writes only as our sector")
+r = atc.post(f"/sessions/{eid}/chat", json={"to": other, "text": "APPROVED", "ref": r.json()["id"]})
+ok(r.status_code == 200 and r.json()["from"] == own, "controller answers (from = our sector)")
+ok(len(ins.get(f"/sessions/{eid}/chat").json()["messages"]) == 2, "the instructor sees the chat")
 ok(pil.post(f"/sessions/{eid}/release/{cs}").status_code == 403, "pilot cannot decontrol")
 ok(atc.post(f"/sessions/{eid}/release/{cs}").status_code == 200, "controller decontrols by hand")
 snap = atc.get(f"/sessions/{eid}/aircraft/{cs}").json()

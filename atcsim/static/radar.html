@@ -150,6 +150,11 @@
   .todo .bt { display: flex; flex-direction: column; gap: 4px; }
   .todo .bt button { padding: 3px 9px; font-size: 12px; }
   .todo .bt .yes { border-color: #2f7a5f; color: #bff5dc; } .todo .bt .no { border-color: #6b2b2b; color: #ffb3b3; }
+  .todo.dl { border-left-color: #5ad1e6; } .todo.dl .tg { color: #9fe3ef; } .todo.dl .tx { font-family: var(--mono); font-size: 12px; }
+  .todo.dl .bt { display: grid; grid-template-columns: auto auto; gap: 4px; } .todo.dl .bt .yes { grid-column: 1 / -1; }
+  .todo.dl .bt button.small { padding: 2px 6px; font-size: 11px; }
+  .todo.dl.sent, .todo.dl.info { opacity: .85; } .todo.dl.sent { border-left-color: #3b6e93; }
+  .dk-dl { font-size: 11px; color: var(--dim); margin-right: 4px; }
   #deck { font-size: 12.5px; }
   .dk-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
   .dk-cs { font: 700 17px var(--mono); color: var(--sel); }
@@ -183,6 +188,55 @@
   #ptt { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; z-index: 4; font-family: var(--mono); font-size: 12px; }
   #ptt .k { background: #0b1724dd; border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px; color: var(--dim); user-select: none; cursor: pointer; }
   #ptt .k.tx { background: #b32d2d; border-color: #ff6b6b; color: #fff; font-weight: 700; }
+  /* CPDLC command line (controller): above the PTT strip; suggestions and preview open above it */
+  #cmdBar { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); width: min(640px, 72%); z-index: 5; display: none;
+    flex-direction: column-reverse; font-family: var(--mono); font-size: 12px; }
+  body.seat-atc #cmdBar, body:not(.exercise) #cmdBar { display: flex; }
+  #cmdBar .cb-row { display: flex; align-items: center; gap: 6px; background: #0b1724cc; border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; opacity: .72; }
+  #cmdBar.open .cb-row, #cmdBar:hover .cb-row { opacity: 1; border-color: #4a77a3; }
+  #cmdBar .cb-cs { font-weight: 700; color: #e9eef2; min-width: 64px; }
+  #cmdBar .cb-cs.none { color: var(--dim); font-weight: 400; }
+  #cmdBar .cb-dl { font-size: 10px; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--line); color: var(--dim); }
+  #cmdBar .cb-dl.cpdlc { color: #9fd0ff; border-color: #6fa8dc; }
+  #cmdBar .cb-dl.logon { color: #c2cfdb; }
+  #cmdBar .cb-dl.voice { color: #f2b84b; border-color: #7a6a2a; }
+  #cmdBar input { flex: 1; min-width: 0; background: transparent; border: 0 !important; box-shadow: none !important; color: #fff; font-family: var(--mono); font-size: 13px;
+    text-transform: uppercase; padding: 3px 2px; outline: none; }
+  #cmdBar input::placeholder { text-transform: none; color: #7d93a8; }
+  #cmdBar .cb-k { color: var(--dim); font-size: 10px; white-space: nowrap; }
+  #cmdBar .cb-pv, #cmdBar .cb-sg { display: none; }
+  #cmdBar.open .cb-pv:not(:empty), #cmdBar .cb-pv:has(.cb-ok, .cb-err) { display: block; background: #102133ee; border: 1px solid #33557a; border-radius: 6px; padding: 6px 9px; margin-bottom: 4px; line-height: 1.5; }
+  #cmdBar.open .cb-sg:not(:empty) { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+  #cmdBar .cb-sg span { background: #0b1724ee; border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; color: var(--dim); cursor: pointer; }
+  #cmdBar .cb-sg span b { color: #dfe7ee; font-weight: 600; }
+  #cmdBar .cb-sg span.on { border-color: var(--chart, #6fa8dc); background: #16304a; }
+  #cmdBar .cb-up { color: #fff; } #cmdBar .cb-down { color: #5ad1e6; } #cmdBar .cb-ok { color: #5fd3a3; } #cmdBar .cb-err { color: #ff8a8a; }
+  /* coordination chat */
+  #chatBtn.hit { border-color: #f2b84b !important; color: #f2b84b !important; }
+  #chatToast { position: absolute; right: 14px; bottom: 60px; z-index: 7; display: flex; flex-direction: column; gap: 6px; width: 330px; }
+  .ch-toast { background: rgba(16, 33, 51, .94); border: 1px solid #f2b84b; border-radius: 8px; padding: 7px 10px; font-size: 12.5px; cursor: pointer; box-shadow: 0 10px 24px -12px #000; }
+  .ch-hd { font-family: var(--mono); font-size: 11.5px; } .ch-hd b { color: #e9eef2; }
+  .ch-cs { font-family: var(--mono); font-size: 11px; color: #9fd0ff; border: 1px solid #3b6e93; border-radius: 3px; padding: 0 4px; }
+  .ch-wrap { display: grid; grid-template-columns: 110px 1fr; gap: 10px; }
+  .ch-threads div { padding: 4px 6px; border-radius: 4px; cursor: pointer; font-family: var(--mono); font-size: 11.5px; }
+  .ch-threads div.on, .ch-threads div:hover { background: #16304a; }
+  .ch-log { max-height: 300px; overflow: auto; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .ch-m { border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: #0b1724aa; }
+  .ch-m.out { border-left: 3px solid #6fa8dc; } .ch-m.in { border-left: 3px solid #f2b84b; }
+  .ch-t { font-size: 12.5px; margin-top: 2px; white-space: pre-wrap; }
+  .ch-q { display: flex; gap: 4px; margin-top: 4px; }
+  .ch-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; font-size: 12px; }
+  .ch-row label { display: flex; gap: 4px; align-items: center; color: var(--dim); }
+  .ch-out { font-size: 11.5px; min-height: 14px; }
+  .ch-plog { max-height: 260px; }
+  #dlBtn.hit { border-color: #5ad1e6 !important; color: #5ad1e6 !important; }
+  .win .dl-r { padding: 4px 6px; border: 1px solid var(--line); border-left: 3px solid #5ad1e6; border-radius: 4px; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; cursor: pointer; }
+  .win .dl-r.late { border-left-color: #f2b84b; }
+  .win .dl-r .dl-b { display: flex; gap: 4px; margin-top: 4px; }
+  .win .dl-conn { font-size: 12px; margin-bottom: 6px; }
+  .win .dl-log { font-family: var(--mono); font-size: 11.5px; max-height: 220px; overflow: auto; }
+  .win .dl-m { padding: 1px 0; } .win .dl-m.down { color: #9fe3ef; }
+  .win .dl-m .st-wilco { color: #5fd3a3; } .win .dl-m .st-unable { color: #ff6b6b; } .win .dl-m .st-open { color: #f2b84b; } .win .dl-m .st-standby { color: #f2b84b; }
   #ptt .rx { background: #1d3a5c; border: 1px solid #3b6e93; border-radius: 4px; padding: 4px 10px; color: #cfe6ff; }
   #ptt .rx.ph { background: #2b3e1d; border-color: #5a8a3b; color: #dcffc9; }
   #phoneBtn { position: absolute; right: 12px; bottom: 12px; z-index: 4; font-size: 18px; padding: 4px 12px; background: #0b1724dd; }
@@ -1535,6 +1589,7 @@ function draw() {
     if (pq.length) tag = pq.some(q => q.type === 'weather_deviation') ? 'WXREQ' : pq.some(q => q.kind === 'descent') ? 'DESC?' : pq.some(q => q.type === 'report') ? 'RPT' : 'REQ';
     if (!atcSeat && (a.turbulence === 'moderate' || a.turbulence === 'severe')) tag += (tag ? ' ' : '') + (a.turbulence === 'severe' ? 'SEV TURB' : 'MOD TURB');
     if (tag) l1.push(['  ' + tag, TH.tags]);
+    if (window.cpdlcTag && seeAlerts) for (const sg of cpdlcTag(a.callsign, blink)) l1.push(sg);
     lines.push(l1);
     const arrow = a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' ';
     const sysCfl = ent && shown.system_cfl ? shown.system_cfl[a.callsign] : null;     // controller: the level the system knows
@@ -1600,6 +1655,8 @@ requestAnimationFrame(draw);
 <script src="/static/comms.js"></script>
 <script src="/static/seat.js"></script>
 <script src="/static/atctools.js"></script>
+<script src="/static/cpdlc.js"></script>
+<script src="/static/chat.js"></script>
 <script src="/static/uirec.js"></script>
 </body>
 </html>

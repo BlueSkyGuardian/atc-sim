@@ -360,14 +360,36 @@
 
   // ---- to do
   let todoH = '';
+  const DL = () => (state && state.cpdlc) || {};
+  const dlOpenFor = rid => Object.values(DL()).some(d => d.open.some(m => m.dir === 'down' && m.request_id === rid));
+  function cpdlcTodo() {
+    const out = [];
+    for (const [cs, d] of Object.entries(DL())) {
+      for (const m of d.open) {
+        const ag = Math.round(state.sim_time_s - m.t);
+        if (m.dir === 'up') {
+          const b = m.resp === 'WU' ? `<button class="yes" data-dlid="${m.id}" data-ans="WILCO" data-cs="${cs}" title="the aircraft executes it">WILCO</button><button data-dlid="${m.id}" data-ans="STANDBY" data-cs="${cs}">Standby</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="weather" data-cs="${cs}" title="UNABLE / DUE TO WEATHER">…wx</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="performance" data-cs="${cs}" title="UNABLE / DUE TO AIRCRAFT PERFORMANCE">…perf</button>`
+            : m.resp === 'AN' ? `<button class="yes" data-dlid="${m.id}" data-ans="AFFIRM" data-cs="${cs}">Affirm</button><button class="no" data-dlid="${m.id}" data-ans="NEGATIVE" data-cs="${cs}">Negative</button>`
+            : `<button class="yes" data-dlid="${m.id}" data-ans="ROGER" data-cs="${cs}">Roger</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button>`;
+          out.push([m.t, `<div class="todo dl" data-cs="${cs}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>data link from the controller${m.status === 'standby' ? ' · you sent STANDBY' : ''} · ${ag} s${m.late ? ' · <span class="c-warn">answer it</span>' : ''}</small></div><div class="bt">${b}</div></div>`]);
+        } else out.push([m.t, `<div class="todo dl sent" data-cs="${cs}"><span class="tg">SENT</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>by data link · waiting for the controller${m.status === 'standby' ? ' (STANDBY)' : ''} · ${ag} s</small></div></div>`]);
+      }
+      for (const m of d.recent.filter(m => m.dir === 'up' && m.resp === 'N' && /^(UNABLE|STANDBY|ROGER|AFFIRM|NEGATIVE)/.test(m.text)))
+        out.push([m.t, `<div class="todo dl info" data-cs="${cs}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>the controller's answer to your request</small></div></div>`]);
+    }
+    return out.sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  }
   function renderTodo() {
-    const items = (state.pending_requests || []).slice().sort((a, b) => a.time_s - b.time_s).map(q => {
+    const conn = cs => (DL()[cs] || {}).state === 'cda';
+    const items = cpdlcTodo().concat((state.pending_requests || []).slice().sort((a, b) => a.time_s - b.time_s).map(q => {
       const age = Math.round(state.sim_time_s - q.time_s);
       if (q.kind === 'checkin') return `<div class="todo call" data-cs="${q.callsign}"><span class="tg">CALL</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>first call · the controller assumes it · ${age} s</small></div></div>`;
       const btns = q.type === 'report' ? `<button data-rep="${q.id}" data-dec="roger" data-cs="${q.callsign}">Acknowledged</button>`
         : `<button class="yes" data-rep="${q.id}" data-dec="approved" data-cs="${q.callsign}" title="the controller approved: the aircraft does it">Approved</button><button class="no" data-rep="${q.id}" data-dec="unable" data-cs="${q.callsign}">Refused</button>`;
-      return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · say <i>“${h(q.phraseology)}”</i><small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s</small></div><div class="bt">${btns}</div></div>`;
-    });
+      const sent = dlOpenFor(q.id);
+      const dlb = conn(q.callsign) && !sent ? `<button data-dlreq="${q.id}" data-cs="${q.callsign}" title="send this request by data link instead of saying it">By CPDLC</button>` : '';
+      return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · ${sent ? 'sent by CPDLC: ' + h(q.phraseology) : `say <i>“${h(q.phraseology)}”</i>`}<small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s${sent ? ' · the controller answers by data link (or on the frequency)' : ''}</small></div><div class="bt">${dlb}${btns}</div></div>`;
+    }));
     // aircraft dealing with weather (they asked for a deviation, were cleared one, or deviate): report clear of it
     for (const a of allAc().filter(x => x.wx_handling)) items.push(`<div class="todo req" data-cs="${a.callsign}"><span class="tg">WX</span><div class="tx"><b>${a.callsign}</b> is dealing with weather · when clear, say <i>“${a.callsign} clear of weather”</i><small>its weather is not counted as a penetration until then</small></div><div class="bt"><button class="yes" data-wxclear="${a.callsign}">Clear of weather</button></div></div>`);
     const html = items.join('') || '<div class="empty">Nothing to say right now. Fly what the controller gives you.</div>';
@@ -377,6 +399,10 @@
   // one listener each (the lists are re-drawn every second; mousedown survives a re-draw between press and release)
   function bindLists() {
     $('#todo').addEventListener('mousedown', e => {
+      const da = e.target.closest('[data-dlid]');
+      if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
+      const dr = e.target.closest('[data-dlreq]');
+      if (dr) { e.preventDefault(); dlSend(dr.dataset.cs, { request_id: dr.dataset.dlreq }); select(dr.dataset.cs); return; }
       const wc = e.target.closest('[data-wxclear]');
       if (wc) { e.preventDefault(); fly(wc.dataset.wxclear, { type: 'wx_clear' }, $('#deck .dk-out')); select(wc.dataset.wxclear); return; }
       const b = e.target.closest('[data-rep]');
@@ -384,6 +410,23 @@
       const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
     });
     $('#fleet').addEventListener('mousedown', e => { const r = e.target.closest('[data-cs]'); if (r) select(r.dataset.cs); });
+  }
+
+  // ---- CPDLC: answers to uplinks, downlink requests
+  async function dlAnswer(cs, id, ans, why) {
+    select(cs);
+    const out = $('#deck [data-out]');
+    try { await api(`/sessions/${SID}/cpdlc/respond`, { method: 'POST', body: JSON.stringify({ message_id: id, answer: ans, reason: why || null }) });
+      if (out) { out.className = 'dk-out ok'; out.textContent = `✓ ${ans}${why ? ' due to ' + why : ''} sent by data link` + (ans === 'WILCO' ? ' — the aircraft is executing' : ''); } }
+    catch (e) { if (out) { out.className = 'dk-out bad'; out.textContent = '✗ ' + e.message; } }
+    if (typeof pollState === 'function') pollState();
+  }
+  async function dlSend(cs, body) {
+    const out = $('#deck [data-out]');
+    try { const m = await api(`/sessions/${SID}/cpdlc/downlink`, { method: 'POST', body: JSON.stringify({ callsign: cs, ...body }) });
+      if (out) { out.className = 'dk-out ok'; out.textContent = '✓ sent by data link: ' + m.text; } }
+    catch (e) { if (out) { out.className = 'dk-out bad'; out.textContent = '✗ ' + e.message; } }
+    if (typeof pollState === 'function') pollState();
   }
 
   // ---- aircraft list
@@ -432,6 +475,12 @@
       <div class="dk-row"><label>Weather</label><div class="dk-ctl">
         <select data-i="side"><option value="either">either side</option><option value="left">left</option><option value="right">right</option></select>
         <button data-go="dev">Deviate around weather</button><button data-go="wxclear" title="the pilot reports clear of the weather: from now on, weather it flies through counts as a penetration">Clear of weather</button></div></div>
+      <div class="dk-row" data-dlrow><label>CPDLC</label><div class="dk-ctl">
+        <span class="dk-dl" data-dlst></span>
+        <select data-i="dlk"><option value="level">Request level</option><option value="direct">Request direct</option><option value="speed">Request speed</option><option value="deviation">Weather deviation</option><option value="text">Free text</option></select>
+        <input data-i="dlv" placeholder="370 / ROLRO / M78 / L20 / text" style="width:150px">
+        <select data-i="dlr" title="reason"><option value="">no reason</option><option value="weather">due to weather</option><option value="performance">due to performance</option></select>
+        <button class="go" data-go="dl">Send</button></div></div>
       <div class="dk-out" data-out></div>`;
     const val = k => box.querySelector(`[data-i=${k}]`).value.trim(), out = box.querySelector('[data-out]');
     const flBtn = box.querySelector('[data-go=fl]'), flIn = box.querySelector('[data-i=fl]');
@@ -454,10 +503,12 @@
       else if (k === 'wxclear') await fly(cs, { type: 'wx_clear' }, out);
       else if (k === 'via') { const v = val('via').toUpperCase().split(/[\s,]+/).filter(x => x && x !== 'DCT'); if (v.length) await fly(cs, { type: 'reroute', points: v }, out); }
       else if (k === 'redit') editRoute(cs);
+      else if (k === 'dl') { const v = val('dlv'); if (!v) { out.className = 'dk-out bad'; out.textContent = 'type what you request'; return; }
+        await dlSend(cs, { kind: val('dlk'), value: v, reason: val('dlr') || null }); box.querySelector('[data-i=dlv]').value = ''; }
     };
     box.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
     box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => fly(cs, { type: 'direct', waypoint: b.dataset.d }, out));
-    const enterMap = { fl: 'fl', hdg: 'h', mach: 'mach', kt: 'kt', dct: 'dct', via: 'via' };
+    const enterMap = { fl: 'fl', hdg: 'h', mach: 'mach', kt: 'kt', dct: 'dct', via: 'via', dlv: 'dl' };
     box.querySelectorAll('input[data-i]').forEach(i => i.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter' && enterMap[i.dataset.i]) go(enterMap[i.dataset.i]); });
     box.querySelector('.dk-x').onclick = () => { pilotSel = null; selected = null; renderPilot(); };
     loadPerf(cs);
@@ -488,6 +539,13 @@
     const pend = (state.pending_instructions || []).filter(p => p.text && p.text.startsWith(deckCs)).map(p => h(p.text.slice(deckCs.length + 1)));
     const co = (state.coord || {})[deckCs];
     const coTxt = co && a.assumed && co.state && co.state !== 'transferred' ? `<div class="dk-pend">coordinated with ${h(co.next_unit)}: F${co.coordinated} (${co.state.toUpperCase()})${co.manual ? ' · <span class="c-warn">phone coordination needed</span>' : ''}</div>` : '';
+    const dd = DL()[deckCs], dst = $('#deck [data-dlst]'), drow = $('#deck [data-dlrow]');
+    if (drow) {
+      const on = dd && dd.state === 'cda';
+      drow.style.display = dd ? '' : 'none';
+      drow.querySelectorAll('select, input, button').forEach(x => x.disabled = !on);
+      if (dst) dst.innerHTML = !dd ? '' : on ? `<span class="c-ok">connected</span> ${h(dd.cda || '')}${dd.nda ? ' · next ' + h(dd.nda) : ''}` : dd.state === 'logon' ? `logged on, CDA ${h(dd.cda || 'previous unit')}` : dd.state === 'transferred' ? `transferred to ${h(dd.cda || '')}` : 'not logged on yet';
+    }
     el.innerHTML = coTxt + `<span><b>FL${String(a.fl).padStart(3, '0')}</b>${vs > 0 ? ' ↑' : vs < 0 ? ' ↓' : ''}${a.cleared_fl !== a.fl ? ' → ' + a.cleared_fl : ''}</span><span>${fmtSpd(a)}</span><span>HDG ${String(Math.round(a.heading)).padStart(3, '0')}</span><span>${fmtNav(a)}</span><span class="badge b-${k}">${t}</span>` +
       (pend.length ? `<div class="dk-pend">executing: ${pend.join(' · ')}</div>` : '');
   }

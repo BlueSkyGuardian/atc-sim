@@ -30,6 +30,29 @@ The simulated pilots generate the requests: a deviation when their onboard radar
 a ride level after a while in turbulence, a descent at their top of descent. The scenario adds scripted ones. You
 choose how to phrase them.
 
+## CPDLC: data link
+
+Most aircraft are CPDLC equipped (J1 to J7 in item 10). The controller can send them clearances by data link
+instead of the frequency. You answer for the crew.
+
+![A CPDLC uplink on the To do list: WILCO, Standby or Unable](/static/docs/p_cpdlc.jpg "A CPDLC uplink on the To do list: WILCO, Standby or Unable")
+
+- **Uplinks** appear on *To do* with a **CPDLC** tag and the message in clear (`CLIMB TO FL350 / MAINTAIN M.78`).
+  - **WILCO**: the aircraft does all of it, and the clearance goes in the controller's system. If the aircraft cannot
+    fly it (performance, weather), WILCO is refused with the reason. Answer **Unable** instead.
+  - **Standby** keeps it open. **Unable** refuses it; **…wx** and **…perf** add *due to weather* / *due to aircraft
+    performance*.
+  - Free text is answered **Roger**.
+  - **CONTACT / MONITOR**: WILCO is the transfer to the next unit. The data link connection goes there too.
+- **Requests by data link**: on a REQ item of a connected aircraft, **By CPDLC** sends it as a downlink instead of
+  saying it. The item then shows *sent by CPDLC* until the controller answers. The answer arrives as an uplink (the
+  clearance, to WILCO), or as UNABLE / STANDBY shown on *To do*.
+- The deck has a **CPDLC** row: the connection state, and a request of your own: level, direct, speed, weather
+  deviation (`L20`, `R15`, `20` either side) or free text, with an optional reason.
+
+The controller can still use the frequency for anything. What you answer on the frequency is answered with the
+usual buttons.
+
 ## The control deck
 
 Select an aircraft (in the list, in *To do*, or on the radar) to get its deck. The deck shows the present level,
@@ -102,6 +125,16 @@ with the previous sector), with the ones needing something first.
   until hung up.
 - The OLDI window (<kbd>O</kbd>) and the deck show the coordination the system made (ABI / ACT / REV, the exit
   level coordinated for the selected aircraft). This is what the next unit "knows" when the controller calls.
+
+## Coordination chat
+
+Below the telephone, write to the controller as another station: an Agadir sector not controlled in the exercise
+(`GMAC WN`…) or an adjacent unit (`GCCC`…). Pick the station in *As* and the destination in *to* (the controller's
+sector by default). *about* takes the selected aircraft. The newest messages are on top, each with its sender →
+destination. Messages from the controller have quick answers (APPROVED, UNABLE, STANDBY, ROGER), sent back as the
+station they were addressed to. The instructor can write as any station.
+
+![The pseudo-pilot's chat: writing as GCCC to GMAC WS](/static/docs/p_chat.jpg "The pseudo-pilot's chat: writing as GCCC to GMAC WS")
 
 ## Radio
 

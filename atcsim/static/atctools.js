@@ -32,6 +32,7 @@
   }
   function closeWin(id) { const el = document.getElementById(id); if (el) el.remove(); if (id === 'fpWin') fpCs = null; if (id === 'tyWin') tyCs = null; if (id === 'mtWin') mtFocus = null; }
   const isOpen = id => !!document.getElementById(id);
+  window.atcWin = win; window.atcCloseWin = closeWin; window.atcIsOpen = isOpen;   // for cpdlc.js
 
   // ------------------------------------------------------------------ flight plan window
   let fpCs = null;
@@ -341,6 +342,7 @@
     ['R', 'show its route for 8 s'], ['B', 'range/bearing line from the aircraft or point under the mouse; it follows the mouse, click (or B) to place it'],
     ['right-drag', 'range/bearing line between two aircraft or points'], ['Delete', 'remove the last RBL (Shift+Delete: all)'],
     ['G', 'flight plan list'], ['M', 'MTCD on / off'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
+    ['Enter', 'command line: type a clearance for the selected aircraft (CPDLC, or Shift+Enter to enter a voice clearance)'], ['J', 'CPDLC window'], ['T', 'coordination chat with the other sectors and units'],
     ['Space (hold)', 'transmit on the frequency'], ['Esc', 'close the menu / windows, cancel'], ['?', 'this help'],
   ];
   function openHelp() {
@@ -377,7 +379,7 @@
     if (e.ctrlKey || e.metaKey || e.altKey || typing()) return;
     const k = e.key, cs = selected, atc = SEAT === 'atc' && EXID;
     const low = k.length === 1 ? k.toLowerCase() : k;           // letters: capitals or not, Caps Lock or not
-    if (k === 'Escape') { if (RE) { closeRE(); return; } for (const id of ['helpWin', 'tyWin', 'olWin', 'mtWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
+    if (k === 'Escape') { if (RE) { closeRE(); return; } for (const id of ['helpWin', 'tyWin', 'olWin', 'mtWin', 'dlWin', 'chatWin', 'flWin', 'fpWin']) if (isOpen(id)) { closeWin(id); return; } selected = null; return; }
     if (k === '?') { isOpen('helpWin') ? closeWin('helpWin') : openHelp(); e.preventDefault(); return; }
     if (k === 'Tab') { e.preventDefault(); cycle(e.shiftKey ? -1 : 1); return; }
     if (k === '+' || k === '=') { setZoom(userZoom * 1.25); return; }
