@@ -3,7 +3,7 @@
 // The camera orbits slowly; with "reduce motion" a single still frame is drawn.
 import * as THREE from '/static/vendor/three.module.min.js';
 
-const C = { chart: 0x6fa8dc, magenta: 0xd1478f, dim: 0x3c5a78, paper: 0xe9eef2, stalk: 0x7fc4e8 };
+const C = { chart: 0x6fa8dc, magenta: 0xd1478f, dim: 0x3c5a78, paper: 0xe9eef2, stalk: 0x7fc4e8, land: 0x15293d, coast: 0x4a7aa3 };
 const FL_SCALE = 0.25;                 // world units per flight level (vertical exaggeration ~15x)
 const SPEED = 450 / 3600 * 55;         // NM per second of animation: 450 kt, 55x time compression
 const canvas = document.getElementById('scene');
@@ -52,6 +52,16 @@ function line(points, material) { const g = new THREE.BufferGeometry().setFromPo
 function buildMap() {
   const xs = geo.outline.map(p => p[0]), ys = geo.outline.map(p => p[1]);
   center = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...ys) + Math.max(...ys)) / 2];
+  // land and coastlines on the ground (Morocco, Iberia, the Canaries, Madeira)
+  if (geo.coast) {
+    const landM = new THREE.MeshBasicMaterial({ color: C.land, transparent: true, opacity: 0.85, side: THREE.DoubleSide, depthWrite: false });
+    for (const ring of geo.coast.land) {
+      const sh = new THREE.Shape(ring.map(p => new THREE.Vector2(p[0] - center[0], p[1] - center[1])));
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), landM); m.rotation.x = -Math.PI / 2; m.position.y = -0.6; m.renderOrder = -2; scene.add(m);
+    }
+    const coastM = new THREE.LineBasicMaterial({ color: C.coast, transparent: true, opacity: 0.75 });
+    for (const ln of geo.coast.lines) scene.add(line(ln.map(p => W(p, -0.2)), coastM));
+  }
   // controlled volume: outline on the ground, at FL195 and FL460, and faint walls between
   const out = geo.outline.concat([geo.outline[0]]);
   scene.add(line(out.map(p => W(p)), new THREE.LineBasicMaterial({ color: C.chart, transparent: true, opacity: 0.9 })));

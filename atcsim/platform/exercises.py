@@ -86,6 +86,11 @@ def landing_geometry():
                     "rad": a.notes.get("rad_routes") or [],
                     "routes": [[n for n in r if n in wps] for r in routes],
                     "points": wps}
+        xs, ys = [p[0] for p in d["outline"]], [p[1] for p in d["outline"]]
+        cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        c = a.coast_clipped((cx - 900, cy - 900, cx + 900, cy + 900))   # the scene's fog hides what is farther
+        if c:
+            _LANDING["coast"] = c
     return _LANDING
 
 
@@ -335,10 +340,13 @@ def outline(eid: str, request: Request):
     s = manager.sessions.get(eid)
     if s is None:
         raise HTTPException(404, "exercise not running")
-    d = s.world.airspace.describe()
+    a = s.world.airspace
+    d = a.describe()
+    b = d["bbox_nm"]
+    c = a.coast_clipped((b[0] - 80, b[1] - 80, b[2] + 80, b[3] + 80))
     return {"outline": d["outline"], "controlled": d["shape"]["polygon"], "bbox": d["bbox_nm"],
             "sectors": [sc["polygon"] for sc in d["sectors"]] if len(d["sectors"]) > 1 else [],
-            "sep_h": s.world.sep_h}
+            "coast": c["lines"] if c else [], "sep_h": s.world.sep_h}
 
 
 @router.post("/api/exercises")

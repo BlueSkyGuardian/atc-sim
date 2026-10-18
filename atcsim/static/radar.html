@@ -339,7 +339,7 @@
       <input id="wxFl" type="number" value="350" min="0" max="800" step="10" style="width:62px" title="Flight level">
       <label><input type="checkbox" id="wxCells" checked> tops</label>
       <span class="sep"></span>
-      <button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button>
+      <button data-v="coast" class="on" title="Land and coastlines (Morocco, Iberia, the Canaries, Madeira, the Azores)">Coast</button><button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button>
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
@@ -440,11 +440,11 @@ const API = '';
 let SID = new URLSearchParams(location.search).get('session');
 const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
-const V = { areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true };
+const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
 // display settings (colours, sizes): per browser, from the Display menu
 const TH_DEF = {
-  bg: '#0d1b2a', outline: '#35567a', sector: '#5b86b0', sectorLines: '#3b6b94', freqs: '#5d8fbd', airways: '#1f3550',
+  bg: '#0d1b2a', land: '#13263a', coast: '#3d6283', outline: '#35567a', sector: '#5b86b0', sectorLines: '#3b6b94', freqs: '#5d8fbd', airways: '#1f3550',
   airwayNames: '#46688a', rad: '#5a2d4c', fpRoute: '#24394d', points: '#5c7a96', extPoints: '#41586e', aerodromes: '#7fa8c9',
   approach: '#3b6e93', cellTops: '#e9eef3',
   assumed: '#5fd3a3', calling: '#ffffff', inbound: '#9db8d0', other: '#6f8191', handedOff: '#56636f', selected: '#7fb8ff', stca: '#f2b84b', los: '#ff5a5a',
@@ -476,7 +476,7 @@ async function api(path, opts = {}) {
 // ---------- Display menu: zoom, sizes, colours of the scope, the aircraft and the label parts (saved in this browser)
 (function () {
   const L = {
-    bg: 'Background', outline: 'CTA outline', sector: 'Controlled area border', sectorLines: 'Sector lines', freqs: 'Sector names / frequencies',
+    bg: 'Background', land: 'Land', coast: 'Coastline', outline: 'CTA outline', sector: 'Controlled area border', sectorLines: 'Sector lines', freqs: 'Sector names / frequencies',
     airways: 'Airways', airwayNames: 'Airway names', rad: 'RAD routings', fpRoute: 'Flight-plan routes', points: 'Points', extPoints: 'Points outside',
     aerodromes: 'Aerodromes', approach: 'Approach paths', cellTops: 'Cloud tops',
     assumed: 'Assumed', calling: 'Calling (to assume)', inbound: 'Inbound (previous sector)', other: 'Not concerned', handedOff: 'Handed off / decontrolled', selected: 'Selected', stca: 'Conflict (STCA)', los: 'Loss of separation',
@@ -489,7 +489,7 @@ async function api(path, opts = {}) {
   };
   const SIZES = [['lblFont', 'Label font', 8, 18, 0.5], ['nameFont', 'Point names', 7, 16, 0.5], ['symbol', 'Aircraft symbol', 4, 14, 1],
                  ['vectorMin', 'Speed vector (min)', 0, 6, 1], ['trail', 'History dots', 0, 12, 1], ['wxAlpha', 'Weather opacity', 0.1, 1, 0.05]];
-  const GROUPS = [['Scope', ['bg', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'cellTops']],
+  const GROUPS = [['Scope', ['bg', 'land', 'coast', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'cellTops']],
                   ['Aircraft', ['assumed', 'calling', 'inbound', 'xfer', 'handedOff', 'selected', 'stca', 'los', 'mtcd', 'routeShow', 'rbl']],
                   ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'xflOk', 'xflAbi', 'xflPend', 'tags', 'hTag', 'wxTag', 'alertInfo', 'alertWarn', 'alertBad', 'extLabel']]];
   const box = document.getElementById('dispPanel');
@@ -1404,6 +1404,15 @@ function draw() {
   view.s = Math.min(W, H) / (2 * home.half * 1.02) * userZoom;      // room for traffic before entry
   if (!sector) { ctx.fillStyle = '#6c7f92'; ctx.font = `${14 * dpr}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('Select or create a session', W / 2, H / 2); return requestAnimationFrame(draw); }
   ctx.textAlign = 'left';
+  // land and coastlines (under everything else)
+  if (sector.coast && V.coast) {
+    ctx.beginPath();
+    for (const ring of sector.coast.land) ring.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.fillStyle = TH.land; ctx.fill('evenodd');
+    ctx.beginPath();
+    for (const line of sector.coast.lines) line.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.strokeStyle = TH.coast; ctx.lineWidth = 1 * dpr; ctx.stroke();
+  }
   // weather
   if (wxImg && wxMeta) {
     const [wx0, wy0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [wx1, wy1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]);

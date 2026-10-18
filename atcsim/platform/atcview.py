@@ -176,6 +176,12 @@ class Renderer:
         d = ImageDraw.Draw(img)
         k, sec, wp = vw.k, self.sec, self.wp
         poly = lambda pts: [vw.P(*p) for p in pts] + [vw.P(*pts[0])]
+        if sec.get("coast") and vw.on("coast"):            # land and coastlines
+            for ring in sec["coast"]["land"]:
+                if len(ring) >= 3:
+                    d.polygon([vw.P(*p) for p in ring], fill=vw.c("land", (19, 38, 58)))
+            for ln in sec["coast"]["lines"]:
+                d.line([vw.P(*p) for p in ln], fill=vw.c("coast", (61, 98, 131)), width=max(1, round(k)))
         sectors = sec.get("sectors") or []
         if len(sectors) > 1:
             ctl = set(sec.get("controlled_sectors") or [])

@@ -47,7 +47,7 @@ in the preview run.
 | ↔ RBL | <kbd>B</kbd> | Click two aircraft: bearing, range, ΔFL at the cursor time and the **CPA along their trajectories** (follows the timeline) |
 
 Other keys: <kbd>Delete</kbd> removes the selection, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd>
-undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the cursor.
+undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the cursor. While you place an aircraft's route, the four arrows pan the map instead (<kbd>Shift</kbd> for bigger steps), so you can carry on beyond the edge of the screen; <kbd>↑</kbd>/<kbd>↓</kbd> pan at any time.
 
 > **Placing a conflict with the RBL:** draw an RBL between the two aircraft, then drag one of them along its route
 > until the CPA is where you want the conflict, and at the separation you want: 0 NM for a collision course, or

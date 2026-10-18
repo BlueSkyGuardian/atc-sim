@@ -1481,6 +1481,7 @@
   ],
   "_note": "Traffic to these aerodromes descends in or just after the CTA: pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
  },
+ "coastline": true,
  "cpdlc": {
   "_note": "CPDLC data link: our ATSU address and the adjacent units (name for CONTACT / MONITOR, frequency, data link address). The frequencies of the adjacent units are training values, not the published ones: replace them with yours.",
   "address": "GMAC",

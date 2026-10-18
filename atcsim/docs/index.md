@@ -75,3 +75,5 @@ squall line.
 - **Stats**: your statistics by role.
 - **Help**: this documentation. The search box searches every page.
 - On the radar, **?** (or the <kbd>?</kbd> key) shows the keyboard shortcuts.
+
+The land and coastlines on the maps come from [Natural Earth](https://www.naturalearthdata.com) (1:10m, public domain).

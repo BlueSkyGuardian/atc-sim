@@ -860,6 +860,12 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Backspace' && tool === 'aircraft' && draft && (draft.route.length || draft.start)) { e.preventDefault(); if (draft.route.length) draft.route.pop(); else delete draft.start; hint(); return; }
   if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); deleteSel(); return; }
   if (e.key === ' ') { e.preventDefault(); togglePlay(); return; }
+  // arrows: pan the map while placing an aircraft's route (and up / down at any time); otherwise left / right scrub time
+  if (e.key.startsWith('Arrow') && (tool === 'aircraft' || e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    e.preventDefault(); const st = (e.shiftKey ? 240 : 70) * devicePixelRatio / view.s;
+    if (e.key === 'ArrowLeft') view.cx -= st; if (e.key === 'ArrowRight') view.cx += st; if (e.key === 'ArrowUp') view.cy += st; if (e.key === 'ArrowDown') view.cy -= st;
+    return;
+  }
   if (e.key === 'ArrowRight') { setT(T + (e.shiftKey ? 60 : 10)); return; }
   if (e.key === 'ArrowLeft') { setT(T - (e.shiftKey ? 60 : 10)); return; }
   const k = { v: 'select', a: 'aircraft', c: 'cell', l: 'squall', r: 'region', p: 'areaPoly', o: 'areaCircle', b: 'rbl', w: 'strat' }[e.key.toLowerCase()];
@@ -896,6 +902,12 @@ function draw() {
   view.s = baseScale() * userZoom;
   const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };
   const mono = sz => `${sz * dpr}px ui-monospace,monospace`;
+  if (sector.coast) {                                    // land and coastlines
+    ctx.beginPath(); for (const r of sector.coast.land) r.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.fillStyle = '#13263a'; ctx.fill('evenodd');
+    ctx.beginPath(); for (const l of sector.coast.lines) l.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
+    ctx.strokeStyle = '#3d6283'; ctx.lineWidth = dpr; ctx.stroke();
+  }
   if (wxImg && wxMeta && $('#showWx').checked) { const [x0, y0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [x1, y1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]); ctx.drawImage(wxImg, x0, y0, x1 - x0, y1 - y0); }
   // airspace
   const wp = sector.waypoints;

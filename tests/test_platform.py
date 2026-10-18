@@ -79,6 +79,15 @@ ok(atc.get("/help/designer").status_code == 200 and anon.get("/help", follow_red
    "help pages are public")
 ok(atc.get("/api/help/nope").status_code == 404, "unknown doc page")
 lg = anon.get("/api/landing").json()
+ok(lg.get("coast") and len(lg["coast"]["lines"]) > 5 and len(lg["coast"]["land"]) > 3, "landing scene: land and coastlines")
+from atcsim import airspace as _asp  # noqa: E402
+_c = _asp.get("agadir").describe().get("coast")
+_ag = _asp.get("agadir").waypoints
+# Agadir (GMAD) is on the Moroccan coast: a coastline passes within 15 NM of it; the training sector has none
+_gmad = _asp.get("agadir").projection.forward(30.33, -9.41)
+ok(_c and min(((p[0] - _gmad[0]) ** 2 + (p[1] - _gmad[1]) ** 2) ** 0.5 for ln in _c["lines"] for p in ln) < 15,
+   "the coastline passes by Agadir")
+ok(not _asp.get("training").describe().get("coast"), "no coastline on the fictional training sector")
 ok(len(lg["outline"]) > 10 and "IBALU" in lg["points"] and len(lg["sectors"]) == 4 and anon.get("/login").status_code == 200,
    "sign-in page and its public map")
 sj = anon.get("/api/help/scenario-json").json()["markdown"]

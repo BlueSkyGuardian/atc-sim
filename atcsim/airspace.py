@@ -210,6 +210,60 @@ class Airspace:
         return RVSM_LOWER_FL, RVSM_UPPER_FL
 
     # ---------------------------------------------------------------- description
+    def coast(self) -> Optional[dict]:
+        """Land and coastlines (Natural Earth 1:10m) in this airspace's NM coordinates, when it is on real ground."""
+        if not (self.notes or {}).get("coastline") or not self.projection:
+            return None
+        if getattr(self, "_coast", None) is None:
+            with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "coast.json"), encoding="utf-8") as f:
+                d = json.load(f)
+            P = lambda ll: [round(v, 1) for v in self.projection.forward(ll[1], ll[0])]  # noqa: E731
+            self._coast = {"land": [[P(p) for p in ring] for ring in d["land"]],
+                           "lines": [[P(p) for p in line] for line in d["coast"]], "source": d["_source"]}
+        return self._coast
+
+    def coast_clipped(self, box) -> Optional[dict]:
+        """The coast within box (x0, y0, x1, y1) NM: land polygons clipped to it, coastlines cut at its edges."""
+        c = self.coast()
+        if not c:
+            return None
+        x0, y0, x1, y1 = box
+
+        def clip(ring):
+            edges = [(lambda p: p[0] >= x0, lambda a, b: [x0, a[1] + (x0 - a[0]) / (b[0] - a[0]) * (b[1] - a[1])]),
+                     (lambda p: p[0] <= x1, lambda a, b: [x1, a[1] + (x1 - a[0]) / (b[0] - a[0]) * (b[1] - a[1])]),
+                     (lambda p: p[1] >= y0, lambda a, b: [a[0] + (y0 - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), y0]),
+                     (lambda p: p[1] <= y1, lambda a, b: [a[0] + (y1 - a[1]) / (b[1] - a[1]) * (b[0] - a[0]), y1])]
+            out = ring
+            for ins, cut in edges:
+                src, out = out, []
+                for i, b in enumerate(src):
+                    a = src[i - 1]
+                    if ins(b):
+                        if not ins(a):
+                            out.append([round(v, 1) for v in cut(a, b)])
+                        out.append(b)
+                    elif ins(a):
+                        out.append([round(v, 1) for v in cut(a, b)])
+                if not out:
+                    break
+            return out
+        land = [r for r in (clip(r) for r in c["land"]) if len(r) >= 3]
+        inside = lambda p: x0 <= p[0] <= x1 and y0 <= p[1] <= y1  # noqa: E731
+        lines = []
+        for ln in c["lines"]:
+            cur = []
+            for p in ln:
+                if inside(p):
+                    cur.append(p)
+                else:
+                    if len(cur) > 1:
+                        lines.append(cur)
+                    cur = []
+            if len(cur) > 1:
+                lines.append(cur)
+        return {"land": land, "lines": lines}
+
     def describe(self) -> dict:
         wps = {k: [round(p[0], 2), round(p[1], 2)] for k, p in self.waypoints.items() if not k.startswith("@")}
         out = {
@@ -246,6 +300,9 @@ class Airspace:
                                     for k, p in self.waypoints.items() if not k.startswith("@")
                                     for ll in [self.projection.inverse(*p)]}
         out.update(self.notes)
+        c = self.coast()
+        if c:
+            out["coast"] = c
         return out
 
 
@@ -467,6 +524,7 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
                          "separation_horizontal_nm": (d.get("separation_minima") or {}).get("horizontal_nm"),
                          "descent_destinations": (d.get("descent_destinations") or {}).get("aerodromes", []),
                          "cpdlc": {k: v for k, v in (d.get("cpdlc") or {}).items() if not k.startswith("_")},
+                         "coastline": bool(d.get("coastline")),
                          "capacity_per_hour": {k: v for k, v in (d.get("capacity_per_hour") or {}).items()
                                                if not k.startswith("_")}})
     sp.construction_points = cons

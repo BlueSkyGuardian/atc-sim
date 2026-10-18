@@ -250,6 +250,7 @@ function drawThumb(cv, ex) {
   const s = Math.min(W / (2 * hx), (H * 0.78) / (2 * hy * TILT));
   const G = (x, y) => [W / 2 + (x - cx) * s, H * 0.6 - (y - cy) * s * TILT];
   const path = (pts, close) => { c.beginPath(); pts.forEach((p, i) => { const [x, y] = G(...p); i ? c.lineTo(x, y) : c.moveTo(x, y); }); if (close) c.closePath(); };
+  for (const ln of o.coast || []) { path(ln, false); c.strokeStyle = 'rgba(74,122,163,0.5)'; c.lineWidth = dpr; c.stroke(); }
   if (o.outline) { path(o.outline, true); c.strokeStyle = '#27405a'; c.lineWidth = dpr; c.stroke(); }
   path(poly, true); c.fillStyle = 'rgba(111,168,220,0.06)'; c.fill(); c.strokeStyle = '#6fa8dc'; c.lineWidth = 1.3 * dpr; c.stroke();
   c.setLineDash([3 * dpr, 3 * dpr]);

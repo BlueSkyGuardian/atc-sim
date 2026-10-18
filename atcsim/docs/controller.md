@@ -36,7 +36,7 @@ The toolbar changes **your view only**, never the simulation:
 |---|---|
 | Weather product and FL | Composite reflectivity, or a CAPPI at a flight level (to see embedded cells at your level) |
 | Tops | Echo tops |
-| Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: restricted / danger areas, airways, RAD routings (dashed, one-way arrows), sector lines with frequencies, point names, history dots |
+| Coast, Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), restricted / danger areas, airways, RAD routings (dashed, one-way arrows), sector lines with frequencies, point names, history dots |
 | RBL | Range-and-bearing mode (you rarely need it, see [RBL](#range-and-bearing-lines-rbl)) |
 | Reset view | Fit the airspace |
 | **FPL** | The flight-plan list (key <kbd>G</kbd>) |

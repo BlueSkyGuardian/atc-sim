@@ -49,6 +49,7 @@
       '<a href="/" style="pointer-events:auto;color:#7fb8ff">Home</a>';
     b.style.pointerEvents = 'auto';
   }
+  window.exShowEnded = () => showEnded();
   function tick() {
     if (ended || !state || !state.session) return;
     const st = state.session.status, b = $('#pauseBanner');

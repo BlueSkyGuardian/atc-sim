@@ -31,7 +31,7 @@
   const sbEnd = $('#sbEnd');
   if (sbEnd) sbEnd.onclick = async () => {
     if (!EXID || !confirm('End this solo run? It is kept in your exercises and statistics, with its recording.')) return;
-    try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); } catch (e) { alert(e.message); }
+    try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); if (window.exShowEnded) exShowEnded(); } catch (e) { alert(e.message); }
   };
   const typing = () => { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT') && a.type !== 'checkbox'; };
   window.addEventListener('keydown', e => {
