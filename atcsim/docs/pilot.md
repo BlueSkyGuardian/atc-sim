@@ -101,6 +101,14 @@ The *Shorthand* line under the aircraft list accepts the command syntax, for spe
 | `RAM101 DEVL20` | Weather deviation left up to 20 NM (`DEV`, `DEVR`…) |
 | `RAM101 APP` / `UNA` / `ROG` | Approve / refuse a request, acknowledge a report |
 
+## Running the simulation
+
+Like the instructor, you have the control bar at the top right of the radar: **Run** / **Pause** (key <kbd>P</kbd>),
+the time factor, **+10 s**, **⟲** restart. The timeline under the scope records the run: click it to look back, and
+**⤺ Resume from T+…** puts the simulation back to that moment for everyone, paused (see the
+[instructor manual](instructor.md#rewinding-the-simulation)). Agree with the instructor before you rewind: it undoes
+what happened after that point for every seat.
+
 ## Weather
 
 In an exercise the aircraft **never deviate by themselves**. You make them deviate when the controller approves

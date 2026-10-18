@@ -217,6 +217,13 @@ Used by the home, stats and admin pages (signed-in users):
 | GET | `/api/help` · `/api/help/{page}` | This documentation |
 | GET | `/api/health` | Health check (public) |
 
+## Timeline and rewind
+
+| Method | Path | What |
+|---|---|---|
+| GET | `/sessions/{id}/timeline` | The points the simulation can be put back to (one every 10 s) |
+| POST | `/sessions/{id}/control` | `{"action": "rewind", "seconds": 600}`: the world as it was at the last point at or before T+600 s (aircraft, entries, requests, CPDLC, chat, metrics), paused. The answer gives `rewound_to_s`; the state's `session.rewinds` counts rewinds and restarts, and the event and message ids start again from that point. Instructor, pseudo-pilots, the solo radar's controller |
+
 ## Solo radar
 
 | Method | Path | What |
@@ -232,7 +239,7 @@ In a connected exercise:
 |---|---|
 | **instructor** | Everything on the session, including control |
 | **atc** | Read everything; `entries`, assume / release, MTCD probe and look-ahead, CPDLC `parse` and `command`, chat as our sector. Instructions do not move aircraft (the pilot executes) |
-| **pilot** | Read everything; instructions (the aircraft executes them whether or not the controller assumed it), MTCD probe, CPDLC `respond` and `downlink`, chat as another station |
+| **pilot** | Read everything; instructions (the aircraft executes them whether or not the controller assumed it), MTCD probe, CPDLC `respond` and `downlink`, chat as another station, simulation control (run, pause, speed, rewind) |
 
 The WebSocket `/sessions/{id}/comms` carries the radio and telephone audio (16 kHz G.711 μ-law). It is used by the
 pages, not by agents.

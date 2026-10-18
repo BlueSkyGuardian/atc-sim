@@ -23,11 +23,28 @@
   const tlPlay = $('#tlPlay'), tlLive = $('#tlLive');
   if (tlPlay) tlPlay.onclick = () => $('#rpPlay') && $('#rpPlay').click();
   if (tlLive) tlLive.onclick = () => $('#rpLive') && $('#rpLive').click();
-  setInterval(() => { if (!tlPlay) return; tlPlay.textContent = $('#rpPlay') ? $('#rpPlay').textContent : '▶ Replay'; tlLive.classList.toggle('on', typeof replayMode === 'undefined' || !replayMode); }, 400);
+  const tlRewind = $('#tlRewind'), tlCtl = $('#tlCtl');
+  setInterval(() => {
+    if (!tlPlay) return;
+    tlPlay.textContent = $('#rpPlay') ? $('#rpPlay').textContent : '▶ Replay';
+    const rp = typeof replayMode !== 'undefined' && replayMode;
+    tlLive.classList.toggle('on', !rp);
+    tlCtl.classList.toggle('replay', rp && canControl());
+    if (rp && tlRewind) tlRewind.textContent = `⤺ Resume from T+${fmtT(Math.floor(replayT / 10) * 10)}`;
+  }, 300);
+  if (tlRewind) tlRewind.onclick = async () => {
+    if (!SID || typeof replayT === 'undefined') return;
+    const t = replayT;
+    if (!confirm(`Put the simulation back to T+${fmtT(Math.floor(t / 10) * 10)} for everyone? What happened after it is undone; it stays paused until Run.`)) return;
+    try { await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify({ action: 'rewind', seconds: t }) });
+      if ($('#rpLive')) $('#rpLive').click(); if (typeof pollState === 'function') pollState(); }
+    catch (e) { alert(e.message); }
+  };
+
 
   // ------------------------------------------------------------------ control bar
   const bar = $('#ctrlRow');
-  const canControl = () => !EXID || SEAT === 'instructor' || solo();
+  const canControl = () => !EXID || SEAT === 'instructor' || SEAT === 'pilot' || solo();
   async function control(body) {
     try { await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify(body) }); if (typeof pollState === 'function') pollState(); } catch (e) { if (typeof msg === 'function') msg(e.message, true); }
   }
@@ -91,5 +108,18 @@
     try { await api(`/sessions/${SID}/cpdlc/command`, { method: 'POST', body: JSON.stringify({ text: b.dataset.ans, callsign: b.dataset.cs, voice: true }) }); if (typeof pollState === 'function') pollState(); }
     catch (err) { if (typeof msg === 'function') msg(err.message, true); }
   });
+  // a rewind (or a restart) by anyone: the recording, the event log and what was derived from them start again
+  let seenRw = null;
+  setInterval(() => {
+    if (!state || !state.session) return;
+    const rw = state.session.rewinds || 0;
+    if (seenRw === null) { seenRw = rw; return; }
+    if (rw === seenRw) return;
+    seenRw = rw;
+    try { rec = null; lastSeq = 0; eventsBuf = []; replayMode = false; replayPlaying = false; } catch (e) {}
+    said.length = 0; seenSeq = 0;
+    if (typeof pollEvents === 'function') pollEvents();
+    window.dispatchEvent(new Event('sim-rewind'));
+  }, 400);
   setInterval(renderLog, 700);
 })();

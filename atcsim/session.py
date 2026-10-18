@@ -1,10 +1,13 @@
 """Sessions: one running scenario each, with its own clock thread."""
 from __future__ import annotations
 
+import io
+import pickle
 import re
 import threading
 import time
 import uuid
+import zlib
 from typing import Dict, List, Optional
 
 from . import airspace as airspace_mod
@@ -18,6 +21,16 @@ from .world import World
 import os as _os
 PRED_MIN_INTERVAL_S = float(_os.environ.get("ATC_PRED_INTERVAL_S", "8"))
 _pred_slots = threading.BoundedSemaphore(max(1, int(_os.environ.get("ATC_PRED_WORKERS", "1"))))
+SNAP_S = 10.0                      # the timeline can rewind the simulation to any of these points
+
+
+def _shared_types():
+    """Objects that never change during a run (weather is a function of time, airspace, performance tables): the
+    snapshots refer to them instead of copying them, so a snapshot is a few tens of kB."""
+    from .airspace import Airspace
+    from .performance import TypePerformance
+    from .weather import Weather
+    return (Weather, Airspace, TypePerformance)
 
 
 class Session:
@@ -41,6 +54,10 @@ class Session:
         self.clients: List[dict] = []
         self.status = "created"
         self._stop = threading.Event()
+        self._snaps: List[tuple] = []     # (sim time, compressed world) every SNAP_S, for the timeline's rewind
+        self._shared: Dict[int, object] = {}
+        self.rewinds = 0
+        self._snapshot()
         self._thread = threading.Thread(target=self._run, daemon=True, name=f"session-{self.id}")
         self._thread.start()
         if autostart and mode == "realtime":
@@ -79,6 +96,7 @@ class Session:
             if self.status == "running" and self.mode == "realtime":
                 with self.lock:
                     self.world.step(1.0)
+                    self._maybe_snapshot()
                     if self.world.finished:
                         self.status = "finished"
                 next_tick += 1.0 / self.time_factor
@@ -120,6 +138,7 @@ class Session:
                 n = int(max(1, min(float(seconds), 7200)))
                 for _ in range(n):
                     self.world.step(1.0)
+                    self._maybe_snapshot()
                     if self.world.finished:
                         self.status = "finished"
                         break
@@ -132,9 +151,72 @@ class Session:
                 self.world.auto_wx = auto
                 self.world.auto_pilot = self.solo
                 self.status = "running" if self.mode == "realtime" else "paused"
+                self._snaps = []
+                self.rewinds += 1
+                self._snapshot()
+            elif action == "rewind":           # back to a point of the timeline; paused there
+                return self.rewind(float(seconds))
             else:
-                raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart|auto_wx")
+                raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart|auto_wx|rewind")
             return self.summary()
+
+    # ------------------------------------------------------------------ snapshots / rewind
+    def _snapshot(self) -> None:
+        w = self.world
+        shared, types = self._shared, _shared_types()
+        rec = w.recording
+        w.recording = {"every_s": rec["every_s"], "frames": [], "meta": {}}     # the replay frames are kept apart
+
+        class _P(pickle.Pickler):
+            def persistent_id(self, o):
+                if isinstance(o, types):
+                    shared[id(o)] = o
+                    return id(o)
+                return None
+        try:
+            f = io.BytesIO()
+            _P(f, protocol=5).dump(w)
+        finally:
+            w.recording = rec
+        t = round(w.t, 1)
+        self._snaps = [s for s in self._snaps if s[0] < t] + [(t, zlib.compress(f.getvalue(), 1))]
+
+    def _maybe_snapshot(self) -> None:
+        if self.world.t - (self._snaps[-1][0] if self._snaps else -1e9) >= SNAP_S - 1e-6:
+            self._snapshot()
+
+    def timeline(self) -> dict:
+        return {"points": [s[0] for s in self._snaps], "every_s": SNAP_S, "rewinds": self.rewinds}
+
+    def rewind(self, t: float) -> dict:
+        """Put the simulation back to the last saved point at or before t (every SNAP_S): the world as it was then
+        (aircraft, clearances, requests, CPDLC, chat, metrics), paused. The replay frames after it are dropped."""
+        with self.lock:
+            cand = [s for s in self._snaps if s[0] <= t + 1e-6]
+            if not cand:
+                raise ValueError("nothing saved that early")
+            st, blob = cand[-1]
+            shared = self._shared
+
+            class _U(pickle.Unpickler):
+                def persistent_load(self, k):
+                    return shared[k]
+            w = _U(io.BytesIO(zlib.decompress(blob))).load()
+            old = self.world
+            w.recording = old.recording
+            w.recording["frames"] = [f for f in w.recording["frames"] if f["t"] <= st + 1e-6]
+            w._last_frame_t = w.recording["frames"][-1]["t"] if w.recording["frames"] else -1e9
+            self.world = w
+            self._snaps = [s for s in self._snaps if s[0] <= st + 1e-6]
+            self._sep_key = None
+            self._shared_sep, self._shared_at = None, 0.0
+            if self.status != "finished" or w.t < w.duration_s:
+                self.status = "paused"
+            self.rewinds += 1
+            w._event("rewind", text=f"simulation rewound to T+{int(st // 60):02d}:{int(st % 60):02d}")
+            out = self.summary()
+            out["rewound_to_s"] = st
+            return out
 
     # ------------------------------------------------------------------ views
     def summary(self) -> dict:
@@ -147,6 +229,8 @@ class Session:
             "auto_wx": getattr(w, "auto_wx", True),
             "pending_requests": sum(1 for r in w.requests.values() if r.status == "pending"),
             "clients": len(self.clients),
+            "rewinds": getattr(self, "rewinds", 0),
+            "rewind_from_s": self._snaps[0][0] if getattr(self, "_snaps", None) else None,
         }
 
     def separation(self, lookahead_s: float = 600.0, include_inbound: bool = True, all_pairs: bool = False,

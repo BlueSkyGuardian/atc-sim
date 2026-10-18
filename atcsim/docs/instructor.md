@@ -157,7 +157,15 @@ the aircraft panel. It is meant for demonstrations and for agents using the API.
 
 In an exercise, the instructor runs the simulation from the control bar at the top right of the radar: **Run** /
 **Pause** (key <kbd>P</kbd>), the time factor ×1 to ×30, **+10 s** (pause and advance), **⟲** restart. The state
-(READY, RUNNING, PAUSED) and the exercise time are shown in it.
+(READY, RUNNING, PAUSED) and the exercise time are shown in it. The pseudo-pilots have the same bar.
+
+### Rewinding the simulation
+
+The timeline under the scope records the run. Click or drag it to look back; the picture shows that moment (REPLAY
+in the information box) while the simulation goes on. **⤺ Resume from T+…** then puts the simulation itself back to
+that moment for every seat: aircraft, clearances in the system, requests, CPDLC and chat as they were, and the
+statistics too. It stays paused until **Run**. The simulation keeps a point every 10 seconds, so the cursor goes back
+to the 10-second mark before it. What happened after that point is undone (the recording video keeps it).
 
 ## Administrator
 

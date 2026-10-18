@@ -26,6 +26,7 @@
     } catch (e) {}
   }
   setInterval(() => { if (SID && state && (state.chat_last || 0) !== last) load(); else if (SID && !info) load(); }, 700);
+  addEventListener('sim-rewind', () => { msgs = []; last = 0; ready = false; load(); });   // the chat is rewound with the simulation
 
   async function send(body, out) {
     try { const m = await api(`/sessions/${SID}/chat`, { method: 'POST', body: JSON.stringify(body) });

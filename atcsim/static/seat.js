@@ -55,7 +55,8 @@
     const st = state.session.status, b = $('#pauseBanner');
     if (st !== 'running') {
       b.style.display = 'block';
-      b.textContent = st === 'finished' ? 'Scenario finished' : st === 'created' ? (SEAT === 'instructor' || EXINFO.solo ? 'Ready · press Run (P) to start' : 'Waiting for the instructor to start the exercise') : 'PAUSED' + (EXINFO.solo ? ' · P to run' : '');
+      const ctl = SEAT === 'instructor' || SEAT === 'pilot' || EXINFO.solo;
+      b.textContent = st === 'finished' ? 'Scenario finished' : st === 'created' ? (ctl ? 'Ready · press Run (P) to start' : 'Waiting for the exercise to start') : 'PAUSED' + (ctl ? ' · P to run' : '');
     } else b.style.display = 'none';
     if (SEAT !== 'atc') renderPilot();
     if (SEAT === 'atc' && $('#lblMenu').classList.contains('on') && !$('#lblMenu').classList.contains('fm')) refreshMenuHead();

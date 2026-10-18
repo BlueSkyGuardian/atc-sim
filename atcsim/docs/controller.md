@@ -417,7 +417,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 - **HUD** in the toolbar hides or shows the information box (scenario, time, traffic, wind).
 - **The timeline** under the scope records the run: click or drag it to look back (REPLAY shows in the information
   box), **▶ Replay** plays from there, **Live** returns to the live picture. Its markers show losses of separation,
-  requests and instructions. **Timeline** in the toolbar hides or shows it.
+  requests and instructions. **Timeline** in the toolbar hides or shows it. **⤺ Resume from T+…** puts the
+  simulation back to the cursor (paused): try another plan from there.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording.
 
 ![The solo radar: the control bar top right, the radio log bottom left, the command line](/static/docs/s_radar.jpg "The solo radar: the control bar top right, the radio log bottom left, the command line")

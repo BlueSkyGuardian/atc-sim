@@ -113,7 +113,7 @@ class Command(BaseModel):
 
 
 class Control(BaseModel):
-    action: Literal["start", "resume", "pause", "set_speed", "set_mode", "step", "restart", "auto_wx"]
+    action: Literal["start", "resume", "pause", "set_speed", "set_mode", "step", "restart", "auto_wx", "rewind"]
     seconds: float = 1.0
     value: Optional[bool] = None
     time_factor: Optional[float] = None
@@ -326,6 +326,14 @@ def control(sid: str, body: Control):
         return s.control(body.action, seconds=body.seconds, time_factor=body.time_factor, mode=body.mode)
     except ValueError as e:
         raise HTTPException(400, str(e))
+
+
+@app.get("/sessions/{sid}/timeline")
+def timeline(sid: str):
+    """The points the simulation can be rewound to (POST /control {"action": "rewind", "seconds": t})."""
+    s = _session(sid)
+    with s.lock:
+        return s.timeline()
 
 
 @app.get("/sessions/{sid}/state")
@@ -1011,7 +1019,7 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
         kind = op.pop("op", "instruction")
         multi = bool(getattr(s, "multi", False))
         pilot = multi and seat in ("pilot", "instructor")
-        if kind == "control" and seat != "instructor":
+        if kind == "control" and not (seat in ("instructor", "pilot") or getattr(s, "solo", False)):
             raise PermissionError("simulation control is for the instructor")
         if seat == "atc" and multi:
             if kind == "entry":
@@ -1041,8 +1049,11 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
         # state every new sim second (cheap); the separation look-ahead is computed by separator() in parallel and
         # attached to the next tick when ready, so a slow prediction never delays the picture
         nonlocal last_t, last_seq
+        seen_rw = getattr(s, "rewinds", 0)
         while True:
             try:
+                if getattr(s, "rewinds", 0) != seen_rw:     # rewound / restarted: the event log starts again
+                    seen_rw, last_seq, last_t = s.rewinds, 0, -1.0
                 sep_msg = latest_sep["msg"]
                 if s.world.t != last_t or sep_msg is not None:
                     t, msg = await run_in_threadpool(build)

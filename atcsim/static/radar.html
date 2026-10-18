@@ -129,7 +129,8 @@
   #lblMenu .lv button.cf { border-color: #a33; color: #ffb3b3; } #lblMenu .lv button.ok { border-color: #2f7a5f; color: #bff5dc; }
   /* seats */
   body.seat-atc #app { grid-template-columns: 1fr; } body.seat-atc aside { display: none; }
-  body.exercise:not(.seat-instructor):not(.solo) #tl, body.exercise .legend-help { display: none; }
+  body.seat-atc:not(.solo) #tl, body.exercise .legend-help { display: none; }
+  body.exercise:not(.solo) #tl { bottom: 44px !important; }
   body.tl-off #tl, body.tl-off #tlCtl { display: none !important; }
   body.seat-pilot #alerts { display: none; }
   body:not(.seat-instructor).exercise .instr-only { display: none !important; }
@@ -225,7 +226,7 @@
   /* simulation control bar (instructor, solo radar, sandbox) */
   .simbar { position: absolute; right: 12px; top: 44px; z-index: 5; display: flex; align-items: center; gap: 6px; padding: 5px 7px; background: rgba(16, 33, 51, .9);
     border: 1px solid #33557a; border-radius: 10px; box-shadow: 0 12px 28px -14px #000; font-family: var(--mono); font-size: 12px; }
-  body.exercise:not(.seat-instructor):not(.solo) .simbar { display: none; }
+  body.seat-atc:not(.solo) .simbar { display: none; }
   .simbar button { padding: 4px 9px; font-size: 12px; }
   .simbar .sb-st { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); }
   .simbar .sb-st.running { color: #5fd3a3; border-color: #2f7a5f; } .simbar .sb-st.paused, .simbar .sb-st.created { color: #f2b84b; border-color: #7a6a2a; }
@@ -255,11 +256,14 @@
   #radioLog .hd { color: var(--dim); font-size: 10.5px; letter-spacing: .06em; }
   body.solo #legend { display: none; }
   /* timeline on the solo radar: at the bottom, with its own Replay / Live buttons; what sat at the bottom moves up */
-  body.exercise:not(.seat-instructor):not(.solo) #tlBtn { display: none; }
+  body.seat-atc:not(.solo) #tlBtn { display: none; }
   #tlBtn.on { border-color: var(--chart) !important; color: var(--sel) !important; }
   body.solo #tl { bottom: 4px !important; }
   #tlCtl { display: none; position: absolute; right: 12px; bottom: 56px; z-index: 5; gap: 4px; }
-  body.solo #tlCtl { display: flex; }
+  body.solo #tlCtl, body.seat-instructor #tlCtl, body.seat-pilot #tlCtl, body:not(.exercise) #tlCtl { display: flex; }
+  body.exercise:not(.solo) #tlCtl { bottom: 96px; }
+  #tlCtl #tlRewind { display: none; border-color: #c9a227; color: #ffe08a; }
+  #tlCtl.replay #tlRewind { display: inline-block; }
   #tlCtl button { padding: 3px 9px; font-size: 12px; background: rgba(13, 27, 42, .85); }
   #tlCtl button.on { border-color: #5fd3a3; color: #5fd3a3; }
   body.solo:not(.tl-off) #cmdBar { bottom: 62px; }
@@ -382,7 +386,7 @@
     <div id="busy"><div class="box"><div class="t" id="busyT"></div><div class="s" id="busyS"></div>
       <div class="bar"><div class="fill" id="busyF"></div></div><div class="e"><span id="busyE"></span><span id="busyH"></span></div></div></div>
     <canvas id="tl" style="position:absolute;left:0;right:0;bottom:28px;height:46px;width:100%;cursor:pointer"></canvas>
-    <div id="tlCtl"><button id="tlPlay" title="Play the recording from the cursor (or the last 5 minutes)">▶ Replay</button><button id="tlLive" title="Back to the live picture">Live</button></div>
+    <div id="tlCtl"><button id="tlPlay" title="Play the recording from the cursor (or the last 5 minutes)">▶ Replay</button><button id="tlLive" title="Back to the live picture">Live</button><button id="tlRewind" title="Put the simulation back to this point for every seat, paused: Run continues from here">⤺ Resume from here</button></div>
     <div id="tltip" style="position:absolute;display:none;background:#0b1016ee;border:1px solid #1f2b38;padding:3px 6px;font:11px ui-monospace,monospace;color:#c9d6e2;pointer-events:none;white-space:nowrap"></div>
     <div id="legend"><span class="lg-d">Danger</span><span class="lg-r">Restricted</span><span class="lg-p">Prohibited</span><span class="legend-help" style="--x:0">dashed = inactive · drag a label to move it, double-click it to reset · right-drag between two aircraft / points (or B over one) for an RBL, drag its label to move it, right-click it to remove · I: track info · ? for shortcuts</span></div>
   </div>

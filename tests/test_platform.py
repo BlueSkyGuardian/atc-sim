@@ -138,7 +138,22 @@ r = pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "alt
 ok(r["status"] != "rejected", f"pilot executes before the controller assumed ({r.get('reason', r['status'])})")
 ok(pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "assume"}).status_code == 403, "pilot cannot assume")
 r = atc.post(f"/sessions/{eid}/assume/{cs}"); print(r.text); ok(r.status_code == 200, "controller assumes")
-ok(pil.post(f"/sessions/{eid}/control", json={"action": "pause"}).status_code == 403, "pilot cannot pause")
+ok(pil.post(f"/sessions/{eid}/control", json={"action": "pause"}).status_code == 200, "the pseudo-pilot runs the simulation too (pause)")
+ok(pil.post(f"/sessions/{eid}/control", json={"action": "resume"}).status_code == 200, "and runs it again")
+tl_ = ins.get(f"/sessions/{eid}/timeline").json()
+ok(tl_["points"] and tl_["points"][0] == 0, f"timeline: {len(tl_['points'])} points to rewind to")
+s_e = manager.sessions[eid]
+with s_e.lock:
+    for _ in range(25):
+        s_e.world.step(1)
+        s_e._maybe_snapshot()
+t_before = ins.get(f"/sessions/{eid}/state").json()["sim_time_s"]
+r = pil.post(f"/sessions/{eid}/control", json={"action": "rewind", "seconds": t_before - 12})
+ok(r.status_code == 200 and r.json()["rewound_to_s"] <= t_before - 12 and r.json()["status"] == "paused",
+   f"the pseudo-pilot rewinds the simulation (T+{t_before:.0f} → T+{r.json().get('rewound_to_s')}), paused")
+ok(ins.get(f"/sessions/{eid}/state").json()["sim_time_s"] == r.json()["rewound_to_s"], "every seat sees the rewound picture")
+ok(atc.post(f"/sessions/{eid}/control", json={"action": "rewind", "seconds": 0}).status_code == 403, "the controller does not")
+ins.post(f"/sessions/{eid}/control", json={"action": "resume"})
 r = atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 35})
 ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sessions/{eid}/mtcd").json()["look_ahead_s"] == 2100,
    "controller sets the MTCD look-ahead (35 min), every seat sees it")
