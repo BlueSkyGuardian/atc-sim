@@ -392,9 +392,11 @@
       const btns = q.type === 'report' ? `<button data-rep="${q.id}" data-dec="roger" data-cs="${q.callsign}">Acknowledged</button>`
         : `<button class="yes" data-rep="${q.id}" data-dec="approved" data-cs="${q.callsign}" title="the controller approved: the aircraft does it">Approved</button><button class="no" data-rep="${q.id}" data-dec="unable" data-cs="${q.callsign}">Refused</button>`;
       const sent = dlOpenFor(q.id);
-      const dlb = conn(q.callsign) && !sent ? `<button data-dlreq="${q.id}" data-cs="${q.callsign}" title="send this request by data link instead of saying it">By CPDLC</button>` : '';
+      const dlb = conn(q.callsign) && !sent && q.kind !== 'emergency' ? `<button data-dlreq="${q.id}" data-cs="${q.callsign}" title="send this request by data link instead of saying it">By CPDLC</button>` : '';
       return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · ${sent ? 'sent by CPDLC: ' + h(q.phraseology) : `say <i>“${h(q.phraseology)}”</i>`}<small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s${sent ? ' · the controller answers by data link (or on the frequency)' : ''}</small></div><div class="bt">${dlb}${btns}</div></div>`;
     }));
+    // radio failure (live action): the pseudo-pilot does not answer for it on the frequency
+    for (const a of allAc().filter(x => x.emergency && x.emergency.kind === 'radio')) items.push(`<div class="todo call" data-cs="${a.callsign}"><span class="tg">7600</span><div class="tx"><b>${a.callsign}</b> · radio failure: <i>do not answer</i> for it on the frequency; it flies its flight plan<small>squawk 7600 · CPDLC still works · cleared from Live actions</small></div></div>`);
     // aircraft dealing with weather (they asked for a deviation, were cleared one, or deviate): report clear of it
     for (const a of allAc().filter(x => x.wx_handling)) items.push(`<div class="todo req" data-cs="${a.callsign}"><span class="tg">WX</span><div class="tx"><b>${a.callsign}</b> is dealing with weather · when clear, say <i>“${a.callsign} clear of weather”</i><small>its weather is not counted as a penetration until then</small></div><div class="bt"><button class="yes" data-wxclear="${a.callsign}">Clear of weather</button></div></div>`);
     const html = items.join('') || '<div class="empty">Nothing to say right now. Fly what the controller gives you.</div>';

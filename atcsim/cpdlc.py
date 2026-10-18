@@ -167,7 +167,7 @@ def update(w) -> None:
     if getattr(w, "auto_pilot", False):
         sent = {m.get("request_id") for m in w.cpdlc_msgs if m.get("request_id")}
         for req in list(w.requests.values()):
-            if req.status != "pending" or req.kind == "checkin" or req.id in sent:
+            if req.status != "pending" or req.kind in ("checkin", "emergency", "live") or req.id in sent:
                 continue
             c = w.cpdlc.get(req.callsign)
             a = w.aircraft.get(req.callsign)

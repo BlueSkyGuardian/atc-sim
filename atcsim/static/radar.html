@@ -269,6 +269,21 @@
   body.solo:not(.tl-off) #cmdBar { bottom: 62px; }
   body.solo:not(.tl-off) #radioLog { bottom: 58px; }
   body.solo:not(.tl-off) #chatToast { bottom: 90px; }
+  /* live actions */
+  .lv-tabs { display: flex; gap: 0; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .lv-tabs button { flex: 1; border: 0; border-radius: 0; padding: 5px 4px; font-size: 12px; background: transparent; }
+  .lv-tabs button + button { border-left: 1px solid var(--line); }
+  .lv-tabs button.on { background: #1c3856; color: var(--sel); }
+  .lv-g { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: flex-end; font-size: 12px; }
+  .lv-g label { display: flex; flex-direction: column; gap: 2px; color: var(--dim); }
+  .lv-g label.lv-w { flex: 1 1 100%; }
+  .lv-g input, .lv-g select { font-size: 12px; padding: 4px 6px; }
+  .lv-g input[data-f=callsign], .lv-g input[data-f=route], .lv-g input[data-f=type], .lv-g input[data-f=dep], .lv-g input[data-f=dest], .lv-g input[data-f=aerodrome] { text-transform: uppercase; font-family: var(--mono); }
+  .lv-row { display: flex; gap: 8px; align-items: center; padding: 4px 0; border-top: 1px solid var(--line-2, #1d3249); font-size: 12px; }
+  .lv-row button { margin-left: auto; }
+  .lv-sub { margin: 8px 0 2px; color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .lv-sq { font-family: var(--mono); color: #fff; background: #b32d2d; border-radius: 3px; padding: 0 5px; }
+  .lv-out { font-size: 12px; min-height: 16px; margin-top: 6px; }
   /* coordination chat */
   #chatBtn.hit { border-color: #f2b84b !important; color: #f2b84b !important; }
   #chatToast { position: absolute; right: 14px; bottom: 60px; z-index: 7; display: flex; flex-direction: column; gap: 6px; width: 330px; }
@@ -1736,6 +1751,7 @@ requestAnimationFrame(draw);
 <script src="/static/cpdlc.js"></script>
 <script src="/static/chat.js"></script>
 <script src="/static/radarui.js"></script>
+<script src="/static/live.js"></script>
 <script src="/static/uirec.js"></script>
 </body>
 </html>

@@ -311,6 +311,10 @@ def special_tracks(w) -> Dict[str, list]:
             inband = RVSM_LO - 50 <= a.alt_ft <= RVSM_HI + 50
             tags.append(["NRVSM", "warn" if inband else "info",
                          ("RVSM unable" if a.rvsm_status == "unable" else "not RVSM approved") + (" · in RVSM airspace" if inband else "")])
+        em = getattr(a, "emergency", None)
+        if em:
+            tags.insert(0, ["RCF" if em["kind"] == "radio" else "EMG", "alert",
+                            f"squawk {em['code']}: " + ("radio failure" if em["kind"] == "radio" else em.get("text", "emergency"))])
         if a.military:
             tags.append(["MIL", "info", "military" + (f" formation {a.formation['types']}" if a.formation else "")])
         # non-standard level: cleared or flown level against the semicircular rule (not for descents to destination)

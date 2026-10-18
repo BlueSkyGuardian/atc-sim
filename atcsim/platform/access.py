@@ -25,7 +25,7 @@ SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
 WRITE_RIGHTS = {
-    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control)$",),   # pseudo-pilots run the simulation too
+    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live)$",),   # pseudo-pilots run the simulation too
     "atc": (r"^/(probe|mtcd|mtcd/settings|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
 }
 
@@ -69,7 +69,7 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         for pat in WRITE_RIGHTS.get(seat, ()):
             if re.match(pat, rest):
                 return None
-        if seat == "atc" and rest == "/control" and db.is_solo(sid):
+        if seat == "atc" and rest in ("/control", "/live") and db.is_solo(sid):
             return None                                # solo radar: the controller runs the simulation
         return f"not allowed for the {seat} seat"
     if path in ("/sessions",) and method == "POST":

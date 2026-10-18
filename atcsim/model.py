@@ -100,6 +100,8 @@ class Request:
                     f"then direct {v['then_direct']}")
         if self.kind == "descent":
             return f"{self.callsign} request descent"
+        if self.type == "report" and self.kind == "emergency":
+            return str(self.value)                     # MAYDAY / PAN PAN: the callsign is inside the call
         if self.type == "report" and self.kind == "rvsm_unable":
             return f"{self.callsign} unable RVSM due {self.value}"
         if self.type == "report":

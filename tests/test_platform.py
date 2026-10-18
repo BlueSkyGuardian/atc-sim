@@ -153,6 +153,15 @@ ok(r.status_code == 200 and r.json()["rewound_to_s"] <= t_before - 12 and r.json
    f"the pseudo-pilot rewinds the simulation (T+{t_before:.0f} → T+{r.json().get('rewound_to_s')}), paused")
 ok(ins.get(f"/sessions/{eid}/state").json()["sim_time_s"] == r.json()["rewound_to_s"], "every seat sees the rewound picture")
 ok(atc.post(f"/sessions/{eid}/control", json={"action": "rewind", "seconds": 0}).status_code == 403, "the controller does not")
+lo = pil.get(f"/sessions/{eid}/live").json()
+ok(lo["aircraft"] and "A320" in lo["types"], "live actions: the options (aircraft, types, areas)")
+r = pil.post(f"/sessions/{eid}/live", json={"action": "request", "callsign": lo["aircraft"][0], "kind": "report", "value": "smooth ride at FL350"})
+ok(r.status_code == 200 and r.json()["request_id"], "the pseudo-pilot makes a pilot speak (live action)")
+r = ins.post(f"/sessions/{eid}/live", json={"action": "emergency", "callsign": lo["aircraft"][0], "kind": "general", "why": "engine failure"})
+ok(r.status_code == 200 and r.json()["squawk"] == "7700", "the instructor declares an emergency")
+ok(ins.post(f"/sessions/{eid}/live", json={"action": "clear_emergency", "callsign": lo["aircraft"][0]}).status_code == 200, "and clears it")
+ok(atc.post(f"/sessions/{eid}/live", json={"action": "request", "callsign": lo["aircraft"][0], "kind": "level", "value": 300}).status_code == 403,
+   "the controller has no live actions in an exercise")
 ins.post(f"/sessions/{eid}/control", json={"action": "resume"})
 r = atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 35})
 ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sessions/{eid}/mtcd").json()["look_ahead_s"] == 2100,

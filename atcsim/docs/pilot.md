@@ -101,6 +101,13 @@ The *Shorthand* line under the aircraft list accepts the command syntax, for spe
 | `RAM101 DEVL20` | Weather deviation left up to 20 NM (`DEV`, `DEVR`…) |
 | `RAM101 APP` / `UNA` / `ROG` | Approve / refuse a request, acknowledge a report |
 
+## Live actions
+
+Under *CPDLC*, the **Live actions** box adds an aircraft now (or entering in a few minutes), declares an emergency
+(emergency descent, medical diversion, radio failure, general), makes an aircraft ask for something, or switches an
+area: see the [instructor manual](instructor.md#live-actions). An emergency puts its call (MAYDAY, PAN PAN) on your
+*To do* to read out; a radio failure puts a reminder not to answer for that aircraft.
+
 ## Running the simulation
 
 Like the instructor, you have the control bar at the top right of the radar: **Run** / **Pause** (key <kbd>P</kbd>),

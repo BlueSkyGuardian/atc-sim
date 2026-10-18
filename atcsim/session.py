@@ -215,7 +215,13 @@ class Session:
                 if k[0] == "A":
                     return base.env.airspace
                 return performance.get(k[1], k[2])
-        return _U(io.BytesIO(zlib.decompress(blob))).load()
+        w = _U(io.BytesIO(zlib.decompress(blob))).load()
+        asp = w.env.airspace                       # points added by live actions (pop-up aircraft): back in it
+        for k in getattr(w, "live_cops", []):
+            if k in w.waypoints:
+                asp.boundary_points.setdefault(k, w.waypoints[k])
+                asp.cop_points.add(k)
+        return w
 
     # ------------------------------------------------------------------ surviving a restart
     def _meta(self) -> dict:

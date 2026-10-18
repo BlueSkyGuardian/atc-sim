@@ -242,6 +242,180 @@ def _add_cops(names: List[str], asp, waypoints: Dict[str, tuple]) -> List[str]:
     return out
 
 
+def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes: dict, aerodromes: dict, wind,
+                  dT: float, pre_entry_nm: float, checkin_nm: float, start_min: float) -> Aircraft:
+    """One aircraft of a scenario (its route completed, entry time, flight plan) - also used to add one during a run."""
+    cs = str(a["callsign"]).upper()
+    names = [w.upper() for w in a["route"]]
+    if len(names) < (1 if a.get("start") else 2):
+        raise ScenarioError(f"{cs}: route needs at least an entry and an exit waypoint"
+                            + (" (or a start position and one waypoint)" if not a.get("start") else ""))
+    for w in names:
+        if w not in waypoints:
+            raise ScenarioError(f"{cs}: unknown waypoint {w}")
+    # flight plan beyond the controlled airspace: points before the entry / after the exit, by transfer point
+    # and destination (departure for entries), unless the route already gives them or auto_route is off
+    dest0 = str(a.get("dest") or "").upper()
+    if not dest0 and names[-1] in seqfixes and a.get("arrival", True):
+        dest0 = seqfixes[names[-1]].aerodrome
+    start = a.get("start")              # free starting position: {"point": [x, y] or a point name, "time": s}
+    if a.get("auto_route", scn.get("auto_routes", True)) and asp.id != "training":
+        before, after = routing.complete(asp, names, dest0, str(a.get("dep") or ""), key=cs,
+                                         runways={k: v.in_use for k, v in aerodromes.items()})
+        names = ([] if start else before) + names + after
+    filed = list(names)
+    start_name = None
+    if start:
+        if "time" not in start:
+            raise ScenarioError(f"{cs}: start needs a 'time'")
+        start_name = f"@{cs}"
+        waypoints[start_name] = asp.resolve_point(start["point"])
+        if dist(waypoints[start_name], waypoints[names[0]]) < 0.5:
+            names = names[1:] if len(names) > 2 else names
+        names = [start_name] + names
+    if asp.id != "training":
+        names = _add_cops(names, asp, waypoints)
+    # entry = first route point on the controlled boundary (or inside); points before it are upstream
+    # (previous sector); the route ends at the exit = last point on the boundary or inside.
+    inside = [w in asp.boundary_points or asp.inside(waypoints[w]) for w in names]
+    if not any(inside):
+        raise ScenarioError(f"{cs}: route {names} never enters the controlled airspace")
+    idx_entry = inside.index(True)
+    idx_exit = len(inside) - 1 - inside[::-1].index(True)
+    if idx_exit <= idx_entry:
+        raise ScenarioError(f"{cs}: route has no leg inside the controlled airspace")
+    route = names[idx_entry:idx_exit + 1]
+    after_exit = [w for w in names[idx_exit + 1:] if not w.startswith("C") or w in asp.point_info]
+    try:
+        perf = performance.get(a.get("type", "A320"), dT)
+    except KeyError as e:
+        raise ScenarioError(f"{cs}: {e.args[0]}")
+    fl = int(a["fl"])
+    if "mass_kg" in a:
+        mass = float(a["mass_kg"])
+    else:
+        load = float(a.get("load", performance.DEFAULT_LOAD))
+        mass = perf.oew + load * (perf.mtow - perf.oew)
+    if not (perf.oew < mass <= perf.mtow):
+        raise ScenarioError(f"{cs}: mass {mass:.0f} kg outside {perf.icao} OEW-MTOW")
+    filed_mach = float(a["mach"]) if "mach" in a else None
+    ac = Aircraft(callsign=cs, perf=perf, route=route, entry_time=0.0, fl=fl, mass=mass, filed_mach=filed_mach)
+    if "ias_kt" in a:
+        ac.spd_cas, ac.spd_ias_now = float(a["ias_kt"]), True
+    # category, formation, RVSM approval and equipment
+    ac.military = bool(a.get("military", perf.military))
+    form = a.get("formation")
+    if form:
+        if isinstance(form, int):
+            form = {"size": form}
+        n = int(form.get("size", 2))
+        if n < 2:
+            raise ScenarioError(f"{cs}: a formation has at least 2 aircraft")
+        ac.formation = {"size": n, "types": form.get("types", f"{n}x{perf.icao}"),
+                        "extent_nm": float(form.get("extent_nm", 1.0)),
+                        "note": "formation flight: only the leader is shown; 2000 ft from any other aircraft, "
+                                f"horizontal minimum radar minimum + {float(form.get('extent_nm', 1.0)):.0f} NM"}
+        ac.military = True
+    rv_default = perf.rvsm_default and ac.formation is None
+    ac.rvsm_approved = bool(a.get("rvsm", rv_default))
+    if ac.formation is not None and ac.rvsm_approved:
+        raise ScenarioError(f"{cs}: formation flights are not RVSM approved")
+    ac.rvsm_status = "approved" if ac.rvsm_approved else "non_approved"
+    ac.equipment = str(a.get("equipment") or (DEFAULT_EQUIPMENT["military"] if ac.military and not ac.rvsm_approved
+                                              else DEFAULT_EQUIPMENT["rvsm" if ac.rvsm_approved else "non_rvsm"]))
+    if ac.rvsm_approved and "W" not in ac.equipment.split("/")[0]:
+        raise ScenarioError(f"{cs}: RVSM approved but equipment {ac.equipment} has no 'W'")
+    ok, why = perf.level_available(fl, *ac.speed_target(fl * 100.0), mass)
+    if not ok and fl * 100 > perf.ceiling_ft:
+        raise ScenarioError(f"{cs}: {why}")
+    tas = perf.tas_for(*ac.speed_target(fl * 100.0), fl * 100.0)
+    pts = [waypoints[w] for w in route]
+    brg = bearing(pts[0], pts[-1])
+    ac.southbound = str(a.get("direction", "southbound" if 90.0 <= brg < 270.0 else "northbound")) == "southbound"
+    if start_name:
+        # the aircraft is at its start point at start.time and flies the route from there
+        full = [waypoints[w] for w in names]
+        entry = float(start["time"]) + _route_time_s(full, polyline_length(full[:idx_entry + 1]), tas, wind, fl)
+    elif "entry_time" in a:
+        entry = float(a["entry_time"])
+    elif "reach" in a:
+        r = a["reach"]
+        full = [waypoints[w] for w in names]          # whole filed route, upstream and downstream included
+        if "waypoint" in r:
+            wn = r["waypoint"].upper()
+            if wn not in names:
+                raise ScenarioError(f"{cs}: reach waypoint {wn} is not on its route")
+            target = waypoints[wn]
+        else:
+            target = asp.resolve_point(r["point"])
+        along, off, _ = project_on_polyline(full, target)
+        if off > 1.0:
+            raise ScenarioError(f"{cs}: reach point is {off:.1f} NM off its route")
+        along_entry = polyline_length(full[:idx_entry + 1])
+        entry = float(r["time"]) - (_route_time_s(full, along, tas, wind, fl)
+                                    - _route_time_s(full, along_entry, tas, wind, fl))
+    else:
+        raise ScenarioError(f"{cs}: needs 'entry_time' or 'reach'")
+    # ---- appear before the entry waypoint (previous sector's traffic), along the upstream route if any
+    pre_nm = float(a.get("pre_entry_nm", pre_entry_nm))
+    if start_name:
+        pre_name, pre_pt, upstream = start_name, waypoints[start_name], names[1:idx_entry]
+    else:
+        pre_pt, upstream = _place_pre_entry(names, waypoints, idx_entry, pre_nm)
+        pre_name = f"@{cs}"
+        waypoints[pre_name] = pre_pt
+    head = [pre_pt] + [waypoints[w] for w in upstream] + ([pts[0]] if route[0] != pre_name else [])
+    ext_pts = head + pts[1:]
+    t_pre = _route_time_s(head, polyline_length(head), tas, wind, fl)
+    spawn = entry - t_pre                       # entry = planned time at the entry waypoint
+    start_along = 0.0                           # measured along the extended route (from the pre-entry point)
+    if spawn < 0:
+        lo, hi = 0.0, polyline_length(ext_pts)
+        for _ in range(40):
+            mid = (lo + hi) / 2
+            if _route_time_s(ext_pts, mid, tas, wind, fl) < -spawn:
+                lo = mid
+            else:
+                hi = mid
+        start_along = lo
+        if start_along >= polyline_length(ext_pts) - 1:
+            raise ScenarioError(f"{cs}: would already have left the sector at t=0")
+        spawn = 0.0
+    head_len = polyline_length(head)
+    ac.route = ([pre_name] + upstream if route[0] != pre_name else []) + route
+    ac.entry_time = spawn
+    ac.boundary_time = entry
+    ac.entry_wp = route[0]
+    ac.checkin_nm = float(a.get("checkin_nm", checkin_nm))
+    ac.start_along_nm = start_along
+    ac.planned_exit = route[-1]
+    ac.planned_length_nm = polyline_length(pts) - max(0.0, start_along - head_len)
+    dest_fp = str(a.get("dest") or "").upper()
+    if (route[-1] in seqfixes and a.get("arrival", True)
+            and (not dest_fp or dest_fp == seqfixes[route[-1]].aerodrome)):   # arrival behind the fix
+        ac.destination = seqfixes[route[-1]].aerodrome
+        ac.arr = {"fix": route[-1]}
+    dest = str(a.get("dest") or ac.destination or "ZZZZ").upper()
+    spd_mode, spd_val = ac.speed_target(fl * 100.0)
+    ac.flight_plan = {
+        "callsign": cs, "aircraft_type": perf.icao, "wake": _wake(perf),
+        "flight_rules": "I", "flight_type": "M" if ac.military else "S",
+        "departure": str(a.get("dep") or "ZZZZ").upper(), "destination": dest,
+        "cruise": f"F{fl:03d}", "speed": (f"M{int(round(spd_val * 100)):03d}" if spd_mode == "mach"
+                                          else f"N{int(round(tas)):04d}"),
+        "route": asp.route_string(filed + [w.upper() for w in a.get("route_after", [])]),
+        "equipment": ac.equipment, "rvsm": "approved (W)" if ac.rvsm_approved else "non-RVSM",
+        "formation": ac.formation["types"] if ac.formation else None,
+        "remarks": str(a.get("remarks", "")) or ("STS/STATE" if ac.military else ""),
+    }
+    ac.route_after = after_exit
+    ac.route_before = [w for w in filed[:filed.index(route[0])] if w in waypoints] if route[0] in filed else []
+    ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints,
+                                                            str(a.get("dep") or ""), str(a.get("dest") or ac.destination or ""))
+    ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
+    return ac
+
+
 def build_world(scn: dict) -> World:
     import copy as _copy
     asp = _copy.copy(_airspace_for(scn))           # per-world copy: coordination points are added to it
@@ -280,173 +454,7 @@ def build_world(scn: dict) -> World:
         if cs in seen:
             raise ScenarioError(f"duplicate callsign {cs}")
         seen.add(cs)
-        names = [w.upper() for w in a["route"]]
-        if len(names) < (1 if a.get("start") else 2):
-            raise ScenarioError(f"{cs}: route needs at least an entry and an exit waypoint"
-                                + (" (or a start position and one waypoint)" if not a.get("start") else ""))
-        for w in names:
-            if w not in waypoints:
-                raise ScenarioError(f"{cs}: unknown waypoint {w}")
-        # flight plan beyond the controlled airspace: points before the entry / after the exit, by transfer point
-        # and destination (departure for entries), unless the route already gives them or auto_route is off
-        dest0 = str(a.get("dest") or "").upper()
-        if not dest0 and names[-1] in seqfixes and a.get("arrival", True):
-            dest0 = seqfixes[names[-1]].aerodrome
-        start = a.get("start")              # free starting position: {"point": [x, y] or a point name, "time": s}
-        if a.get("auto_route", scn.get("auto_routes", True)) and asp.id != "training":
-            before, after = routing.complete(asp, names, dest0, str(a.get("dep") or ""), key=cs,
-                                             runways={k: v.in_use for k, v in aerodromes.items()})
-            names = ([] if start else before) + names + after
-        filed = list(names)
-        start_name = None
-        if start:
-            if "time" not in start:
-                raise ScenarioError(f"{cs}: start needs a 'time'")
-            start_name = f"@{cs}"
-            waypoints[start_name] = asp.resolve_point(start["point"])
-            if dist(waypoints[start_name], waypoints[names[0]]) < 0.5:
-                names = names[1:] if len(names) > 2 else names
-            names = [start_name] + names
-        if asp.id != "training":
-            names = _add_cops(names, asp, waypoints)
-        # entry = first route point on the controlled boundary (or inside); points before it are upstream
-        # (previous sector); the route ends at the exit = last point on the boundary or inside.
-        inside = [w in asp.boundary_points or asp.inside(waypoints[w]) for w in names]
-        if not any(inside):
-            raise ScenarioError(f"{cs}: route {names} never enters the controlled airspace")
-        idx_entry = inside.index(True)
-        idx_exit = len(inside) - 1 - inside[::-1].index(True)
-        if idx_exit <= idx_entry:
-            raise ScenarioError(f"{cs}: route has no leg inside the controlled airspace")
-        route = names[idx_entry:idx_exit + 1]
-        after_exit = [w for w in names[idx_exit + 1:] if not w.startswith("C") or w in asp.point_info]
-        try:
-            perf = performance.get(a.get("type", "A320"), dT)
-        except KeyError as e:
-            raise ScenarioError(f"{cs}: {e.args[0]}")
-        fl = int(a["fl"])
-        if "mass_kg" in a:
-            mass = float(a["mass_kg"])
-        else:
-            load = float(a.get("load", performance.DEFAULT_LOAD))
-            mass = perf.oew + load * (perf.mtow - perf.oew)
-        if not (perf.oew < mass <= perf.mtow):
-            raise ScenarioError(f"{cs}: mass {mass:.0f} kg outside {perf.icao} OEW-MTOW")
-        filed_mach = float(a["mach"]) if "mach" in a else None
-        ac = Aircraft(callsign=cs, perf=perf, route=route, entry_time=0.0, fl=fl, mass=mass, filed_mach=filed_mach)
-        if "ias_kt" in a:
-            ac.spd_cas, ac.spd_ias_now = float(a["ias_kt"]), True
-        # category, formation, RVSM approval and equipment
-        ac.military = bool(a.get("military", perf.military))
-        form = a.get("formation")
-        if form:
-            if isinstance(form, int):
-                form = {"size": form}
-            n = int(form.get("size", 2))
-            if n < 2:
-                raise ScenarioError(f"{cs}: a formation has at least 2 aircraft")
-            ac.formation = {"size": n, "types": form.get("types", f"{n}x{perf.icao}"),
-                            "extent_nm": float(form.get("extent_nm", 1.0)),
-                            "note": "formation flight: only the leader is shown; 2000 ft from any other aircraft, "
-                                    f"horizontal minimum radar minimum + {float(form.get('extent_nm', 1.0)):.0f} NM"}
-            ac.military = True
-        rv_default = perf.rvsm_default and ac.formation is None
-        ac.rvsm_approved = bool(a.get("rvsm", rv_default))
-        if ac.formation is not None and ac.rvsm_approved:
-            raise ScenarioError(f"{cs}: formation flights are not RVSM approved")
-        ac.rvsm_status = "approved" if ac.rvsm_approved else "non_approved"
-        ac.equipment = str(a.get("equipment") or (DEFAULT_EQUIPMENT["military"] if ac.military and not ac.rvsm_approved
-                                                  else DEFAULT_EQUIPMENT["rvsm" if ac.rvsm_approved else "non_rvsm"]))
-        if ac.rvsm_approved and "W" not in ac.equipment.split("/")[0]:
-            raise ScenarioError(f"{cs}: RVSM approved but equipment {ac.equipment} has no 'W'")
-        ok, why = perf.level_available(fl, *ac.speed_target(fl * 100.0), mass)
-        if not ok and fl * 100 > perf.ceiling_ft:
-            raise ScenarioError(f"{cs}: {why}")
-        tas = perf.tas_for(*ac.speed_target(fl * 100.0), fl * 100.0)
-        pts = [waypoints[w] for w in route]
-        brg = bearing(pts[0], pts[-1])
-        ac.southbound = str(a.get("direction", "southbound" if 90.0 <= brg < 270.0 else "northbound")) == "southbound"
-        if start_name:
-            # the aircraft is at its start point at start.time and flies the route from there
-            full = [waypoints[w] for w in names]
-            entry = float(start["time"]) + _route_time_s(full, polyline_length(full[:idx_entry + 1]), tas, wind, fl)
-        elif "entry_time" in a:
-            entry = float(a["entry_time"])
-        elif "reach" in a:
-            r = a["reach"]
-            full = [waypoints[w] for w in names]          # whole filed route, upstream and downstream included
-            if "waypoint" in r:
-                wn = r["waypoint"].upper()
-                if wn not in names:
-                    raise ScenarioError(f"{cs}: reach waypoint {wn} is not on its route")
-                target = waypoints[wn]
-            else:
-                target = asp.resolve_point(r["point"])
-            along, off, _ = project_on_polyline(full, target)
-            if off > 1.0:
-                raise ScenarioError(f"{cs}: reach point is {off:.1f} NM off its route")
-            along_entry = polyline_length(full[:idx_entry + 1])
-            entry = float(r["time"]) - (_route_time_s(full, along, tas, wind, fl)
-                                        - _route_time_s(full, along_entry, tas, wind, fl))
-        else:
-            raise ScenarioError(f"{cs}: needs 'entry_time' or 'reach'")
-        # ---- appear before the entry waypoint (previous sector's traffic), along the upstream route if any
-        pre_nm = float(a.get("pre_entry_nm", pre_entry_nm))
-        if start_name:
-            pre_name, pre_pt, upstream = start_name, waypoints[start_name], names[1:idx_entry]
-        else:
-            pre_pt, upstream = _place_pre_entry(names, waypoints, idx_entry, pre_nm)
-            pre_name = f"@{cs}"
-            waypoints[pre_name] = pre_pt
-        head = [pre_pt] + [waypoints[w] for w in upstream] + ([pts[0]] if route[0] != pre_name else [])
-        ext_pts = head + pts[1:]
-        t_pre = _route_time_s(head, polyline_length(head), tas, wind, fl)
-        spawn = entry - t_pre                       # entry = planned time at the entry waypoint
-        start_along = 0.0                           # measured along the extended route (from the pre-entry point)
-        if spawn < 0:
-            lo, hi = 0.0, polyline_length(ext_pts)
-            for _ in range(40):
-                mid = (lo + hi) / 2
-                if _route_time_s(ext_pts, mid, tas, wind, fl) < -spawn:
-                    lo = mid
-                else:
-                    hi = mid
-            start_along = lo
-            if start_along >= polyline_length(ext_pts) - 1:
-                raise ScenarioError(f"{cs}: would already have left the sector at t=0")
-            spawn = 0.0
-        head_len = polyline_length(head)
-        ac.route = ([pre_name] + upstream if route[0] != pre_name else []) + route
-        ac.entry_time = spawn
-        ac.boundary_time = entry
-        ac.entry_wp = route[0]
-        ac.checkin_nm = float(a.get("checkin_nm", checkin_nm))
-        ac.start_along_nm = start_along
-        ac.planned_exit = route[-1]
-        ac.planned_length_nm = polyline_length(pts) - max(0.0, start_along - head_len)
-        dest_fp = str(a.get("dest") or "").upper()
-        if (route[-1] in seqfixes and a.get("arrival", True)
-                and (not dest_fp or dest_fp == seqfixes[route[-1]].aerodrome)):   # arrival behind the fix
-            ac.destination = seqfixes[route[-1]].aerodrome
-            ac.arr = {"fix": route[-1]}
-        dest = str(a.get("dest") or ac.destination or "ZZZZ").upper()
-        spd_mode, spd_val = ac.speed_target(fl * 100.0)
-        ac.flight_plan = {
-            "callsign": cs, "aircraft_type": perf.icao, "wake": _wake(perf),
-            "flight_rules": "I", "flight_type": "M" if ac.military else "S",
-            "departure": str(a.get("dep") or "ZZZZ").upper(), "destination": dest,
-            "cruise": f"F{fl:03d}", "speed": (f"M{int(round(spd_val * 100)):03d}" if spd_mode == "mach"
-                                              else f"N{int(round(tas)):04d}"),
-            "route": asp.route_string(filed + [w.upper() for w in a.get("route_after", [])]),
-            "equipment": ac.equipment, "rvsm": "approved (W)" if ac.rvsm_approved else "non-RVSM",
-            "formation": ac.formation["types"] if ac.formation else None,
-            "remarks": str(a.get("remarks", "")) or ("STS/STATE" if ac.military else ""),
-        }
-        ac.route_after = after_exit
-        ac.route_before = [w for w in filed[:filed.index(route[0])] if w in waypoints] if route[0] in filed else []
-        ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints,
-                                                                str(a.get("dep") or ""), str(a.get("dest") or ac.destination or ""))
-        ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
+        ac = make_aircraft(a, scn, asp, waypoints, seqfixes, aerodromes, wind, dT, pre_entry_nm, checkin_nm, start_min)
         aircraft.append(ac)
 
     # SSR codes: one per flight (the code correlates the track with its flight plan)
@@ -535,6 +543,8 @@ def build_world(scn: dict) -> World:
     for ac in aircraft:
         ac.mag_var = w.mag_var
     w.auto_assume = bool(scn.get("auto_assume", False))
+    w.build_ctx = {"pre_entry_nm": pre_entry_nm, "checkin_nm": checkin_nm, "start_min": start_min,
+                   "auto_routes": scn.get("auto_routes", True)}       # to add aircraft during the run
     # horizontal radar separation: the scenario's own, else the airspace's (Agadir CTA 7 NM), else 5 NM
     sep = scn.get("separation") or {}
     w.sep_h = float(sep.get("horizontal_nm") or (asp.notes or {}).get("separation_horizontal_nm") or 5.0)

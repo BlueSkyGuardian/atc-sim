@@ -108,6 +108,7 @@ class Aircraft:
     destination: Optional[str] = None  # aerodrome id for arrivals (via a sequencing fix)
     arr: dict = field(default_factory=dict)   # arrival / top-of-descent state
     speedbrake: bool = False
+    emergency: Optional[dict] = None   # live action: {code 7700 / 7600, kind descent | medical | radio | general}
     x: float = 0.0
     y: float = 0.0
     alt_ft: float = 0.0
@@ -531,7 +532,8 @@ class Aircraft:
             "arrival": ({k: v for k, v in self.arr.items() if not k.startswith("_")} if self.destination else None),
             "speedbrake": self.speedbrake,
             "flight_plan": self.flight_plan,
-            "squawk": (self.flight_plan or {}).get("ssr"),
+            "squawk": (self.emergency or {}).get("code") or (self.flight_plan or {}).get("ssr"),
+            "emergency": self.emergency,
             "mode_s": mode_s(self, self.mag_var),
             "fp_next": self.next_wp,
             "prev_unit": self.prev_unit, "next_unit": self.next_unit,

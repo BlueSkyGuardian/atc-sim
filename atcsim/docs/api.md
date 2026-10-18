@@ -224,6 +224,15 @@ Used by the home, stats and admin pages (signed-in users):
 | GET | `/sessions/{id}/timeline` | The points the simulation can be put back to (one every 10 s) |
 | POST | `/sessions/{id}/control` | `{"action": "rewind", "seconds": 600}`: the world as it was at the last point at or before T+600 s (aircraft, entries, requests, CPDLC, chat, metrics), paused. The answer gives `rewound_to_s`; the state's `session.rewinds` counts rewinds and restarts, and the event and message ids start again from that point. Instructor, pseudo-pilots, the solo radar's controller |
 
+## Live actions
+
+| Method | Path | What |
+|---|---|---|
+| GET | `/sessions/{id}/live` | Aircraft on the picture, emergencies in progress, areas, aerodromes, aircraft types |
+| POST | `/sessions/{id}/live` | `{"action": "aircraft", "callsign", "type", "fl", "route": [...], "appear": "now" or seconds to its entry}` · `{"action": "emergency", "callsign", "kind": "descent" \| "medical" \| "radio" \| "general", "aerodrome", "why"}` · `{"action": "clear_emergency", "callsign"}` · `{"action": "request", "callsign", "kind": "level" \| "direct" \| "speed" \| "deviation" \| "report", "value", "reason"}` · `{"action": "area", "area", "active"}`. Instructor, pseudo-pilots, the solo radar's controller |
+
+Aircraft snapshots carry `emergency` and `squawk` (7700 / 7600 during one); the special tracks give `EMG` / `RCF`.
+
 ## Solo radar
 
 | Method | Path | What |

@@ -331,6 +331,58 @@ def control(sid: str, body: Control):
         raise HTTPException(400, str(e))
 
 
+class LiveAction(BaseModel):
+    action: Literal["aircraft", "emergency", "clear_emergency", "request", "area"]
+    callsign: Optional[str] = None
+    type: Optional[str] = None
+    fl: Optional[int] = None
+    route: Optional[List[str]] = None
+    appear: Optional[Union[str, float]] = "now"
+    dep: Optional[str] = None
+    dest: Optional[str] = None
+    kind: Optional[str] = None
+    aerodrome: Optional[str] = None
+    why: Optional[str] = None
+    value: Optional[Union[str, float, int]] = None
+    reason: Optional[str] = None
+    area: Optional[str] = None
+    active: Optional[bool] = None
+
+
+@app.get("/sessions/{sid}/live")
+def live_options(sid: str):
+    """What the live actions can use: aircraft on the picture, emergencies in progress, areas, aerodromes, types."""
+    from . import live
+    s = _session(sid)
+    with s.lock:
+        return live.options(s.world)
+
+
+@app.post("/sessions/{sid}/live")
+def live_action(sid: str, body: LiveAction, request: Request):
+    """A live action (instructor, pseudo-pilots, the solo radar's controller): "aircraft" (callsign, type, fl, route,
+    appear: "now" or seconds to its entry), "emergency" (callsign, kind: descent | medical | radio | general,
+    aerodrome, why), "clear_emergency" (callsign), "request" (callsign, kind: level | direct | speed | deviation |
+    report, value, reason), "area" (area, active)."""
+    from . import live
+    s = _session(sid)
+    who = _who(request, "instructor")
+    with s.lock:
+        w = s.world
+        try:
+            if body.action == "aircraft":
+                return live.add_aircraft(w, body.model_dump(), by=who)
+            if body.action == "emergency":
+                return live.emergency(w, body.callsign or "", body.kind or "general", body.aerodrome, body.why, by=who)
+            if body.action == "clear_emergency":
+                return live.clear_emergency(w, body.callsign or "", by=who)
+            if body.action == "request":
+                return live.request(w, body.callsign or "", body.kind or "", body.value, body.reason or "", by=who)
+            return live.set_area(w, body.area or "", bool(body.active), by=who)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+
+
 @app.get("/sessions/{sid}/timeline")
 def timeline(sid: str):
     """The points the simulation can be rewound to (POST /control {"action": "rewind", "seconds": t})."""

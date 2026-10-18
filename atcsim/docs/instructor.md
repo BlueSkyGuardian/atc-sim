@@ -115,6 +115,23 @@ timeline under the scope (**Timeline** in the toolbar hides it). Click or drag t
 
 The exercise page has a switcher to your other live exercises and a link back to the grid.
 
+### Live actions
+
+The **Live actions** box of the Exercise tab changes the exercise as it runs. The pseudo-pilots have the same box in
+their panel.
+
+![Live actions: add an aircraft, an emergency, a pilot request, switch an area](/static/docs/i_live.jpg "Live actions: add an aircraft, an emergency, a pilot request, switch an area")
+
+| Tab | What it does |
+|---|---|
+| **Aircraft** | Adds a flight: callsign, type, level, route (entry point first), and when it appears: now at its first point, or entering in 5, 10 or 15 minutes (it then appears before the boundary and calls like any traffic). Its flight plan, SSR code, OLDI and CPDLC follow as for a scenario aircraft |
+| **Emergency** | **Emergency descent** (squawk 7700, MAYDAY, the aircraft starts down to FL100), **medical** (7700, PAN PAN, then a request direct to an aerodrome: the one you type, else the nearest), **radio failure** (7600: no reply on the frequency, it flies its flight plan; CPDLC still works), **general** 7700 with your reason. The controller sees **EMG** or **RCF** and the squawk on the label. **Clear** ends it |
+| **Pilot request** | An aircraft asks now for a level, a direct, a speed, a weather deviation, or says something in your words (a report to acknowledge) |
+| **Areas** | Activates or deactivates an area until its next scheduled change |
+
+The pseudo-pilots read out the calls (MAYDAY, PAN PAN, requests) from their *To do*. Everything is logged, rewound
+with the timeline and kept through a restart.
+
 ### If the server restarts
 
 Running exercises (and solo runs) are saved every 10 simulated seconds. After a restart or a redeploy they come back

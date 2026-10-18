@@ -295,6 +295,10 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- instructor: monitor, dashboard
     ins.click("#asideTabs [data-t=monitor]"); ins.wait_for_timeout(1500)
     shot(ins, "i_monitor", "aside")
+    ins.click("#asideTabs [data-t=exercise]"); ins.wait_for_selector("#liveSec .lv-tabs")
+    ins.click("#liveSec [data-tab-lv=emergency]"); ins.wait_for_timeout(500)
+    ins.evaluate("document.getElementById('liveSec').scrollIntoView({ block: 'start' })"); ins.wait_for_timeout(300)
+    shot(ins, "i_live", "#liveSec")
     ins.goto("/#live"); ins.wait_for_selector(".thumb[data-id]", state="attached", timeout=90000); ins.wait_for_timeout(4000)
     shot(ins, "i_dashboard", region=[0, 0, VIEW["width"], 520])
     ins.goto(f"/x/{eid}"); ins.wait_for_function("() => typeof state !== 'undefined' && state && state.aircraft", timeout=30000)

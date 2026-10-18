@@ -1509,6 +1509,9 @@ class World:
         ac = self.aircraft.get(cs)
         if ac is None or not (ac.active or ac.outside):
             return []
+        if getattr(ac, "emergency", None) and ac.emergency.get("kind") == "radio":
+            self._event("pilot_readback", callsign=cs, ok=False, text=f"{cs}: no reply (radio failure, squawk 7600)")
+            return [{"status": "rejected", "text": f"{cs}: no reply (radio failure)"}]
         instrs = []
         f = fields
         if f.get("cfl") not in (None, ""):
