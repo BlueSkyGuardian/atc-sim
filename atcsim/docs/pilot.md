@@ -118,6 +118,9 @@ the time factor, **+10 s**, **⟲** restart. The timeline under the scope record
 [instructor manual](instructor.md#rewinding-the-simulation)). Agree with the instructor before you rewind: it undoes
 what happened after that point for every seat.
 
+**⚑ Mark** (key <kbd>K</kbd>) marks a moment for the debrief with a short note: something the instructor should
+come back to. It shows on the timeline and in the debrief.
+
 ## Weather
 
 In an exercise the aircraft **never deviate by themselves**. You make them deviate when the controller approves
@@ -165,4 +168,5 @@ radar shows who is talking.
 ## After the exercise
 
 The controller rates you: readbacks, execution of clearances, reaction time, R/T, realism and an overall grade,
-with a comment. *Stats → As pseudo-pilot* shows the ratings over time, your average profile and the comments.
+with a comment. The **Debrief** (on the exercise's card) shows the run: workload, losses and what led to them,
+bookmarks. *Stats → As pseudo-pilot* shows the ratings over time, your average profile and the comments.

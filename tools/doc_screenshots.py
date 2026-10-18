@@ -354,5 +354,16 @@ with sync_playwright() as p:
         atc.keyboard.press("Enter"); atc.keyboard.type("H200"); atc.wait_for_timeout(600)
     shot(atc, "s_radar")
     atc.keyboard.press("Escape")
+    # ---------------------------------------------------------------- the debrief of that solo run
+    atc.evaluate("""async () => {
+        const P = (p, b) => api(p, { method: 'POST', body: JSON.stringify(b) });
+        await P(`/sessions/${SID}/bookmark`, { note: 'two arrivals converging at ROLRO' });
+        await P(`/sessions/${SID}/control`, { action: 'step', seconds: 900 });
+        await P(`/sessions/${SID}/bookmark`, { note: 'late hand-off' });
+        await P(`/sessions/${SID}/control`, { action: 'step', seconds: 600 });
+        await P(`/api/exercises/${EXID}/end`, {}); }""")
+    eid_solo = atc.evaluate("EXID")
+    atc.goto(f"/debrief/{eid_solo}"); atc.wait_for_selector("#wl"); atc.wait_for_timeout(1500)
+    shot(atc, "x_debrief", full_page=True)
     br.close()
 print("screenshots in", OUT)

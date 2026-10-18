@@ -228,6 +228,7 @@
     border: 1px solid #33557a; border-radius: 10px; box-shadow: 0 12px 28px -14px #000; font-family: var(--mono); font-size: 12px; }
   body.seat-atc:not(.solo) .simbar { display: none; }
   .simbar button { padding: 4px 9px; font-size: 12px; }
+  #sbMarkIn { width: 150px; font-size: 11.5px; padding: 2px 6px; }
   .simbar .sb-st { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); }
   .simbar .sb-st.running { color: #5fd3a3; border-color: #2f7a5f; } .simbar .sb-st.paused, .simbar .sb-st.created { color: #f2b84b; border-color: #7a6a2a; }
   .simbar .sb-run, .simbar .sb-pause { min-width: 78px; font-weight: 650; }
@@ -388,6 +389,7 @@
       <span class="sb-seg" title="Time factor"><button data-tf="1">×1</button><button data-tf="2">×2</button><button data-tf="5">×5</button><button data-tf="10">×10</button><button data-tf="30">×30</button></span>
       <button data-act="step" title="Pause and advance 10 seconds">+10 s</button>
       <span class="sb-t" id="sbT"></span>
+      <span id="sbMark"><button id="sbMarkBtn" title="Mark this moment for the debrief, with a note (K)">⚑ Mark</button><input id="sbMarkIn" placeholder="note, Enter" maxlength="200" hidden></span>
       <button data-act="restart" class="sb-rst" title="Start the scenario again from T+0">⟲</button>
       <button id="sbEnd" class="sb-end" title="End: it is kept in your exercises and statistics, with its recording">End</button>
     </div>
@@ -999,10 +1001,10 @@ const tl = $('#tl'), tctx = tl.getContext('2d');
 const TL_COL = { separation_loss_start: '#ff5a5a', area_infringement_start: '#e0c13c', pilot_request: '#7fb8ff', instruction: '#8a9bb0',
   instruction_rejected: '#ff9a5a', rvsm_status: '#f2b84b', weather_penetration_start: '#d05ad0', aircraft_left_sector: '#ff5a5a',
   area_activated: '#e0c13c', runway_change: '#5fd3a3', fix_crossing: '#5fd3a3', wrong_direction_level: '#f2b84b',
-  rvsm_airspace_violation_start: '#ff5a5a' };
+  rvsm_airspace_violation_start: '#ff5a5a', bookmark: '#ffffff', live: '#c08aff', readback_missed: '#ff9a5a', rewind: '#5a8aff' };
 const TL_ROW = { separation_loss_start: 0, aircraft_left_sector: 0, rvsm_airspace_violation_start: 0, weather_penetration_start: 0,
   area_infringement_start: 0, pilot_request: 1, rvsm_status: 1, instruction: 2, instruction_rejected: 2, area_activated: 3,
-  runway_change: 3, fix_crossing: 3, wrong_direction_level: 3 };
+  runway_change: 3, fix_crossing: 3, wrong_direction_level: 3, bookmark: 1, live: 3, readback_missed: 2, rewind: 3 };
 function tlSpan() { const d = (rec && rec.duration_s) || (state && state.duration_s) || 1800; return Math.max(d, rec && rec.frames.length ? rec.frames[rec.frames.length - 1].t : 0); }
 function drawTimeline() {
   const r = tl.getBoundingClientRect(), dpr = devicePixelRatio;

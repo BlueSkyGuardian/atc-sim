@@ -95,7 +95,7 @@ def conn() -> sqlite3.Connection:
                     _conn.execute(f"ALTER TABLE recordings ADD COLUMN {col}")
                 except sqlite3.OperationalError:
                     pass
-            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT", "solo INTEGER DEFAULT 0"):   # added with the statistics
+            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT", "solo INTEGER DEFAULT 0", "debrief TEXT"):   # added with the statistics
                 try:
                     _conn.execute(f"ALTER TABLE exercises ADD COLUMN {col}")
                 except sqlite3.OperationalError:

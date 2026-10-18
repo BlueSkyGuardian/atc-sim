@@ -162,6 +162,13 @@ ok(r.status_code == 200 and r.json()["squawk"] == "7700", "the instructor declar
 ok(ins.post(f"/sessions/{eid}/live", json={"action": "clear_emergency", "callsign": lo["aircraft"][0]}).status_code == 200, "and clears it")
 ok(atc.post(f"/sessions/{eid}/live", json={"action": "request", "callsign": lo["aircraft"][0], "kind": "level", "value": 300}).status_code == 403,
    "the controller has no live actions in an exercise")
+r = pil.post(f"/sessions/{eid}/bookmark", json={"note": "late descent RAM"})
+ok(r.status_code == 200 and r.json()["note"] == "late descent RAM", "the pseudo-pilot marks a moment for the debrief")
+ok(ins.post(f"/sessions/{eid}/bookmark", json={"note": "good spacing"}).status_code == 200, "the instructor too")
+ok(atc.post(f"/sessions/{eid}/bookmark", json={"note": "x"}).status_code == 403, "not the controller in an exercise")
+db_ = atc.get(f"/api/exercises/{eid}/debrief").json()
+ok(db_["live_now"] and len(db_["debrief"]["bookmarks"]) == 2 and "workload" in db_["debrief"], "the debrief so far, while it runs")
+ok(client("nosy@gmail.com").get(f"/api/exercises/{eid}/debrief").status_code == 403, "not for someone outside the exercise")
 ins.post(f"/sessions/{eid}/control", json={"action": "resume"})
 r = atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 35})
 ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sessions/{eid}/mtcd").json()["look_ahead_s"] == 2100,
@@ -261,6 +268,10 @@ with atc.websocket_connect(f"/sessions/{eid}/comms") as wa, pil.websocket_connec
 
 r = ins.post(f"/api/exercises/{eid}/end").json()
 ok(r["recording_id"], "ending renders the recording")
+db_ = atc.get(f"/api/exercises/{eid}/debrief").json()
+ok(not db_["live_now"] and [x["note"] for x in db_["debrief"]["bookmarks"]] == ["late descent RAM", "good spacing"],
+   "ended: the debrief is kept with the exercise, with its bookmarks")
+ok(atc.get(f"/debrief/{eid}").status_code == 200, "the debrief page")
 for _ in range(240):
     rec = ins.get("/api/recordings").json()[0]
     if rec["status"] != "rendering":
@@ -298,8 +309,10 @@ r = atc.post(f"/sessions/{sid}/entries", json={"callsign": scs, "cfl": 600}).jso
 ok(r["_readback"][0]["status"] == "rejected" and "unable" in r["_readback"][0]["text"].lower(), "the pilot says unable: " + r["_readback"][0]["text"])
 r = atc.post(f"/sessions/{sid}/cpdlc/command", json={"callsign": scs, "text": "H250", "voice": True}).json()
 ok(r["kind"] == "entry" and "heading 250" in r["note"], "command line, voice: flown and read back")
+ok(atc.post(f"/sessions/{sid}/bookmark", json={"note": "my mark"}).status_code == 200, "the solo controller marks moments")
 ok(any(x["id"] == sid and x["solo"] for x in atc.get("/api/exercises").json()), "listed in the controller's exercises")
 ok(atc.post(f"/api/exercises/{sid}/end").status_code == 200, "the controller ends it")
 ss = [x for x in atc.get("/api/stats").json().get("controller", {}).get("sessions", []) if x["exercise_id"] == sid]
 ok(len(ss) == 1 and ss[0]["solo"], "in the controller's statistics, once, as solo")
+ok(atc.get(f"/api/exercises/{sid}/debrief").json()["debrief"]["bookmarks"][0]["note"] == "my mark", "and reads its debrief")
 print("all platform checks passed")

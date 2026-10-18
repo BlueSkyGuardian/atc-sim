@@ -339,7 +339,7 @@ function renderExercises(quiet) {
         ${seats.atc.length ? `<span>Controller</span><span>${hl(seats.atc.join(', '), q)}</span>` : ''}
         ${seats.pilot.length ? `<span>Pseudo-pilot</span><span>${hl(seats.pilot.join(', '), q)}</span>` : ''}</div>
       <div class="acts">${e.live ? `<a href="/x/${e.id}"><button class="small primary">Open</button></a>` : ''}
-        ${!e.live && e.ended_at ? `<a href="/stats"><button class="small">Statistics</button></a><a href="#recordings"><button class="small">Recording</button></a>` : ''}</div></div>`;
+        ${!e.live && e.ended_at ? `<a href="/debrief/${e.id}"><button class="small primary">Debrief</button></a><a href="/stats"><button class="small">Statistics</button></a><a href="#recordings"><button class="small">Recording</button></a>` : ''}</div></div>`;
   };
   if (!L.length) { $('#xList').innerHTML = `<div class="empty-card">${EXS.length ? 'No exercise matches. Clear the search or widen the dates.' : (isInstr() ? 'No exercise yet. Start one with New exercise.' : 'No exercise yet. Your instructor invites you, or sends you a link.')}</div>`; return; }
   const groups = [];

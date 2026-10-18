@@ -62,10 +62,23 @@
     if (!EXID || !confirm('End this solo run? It is kept in your exercises and statistics, with its recording.')) return;
     try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); if (window.exShowEnded) exShowEnded(); } catch (e) { alert(e.message); }
   };
+  // bookmarks for the debrief: ⚑ Mark, a note, Enter
+  const mBtn = $('#sbMarkBtn'), mIn = $('#sbMarkIn');
+  function markOpen() { if (!mIn || !SID) return; mIn.hidden = false; mIn.value = ''; mIn.focus(); }
+  if (mBtn) mBtn.onclick = markOpen;
+  if (mIn) mIn.addEventListener('keydown', async e => {
+    e.stopPropagation();
+    if (e.key === 'Escape') { mIn.hidden = true; mIn.blur(); return; }
+    if (e.key !== 'Enter') return;
+    const note = mIn.value; mIn.hidden = true; mIn.blur();
+    try { const b = await api(`/sessions/${SID}/bookmark`, { method: 'POST', body: JSON.stringify({ note }) }); if (typeof msg === 'function') msg(`⚑ marked at T+${fmtT(b.t)}: ${b.note}`); }
+    catch (err) { if (typeof msg === 'function') msg(err.message, true); }
+  });
   const typing = () => { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT') && a.type !== 'checkbox'; };
   window.addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || typing() || !SID || !state || !state.session || !canControl()) return;
     if (e.key === 'p' || e.key === 'P') { e.preventDefault(); control({ action: state.session.status === 'running' ? 'pause' : 'resume' }); }
+    else if ((e.key === 'k' || e.key === 'K') && EXID) { e.preventDefault(); markOpen(); }
   });
 
   // ------------------------------------------------------------------ solo radar: the radio log

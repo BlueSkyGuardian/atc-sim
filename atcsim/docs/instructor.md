@@ -140,6 +140,12 @@ by themselves, paused at the last save (at most 10 simulated seconds earlier), w
 chat, the replay timeline and the rewind points. Everyone reconnects, and you press **Run**. The recording video goes
 on, with a gap for the time the server was down.
 
+### Bookmarks
+
+**⚑ Mark** on the control bar (key <kbd>K</kbd>) marks the moment with a short note (type it, Enter): *late descent
+RAM123*, *good use of speed*. Bookmarks show as white ticks on the timeline and are listed in the debrief, with who
+marked them. The pseudo-pilots mark moments too.
+
 ## Ending, recordings and evaluations
 
 **End exercise** asks for confirmation, then:
@@ -153,6 +159,24 @@ on, with a gap for the time the server was down.
 3. Opens the evaluations. Rate each controller on phraseology, conflict detection, conflict resolution,
    anticipation and planning, coordination, and an overall grade (each out of 5), with a comment. The controller
    reads it, acknowledges it with a comment, and rates the pseudo-pilot.
+4. Keeps the **debrief** with the exercise (below).
+
+### The debrief
+
+**Debrief** (on the ended exercise's card, in the banner on the radar when it ends, and on each session of the
+statistics) opens the report written from the run, for the instructor and the members of the exercise:
+
+- key figures: losses of separation, infringements, peak and mean traffic on frequency, time to assume, request
+  response time, requests left unanswered, wrong read-backs caught;
+- **workload**: aircraft on the controller's frequency minute by minute, with the losses and the bookmarks on it;
+- each **loss of separation** with its closest distance and the clearances given to its two aircraft in the 10 minutes
+  before: what led to it;
+- the **bookmarks**, the requests left unanswered, the read-back errors (caught or missed), infringements and weather,
+  the live actions taken, the clearances given (radio and CPDLC).
+
+While an exercise runs, `/debrief/<exercise>` shows the debrief so far.
+
+![The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_debrief.jpg "The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
 
 ## Statistics
 

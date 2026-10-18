@@ -395,6 +395,7 @@ Shortcuts work outside text fields, with or without capitals.
 | <kbd>Esc</kbd> | Close / cancel / deselect | <kbd>?</kbd> | Help |
 | <kbd>Space</kbd> (held) | Transmit | <kbd>Enter</kbd> | Command line (CPDLC, voice entry) |
 | <kbd>J</kbd> | CPDLC window | <kbd>T</kbd> | Coordination chat |
+| <kbd>P</kbd> | Run / pause (solo radar) | <kbd>K</kbd> | ⚑ Mark a moment (solo radar) |
 
 ## Solo radar: practising alone
 
@@ -423,12 +424,18 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   box), **▶ Replay** plays from there, **Live** returns to the live picture. Its markers show losses of separation,
   requests and instructions. **Timeline** in the toolbar hides or shows it. **⤺ Resume from T+…** puts the
   simulation back to the cursor (paused): try another plan from there.
-- **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording.
+- **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
+- **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
+  its **debrief**.
 
 ![The solo radar: the control bar top right, the radio log bottom left, the command line](/static/docs/s_radar.jpg "The solo radar: the control bar top right, the radio log bottom left, the command line")
 
 ## After the exercise
 
+- **Debrief** (on the exercise's card, in the banner when it ends, or from a session in your statistics): the run
+  written up. Workload minute by minute; each loss of separation with the clearances given to its two aircraft in the
+  10 minutes before; requests you left unanswered; wrong read-backs caught or missed; infringements and weather; the
+  bookmarks the instructor and pseudo-pilots set, with their notes.
 - **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your
   windows, your mouse and clicks, a caption log of your actions) with the frequency and your telephone calls. It
   appears on the *Recordings* page (home page tile), ready to download.
@@ -439,6 +446,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   other mistakes (infringements, RVSM, wrong-direction exits, weather penetrations, unanswered requests), reaction
   times, your profile per dimension, and the list of sessions. Each session shows the scenario's **complexity** and
   **density** as they were when you flew it, so you can see your results against the difficulty.
+
+![The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_debrief.jpg "The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
 
 ![The instructor's evaluation on your home page, to acknowledge with a comment](/static/docs/c_evaluation.jpg "The instructor's evaluation on your home page, to acknowledge with a comment")
 

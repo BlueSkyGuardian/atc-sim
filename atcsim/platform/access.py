@@ -20,12 +20,12 @@ from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
           "/help", "/help/", "/api/help", "/api/help/", "/api/landing")       # the documentation is public
-PAGES = ("/", "/designer", "/radar", "/solo", "/admin", "/profile", "/x/", "/stats", "/help")
+PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
 WRITE_RIGHTS = {
-    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live)$",),   # pseudo-pilots run the simulation too
+    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live|bookmark)$",),   # pseudo-pilots run the simulation too
     "atc": (r"^/(probe|mtcd|mtcd/settings|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
 }
 
@@ -69,7 +69,7 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         for pat in WRITE_RIGHTS.get(seat, ()):
             if re.match(pat, rest):
                 return None
-        if seat == "atc" and rest in ("/control", "/live") and db.is_solo(sid):
+        if seat == "atc" and rest in ("/control", "/live", "/bookmark") and db.is_solo(sid):
             return None                                # solo radar: the controller runs the simulation
         return f"not allowed for the {seat} seat"
     if path in ("/sessions",) and method == "POST":
@@ -97,7 +97,7 @@ class AccessMiddleware:
         if scope["type"] == "websocket":
             await send({"type": "websocket.close", "code": 4403})
             return
-        is_page = method == "GET" and (path in PAGES or path.startswith(("/x/", "/help/")) or path == "/designer")
+        is_page = method == "GET" and (path in PAGES or path.startswith(("/x/", "/help/", "/debrief/")) or path == "/designer")
         if is_page and user is None:
             resp = RedirectResponse("/login?next=" + path, status_code=303)
         else:

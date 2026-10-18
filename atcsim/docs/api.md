@@ -231,6 +231,9 @@ Used by the home, stats and admin pages (signed-in users):
 | GET | `/sessions/{id}/live` | Aircraft on the picture, emergencies in progress, areas, aerodromes, aircraft types |
 | POST | `/sessions/{id}/live` | `{"action": "aircraft", "callsign", "type", "fl", "route": [...], "appear": "now" or seconds to its entry}` · `{"action": "emergency", "callsign", "kind": "descent" \| "medical" \| "radio" \| "general", "aerodrome", "why"}` · `{"action": "clear_emergency", "callsign"}` · `{"action": "request", "callsign", "kind": "level" \| "direct" \| "speed" \| "deviation" \| "report", "value", "reason"}` · `{"action": "area", "area", "active"}`. Instructor, pseudo-pilots, the solo radar's controller |
 
+| POST | `/sessions/{id}/bookmark` | `{"note": "late descent"}`: mark this moment for the debrief (a `bookmark` event on the timeline). Instructor, pseudo-pilots, the solo radar's controller |
+| GET | `/api/exercises/{eid}/debrief` | The debrief: `workload` (`per_minute` [[minute, aircraft on frequency]], `peak`, `mean`), `losses` (each with `before`: the clearances to its aircraft in the 10 min before), `infringements`, `weather_penetrations`, `requests` (`unanswered`, `mean_response_s`), `assume`, `readback`, `live`, `bookmarks`, `cpdlc`, `instructions`. Built at the end and kept; built now (`live_now: true`) while the exercise runs. Members and the instructor |
+
 Aircraft snapshots carry `emergency` and `squawk` (7700 / 7600 during one); the special tracks give `EMG` / `RCF`.
 
 ## Solo radar

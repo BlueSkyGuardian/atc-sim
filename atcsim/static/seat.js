@@ -44,7 +44,7 @@
     SID = null;                                   // stop polling the finished session
     if (ws) { try { ws.onclose = null; ws.close(); } catch (e) {} }
     const b = $('#pauseBanner'); b.style.display = 'block'; b.style.color = '#c9d6e2';
-    b.innerHTML = 'This exercise has ended. ' + (EXINFO && EXINFO.solo ? '<a href="/stats" style="pointer-events:auto;color:#7fb8ff">Your statistics</a> · <a href="/solo" style="pointer-events:auto;color:#7fb8ff">Another scenario</a> · '
+    b.innerHTML = 'This exercise has ended. ' + `<a href="/debrief/${EXID}" style="pointer-events:auto;color:#7fb8ff;font-weight:700">Debrief</a> · ` + (EXINFO && EXINFO.solo ? '<a href="/stats" style="pointer-events:auto;color:#7fb8ff">Your statistics</a> · <a href="/solo" style="pointer-events:auto;color:#7fb8ff">Another scenario</a> · '
       : SEAT === 'pilot' ? '' : '<a href="/#evaluations" style="pointer-events:auto;color:#7fb8ff">Evaluate it</a> · ') +
       '<a href="/" style="pointer-events:auto;color:#7fb8ff">Home</a>';
     b.style.pointerEvents = 'auto';

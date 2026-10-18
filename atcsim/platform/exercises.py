@@ -133,6 +133,39 @@ def help_doc(slug: str, request: Request):
     return {"slug": slug, "markdown": md}
 
 
+@router.get("/debrief/{eid}", include_in_schema=False)
+def debrief_page(eid: str, request: Request):
+    u = require_user(request)
+    if seat_for(eid, u) is None:
+        raise HTTPException(403, "you are not a member of this exercise")
+    return page("debrief.html")
+
+
+@router.get("/api/exercises/{eid}/debrief")
+def debrief_data(eid: str, request: Request):
+    """The debrief of an ended exercise: workload, losses with the clearances before them, unanswered requests,
+    read-backs, infringements, live actions, bookmarks. For a live exercise: built now."""
+    u = require_user(request)
+    if seat_for(eid, u) is None:
+        raise HTTPException(403, "you are not a member of this exercise")
+    e = db.exercise(eid)
+    if e is None:
+        raise HTTPException(404, "no such exercise")
+    s = manager.sessions.get(eid)
+    if s is not None:
+        from .. import debrief
+        with s.lock:
+            d = debrief.build(s.world)
+        live = True
+    elif e.get("debrief"):
+        d, live = json.loads(e["debrief"]), False
+    else:
+        raise HTTPException(404, "no debrief for this exercise (ended before debriefs existed, or after a restart)")
+    out = _summary(e, u)
+    out.update(debrief=d, live_now=live, metrics=json.loads(e["metrics"]) if e.get("metrics") else None)
+    return out
+
+
 @router.get("/solo", include_in_schema=False)
 def solo_page(request: Request):
     require_user(request)
@@ -556,6 +589,8 @@ def end(eid: str) -> dict:
             try:                                   # the exercise's results, for the statistics
                 db.x("UPDATE exercises SET metrics=?, sim_time_s=?, multi=? WHERE id=?",
                      (db.dumps(summarize_metrics(s.world)), round(s.world.t, 1), 1 if s.multi and not s.solo else 0, eid))
+                from .. import debrief
+                db.x("UPDATE exercises SET debrief=? WHERE id=?", (db.dumps(debrief.build(s.world)), eid))
             except Exception:  # noqa: BLE001 - never block the end of an exercise
                 pass
     rec_id = recorder.finish(eid, s)

@@ -149,3 +149,28 @@ ok(pr and pr["mode"] == "pilot" and pr in [t for t in we.readback_traps] and we.
 live.readback_result(we, pr["id"], caught=False)
 ok(pr["status"] == "missed" and we.m["readback"]["missed"] == 1, "the pseudo-pilot reports it missed")
 print("live actions checks passed")
+# ---- debrief and bookmarks
+from atcsim import debrief  # noqa: E402
+wd = build_world(load_scenario("s07_restricted_area_activation"))
+wd.multi = True
+for _ in range(400):
+    wd.step(1)
+b = debrief.bookmark(wd, "  watch   AMC31  ", by="inst")
+ok(b["note"] == "watch AMC31" and any(e["type"] == "bookmark" for e in wd.events), "bookmark: kept, an event on the timeline")
+ok(any(e["type"] == "bookmark" for e in wd.recording_view()["events"]) if hasattr(wd, "recording_view") else True, "bookmark in the replay's events")
+for _ in range(200):
+    wd.step(1)
+dd = debrief.build(wd)
+ok(dd["workload"]["per_minute"] and dd["workload"]["peak"] >= 1, f"debrief: workload per minute (peak {dd['workload']['peak']})")
+ok(dd["bookmarks"][0]["t"] == b["t"] and isinstance(dd["infringements"], list), "debrief: bookmarks, infringements")
+import json as _json  # noqa: E402
+_json.dumps(dd)
+ok(True, "debrief is plain JSON")
+# a loss with the clearances before it
+wl = build_world(load_scenario("p01_ws_two_merges"))
+wl.multi = True
+for _ in range(1800):
+    wl.step(1)
+dl = debrief.build(wl)
+ok(all("before" in x for x in dl["losses"]), f"debrief: {len(dl['losses'])} losses, each with the clearances before it")
+print("debrief checks passed")

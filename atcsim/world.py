@@ -990,7 +990,7 @@ class World:
         keep = ("separation_loss_start", "area_infringement_start", "pilot_request", "instruction",
                 "instruction_rejected", "rvsm_status", "weather_penetration_start", "aircraft_left_sector",
                 "area_activated", "area_deactivated", "runway_change", "fix_crossing", "wrong_direction_level",
-                "rvsm_airspace_violation_start", "checkin")
+                "rvsm_airspace_violation_start", "checkin", "bookmark", "live", "readback_missed", "rewind")
         evs = [e for e in self.events if e["type"] in keep and e["time_s"] > since]
         return {"every_s": self.recording["every_s"], "sim_time_s": round(self.t, 1),
                 "duration_s": self.duration_s, "frame_fields": ["callsign", "x_nm", "y_nm", "fl", "cleared_fl",

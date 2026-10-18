@@ -390,6 +390,20 @@ def live_action(sid: str, body: LiveAction, request: Request):
             raise HTTPException(400, str(e))
 
 
+class Bookmark(BaseModel):
+    note: str = ""
+
+
+@app.post("/sessions/{sid}/bookmark")
+def bookmark(sid: str, body: Bookmark, request: Request):
+    """Mark this moment for the debrief (instructor, pseudo-pilots, the solo radar's controller): on the timeline and
+    in the debrief, with a note."""
+    from . import debrief
+    s = _session(sid)
+    with s.lock:
+        return debrief.bookmark(s.world, body.note, by=_who(request, ""))
+
+
 @app.get("/sessions/{sid}/timeline")
 def timeline(sid: str):
     """The points the simulation can be rewound to (POST /control {"action": "rewind", "seconds": t})."""
