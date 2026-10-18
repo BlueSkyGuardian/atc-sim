@@ -112,7 +112,7 @@
     if (!inp.value.trim()) h += `<div class="c-dim">${c ? (d && d.state === 'cda' ? 'Type the clearance, Enter sends it by CPDLC.' : 'Type the clearance, Enter puts it in the system (no data link: give it by voice).') : 'Select an aircraft, or start with its callsign.'}</div>`;
     else if (p && p.ok) h += `<div class="cb-up">${p.connected ? '↑ ' : '✎ '}${p.elements.map(esc).join(' · ')}</div>` +
       `<div class="c-dim">${p.connected ? 'Enter: send to ' + p.callsign + ' by CPDLC · Shift+Enter: voice, enter only' : 'Enter: put it in the system for ' + p.callsign + ' (' + (p.equipped ? 'no active connection' : 'not CPDLC equipped') + ', give it by voice)'}</div>`;
-    else if (p) h += `<div class="cb-err">${esc(p.error)}</div>`;
+    else if (p) h += `<div class="${/\?$/.test(p.error) ? 'c-dim' : 'cb-err'}">${esc(p.error)}</div>`;   // a question: not finished yet
     pv.innerHTML = h;
   }
   function refresh() {

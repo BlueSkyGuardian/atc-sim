@@ -247,6 +247,7 @@ with sync_playwright() as p:
         atc.wait_for_function(f"document.getElementById('cbPv').textContent.includes('CLIMB TO FL{fl:03d}')", timeout=5000)
         atc.keyboard.press("Enter")
         pil.wait_for_selector(f"#dlBox .todo.dl[data-cs='{dcs}']", timeout=10000); pil.wait_for_timeout(500)
+        pil.evaluate("document.getElementById('dlSec').scrollIntoView({ block: 'start' })"); pil.wait_for_timeout(300)
         shot(pil, "p_cpdlc", "#dlSec")
         pil.click(f"#dlBox .todo.dl[data-cs='{dcs}'] [data-ans=WILCO]"); pil.wait_for_timeout(1500)
         pil.evaluate(f"api(`/sessions/${{SID}}/cpdlc/downlink`, {{ method: 'POST', body: JSON.stringify({{ callsign: '{dcs}', kind: 'level', value: {fl + 20}, reason: 'weather' }}) }})")
@@ -271,6 +272,7 @@ with sync_playwright() as p:
     pil.fill("#chatSec [data-tx]", "RELEASED FOR CLIMB ON CONTACT"); pil.press("#chatSec [data-tx]", "Enter")
     atc.wait_for_timeout(2000)
     shot(atc, "c_chat", "#chatWin")
+    pil.evaluate("document.getElementById('chatSec').scrollIntoView({ block: 'start' })"); pil.wait_for_timeout(300)
     shot(pil, "p_chat", "#chatSec")
     atc.keyboard.press("Escape")
 
