@@ -46,6 +46,7 @@ instead of the frequency. You answer for the crew.
   - **Standby** keeps it open. **Unable** refuses it; **…wx** and **…perf** add *due to weather* / *due to aircraft
     performance*.
   - Free text is answered **Roger**.
+  - The field under the message adds free text to your answer (`UNABLE / TRAFFIC AT FL370`).
   - **CONTACT / MONITOR**: WILCO is the transfer to the next unit. The data link connection goes there too.
 - **Requests by data link**: on a REQ item of a connected aircraft, **By CPDLC** sends it as a downlink instead of
   saying it. The item then shows *sent by CPDLC* until the controller answers. The answer arrives as an uplink (the

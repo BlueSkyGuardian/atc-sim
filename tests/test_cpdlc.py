@@ -68,7 +68,10 @@ ok(P("CT")["elements"][0]["text"].startswith("CONTACT CANARIAS CONTROL") or P("C
 ok(P('TXT EXPECT DIRECT LATER')["elements"][0]["code"] == "UM169" and P('"WHEN READY"')["elements"][0]["text"] == "WHEN READY", "free text")
 ok(P(f"{cs} H180")["callsign"] == cs, "callsign first works too")
 ok("which point" in raises(P, "D"), "D alone asks for the point")
-ok("cannot read" in raises(P, "ZZZZZ9"), "nonsense refused")
+p = P("CL370 WHEN READY")
+ok([e["code"] for e in p["elements"]] == ["UM20", "UM169"] and p["elements"][1]["text"] == "WHEN READY",
+   "unknown words: free text after the clearance (CL370 WHEN READY)")
+ok(cpdlc.preview(w, "EXPECT LOWER IN 10 MIN", cs)["elements"] == ['"EXPECT LOWER IN 10 MIN" (free text)'], "a free-text uplink, shown as such")
 
 # ---- uplink, WILCO by the pseudo-pilot: the aircraft executes, the system takes it
 r = cpdlc.command(w, f"CL{fl} M78", cs)
@@ -91,6 +94,11 @@ cpdlc.respond(w, m3["id"], "STANDBY")
 ok(m3["status"] == "standby", "STANDBY keeps it open")
 cpdlc.respond(w, m3["id"], "WILCO")
 ok(w.entries[cs].get("heading") == 200, "WILCO after STANDBY")
+
+m4 = cpdlc.command(w, "REPORT RIDE CONDITIONS", cs)["message"]
+ok(m4["elements"][0]["code"] == "UM169" and m4["resp"] == "R", "a free-text uplink waits for ROGER")
+cpdlc.respond(w, m4["id"], "ROGER", text="smooth at FL370")
+ok(w.cpdlc_msgs[-1]["text"] == "ROGER / SMOOTH AT FL370", "the pilot answers with free text: " + w.cpdlc_msgs[-1]["text"])
 
 # ---- voice: only the system
 cs2 = next(c for c, v in w.cpdlc.items() if v["state"] == "cda" and c not in (cs, inb) and w.aircraft[c].active)

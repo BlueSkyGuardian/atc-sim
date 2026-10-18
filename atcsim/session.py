@@ -59,6 +59,19 @@ class Session:
         if self._multi:                    # exercises: aircraft deviate only when a pseudo-pilot makes them
             self.world.auto_wx = False
 
+    @property
+    def solo(self) -> bool:
+        return bool(getattr(self, "_solo", False))
+
+    @solo.setter
+    def solo(self, v: bool) -> None:
+        """Solo radar: the controller's seat of an exercise, with simulated pilots that fly what is entered."""
+        self._solo = bool(v)
+        if self._solo:
+            self.multi = True
+            self.world.auto_pilot = True
+            self.world.auto_wx = True
+
     # ------------------------------------------------------------------ clock
     def _run(self) -> None:
         next_tick = time.monotonic()
@@ -117,6 +130,7 @@ class Session:
                 self.world = build_world(self.scn)
                 self.world.multi = self._multi
                 self.world.auto_wx = auto
+                self.world.auto_pilot = self.solo
                 self.status = "running" if self.mode == "realtime" else "paused"
             else:
                 raise ValueError("action must be start|resume|pause|set_speed|set_mode|step|restart|auto_wx")

@@ -144,9 +144,20 @@ difficulty.
 
 ## Solo radar
 
-*Solo radar* opens the single-user radar. It creates a session from any scenario without seats, radio or
-evaluations. It is for practice, demonstrations and agents. The controller's commands there move the aircraft
-directly, through the shorthand line or the aircraft panel. Solo sessions count as practice in the statistics.
+*Solo radar* is open to every account: pick a scenario and fly it alone on the controller's screen, with
+simulated pilots (see the [controller manual](controller.md#solo-radar-practising-alone)). Your own scenarios and
+those shared with you are listed with the library. Solo runs count as practice in the statistics and are not
+evaluated.
+
+**Classic sandbox** (a button on the solo page, instructors only) is the former single-user radar: bare sessions from
+any scenario, the instructor's side panel, instructions that move the aircraft directly through the shorthand line or
+the aircraft panel. It is meant for demonstrations and for agents using the API.
+
+### The control bar
+
+In an exercise, the instructor runs the simulation from the control bar at the top right of the radar: **Run** /
+**Pause** (key <kbd>P</kbd>), the time factor ×1 to ×30, **+10 s** (pause and advance), **⟲** restart. The state
+(READY, RUNNING, PAUSED) and the exercise time are shown in it.
 
 ## Administrator
 

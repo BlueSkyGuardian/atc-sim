@@ -163,6 +163,19 @@ def update(w) -> None:
         # decontrolled without a CPDLC transfer, or gone: the system transfers / ends the connection
         if (a.released and not a.assumed) or a.outside and not a.assumed or a.gone or a.status in ("exited", "landed"):
             _transfer(w, a, c, by="system")
+    # solo radar: the simulated pilots of connected aircraft send their requests by data link
+    if getattr(w, "auto_pilot", False):
+        sent = {m.get("request_id") for m in w.cpdlc_msgs if m.get("request_id")}
+        for req in list(w.requests.values()):
+            if req.status != "pending" or req.kind == "checkin" or req.id in sent:
+                continue
+            c = w.cpdlc.get(req.callsign)
+            a = w.aircraft.get(req.callsign)
+            if c and c["state"] == "cda" and a is not None and a.assumed:
+                try:
+                    downlink(w, req.callsign, None, request_id=req.id, who="pilot")
+                except ValueError:
+                    pass
     # timers: late uplinks, downlink requests resolved some other way (on the frequency), solo answers
     for m in w.cpdlc_msgs[-200:]:
         if m["status"] not in ("open", "standby"):
@@ -175,7 +188,7 @@ def update(w) -> None:
             req = w.requests.get(m["request_id"])
             if req is not None and req.status != "pending":
                 _close(w, m, "answered" if req.status in ("approved", "unable", "acknowledged", "amended") else req.status)
-        if m["dir"] == "up" and not getattr(w, "multi", False):
+        if m["dir"] == "up" and (not getattr(w, "multi", False) or getattr(w, "auto_pilot", False)):
             auto = m.setdefault("auto_at", round(m["t"] + w.pilot_delay_s + _jitter(m["id"]), 1))
             if w.t >= auto and m["status"] == "open":
                 _auto_answer(w, m)
@@ -398,7 +411,9 @@ def parse(w, text: str, callsign: Optional[str] = None) -> dict:
                         "instr": {"type": "direct", "waypoint": pt}, "entry": {"direct": pt, "heading": "", "wx": ""}})
             i += 1
             continue
-        raise ValueError(f"cannot read '{tk}'")
+        # anything else: the rest of the line is free text (UM169), shown as such before it is sent
+        els.append({"code": "UM169", "text": " ".join(toks[i:]), "resp": "R", "kind": "free"})
+        break
     if quoted:
         els.append({"code": "UM169", "text": quoted, "resp": "R"})
     if not els and not out["answer"] and not out["control"]:
@@ -415,7 +430,7 @@ def preview(w, text: str, callsign: Optional[str] = None) -> dict:
     cs = p["callsign"]
     c = conn(w, cs)
     down = open_downlink(w, cs)
-    txt = [e["text"] for e in p["elements"]]
+    txt = [f'"{e["text"]}" (free text)' if e.get("code") == "UM169" else e["text"] for e in p["elements"]]
     if p["answer"]:
         if p["answer"][0] == "APPROVE":
             txt = [e["text"] for e in _approval(w, down)] if down else ["(no request to approve)"]
@@ -480,6 +495,37 @@ def command(w, text: str, callsign: Optional[str] = None, voice: bool = False, w
         if not p["elements"] and not p["answer"]:
             return {"callsign": cs, "kind": "control", "connection": conn(w, cs)}
     linked = not voice and c is not None and c["state"] == "cda"
+    if not linked and p["answer"] and getattr(w, "auto_pilot", False):
+        # solo radar, on the frequency: the answer to the aircraft's pending request (APP / UNA / ROG)
+        req = next((r for r in w.requests.values() if r.callsign == cs and r.status == "pending" and r.kind != "checkin"), None)
+        if req is None:
+            raise ValueError(f"{cs} has no request to answer")
+        dec = {"APPROVE": "approved", "UNABLE": "unable", "NEGATIVE": "unable", "ROGER": "roger", "AFFIRM": "approved"}.get(p["answer"][1])
+        if dec is None:
+            raise ValueError("answer APP, UNA or ROG")
+        if req.type == "report":
+            dec = "roger"
+        r = w.issue({"callsign": cs, "type": "reply", "request_id": req.id, "decision": dec}, source="voice")
+        if r["status"] == "rejected":
+            raise ValueError(r["reason"])
+        if dec == "approved" and r.get("instruction"):
+            ent = {}
+            ins = r["instruction"]
+            if ins.get("type") == "altitude":
+                ent["cfl"] = ins["fl"]
+            elif ins.get("type") == "direct":
+                ent.update(direct=ins["waypoint"], heading="")
+            elif ins.get("type") in ("wx_plan", "deviation"):
+                ent["wx"] = "Y"
+            if ent:
+                w.auto_pilot, ap = False, True        # put it in the system without flying it twice
+                try:
+                    w.enter(cs, ent, who=who)
+                finally:
+                    w.auto_pilot = ap
+        txt = f"{cs} {req.what() if dec == 'approved' else dec}"
+        w._event("pilot_readback", callsign=cs, ok=dec != "unable", text=txt)
+        return {"callsign": cs, "kind": "reply", "request_id": req.id, "decision": dec, "note": txt}
     if not linked:
         ent = {}
         for e in p["elements"]:
@@ -487,8 +533,14 @@ def command(w, text: str, callsign: Optional[str] = None, voice: bool = False, w
         if p["answer"] and p["answer"][0] == "APPROVE":
             raise ValueError("APP answers a CPDLC request: nothing to approve here")
         if not ent:
+            if any(e.get("code") == "UM169" for e in p["elements"]):
+                raise ValueError(f"free text goes by CPDLC only, and {cs} has no active connection")
             raise ValueError(f"{cs} has no active CPDLC connection" if not voice else "nothing to enter")
         w.enter(cs, ent, who=who)
+        rb = list(getattr(w, "last_readback", []) or [])
+        if getattr(w, "auto_pilot", False):
+            note = " · ".join(r["text"][len(cs) + 1:] if r["text"].startswith(cs + " ") else r["text"] for r in rb) or "entered"   # read back
+            return {"callsign": cs, "kind": "entry", "entry": ent, "note": note, "readback": rb}
         why = "entered" if voice else ("not CPDLC equipped" if not equipped(a) else
                                        "no active CPDLC connection" if not c or c["state"] != "cda" else "")
         return {"callsign": cs, "kind": "entry", "entry": ent, "note": f"{why}: give it by voice" if not voice else "entered"}
@@ -539,7 +591,7 @@ def _reply_request(w, down: dict, decision: str) -> None:
 
 
 # ------------------------------------------------------------------ the pilot's side
-def respond(w, mid: int, answer: str, reason: Optional[str] = None, who: str = "pilot") -> dict:
+def respond(w, mid: int, answer: str, reason: Optional[str] = None, who: str = "pilot", text: Optional[str] = None) -> dict:
     """The pilot answers an uplink: WILCO (the aircraft executes it), UNABLE [reason], STANDBY, ROGER, AFFIRM,
     NEGATIVE. Raises ValueError if WILCO cannot be flown (answer UNABLE instead)."""
     m = get_msg(w, int(mid))
@@ -593,6 +645,8 @@ def respond(w, mid: int, answer: str, reason: Optional[str] = None, who: str = "
     els = [{"code": RESPONSES_DOWN[ans], "text": ans, "resp": "N"}]
     if ans == "UNABLE" and reason in REASONS:
         els.append({"code": REASONS[reason][0], "text": REASONS[reason][1], "resp": "N"})
+    if text and str(text).strip():
+        els.append({"code": "DM67", "text": " ".join(str(text).upper().split())[:160], "resp": "N"})
     r = _msg(w, cs, "down", els, ref=m["id"], by=who, response=True)
     contact = next((e for e in m["elements"] if e.get("kind") == "contact"), None)
     if ans == "WILCO" and contact is not None:          # the transfer: decontrol, the connection goes to the next unit

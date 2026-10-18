@@ -105,6 +105,7 @@ class World:
         # aircraft (cleared level, speed, heading, direct). They do not move the aircraft - the pseudo-pilot does.
         self.entries: Dict[str, dict] = {}
         self.multi = False                 # connected exercise (controller enters, pseudo-pilot flies)
+        self.auto_pilot = False            # solo radar: simulated pilots fly what the controller enters
         self.oldi: List[dict] = []         # OLDI messages with the adjacent units (oldi.py)
         self.coord: Dict[str, dict] = {}   # outbound coordination per aircraft
         self.coord_in: Dict[str, dict] = {}
@@ -1500,7 +1501,63 @@ class World:
         e["t"] = round(self.t, 1)
         self.entries[cs] = e
         self._event("atc_entry", callsign=cs, entry={k: v for k, v in e.items() if k != "t"}, by=who)
+        self.last_readback = self._auto_fly(cs, fields) if self.auto_pilot and who != "cpdlc" else []
         return e
+
+    def _auto_fly(self, cs: str, fields: dict) -> List[dict]:
+        """Solo radar: the simulated pilot flies what the controller entered and reads it back (or says unable)."""
+        ac = self.aircraft.get(cs)
+        if ac is None or not (ac.active or ac.outside):
+            return []
+        instrs = []
+        f = fields
+        if f.get("cfl") not in (None, ""):
+            ins = {"type": "altitude", "fl": int(str(f["cfl"]).upper().lstrip("FL").lstrip("F"))}
+            instrs.append(ins)
+        if f.get("heading") not in (None, ""):
+            instrs.append({"type": "heading", "heading": int(f["heading"])})
+        elif "heading" in f and not f.get("direct") and not f.get("route") and ac.nav_mode == "heading":
+            instrs.append({"type": "resume"})
+        if f.get("direct") not in (None, ""):
+            instrs.append({"type": "direct", "waypoint": str(f["direct"]).upper()})
+        if f.get("route"):
+            r = f["route"] if isinstance(f["route"], list) else str(f["route"]).replace(",", " ").split()
+            instrs.append({"type": "reroute", "points": r})
+        if f.get("speed") not in (None, ""):
+            v = str(f["speed"]).upper().replace(" ", "")
+            m = re.match(r"^M0?\.?(\d{2})$", v)
+            if v == "SN":
+                instrs.append({"type": "speed", "resume_normal": True})
+            elif m:
+                instrs.append({"type": "speed", "mach": int(m.group(1)) / 100.0})
+            elif re.match(r"^K\d{3}$", v):
+                instrs.append({"type": "speed", "conversion_kt": int(v[1:])})
+            elif re.match(r"^S?\d{3}(KT)?$", v):
+                instrs.append({"type": "speed", "ias_kt": int(re.sub(r"\D", "", v)[:3])})
+        if f.get("wx") not in (None, ""):
+            m = re.match(r"^(L|R|Y|LR)?(\d{0,3})$", str(f["wx"]).upper())
+            side = {"L": "left", "R": "right"}.get(m.group(1) if m else "", "either")
+            ins = {"type": "deviation", "side": side}
+            if m and m.group(2):
+                ins["max_nm"] = int(m.group(2))
+            instrs.append(ins)
+        out = []
+        for ins in instrs:
+            ins["callsign"] = cs
+            if not ac.assumed and ins["type"] != "assume":
+                out.append({"status": "rejected", "text": f"{cs} not assumed: entered only"})
+                break
+            r = self.issue(ins, source="voice")
+            if r["status"] == "rejected":
+                why = r["reason"][len(cs) + 1:] if r["reason"].startswith(cs + " ") else r["reason"]
+                txt = f"{cs} {why}" if why.lower().startswith("unable") else f"{cs} unable: {why}"
+                self._event("pilot_readback", callsign=cs, ok=False, text=txt)
+                out.append({"status": "rejected", "text": txt})
+            else:
+                txt = self.phrase(r["instruction"])
+                self._event("pilot_readback", callsign=cs, ok=True, text=txt)
+                out.append({"status": "accepted", "text": txt, "warnings": r.get("warnings") or []})
+        return out
 
     def state(self, trails: bool = False) -> dict:
         from . import atctools, oldi, cpdlc

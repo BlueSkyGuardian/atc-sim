@@ -14,9 +14,11 @@
     catch (e) { document.body.innerHTML = `<p style="padding:30px;font:15px system-ui;color:#c9d6e2">${h(e.message)} · <a style="color:#7fb8ff" href="/">home</a></p>`; return; }
     SEAT = EXINFO.seat;
     document.body.classList.add('exercise', 'seat-' + SEAT);
-    document.title = `${EXINFO.name} · ${SEATN[SEAT]}`;
+    if (EXINFO.solo) document.body.classList.add('solo');
+    document.title = `${EXINFO.name} · ${EXINFO.solo ? 'Solo radar' : SEATN[SEAT]}`;
     resize();
     if (!EXINFO.live) { showEnded(); return; }
+    if (EXINFO.solo) { await attach(EXID); setInterval(tick, 500); return; }   // solo radar: no radio, no telephone
     buildUnits();
     voice = window.__voice = new Voice(EXID, {
       onCalls: renderCalls, onRoster: renderMembers, onHello: renderMembers, onPtt: renderRx, onTx: renderTx,
@@ -42,7 +44,8 @@
     SID = null;                                   // stop polling the finished session
     if (ws) { try { ws.onclose = null; ws.close(); } catch (e) {} }
     const b = $('#pauseBanner'); b.style.display = 'block'; b.style.color = '#c9d6e2';
-    b.innerHTML = 'This exercise has ended. ' + (SEAT === 'pilot' ? '' : '<a href="/#evaluations" style="pointer-events:auto;color:#7fb8ff">Evaluate it</a> · ') +
+    b.innerHTML = 'This exercise has ended. ' + (EXINFO && EXINFO.solo ? '<a href="/stats" style="pointer-events:auto;color:#7fb8ff">Your statistics</a> · <a href="/solo" style="pointer-events:auto;color:#7fb8ff">Another scenario</a> · '
+      : SEAT === 'pilot' ? '' : '<a href="/#evaluations" style="pointer-events:auto;color:#7fb8ff">Evaluate it</a> · ') +
       '<a href="/" style="pointer-events:auto;color:#7fb8ff">Home</a>';
     b.style.pointerEvents = 'auto';
   }
@@ -51,7 +54,7 @@
     const st = state.session.status, b = $('#pauseBanner');
     if (st !== 'running') {
       b.style.display = 'block';
-      b.textContent = st === 'finished' ? 'Scenario finished' : st === 'created' ? (SEAT === 'instructor' ? 'Ready · press Run to start' : 'Waiting for the instructor to start the exercise') : 'PAUSED';
+      b.textContent = st === 'finished' ? 'Scenario finished' : st === 'created' ? (SEAT === 'instructor' || EXINFO.solo ? 'Ready · press Run (P) to start' : 'Waiting for the instructor to start the exercise') : 'PAUSED' + (EXINFO.solo ? ' · P to run' : '');
     } else b.style.display = 'none';
     if (SEAT !== 'atc') renderPilot();
     if (SEAT === 'atc' && $('#lblMenu').classList.contains('on') && !$('#lblMenu').classList.contains('fm')) refreshMenuHead();
@@ -371,7 +374,7 @@
           const b = m.resp === 'WU' ? `<button class="yes" data-dlid="${m.id}" data-ans="WILCO" data-cs="${cs}" title="the aircraft executes it">WILCO</button><button data-dlid="${m.id}" data-ans="STANDBY" data-cs="${cs}">Standby</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="weather" data-cs="${cs}" title="UNABLE / DUE TO WEATHER">…wx</button><button class="no small" data-dlid="${m.id}" data-ans="UNABLE" data-why="performance" data-cs="${cs}" title="UNABLE / DUE TO AIRCRAFT PERFORMANCE">…perf</button>`
             : m.resp === 'AN' ? `<button class="yes" data-dlid="${m.id}" data-ans="AFFIRM" data-cs="${cs}">Affirm</button><button class="no" data-dlid="${m.id}" data-ans="NEGATIVE" data-cs="${cs}">Negative</button>`
             : `<button class="yes" data-dlid="${m.id}" data-ans="ROGER" data-cs="${cs}">Roger</button><button class="no" data-dlid="${m.id}" data-ans="UNABLE" data-cs="${cs}">Unable</button>`;
-          out.push([m.t, `<div class="todo dl${state.sim_time_s - m.t < 12 ? ' new' : ''}" data-cs="${cs}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>data link from the controller${m.status === 'standby' ? ' · you sent STANDBY' : ''} · ${ag} s${m.late ? ' · <span class="c-warn">answer it</span>' : ''}</small></div><div class="bt">${b}</div></div>`]);
+          out.push([m.t, `<div class="todo dl${state.sim_time_s - m.t < 12 ? ' new' : ''}" data-cs="${cs}" data-dlm="${m.id}"><span class="tg">CPDLC</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>from the controller at ${h(m.utc.slice(0, 5))}${m.status === 'standby' ? ' · you sent STANDBY' : ''}${m.late ? ' · <span class="c-warn">answer it</span>' : ''}</small><input class="dl-tx" data-dltx="${m.id}" placeholder="+ free text with your answer (optional)"></div><div class="bt">${b}</div></div>`]);
         } else out.push([m.t, `<div class="todo dl sent" data-cs="${cs}"><span class="tg">SENT</span><div class="tx"><b>${cs}</b> · ${h(m.text)}<small>by data link · waiting for the controller${m.status === 'standby' ? ' (STANDBY)' : ''} · ${ag} s</small></div></div>`]);
       }
       for (const m of d.recent.filter(m => m.dir === 'up' && m.resp === 'N' && /^(UNABLE|STANDBY|ROGER|AFFIRM|NEGATIVE)/.test(m.text)))
@@ -410,15 +413,24 @@
       try { dlLog = (await api(`/sessions/${SID}/cpdlc`)).messages.filter(m => !/^(NEXT DATA AUTHORITY|END SERVICE)/.test(m.text)).slice(-14).reverse(); } catch (e) {} }
     const log = dlLog.length ? `<div class="dl-log2">${dlLog.map(m => `<div class="${m.dir}" data-cs="${m.callsign}"><span class="c-dim">${h(m.utc.slice(0, 5))}</span> <b>${m.callsign}</b> ${m.dir === 'up' ? '↓ from ATC' : '↑ sent'}: ${h(m.text)} <span class="st-${m.status}">${m.resp === 'N' ? '' : m.status.toUpperCase()}</span></div>`).join('')}</div>` : '';
     const html = (items.join('') || `<div class="empty">No message to answer. Uplinks from the controller appear here with WILCO / UNABLE / STANDBY; ${conns.filter(d => d.state === 'cda').length} aircraft connected.</div>`) + log;
-    if (html !== dlH) { box.innerHTML = html; dlH = html; }
+    if (html !== dlH) {
+      const keep = {}; box.querySelectorAll('[data-dltx]').forEach(i => { if (i.value) keep[i.dataset.dltx] = i.value; });
+      const foc = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.dltx;
+      box.innerHTML = html; dlH = html;
+      for (const [k, v] of Object.entries(keep)) { const i = box.querySelector(`[data-dltx="${k}"]`); if (i) i.value = v; }
+      if (foc) { const i = box.querySelector(`[data-dltx="${foc}"]`); if (i) i.focus(); }
+    }
   }
   // one listener each (the lists are re-drawn every second; mousedown survives a re-draw between press and release)
   function bindLists() {
     $('#dlBox').addEventListener('mousedown', e => {
       const da = e.target.closest('[data-dlid]');
-      if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
+      if (da) { e.preventDefault(); const tx = $(`#dlBox [data-dltx="${da.dataset.dlid}"]`);
+        dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why, tx ? tx.value : ''); return; }
+      if (e.target.closest('input')) return;
       const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
     });
+    $('#dlBox').addEventListener('keydown', e => e.stopPropagation());
     $('#todo').addEventListener('mousedown', e => {
       const da = e.target.closest('[data-dlid]');
       if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
@@ -434,10 +446,10 @@
   }
 
   // ---- CPDLC: answers to uplinks, downlink requests
-  async function dlAnswer(cs, id, ans, why) {
+  async function dlAnswer(cs, id, ans, why, text) {
     select(cs);
     const out = $('#deck [data-out]');
-    try { await api(`/sessions/${SID}/cpdlc/respond`, { method: 'POST', body: JSON.stringify({ message_id: id, answer: ans, reason: why || null }) });
+    try { await api(`/sessions/${SID}/cpdlc/respond`, { method: 'POST', body: JSON.stringify({ message_id: id, answer: ans, reason: why || null, text: text || null }) });
       if (out) { out.className = 'dk-out ok'; out.textContent = `✓ ${ans}${why ? ' due to ' + why : ''} sent by data link` + (ans === 'WILCO' ? ' — the aircraft is executing' : ''); } }
     catch (e) { if (out) { out.className = 'dk-out bad'; out.textContent = '✗ ' + e.message; } }
     if (typeof pollState === 'function') pollState();

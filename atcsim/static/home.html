@@ -189,6 +189,7 @@ function renderTiles() {
       <p>Start an exercise, copy, share, open in the designer.</p></a>`);
     T.push(`<a class="tile" href="/designer"><h3>Scenario designer</h3><p>Build traffic, weather and traps on a timeline, or paste a scenario as JSON.</p></a>`);
   }
+  T.push(`<a class="tile" href="/solo" data-tile="solo"><h3>Solo radar</h3><p>Fly a scenario alone on the real radar screen: simulated pilots fly what you enter, read back and ask for what they need.</p></a>`);
   T.push(`<a class="tile" href="/stats"><h3>Statistics</h3><p>Losses of separation, grades and reaction times session after session, against the difficulty of each exercise.</p></a>`);
   if (ME.role === 'admin') T.push(`<a class="tile" href="/admin"><h3>Users</h3><p>Roles of every account: administrator, instructor, controller, pseudo-pilot.</p></a>`);
   T.push(`<a class="tile" href="/help"><h3>Help</h3><p>Manuals for each seat, the scenario format, the weather and aircraft models, the API.</p></a>`);

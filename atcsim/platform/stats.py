@@ -152,6 +152,7 @@ def controller_sessions(uid: int, instructor: Optional[int] = None) -> List[dict
                 " ORDER BY e.created_at", (uid, instructor) if instructor else (uid,))
     if instructor is None:
         rows += db.q("SELECT * FROM exercises WHERE instructor_id=? AND multi=0 AND ended_at IS NOT NULL", (uid,))
+    rows = list({e["id"]: e for e in rows}.values())       # a solo exercise is both (owner and controller)
     rows.sort(key=lambda e: e["created_at"])
     out = []
     for e in rows:

@@ -45,6 +45,7 @@ The toolbar changes **your view only**, never the simulation:
 | **OLDI** | OLDI messages window (key <kbd>O</kbd>) |
 | **CPDLC** | CPDLC window: requests, dialogues, connections (key <kbd>J</kbd>); the count of requests waiting |
 | **CHAT** | Coordination chat with the other sectors and units (key <kbd>T</kbd>); the count of unread messages |
+| **HUD** | Show or hide the information box (saved in your browser) |
 | **?** | Keyboard shortcuts |
 | UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
 | ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
@@ -303,12 +304,12 @@ the callsign (`RAM201 H270`) without selecting the aircraft.
 | `D ROLRO`, `DROLRO`, `ROLRO` | PROCEED DIRECT TO ROLRO | `VIA IBALU TERTO` | CLEARED TO TERTO VIA IBALU TERTO |
 | `M78` | MAINTAIN M.78 | `S280` / `K280` | MAINTAIN 280 KT / ON CONVERSION |
 | `SN` | RESUME NORMAL SPEED | `RES` | RESUME OWN NAVIGATION |
-| `DEV`, `DEVL20`, `DEVR15` | CLEARED TO DEVIATE UP TO 20 NM (EITHER SIDE / LEFT / RIGHT) OF ROUTE | `TXT …` or `"…"` | free text |
+| `DEV`, `DEVL20`, `DEVR15` | CLEARED TO DEVIATE UP TO 20 NM (EITHER SIDE / LEFT / RIGHT) OF ROUTE | `TXT …`, `"…"`, or any words | free text |
 | `CT` / `MON` | CONTACT / MONITOR the next unit on its frequency (`CT GCCC 128.6` to choose) | `NDA GCCC` | NEXT DATA AUTHORITY |
 | `APP` | approves the pilot's request as asked | `UNA`, `SBY`, `ROG`, `AFF`, `NEG` | UNABLE, STANDBY, ROGER, AFFIRM, NEGATIVE |
 | `EOS` | END SERVICE (ends the connection) | | |
 
-The level, heading and speed shortcuts are those of the solo radar's command box.
+The level, heading and speed shortcuts are those of the classic sandbox's command box. Words the command line does not recognise are sent as free text, shown as such above the line before you send it (`CL370 WHEN READY` = CLIMB TO FL370 / WHEN READY).
 
 ### Connection and data authority
 
@@ -393,6 +394,29 @@ Shortcuts work outside text fields, with or without capitals.
 | <kbd>Esc</kbd> | Close / cancel / deselect | <kbd>?</kbd> | Help |
 | <kbd>Space</kbd> (held) | Transmit | <kbd>Enter</kbd> | Command line (CPDLC, voice entry) |
 | <kbd>J</kbd> | CPDLC window | <kbd>T</kbd> | Coordination chat |
+
+## Solo radar: practising alone
+
+*Solo radar* (in the top bar, for every account) lists the scenarios you can fly. Pick one with **Fly it** and the
+radar opens with you as the controller. It is the same screen as in an exercise: labels and their menus, the command
+line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone; simulated pilots take their place.
+
+![Solo radar: pick a scenario](/static/docs/s_pick.jpg "Solo radar: pick a scenario")
+
+- **The control bar** at the top right: **Run** / **Pause** (key <kbd>P</kbd>), the time factor (×1 to ×30),
+  **+10 s**, **⟲** to start again, **End**. It starts paused.
+- **What you enter is flown.** A cleared level, heading, direct, speed, route or weather deviation entered in the
+  label menus, or on the command line, is flown by the pilot after a short delay. The pilot reads it back, or says
+  *unable* with the reason (performance, weather, outside the levels you can give).
+- **The radio log** at the bottom left shows what the pilots say: first calls (with **Assume**), read-backs, unable,
+  and their requests with **Approve** / **Unable** (or **Roger** for a report). `APP`, `UNA` and `ROG` on the command
+  line do the same.
+- **CPDLC**: connected aircraft send their requests by data link and answer your uplinks by themselves (WILCO, or
+  UNABLE when they cannot).
+- **HUD** in the toolbar hides or shows the information box (scenario, time, traffic, wind).
+- **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording.
+
+![The solo radar: the control bar top right, the radio log bottom left, the command line](/static/docs/s_radar.jpg "The solo radar: the control bar top right, the radio log bottom left, the command line")
 
 ## After the exercise
 

@@ -20,7 +20,7 @@ from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
           "/help", "/help/", "/api/help", "/api/help/", "/api/landing")       # the documentation is public
-PAGES = ("/", "/designer", "/radar", "/admin", "/profile", "/x/", "/stats", "/help")
+PAGES = ("/", "/designer", "/radar", "/solo", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
@@ -69,6 +69,8 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         for pat in WRITE_RIGHTS.get(seat, ()):
             if re.match(pat, rest):
                 return None
+        if seat == "atc" and rest == "/control" and db.is_solo(sid):
+            return None                                # solo radar: the controller runs the simulation
         return f"not allowed for the {seat} seat"
     if path in ("/sessions",) and method == "POST":
         return None if role in ("instructor", "admin") else "only instructors create sessions"

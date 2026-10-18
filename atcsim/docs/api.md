@@ -137,7 +137,7 @@ Entries drive the labels, MTCD, route adherence and OLDI. An empty string clears
 | GET | `/sessions/{id}/cpdlc?since=0&callsign=` | Messages since an id (one aircraft's or all), our address (`own`), and per equipped aircraft its connection: `state` (`none`, `logon`, `cda`, `transferred`), `cda`, `nda`, `open` dialogues, `recent` ones |
 | POST | `/sessions/{id}/cpdlc/parse` | `{"text": "CL350 D ROLRO", "callsign": "RAM201"}` → the elements in clear, whether it would be sent by data link |
 | POST | `/sessions/{id}/cpdlc/command` | The controller's command line: `{"text", "callsign", "voice": false}`. An uplink to a connected, assumed aircraft (or an answer to its request: `APP`, `UNA`, `SBY`, `ROG`); `voice: true` or no connection = only the system entries. Also `NDA GCCC`, `EOS` |
-| POST | `/sessions/{id}/cpdlc/respond` | The pilot answers an uplink: `{"message_id", "answer": "WILCO" | "UNABLE" | "STANDBY" | "ROGER" | "AFFIRM" | "NEGATIVE", "reason": "weather" | "performance"}`. WILCO executes it (400 if the aircraft cannot) |
+| POST | `/sessions/{id}/cpdlc/respond` | The pilot answers an uplink: `{"message_id", "answer": "WILCO" | "UNABLE" | "STANDBY" | "ROGER" | "AFFIRM" | "NEGATIVE", "reason": "weather" | "performance", "text": "free text added"}`. WILCO executes it (400 if the aircraft cannot) |
 | POST | `/sessions/{id}/cpdlc/downlink` | A pilot request: `{"callsign", "kind": "level" | "climb" | "descent" | "direct" | "speed" | "deviation" | "text", "value", "reason"}`, or `{"callsign", "request_id"}` to send one of its pending requests |
 
 ### Coordination chat
@@ -216,6 +216,13 @@ Used by the home, stats and admin pages (signed-in users):
 | GET | `/api/stats` | Statistics by role |
 | GET | `/api/help` · `/api/help/{page}` | This documentation |
 | GET | `/api/health` | Health check (public) |
+
+## Solo radar
+
+| Method | Path | What |
+|---|---|---|
+| GET | `/api/solo/scenarios` | The scenarios this user can fly alone (the library for everyone; own and shared ones for instructors) |
+| POST | `/api/solo` | `{"scenario", "name"}` → a solo exercise: the user's seat is `atc`, simulated pilots fly the controller's `entries` (the answer carries `_readback`: what the pilot read back, or unable) and answer CPDLC uplinks. The controller may use `/control` on it and end it with `POST /api/exercises/{id}/end` |
 
 ## Seats and rights
 

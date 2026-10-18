@@ -328,5 +328,27 @@ with sync_playwright() as p:
     ins.click("[data-tab=chk]"); ins.click("#pvNaive")
     ins.wait_for_function("() => prev.naive_approve", timeout=180000); ins.wait_for_timeout(800)
     shot(ins, "d_check")
+
+    # ---------------------------------------------------------------- solo radar (the controller)
+    atc.goto("/solo"); atc.wait_for_selector("[data-fly]"); atc.wait_for_timeout(800)
+    shot(atc, "s_pick", region=[0, 0, VIEW["width"], VIEW["height"]])
+    atc.click("[data-fly='p02_wn_merges_and_climbs']")
+    atc.wait_for_url("**/x/*", timeout=120000)
+    atc.wait_for_function("() => typeof state !== 'undefined' && state && state.session && document.body.classList.contains('solo')", timeout=60000)
+    atc.keyboard.press("p"); atc.click("#ctrlRow [data-tf='10']"); atc.wait_for_timeout(9000); atc.click("#ctrlRow [data-tf='1']")
+    for _ in range(3):
+        c = atc.evaluate("(state.aircraft.find(a => a.on_frequency && !a.assumed) || {}).callsign")
+        if not c:
+            break
+        atc.evaluate(f"assume('{c}')"); atc.wait_for_timeout(500)
+    scs = atc.evaluate("(state.aircraft.find(a => a.assumed && a.fl >= 300) || state.aircraft.find(a => a.assumed) || {}).callsign")
+    if scs:
+        fl = atc.evaluate(f"Math.floor(state.aircraft.find(a => a.callsign === '{scs}').fl / 10) * 10 + 20")
+        atc.evaluate(f"selected = '{scs}'; document.activeElement && document.activeElement.blur()")
+        atc.keyboard.press("Enter"); atc.keyboard.type(f"CL{fl} M78"); atc.wait_for_timeout(300); atc.keyboard.press("Shift+Enter")
+        atc.wait_for_timeout(1500)
+        atc.keyboard.press("Enter"); atc.keyboard.type("H200"); atc.wait_for_timeout(600)
+    shot(atc, "s_radar")
+    atc.keyboard.press("Escape")
     br.close()
 print("screenshots in", OUT)

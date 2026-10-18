@@ -128,6 +128,12 @@ def help_doc(slug: str, request: Request):
     return {"slug": slug, "markdown": md}
 
 
+@router.get("/solo", include_in_schema=False)
+def solo_page(request: Request):
+    require_user(request)
+    return page("solo.html")
+
+
 @router.get("/radar", include_in_schema=False)
 def radar_page(request: Request):
     require_user(request, roles=("instructor",))
@@ -278,7 +284,7 @@ def _summary(e: dict, u: dict, with_picture: bool = False) -> dict:
            "ended_at": e["ended_at"], "seat": seat_for(e["id"], u), "members": db.members(e["id"]),
            "instructor": db.public_user(db.user_by_id(e["instructor_id"]) or {
                "id": 0, "email": "?", "first_name": "", "last_name": "", "licence": "", "role": "", "active": 0})["name"],
-           "live": s is not None, "scenario_info": db.scenario_info(e)}
+           "live": s is not None, "scenario_info": db.scenario_info(e), "solo": bool(e.get("solo"))}
     from . import comms
     room = comms.hub.rooms.get(e["id"])
     out["online"] = [{"name": c.name, "seat": c.seat, "ptt": c.ptt} for c in room.conns.values()] if room else []
@@ -349,15 +355,22 @@ def create_exercise(body: NewExercise, request: Request):
     return _summary(db.exercise(s.id), u)
 
 
-def register(s, u: dict, name: str, multi: bool = True) -> None:
-    """Record a simulator session as an exercise of this instructor; start its radio/phone room and recording."""
+def register(s, u: dict, name: str, multi: bool = True, solo: bool = False) -> None:
+    """Record a simulator session as an exercise of this instructor; start its radio/phone room and recording.
+    solo: the solo radar - the user sits as the controller, simulated pilots fly what is entered."""
     from . import recorder
-    s.multi = multi
+    if solo:
+        s.solo = True
+    else:
+        s.multi = multi
     db.x("INSERT INTO exercises (id, name, scenario, instructor_id, created_at, atc_token, pilot_token, observer_token, "
-         "scn_info) VALUES (?,?,?,?,?,?,?,?,?)", (s.id, name, s.scenario_name, u["id"], time.time(),
+         "scn_info, multi, solo) VALUES (?,?,?,?,?,?,?,?,?,?,?)", (s.id, name, s.scenario_name, u["id"], time.time(),
                                                  secrets.token_urlsafe(12), secrets.token_urlsafe(12),
-                                                 secrets.token_urlsafe(12), db.dumps(db.scenario_snapshot(s.scenario_name))))
-    if multi:
+                                                 secrets.token_urlsafe(12), db.dumps(db.scenario_snapshot(s.scenario_name)),
+                                                 0 if solo or not multi else 1, 1 if solo else 0))
+    if solo:
+        db.add_member(s.id, u["id"], "atc")
+    if multi or solo:
         recorder.start(s.id, s, name)
 
 
@@ -409,10 +422,58 @@ def remove_member(eid: str, uid: int, request: Request):
 
 @router.post("/api/exercises/{eid}/end")
 def end_exercise(eid: str, request: Request):
-    u = require_user(request, roles=("instructor",))
-    if seat_for(eid, u) != "instructor":
+    u = require_user(request)
+    e = db.exercise(eid)
+    if e and e.get("solo") and e["instructor_id"] == u["id"]:
+        return end(eid)                            # solo radar: the controller ends it
+    if u["role"] not in ("instructor", "admin") or seat_for(eid, u) != "instructor":
         raise HTTPException(403, "only the exercise's instructor ends it")
     return end(eid)
+
+
+# ------------------------------------------------------------------ solo radar
+class SoloStart(BaseModel):
+    scenario: str
+    name: Optional[str] = None
+
+
+def _solo_access(name: str, u: dict) -> Optional[str]:
+    """Library scenarios for everyone; instructors also their own and those shared with them."""
+    acc = db.scenario_access(name, u)
+    if acc is None and db.q1("SELECT 1 FROM scenario_meta WHERE name=? AND owner_id IS NOT NULL", (name,)) is None:
+        return "read"
+    return acc
+
+
+@router.get("/api/solo/scenarios")
+def solo_scenarios(request: Request):
+    """The scenarios this user can fly on the solo radar."""
+    u = require_user(request)
+    out = []
+    for s in list_scenarios():
+        if _solo_access(s["name"], u) is None:
+            continue
+        meta = _scn_meta(s["name"])
+        if not s.get("author"):
+            s["author"] = meta["owner"]["name"] if meta["owner"] else None
+        out.append({**s, **meta})
+    return out
+
+
+@router.post("/api/solo")
+def solo_start(body: SoloStart, request: Request):
+    """Start a solo radar exercise: the user is the controller, simulated pilots fly what is entered and answer.
+    It is kept like any exercise (history, statistics, recording)."""
+    u = require_user(request)
+    if _solo_access(body.scenario, u) is None:
+        raise HTTPException(403, "no access to this scenario")
+    try:
+        s = manager.create(scenario_name=body.scenario, mode="realtime", time_factor=1.0, autostart=False,
+                           label=body.name or body.scenario)
+    except (ScenarioError, ValueError) as e:
+        raise HTTPException(400, str(e))
+    register(s, u, body.name or f"Solo · {body.scenario}", multi=False, solo=True)
+    return _summary(db.exercise(s.id), u)
 
 
 def summarize_metrics(w) -> dict:
@@ -449,7 +510,7 @@ def end(eid: str) -> dict:
             s.status = "finished"
             try:                                   # the exercise's results, for the statistics
                 db.x("UPDATE exercises SET metrics=?, sim_time_s=?, multi=? WHERE id=?",
-                     (db.dumps(summarize_metrics(s.world)), round(s.world.t, 1), 1 if s.multi else 0, eid))
+                     (db.dumps(summarize_metrics(s.world)), round(s.world.t, 1), 1 if s.multi and not s.solo else 0, eid))
             except Exception:  # noqa: BLE001 - never block the end of an exercise
                 pass
     rec_id = recorder.finish(eid, s)

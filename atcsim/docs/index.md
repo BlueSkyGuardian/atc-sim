@@ -71,7 +71,7 @@ squall line.
 
 - **Home**: live exercises, scenarios (instructors), recordings, evaluations.
 - **Scenario designer** (instructors): build and edit scenarios.
-- **Solo radar** (instructors): the single-user radar, for practice and agents.
+- **Solo radar** (everyone): fly a scenario alone on the controller's screen, with simulated pilots.
 - **Stats**: your statistics by role.
 - **Help**: this documentation. The search box searches every page.
 - On the radar, **?** (or the <kbd>?</kbd> key) shows the keyboard shortcuts.

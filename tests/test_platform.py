@@ -240,4 +240,33 @@ ok(ins.post(f"/api/recordings/{rec['id']}/archive", json={"archived": True}).sta
 ok(not ins.get("/api/recordings").json() and ins.get("/api/recordings?archived=true").json(), "archived list")
 ok(atc.post(f"/api/recordings/{rec['id']}/archive", json={"archived": False}).status_code == 403, "only the instructor archives")
 ok(ins.delete(f"/api/scenarios/{COPY}").status_code == 200, "owner deletes the copy")
+
+# ---- solo radar: a controller flies a scenario alone; simulated pilots fly what is entered
+ok(atc.get("/solo").status_code == 200, "the solo radar page is open to controllers")
+lib = atc.get("/api/solo/scenarios").json()
+ok(any(x["name"] == "s01_basic_crossing" for x in lib), f"controllers see the library scenarios ({len(lib)})")
+ok(atc.post("/api/solo", json={"scenario": "nope"}).status_code in (400, 403, 404), "unknown scenario refused")
+so = atc.post("/api/solo", json={"scenario": "s01_basic_crossing"}).json()
+sid = so["id"]
+ok(so["solo"] and so["seat"] == "atc", "solo run: the controller's seat")
+ok(atc.post(f"/sessions/{sid}/control", json={"action": "resume"}).status_code == 200, "the controller runs the solo simulation")
+ok(atc.post(f"/sessions/{eid}/control", json={"action": "resume"}).status_code in (403, 404), "but not an instructor's exercise")
+ok(pil.get(f"/sessions/{sid}/state").status_code == 403, "nobody else in it")
+s_ = manager.sessions[sid]
+with s_.lock:
+    for _ in range(5):
+        s_.world.step(1)
+st = atc.get(f"/sessions/{sid}/state").json()
+scs = next(a["callsign"] for a in st["aircraft"] if a["assumed"])
+fl = st["aircraft"][[a["callsign"] for a in st["aircraft"]].index(scs)]["fl"] // 10 * 10 + 20
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": scs, "cfl": fl}).json()
+ok(r["cfl"] == fl and r["_readback"] and r["_readback"][0]["status"] == "accepted", "an entry is flown and read back: " + r["_readback"][0]["text"])
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": scs, "cfl": 600}).json()
+ok(r["_readback"][0]["status"] == "rejected" and "unable" in r["_readback"][0]["text"].lower(), "the pilot says unable: " + r["_readback"][0]["text"])
+r = atc.post(f"/sessions/{sid}/cpdlc/command", json={"callsign": scs, "text": "H250", "voice": True}).json()
+ok(r["kind"] == "entry" and "heading 250" in r["note"], "command line, voice: flown and read back")
+ok(any(x["id"] == sid and x["solo"] for x in atc.get("/api/exercises").json()), "listed in the controller's exercises")
+ok(atc.post(f"/api/exercises/{sid}/end").status_code == 200, "the controller ends it")
+ss = [x for x in atc.get("/api/stats").json().get("controller", {}).get("sessions", []) if x["exercise_id"] == sid]
+ok(len(ss) == 1 and ss[0]["solo"], "in the controller's statistics, once, as solo")
 print("all platform checks passed")

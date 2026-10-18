@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solo radar · ATC SIM</title>
+<link rel="stylesheet" href="/static/app.css">
+<style>
+  .pagehead { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+  .pagehead h1 { margin: 0; } .pagehead .grow { flex: 1; }
+  .lede { color: var(--dim); max-width: 60em; margin: 0 0 16px; line-height: 1.5; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .tools input[type=search] { flex: 1; min-width: 220px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .group { margin: 22px 0 10px; display: flex; align-items: baseline; gap: 10px; font-size: 15px; font-weight: 650; }
+  .group .dim { font-size: 13px; font-weight: 400; }
+  .xc { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth);
+    transition: border-color .15s, transform .18s; }
+  .xc:hover { border-color: var(--chart); transform: translateY(-2px); }
+  .xc .t { font-weight: 650; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .xc .s { color: var(--dim); font-size: 13px; }
+  .xc .acts { display: flex; gap: 6px; margin-top: auto; padding-top: 6px; }
+  .live { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+  .live .xc { flex-direction: row; align-items: center; }
+  .live .xc .grow { flex: 1; }
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 0 0 18px; }
+  .how div { border-top: 2px solid var(--chart); padding-top: 8px; font-size: 13.5px; color: #c2cfdb; line-height: 1.45; }
+  .how b { display: block; color: var(--text); margin-bottom: 2px; }
+  .empty-card { padding: 22px; text-align: center; color: var(--dim); background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="pagehead"><h1>Solo radar</h1><span class="grow"></span><a href="/radar" class="instr-link" style="display:none"><button class="small" title="The instructor's sandbox: bare sessions for the API and agents">Classic sandbox</button></a></div>
+  <p class="lede">Pick a scenario and the radar opens with you as the controller: the same screen, labels, menus,
+    MTCD, CPDLC and tools as in an exercise. Simulated pilots fly what you enter, read it back, call you and ask for
+    what they need. Pause, speed up or end it from the control bar. Every solo run is kept in your exercises and
+    statistics, with its recording.</p>
+  <div class="how">
+    <div><b>Assume, then clear</b>Aircraft call you (CALL): click the callsign or press A. Enter clearances in the label menus or on the command line (Enter).</div>
+    <div><b>Pilots answer</b>The read-back, or "unable" with the reason, shows in the radio log at the bottom left. Their requests appear there with Approve / Unable.</div>
+    <div><b>Data link</b>Connected aircraft send requests by CPDLC and answer your uplinks by themselves.</div>
+  </div>
+  <div id="live"></div>
+  <div class="tools">
+    <input type="search" id="q" placeholder="Search by name, title or author" aria-label="Search scenarios">
+    <select id="sort" aria-label="Sort"><option value="lib">Grouped, easiest first</option><option value="az">Name A–Z</option><option value="cx+">Complexity: easiest first</option><option value="cx-">Complexity: hardest first</option><option value="dn-">Density: busiest first</option></select>
+  </div>
+  <div id="list"></div>
+</main>
+<script src="/static/common.js"></script>
+<script>
+let SCN = [];
+function fam(s) {
+  if (!s.library) return ['Your scenarios and those shared with you', 0];
+  if (/^p\d/.test(s.name)) return ['Agadir progression — one sector at a time', 1];
+  if (s.airspace === 'agadir') return ['Agadir band-boxed — WW, OCE, the whole CTA', 2];
+  return ['Training sector — one problem per scenario', 3];
+}
+function render() {
+  const q = $('#q').value.trim().toLowerCase(), sort = $('#sort').value;
+  let L = SCN.filter(s => !q || q.split(/\s+/).every(w => [s.name, s.title, s.author].join(' ').toLowerCase().includes(w)));
+  const by = { lib: (a, b) => a.complexity - b.complexity || a.density - b.density || a.name.localeCompare(b.name), az: (a, b) => a.name.localeCompare(b.name),
+    'cx+': (a, b) => a.complexity - b.complexity || a.density - b.density, 'cx-': (a, b) => b.complexity - a.complexity || b.density - a.density,
+    'dn-': (a, b) => b.density - a.density }[sort];
+  L.sort(by);
+  const card = s => `<div class="xc"><div class="t"><span>${esc(s.name)}</span><span class="dim" style="font-weight:400;font-size:12px">${esc(s.airspace || '')}</span></div>
+    <div class="s">${esc(s.title || '')}</div>${scnBadge(s, false)}
+    <div class="s">${s.aircraft_per_hour} aircraft/h · ${Math.round((s.duration_s || 0) / 60)} min${s.capacity ? ` · ${s.sector_config} ${Math.round((s.load_ratio || 0) * 100)} % of capacity` : ''}${s.author ? ' · by ' + esc(s.author) : ''}</div>
+    <div class="acts"><button class="primary" data-fly="${esc(s.name)}">Fly it</button></div></div>`;
+  let html;
+  if (sort === 'lib') {
+    const g = new Map(); for (const s of L) { const [t, o] = fam(s); if (!g.has(o)) g.set(o, [t, []]); g.get(o)[1].push(s); }
+    html = [...g.entries()].sort((a, b) => a[0] - b[0]).map(([, [t, v]]) => `<div class="group">${esc(t)} <span class="dim">${v.length}</span></div><div class="grid">${v.map(card).join('')}</div>`).join('');
+  } else html = `<div class="grid" style="margin-top:12px">${L.map(card).join('')}</div>`;
+  $('#list').innerHTML = L.length ? html : '<div class="empty-card">No scenario matches.</div>';
+  $$('[data-fly]').forEach(b => b.onclick = () => fly(b.dataset.fly, b));
+}
+async function fly(name, b) {
+  b.disabled = true; b.textContent = 'Building…';
+  try { const e = await post('/api/solo', { scenario: name }); location.href = '/x/' + e.id; }
+  catch (e) { b.disabled = false; b.textContent = 'Fly it'; alert(e.message); }
+}
+async function loadLive() {
+  let ex = []; try { ex = await api('/api/exercises'); } catch (e) { return; }
+  const live = ex.filter(e => e.live && e.solo);
+  $('#live').innerHTML = live.length ? `<div class="group" style="margin-top:0">Running now <span class="dim">${live.length}</span></div><div class="live">` +
+    live.map(e => `<div class="xc"><div class="grow"><b>${esc(e.name)}</b> <span class="dim">· T+${fmtT(e.sim_time_s || 0)} · ${esc((STATUS_N[e.status] || e.status))}</span></div><a href="/x/${e.id}"><button class="primary small">Resume</button></a></div>`).join('') + '</div>' : '';
+}
+const STATUS_N = { running: 'running', paused: 'paused', created: 'ready' };
+(async () => {
+  await header('/solo');
+  if (ME.role === 'instructor' || ME.role === 'admin') $('.instr-link').style.display = '';
+  SCN = await api('/api/solo/scenarios');
+  render(); loadLive();
+  $('#q').oninput = render; $('#sort').onchange = render;
+})();
+</script>
+</body>
+</html>

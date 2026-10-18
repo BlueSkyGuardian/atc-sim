@@ -488,7 +488,8 @@ def entries(sid: str, body: Entry, request: Request):
     u = _user(request)
     with s.lock:
         try:
-            return s.world.enter(body.callsign, fields, who=pex.db.public_user(u)["name"] if u["id"] else "atc")
+            e = s.world.enter(body.callsign, fields, who=pex.db.public_user(u)["name"] if u["id"] else "atc")
+            return {**e, "_readback": getattr(s.world, "last_readback", [])}     # solo: what the pilot read back
         except (InstructionError, ValueError) as e:
             raise HTTPException(400, str(e))
 
@@ -553,6 +554,7 @@ class CpdlcAnswer(BaseModel):
     message_id: int
     answer: str
     reason: Optional[str] = None
+    text: Optional[str] = None
 
 
 class CpdlcDown(BaseModel):
@@ -612,7 +614,7 @@ def cpdlc_respond(sid: str, body: CpdlcAnswer, request: Request):
     s = _session(sid)
     with s.lock:
         try:
-            return cpdlc.respond(s.world, body.message_id, body.answer, body.reason, who=_who(request, "pilot"))
+            return cpdlc.respond(s.world, body.message_id, body.answer, body.reason, who=_who(request, "pilot"), text=body.text)
         except (InstructionError, ValueError) as e:
             raise HTTPException(400, str(e))
 

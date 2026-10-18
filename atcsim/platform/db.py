@@ -95,7 +95,7 @@ def conn() -> sqlite3.Connection:
                     _conn.execute(f"ALTER TABLE recordings ADD COLUMN {col}")
                 except sqlite3.OperationalError:
                     pass
-            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT"):   # added with the statistics
+            for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT", "solo INTEGER DEFAULT 0"):   # added with the statistics
                 try:
                     _conn.execute(f"ALTER TABLE exercises ADD COLUMN {col}")
                 except sqlite3.OperationalError:
@@ -186,10 +186,17 @@ def seat_of(eid: str, user: dict) -> Optional[str]:
     e = exercise(eid)
     if e is None:
         return "instructor" if user["role"] == "admin" else None
+    if e.get("solo") and e["instructor_id"] == user["id"]:
+        return "atc"                                   # solo radar: the owner sits as the controller
     if e["instructor_id"] == user["id"] or user["role"] == "admin":
         return "instructor"
     m = q1("SELECT seat FROM exercise_members WHERE exercise_id=? AND user_id=?", (eid, user["id"]))
     return m["seat"] if m else None
+
+
+def is_solo(eid: str) -> bool:
+    e = exercise(eid)
+    return bool(e and e.get("solo"))
 
 
 def members(eid: str) -> List[dict]:
