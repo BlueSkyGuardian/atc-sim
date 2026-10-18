@@ -2,20 +2,47 @@
 
 ## Home page
 
-| Section | What it holds |
+The home page is a grid of tiles. Each tile sums up one area (how many exercises are live and whether one has a
+conflict now, how many evaluations are waiting, the latest recording) and opens that area's page. Inside a page the
+content is grouped in cards. *Home* in the breadcrumb at the top of a page brings you back.
+
+![The home page: one tile per area](/static/docs/i_home.jpg "The home page: one tile per area")
+
+| Tile | Page |
 |---|---|
 | **Live exercises** | A live thumbnail of each running exercise (airspace and traffic) with a status bar: elapsed sim time, LIVE / PAUSED / READY, conflict state (red **LOSS**, amber **CONFLICT** within 3 min, or none), who is connected, a **TX** tag on whoever is transmitting, aircraft waiting to be assumed. Click one to open it. **+ New exercise** starts one |
+| **New exercise** | Opens the scenario picker straight away |
+| **Exercises** | Every exercise you ran or joined, live and past, with a search bar (see below) |
+| **Evaluations** | The evaluations you still have to write, those you received and those you gave |
 | **Recordings** | The videos of ended exercises: download, archive (hide), re-render, delete |
-| **Scenarios** | Every scenario you can use, with author, complexity, density, aircraft per hour and duration |
-| **Evaluations** | The evaluations you still have to write, and the ones written |
+| **Scenarios** | Every scenario you can use, grouped by family, with author, complexity, density, traffic and duration |
+| **Scenario designer**, **Statistics**, **Users** (admin), **Help** | Open those pages |
 
 ![Live exercises: a thumbnail per exercise with its status, conflicts and who is connected](/static/docs/i_dashboard.jpg "Live exercises: a thumbnail per exercise with its status, conflicts and who is connected")
 
+### Finding a past exercise
+
+The *Exercises* page searches every exercise you ran or joined:
+
+- **Search** matches the exercise name, the scenario name and title, the scenario author, and the names (and
+  licence numbers) of the instructor, the controller and the pseudo-pilot. Several words must all match, in any
+  field, so `hamza p05` finds Hamza's exercises on p05. Matches are highlighted.
+- **From / to** keep the exercises created between two dates.
+- **Seat** keeps those where you were instructor, controller or pseudo-pilot; **status** keeps live or past ones.
+- **Sort**: newest or oldest first (grouped by month, with the running ones on top), name A–Z or Z–A, complexity
+  (hardest or easiest first) or density (busiest or quietest first). Complexity and density are those of the scenario
+  as it was when the exercise was created.
+
+Each card shows the scenario's difficulty, who sat where, and **Open** for a live exercise.
+
 ## Scenarios
 
-The list shows, for each scenario:
+The *Scenarios* page groups the scenarios in grids: yours, those shared with you, the Agadir progression
+(p01–p06), the Agadir band-boxed scenarios, and the training sector, each group from the easiest to the hardest.
+Search by name, title or author, filter by airspace, or sort the whole list by name, complexity, density or traffic.
+![Scenarios grouped by family, with author, complexity, density, airspace and access](/static/docs/i_scenarios.jpg "Scenarios grouped by family, with author, complexity, density, airspace and access")
 
-![The scenario list with author, complexity, density, airspace and access](/static/docs/i_scenarios.jpg "The scenario list with author, complexity, density, airspace and access")
+Each card shows:
 
 - **Name and title**.
 - **Author**: who designed it (*library* for the built-in ones without an author).

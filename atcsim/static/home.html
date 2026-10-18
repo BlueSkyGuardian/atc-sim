@@ -2,10 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ATC Simulator</title>
+<title>ATC SIM</title>
 <link rel="stylesheet" href="/static/app.css">
 <style>
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  /* hub: one tile per area, each opening its own page (hash routes) */
+  .page { display: none; } .page.on { display: block; }
+  .crumb { display: flex; align-items: center; gap: 10px; color: var(--dim); font-size: 13.5px; margin: 6px 0 2px; }
+  .crumb a { color: var(--dim); } .crumb a:hover { color: var(--text); }
+  .pagehead { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .pagehead h1 { margin: 0; }
+  .pagehead .grow { flex: 1; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .tile { display: flex; flex-direction: column; gap: 8px; min-height: 170px; padding: 16px 18px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; box-shadow: var(--depth); color: var(--text); text-decoration: none; cursor: pointer;
+    transition: border-color .15s, transform .18s, box-shadow .18s; }
+  .tile:hover { text-decoration: none; border-color: var(--chart); transform: translateY(-3px); box-shadow: var(--depth), 0 26px 44px -24px rgba(111, 168, 220, .5); }
+  .tile h3 { margin: 0; font-size: 18px; font-weight: 650; font-variation-settings: "wdth" 110; display: flex; align-items: baseline; gap: 8px; }
+  .tile h3 .n { color: var(--sel); font-variation-settings: "wdth" 100; }
+  .tile h3 .n.hot { color: var(--magenta); }
+  .tile p { margin: 0; color: var(--dim); font-size: 13.5px; line-height: 1.45; }
+  .tile ul { list-style: none; margin: 0; padding: 0; font-size: 13.5px; }
+  .tile li { padding: 4px 0; border-top: 1px solid var(--line-2); display: flex; gap: 8px; align-items: center; }
+  .tile li:first-child { border-top: 0; }
+  .tile li .grow { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile canvas { width: 100%; height: 112px; border-radius: 8px; border: 1px solid var(--line-2); display: block; }
+  .tile.action { align-items: flex-start; justify-content: flex-end; border-style: dashed; border-color: #3d5d7d; background: rgba(19, 38, 58, .6); }
+  .tile.action h3 { color: var(--text); }
+  .tile .foot { margin-top: auto; color: var(--dim); font-size: 12.5px; }
+  .tile .pipsrow { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--dim); }
+  /* card grids inside the pages */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .grid.wide { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+  .group { margin: 22px 0 8px; display: flex; align-items: baseline; gap: 10px; font-size: 15px; font-weight: 650; color: var(--text); }
+  .group .dim { font-size: 13px; font-weight: 400; }
+  .xc { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth); }
+  .xc .t { font-weight: 650; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .xc .s { color: var(--dim); font-size: 13px; }
+  .xc .ppl { font-size: 13px; display: grid; grid-template-columns: auto 1fr; gap: 1px 10px; }
+  .xc .ppl span:nth-child(odd) { color: var(--dim); }
+  .xc .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+  .xc mark { background: rgba(209, 71, 143, .35); color: #fff; border-radius: 2px; padding: 0 1px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; padding: 10px 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+  .tools input[type=search] { flex: 1; min-width: 220px; }
+  .tools label { color: var(--dim); font-size: 13px; display: flex; gap: 6px; align-items: center; }
+  .count { color: var(--dim); font-size: 13px; margin: 6px 2px 0; }
+  /* live exercise thumbnails */
   .thumb { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: pointer; box-shadow: var(--depth);
     transition: border-color .15s, transform .18s, box-shadow .18s; }
   .thumb:hover { border-color: var(--chart); transform: translateY(-3px); box-shadow: var(--depth), 0 24px 40px -22px rgba(111, 168, 220, .45); }
@@ -16,53 +57,170 @@
   .thumb .who { padding: 0 9px 2px; font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .newcard { display: flex; align-items: center; justify-content: center; min-height: 250px; border-style: dashed; border-color: #3d5d7d; color: var(--dim); font-size: 15px; }
   .newcard:hover { color: var(--text); }
-  .ex { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
-  .ex + .ex { border-top: 1px solid var(--line); }
-  .ev { padding: 12px 14px; margin-bottom: 10px; }
+  /* evaluations */
+  .ev { padding: 12px 14px; }
   .ev .hd { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
   .ev .sc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0; font-size: 13px; }
   .ev .sc b { font-family: var(--mono); color: var(--accent); }
-  .ev .cm { white-space: pre-wrap; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; margin-top: 6px; }
+  .ev .cm { white-space: pre-wrap; background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; margin-top: 6px; }
   .ev .ack { margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--chart); }
-  .todo-ev { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid #7a6a2a; background: rgba(42, 36, 18, .85); border-radius: 8px; margin-bottom: 8px; box-shadow: var(--depth); }
+  .todo-ev { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; border: 1px solid #7a6a2a; background: rgba(42, 36, 18, .85); border-radius: 10px; box-shadow: var(--depth); }
   .rate { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; align-items: center; margin: 10px 0; }
   .stars { display: inline-flex; gap: 3px; }
   .stars button { width: 32px; padding: 4px 0; font-family: var(--mono); }
   .stars button.on { background: var(--magenta); border-color: var(--magenta); color: #fff; }
   .tx { color: #fff; background: #b32d2d; border-radius: 3px; padding: 0 5px; font-size: 10px; }
+  .empty-card { padding: 22px; text-align: center; color: var(--dim); background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; }
 </style>
 </head>
 <body>
 <main>
-  <section id="mine" style="display:none">
-    <h2>Your exercises</h2>
-    <div class="card" style="padding:0" id="mineList"></div>
+  <!-- ======================================================= hub -->
+  <section class="page" id="pg-home">
+    <div class="pagehead"><h1 id="hello">Home</h1></div>
+    <div class="tiles" id="tiles"></div>
   </section>
-  <section id="instr" style="display:none">
-    <h2>Live exercises <span class="dim" >click one to open it · status refreshes every 2 s</span></h2>
+
+  <!-- ======================================================= live exercises (instructor) -->
+  <section class="page" id="pg-live">
+    <div class="crumb"><a href="#">Home</a> / Live exercises</div>
+    <div class="pagehead"><h1>Live exercises</h1><span class="dim">click one to open it · status refreshes every 2 s</span></div>
     <div class="grid" id="thumbs"></div>
   </section>
-  <section id="evalSec" style="display:none">
-    <h2 id="evaluations">Evaluations</h2>
+
+  <!-- ======================================================= exercises: live + history, search -->
+  <section class="page" id="pg-exercises">
+    <div class="crumb"><a href="#">Home</a> / Exercises</div>
+    <div class="pagehead"><h1>Exercises</h1><span class="grow"></span><button class="primary instr-only" data-newex>New exercise</button></div>
+    <div class="tools">
+      <input type="search" id="xq" placeholder="Search by exercise, scenario, instructor, controller or pseudo-pilot name" aria-label="Search exercises">
+      <label>From <input type="date" id="xFrom"></label><label>to <input type="date" id="xTo"></label>
+      <select id="xSeat" aria-label="Seat"><option value="">Any seat</option><option value="instructor">As instructor</option><option value="atc">As controller</option><option value="pilot">As pseudo-pilot</option></select>
+      <select id="xStatus" aria-label="Status"><option value="">Live and past</option><option value="live">Live now</option><option value="past">Past</option></select>
+      <select id="xSort" aria-label="Sort"><option value="new">Newest first</option><option value="old">Oldest first</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option>
+        <option value="cx-">Complexity: hardest first</option><option value="cx+">Complexity: easiest first</option><option value="dn-">Density: busiest first</option><option value="dn+">Density: quietest first</option></select>
+    </div>
+    <div class="count" id="xCount"></div>
+    <div id="xList"></div>
+  </section>
+
+  <!-- ======================================================= scenarios (instructor) -->
+  <section class="page" id="pg-scenarios">
+    <div class="crumb"><a href="#">Home</a> / Scenarios</div>
+    <div class="pagehead"><h1>Scenarios</h1><span class="grow"></span><a href="/designer"><button>Open the designer</button></a></div>
+    <div class="tools">
+      <input type="search" id="sq" placeholder="Search by name, title or author" aria-label="Search scenarios">
+      <select id="sAsp" aria-label="Airspace"><option value="">Any airspace</option><option value="agadir">Agadir CTA</option><option value="training">Training sector</option></select>
+      <select id="sSort" aria-label="Sort"><option value="lib">Library order</option><option value="az">Name A–Z</option><option value="cx+">Complexity: easiest first</option><option value="cx-">Complexity: hardest first</option>
+        <option value="dn+">Density: quietest first</option><option value="dn-">Density: busiest first</option><option value="tr-">Traffic: most aircraft/h</option></select>
+    </div>
+    <div id="scns"></div>
+  </section>
+
+  <!-- ======================================================= evaluations -->
+  <section class="page" id="pg-evaluations">
+    <div class="crumb"><a href="#">Home</a> / Evaluations</div>
+    <div class="pagehead"><h1 id="evaluations">Evaluations</h1></div>
     <div id="evalPending"></div>
     <div id="evalReceived"></div>
     <div id="evalGiven"></div>
+    <div id="evalNone"></div>
   </section>
-  <section id="recSec">
-    <h2>Recordings <span class="grow"></span><label  class="dim"><input type="checkbox" id="showArch"> archived</label></h2>
-    <div class="card"><table><thead><tr><th>Exercise</th><th>Scenario</th><th>Date</th><th>Length</th><th>Status</th><th></th></tr></thead><tbody id="recs"></tbody></table></div>
-  </section>
-  <section id="scnSec" style="display:none">
-    <h2>Scenarios <span class="grow"></span><a href="/designer" >Open the designer</a></h2>
-    <div class="card"><table><thead><tr><th>Scenario</th><th>Author</th><th>Complexity · density</th><th>Airspace</th><th>Access</th><th>Owner</th><th></th></tr></thead><tbody id="scns"></tbody></table></div>
+
+  <!-- ======================================================= recordings -->
+  <section class="page" id="pg-recordings">
+    <div class="crumb"><a href="#">Home</a> / Recordings</div>
+    <div class="pagehead"><h1>Recordings</h1><span class="grow"></span><label class="dim"><input type="checkbox" id="showArch"> archived</label></div>
+    <div class="grid wide" id="recs"></div>
   </section>
 </main>
 <script src="/static/common.js"></script>
 <script>
-let scenarios = [], outlines = {};
+let scenarios = [], outlines = {}, EXS = [], RECS = [], EV = null;
 const isInstr = () => ME && (ME.role === 'instructor' || ME.role === 'admin');
+const STATUS = { running: ['LIVE', 'live'], paused: ['PAUSED', 'paused'], created: ['READY', 'paused'], finished: ['FINISHED', ''] };
+const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+const fmtDay = t => t ? new Date(t * 1000).toLocaleDateString([], { dateStyle: 'medium' }) : '';
+const month = t => new Date(t * 1000).toLocaleDateString([], { year: 'numeric', month: 'long' });
+const person = m => `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email;
 
-// ------------------------------------------------------------ thumbnails
+// ------------------------------------------------------------ router: #live, #exercises, #scenarios, #evaluations, #recordings
+const PAGES = ['home', 'live', 'exercises', 'scenarios', 'evaluations', 'recordings'];
+function route() {
+  let p = location.hash.replace(/^#\/?/, '') || 'home';
+  if (!PAGES.includes(p) || ((p === 'live' || p === 'scenarios') && !isInstr())) p = 'home';
+  PAGES.forEach(k => $('#pg-' + k).classList.toggle('on', k === p));
+  document.title = (p === 'home' ? 'ATC SIM' : $('#pg-' + p + ' h1').textContent + ' · ATC SIM');
+  if (p === 'home') renderTiles();
+  if (p === 'exercises') renderExercises();
+  if (p === 'scenarios') renderScenarios();
+  if (p === 'recordings') renderRecs();
+  window.scrollTo(0, 0);
+}
+addEventListener('hashchange', route);
+
+// ------------------------------------------------------------ hub tiles
+function renderTiles() {
+  const live = EXS.filter(e => e.live), mineLive = live.filter(e => e.seat !== 'instructor');
+  const instrLive = live.filter(e => e.seat === 'instructor');
+  const conflicts = instrLive.filter(e => (e.losses && e.losses.length) || e._stca).length;
+  const recent = EXS.filter(e => !e.live).slice(0, 3);
+  const pend = EV ? EV.pending.length : 0, unack = EV ? EV.received.filter(r => !r.ack_at).length : 0;
+  const ready = RECS.filter(r => r.status === 'ready').length, rendering = RECS.filter(r => r.status === 'rendering').length;
+  const T = [];
+  if (isInstr()) {
+    T.push(`<a class="tile" href="#live" data-tile="live"><h3>Live exercises <span class="n ${conflicts ? 'hot' : ''}">${instrLive.length}</span></h3>
+      ${instrLive.length ? `<canvas data-mini></canvas><p>${conflicts ? `<span class="bad">${conflicts} with a conflict now</span>` : 'No conflict now'} · ${instrLive.map(e => esc(e.name)).slice(0, 2).join(', ')}</p>`
+        : '<p>None running. Start one from a scenario.</p>'}</a>`);
+    T.push(`<div class="tile action" data-newex role="button" tabindex="0"><h3>New exercise</h3><p>Pick a scenario; it is built paused, then you invite the controller and the pseudo-pilot.</p></div>`);
+  }
+  T.push(`<a class="tile" href="#exercises" data-tile="exercises"><h3>${isInstr() ? 'Exercises' : 'Your exercises'} <span class="n">${EXS.length}</span></h3>
+    ${mineLive.length ? `<ul>${mineLive.map(e => `<li><span class="pill live">LIVE</span><span class="grow">${esc(e.name)}</span><a href="/x/${e.id}" onclick="event.stopPropagation()"><button class="small primary">Open</button></a></li>`).join('')}</ul>` : ''}
+    ${instrLive.length && !mineLive.length ? `<p><span class="pill live">LIVE</span> ${instrLive.length} running now, ${instrLive.map(e => esc(e.name)).slice(0, 3).join(', ')}</p>` : ''}
+    ${recent.length ? `<ul>${recent.map(e => `<li><span class="grow">${esc(e.name)}</span><span class="dim">${fmtDay(e.ended_at || e.created_at)}</span></li>`).join('')}</ul>`
+      : mineLive.length ? '' : `<p>${isInstr() ? 'Every exercise you ran or joined, with search.' : 'No exercise yet. Your instructor invites you, or sends you a link.'}</p>`}
+    <div class="foot">Search by name or date, sort by difficulty</div></a>`);
+  T.push(`<a class="tile" href="#evaluations" data-tile="evaluations"><h3>Evaluations ${pend ? `<span class="n hot">${pend} to write</span>` : ''}</h3>
+    ${EV && EV.pending[0] ? `<p>Next: evaluate <b>${esc(EV.pending[0].ratee)}</b> (${EV.pending[0].role}), ${esc(EV.pending[0].exercise)}</p>` : ''}
+    ${unack ? `<p><span class="warn">${unack} received to acknowledge</span></p>` : ''}
+    ${EV && !pend && !unack ? `<p>${EV.received.length} received · ${EV.given.length} given. Nothing waiting.</p>` : ''}</a>`);
+  T.push(`<a class="tile" href="#recordings" data-tile="recordings"><h3>Recordings <span class="n">${ready}</span></h3>
+    <p>${RECS[0] ? `Latest: ${esc(RECS[0].exercise || '')}, ${fmtDay(RECS[0].created_at)}` : 'Every exercise is recorded: the controller’s screen with the radio and telephone.'}</p>
+    ${rendering ? `<p class="warn">${rendering} rendering…</p>` : ''}</a>`);
+  if (isInstr()) {
+    const fam = { p: 0, b: 0, s: 0, own: 0 };
+    for (const s of scenarios) fam[scnFamily(s).k] = (fam[scnFamily(s).k] || 0) + 1;
+    T.push(`<a class="tile" href="#scenarios" data-tile="scenarios"><h3>Scenarios <span class="n">${scenarios.length}</span></h3>
+      <div class="pipsrow"><span>${fam.p} Agadir progression</span><span>${fam.b} Agadir band-boxed</span><span>${fam.s} training sector</span><span>${(fam.own || 0) + (fam.shared || 0)} yours or shared</span></div>
+      <p>Start an exercise, copy, share, open in the designer.</p></a>`);
+    T.push(`<a class="tile" href="/designer"><h3>Scenario designer</h3><p>Build traffic, weather and traps on a timeline, or paste a scenario as JSON.</p></a>`);
+  }
+  T.push(`<a class="tile" href="/stats"><h3>Statistics</h3><p>Losses of separation, grades and reaction times session after session, against the difficulty of each exercise.</p></a>`);
+  if (ME.role === 'admin') T.push(`<a class="tile" href="/admin"><h3>Users</h3><p>Roles of every account: administrator, instructor, controller, pseudo-pilot.</p></a>`);
+  T.push(`<a class="tile" href="/help"><h3>Help</h3><p>Manuals for each seat, the scenario format, the weather and aircraft models, the API.</p></a>`);
+  $('#tiles').innerHTML = T.join('');
+  $$('[data-newex]').forEach(b => { b.onclick = newExercise; b.onkeydown = e => { if (e.key === 'Enter') newExercise(); }; });
+  const mini = $('#tiles canvas[data-mini]'); if (mini && instrLive[0]) drawThumb(mini, instrLive[0]);
+}
+
+// ------------------------------------------------------------ data
+let HIST = [];                                     // full history, refreshed every 30 s; live rows every 2 s
+async function loadHistory() { try { HIST = await api('/api/exercises?limit=1000'); } catch (e) { } }
+async function loadExercises(full) {
+  if (full === true) await loadHistory();
+  let live; try { live = await api('/api/exercises?pictures=true&live=true'); } catch (e) { return; }
+  const L = new Map(live.map(e => [e.id, e]));
+  if (HIST.some(e => e.live && !L.has(e.id))) await loadHistory();   // one just ended: refresh its row
+  EXS = live.concat(HIST.filter(e => !L.has(e.id)).map(e => e.live ? Object.assign({}, e, { live: false, status: 'ended' }) : e))
+    .sort((a, b) => b.created_at - a.created_at);
+  for (const e of EXS) if (e.live && e.seat === 'instructor') { e._stca = stca(e.picture || [], e.sep_h || 5);
+    if (!outlines[e.id]) api(`/api/exercises/${e.id}/outline`).then(o => { outlines[e.id] = o; }).catch(() => {}); }
+  const p = location.hash.replace(/^#\/?/, '') || 'home';
+  if (p === 'home') renderTiles(); else if (p === 'live') renderThumbs(); else if (p === 'exercises' && !$('#xList').dataset.sig) renderExercises();
+  else if (p === 'exercises') renderExercises(true);
+}
+
+// ------------------------------------------------------------ live thumbnails
 function stca(pic, sep) {
   // straight-line closest approach within 3 min, vertical from present rates
   let worst = null;
@@ -112,25 +270,21 @@ function drawThumb(cv, ex) {
     if (W > 250 * dpr) c.fillText(String(a[3]).padStart(3, '0'), x + 4 * dpr, y - 3 * dpr);
   }
 }
-const STATUS = { running: ['LIVE', 'live'], paused: ['PAUSED', 'paused'], created: ['READY', 'paused'], finished: ['FINISHED', ''] };
-async function refreshThumbs() {
-  let list;
-  try { list = await api('/api/exercises?pictures=true'); } catch (e) { return; }
-  const live = list.filter(e => e.live && e.seat === 'instructor');
+
+function renderThumbs() {
+  const live = EXS.filter(e => e.live && e.seat === 'instructor');
   const box = $('#thumbs');
   const ids = live.map(e => e.id).join(',');
   if (box.dataset.ids !== ids) {
     box.dataset.ids = ids;
     box.innerHTML = live.map(e => `<div class="thumb" data-id="${e.id}"><div class="name"><span>${esc(e.name)}</span><span class="dim mono" style="font-weight:400">${e.id}</span></div>
       <div class="who" data-who></div><canvas></canvas><div class="bar" data-bar></div></div>`).join('') +
-      `<div class="thumb card newcard" id="newEx">＋ New exercise</div>`;
+      `<div class="thumb newcard" id="newEx" data-newex>＋ New exercise</div>`;
     $$('.thumb[data-id]').forEach(t => t.onclick = () => location.href = '/x/' + t.dataset.id);
     $('#newEx').onclick = newExercise;
   }
   for (const e of live) {
     const el = box.querySelector(`[data-id="${e.id}"]`); if (!el) continue;
-    if (!outlines[e.id]) api(`/api/exercises/${e.id}/outline`).then(o => { outlines[e.id] = o; }).catch(() => {});
-    e._stca = stca(e.picture || [], e.sep_h || 5);
     drawThumb(el.querySelector('canvas'), e);
     const [st, cls] = STATUS[e.status] || [e.status, ''];
     const conf = e.losses && e.losses.length ? `<span class="pill los">LOSS ${e.losses[0].join('×')}</span>`
@@ -141,16 +295,107 @@ async function refreshThumbs() {
     el.querySelector('[data-who]').innerHTML = (on.length ? on.map(p => `${p.ptt ? '<span class="tx">TX</span> ' : ''}${esc(p.name)} <span style="opacity:.7">(${SEAT_NAMES[p.seat]})</span>`).join(' · ') : 'nobody connected') +
       (e.calls ? ` · ☎ ${e.calls}` : '');
   }
-  // controllers / pilots (and instructors invited to someone else's exercise)
-  const mine = list.filter(e => e.seat !== 'instructor' || !isInstr());
-  $('#mine').style.display = mine.length || !isInstr() ? '' : 'none';
-  $('#mineList').innerHTML = mine.length ? mine.map(e => `<div class="ex"><div class="grow"><b>${esc(e.name)}</b> <span class="dim">· ${esc(e.scenario)} · instructor ${esc(e.instructor)}</span><br>${scnBadge(e.scenario_info)}<br>
-      <span class="dim" style="font-size:12px">your seat: ${SEAT_NAMES[e.seat]} · ${e.live ? (STATUS[e.status] || [e.status])[0] + ' · T+' + fmtT(e.sim_time_s) : e.status}</span></div>
-      ${e.live ? `<a href="/x/${e.id}"><button class="primary">Open</button></a>` : ''}</div>`).join('')
-    : '<div class="ex empty">No exercise yet. Your instructor invites you, or sends you a link.</div>';
 }
 
-// ------------------------------------------------------------ new exercise
+// ------------------------------------------------------------ exercises page: search, filters, sort, grouped grid
+function hl(text, q) {                           // highlight the search words in a text
+  const t = esc(text); if (!q) return t;
+  let out = t; for (const w of q.split(/\s+/).filter(Boolean)) out = out.replace(new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>');
+  return out;
+}
+function exText(e) {
+  const i = e.scenario_info || {};
+  return [e.name, e.scenario, i.title, i.author, e.instructor, ...(e.members || []).map(person), ...(e.members || []).map(m => m.licence || '')].join(' ').toLowerCase();
+}
+function renderExercises(quiet) {
+  const q = $('#xq').value.trim().toLowerCase(), from = $('#xFrom').value, to = $('#xTo').value, seat = $('#xSeat').value, st = $('#xStatus').value, sort = $('#xSort').value;
+  const t0 = from ? new Date(from + 'T00:00').getTime() / 1000 : -Infinity, t1 = to ? new Date(to + 'T23:59:59').getTime() / 1000 : Infinity;
+  let L = EXS.filter(e => {
+    const t = e.created_at;
+    if (t < t0 || t > t1) return false;
+    if (seat && e.seat !== seat) return false;
+    if (st === 'live' && !e.live) return false; if (st === 'past' && e.live) return false;
+    return !q || q.split(/\s+/).every(w => exText(e).includes(w));
+  });
+  const cx = e => (e.scenario_info || {}).complexity || 0, dn = e => (e.scenario_info || {}).density || 0;
+  const by = { new: (a, b) => b.created_at - a.created_at, old: (a, b) => a.created_at - b.created_at, az: (a, b) => a.name.localeCompare(b.name), za: (a, b) => b.name.localeCompare(a.name),
+    'cx-': (a, b) => cx(b) - cx(a) || b.created_at - a.created_at, 'cx+': (a, b) => cx(a) - cx(b) || b.created_at - a.created_at,
+    'dn-': (a, b) => dn(b) - dn(a) || b.created_at - a.created_at, 'dn+': (a, b) => dn(a) - dn(b) || b.created_at - a.created_at }[sort];
+  L.sort(by);
+  const sig = JSON.stringify([q, from, to, seat, st, sort, L.map(e => [e.id, e.status, e.live, e.sim_time_s])]);
+  if (quiet && $('#xList').dataset.sig === sig) return;
+  $('#xList').dataset.sig = sig;
+  $('#xCount').textContent = `${L.length} of ${EXS.length} exercise${EXS.length === 1 ? '' : 's'}`;
+  const card = e => {
+    const i = e.scenario_info || {}, seats = { atc: [], pilot: [], instructor: [] };
+    for (const m of e.members || []) (seats[m.seat] || (seats[m.seat] = [])).push(person(m));
+    const [stx, cls] = e.live ? (STATUS[e.status] || [e.status, '']) : [e.ended_at ? 'ENDED' : 'CLOSED', ''];
+    return `<div class="xc" data-x="${e.id}"><div class="t"><span>${hl(e.name, q)}</span><span class="pill ${cls}">${stx}</span></div>
+      <div class="s">${hl(e.scenario, q)}${i.title ? ' · ' + hl(i.title, q) : ''}</div>
+      <div class="s">${fmtDate(e.created_at)}${e.ended_at ? ' – ' + new Date(e.ended_at * 1000).toLocaleTimeString([], { timeStyle: 'short' }) : ''} · your seat: ${SEAT_NAMES[e.seat] || '–'}</div>
+      ${scnBadge(i)}
+      <div class="ppl"><span>Instructor</span><span>${hl(e.instructor, q)}</span>
+        ${seats.atc.length ? `<span>Controller</span><span>${hl(seats.atc.join(', '), q)}</span>` : ''}
+        ${seats.pilot.length ? `<span>Pseudo-pilot</span><span>${hl(seats.pilot.join(', '), q)}</span>` : ''}</div>
+      <div class="acts">${e.live ? `<a href="/x/${e.id}"><button class="small primary">Open</button></a>` : ''}
+        ${!e.live && e.ended_at ? `<a href="/stats"><button class="small">Statistics</button></a><a href="#recordings"><button class="small">Recording</button></a>` : ''}</div></div>`;
+  };
+  if (!L.length) { $('#xList').innerHTML = `<div class="empty-card">${EXS.length ? 'No exercise matches. Clear the search or widen the dates.' : (isInstr() ? 'No exercise yet. Start one with New exercise.' : 'No exercise yet. Your instructor invites you, or sends you a link.')}</div>`; return; }
+  const groups = [];
+  const live = L.filter(e => e.live), past = L.filter(e => !e.live);
+  if (live.length && (sort === 'new' || sort === 'old')) groups.push(['Running now', live]);
+  if (sort === 'new' || sort === 'old') {
+    const ms = new Map(); for (const e of past) { const k = month(e.created_at); if (!ms.has(k)) ms.set(k, []); ms.get(k).push(e); }
+    for (const [k, v] of ms) groups.push([k, v]);
+  } else groups.push(['', L]);
+  $('#xList').innerHTML = groups.map(([g, v]) => `${g ? `<div class="group">${esc(g)} <span class="dim">${v.length}</span></div>` : ''}<div class="grid">${v.map(card).join('')}</div>`).join('');
+}
+for (const id of ['#xq', '#xFrom', '#xTo', '#xSeat', '#xStatus', '#xSort']) $(id).addEventListener('input', () => renderExercises());
+
+// ------------------------------------------------------------ scenarios page: grouped grid
+function scnFamily(s) {
+  if (!s.library) return s.owner && ME && s.owner.id === ME.id ? { k: 'own', g: 'Your scenarios', o: 0 } : { k: 'shared', g: 'Shared with you', o: 1 };
+  if (/^p\d/.test(s.name)) return { k: 'p', g: 'Agadir progression — one sector at a time', o: 2 };
+  if (s.airspace === 'agadir') return { k: 'b', g: 'Agadir band-boxed — WW, OCE, the whole CTA', o: 3 };
+  return { k: 's', g: 'Training sector — one problem per scenario', o: 4 };
+}
+async function loadScenarios() {
+  scenarios = await api('/api/scenarios');
+  if ((location.hash.replace(/^#\/?/, '') || 'home') === 'scenarios') renderScenarios();
+}
+function renderScenarios() {
+  const q = $('#sq').value.trim().toLowerCase(), asp = $('#sAsp').value, sort = $('#sSort').value;
+  let L = scenarios.filter(s => (!asp || s.airspace === asp) && (!q || q.split(/\s+/).every(w => [s.name, s.title, s.author].join(' ').toLowerCase().includes(w))));
+  const by = { lib: (a, b) => a.complexity - b.complexity || a.density - b.density || a.name.localeCompare(b.name), az: (a, b) => a.name.localeCompare(b.name),
+    'cx+': (a, b) => a.complexity - b.complexity || a.density - b.density, 'cx-': (a, b) => b.complexity - a.complexity || b.density - a.density,
+    'dn+': (a, b) => a.density - b.density || a.complexity - b.complexity, 'dn-': (a, b) => b.density - a.density || b.complexity - a.complexity,
+    'tr-': (a, b) => (b.aircraft_per_hour || 0) - (a.aircraft_per_hour || 0) }[sort];
+  L.sort(by);
+  const card = s => `<div class="xc scard" data-scn="${s.name}"><div class="t"><span>${hl(s.name, q)}</span><span class="dim" style="font-weight:400;font-size:12px">${esc(s.airspace || '')}</span></div>
+      <div class="s">${hl(s.title || '', q)}</div>
+      ${scnBadge(s, false)}
+      <div class="s">${s.aircraft_per_hour} aircraft/h · ${Math.round((s.duration_s || 0) / 60)} min${s.capacity ? ` · ${s.sector_config} ${Math.round((s.load_ratio || 0) * 100)} % of capacity` : ''}</div>
+      <div class="s">by ${hl(s.author || (s.library ? 'library' : ''), q)} · ${s.access === 'write' ? '<span class="ok">read/write</span>' : 'read-only'}${s.shares && s.shares.length ? ' · shared with ' + s.shares.map(x => esc(x.first_name + ' ' + x.last_name) + (x.perm === 'write' ? ' (rw)' : '')).join(', ') : ''}</div>
+      <div class="acts"><button class="small primary" data-run="${s.name}">Start exercise</button>
+        <a href="/designer?scenario=${encodeURIComponent(s.name)}"><button class="small">${s.access === 'write' ? 'Edit' : 'View'}</button></a>
+        <button class="small" data-copy="${s.name}">Copy</button>
+        ${!s.library && (s.owner.id === ME.id || ME.role === 'admin') ? `<button class="small" data-share="${s.name}">Share</button><button class="small danger" data-del="${s.name}">Delete</button>` : ''}</div></div>`;
+  let html = '';
+  if (sort === 'lib') {
+    const gs = new Map(); for (const s of L) { const f = scnFamily(s); if (!gs.has(f.o)) gs.set(f.o, [f.g, []]); gs.get(f.o)[1].push(s); }
+    html = [...gs.entries()].sort((a, b) => a[0] - b[0]).map(([, [g, v]]) => `<div class="group">${esc(g)} <span class="dim">${v.length}</span></div><div class="grid">${v.map(card).join('')}</div>`).join('');
+  } else html = `<div class="grid" style="margin-top:12px">${L.map(card).join('')}</div>`;
+  $('#scns').innerHTML = L.length ? html : '<div class="empty-card">No scenario matches.</div>';
+  $$('[data-run]').forEach(b => b.onclick = () => { history.replaceState(null, '', '?scenario=' + b.dataset.run + location.hash); newExercise(); });
+  $$('[data-copy]').forEach(b => b.onclick = async () => {
+    const n = prompt('Name of your copy (lower-case letters, digits, _ or -)', b.dataset.copy + '_copy'); if (!n) return;
+    try { await post(`/api/scenarios/${b.dataset.copy}/copy`, { new_name: n }); loadScenarios(); } catch (e) { alert(e.message); } });
+  $$('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm(`Delete scenario ${b.dataset.del}? (a copy is kept in the server's deleted_scenarios folder)`)) return;
+    try { await api(`/api/scenarios/${b.dataset.del}`, { method: 'DELETE' }); loadScenarios(); } catch (e) { alert(e.message); } });
+  $$('[data-share]').forEach(b => b.onclick = () => share(b.dataset.share));
+}
+for (const id of ['#sq', '#sAsp', '#sSort']) $(id).addEventListener('input', renderScenarios);
 function newExercise() {
   modal(`<h3>New exercise</h3>
     <label class="f">Scenario</label><select id="nxScn">${scenarios.map(s => `<option value="${s.name}">${esc(s.name)} — ${esc(s.title || '')} (C${s.complexity}${s.complexity_estimated ? '~' : ''} D${s.density}${s.density_estimated ? '~' : ''})</option>`).join('')}</select>
@@ -166,30 +411,7 @@ function newExercise() {
   });
 }
 
-// ------------------------------------------------------------ scenarios
-async function loadScenarios() {
-  scenarios = await api('/api/scenarios');
-  $('#scns').innerHTML = scenarios.map(s => `<tr><td><b>${esc(s.name)}</b><br><span class="dim" style="font-size:12px">${esc(s.title || '')}</span></td>
-    <td>${esc(s.author || (s.library ? 'library' : ''))}</td>
-    <td>${scnBadge(s, false)}<br><span class="dim" style="font-size:11px">${s.aircraft_per_hour} aircraft/h · ${Math.round((s.duration_s || 0) / 60)} min</span></td>
-    <td class="dim">${esc(s.airspace || '')}</td>
-    <td>${s.access === 'write' ? '<span class="ok">read/write</span>' : '<span class="dim">read-only</span>'}</td>
-    <td class="dim">${s.library ? 'library' : esc(s.owner.name)}${s.shares && s.shares.length ? `<br><span style="font-size:11px">shared with ${s.shares.map(x => esc(x.first_name + ' ' + x.last_name) + (x.perm === 'write' ? ' (rw)' : '')).join(', ')}</span>` : ''}</td>
-    <td style="white-space:nowrap;text-align:right">
-      <button class="small primary" data-run="${s.name}">Start exercise</button>
-      <a href="/designer?scenario=${encodeURIComponent(s.name)}"><button class="small">${s.access === 'write' ? 'Edit' : 'View'}</button></a>
-      <button class="small" data-copy="${s.name}">Copy</button>
-      ${!s.library && (s.owner.id === ME.id || ME.role === 'admin') ? `<button class="small" data-share="${s.name}">Share</button> <button class="small danger" data-del="${s.name}">Delete</button>` : ''}
-    </td></tr>`).join('');
-  $$('[data-run]').forEach(b => b.onclick = () => { history.replaceState(null, '', '?scenario=' + b.dataset.run); newExercise(); });
-  $$('[data-copy]').forEach(b => b.onclick = async () => {
-    const n = prompt('Name of your copy (lower-case letters, digits, _ or -)', b.dataset.copy + '_copy'); if (!n) return;
-    try { await post(`/api/scenarios/${b.dataset.copy}/copy`, { new_name: n }); loadScenarios(); } catch (e) { alert(e.message); } });
-  $$('[data-del]').forEach(b => b.onclick = async () => {
-    if (!confirm(`Delete scenario ${b.dataset.del}? (a copy is kept in the server's deleted_scenarios folder)`)) return;
-    try { await api(`/api/scenarios/${b.dataset.del}`, { method: 'DELETE' }); loadScenarios(); } catch (e) { alert(e.message); } });
-  $$('[data-share]').forEach(b => b.onclick = () => share(b.dataset.share));
-}
+
 async function share(name) {
   const [users, s] = [await api('/api/users'), scenarios.find(x => x.name === name)];
   const ins = users.filter(u => (u.role === 'instructor' || u.role === 'admin') && u.id !== ME.id);
@@ -208,46 +430,53 @@ async function share(name) {
   });
 }
 
-// ------------------------------------------------------------ recordings
+
+
+// ------------------------------------------------------------ recordings page
 async function loadRecs() {
-  let recs; try { recs = await api('/api/recordings' + ($('#showArch').checked ? '?archived=true' : '')); } catch (e) { return; }
+  try { RECS = await api('/api/recordings' + ($('#showArch').checked ? '?archived=true' : '')); } catch (e) { return; }
+  const p = location.hash.replace(/^#\/?/, '') || 'home';
+  if (p === 'recordings') renderRecs(); else if (p === 'home') renderTiles();
+}
+function renderRecs() {
   const mb = b => b ? (b / 1e6).toFixed(1) + ' MB' : '';
-  $('#recs').innerHTML = recs.map(r => `<tr><td><b>${esc(r.exercise || r.exercise_id)}</b>${r.title ? `<br><span class="dim" style="font-size:12px">${esc(r.title)}</span>` : ''}</td><td class="dim">${esc(r.scenario || '')}</td><td class="dim">${fmtDate(r.created_at)}</td>
-    <td class="mono">${r.duration_s ? fmtT(r.duration_s) : ''} <span class="dim">${mb(r.size_bytes)}</span></td>
-    <td>${r.status === 'ready' ? '<span class="ok">ready</span>' : r.status === 'rendering' ? '<span class="warn">rendering…</span>' : `<span class="bad" title="${esc(r.error)}">${r.status}</span>`}</td>
-    <td style="text-align:right;white-space:nowrap">${r.download ? `<a href="${r.download}"><button class="small primary">Download .mp4</button></a>` : ''}
+  $('#recs').innerHTML = RECS.map(r => `<div class="xc rcard"><div class="t"><span>${esc(r.exercise || r.exercise_id)}</span>
+      ${r.status === 'ready' ? '<span class="pill clear">ready</span>' : r.status === 'rendering' ? '<span class="pill paused">rendering…</span>' : `<span class="pill los" title="${esc(r.error)}">${r.status}</span>`}</div>
+      ${r.title ? `<div class="s">${esc(r.title)}</div>` : ''}
+      <div class="s">${esc(r.scenario || '')} · ${fmtDate(r.created_at)}${r.duration_s ? ' · ' + fmtT(r.duration_s) : ''} ${mb(r.size_bytes)}</div>
+      <div class="acts">${r.download ? `<a href="${r.download}"><button class="small primary">Download .mp4</button></a>` : ''}
       ${r.can_manage ? `<button class="small" data-arch="${r.id}" data-v="${r.archived ? 0 : 1}">${r.archived ? 'Unarchive' : 'Archive'}</button>
       ${r.status === 'failed' ? `<button class="small" data-rr="${r.id}">Render again</button>` : ''}
-      <button class="small danger" data-rdel="${r.id}">Delete</button>` : ''}</td></tr>`).join('') || `<tr><td colspan="6" class="empty">${$('#showArch').checked ? 'No archived recording.' : 'No recording yet: every exercise is recorded: the controller’s screen (traffic as they saw it, mouse, clicks, label entries, panels) with the radio and telephone audio, turned into an .mp4 when the instructor ends it.'}</td></tr>`;
+      <button class="small danger" data-rdel="${r.id}">Delete</button>` : ''}</div></div>`).join('')
+    || `<div class="empty-card">${$('#showArch').checked ? 'No archived recording.' : 'No recording yet. Every exercise is recorded: the controller’s screen (traffic as they saw it, mouse, clicks, label entries, panels) with the radio and telephone audio, turned into an .mp4 when the instructor ends it.'}</div>`;
   $$('[data-arch]').forEach(b => b.onclick = async () => { await post(`/api/recordings/${b.dataset.arch}/archive`, { archived: b.dataset.v === '1' }); loadRecs(); });
   $$('[data-rr]').forEach(b => b.onclick = async () => { await post(`/api/recordings/${b.dataset.rr}/render`); loadRecs(); });
   $$('[data-rdel]').forEach(b => b.onclick = async () => { if (!confirm('Delete this recording permanently?')) return; await api(`/api/recordings/${b.dataset.rdel}`, { method: 'DELETE' }); loadRecs(); });
 }
 $('#showArch').onchange = loadRecs;
 
-// ------------------------------------------------------------ evaluations
-let EV = null;
-const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+// ------------------------------------------------------------ evaluations page
 async function loadEvals(force) {
   const ae = document.activeElement;
-  if (!force && ae && ae.matches && ae.matches('textarea, input') && ae.closest('#evalSec, .modal')) return;   // typing
+  if (!force && ae && ae.matches && ae.matches('textarea, input') && ae.closest('#pg-evaluations, .modal')) return;   // typing
   try { EV = await api('/api/evaluations'); } catch (e) { return; }
   const dimsOf = k => EV.dimensions[k];
-  $('#evalSec').style.display = EV.pending.length || EV.received.length || EV.given.length ? '' : 'none';
-  $('#evalPending').innerHTML = EV.pending.map((p, i) => `<div class="todo-ev"><span class="grow"><b>Evaluate ${esc(p.ratee)}</b> (${p.role})
-      <span class="dim">· ${esc(p.exercise)} · ${esc(p.scenario)} · ${fmtDate(p.date)}</span></span><button class="primary" data-ev="${i}">Evaluate</button></div>`).join('');
+  $('#evalPending').innerHTML = EV.pending.length ? `<div class="group">To write <span class="dim">${EV.pending.length}</span></div><div class="grid">` + EV.pending.map((p, i) => `<div class="todo-ev"><span><b>Evaluate ${esc(p.ratee)}</b> (${p.role})</span>
+      <span class="dim">${esc(p.exercise)} · ${esc(p.scenario)} · ${fmtDate(p.date)}</span><span><button class="primary" data-ev="${i}">Evaluate</button></span></div>`).join('') + '</div>' : '';
   $$('[data-ev]').forEach(b => b.onclick = () => evalForm(EV.pending[+b.dataset.ev]));
-  const card = (r, mine) => `<div class="card ev"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span> ${scnBadge(r.scenario_info)}</span>
+  const card = (r, mine) => `<div class="card ev"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span></span>
       <span class="dim">${mine ? 'from ' + esc(r.rater) : 'to ' + esc(r.ratee)} · ${r.kind === 'atc' ? 'controller' : 'pseudo-pilot'} evaluation</span></div>
+      ${scnBadge(r.scenario_info)}
       <div class="sc">${dimsOf(r.kind).map(d => `<span>${d.label} <b>${r.scores[d.key]}/5</b></span>`).join('')}<span>Overall <b>${r.grade}/5</b> <span class="warn">${stars(r.grade)}</span></span></div>
       ${r.comment ? `<div class="cm">${esc(r.comment)}</div>` : ''}
       ${r.ack_at ? `<div class="ack"><span class="dim">acknowledged ${fmtDate(r.ack_at)}</span>${r.ack_comment ? `<div class="cm">${esc(r.ack_comment)}</div>` : ''}</div>`
         : mine ? `<div class="ack"><textarea data-ackc="${r.id}" rows="2" style="width:100%" placeholder="your comment (optional)"></textarea><button class="small primary" data-ack="${r.id}" style="margin-top:4px">Acknowledge</button></div>`
         : '<div class="ack dim">not acknowledged yet</div>'}</div>`;
-  $('#evalReceived').innerHTML = EV.received.length ? `<h2 style="margin-top:14px">Received</h2>` + EV.received.map(r => card(r, true)).join('') : '';
-  $('#evalGiven').innerHTML = EV.given.length ? `<h2 style="margin-top:14px">Given</h2>` + EV.given.slice(0, 20).map(r => card(r, false)).join('') : '';
+  $('#evalReceived').innerHTML = EV.received.length ? `<div class="group">Received <span class="dim">${EV.received.length}</span></div><div class="grid wide">` + EV.received.map(r => card(r, true)).join('') + '</div>' : '';
+  $('#evalGiven').innerHTML = EV.given.length ? `<div class="group">Given <span class="dim">${EV.given.length}</span></div><div class="grid wide">` + EV.given.slice(0, 40).map(r => card(r, false)).join('') + '</div>' : '';
+  $('#evalNone').innerHTML = EV.pending.length || EV.received.length || EV.given.length ? '' : '<div class="empty-card">No evaluation yet. They are written when an exercise ends.</div>';
   $$('[data-ack]').forEach(b => b.onclick = async () => { await post(`/api/evaluations/${b.dataset.ack}/ack`, { comment: $(`[data-ackc="${b.dataset.ack}"]`).value }); loadEvals(true); });
-  if (location.hash === '#evaluations' && !loadEvals.scrolled) { loadEvals.scrolled = 1; $('#evaluations').scrollIntoView(); }
+  if ((location.hash.replace(/^#\/?/, '') || 'home') === 'home') renderTiles();
 }
 function evalForm(p) {
   const dims = EV.dimensions[p.kind], val = {};
@@ -268,12 +497,16 @@ function evalForm(p) {
   });
 }
 
+
 (async () => {
   await header('/');
-  loadEvals(); setInterval(loadEvals, 15000);
-  if (isInstr()) { $('#instr').style.display = ''; $('#scnSec').style.display = ''; await loadScenarios(); }
-  refreshThumbs(); loadRecs();
-  setInterval(refreshThumbs, 2000); setInterval(loadRecs, 8000);
+  $$('.instr-only').forEach(el => el.style.display = isInstr() ? '' : 'none');
+  $$('[data-newex]').forEach(b => b.onclick = newExercise);
+  const tasks = [loadExercises(true), loadEvals(), loadRecs()];
+  if (isInstr()) tasks.push(loadScenarios());
+  await Promise.all(tasks);
+  route();
+  setInterval(loadExercises, 2000); setInterval(() => loadExercises(true), 30000); setInterval(loadEvals, 15000); setInterval(loadRecs, 8000);
   if (isInstr() && new URLSearchParams(location.search).get('scenario')) newExercise();
 })();
 </script>

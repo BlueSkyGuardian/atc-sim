@@ -302,16 +302,21 @@ def _summary(e: dict, u: dict, with_picture: bool = False) -> dict:
 
 
 @router.get("/api/exercises")
-def exercises(request: Request, pictures: bool = False):
+def exercises(request: Request, pictures: bool = False, live: bool = False, limit: int = 200):
+    """Exercises this user ran or joined, newest first. live=true returns only the running ones (cheap, for polling);
+    limit (max 1000) widens the history for the dashboard search."""
     u = require_user(request)
+    limit = max(1, min(int(limit), 1000))
     if u["role"] == "admin":
-        rows = db.q("SELECT * FROM exercises ORDER BY created_at DESC LIMIT 200")
+        rows = db.q("SELECT * FROM exercises ORDER BY created_at DESC LIMIT ?", (limit,))
     elif u["role"] == "instructor":
         rows = db.q("SELECT * FROM exercises WHERE instructor_id=? OR id IN (SELECT exercise_id FROM exercise_members "
-                    "WHERE user_id=?) ORDER BY created_at DESC LIMIT 200", (u["id"], u["id"]))
+                    "WHERE user_id=?) ORDER BY created_at DESC LIMIT ?", (u["id"], u["id"], limit))
     else:
         rows = db.q("SELECT e.* FROM exercises e JOIN exercise_members m ON m.exercise_id=e.id WHERE m.user_id=? "
-                    "ORDER BY e.created_at DESC LIMIT 100", (u["id"],))
+                    "ORDER BY e.created_at DESC LIMIT ?", (u["id"], limit))
+    if live:
+        rows = [e for e in rows if manager and e["id"] in manager.sessions]
     return [_summary(e, u, with_picture=pictures and seat_for(e["id"], u) == "instructor") for e in rows]
 
 

@@ -75,8 +75,9 @@ with sync_playwright() as p:
     shot(boss, "a_users", "main")
 
     # ---------------------------------------------------------------- instructor: scenarios, new exercise
-    ins.reload(); ins.wait_for_selector("#scns tr")
-    ins.evaluate("document.getElementById('scnSec').scrollIntoView()")
+    ins.goto("/"); ins.wait_for_selector("#tiles [data-tile=scenarios]"); ins.wait_for_timeout(500)
+    shot(ins, "i_home", region=[0, 0, VIEW["width"], VIEW["height"]])
+    ins.click("#tiles [data-tile=scenarios]"); ins.wait_for_selector("#scns [data-run]")
     ins.wait_for_timeout(300)
     shot(ins, "i_scenarios", region=[0, 0, VIEW["width"], VIEW["height"]])
     ins.click(f"[data-run='{SCN}']")
@@ -94,7 +95,8 @@ with sync_playwright() as p:
     links = ins.evaluate("EXINFO.links")
     pil.goto(links["pilot"]); pil.wait_for_url(f"**/x/{eid}")
     atc.goto("/"); atc.wait_for_selector(f"a[href='/x/{eid}']")
-    shot(atc, "c_home", "#mine")
+    atc.wait_for_timeout(400)
+    shot(atc, "c_home", "#tiles")
     atc.click(f"a[href='/x/{eid}'] button")
     for pg in (atc, pil, ins):
         pg.wait_for_function("() => typeof state !== 'undefined' && state && state.aircraft", timeout=60000)
@@ -252,7 +254,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- instructor: monitor, dashboard
     ins.click("#asideTabs [data-t=monitor]"); ins.wait_for_timeout(1500)
     shot(ins, "i_monitor", "aside")
-    ins.goto("/"); ins.wait_for_selector(".thumb[data-id]", state="attached", timeout=90000); ins.wait_for_timeout(4000)
+    ins.goto("/#live"); ins.wait_for_selector(".thumb[data-id]", state="attached", timeout=90000); ins.wait_for_timeout(4000)
     shot(ins, "i_dashboard", region=[0, 0, VIEW["width"], 520])
     ins.goto(f"/x/{eid}"); ins.wait_for_function("() => typeof state !== 'undefined' && state && state.aircraft", timeout=30000)
     ins.wait_for_timeout(1500)
@@ -269,6 +271,8 @@ with sync_playwright() as p:
     ins.click("#evGo"); ins.wait_for_selector(".modal", state="detached")
     atc.goto("/#evaluations"); atc.wait_for_selector("#evalReceived .ev")
     shot(atc, "c_evaluation", "#evalReceived")
+    atc.goto("/#exercises"); atc.wait_for_selector("#xList [data-x]"); atc.select_option("#xSort", "cx-"); atc.wait_for_timeout(400)
+    shot(atc, "c_exercises", region=[0, 0, VIEW["width"], 560])
     atc.goto("/stats"); atc.wait_for_selector("canvas"); atc.wait_for_timeout(1500)
     shot(atc, "c_stats", full_page=True)
 

@@ -11,9 +11,14 @@ pseudo-pilot makes them do. They never react to what you type.
 ## Joining an exercise
 
 Your instructor invites you from the user list, or sends you a link (`/join/…`). The exercise then appears on your
-home page under *Your exercises*, with its seat and status. **Open** takes you to the radar.
+home page in the *Your exercises* tile while it runs. **Open** takes you to the radar.
 
-![Your exercises on the home page: Open takes you to the radar](/static/docs/c_home.jpg "Your exercises on the home page: Open takes you to the radar")
+![The home page: Your exercises (Open takes you to the radar), Evaluations, Recordings, Statistics, Help](/static/docs/c_home.jpg "The home page: Your exercises (Open takes you to the radar), Evaluations, Recordings, Statistics, Help")
+
+Click the tile itself for every exercise you took part in. Search them by name (exercise, scenario, instructor,
+pseudo-pilot), by date, by seat, and sort them by date, name, complexity or density.
+
+![Your exercises, hardest first, with the difficulty and who sat where](/static/docs/c_exercises.jpg "Your exercises, hardest first, with the difficulty and who sat where")
 
 The microphone needs HTTPS, and the browser asks once for permission. Hold the **space bar** to transmit. It works
 anywhere except inside a text field.
@@ -298,9 +303,9 @@ Shortcuts work outside text fields, with or without capitals.
 
 - **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your
   windows, your mouse and clicks, a caption log of your actions) with the frequency and your telephone calls. It
-  appears under *Recordings* on your home page, ready to download.
+  appears on the *Recordings* page (home page tile), ready to download.
 - **Evaluation:** your instructor rates you (phraseology, conflict detection, conflict resolution, anticipation and
-  planning, coordination, overall grade). Read it on the home page under *Evaluations*, then acknowledge it with a
+  planning, coordination, overall grade). Read it on the *Evaluations* page (home page tile), then acknowledge it with a
   comment. You rate the pseudo-pilot there too.
 - **Statistics** (*Stats*, *As controller*): losses of separation per session and per hour, your grades over time,
   other mistakes (infringements, RVSM, wrong-direction exits, weather penetrations, unanswered requests), reaction
