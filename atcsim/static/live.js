@@ -40,6 +40,15 @@
         <label class="lv-w">Value<input data-f="value" list="plPts" placeholder="370 · ROLRO · M78 · free words for a report" style="width:100%"></label>
         <label class="lv-w">Reason<input data-f="reason" placeholder="e.g. turbulence, weight" style="width:100%"></label>
         <button class="primary" data-go="request">Make it ask</button></div>`;
+    if (tab === 'readback') {
+      const rb = o.readback || { rate: 0, traps: [], counts: {} }, c = rb.counts || {};
+      const rate = rb.rate >= 0.19 ? '0.2' : rb.rate >= 0.09 ? '0.1' : rb.rate > 0 ? '0.05' : '0';
+      return `<div class="lv-g"><label>Read-back errors<select data-f="rate">${[['0', 'off'], ['0.05', 'about 1 clearance in 20'], ['0.1', 'about 1 in 10'], ['0.2', 'about 1 in 5']].map(([v, t]) => `<option value="${v}" ${v === rate ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+        <button class="primary" data-go="rate">Apply</button></div>
+        <div class="c-dim" style="font-size:11.5px;margin-top:6px">${EXINFO && EXINFO.solo ? 'The pilot reads a clearance back with a wrong value and flies it unless you correct it (enter it again) within a minute.' : 'The pseudo-pilot gets a prompt on To do to read back a wrong value, flies it unless the controller corrects it, and reports whether it was caught.'}</div>
+        <div class="lv-sub">So far: ${c.errors || 0} · caught ${c.caught || 0} · missed ${c.missed || 0}</div>` +
+        (rb.traps || []).slice().reverse().slice(0, 8).map(t => `<div class="lv-row"><span class="c-dim">T+${fmtT(t.t)}</span> <b>${esc(t.callsign)}</b> ${esc(t.said)} <span class="c-dim">for</span> ${esc(t.cleared)} <span class="${t.status === 'caught' ? 'c-ok' : t.status === 'missed' ? 'c-los' : 'c-dim'}" style="margin-left:auto">${t.status}</span></div>`).join('');
+    }
     return (o.areas || []).length ? (o.areas.map(a => `<div class="lv-row"><b>${esc(a.name)}</b> <span class="c-dim">${esc(a.kind)} FL${a.lower_fl}–${a.upper_fl}${a.next_change ? ' · next change T+' + fmtT(a.next_change.time_s) : ''}</span>
         <button class="small ${a.active ? 'danger' : 'primary'}" data-area="${esc(a.id)}" data-v="${a.active ? 0 : 1}">${a.active ? 'Deactivate' : 'Activate'}</button></div>`).join(''))
       : '<div class="c-dim">This scenario has no area.</div>';
@@ -47,13 +56,13 @@
   let lastSig = '';
   function render(force) {
     if (!box) return;
-    const sig = tab + JSON.stringify(opts && [opts.aircraft, opts.emergencies, opts.areas]);
+    const sig = tab + JSON.stringify(opts && [opts.aircraft, opts.emergencies, opts.areas, opts.readback]);
     if (!force && sig === lastSig && box.innerHTML) return;
     // keep what was typed across a refresh of the lists
     const keep = {}; box.querySelectorAll('[data-f]').forEach(i => { keep[i.dataset.f] = i.value; });
     const out = box.querySelector('.lv-out'), msg = out ? [out.className, out.textContent] : null;
     lastSig = sig;
-    box.innerHTML = `<div class="lv-tabs">${[['aircraft', 'Aircraft'], ['emergency', 'Emergency'], ['request', 'Pilot request'], ['area', 'Areas']].map(([k, t]) => `<button data-tab-lv="${k}" class="${tab === k ? 'on' : ''}">${t}</button>`).join('')}</div>
+    box.innerHTML = `<div class="lv-tabs">${[['aircraft', 'Aircraft'], ['emergency', 'Emergency'], ['request', 'Request'], ['area', 'Areas'], ['readback', 'Read-backs']].map(([k, t]) => `<button data-tab-lv="${k}" class="${tab === k ? 'on' : ''}">${t}</button>`).join('')}</div>
       <div class="lv-body">${form()}</div><div class="lv-out"></div>`;
     for (const [k, v] of Object.entries(keep)) { const i = box.querySelector(`[data-f="${k}"]`); if (i && v !== undefined && i.tagName !== 'SELECT') i.value = v; else if (i && [...i.options].some(o => o.value === v)) i.value = v; }
     if (msg) { const o = box.querySelector('.lv-out'); o.className = msg[0]; o.textContent = msg[1]; }
@@ -71,6 +80,7 @@
           route: f('route').toUpperCase().split(/[\s,]+/).filter(Boolean), appear: f('appear') === 'now' ? 'now' : +f('appear'), dep: f('dep').toUpperCase() || null, dest: f('dest').toUpperCase() || null }, out);
         if (r) { const i = box.querySelector('[data-f="callsign"]'); if (i) i.value = ''; }
       } else if (g.dataset.go === 'emergency') act({ action: 'emergency', callsign: f('callsign'), kind: f('kind'), aerodrome: f('aerodrome').toUpperCase() || null, why: f('why') || null }, out);
+      else if (g.dataset.go === 'rate') act({ action: 'readback_rate', rate: +f('rate') }, out);
       else if (g.dataset.go === 'request') act({ action: 'request', callsign: f('callsign'), kind: f('kind'), value: f('value'), reason: f('reason') }, out);
     });
   }

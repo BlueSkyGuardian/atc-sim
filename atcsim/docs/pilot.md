@@ -106,7 +106,9 @@ The *Shorthand* line under the aircraft list accepts the command syntax, for spe
 Under *CPDLC*, the **Live actions** box adds an aircraft now (or entering in a few minutes), declares an emergency
 (emergency descent, medical diversion, radio failure, general), makes an aircraft ask for something, or switches an
 area: see the [instructor manual](instructor.md#live-actions). An emergency puts its call (MAYDAY, PAN PAN) on your
-*To do* to read out; a radio failure puts a reminder not to answer for that aircraft.
+*To do* to read out; a radio failure puts a reminder not to answer for that aircraft. When the instructor turns on read-back errors,
+*To do* sometimes asks you to read a clearance back wrong (READ-BACK): do it, fly the wrong value unless the
+controller corrects you, then press **Caught** or **Missed**.
 
 ## Running the simulation
 

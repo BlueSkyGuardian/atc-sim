@@ -395,6 +395,8 @@
       const dlb = conn(q.callsign) && !sent && q.kind !== 'emergency' ? `<button data-dlreq="${q.id}" data-cs="${q.callsign}" title="send this request by data link instead of saying it">By CPDLC</button>` : '';
       return `<div class="todo req" data-cs="${q.callsign}"><span class="tg">${q.type === 'report' ? 'REPORT' : 'REQ'}</span><div class="tx"><b>${q.callsign}</b> · ${sent ? 'sent by CPDLC: ' + h(q.phraseology) : `say <i>“${h(q.phraseology)}”</i>`}<small>${q.reason ? h(q.reason) + ' · ' : ''}${age} s${sent ? ' · the controller answers by data link (or on the frequency)' : ''}</small></div><div class="bt">${dlb}${btns}</div></div>`;
     }));
+    // read-back error prompts (live action): read back the wrong value, then say whether the controller caught it
+    for (const t of state.readback_open || []) if (t.mode === 'pilot') items.push(`<div class="todo req" data-cs="${t.callsign}"><span class="tg">READ-BACK</span><div class="tx"><b>${t.callsign}</b> · read back <i>${h(t.said)}</i> instead of ${h(t.cleared)}, and fly ${h(t.said)} unless the controller corrects you<small>hearback training · then tell whether it was caught</small></div><div class="bt"><button class="yes" data-rbt="${t.id}" data-c="1">Caught</button><button class="no" data-rbt="${t.id}" data-c="0">Missed</button></div></div>`);
     // radio failure (live action): the pseudo-pilot does not answer for it on the frequency
     for (const a of allAc().filter(x => x.emergency && x.emergency.kind === 'radio')) items.push(`<div class="todo call" data-cs="${a.callsign}"><span class="tg">7600</span><div class="tx"><b>${a.callsign}</b> · radio failure: <i>do not answer</i> for it on the frequency; it flies its flight plan<small>squawk 7600 · CPDLC still works · cleared from Live actions</small></div></div>`);
     // aircraft dealing with weather (they asked for a deviation, were cleared one, or deviate): report clear of it
@@ -438,6 +440,8 @@
     $('#todo').addEventListener('mousedown', e => {
       const da = e.target.closest('[data-dlid]');
       if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
+      const rb = e.target.closest('[data-rbt]');
+      if (rb) { e.preventDefault(); api(`/sessions/${SID}/live`, { method: 'POST', body: JSON.stringify({ action: 'readback_result', trap: +rb.dataset.rbt, caught: rb.dataset.c === '1' }) }).catch(() => {}); return; }
       const dr = e.target.closest('[data-dlreq]');
       if (dr) { e.preventDefault(); dlSend(dr.dataset.cs, { request_id: dr.dataset.dlreq }); select(dr.dataset.cs); return; }
       const wc = e.target.closest('[data-wxclear]');

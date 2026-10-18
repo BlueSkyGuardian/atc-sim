@@ -415,7 +415,9 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 - **CPDLC**: connected aircraft send their requests by data link and answer your uplinks by themselves (WILCO, or
   UNABLE when they cannot).
 - **LIVE** in the toolbar opens the live actions: add an aircraft, an emergency, a pilot request, switch an area
-  (see the [instructor manual](instructor.md#live-actions)).
+  (see the [instructor manual](instructor.md#live-actions)). Its **Read-backs** tab makes pilots read some
+  clearances back wrong: listen to the read-back in the radio log, and correct it (enter the clearance again)
+  within a minute, or the pilot flies the wrong value.
 - **HUD** in the toolbar hides or shows the information box (scenario, time, traffic, wind).
 - **The timeline** under the scope records the run: click or drag it to look back (REPLAY shows in the information
   box), **▶ Replay** plays from there, **Live** returns to the live picture. Its markers show losses of separation,

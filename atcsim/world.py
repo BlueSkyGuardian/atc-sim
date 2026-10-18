@@ -942,8 +942,9 @@ class World:
         if self.record:
             from . import oldi
             oldi.update(self)
-            from . import cpdlc
+            from . import cpdlc, live as _live
             cpdlc.update(self)
+            _live.update(self)
             self._monitor(dt)
             self._monitor_weather(dt)
             if self.t - self._last_frame_t >= self.recording["every_s"] - 1e-6 or self.finished:
@@ -1381,6 +1382,7 @@ class World:
                 "wrong_direction_clearances": self.m["wrong_direction_clearances"],
             },
             "instructions": {"issued": self.m["instructions_issued"], "rejected": self.m["instructions_rejected"]},
+            "readback": dict(self.m.get("readback", {"errors": 0, "caught": 0, "missed": 0})),
             "assumption": (lambda ts, never: {
                 "assumed": len(ts), "mean_delay_s": round(sum(ts) / len(ts), 1) if ts else None,
                 "max_delay_s": max(ts) if ts else None, "late_over_30s": sum(1 for x in ts if x > 30),
@@ -1501,6 +1503,8 @@ class World:
         e["t"] = round(self.t, 1)
         self.entries[cs] = e
         self._event("atc_entry", callsign=cs, entry={k: v for k, v in e.items() if k != "t"}, by=who)
+        from . import live
+        live.on_entry(self, cs, fields)
         self.last_readback = self._auto_fly(cs, fields) if self.auto_pilot and who != "cpdlc" else []
         return e
 
@@ -1544,13 +1548,19 @@ class World:
             if m and m.group(2):
                 ins["max_nm"] = int(m.group(2))
             instrs.append(ins)
+        from . import live
         out = []
         for ins in instrs:
             ins["callsign"] = cs
             if not ac.assumed and ins["type"] != "assume":
                 out.append({"status": "rejected", "text": f"{cs} not assumed: entered only"})
                 break
-            r = self.issue(ins, source="voice")
+            fly, trap = live.solo_readback(self, ac, ins)      # sometimes the pilot reads it back (and flies it) wrong
+            r = self.issue(fly, source="voice")
+            if trap and r["status"] == "rejected":            # the wrong value cannot be flown: no error after all
+                trap["status"] = "void"
+                self.m["readback"]["errors"] -= 1
+                r = self.issue(ins, source="voice")
             if r["status"] == "rejected":
                 why = r["reason"][len(cs) + 1:] if r["reason"].startswith(cs + " ") else r["reason"]
                 txt = f"{cs} {why}" if why.lower().startswith("unable") else f"{cs} unable: {why}"
@@ -1584,6 +1594,8 @@ class World:
             "cpdlc": cpdlc.state_view(self),
             "cpdlc_last": self.cpdlc_msgs[-1]["id"] if getattr(self, "cpdlc_msgs", None) else 0,
             "chat_last": self.chat_msgs[-1]["id"] if getattr(self, "chat_msgs", None) else 0,
+            "readback_open": [{k: v for k, v in t.items() if k != "instr"} for t in getattr(self, "readback_traps", [])
+                              if t["status"] == "open"],
             "duration_s": self.duration_s,
             "finished": self.finished,
             "aircraft": acs,

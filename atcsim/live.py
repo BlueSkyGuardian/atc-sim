@@ -223,4 +223,142 @@ def options(w) -> dict:
             "areas": [{"id": a.id, "name": a.name, "kind": a.kind, "active": a.active, "lower_fl": a.lower_fl,
                        "upper_fl": a.upper_fl, "next_change": a.next_change()} for a in w.areas.values()],
             "aerodromes": sorted(w.aerodromes),
-            "types": sorted(performance.SUPPORTED)}
+            "types": sorted(performance.SUPPORTED),
+            "readback": readback_view(w)}
+
+
+# ------------------------------------------------------------------ read-back errors (hearback training)
+READBACK_WINDOW_S = 60.0       # solo: the controller has this long to correct a wrong read-back
+PROMPT_EXPIRE_S = 180.0        # exercise: a pseudo-pilot's prompt not reported by then is closed as unreported
+_FIELD = {"altitude": "cfl", "heading": "heading", "speed": "speed", "direct": "direct"}
+
+
+def set_readback_rate(w, rate: float, by: str = "") -> dict:
+    r = max(0.0, min(0.5, float(rate)))
+    w.readback_rate = r
+    w._event("live", action="readback_rate", rate=r, by=by,
+             text="read-back errors off" if r == 0 else f"read-back errors: about 1 clearance in {round(1 / r)}")
+    return {"readback_rate": r}
+
+
+def _hit(w, cs: str, field: str) -> bool:
+    import random
+    r = float(getattr(w, "readback_rate", 0.0) or 0.0)
+    if r <= 0:
+        return False
+    return random.Random(f"{cs}|{field}|{int(w.t)}|{len(getattr(w, 'readback_traps', []))}").random() < r
+
+
+def _wrong(w, ac, ins: dict) -> Optional[dict]:
+    """The same clearance with a plausible wrong value (as a pilot mishears it), or None."""
+    import random
+    rnd = random.Random(f"{ac.callsign}|{int(w.t)}")
+    t = ins["type"]
+    if t == "altitude":
+        fl = int(ins["fl"]) + rnd.choice([10, -10, 20, -20])
+        return {**ins, "fl": fl} if 100 <= fl <= 460 else None
+    if t == "heading":
+        h = (int(ins["heading"]) + rnd.choice([10, -10, 20, 30]) - 1) % 360 + 1
+        return {**ins, "heading": h}
+    if t == "speed":
+        if ins.get("mach"):
+            return {**ins, "mach": round(ins["mach"] + rnd.choice([0.01, -0.01, 0.02]), 2)}
+        if ins.get("ias_kt"):
+            return {**ins, "ias_kt": int(ins["ias_kt"]) + rnd.choice([10, -10, 20])}
+        return None
+    if t == "direct":
+        ahead = [n for n in ac.route[ac.next_index:] if not n.startswith("@") and n != ins["waypoint"] and n in w.waypoints]
+        return {**ins, "waypoint": ahead[0]} if ahead else None
+    return None
+
+
+def _value(ins: dict) -> str:
+    t = ins["type"]
+    return (f"FL{int(ins['fl']):03d}" if t == "altitude" else f"heading {int(ins['heading']):03d}" if t == "heading"
+            else f"M.{int(round(ins['mach'] * 100))}" if t == "speed" and ins.get("mach")
+            else f"{ins.get('ias_kt')} kt" if t == "speed" else f"direct {ins.get('waypoint')}")
+
+
+def _new_trap(w, cs: str, ins: dict, wrong: dict, mode: str) -> dict:
+    traps = w.__dict__.setdefault("readback_traps", [])
+    tr = {"id": len(traps) + 1, "callsign": cs, "field": _FIELD[ins["type"]], "cleared": _value(ins), "said": _value(wrong),
+          "t": round(w.t, 1), "status": "open", "mode": mode, "instr": wrong}
+    traps.append(tr)
+    m = w.m.setdefault("readback", {"errors": 0, "caught": 0, "missed": 0})
+    m["errors"] += 1
+    return tr
+
+
+def solo_readback(w, ac, ins: dict):
+    """Solo radar: maybe a wrong read-back. Returns the clearance the pilot will fly (the wrong one, if so)."""
+    if ins["type"] not in _FIELD or not _hit(w, ac.callsign, ins["type"]):
+        return ins, None
+    if any(t["status"] == "open" and t["callsign"] == ac.callsign for t in getattr(w, "readback_traps", [])):
+        return ins, None
+    wrong = _wrong(w, ac, ins)
+    if wrong is None:
+        return ins, None
+    tr = _new_trap(w, ac.callsign, ins, wrong, "solo")
+    w._event("readback_error", callsign=ac.callsign, trap=tr["id"], cleared=tr["cleared"], said=tr["said"],
+             text=f"{ac.callsign} read back {tr['said']} (cleared {tr['cleared']})")
+    return wrong, tr
+
+
+def on_entry(w, cs: str, fields: dict) -> None:
+    """A new entry for the aircraft: an open solo read-back error on that field is caught (corrected); in an
+    exercise, maybe a prompt for the pseudo-pilot to read it back wrong."""
+    for tr in getattr(w, "readback_traps", []):
+        if tr["status"] == "open" and tr["mode"] == "solo" and tr["callsign"] == cs and fields.get(tr["field"]) not in (None, ""):
+            tr["status"] = "caught"
+            tr["closed_t"] = round(w.t, 1)
+            w.m.setdefault("readback", {"errors": 0, "caught": 0, "missed": 0})["caught"] += 1
+            w._event("readback_corrected", callsign=cs, trap=tr["id"], text=f"{cs} read-back error corrected ({tr['cleared']})")
+    if getattr(w, "multi", False) and not getattr(w, "auto_pilot", False) and getattr(w, "readback_rate", 0):
+        ac = w.aircraft.get(cs)
+        if ac is None or not ac.assumed:
+            return
+        for k, t in (("cfl", "altitude"), ("heading", "heading"), ("direct", "direct")):
+            v = fields.get(k)
+            if v in (None, "") or not _hit(w, cs, t):
+                continue
+            ins = {"type": t, "callsign": cs, **({"fl": int(v)} if t == "altitude" else {"heading": int(v)} if t == "heading"
+                                                 else {"waypoint": str(v).upper()})}
+            wrong = _wrong(w, ac, ins)
+            if wrong:
+                tr = _new_trap(w, cs, ins, wrong, "pilot")
+                w._event("readback_prompt", callsign=cs, trap=tr["id"], text=f"pseudo-pilot: read back {tr['said']} for {cs} (cleared {tr['cleared']})")
+                break
+
+
+def readback_result(w, trap_id: int, caught: bool, by: str = "") -> dict:
+    """The pseudo-pilot reports whether the controller caught the wrong read-back."""
+    tr = next((t for t in getattr(w, "readback_traps", []) if t["id"] == int(trap_id)), None)
+    if tr is None or tr["status"] != "open":
+        raise ValueError("no such open read-back error")
+    tr["status"] = "caught" if caught else "missed"
+    tr["closed_t"] = round(w.t, 1)
+    w.m.setdefault("readback", {"errors": 0, "caught": 0, "missed": 0})["caught" if caught else "missed"] += 1
+    w._event("readback_corrected" if caught else "readback_missed", callsign=tr["callsign"], trap=tr["id"], by=by,
+             text=f"{tr['callsign']} wrong read-back ({tr['said']} for {tr['cleared']}) " + ("caught" if caught else "missed"))
+    return tr
+
+
+def update(w) -> None:
+    """Every second: solo read-back errors not corrected in time are missed; old prompts close."""
+    for tr in getattr(w, "readback_traps", []):
+        if tr["status"] != "open":
+            continue
+        age = w.t - tr["t"]
+        if tr["mode"] == "solo" and age >= READBACK_WINDOW_S:
+            tr["status"], tr["closed_t"] = "missed", round(w.t, 1)
+            w.m.setdefault("readback", {"errors": 0, "caught": 0, "missed": 0})["missed"] += 1
+            w._event("readback_missed", callsign=tr["callsign"], trap=tr["id"],
+                     text=f"{tr['callsign']} wrong read-back not corrected: flying {tr['said']} (cleared {tr['cleared']})")
+        elif tr["mode"] == "pilot" and age >= PROMPT_EXPIRE_S:
+            tr["status"], tr["closed_t"] = "unreported", round(w.t, 1)
+
+
+def readback_view(w) -> dict:
+    return {"rate": float(getattr(w, "readback_rate", 0.0) or 0.0),
+            "traps": [{k: v for k, v in t.items() if k != "instr"} for t in getattr(w, "readback_traps", [])][-30:],
+            "counts": dict(w.m.get("readback", {"errors": 0, "caught": 0, "missed": 0}))}

@@ -541,6 +541,8 @@ def summarize_metrics(w) -> dict:
         "aircraft": (m.get("traffic") or {}).get("total", 0),
         "atc_entries": sum(1 for e in w.events if e.get("type") == "atc_entry"),
         "instructions": (m.get("instructions") or {}).get("issued", 0),
+        "readback_errors": (m.get("readback") or {}).get("errors", 0),
+        "readback_caught": (m.get("readback") or {}).get("caught", 0),
     }
 
 

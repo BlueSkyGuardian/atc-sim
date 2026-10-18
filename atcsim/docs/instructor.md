@@ -128,6 +128,7 @@ their panel.
 | **Emergency** | **Emergency descent** (squawk 7700, MAYDAY, the aircraft starts down to FL100), **medical** (7700, PAN PAN, then a request direct to an aerodrome: the one you type, else the nearest), **radio failure** (7600: no reply on the frequency, it flies its flight plan; CPDLC still works), **general** 7700 with your reason. The controller sees **EMG** or **RCF** and the squawk on the label. **Clear** ends it |
 | **Pilot request** | An aircraft asks now for a level, a direct, a speed, a weather deviation, or says something in your words (a report to acknowledge) |
 | **Areas** | Activates or deactivates an area until its next scheduled change |
+| **Read-backs** | Hearback training: about 1 clearance in 20, 10 or 5 is read back wrong. In an exercise the pseudo-pilot gets the prompt (read back FL360 instead of FL350, fly it unless corrected) and reports whether the controller caught it; on the solo radar the simulated pilot does it, and the controller has a minute to correct it (enter it again). The count, caught and missed, goes to the statistics |
 
 The pseudo-pilots read out the calls (MAYDAY, PAN PAN, requests) from their *To do*. Everything is logged, rewound
 with the timeline and kept through a restart.

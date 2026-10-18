@@ -332,7 +332,10 @@ def control(sid: str, body: Control):
 
 
 class LiveAction(BaseModel):
-    action: Literal["aircraft", "emergency", "clear_emergency", "request", "area"]
+    action: Literal["aircraft", "emergency", "clear_emergency", "request", "area", "readback_rate", "readback_result"]
+    rate: Optional[float] = None
+    trap: Optional[int] = None
+    caught: Optional[bool] = None
     callsign: Optional[str] = None
     type: Optional[str] = None
     fl: Optional[int] = None
@@ -378,6 +381,10 @@ def live_action(sid: str, body: LiveAction, request: Request):
                 return live.clear_emergency(w, body.callsign or "", by=who)
             if body.action == "request":
                 return live.request(w, body.callsign or "", body.kind or "", body.value, body.reason or "", by=who)
+            if body.action == "readback_rate":
+                return live.set_readback_rate(w, body.rate or 0.0, by=who)
+            if body.action == "readback_result":
+                return live.readback_result(w, body.trap or 0, bool(body.caught), by=who)
             return live.set_area(w, body.area or "", bool(body.active), by=who)
         except ValueError as e:
             raise HTTPException(400, str(e))

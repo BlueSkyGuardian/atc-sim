@@ -100,4 +100,52 @@ ok("POP2" in r.world.aircraft and r.world.aircraft["POP2"].active, "restart: the
 r.control("step", seconds=60)
 ok(r.world.aircraft["POP2"].active or r.world.aircraft["POP2"].status in ("exited",), "and flies on")
 r.stop()
+# ---- read-back errors
+ws = build_world(load_scenario("p02_wn_merges_and_climbs"))
+ws.multi, ws.auto_pilot = True, True
+for _ in range(5):
+    ws.step(1)
+live.set_readback_rate(ws, 0.5)
+acs = [c for c, x in ws.aircraft.items() if x.assumed][:6]
+trap = None
+for c in acs * 3:
+    a = ws.aircraft[c]
+    ws.enter(c, {"heading": (int(a.trk // 10) * 10 + 30) % 360 or 360})
+    trap = next((t for t in getattr(ws, "readback_traps", []) if t["status"] == "open"), None)
+    if trap:
+        break
+    ws.step(1)
+ok(trap is not None and trap["said"] != trap["cleared"], f"solo: a wrong read-back ({trap and trap['said']} for {trap and trap['cleared']})")
+ok(any("read back" in (e.get("text") or "") or e["type"] == "pilot_readback" for e in ws.events[-5:]), "it shows in the radio log")
+ws.enter(trap["callsign"], {"heading": int(trap["cleared"].split()[-1])})
+ok(trap["status"] == "caught" and ws.m["readback"]["caught"] == 1, "entered again: caught (corrected)")
+live.set_readback_rate(ws, 0.5)
+tr2 = None
+for c in acs * 3:
+    a = ws.aircraft[c]
+    if any(t["status"] == "open" and t["callsign"] == c for t in ws.readback_traps):
+        continue
+    ws.enter(c, {"heading": (int(a.trk // 10) * 10 + 40) % 360 or 360})
+    tr2 = next((t for t in ws.readback_traps if t["status"] == "open"), None)
+    if tr2:
+        break
+for _ in range(int(live.READBACK_WINDOW_S) + 2):
+    ws.step(1)
+ok(tr2 and tr2["status"] == "missed" and ws.metrics()["readback"]["missed"] >= 1, "not corrected within a minute: missed")
+# exercise: a prompt for the pseudo-pilot, who reports the outcome
+we = build_world(load_scenario("p02_wn_merges_and_climbs"))
+we.multi = True
+for _ in range(5):
+    we.step(1)
+live.set_readback_rate(we, 0.5)
+pr = None
+for c in [c for c, x in we.aircraft.items() if x.assumed] * 4:
+    we.enter(c, {"cfl": int(we.aircraft[c].alt_ft // 1000) * 10 - 20})
+    pr = next((t for t in getattr(we, "readback_traps", []) if t["status"] == "open"), None)
+    if pr:
+        break
+    we.step(1)
+ok(pr and pr["mode"] == "pilot" and pr in [t for t in we.readback_traps] and we.state()["readback_open"], "exercise: a read-back prompt on the pseudo-pilot's To do")
+live.readback_result(we, pr["id"], caught=False)
+ok(pr["status"] == "missed" and we.m["readback"]["missed"] == 1, "the pseudo-pilot reports it missed")
 print("live actions checks passed")
