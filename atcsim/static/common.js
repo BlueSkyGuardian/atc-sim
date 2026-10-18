@@ -41,9 +41,18 @@ async function header(cur) {
   h.innerHTML = `<div class="brand">ATC <span>SIM</span></div><nav>${links.map(([u, t]) => `<a href="${u}" class="${u === cur ? 'cur' : ''}">${t}</a>`).join('')}</nav>
     <div class="who"><span>${esc(ME.name)} · ${ROLE_NAMES[ME.role] || ME.role}${ME.licence ? ' · ' + esc(ME.licence) : ''}</span><button class="small" id="logout">Sign out</button></div>`;
   document.body.prepend(h);
+  if (cur !== '/help') ambientScene();
   $('#logout').onclick = async () => { await post('/auth/logout'); location.href = '/login'; };
   if (!ME.profile_complete && cur !== '/profile') { location.href = '/profile?first=1'; return new Promise(() => {}); }
   return ME;
+}
+// the slowly turning 3D CTA behind the dashboards (same scene as the sign-in page, without labels)
+function ambientScene() {
+  if (document.getElementById('scene')) return;
+  const c = document.createElement('canvas'); c.id = 'scene'; c.dataset.mode = 'ambient'; c.setAttribute('aria-hidden', 'true');
+  const s = document.createElement('div'); s.className = 'scene-scrim';
+  document.body.prepend(s); document.body.prepend(c);
+  const m = document.createElement('script'); m.type = 'module'; m.src = '/static/landing3d.js'; document.body.appendChild(m);
 }
 function modal(html, onReady) {
   const bg = document.createElement('div'); bg.className = 'modal-bg on';

@@ -45,11 +45,11 @@ def around(pg, cs, w=520, h=300, dx=-160, dy=-150):
 
 with sync_playwright() as p:
     br = p.chromium.launch(args=["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream",
-                                 "--autoplay-policy=no-user-gesture-required", "--use-angle=swiftshader",
-                                 "--enable-unsafe-swiftshader"])
+                                 "--autoplay-policy=no-user-gesture-required"])
 
     def person(email, first, last, lic):
-        ctx = br.new_context(viewport=VIEW, base_url=BASE, permissions=["microphone"])
+        # reduced motion: the 3D background is drawn once (software WebGL is slow in headless browsers)
+        ctx = br.new_context(viewport=VIEW, base_url=BASE, permissions=["microphone"], reduced_motion="reduce")
         pg = ctx.new_page()
         pg.goto("/login"); pg.fill("#email", email); pg.click("#devBtn")
         pg.wait_for_url("**/profile?first=1"); pg.wait_for_selector("#fn")
@@ -58,9 +58,11 @@ with sync_playwright() as p:
         return pg
 
     # ---------------------------------------------------------------- the sign-in page
-    lp = br.new_context(viewport=VIEW, base_url=BASE).new_page()
+    gl = p.chromium.launch(args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"])   # software WebGL: the sign-in scene
+    lp = gl.new_context(viewport=VIEW, base_url=BASE).new_page()
     lp.goto("/login"); lp.wait_for_timeout(5000)
     shot(lp, "landing")
+    gl.close()
 
     boss = person("boss@gmail.com", "Samira", "Idrissi", "ADM-1")
     ins = person("ins@gmail.com", "Youssef", "Benali", "MA-INS-12")
@@ -250,7 +252,7 @@ with sync_playwright() as p:
     # ---------------------------------------------------------------- instructor: monitor, dashboard
     ins.click("#asideTabs [data-t=monitor]"); ins.wait_for_timeout(1500)
     shot(ins, "i_monitor", "aside")
-    ins.goto("/"); ins.wait_for_selector(".thumb[data-id] canvas"); ins.wait_for_timeout(3000)
+    ins.goto("/"); ins.wait_for_selector(".thumb[data-id]", state="attached", timeout=90000); ins.wait_for_timeout(4000)
     shot(ins, "i_dashboard", region=[0, 0, VIEW["width"], 520])
     ins.goto(f"/x/{eid}"); ins.wait_for_function("() => typeof state !== 'undefined' && state && state.aircraft", timeout=30000)
     ins.wait_for_timeout(1500)

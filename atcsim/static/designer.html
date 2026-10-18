@@ -6,7 +6,7 @@
 <title>Scenario Designer</title>
 <style>
   :root {
-    --bg: #0b1016; --panel: #111922; --line: #1f2b38; --text: #c9d6e2; --dim: #6c7f92;
+    --bg: #0d1b2a; --panel: #13263a; --line: #27405a; --text: #dfe7ee; --dim: #93a7ba;
     --accent: #5fd3a3; --warn: #f2b84b; --alert: #ff5a5a; --sel: #7fb8ff; --req: #7fb8ff; --evt: #f2b84b; --wx: #d05ad0;
     --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   }
@@ -15,7 +15,7 @@
   #app { display: grid; grid-template-columns: 1fr 400px; grid-template-rows: 1fr 230px; height: 100vh; }
   #map { position: relative; overflow: hidden; grid-column: 1; grid-row: 1; }
   #map canvas { display: block; width: 100%; height: 100%; }
-  #tlWrap { grid-column: 1; grid-row: 2; border-top: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: #0d141c; }
+  #tlWrap { grid-column: 1; grid-row: 2; border-top: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: #0b1724; }
   #tlBar { display: flex; gap: 6px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
   #tlScroll { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
   #tl { display: block; width: 100%; cursor: col-resize; }
@@ -28,7 +28,7 @@
   .pane.on { display: block; }
   section { border-bottom: 1px solid var(--line); padding: 10px 12px; }
   h2 { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin: 0 0 8px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-  select, input, button, textarea { font: inherit; color: var(--text); background: #0d141c; border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; }
+  select, input, button, textarea { font: inherit; color: var(--text); background: #0b1724; border: 1px solid var(--line); border-radius: 4px; padding: 4px 7px; }
   textarea { width: 100%; font-family: var(--mono); font-size: 11.5px; resize: vertical; }
   button { cursor: pointer; } button:hover { border-color: var(--dim); }
   button.on { border-color: var(--accent); color: var(--accent); }
@@ -40,12 +40,12 @@
   .grid label { color: var(--dim); font-size: 12px; }
   .grid input, .grid select { width: 100%; }
   #tools { position: absolute; left: 10px; top: 10px; display: flex; flex-direction: column; gap: 4px; }
-  #tools button { width: 112px; text-align: left; background: #0d141cee; font-size: 12px; }
-  #hud { position: absolute; right: 10px; top: 8px; background: #0b1016dd; padding: 6px 9px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--dim); pointer-events: none; text-align: right; }
+  #tools button { width: 112px; text-align: left; background: #0b1724ee; font-size: 12px; }
+  #hud { position: absolute; right: 10px; top: 8px; background: #0d1b2add; padding: 6px 9px; border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 12px; color: var(--dim); pointer-events: none; text-align: right; }
   #hud b { color: var(--text); }
-  #hint { position: absolute; left: 132px; top: 10px; right: 260px; background: #0b1016dd; border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; font-size: 12px; color: var(--text); }
+  #hint { position: absolute; left: 132px; top: 10px; right: 260px; background: #0d1b2add; border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; font-size: 12px; color: var(--text); }
   #hint:empty { display: none; }
-  #status { position: absolute; left: 10px; bottom: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); background: #0b1016cc; padding: 2px 6px; border-radius: 3px; }
+  #status { position: absolute; left: 10px; bottom: 8px; font-family: var(--mono); font-size: 11px; color: var(--dim); background: #0d1b2acc; padding: 2px 6px; border-radius: 3px; }
   .item { font-family: var(--mono); font-size: 12px; padding: 4px 0; border-bottom: 1px dashed var(--line); cursor: pointer; }
   .item:hover { color: #fff; }
   .c-los { color: var(--alert); } .c-warn { color: var(--warn); } .c-dim { color: var(--dim); } .c-ok { color: var(--accent); }
@@ -56,6 +56,7 @@
   small.note { color: var(--dim); display: block; font-size: 11.5px; margin-top: 4px; }
   kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
 </style>
+<link rel="stylesheet" href="/static/theme.css">
 </head>
 <body>
 <div id="app">
@@ -890,7 +891,7 @@ function legArrows(pts, col) {          // direction arrows at the middle of eac
 const AREA_COL = { danger: '#e08a3c', restricted: '#e0c13c', prohibited: '#ff5a5a' };
 function draw() {
   const W = cv.width, H = cv.height, dpr = devicePixelRatio;
-  ctx.fillStyle = '#0b1016'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#0d1b2a'; ctx.fillRect(0, 0, W, H);
   if (!sector) { ctx.fillStyle = '#6c7f92'; ctx.font = `${14 * dpr}px system-ui`; ctx.textAlign = 'center'; ctx.fillText('Open a scenario or start a new one', W / 2, H / 2); ctx.textAlign = 'left'; return requestAnimationFrame(draw); }
   view.s = baseScale() * userZoom;
   const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };

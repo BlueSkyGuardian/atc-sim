@@ -10,10 +10,10 @@
   .tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 9px 14px; color: var(--dim); font-weight: 600; }
   .tabs button.on { color: var(--text); border-bottom-color: var(--accent); }
   .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: var(--depth); }
   .kpi .v { font: 700 26px var(--mono); color: var(--text); } .kpi .l { color: var(--dim); font-size: 12px; }
   .charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 14px; }
-  .chart { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; }
+  .chart { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; box-shadow: var(--depth); }
   .chart h3 { margin: 0 0 2px; font-size: 14px; } .chart .sub { color: var(--dim); font-size: 12px; margin-bottom: 8px; }
   .chart canvas { width: 100% !important; height: 260px !important; }
   .pane { display: none; } .pane.on { display: block; }
@@ -32,7 +32,7 @@
 <script>
 const C = { a: '#5fd3a3', b: '#7fb8ff', c: '#f2b84b', d: '#ff6b6b', e: '#d79bff', f: '#9ad0ff', g: '#c9d6e2', h: '#ffb36b' };
 const PAL = ['#5fd3a3', '#7fb8ff', '#f2b84b', '#d79bff', '#ff8a8a', '#9ae6e6', '#ffd166', '#b5e48c', '#f4a3c4', '#a0a8ff'];
-Chart.defaults.color = '#8a9bb0'; Chart.defaults.borderColor = '#1f2b38'; Chart.defaults.font.family = 'system-ui';
+Chart.defaults.color = '#93a7ba'; Chart.defaults.borderColor = '#27405a'; Chart.defaults.font.family = 'Archivo, system-ui';
 const charts = [];
 function chart(id, cfg) { const c = new Chart(document.getElementById(id), cfg); charts.push(c); return c; }
 const d8 = t => new Date(t * 1000).toLocaleDateString([], { day: '2-digit', month: 'short' });
@@ -111,7 +111,7 @@ function drawController(Cc, dims) {
     { label: 'assume (mean s)', data: s.map(x => x.metrics.assume_mean_delay_s), borderColor: C.a, backgroundColor: C.a, spanGaps: true, tension: .25 },
     { label: 'answer a request (mean s)', data: s.map(x => x.metrics.request_mean_response_s), borderColor: C.b, backgroundColor: C.b, spanGaps: true, tension: .25 }] }, options: lineOpts('seconds') });
   chart('cDims', { type: 'radar', data: { labels: dims.map(d => d.label), datasets: [{ label: 'average', data: dims.map(d => Cc.dims_avg[d.key]), borderColor: C.a, backgroundColor: '#5fd3a333' }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#1f2b38' }, angleLines: { color: '#1f2b38' } } } } });
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#27405a' }, angleLines: { color: '#27405a' } } } } });
 }
 
 function pilotPane(P, dims) {
@@ -126,7 +126,7 @@ function drawPilot(P, dims) {
     .concat(dims.map((d, k) => ({ label: d.label, data: P.ratings.map(r => r.scores[d.key]), borderColor: PAL[k + 1], backgroundColor: PAL[k + 1], borderWidth: 1.5 }))) },
     options: lineOpts('out of 5', { scales: { y: { min: 0, max: 5 } } }) });
   chart('pDims', { type: 'radar', data: { labels: dims.map(d => d.label), datasets: [{ label: 'average', data: dims.map(d => P.dims_avg[d.key]), borderColor: C.b, backgroundColor: '#7fb8ff33' }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#1f2b38' }, angleLines: { color: '#1f2b38' } } } } });
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 0, max: 5, ticks: { stepSize: 1, backdropColor: 'transparent' }, grid: { color: '#27405a' }, angleLines: { color: '#27405a' } } } } });
 }
 
 (async () => {

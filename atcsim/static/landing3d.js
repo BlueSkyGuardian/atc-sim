@@ -7,11 +7,19 @@ const C = { chart: 0x6fa8dc, magenta: 0xd1478f, dim: 0x3c5a78, paper: 0xe9eef2, 
 const FL_SCALE = 0.25;                 // world units per flight level (vertical exaggeration ~15x)
 const SPEED = 450 / 3600 * 55;         // NM per second of animation: 450 kt, 55x time compression
 const canvas = document.getElementById('scene');
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+// 'landing' (sign-in page) or 'ambient' (behind the dashboards: no labels, fewer aircraft, slower, centred)
+const AMBIENT = canvas.dataset.mode === 'ambient';
+let reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.75));
+renderer.setPixelRatio(AMBIENT ? 1 : Math.min(devicePixelRatio || 1, 1.75));   // behind the dashboards: light on the GPU
 renderer.setClearColor(0x0d1b2a, 1);
+// software WebGL (no GPU: SwiftShader, llvmpipe): behind the dashboards, one still frame instead of an animation
+try {
+  const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
+  const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+  if (AMBIENT && /swiftshader|llvmpipe|software/i.test(name)) reduce = true;
+} catch (e) { /* keep animating */ }
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x0d1b2a, 520, 1200);
 const camera = new THREE.PerspectiveCamera(38, 1, 1, 3000);
@@ -61,7 +69,7 @@ function buildMap() {
     const p = s.polygon.concat([s.polygon[0]]);
     scene.add(line(p.map(q => W(q, 0.4)), new THREE.LineDashedMaterial({ color: C.chart, dashSize: 4, gapSize: 4, transparent: true, opacity: 0.35 })));
     const cx = s.polygon.reduce((u, q) => u + q[0], 0) / s.polygon.length, cy = s.polygon.reduce((u, q) => u + q[1], 0) / s.polygon.length;
-    const t = textSprite(s.name, { size: 30, color: '#6fa8dc', alpha: 0.55, weight: 500, width: 50 }); t.position.copy(W([cx, cy], 6)); scene.add(t);
+    if (!AMBIENT) { const t = textSprite(s.name, { size: 30, color: '#6fa8dc', alpha: 0.55, weight: 500, width: 50 }); t.position.copy(W([cx, cy], 6)); scene.add(t); }
   }
   // airways (solid) and RAD routings (dashed magenta)
   const awM = new THREE.LineBasicMaterial({ color: 0x4f7aa3, transparent: true, opacity: 0.55 });
@@ -76,7 +84,7 @@ function buildMap() {
     'VASTO', 'KONBA', 'AKUDA', 'RUNAX', 'BAROK', 'KUBIL', 'OSDIV', 'NIPRI', 'DESUM', 'TAKAV', 'SUNID', 'DIMSA']);
   for (const [n, p] of Object.entries(geo.points)) {
     const m = new THREE.Mesh(tri, triM); m.position.copy(W(p, 0.5)); scene.add(m);
-    if (named.has(n)) { const t = textSprite(n, { size: 24, color: '#93a7ba', alpha: 0.8, weight: 500, width: 19 }); t.position.copy(W(p, 9)); scene.add(t); }
+    if (named.has(n) && !AMBIENT) { const t = textSprite(n, { size: 24, color: '#93a7ba', alpha: 0.8, weight: 500, width: 19 }); t.position.copy(W(p, 9)); scene.add(t); }
   }
 }
 
@@ -122,7 +130,7 @@ function newFlight(f, routes, fresh) {
   Object.assign(f, { segs, L, fl, s: fresh ? Math.random() * L : -Math.random() * 60, speed: SPEED * (0.9 + Math.random() * 0.25), trail: [] });
   const cs = OPS[Math.floor(Math.random() * OPS.length)] + (100 + Math.floor(Math.random() * 8900));
   if (f.label) { scene.remove(f.label); f.label.material.map.dispose(); }
-  f.label = textSprite(`${cs}  ${fl}`, { size: 24, color: '#e9eef2', alpha: 0.85, weight: 600, width: 30 }); scene.add(f.label);
+  f.label = textSprite(`${cs}  ${fl}`, { size: 24, color: '#e9eef2', alpha: 0.85, weight: 600, width: 30 }); f.label.visible = !AMBIENT; if (!AMBIENT) scene.add(f.label);
 }
 function at(f, s) {
   s = Math.max(0, Math.min(f.L, s));
@@ -145,10 +153,10 @@ function stepTraffic(dt) {
     f.s += f.speed * dt;
     if (f.s > f.L) { newFlight(f, f.routes, false); }
     const vis = f.s >= 0;
-    for (const o of [f.mesh, f.shadow, f.stalk, f.label, f.trailLine]) o.visible = vis;
+    for (const o of [f.mesh, f.shadow, f.stalk, f.trailLine]) o.visible = vis; f.label.visible = vis && !AMBIENT;
     if (!vis) continue;
     const [p, hdg] = at(f, f.s), v = W(p, f.fl);
-    f.mesh.position.copy(v); f.mesh.rotation.y = -hdg + Math.PI;
+    f.mesh.position.copy(v); f.mesh.rotation.y = -hdg;            // nose (-z) along the track: east +x, north -z
     f.shadow.position.copy(W(p, 0.7));
     f.stalk.geometry.setFromPoints([W(p, 0.7), v]);
     f.label.position.set(v.x + 13, v.y + 6, v.z);
@@ -163,20 +171,22 @@ function resize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
-  offsetX = w > 860 ? -w * 0.19 : 0;            // keep the map on the right of the text column on wide screens
+  offsetX = w > 860 && !AMBIENT ? -w * 0.19 : 0;            // keep the map on the right of the text column on wide screens
   if (offsetX) camera.setViewOffset(w, h, offsetX, 0, w, h); else camera.clearViewOffset();
   camera.updateProjectionMatrix();
 }
 function placeCamera() {
-  const r = innerWidth > 860 ? 640 : 760, el = 0.64;
+  const r = AMBIENT ? 600 : innerWidth > 860 ? 640 : 760, el = AMBIENT ? 0.5 : 0.64;
   camera.position.set(Math.sin(angle) * r * Math.cos(el), r * Math.sin(el), Math.cos(angle) * r * Math.cos(el));
   camera.lookAt(0, 20, 0);
 }
 let last = performance.now(), running = true;
+const MIN_FRAME_MS = AMBIENT ? 40 : 0;        // ~25 frames/s behind the dashboards
 function frame(now) {
+  if (now - last < MIN_FRAME_MS) { requestAnimationFrame(frame); return; }
   const dt = Math.min(0.1, (now - last) / 1000); last = now;
   if (running) {
-    angle += dt * 0.022;
+    angle += dt * (AMBIENT ? 0.012 : 0.022);
     stepTraffic(dt);
     for (const s of storms) { s.x += dt * 0.35; s.y += dt * 0.2; s.ph += dt * 0.6;
       s.m.position.copy(W([s.x, s.y], 0.6)); s.tower.position.x = s.m.position.x; s.tower.position.z = s.m.position.z;
@@ -192,7 +202,7 @@ addEventListener('resize', () => { resize(); if (reduce) { placeCamera(); render
 try {
   geo = await (await fetch('/api/landing')).json();
   await document.fonts.ready.catch(() => {});
-  buildMap(); buildStorms(); buildTraffic(innerWidth > 860 ? 26 : 14);
+  buildMap(); buildStorms(); buildTraffic(AMBIENT ? 16 : innerWidth > 860 ? 26 : 14);
   resize(); placeCamera();
   if (reduce) { stepTraffic(0); renderer.render(scene, camera); }
   else requestAnimationFrame(frame);

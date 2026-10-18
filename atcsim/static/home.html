@@ -6,14 +6,16 @@
 <link rel="stylesheet" href="/static/app.css">
 <style>
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
-  .thumb { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; cursor: pointer; transition: border-color .15s; }
-  .thumb:hover { border-color: var(--sel); }
-  .thumb canvas { display: block; width: 100%; height: 180px; background: #0b1016; }
+  .thumb { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; cursor: pointer; box-shadow: var(--depth);
+    transition: border-color .15s, transform .18s, box-shadow .18s; }
+  .thumb:hover { border-color: var(--chart); transform: translateY(-3px); box-shadow: var(--depth), 0 24px 40px -22px rgba(111, 168, 220, .45); }
+  .thumb canvas { display: block; width: 100%; height: 180px; background: #0b1724; }
   .thumb .bar { display: flex; gap: 6px; align-items: center; padding: 6px 9px; border-top: 1px solid var(--line); font-size: 12px; }
   .thumb .bar .t { font-family: var(--mono); color: var(--text); }
   .thumb .name { padding: 7px 9px 0; font-weight: 600; display: flex; justify-content: space-between; gap: 6px; }
   .thumb .who { padding: 0 9px 2px; font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .newcard { display: flex; align-items: center; justify-content: center; min-height: 250px; border-style: dashed; color: var(--dim); font-size: 15px; }
+  .newcard { display: flex; align-items: center; justify-content: center; min-height: 250px; border-style: dashed; border-color: #3d5d7d; color: var(--dim); font-size: 15px; }
+  .newcard:hover { color: var(--text); }
   .ex { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
   .ex + .ex { border-top: 1px solid var(--line); }
   .ev { padding: 12px 14px; margin-bottom: 10px; }
@@ -21,12 +23,12 @@
   .ev .sc { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 8px 0; font-size: 13px; }
   .ev .sc b { font-family: var(--mono); color: var(--accent); }
   .ev .cm { white-space: pre-wrap; background: var(--panel2); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; margin-top: 6px; }
-  .ev .ack { margin-top: 8px; padding-left: 10px; border-left: 2px solid #2f7a5f; }
-  .todo-ev { display: flex; align-items: center; gap: 12px; padding: 9px 14px; border: 1px solid #7a6a2a; background: #2a2412; border-radius: 6px; margin-bottom: 8px; }
+  .ev .ack { margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--chart); }
+  .todo-ev { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid #7a6a2a; background: rgba(42, 36, 18, .85); border-radius: 8px; margin-bottom: 8px; box-shadow: var(--depth); }
   .rate { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; align-items: center; margin: 10px 0; }
   .stars { display: inline-flex; gap: 3px; }
   .stars button { width: 32px; padding: 4px 0; font-family: var(--mono); }
-  .stars button.on { background: #1d4d3d; border-color: #2f7a5f; color: #e6fff4; }
+  .stars button.on { background: var(--magenta); border-color: var(--magenta); color: #fff; }
   .tx { color: #fff; background: #b32d2d; border-radius: 3px; padding: 0 5px; font-size: 10px; }
 </style>
 </head>
@@ -37,7 +39,7 @@
     <div class="card" style="padding:0" id="mineList"></div>
   </section>
   <section id="instr" style="display:none">
-    <h2>Live exercises <span class="dim" style="text-transform:none;letter-spacing:0;font-weight:400">click one to open it · status refreshes every 2 s</span></h2>
+    <h2>Live exercises <span class="dim" >click one to open it · status refreshes every 2 s</span></h2>
     <div class="grid" id="thumbs"></div>
   </section>
   <section id="evalSec" style="display:none">
@@ -47,11 +49,11 @@
     <div id="evalGiven"></div>
   </section>
   <section id="recSec">
-    <h2>Recordings <span class="grow"></span><label style="text-transform:none;letter-spacing:0;font-weight:400" class="dim"><input type="checkbox" id="showArch"> archived</label></h2>
+    <h2>Recordings <span class="grow"></span><label  class="dim"><input type="checkbox" id="showArch"> archived</label></h2>
     <div class="card"><table><thead><tr><th>Exercise</th><th>Scenario</th><th>Date</th><th>Length</th><th>Status</th><th></th></tr></thead><tbody id="recs"></tbody></table></div>
   </section>
   <section id="scnSec" style="display:none">
-    <h2>Scenarios <span class="grow"></span><a href="/designer" style="text-transform:none;letter-spacing:0;font-weight:400">open the designer →</a></h2>
+    <h2>Scenarios <span class="grow"></span><a href="/designer" >Open the designer</a></h2>
     <div class="card"><table><thead><tr><th>Scenario</th><th>Author</th><th>Complexity · density</th><th>Airspace</th><th>Access</th><th>Owner</th><th></th></tr></thead><tbody id="scns"></tbody></table></div>
   </section>
 </main>
@@ -77,25 +79,35 @@ function stca(pic, sep) {
   return worst;
 }
 function drawThumb(cv, ex) {
+  // a 2.5D view of the exercise, like the 3D chart: the sectors on a tilted ground plane, each aircraft at its level
+  // on a stalk above its ground position
   const o = outlines[ex.id], c = cv.getContext('2d'), dpr = devicePixelRatio, W = cv.clientWidth * dpr, H = cv.clientHeight * dpr;
   if (cv.width !== W) { cv.width = W; cv.height = H; }
-  c.fillStyle = '#0b1016'; c.fillRect(0, 0, W, H);
+  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b1724'); g.addColorStop(1, '#10233a');
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
   if (!o) return;
   const poly = o.controlled, xs = poly.map(p => p[0]), ys = poly.map(p => p[1]);
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2, cy = (Math.min(...ys) + Math.max(...ys)) / 2;
-  const half = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) / 2 + 20, s = Math.min(W, H) / (2 * half);
-  const P = (x, y) => [W / 2 + (x - cx) * s, H / 2 - (y - cy) * s];
-  const line = (pts, col, w) => { c.beginPath(); pts.forEach((p, i) => { const [x, y] = P(...p); i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.closePath(); c.strokeStyle = col; c.lineWidth = w * dpr; c.stroke(); };
-  for (const sc of o.sectors) line(sc, '#1f4a3a', 0.8);
-  if (o.outline) line(o.outline, '#2d4258', 1);
-  line(poly, '#4a6886', 1.4);
+  const hx = (Math.max(...xs) - Math.min(...xs)) / 2 + 15, hy = (Math.max(...ys) - Math.min(...ys)) / 2 + 15;
+  const TILT = 0.55, KZ = H / 1500;                       // ground squashed to 55 %, ~0.23 H for FL350
+  const s = Math.min(W / (2 * hx), (H * 0.78) / (2 * hy * TILT));
+  const G = (x, y) => [W / 2 + (x - cx) * s, H * 0.6 - (y - cy) * s * TILT];
+  const path = (pts, close) => { c.beginPath(); pts.forEach((p, i) => { const [x, y] = G(...p); i ? c.lineTo(x, y) : c.moveTo(x, y); }); if (close) c.closePath(); };
+  if (o.outline) { path(o.outline, true); c.strokeStyle = '#27405a'; c.lineWidth = dpr; c.stroke(); }
+  path(poly, true); c.fillStyle = 'rgba(111,168,220,0.06)'; c.fill(); c.strokeStyle = '#6fa8dc'; c.lineWidth = 1.3 * dpr; c.stroke();
+  c.setLineDash([3 * dpr, 3 * dpr]);
+  for (const sc of o.sectors) { path(sc, true); c.strokeStyle = 'rgba(111,168,220,0.35)'; c.lineWidth = 0.8 * dpr; c.stroke(); }
+  c.setLineDash([]);
   const los = new Set((ex.losses || []).flat()), st = new Set(ex._stca || []);
   c.font = `${8.5 * dpr}px ui-monospace,monospace`;
-  for (const a of ex.picture || []) {
-    const [x, y] = P(a[1], a[2]);
-    const col = los.has(a[0]) ? '#ff5a5a' : st.has(a[0]) ? '#f2b84b' : a[4] > 0 ? '#5fd3a3' : a[4] === 0 ? '#ffffff' : '#6f8191';
-    const r = a[6] * Math.PI / 180, L = a[5] / 30, [vx, vy] = P(a[1] + Math.sin(r) * L, a[2] + Math.cos(r) * L);
-    c.strokeStyle = col; c.lineWidth = 1 * dpr; c.beginPath(); c.moveTo(x, y); c.lineTo(vx, vy); c.stroke();
+  const pics = (ex.picture || []).slice().sort((p, q) => q[2] - p[2]);   // far (north) first
+  for (const a of pics) {
+    const [gx, gy] = G(a[1], a[2]), z = a[3] * KZ, x = gx, y = gy - z;
+    const col = los.has(a[0]) ? '#ff6464' : st.has(a[0]) ? '#f2b84b' : a[4] > 0 ? '#5fd3a3' : a[4] === 0 ? '#ffffff' : '#8fa3b6';
+    c.strokeStyle = 'rgba(127,196,232,0.28)'; c.lineWidth = dpr; c.beginPath(); c.moveTo(gx, gy); c.lineTo(x, y); c.stroke();
+    c.fillStyle = 'rgba(127,196,232,0.45)'; c.beginPath(); c.ellipse(gx, gy, 1.8 * dpr, 0.9 * dpr, 0, 0, 7); c.fill();
+    const r = a[6] * Math.PI / 180, L = a[5] / 30, [vx, vy] = G(a[1] + Math.sin(r) * L, a[2] + Math.cos(r) * L);
+    c.strokeStyle = col; c.beginPath(); c.moveTo(x, y); c.lineTo(vx, vy - z); c.stroke();
     c.fillStyle = col; c.fillRect(x - 2 * dpr, y - 2 * dpr, 4 * dpr, 4 * dpr);
     if (W > 250 * dpr) c.fillText(String(a[3]).padStart(3, '0'), x + 4 * dpr, y - 3 * dpr);
   }

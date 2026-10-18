@@ -908,6 +908,7 @@ atcsim/docs_gen.py               generated documentation: reference tables, refe
 atcsim/docs/*.md, static/help.html, vendor/marked.min.js   in-app documentation (Markdown, rendered with marked 12, MIT)
 atcsim/static/docs/*.jpg         screenshots in the manuals (python tools/doc_screenshots.py <server>: three browsers through an exercise)
 atcsim/static/login.html, landing3d.js, vendor/three.module.min.js   sign-in page with the 3D Agadir CTA (three.js 0.160, MIT)
+atcsim/static/app.css, theme.css, fonts.css   night-chart theme: dashboards (app.css, with the 3D CTA behind them), radar seats and designer chrome (theme.css); Archivo self-hosted (vendor/fonts, SIL OFL)
 Dockerfile, deploy/              internet deployment (Docker + Caddy HTTPS)
 scenarios/*.json                 scenario library
 tools/build_scenarios.py         scenario generator + trap/solution verification (python tools/build_scenarios.py a02 s16 ...)

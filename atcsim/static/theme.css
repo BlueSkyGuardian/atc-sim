@@ -1,0 +1,49 @@
+/* Night-chart theme for the working pages (radar seats, scenario designer), loaded after their own styles.
+   The scope keeps its own colours (⚙ Display); this styles the chrome: toolbar, panels, floating windows, menus.
+   Panels float over the scope as layered glass, so the picture stays visible behind them. */
+@import url("/static/fonts.css");
+:root {
+  --bg: #0d1b2a; --panel: #13263a; --line: #27405a; --text: #dfe7ee; --dim: #93a7ba;
+  --sel: #8cc0ee; --chart: #6fa8dc; --magenta: #d1478f;
+  --sans: "Archivo", system-ui, sans-serif;
+  --depth: inset 0 1px 0 rgba(255, 255, 255, .05), 0 1px 2px rgba(0, 0, 0, .4), 0 20px 44px -18px rgba(0, 0, 0, .8);
+  --glass: blur(10px) saturate(1.15);
+}
+html, body { font-family: var(--sans); }
+:focus-visible { outline: 2px solid var(--chart); outline-offset: 1px; }
+select, input, button, textarea { border-radius: 6px; transition: border-color .12s, background .12s; }
+input:focus, select:focus, textarea:focus { border-color: var(--chart); outline: none; box-shadow: 0 0 0 3px rgba(111, 168, 220, .16); }
+button:hover { border-color: #3d5d7d; }
+button.on { border-color: var(--chart) !important; color: var(--sel) !important; background: rgba(111, 168, 220, .10) !important; }
+button.primary, .dk-ctl button.go { background: var(--magenta) !important; border-color: var(--magenta) !important; color: #fff !important; font-weight: 600;
+  box-shadow: 0 6px 16px -8px rgba(209, 71, 143, .85); }
+button.primary:hover, .dk-ctl button.go:hover { filter: brightness(1.08); }
+
+/* side panels: a deep glass column */
+aside { background: linear-gradient(180deg, rgba(19, 38, 58, .97), rgba(15, 31, 48, .97)) !important; border-left-color: var(--line) !important;
+  box-shadow: -14px 0 30px -18px rgba(0, 0, 0, .8); }
+aside section, aside .pane section { border-bottom-color: #1d3249 !important; }
+aside h2, #app > aside h2 { font-size: 12.5px !important; letter-spacing: 0 !important; text-transform: none !important; color: #c6d3df !important; font-weight: 650 !important; }
+#asideTabs, #tabs { background: rgba(13, 27, 42, .9) !important; backdrop-filter: var(--glass); }
+#asideTabs button.on, #tabs button.on { border-bottom-color: var(--magenta) !important; color: var(--text) !important; }
+
+/* everything that floats over the scope / map */
+.win, #lblMenu, #dispPanel, #phonePanel, .callbox, #busy .box, #hud, #hint, #pauseBanner {
+  background: rgba(16, 33, 51, .88) !important; backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass);
+  border-color: #33557a !important; border-radius: 10px !important; box-shadow: var(--depth) !important; }
+.win .wh { background: linear-gradient(180deg, rgba(111, 168, 220, .10), rgba(111, 168, 220, 0)); border-bottom-color: #2a4767 !important; border-radius: 10px 10px 0 0; }
+.win th { background: rgba(16, 33, 51, .98) !important; }
+.win pre { background: rgba(8, 18, 29, .85) !important; }
+.callbox.ring { border-color: #f2b84b !important; }
+.callbox.act { border-color: #5a8a3b !important; }
+#lblMenu { border-color: #4a77a3 !important; }
+#viewbar button, #viewbar select, #viewbar input, #viewbar label, #utcClock, #ptt .k, #phoneBtn, #tools button {
+  background: rgba(13, 27, 42, .78) !important; backdrop-filter: blur(6px); border-color: #2c4866 !important; border-radius: 6px !important;
+  box-shadow: 0 6px 14px -10px rgba(0, 0, 0, .9); }
+#viewbar button.on { border-color: var(--chart) !important; color: var(--sel) !important; background: rgba(28, 56, 86, .85) !important; }
+#ptt .k.tx { background: #b32d2d !important; border-color: #ff6b6b !important; }
+.todo, .pl { border-radius: 8px !important; background: rgba(13, 27, 42, .55); }
+.dk-now, .dk-lim { border-radius: 8px !important; }
+#tlWrap { background: #0b1724 !important; }
+#tlBar { background: rgba(19, 38, 58, .9); }
+@media (prefers-reduced-motion: reduce) { select, input, button, textarea { transition: none; } }
