@@ -92,12 +92,34 @@
     const b = document.getElementById('mtBtn');
     if (b) { b.textContent = !mtcdOn ? 'MTCD off' : list.length ? `MTCD ${list.length}` : 'MTCD on'; b.classList.toggle('on', mtcdOn); b.classList.toggle('hit', mtcdOn && list.length > 0); }
     if (!isOpen('mtWin') || !mtcdOn) return;
-    const el = win('mtWin', `MTCD <span class="c-dim" style="font-weight:400">conflicts in the next 20 min · system trajectories</span>`, 60, 50, 380);
-    const body = el.querySelector('.wb');
+    const look = Math.round(((state && state.mtcd_look_s) || 1200) / 60);
+    const el = win('mtWin', `MTCD <span class="c-dim" style="font-weight:400">conflicts in the next ${look} min · system trajectories</span>`, 60, 50, 380);
+    const wb = el.querySelector('.wb');
+    if (!wb.querySelector('.mtl')) {                 // built once: the look-ahead field keeps its focus across refreshes
+      const can = SEAT === 'atc' || SEAT === 'instructor';
+      wb.innerHTML = `<div class="mtla"><label for="mtLook">Look-ahead</label>
+        <button class="small" data-la="-5" title="5 min less" ${can ? '' : 'disabled'}>−</button><input id="mtLook" type="number" min="5" max="60" step="5" ${can ? '' : 'disabled title="the controller or the instructor sets it"'}><button class="small" data-la="5" title="5 min more" ${can ? '' : 'disabled'}>+</button>
+        <span class="c-dim">min</span><span class="c-dim mtmsg"></span></div><div class="mtl"></div>`;
+      const inp = wb.querySelector('#mtLook'), msg = wb.querySelector('.mtmsg');
+      const send = async v => {
+        v = Math.max(5, Math.min(60, Math.round(+v)));
+        if (!isFinite(v)) return;
+        inp.value = v; msg.textContent = '…';
+        try { const r = await api(`/sessions/${SID}/mtcd/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ look_ahead_min: v }) });
+          if (state) { state.mtcd_look_s = r.look_ahead_s; state.mtcd = r.conflicts; } msg.textContent = ''; renderMtcd(); }
+        catch (e) { msg.textContent = e.message; }
+      };
+      inp.onchange = () => send(inp.value);
+      inp.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') { send(inp.value); inp.blur(); } if (e.key === 'Escape') inp.blur(); };
+      wb.querySelectorAll('[data-la]').forEach(b => b.onclick = () => send((+inp.value || look) + +b.dataset.la));
+    }
+    const inp = wb.querySelector('#mtLook');
+    if (document.activeElement !== inp) inp.value = look;
+    const body = wb.querySelector('.mtl');
     const html = list.length ? list.map(c => { const k = c.aircraft.join('|');
       return `<div class="mt ${mtFocus === k ? 'on' : ''}" data-k="${k}"><b>${c.aircraft.join(' × ')}</b> in ${Math.floor(c.time_to_conflict_s / 60)}' · min ${c.min_horizontal_nm} NM / ${c.vertical_ft} ft
         <small>FL${c.levels[0]} / FL${c.levels[1]} at the start · ${Math.round(c.duration_s / 60) || '<1'} min long · min ${c.required_horizontal_nm} NM / ${c.required_vertical_ft} ft${c.current ? ' · <b>now</b>' : ''}</small></div>`; }).join('')
-      : '<div class="empty">No medium-term conflict between the system trajectories (cleared levels as entered, routes, headings and directs entered).</div>';
+      : `<div class="empty">No medium-term conflict in the next ${look} min between the system trajectories (cleared levels as entered, routes, headings and directs entered).</div>`;
     if (body.dataset.h !== html) { body.innerHTML = html; body.dataset.h = html;
       body.querySelectorAll('[data-k]').forEach(d => d.onclick = () => { mtFocus = mtFocus === d.dataset.k ? null : d.dataset.k; selected = mtFocus ? d.dataset.k.split('|')[0] : selected; body.dataset.h = ''; renderMtcd(); }); }
   }

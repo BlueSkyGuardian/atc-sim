@@ -216,18 +216,23 @@ Every aircraft has an ICAO flight plan, correlated with its track by the SSR cod
 
 ### MTCD (medium-term conflict detection)
 
-Turn it on with the *MTCD* button or <kbd>M</kbd>. It is off by default. MTCD looks **20 minutes** ahead along the
+Turn it on with the *MTCD* button or <kbd>M</kbd>. It is off by default. MTCD looks ahead (**20 minutes** unless you
+change the look-ahead) along the
 **system trajectories**: the flight-plan route, or the heading / direct / route you entered, at the system cleared
 level. It warns well before the STCA and finds conflicts you have not yet cleared into.
 
 ![MTCD on: the conflict list (top left), the violet diamonds and MTCn' tags, and where both aircraft will be when the conflict starts](/static/docs/c_mtcd.jpg "MTCD on: the conflict list (top left), the violet diamonds and MTCn' tags, and where both aircraft will be when the conflict starts")
 
+- **Look-ahead**: at the top of the MTCD window, from 5 to 60 minutes. Type a value and press <kbd>Enter</kbd>, or
+  use − / + (5 minutes each). It is a setting of the exercise: the instructor's MTCD follows yours, and the
+  instructor can change it too. A short look-ahead keeps the list to what needs action now in dense traffic; a
+  long one helps plan the oceanic crossings early.
 - The list shows each pair, the time to the conflict, and the minimum distance and level difference.
 - Click a conflict (or select one of its aircraft) to see where both will be when it starts. Drag that label away
   if it is in the way.
 - The aircraft gets a violet diamond and `MTCn'` in its label.
 
-The **level probe** in the level menus uses the same trajectories: green levels are clear for 20 minutes, red ones
+The **level probe** in the level menus uses the same trajectories: green levels are clear over the look-ahead, red ones
 are not (hover to see with whom).
 
 ### Range and bearing lines (RBL)

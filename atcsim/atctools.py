@@ -20,7 +20,8 @@ from .aircraft import level_parity_ok
 from .flightplan import fields, hhmm
 from .geometry import bearing, dist
 
-MTCD_LOOK_S = 1200.0
+MTCD_LOOK_S = 1200.0       # default look-ahead; each exercise can set its own (look_ahead / set_look_ahead)
+MTCD_LOOK_MIN_S, MTCD_LOOK_MAX_S = 300.0, 3600.0
 MTCD_STEP_S = 20.0
 RVSM_LO, RVSM_HI = 29000.0, 41000.0
 RDEV_NM = 3.0            # route adherence: further than this from the flight-plan route, with no cleared deviation
@@ -225,9 +226,24 @@ def _pairs(w, acs, tr, times, only: Optional[str] = None) -> List[dict]:
     return res
 
 
-def mtcd(w, look_s: float = MTCD_LOOK_S, step_s: float = MTCD_STEP_S) -> List[dict]:
-    """Medium-term conflicts between the system trajectories, cached for 8 simulated seconds."""
-    key = (int(w.t // 8), id(w.entries), sum(len(e) for e in w.entries.values()), len(w.entries),
+def look_ahead(w) -> float:
+    """The exercise's MTCD look-ahead in seconds (set by the controller or the instructor; 20 min by default)."""
+    return float(getattr(w, "mtcd_look_s", MTCD_LOOK_S))
+
+
+def set_look_ahead(w, seconds: float) -> float:
+    s = float(seconds)
+    if not MTCD_LOOK_MIN_S <= s <= MTCD_LOOK_MAX_S:
+        raise ValueError(f"MTCD look-ahead must be between {int(MTCD_LOOK_MIN_S // 60)} and {int(MTCD_LOOK_MAX_S // 60)} minutes")
+    w.mtcd_look_s = s
+    w._mtcd_cache = None
+    return s
+
+
+def mtcd(w, look_s: Optional[float] = None, step_s: float = MTCD_STEP_S) -> List[dict]:
+    """Medium-term conflicts between the system trajectories over the look-ahead, cached for 8 simulated seconds."""
+    look_s = look_ahead(w) if look_s is None else look_s
+    key = (int(w.t // 8), look_s, id(w.entries), sum(len(e) for e in w.entries.values()), len(w.entries),
            tuple(sorted((k, e.get("t")) for k, e in w.entries.items())))
     cache = getattr(w, "_mtcd_cache", None)
     if cache and cache[0] == key:
@@ -240,13 +256,14 @@ def mtcd(w, look_s: float = MTCD_LOOK_S, step_s: float = MTCD_STEP_S) -> List[di
 
 
 def probe(w, callsign: str, cfl=None, heading=None, direct=None, levels: Optional[List[int]] = None) -> dict:
-    """What-if for one aircraft: the conflicts it would have with another level / heading / direct (20 minutes)."""
+    """What-if for one aircraft: the conflicts it would have with another level / heading / direct (over the
+    exercise's MTCD look-ahead)."""
     cs = callsign.upper()
     a = w.aircraft.get(cs)
     if a is None or not a.active:
         raise ValueError(f"{cs} is not on the picture")
     acs = _candidates(w)
-    times = np.arange(0.0, MTCD_LOOK_S + 1e-6, MTCD_STEP_S)
+    times = np.arange(0.0, look_ahead(w) + 1e-6, MTCD_STEP_S)
     base = _trajectories(w, acs, times)
     out = {"callsign": cs}
 

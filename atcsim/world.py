@@ -1513,6 +1513,7 @@ class World:
             "sim_time_s": round(self.t, 1),
             "utc": atctools.utc(self),
             "mtcd": atctools.mtcd(self),
+            "mtcd_look_s": atctools.look_ahead(self),
             "special": atctools.special_tracks(self),
             "system_cfl": atctools.system_cfls(self),
             "coord": oldi.coord_view(self),

@@ -73,6 +73,27 @@ w.enter("AFR452", {"cfl": 360})
 w._mtcd_cache = None
 ok(not any(set(c["aircraft"]) == {"RAM201", "AFR452"} for c in atctools.mtcd(w)), "MTCD uses the level the controller entered")
 
+# MTCD look-ahead: set per exercise, shortens or widens the list, bounded 5-60 min
+w = build_world(load_scenario("s01_basic_crossing"))
+w.multi = True
+for _ in range(120):
+    w.step(1)
+c20 = [c for c in atctools.mtcd(w) if set(c["aircraft"]) == {"RAM201", "AFR452"}]
+t = c20[0]["time_to_conflict_s"]
+short = max(300, (int(t) // 60 - 1) * 60)
+atctools.set_look_ahead(w, short)
+ok(atctools.look_ahead(w) == short and not any(set(c["aircraft"]) == {"RAM201", "AFR452"} for c in atctools.mtcd(w))
+   and w.state()["mtcd_look_s"] == short, f"MTCD look-ahead {short // 60} min hides the conflict {t // 60:.0f} min away")
+atctools.set_look_ahead(w, 2400)
+ok(any(set(c["aircraft"]) == {"RAM201", "AFR452"} for c in atctools.mtcd(w)) and all(c["time_to_conflict_s"] <= 2400 for c in atctools.mtcd(w)),
+   "MTCD look-ahead 40 min shows it again")
+for bad in (60, 7200):
+    try:
+        atctools.set_look_ahead(w, bad); ok(False, f"look-ahead {bad} s refused")
+    except ValueError:
+        pass
+ok(atctools.look_ahead(w) == 2400, "out-of-range look-ahead refused, setting kept")
+
 # special tracks: level bust, route deviation (connected exercise)
 w = build_world(load_scenario("s10_busy_mixed"))
 w.multi = True

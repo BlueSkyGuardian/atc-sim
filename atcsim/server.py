@@ -503,16 +503,36 @@ class MtcdProbe(BaseModel):
 
 @app.get("/sessions/{sid}/mtcd")
 def mtcd_list(sid: str):
-    """Medium-term conflict detection: conflicts between the system trajectories over the next 20 minutes."""
+    """Medium-term conflict detection: conflicts between the system trajectories over the exercise's look-ahead
+    (20 minutes unless changed with POST /sessions/{sid}/mtcd/settings)."""
     from . import atctools
     s = _session(sid)
     with s.lock:
-        return {"utc": atctools.utc(s.world), "look_ahead_s": atctools.MTCD_LOOK_S, "conflicts": atctools.mtcd(s.world)}
+        return {"utc": atctools.utc(s.world), "look_ahead_s": atctools.look_ahead(s.world), "conflicts": atctools.mtcd(s.world)}
+
+
+class MtcdSettings(BaseModel):
+    look_ahead_min: float
+
+
+@app.post("/sessions/{sid}/mtcd/settings")
+def mtcd_settings(sid: str, body: MtcdSettings):
+    """Set the MTCD look-ahead of this exercise, in minutes (5 to 60). Every seat's MTCD (list, tags, conflict
+    display) and the what-if probes then look that far ahead. Controller or instructor."""
+    from . import atctools
+    s = _session(sid)
+    with s.lock:
+        try:
+            v = atctools.set_look_ahead(s.world, body.look_ahead_min * 60)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"look_ahead_s": v, "conflicts": atctools.mtcd(s.world)}
 
 
 @app.post("/sessions/{sid}/mtcd")
 def mtcd_probe(sid: str, body: MtcdProbe):
-    """What-if probe for one aircraft: conflicts with another cleared level, heading or direct (20 minutes);
+    """What-if probe for one aircraft: conflicts with another cleared level, heading or direct (over the MTCD
+    look-ahead);
     "levels": [...] checks a list of levels at once (the label menu colours them)."""
     from . import atctools
     s = _session(sid)

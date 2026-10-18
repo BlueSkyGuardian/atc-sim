@@ -136,7 +136,8 @@ Entries drive the labels, MTCD, route adherence and OLDI. An empty string clears
 |---|---|---|
 | GET | `/sessions/{id}/separation` | Current pairs, **predicted conflicts** (flying the full pilot model, weather included), area infringements and weather penetrations ahead |
 | POST | `/sessions/{id}/probe` | What-if: `{"instructions": [...], "horizon_s": 600}`. Runs the candidate clearances on a copy and returns the conflicts they would create or solve. Changes nothing |
-| GET | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories over 20 min |
+| GET | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories over the look-ahead (`look_ahead_s`, 20 min by default) |
+| POST | `/sessions/{id}/mtcd/settings` | Set the exercise's MTCD look-ahead: `{"look_ahead_min": 30}`, 5 to 60. Controller or instructor. Also used by the probes; the state carries it as `mtcd_look_s` |
 | POST | `/sessions/{id}/mtcd` | Probe one aircraft: `{"callsign", "cfl"}` / `"heading"` / `"direct"`, or `{"callsign", "levels": [310, 330, 350]}` for the level-probe colours |
 | GET | `/sessions/{id}/oldi?since=&callsign=` | OLDI messages (ABI, ACT, REV, PHONE; sent / received; LAM) and each aircraft's cleared, exit and coordinated levels |
 | GET | `/sessions/{id}/flightplans` · `/flightplans/{cs}` | Every flight plan · one: FPL message, decoded items, estimates over the points ahead, coordination, correlation |
@@ -199,7 +200,7 @@ In a connected exercise:
 | Seat | May |
 |---|---|
 | **instructor** | Everything on the session, including control |
-| **atc** | Read everything; `entries`, assume / release, MTCD probe. Instructions do not move aircraft (the pilot executes) |
+| **atc** | Read everything; `entries`, assume / release, MTCD probe and look-ahead. Instructions do not move aircraft (the pilot executes) |
 | **pilot** | Read everything; instructions (the aircraft executes them whether or not the controller assumed it), MTCD probe |
 
 The WebSocket `/sessions/{id}/comms` carries the radio and telephone audio (16 kHz G.711 μ-law). It is used by the

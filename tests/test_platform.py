@@ -130,6 +130,12 @@ ok(r["status"] != "rejected", f"pilot executes before the controller assumed ({r
 ok(pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "assume"}).status_code == 403, "pilot cannot assume")
 r = atc.post(f"/sessions/{eid}/assume/{cs}"); print(r.text); ok(r.status_code == 200, "controller assumes")
 ok(pil.post(f"/sessions/{eid}/control", json={"action": "pause"}).status_code == 403, "pilot cannot pause")
+r = atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 35})
+ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sessions/{eid}/mtcd").json()["look_ahead_s"] == 2100,
+   "controller sets the MTCD look-ahead (35 min), every seat sees it")
+ok(atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 90}).status_code == 400, "MTCD look-ahead over 60 min refused")
+ok(pil.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 10}).status_code == 403, "pilot cannot change the MTCD look-ahead")
+ok(ins.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 20}).status_code == 200, "instructor resets it to 20 min")
 ok(pil.post(f"/sessions/{eid}/release/{cs}").status_code == 403, "pilot cannot decontrol")
 ok(atc.post(f"/sessions/{eid}/release/{cs}").status_code == 200, "controller decontrols by hand")
 snap = atc.get(f"/sessions/{eid}/aircraft/{cs}").json()

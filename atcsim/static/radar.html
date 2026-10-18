@@ -105,6 +105,11 @@
   .win input.flt { width: 100%; margin-bottom: 6px; font-family: var(--mono); text-transform: uppercase; }
   .win .mt { padding: 5px 6px; border: 1px solid var(--line); border-left: 3px solid #8a5fd0; border-radius: 4px; margin-bottom: 5px; cursor: pointer; font-family: var(--mono); }
   .win .mt:hover, .win .mt.on { background: #1a1630; }
+  .win .mtla { display: flex; align-items: center; gap: 5px; margin: 0 0 8px; font-size: 12px; }
+  .win .mtla label { margin-right: 3px; }
+  .win .mtla input { width: 54px; text-align: center; font-family: var(--mono); }
+  .win .mtla button { min-width: 24px; }
+  .win .mtla .mtmsg { margin-left: 6px; color: #ff8a8a; }
   .win .mt small { display: block; color: var(--dim); font-family: system-ui; }
   .win kbd { font: 600 11px var(--mono); background: #1a2633; border: 1px solid #2c3e50; border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; color: #e6eef5; }
   .win .keys { display: grid; grid-template-columns: 120px 1fr; gap: 4px 10px; align-items: center; }
@@ -242,7 +247,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the next 20 minutes (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
