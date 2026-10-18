@@ -1,7 +1,7 @@
 // Connected exercise (/x/<id>): the controller's, pseudo-pilot's and instructor's seats on top of the radar page.
 // Uses the radar page's globals (state, sector, SID, SEAT, EXID, selected, api, attach, ...).
 (function () {
-  if (!EXID) return;
+  if (!EXID || DBID) return;
   const allAc = () => state ? state.aircraft.concat(state.transferred || []) : [];   // incl. those gone to the next sectors
   const SEATN = { instructor: 'Instructor', atc: 'Controller', pilot: 'Pseudo-pilot' };
   const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -45,7 +45,7 @@
     if (ws) { try { ws.onclose = null; ws.close(); } catch (e) {} }
     const b = $('#pauseBanner'); b.style.display = 'block'; b.style.color = '#c9d6e2';
     b.innerHTML = 'This exercise has ended. ' + `<a href="/debrief/${EXID}" style="pointer-events:auto;color:#7fb8ff;font-weight:700">Debrief</a> · ` + (EXINFO && EXINFO.solo ? '<a href="/stats" style="pointer-events:auto;color:#7fb8ff">Your statistics</a> · <a href="/solo" style="pointer-events:auto;color:#7fb8ff">Another scenario</a> · '
-      : SEAT === 'pilot' ? '' : '<a href="/#evaluations" style="pointer-events:auto;color:#7fb8ff">Evaluate it</a> · ') +
+      : SEAT === 'pilot' ? '' : `<a href="/#evaluations/${EXID}" style="pointer-events:auto;color:#7fb8ff">Evaluation</a> · `) +
       '<a href="/" style="pointer-events:auto;color:#7fb8ff">Home</a>';
     b.style.pointerEvents = 'auto';
   }
@@ -626,8 +626,8 @@
       $('#exMsg').textContent = aw.checked ? 'simulated pilots deviate around weather by themselves' : 'aircraft deviate only when a pseudo-pilot makes them'; } catch (e) { $('#exMsg').textContent = e.message; } };
     setInterval(() => { if (aw && state && state.session && document.activeElement !== aw) aw.checked = state.session.auto_wx !== false; }, 2000);
     $('#endBtn').onclick = async () => {
-      if (!confirm('End this exercise for everybody? The recording (radar + all audio) is then turned into an .mp4 on the home page.')) return;
-      try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); showEnded(); setTimeout(() => location.href = '/#evaluations', 1500); } catch (e) { $('#exMsg').textContent = e.message; }
+      if (!confirm('End this exercise for everybody? You then go to its debrief; the recording (radar + all audio) is turned into an .mp4 on the home page.')) return;
+      try { await api(`/api/exercises/${EXID}/end`, { method: 'POST' }); showEnded(); setTimeout(() => location.href = `/debrief/${EXID}`, 1200); } catch (e) { $('#exMsg').textContent = e.message; }
     };
     renderMembers();
     setInterval(async () => { try { const d = await api(`/api/exercises/${EXID}`); EXINFO.members = d.members; renderMembers(); } catch (e) {} }, 6000);

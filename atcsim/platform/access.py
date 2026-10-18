@@ -44,7 +44,17 @@ class _Req:                      # minimal request-like view of an ASGI scope fo
 def seat_for(sid: str, user: dict) -> Optional[str]:
     if config.AUTH == "off" or user.get("id") == 0:
         return "instructor"
+    o = _debrief(sid)
+    if o is not None:                  # a debrief's run: everybody sees the controller's screen
+        return "atc" if db.seat_of(o["eid"], user) else None
     return db.seat_of(sid, user)
+
+
+def _debrief(sid: str) -> Optional[dict]:
+    if len(sid) <= 8:
+        return None
+    from . import debriefs
+    return debriefs.lookup(sid)
 
 
 def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
@@ -62,6 +72,20 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         seat = seat_for(sid, user)
         if seat is None:
             return "you are not a member of this exercise"
+        o = _debrief(sid)
+        if o is not None:
+            from . import debriefs
+            if method in ("GET", "HEAD") or rest in ("/stream", "/comms") or (method == "POST" and rest == "/connect"):
+                return None
+            if not debriefs.can_write(sid, user):
+                return ("the exercise's run is kept as it was: Try from here to change it" if o["kind"] == "orig"
+                        else "the instructor leads the tries (open again once the debrief session is on)")
+            if debriefs.is_leader(o["eid"], user):
+                return None
+            for pat in WRITE_RIGHTS["atc"]:
+                if re.match(pat, rest):
+                    return None
+            return "the instructor runs the simulation in the debrief"
         if seat == "instructor" or method in ("GET", "HEAD") or rest in ("/stream", "/comms"):
             return None
         if method == "POST" and rest == "/connect":

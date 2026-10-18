@@ -355,6 +355,43 @@
   .mem { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; padding: 2px 0; }
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
   .dot.on { background: var(--accent); }
+  /* ---- debrief on the simulator (debrief.js) */
+  body.debrief #sbEnd, body.debrief .simbar [data-act=restart], body.debrief #chatBtn, body.debrief #chatToast, body.debrief #tlRewind,
+  body.debrief #legend, body.debrief #ptt, body.debrief #phoneBtn { display: none !important; }
+  body.debrief.db-ro .simbar, body.debrief.db-ro #cmdBar, body.debrief.db-ro #liveBtn, body.debrief:not(.db-lead) .simbar,
+  body.debrief:not(.db-lead) #liveBtn, body.debrief.db-orig #tlLive, body.debrief:not(.db-lead) .db-lead-only { display: none !important; }
+  #dbBar { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; flex-direction: column; gap: 5px;
+    align-items: center; max-width: calc(100% - 520px); min-width: 520px; pointer-events: none; }
+  #dbBar .db-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; background: #0d1b2ae8;
+    border: 1px solid var(--line); border-radius: 8px; padding: 5px 9px; font-size: 12.5px; pointer-events: auto; box-shadow: 0 6px 20px #0008; }
+  #dbBar .db-name { color: var(--dim); max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #dbBar .db-tabs { padding: 3px; gap: 3px; }
+  #dbBar .db-tabs button { font-size: 12px; padding: 3px 9px; border-radius: 6px; }
+  #dbBar .db-tabs button.on { background: #1f4a6e; border-color: #3b6e93; color: #fff; }
+  #dbBar button { font-size: 12px; padding: 3px 9px; }
+  .db-pill { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); }
+  .db-pill.live { color: #ff8a8a; border-color: #8a3030; animation: dbpulse 1.6s infinite; } .db-pill.ready { color: #f2b84b; border-color: #7a6a2a; }
+  @keyframes dbpulse { 50% { opacity: .55; } }
+  .db-call { display: inline-flex; gap: 5px; align-items: center; padding-left: 6px; border-left: 1px solid var(--line); }
+  .db-call button.onair { border-color: #2f7a5f; color: #8fe8c4; } .db-call button.muted { border-color: #7a3030; color: #ff9a9a; }
+  .db-who { font-size: 11.5px; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--dim); white-space: nowrap; }
+  .db-who.talk { border-color: #5fd3a3; color: #e6fff4; box-shadow: 0 0 0 2px #5fd3a333; }
+  .db-follow.on { border-color: #3b6e93; color: #9fd0ff; } .db-follow:not(.on) { border-color: #c9a227; color: #ffe08a; }
+  .db-end { border-color: #6b2b2b !important; color: #ffb3b3 !important; }
+  .db-links { display: inline-flex; gap: 9px; padding-left: 6px; border-left: 1px solid var(--line); } .db-links a { color: var(--sel); text-decoration: none; }
+  body.db-lead:not(.db-ro) #dbBar { top: 90px; }
+  body.debrief.db-orig #radioLog { display: none !important; }
+  #dbCursors { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 6; pointer-events: none; }
+  .db-cur { position: absolute; left: 0; top: 0; display: flex; align-items: flex-start; gap: 2px; will-change: transform; }
+  .db-cur svg path { fill: #7fb8ff; stroke: #06101a; stroke-width: 1.3; } .db-cur.lead svg path { fill: #ffd166; }
+  .db-cur span { margin-top: 15px; font: 600 11px system-ui; color: #06101a; background: #7fb8ff; padding: 1px 6px; border-radius: 4px; white-space: nowrap; }
+  .db-cur.lead span { background: #ffd166; }
+  #dbMsg { display: none; position: absolute; left: 50%; top: 176px; transform: translateX(-50%); z-index: 7; max-width: 640px; background: #10263bf2;
+    border: 1px solid #3b6e93; border-radius: 8px; padding: 9px 14px; font-size: 13px; color: #dbe9f6; box-shadow: 0 8px 26px #000a; }
+  #dbMsg a { color: #9fd0ff; }
+  #dbSpd { font-size: 12px; padding: 2px 4px; }
+  #dbTry { border-color: #2f7a5f; color: #8fe8c4; }
+  #dbTryBox { display: inline-flex; gap: 4px; } #dbTryBox[hidden] { display: none; } #dbTryName { width: 230px; font-size: 12px; padding: 2px 6px; }
 </style>
 <link rel="stylesheet" href="/static/theme.css">
 </head>
@@ -472,7 +509,8 @@
 const $ = s => document.querySelector(s);
 const API = '';
 let SID = new URLSearchParams(location.search).get('session');
-const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || null;
+const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] || null;   // debrief on the simulator (debrief.js)
+const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
 const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
@@ -492,7 +530,7 @@ const TH_DEF = {
 const TH = { ...TH_DEF };
 try { Object.assign(TH, JSON.parse(localStorage.getItem('atc_theme') || '{}')); } catch (e) {}
 function saveTheme() { try { localStorage.setItem('atc_theme', JSON.stringify(TH)); } catch (e) {} }
-if (EXID) SID = EXID;
+if (EXID && !DBID) SID = EXID;
 let mtcdOn = false; try { mtcdOn = localStorage.getItem('atc_mtcd') === '1'; } catch (e) {}
 let sector = null, state = null, sep = null, selected = null, lastSeq = 0, eventsBuf = [], weather = null, ws = null, wsOk = false;
 let wxImg = null, wxMeta = null, wxCellsData = [], arrInfo = null;
@@ -913,7 +951,8 @@ function evText(e) {
     case 'rvsm_airspace_violation_start': return `⚠ ${e.text} FL${e.fl}`;
     case 'rvsm_airspace_violation_end': return `${e.callsign} out of RVSM airspace (${e.duration_s} s)`;
     case 'wrong_direction_level': return `⚠ ${e.text}`;
-    default: return `${e.type}`;
+    case 'bookmark': case 'branch': case 'live': return e.text || e.type;
+    default: return e.text || `${e.type}`;
   }
 }
 function renderEvents() {
@@ -1001,10 +1040,10 @@ const tl = $('#tl'), tctx = tl.getContext('2d');
 const TL_COL = { separation_loss_start: '#ff5a5a', area_infringement_start: '#e0c13c', pilot_request: '#7fb8ff', instruction: '#8a9bb0',
   instruction_rejected: '#ff9a5a', rvsm_status: '#f2b84b', weather_penetration_start: '#d05ad0', aircraft_left_sector: '#ff5a5a',
   area_activated: '#e0c13c', runway_change: '#5fd3a3', fix_crossing: '#5fd3a3', wrong_direction_level: '#f2b84b',
-  rvsm_airspace_violation_start: '#ff5a5a', bookmark: '#ffffff', live: '#c08aff', readback_missed: '#ff9a5a', rewind: '#5a8aff' };
+  rvsm_airspace_violation_start: '#ff5a5a', bookmark: '#ffffff', live: '#c08aff', readback_missed: '#ff9a5a', rewind: '#5a8aff', branch: '#5fd3a3' };
 const TL_ROW = { separation_loss_start: 0, aircraft_left_sector: 0, rvsm_airspace_violation_start: 0, weather_penetration_start: 0,
   area_infringement_start: 0, pilot_request: 1, rvsm_status: 1, instruction: 2, instruction_rejected: 2, area_activated: 3,
-  runway_change: 3, fix_crossing: 3, wrong_direction_level: 3, bookmark: 1, live: 3, readback_missed: 2, rewind: 3 };
+  runway_change: 3, fix_crossing: 3, wrong_direction_level: 3, bookmark: 1, live: 3, readback_missed: 2, rewind: 3, branch: 3 };
 function tlSpan() { const d = (rec && rec.duration_s) || (state && state.duration_s) || 1800; return Math.max(d, rec && rec.frames.length ? rec.frames[rec.frames.length - 1].t : 0); }
 function drawTimeline() {
   const r = tl.getBoundingClientRect(), dpr = devicePixelRatio;
@@ -1755,5 +1794,6 @@ requestAnimationFrame(draw);
 <script src="/static/radarui.js"></script>
 <script src="/static/live.js"></script>
 <script src="/static/uirec.js"></script>
+<script src="/static/debrief.js"></script>
 </body>
 </html>

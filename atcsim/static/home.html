@@ -72,6 +72,14 @@
   .stars button { width: 32px; padding: 4px 0; font-family: var(--mono); }
   .stars button.on { background: var(--magenta); border-color: var(--magenta); color: #fff; }
   .tx { color: #fff; background: #b32d2d; border-radius: 3px; padding: 0 5px; font-size: 10px; }
+  .ev.focus, .todo-ev.focus { outline: 2px solid var(--sel); outline-offset: 2px; }
+  .dbc { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth); }
+  .dbc.live { border-color: #8a3030; background: linear-gradient(180deg, rgba(90, 29, 29, .35), var(--panel) 60%); }
+  .dbc .t { font-weight: 650; font-size: 15px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .dbc .s { color: var(--dim); font-size: 13px; }
+  .dbc .acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+  .pill.dblive { background: #4a1d1d; border-color: #a33; color: #ffd0d0; animation: dbp 1.6s infinite; } @keyframes dbp { 50% { opacity: .6; } }
+  .pill.dbready { background: #4a4119; border-color: #7a6a2a; color: #f6e7a9; }
   .empty-card { padding: 22px; text-align: center; color: var(--dim); background: var(--panel); border: 1px dashed var(--line); border-radius: 10px; }
 </style>
 </head>
@@ -127,6 +135,15 @@
     <div id="evalNone"></div>
   </section>
 
+  <!-- ======================================================= debriefs -->
+  <section class="page" id="pg-debriefs">
+    <div class="crumb"><a href="#">Home</a> / Debriefs</div>
+    <div class="pagehead"><h1>Debriefs</h1></div>
+    <p class="dim" style="margin-top:-6px">Every ended exercise has its debrief on the simulator: the whole run replayed with its marked moments,
+      and the alternatives the instructor tried. The instructor holds it as a session (an open call, everybody on the same screen); afterwards it stays with the exercise.</p>
+    <div id="dbList"></div>
+  </section>
+
   <!-- ======================================================= recordings -->
   <section class="page" id="pg-recordings">
     <div class="crumb"><a href="#">Home</a> / Recordings</div>
@@ -136,7 +153,7 @@
 </main>
 <script src="/static/common.js"></script>
 <script>
-let scenarios = [], outlines = {}, EXS = [], RECS = [], EV = null;
+let scenarios = [], outlines = {}, EXS = [], RECS = [], EV = null, DBS = [], evFocus = null;
 const isInstr = () => ME && (ME.role === 'instructor' || ME.role === 'admin');
 const STATUS = { running: ['LIVE', 'live'], paused: ['PAUSED', 'paused'], created: ['READY', 'paused'], finished: ['FINISHED', ''] };
 const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -145,7 +162,7 @@ const month = t => new Date(t * 1000).toLocaleDateString([], { year: 'numeric', 
 const person = m => `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.email;
 
 // ------------------------------------------------------------ router: #live, #exercises, #scenarios, #evaluations, #recordings
-const PAGES = ['home', 'exercises', 'scenarios', 'evaluations', 'recordings'];
+const PAGES = ['home', 'exercises', 'scenarios', 'evaluations', 'recordings', 'debriefs'];
 function route() {
   let p = curPage();
   if (!PAGES.includes(p) || (p === 'scenarios' && !isInstr())) p = 'home';
@@ -155,10 +172,12 @@ function route() {
   if (p === 'exercises') renderExercises();
   if (p === 'scenarios') renderScenarios();
   if (p === 'recordings') renderRecs();
+  if (p === 'debriefs') renderDebriefs();
+  if (p === 'evaluations') { evFocus = location.hash.split('/')[1] || null; focusEval(true); }
   window.scrollTo(0, 0);
 }
 addEventListener('hashchange', route);
-function curPage() { const p = location.hash.replace(/^#\/?/, '') || 'home'; return p === 'live' ? 'home' : p; }
+function curPage() { const p = location.hash.replace(/^#\/?/, '').split('/')[0] || 'home'; return p === 'live' ? 'home' : p; }
 
 // ------------------------------------------------------------ hub tiles
 function renderTiles() {
@@ -174,6 +193,10 @@ function renderTiles() {
     ${recent.length ? `<ul>${recent.map(e => `<li><span class="grow">${esc(e.name)}</span><span class="dim">${fmtDay(e.ended_at || e.created_at)}</span></li>`).join('')}</ul>`
       : mineLive.length ? '' : `<p>${isInstr() ? 'Every exercise you ran or joined, with search.' : 'No exercise yet. Your instructor invites you, or sends you a link.'}</p>`}
     <div class="foot">Search by name or date, sort by difficulty</div></div>`);
+  const dbLive = DBS.filter(d => d.debrief_status === 'live'), dbReady = DBS.filter(d => d.debrief_status === 'ready');
+  T.push(`<div class="tile" data-href="#debriefs" data-tile="debriefs" role="link" tabindex="0"><h3>Debriefs ${dbLive.length ? `<span class="n hot">${dbLive.length} live</span>` : `<span class="n">${DBS.length}</span>`}</h3>
+    ${dbLive.length ? `<ul>${dbLive.map(d => `<li><span class="pill dblive">LIVE</span><span class="grow">${esc(d.name)}</span><a href="/debrief/${d.id}" onclick="event.stopPropagation()"><button class="small primary">Join</button></a></li>`).join('')}</ul>` : ''}
+    <p>${dbReady.length && isInstr() ? `${dbReady.length} to hold. ` : ''}Go through each exercise on the simulator: the replay, the marked moments, other solutions tried.</p></div>`);
   T.push(`<a class="tile" href="#evaluations" data-tile="evaluations"><h3>Evaluations ${pend ? `<span class="n hot">${pend} to write</span>` : ''}</h3>
     ${EV && EV.pending[0] ? `<p>Next: evaluate <b>${esc(EV.pending[0].ratee)}</b> (${EV.pending[0].role}), ${esc(EV.pending[0].exercise)}</p>` : ''}
     ${unack ? `<p><span class="warn">${unack} received to acknowledge</span></p>` : ''}
@@ -323,7 +346,7 @@ function renderExercises(quiet) {
     'cx-': (a, b) => cx(b) - cx(a) || b.created_at - a.created_at, 'cx+': (a, b) => cx(a) - cx(b) || b.created_at - a.created_at,
     'dn-': (a, b) => dn(b) - dn(a) || b.created_at - a.created_at, 'dn+': (a, b) => dn(a) - dn(b) || b.created_at - a.created_at }[sort];
   L.sort(by);
-  const sig = JSON.stringify([q, from, to, seat, st, sort, L.map(e => [e.id, e.status, e.live, e.sim_time_s])]);
+  const sig = JSON.stringify([q, from, to, seat, st, sort, L.map(e => [e.id, e.status, e.live, e.sim_time_s]), DBS.map(d => d.id + d.debrief_status), EV && EV.pending.length]);
   if (quiet && $('#xList').dataset.sig === sig) return;
   $('#xList').dataset.sig = sig;
   $('#xCount').textContent = `${L.length} of ${EXS.length} exercise${EXS.length === 1 ? '' : 's'}`;
@@ -339,7 +362,7 @@ function renderExercises(quiet) {
         ${seats.atc.length ? `<span>Controller</span><span>${hl(seats.atc.join(', '), q)}</span>` : ''}
         ${seats.pilot.length ? `<span>Pseudo-pilot</span><span>${hl(seats.pilot.join(', '), q)}</span>` : ''}</div>
       <div class="acts">${e.live ? `<a href="/x/${e.id}"><button class="small primary">Open</button></a>` : ''}
-        ${!e.live && e.ended_at ? `<a href="/debrief/${e.id}"><button class="small primary">Debrief</button></a><a href="/stats"><button class="small">Statistics</button></a><a href="#recordings"><button class="small">Recording</button></a>` : ''}</div></div>`;
+        ${!e.live && e.ended_at ? exActs(e) : ''}</div></div>`;
   };
   if (!L.length) { $('#xList').innerHTML = `<div class="empty-card">${EXS.length ? 'No exercise matches. Clear the search or widen the dates.' : (isInstr() ? 'No exercise yet. Start one with New exercise.' : 'No exercise yet. Your instructor invites you, or sends you a link.')}</div>`; return; }
   const groups = [];
@@ -456,16 +479,61 @@ function renderRecs() {
 }
 $('#showArch').onchange = loadRecs;
 
+// ------------------------------------------------------------ debriefs page
+const DB_STATUS = { live: ['LIVE DEBRIEF', 'dblive'], ready: ['NOT HELD YET', 'dbready'], done: ['DEBRIEFED', ''] };
+function exActs(e) {                 // buttons of an ended exercise: its debrief and its evaluation first
+  const d = DBS.find(x => x.id === e.id), live = d && d.debrief_status === 'live';
+  const evPend = EV && EV.pending.some(p => p.exercise_id === e.id);
+  return `<a href="/debrief/${e.id}"><button class="small primary">${live ? '● Join the debrief' : 'Debrief'}</button></a>` +
+    (e.solo ? '' : `<a href="#evaluations/${e.id}"><button class="small ${evPend ? 'primary' : ''}">${evPend ? 'Evaluate' : 'Evaluation'}</button></a>`) +
+    `<a href="/debrief/${e.id}/report"><button class="small">Report</button></a><a href="/stats"><button class="small">Statistics</button></a><a href="#recordings"><button class="small">Recording</button></a>`;
+}
+async function loadDebriefs() {
+  try { DBS = await api('/api/debriefs'); } catch (e) { return; }
+  const p = curPage();
+  if (p === 'debriefs') renderDebriefs(); else if (p === 'home') renderTiles();
+}
+function renderDebriefs() {
+  const card = d => {
+    const [stx, cls] = DB_STATUS[d.debrief_status] || ['', ''];
+    const atc = (d.members || []).filter(m => m.seat === 'atc').map(person).join(', ') || (d.solo ? d.instructor : '–');
+    const lead = d.seat === 'instructor' || (d.solo && d.seat === 'atc');
+    const go = d.debrief_status === 'live' ? '● Join' : lead && d.debrief_status === 'ready' ? 'Open and start' : 'Open';
+    return `<div class="dbc ${d.debrief_status === 'live' ? 'live' : ''}"><div class="t"><span>${esc(d.name)}</span><span class="pill ${cls}">${stx}</span></div>
+      <div class="s">${esc(d.scenario)}${d.solo ? ' · solo' : ''} · flown ${fmtDate(d.created_at)}</div>
+      <div class="s">Controller: ${esc(atc)}${d.solo ? '' : ' · instructor: ' + esc(d.instructor)}</div>
+      <div class="s">${d.branches ? `${d.branches} alternative${d.branches > 1 ? 's' : ''} tried` : 'no alternative tried yet'}${d.debrief_ended_at ? ' · debriefed ' + fmtDate(d.debrief_ended_at) : ''}</div>
+      ${d.on_call.length ? `<div class="s"><span class="warn">on the call: ${d.on_call.map(esc).join(', ')}</span></div>` : ''}
+      <div class="acts"><a href="/debrief/${d.id}"><button class="small primary">${go}</button></a>
+        ${d.solo ? '' : `<a href="#evaluations/${d.id}"><button class="small">Evaluation</button></a>`}<a href="/debrief/${d.id}/report"><button class="small">Report</button></a></div></div>`;
+  };
+  const groups = [['Live now', DBS.filter(d => d.debrief_status === 'live')], ['Not held yet', DBS.filter(d => d.debrief_status === 'ready')],
+                  ['Debriefed', DBS.filter(d => d.debrief_status === 'done')]].filter(g => g[1].length);
+  const html = groups.length ? groups.map(([t, L]) => `<div class="group">${t} <span class="dim">${L.length}</span></div><div class="grid">${L.map(card).join('')}</div>`).join('')
+    : '<div class="empty-card">No debrief yet. Each exercise has one once it has ended.</div>';
+  if ($('#dbList').dataset.h !== html) { $('#dbList').innerHTML = html; $('#dbList').dataset.h = html; }
+}
+// an exercise's evaluation (#evaluations/<exercise>): the form when it is yours to write, else its cards highlighted
+function focusEval(open) {
+  if (!evFocus || !EV) return;
+  const i = EV.pending.findIndex(p => p.exercise_id === evFocus);
+  if (i >= 0 && open) { evalForm(EV.pending[i]); return; }
+  const el = document.querySelector(`[data-exid="${evFocus}"]`);
+  $$('[data-exid]').forEach(x => x.classList.toggle('focus', x.dataset.exid === evFocus));
+  if (el && open) el.scrollIntoView({ block: 'center' });
+  else if (open && i < 0) $('#evalNone').innerHTML = '<div class="empty-card">No evaluation for this exercise yet: the instructor writes it after the exercise (or after its debrief).</div>' + $('#evalNone').innerHTML;
+}
+
 // ------------------------------------------------------------ evaluations page
 async function loadEvals(force) {
   const ae = document.activeElement;
   if (!force && ae && ae.matches && ae.matches('textarea, input') && ae.closest('#pg-evaluations, .modal')) return;   // typing
   try { EV = await api('/api/evaluations'); } catch (e) { return; }
   const dimsOf = k => EV.dimensions[k];
-  $('#evalPending').innerHTML = EV.pending.length ? `<div class="group">To write <span class="dim">${EV.pending.length}</span></div><div class="grid">` + EV.pending.map((p, i) => `<div class="todo-ev"><span><b>Evaluate ${esc(p.ratee)}</b> (${p.role})</span>
+  $('#evalPending').innerHTML = EV.pending.length ? `<div class="group">To write <span class="dim">${EV.pending.length}</span></div><div class="grid">` + EV.pending.map((p, i) => `<div class="todo-ev" data-exid="${p.exercise_id}"><span><b>Evaluate ${esc(p.ratee)}</b> (${p.role})</span>
       <span class="dim">${esc(p.exercise)} · ${esc(p.scenario)} · ${fmtDate(p.date)}</span><span><button class="primary" data-ev="${i}">Evaluate</button></span></div>`).join('') + '</div>' : '';
   $$('[data-ev]').forEach(b => b.onclick = () => evalForm(EV.pending[+b.dataset.ev]));
-  const card = (r, mine) => `<div class="card ev"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span></span>
+  const card = (r, mine) => `<div class="card ev" data-exid="${r.exercise_id}"><div class="hd"><span><b>${esc(r.exercise || '')}</b> <span class="dim">· ${esc(r.scenario || '')} · ${fmtDate(r.date)}</span></span>
       <span class="dim">${mine ? 'from ' + esc(r.rater) : 'to ' + esc(r.ratee)} · ${r.kind === 'atc' ? 'controller' : 'pseudo-pilot'} evaluation</span></div>
       ${scnBadge(r.scenario_info)}
       <div class="sc">${dimsOf(r.kind).map(d => `<span>${d.label} <b>${r.scores[d.key]}/5</b></span>`).join('')}<span>Overall <b>${r.grade}/5</b> <span class="warn">${stars(r.grade)}</span></span></div>
@@ -478,6 +546,7 @@ async function loadEvals(force) {
   $('#evalNone').innerHTML = EV.pending.length || EV.received.length || EV.given.length ? '' : '<div class="empty-card">No evaluation yet. They are written when an exercise ends.</div>';
   $$('[data-ack]').forEach(b => b.onclick = async () => { await post(`/api/evaluations/${b.dataset.ack}/ack`, { comment: $(`[data-ackc="${b.dataset.ack}"]`).value }); loadEvals(true); });
   if ((curPage()) === 'home') renderTiles();
+  if (curPage() === 'evaluations') focusEval(false);
 }
 function evalForm(p) {
   const dims = EV.dimensions[p.kind], val = {};
@@ -503,11 +572,11 @@ function evalForm(p) {
   await header('/');
   $$('.instr-only').forEach(el => el.style.display = isInstr() ? '' : 'none');
   $$('[data-newex]').forEach(b => b.onclick = newExercise);
-  const tasks = [loadExercises(true), loadEvals(), loadRecs()];
+  const tasks = [loadExercises(true), loadEvals(), loadRecs(), loadDebriefs()];
   if (isInstr()) tasks.push(loadScenarios());
   await Promise.all(tasks);
   route();
-  setInterval(loadExercises, 2000); setInterval(() => loadExercises(true), 30000); setInterval(loadEvals, 15000); setInterval(loadRecs, 8000);
+  setInterval(loadExercises, 2000); setInterval(() => loadExercises(true), 30000); setInterval(loadEvals, 15000); setInterval(loadRecs, 8000); setInterval(loadDebriefs, 5000);
   if (isInstr() && new URLSearchParams(location.search).get('scenario')) newExercise();
 })();
 </script>

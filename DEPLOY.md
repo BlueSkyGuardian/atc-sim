@@ -83,7 +83,9 @@ administrator. Complete your profile (first name, last name, licence number).
 ## 6. Data, backups, updates
 
 Everything lives in the `atc-data` Docker volume: `atcsim.db` (accounts, scenario sharing, exercises),
-`recordings/<exercise>/exercise.mp4` and the raw material it was made from, and `secret.key`.
+`recordings/<exercise>/exercise.mp4` and the raw material it was made from, `debriefs/<exercise>/` (the whole run of
+each ended exercise for its debrief on the simulator, and the alternatives tried in it: a few MB per hour flown), and
+`secret.key`.
 Scenarios saved with the designer are in `scenarios/` on the host.
 
 ```bash

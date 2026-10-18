@@ -36,7 +36,7 @@
 </main>
 <script src="/static/common.js"></script>
 <script>
-const EID = location.pathname.split('/').filter(Boolean).pop();
+const EID = location.pathname.split('/').filter(Boolean)[1];
 Chart.defaults.color = '#93a7ba'; Chart.defaults.borderColor = '#27405a'; Chart.defaults.font.family = 'Archivo, system-ui';
 const T = s => 'T+' + fmtT(s);
 const ev = (t, html, tag) => `<div class="ev"><span class="t">${t == null ? '' : T(t)}</span><span>${html}</span>${tag ? `<span class="tag">${tag}</span>` : ''}</div>`;

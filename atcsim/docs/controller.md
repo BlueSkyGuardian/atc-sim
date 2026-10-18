@@ -432,10 +432,16 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 
 ## After the exercise
 
-- **Debrief** (on the exercise's card, in the banner when it ends, or from a session in your statistics): the run
-  written up. Workload minute by minute; each loss of separation with the clearances given to its two aircraft in the
-  10 minutes before; requests you left unanswered; wrong read-backs caught or missed; infringements and weather; the
-  bookmarks the instructor and pseudo-pilots set, with their notes.
+- **Debrief**: the exercise replayed on this radar with its marked moments. When your instructor holds the debrief
+  session, the Debriefs tile on your home page (and the exercise's card) shows **● Join the debrief**:
+  - it is an **open call**: talk freely, no push-to-talk; **🎙 On / 🔇 Muted** in the top bar;
+  - your screen **follows the instructor's** (the run shown, the replay time, the view) and you see their cursor; they
+    see yours. Click the timeline to look at something yourself; **↺ Follow the instructor** brings you back;
+  - the instructor may **try other solutions** from a moment of the run: a live branch (a tab next to *Exercise*)
+    where pilots fly what is entered; you may enter clearances in it too. Your exercise itself is never changed;
+  - afterwards the debrief stays on the exercise's card: open it again whenever you want, the exercise and every try.
+  **Report ↗** gives the run written up: workload, each loss of separation with the clearances before it, requests
+  left unanswered, read-backs, infringements, the bookmarks.
 - **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your
   windows, your mouse and clicks, a caption log of your actions) with the frequency and your telephone calls. It
   appears on the *Recordings* page (home page tile), ready to download.
@@ -447,7 +453,7 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   times, your profile per dimension, and the list of sessions. Each session shows the scenario's **complexity** and
   **density** as they were when you flew it, so you can see your results against the difficulty.
 
-![The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_debrief.jpg "The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
+![The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)](/static/docs/x_debrief.jpg "The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)")
 
 ![The instructor's evaluation on your home page, to acknowledge with a comment](/static/docs/c_evaluation.jpg "The instructor's evaluation on your home page, to acknowledge with a comment")
 

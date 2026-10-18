@@ -1,4 +1,6 @@
 // Voice for a connected exercise: radio (push-to-talk) and telephone lines, over /sessions/{id}/comms.
+// Debriefs (opts.open, over /debriefs/{id}/comms): an open call - the microphone is live unless muted - that also
+// carries the debrief's sync (onSync) and everybody's cursor (onCursor).
 // Audio is 16 kHz mono G.711 mu-law. The microphone is resampled in an AudioWorklet; every speaker gets its own
 // little jitter buffer on playback.
 (function () {
@@ -31,7 +33,8 @@
     const mag = (((man << 3) + 0x84) << exp) - 0x84; ULAW[i] = (sign ? -mag : mag) / 32768; }
 
   class Voice {
-    constructor(sid, h) {
+    constructor(sid, h, opts) {
+      this.opts = opts || {}; this.open = !!this.opts.open; this.muted = false; this.heard = {};
       this.sid = sid; this.h = h || {}; this.ws = null; this.me = null; this.calls = []; this.roster = [];
       this.tx = false; this.ctx = null; this.mic = null; this.node = null; this.next = {}; this.micError = null;
       this.ringing = null; this.closed = false;
@@ -41,12 +44,14 @@
     }
     connect() {
       const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-      const ws = this.ws = new WebSocket(`${proto}://${location.host}/sessions/${this.sid}/comms`);
+      const ws = this.ws = new WebSocket(`${proto}://${location.host}${this.opts.url || `/sessions/${this.sid}/comms`}`);
       ws.binaryType = 'arraybuffer';
       ws.onmessage = ev => {
         if (typeof ev.data !== 'string') { this.play(ev.data); return; }
         const m = JSON.parse(ev.data);
-        if (m.type === 'hello') { this.me = m.me; this.roster = m.roster; this.calls = m.calls; this.h.onHello && this.h.onHello(m); this.h.onCalls && this.h.onCalls(this.calls); }
+        if (m.type === 'sync') { this.h.onSync && this.h.onSync(m.s); return; }
+        if (m.type === 'cursor') { this.h.onCursor && this.h.onCursor(m); return; }
+        if (m.type === 'hello') { if (this.open && this.muted) this.send({ op: 'mute', on: true }); this.me = m.me; this.roster = m.roster; this.calls = m.calls; this.h.onHello && this.h.onHello(m); this.h.onCalls && this.h.onCalls(this.calls); }
         else if (m.type === 'roster') { this.roster = m.roster; this.h.onRoster && this.h.onRoster(m.roster); }
         else if (m.type === 'ptt') { const r = this.roster.find(x => x.conn === m.conn); if (r) r.ptt = m.on; this.h.onPtt && this.h.onPtt(m); }
         else if (m.type === 'calls') { this.calls = m.calls; this.h.onCalls && this.h.onCalls(m.calls); this.updateMic(); }
@@ -85,13 +90,16 @@
       } catch (e) { this.micError = 'microphone: ' + (e.message || e.name); this.h.onError && this.h.onError(this.micError); return false; }
     }
     myCall() { return this.me && this.calls.find(c => c.state === 'active' && ((c.caller && c.caller.conn === this.me.conn) || (c.answerer && c.answerer.conn === this.me.conn))); }
+    live() { return this.open ? !this.muted : (this.tx || !!this.myCall()); }
+    mute(on) { this.muted = !!on; this.send({ op: 'mute', on: this.muted }); this.updateMic(); }
+    speaking(conn) { return this.ctx && (this.heard[conn] || 0) > this.ctx.currentTime - 0.35; }
     updateMic() {
-      const on = this.tx || !!this.myCall();
+      const on = this.live();
       if (on && !this.node) { this.ensureMic(); return; }
       if (this.node) this.node.port.postMessage(on);
     }
     frame(pcm) {
-      if (!(this.tx || this.myCall())) return;
+      if (!this.live()) return;
       const u = new Uint8Array(pcm.length);
       for (let i = 0; i < pcm.length; i++) u[i] = lin2ulaw(pcm[i]);
       this.send(u.buffer);
@@ -117,7 +125,8 @@
       const key = chan * 65536 + conn, now = ctx.currentTime;
       let t = this.next[key] || 0;
       if (t < now + 0.03 || t > now + 0.8) t = now + 0.12;          // (re)start with a 120 ms jitter buffer
-      const src = ctx.createBufferSource(); src.buffer = ab; src.connect(chan === 0 ? this.radioIn : this.phoneIn); src.start(t);
+      const src = ctx.createBufferSource(); src.buffer = ab; src.connect(chan === 0 ? this.radioIn : chan === 1 ? this.phoneIn : this.out); src.start(t);
+      this.heard[conn] = t + ab.duration;
       this.next[key] = t + ab.duration;
     }
     // ring (incoming) and ring-back (outgoing) tones, 425 Hz

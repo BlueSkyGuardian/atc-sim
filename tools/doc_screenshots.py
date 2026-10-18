@@ -363,7 +363,10 @@ with sync_playwright() as p:
         await P(`/sessions/${SID}/control`, { action: 'step', seconds: 600 });
         await P(`/api/exercises/${EXID}/end`, {}); }""")
     eid_solo = atc.evaluate("EXID")
-    atc.goto(f"/debrief/{eid_solo}"); atc.wait_for_selector("#wl"); atc.wait_for_timeout(1500)
-    shot(atc, "x_debrief", full_page=True)
+    atc.goto(f"/debrief/{eid_solo}/report"); atc.wait_for_selector("#wl"); atc.wait_for_timeout(1500)
+    shot(atc, "x_report", full_page=True)
+    atc.goto(f"/debrief/{eid_solo}"); atc.wait_for_function("() => typeof rec !== 'undefined' && rec && rec.frames.length > 3 && replayMode", timeout=60000)
+    atc.evaluate("replayPlaying = false; setReplay(true, 600)"); atc.wait_for_timeout(2500)
+    shot(atc, "x_debrief")
     br.close()
 print("screenshots in", OUT)

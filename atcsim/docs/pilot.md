@@ -168,5 +168,5 @@ radar shows who is talking.
 ## After the exercise
 
 The controller rates you: readbacks, execution of clearances, reaction time, R/T, realism and an overall grade,
-with a comment. The **Debrief** (on the exercise's card) shows the run: workload, losses and what led to them,
-bookmarks. *Stats → As pseudo-pilot* shows the ratings over time, your average profile and the comments.
+with a comment. The **Debrief** (on the exercise's card) replays the run on the radar; join the instructor's debrief
+session from there or from the Debriefs tile (an open call, see the [instructor manual](instructor.md#debriefs)). *Stats → As pseudo-pilot* shows the ratings over time, your average profile and the comments.

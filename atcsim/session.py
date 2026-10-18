@@ -184,7 +184,7 @@ class Session:
     def _snapshot(self) -> None:
         w = self.world
         rec = w.recording
-        w.recording = {"every_s": rec["every_s"], "frames": [], "meta": {}}     # the replay frames are kept apart
+        w.recording = {"every_s": rec["every_s"], "frames": [], "meta": rec["meta"]}   # the replay frames are kept apart
 
         class _P(pickle.Pickler):
             def persistent_id(self, o):
@@ -306,7 +306,9 @@ class Session:
                         break
         with s.lock:
             w = s._load_world(snaps[-1][1])
+            meta = w.recording.get("meta") or {}
             w.recording = s.world.recording
+            w.recording["meta"].update(meta)
             w.recording["frames"] = [fr for fr in frames if fr["t"] <= snaps[-1][0] + 1e-6]
             w._last_frame_t = w.recording["frames"][-1]["t"] if w.recording["frames"] else -1e9
             s.world = w
@@ -341,7 +343,9 @@ class Session:
             st, blob = cand[-1]
             w = self._load_world(blob)
             old = self.world
+            meta = dict(w.recording.get("meta") or {}, **old.recording.get("meta", {}))
             w.recording = old.recording
+            w.recording["meta"] = meta
             w.recording["frames"] = [f for f in w.recording["frames"] if f["t"] <= st + 1e-6]
             w._last_frame_t = w.recording["frames"][-1]["t"] if w.recording["frames"] else -1e9
             self.world = w

@@ -48,6 +48,12 @@ CREATE TABLE IF NOT EXISTS exercises (
   status TEXT NOT NULL DEFAULT 'open',
   atc_token TEXT, pilot_token TEXT, observer_token TEXT
 );
+CREATE TABLE IF NOT EXISTS debrief_sessions (
+  exercise_id TEXT PRIMARY KEY,
+  status TEXT NOT NULL DEFAULT 'ready',   -- ready (not held yet) | live (the session is on) | done
+  started_at REAL, ended_at REAL, started_by INTEGER,
+  branches TEXT                          -- JSON list: the alternatives tried
+);
 CREATE TABLE IF NOT EXISTS exercise_members (
   exercise_id TEXT NOT NULL,
   user_id INTEGER NOT NULL,

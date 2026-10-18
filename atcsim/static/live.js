@@ -3,7 +3,7 @@
 (function () {
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   let opts = null, tab = 'aircraft', box = null;
-  const canAct = () => (EXID && (SEAT === 'instructor' || SEAT === 'pilot')) || (EXINFO && EXINFO.solo);
+  const canAct = () => EXINFO && EXINFO.debrief ? !!EXINFO.leader : (EXID && (SEAT === 'instructor' || SEAT === 'pilot')) || (EXINFO && EXINFO.solo);
 
   async function loadOpts() { if (!SID) return; try { opts = await api(`/sessions/${SID}/live`); } catch (e) {} }
   async function act(body, out) {

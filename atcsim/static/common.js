@@ -59,6 +59,8 @@ function modal(html, onReady) {
   const bg = document.createElement('div'); bg.className = 'modal-bg on';
   bg.innerHTML = `<div class="modal">${html}</div>`;
   bg.addEventListener('mousedown', e => { if (e.target === bg) bg.remove(); });
+  const esc = e => { if (e.key === 'Escape' && document.body.contains(bg)) { bg.remove(); removeEventListener('keydown', esc); } };
+  addEventListener('keydown', esc);
   document.body.appendChild(bg);
   if (onReady) onReady(bg.querySelector('.modal'), () => bg.remove());
   return bg;

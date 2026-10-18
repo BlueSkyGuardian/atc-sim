@@ -156,15 +156,55 @@ marked them. The pseudo-pilots mark moments too.
 2. Renders one **.mp4 per controller**: their screen as their seat showed it (labels, alerts, RBLs, windows,
    mouse and clicks, a caption log of their actions) with the audio they heard and said. An hour takes about
    10 minutes to render. With no controller connected, a plain radar overview is rendered instead.
-3. Opens the evaluations. Rate each controller on phraseology, conflict detection, conflict resolution,
-   anticipation and planning, coordination, and an overall grade (each out of 5), with a comment. The controller
-   reads it, acknowledges it with a comment, and rates the pseudo-pilot.
-4. Keeps the **debrief** with the exercise (below).
+3. Keeps the whole run for the **debrief** and takes you to it (below).
+4. The evaluations are then written from the exercise's **Evaluation** button (exercise cards, Debriefs page, the
+   debrief's top bar): rate each controller on phraseology, conflict detection, conflict resolution, anticipation and
+   planning, coordination, and an overall grade (each out of 5), with a comment. The controller reads it, acknowledges
+   it with a comment, and rates the pseudo-pilot.
 
-### The debrief
+## Debriefs
 
-**Debrief** (on the ended exercise's card, in the banner on the radar when it ends, and on each session of the
-statistics) opens the report written from the run, for the instructor and the members of the exercise:
+Every ended exercise has a debrief on the simulator: the radar replays the whole run, with the timeline's markers
+(⚑ bookmarks in white, losses of separation in red, requests, instructions). It is reached from **Debrief** on the
+exercise's card, the **Debriefs** page (home page tile), and the banner on the radar when the exercise ends; you land
+on it when you press **End exercise**.
+
+![The Debriefs page: live now, not held yet, debriefed](/static/docs/x_debriefs.jpg "The Debriefs page: live now, not held yet, debriefed")
+
+### Holding the debrief session
+
+**● Start the debrief session** (top bar) opens an **open voice call**: no push-to-talk, everybody's microphone is
+live unless they press **🎙 On / 🔇 Muted**, and the speaker's name lights up. The members see *LIVE* on their home page
+(Debriefs tile, the exercise's card: **● Join the debrief**) and join here.
+
+- **You lead.** What you show is what they see: the run (the exercise or a try), the replay time and whether it plays,
+  the speed, the view (pan and zoom). Play with **▶ Replay** and the speed next to it, or click and drag the timeline.
+- **Cursors.** Your cursor shows on their screen (yellow, with your name), theirs on yours (blue): point at what you
+  talk about.
+- A controller can leave your screen to look at something on their own (they click the timeline); **↺ Follow the
+  instructor** brings them back.
+- **End debrief** closes the call. The debrief (the exercise and every try) stays with the exercise.
+
+![The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)](/static/docs/x_debrief.jpg "The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)")
+
+### Trying other solutions
+
+**⑂ Try from T+…** (bottom right, on the exercise's replay) branches the run at the replay time (to the 10-second point
+before) into a **live simulation**, paused, with a name (*turn RAM12 earlier*). Simulated pilots fly what is entered,
+as on the solo radar: enter clearances in the labels or the command line, then run it with the control bar (top right,
+×1 to ×30). The controller may enter clearances too while the session is on.
+
+- **The exercise itself is never changed.** Each try is a tab next to *Exercise* in the top bar; switch between them to
+  compare. A try's timeline keeps the run before the branch point (green marker) and goes on from there.
+- Every try is kept: after the session, everybody can replay it like the exercise (and you can go on with it).
+
+![A try: the run from T+09:30 as a live simulation, the instructor's control bar, the tabs Exercise / the try](/static/docs/x_try.jpg "A try: the run from T+09:30 as a live simulation, the instructor's control bar, the tabs Exercise / the try")
+
+### After the session
+
+The members open the debrief again from the exercise's card or the Debriefs page, in the same simulator view, on
+their own: the exercise and every try, read-only. **Report ↗** (top bar) opens the written report of the run:
+
 
 - key figures: losses of separation, infringements, peak and mean traffic on frequency, time to assume, request
   response time, requests left unanswered, wrong read-backs caught;
@@ -174,9 +214,7 @@ statistics) opens the report written from the run, for the instructor and the me
 - the **bookmarks**, the requests left unanswered, the read-back errors (caught or missed), infringements and weather,
   the live actions taken, the clearances given (radio and CPDLC).
 
-While an exercise runs, `/debrief/<exercise>` shows the debrief so far.
-
-![The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_debrief.jpg "The debrief: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
+![The written report: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_report.jpg "The written report: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
 
 ## Statistics
 

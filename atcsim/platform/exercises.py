@@ -135,6 +135,15 @@ def help_doc(slug: str, request: Request):
 
 @router.get("/debrief/{eid}", include_in_schema=False)
 def debrief_page(eid: str, request: Request):
+    """The debrief on the simulator screen (radar page in debrief mode)."""
+    u = require_user(request)
+    if seat_for(eid, u) is None:
+        raise HTTPException(403, "you are not a member of this exercise")
+    return page("radar.html")
+
+
+@router.get("/debrief/{eid}/report", include_in_schema=False)
+def debrief_report_page(eid: str, request: Request):
     u = require_user(request)
     if seat_for(eid, u) is None:
         raise HTTPException(403, "you are not a member of this exercise")
@@ -593,6 +602,12 @@ def end(eid: str) -> dict:
                 db.x("UPDATE exercises SET debrief=? WHERE id=?", (db.dumps(debrief.build(s.world)), eid))
             except Exception:  # noqa: BLE001 - never block the end of an exercise
                 pass
+    if s is not None and db.exercise(eid) is not None:
+        try:                                       # the whole run, for the debrief on the simulator
+            from . import debriefs
+            debriefs.archive(eid, s)
+        except Exception as ex:  # noqa: BLE001
+            print(f"exercise {eid}: run not archived for the debrief ({type(ex).__name__}: {ex})")
     rec_id = recorder.finish(eid, s)
     comms.hub.close_room(eid)
     if s is not None:

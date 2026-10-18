@@ -15,6 +15,10 @@ Control (JSON text frames):
 
 Who hears what: the radio goes to everybody in the exercise (as on a real frequency); a phone call goes between its
 two parties, and every instructor in the exercise listens to all calls. Everything is passed to the recorder.
+
+Debrief rooms (/debriefs/{id}/comms) are an open call instead: every microphone is live unless muted
+({"op": "mute", "on": true}) and everybody hears everybody (channel 2). They also carry the debrief's sync: the leader's
+{"op": "sync", "s": {...}} (what is shown, the replay time, the view) and everybody's {"op": "cursor", "x", "y"}.
 """
 from __future__ import annotations
 
@@ -41,12 +45,14 @@ class Conn:
         self.id, self.ws, self.user, self.seat = cid, ws, user, seat
         self.name = db.public_user(user)["name"] if user.get("id") else "Instructor"
         self.ptt = False
+        self.muted = False
+        self.leader = False
         self.q: asyncio.Queue = asyncio.Queue()
         self.joined = time.time()
 
     def public(self) -> dict:
         return {"conn": self.id, "name": self.name, "seat": self.seat, "user_id": self.user.get("id"),
-                "ptt": self.ptt}
+                "ptt": self.ptt, "muted": self.muted, "leader": self.leader}
 
     def put(self, item) -> None:
         if isinstance(item, (bytes, bytearray)) and self.q.qsize() > MAX_QUEUE:
@@ -74,8 +80,10 @@ class Call:
 
 
 class Room:
-    def __init__(self, eid: str):
+    def __init__(self, eid: str, open_call: bool = False):
         self.eid = eid
+        self.open = open_call               # debrief: an open call, no push-to-talk, no telephone
+        self.sync: Optional[dict] = None    # debrief: the leader's last sync state, for those who join later
         self.conns: Dict[int, Conn] = {}
         self.calls: Dict[int, Call] = {}
         self._ids = itertools.count(1)
@@ -106,6 +114,19 @@ class Room:
     # ---------------------------------------------------------------- control
     def on_control(self, conn: Conn, m: dict) -> None:
         op = m.get("op")
+        if self.open:
+            if op == "mute":
+                conn.muted = bool(m.get("on"))
+                self.broadcast({"type": "roster", "roster": self.roster()})
+            elif op == "sync" and conn.leader and isinstance(m.get("s"), dict):
+                self.sync = m["s"]
+                self.broadcast({"type": "sync", "s": self.sync, "conn": conn.id}, only={c.id for c in self.conns.values() if c.id != conn.id})
+            elif op == "cursor":
+                x, y = m.get("x"), m.get("y")
+                msg = {"type": "cursor", "conn": conn.id, "name": conn.name, "leader": conn.leader,
+                       "x": float(x) if isinstance(x, (int, float)) else None, "y": float(y) if isinstance(y, (int, float)) else None}
+                self.broadcast(msg, only={c.id for c in self.conns.values() if c.id != conn.id})
+            return
         if op == "ui":
             if conn.seat == "atc":
                 from . import recorder
@@ -179,6 +200,14 @@ class Room:
         if not payload or len(payload) > 16000:
             return
         from . import recorder
+        if self.open:
+            if conn.muted:
+                return
+            frame = struct.pack("<BH", 2, conn.id) + payload
+            for c in list(self.conns.values()):
+                if c.id != conn.id:
+                    c.put(frame)
+            return
         if conn.ptt:
             chan, to = 0, [c for c in self.conns.values() if c.id != conn.id]
         else:
@@ -217,10 +246,10 @@ class Hub:
     def __init__(self):
         self.rooms: Dict[str, Room] = {}
 
-    def room(self, eid: str) -> Room:
+    def room(self, eid: str, open_call: bool = False) -> Room:
         r = self.rooms.get(eid)
         if r is None:
-            r = self.rooms[eid] = Room(eid)
+            r = self.rooms[eid] = Room(eid, open_call)
         return r
 
     def open_room(self, eid: str) -> Room:
@@ -245,10 +274,17 @@ async def comms(ws: WebSocket, sid: str):
         await ws.close(code=4403)
         return
     await ws.accept()
-    room = hub.room(sid)
+    await serve(ws, hub.room(sid), user, seat)
+
+
+async def serve(ws: WebSocket, room: Room, user: dict, seat: str, leader: bool = False) -> None:
+    """One participant's audio and control over an accepted WebSocket, until it closes."""
     conn = room.join(ws, user, seat)
+    if leader:
+        conn.leader = True
+        room.broadcast({"type": "roster", "roster": room.roster()})
     conn.put({"type": "hello", "me": conn.public(), "roster": room.roster(), "calls": room.calls_public(),
-              "units": config.ADJACENT_UNITS, "unit_names": config.UNIT_NAMES})
+              "units": config.ADJACENT_UNITS, "unit_names": config.UNIT_NAMES, "open": room.open, "sync": room.sync})
 
     async def sender():
         while True:
