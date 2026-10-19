@@ -164,47 +164,58 @@ marked them. The pseudo-pilots mark moments too.
 
 ## Debriefs
 
-Every ended exercise has a debrief on the simulator: the radar replays the whole run, with the timeline's markers
-(⚑ bookmarks in white, losses of separation in red, requests, instructions). It is reached from **Debrief** on the
-exercise's card, the **Debriefs** page (home page tile), and the banner on the radar when the exercise ends; you land
-on it when you press **End exercise**.
+Every ended exercise has a debrief on the simulator. It is reached from **Debrief** on the exercise's card, the
+**Debriefs** page (home page tile), and the banner on the radar when the exercise ends; you land on it when you press
+**End exercise**.
 
 ![The Debriefs page: live now, not held yet, debriefed](/static/docs/x_debriefs.jpg "The Debriefs page: live now, not held yet, debriefed")
 
+### The exercise, reproduced 1:1
+
+The radar shows the exercise **re-simulated**, not a recording: every action of the run (assumes and decontrols, the
+clearances entered in the labels, the pseudo-pilots' instructions, CPDLC, live actions) is applied again at its exact
+second, so the controller's screen is as it was - control states, entered levels and headings, coordination, alerts,
+the radio log's pending calls.
+
+- **Play / Pause** (or <kbd>P</kbd>), **⏮** to the start, **−30 s / +30 s**, the speed **×1 … ×30** (bottom centre);
+- click or drag the **time bar** to go to a moment; its markers show the losses of separation, requests, entries,
+  bookmarks.
+
+### Timelines: other solutions
+
+**Any action on the picture creates a new timeline from that second**: assume, decontrol, a level, a heading, a direct,
+a speed in the labels or the command line, an answer to a request... The exercise itself is never changed.
+
+- With no pseudo-pilot, a **synthetic pseudo-pilot** flies the clearances (and reads them back in the radio log).
+- The new timeline is **extrapolated to the end of the exercise** at once: the other aircraft do what was done in the
+  exercise (the controller's later actions are replayed), the changed aircraft fly the new clearances. Its outcome
+  shows in the **Timelines** panel (left): *no loss*, or the losses and the first one's time.
+- Further actions **at the same second** are added to that timeline (a solution with several clearances); an action
+  later on branches again (a timeline of a timeline). The time bar shows the branch point (⑂) and the extrapolated part.
+- Click a timeline in the panel to show it at the same moment and compare; double-click its name to rename it.
+
+![A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)](/static/docs/x_try.jpg "A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)")
+
 ### Holding the debrief session
 
-**● Start the debrief session** (top bar) opens an **open voice call**: no push-to-talk, everybody's microphone is
-live unless they press **🎙 On / 🔇 Muted**, and the speaker's name lights up. The members see *LIVE* on their home page
-(Debriefs tile, the exercise's card: **● Join the debrief**) and join here.
+**● Start the debrief session** (top right) puts everybody on **one shared player** with an **open voice call**: no
+push-to-talk, every microphone is live unless muted (**🎙 On / 🔇 Muted**), the speaker's name lights up. The members
+see *LIVE* on their home page (Debriefs tile, the exercise's card: **● Join the debrief**) and join here.
 
-- **You lead.** What you show is what they see: the run (the exercise or a try), the replay time and whether it plays,
-  the speed, the view (pan and zoom). Play with **▶ Replay** and the speed next to it, or click and drag the timeline.
-- **Cursors.** Your cursor shows on their screen (yellow, with your name), theirs on yours (blue): point at what you
-  talk about.
-- A controller can leave your screen to look at something on their own (they click the timeline); **↺ Follow the
-  instructor** brings them back.
-- **End debrief** closes the call. The debrief (the exercise and every try) stays with the exercise.
+- **You run the player**: play, pause, the moment, the speed, which timeline - everybody sees the same.
+- **Everybody may act on it**: the controller assumes, decontrols, gives levels and headings, and each action branches a
+  timeline that everybody sees.
+- Their view (pan, zoom) follows yours; **↺ Follow the instructor** brings back a controller who moved away. Your cursor
+  shows on their screen (yellow, with your name), theirs on yours (blue).
+- **End debrief** closes the call. Every timeline stays with the exercise.
 
-![The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)](/static/docs/x_debrief.jpg "The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)")
+![The debrief session, on the instructor's screen: the open call (top right), the timelines (left), the player's controls, a new timeline being extrapolated](/static/docs/x_debrief.jpg "The debrief session, on the instructor's screen: the open call (top right), the timelines (left), the player's controls, a new timeline being extrapolated")
 
-### Trying other solutions
+### Afterwards
 
-**⑂ Try from T+…** (bottom right, on the exercise's replay) branches the run at the replay time (to the 10-second point
-before) into a **live simulation**, paused, with a name (*turn RAM12 earlier*). Simulated pilots fly what is entered,
-as on the solo radar: enter clearances in the labels or the command line, then run it with the control bar (top right,
-×1 to ×30). The controller may enter clearances too while the session is on.
-
-- **The exercise itself is never changed.** Each try is a tab next to *Exercise* in the top bar; switch between them to
-  compare. A try's timeline keeps the run before the branch point (green marker) and goes on from there.
-- Every try is kept: after the session, everybody can replay it like the exercise (and you can go on with it).
-
-![A try: the run from T+09:30 as a live simulation, the instructor's control bar, the tabs Exercise / the try](/static/docs/x_try.jpg "A try: the run from T+09:30 as a live simulation, the instructor's control bar, the tabs Exercise / the try")
-
-### After the session
-
-The members open the debrief again from the exercise's card or the Debriefs page, in the same simulator view, on
-their own: the exercise and every try, read-only. **Report ↗** (top bar) opens the written report of the run:
-
+Outside a session, **every member has their own player** of the debrief: the controller plays the exercise again, at
+their own pace, and tries their own instructions - each creates a timeline, listed for everybody. **Report ↗** (top
+bar) opens the written report of the run:
 
 - key figures: losses of separation, infringements, peak and mean traffic on frequency, time to assume, request
   response time, requests left unanswered, wrong read-backs caught;

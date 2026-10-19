@@ -1,5 +1,6 @@
-"""Debrief on the simulator: the run archived at the end, replayed read-only, tries branched from a moment (simulated
-pilots), the session (open call, sync), rights, and the debrief kept afterwards.
+"""Debrief on the simulator: the exercise reproduced 1:1 (control states, entries, positions) by re-simulating it,
+any action creating a new timeline (synthetic pilot, extrapolated to the end), timelines of timelines, the session's
+shared player, each member's own player afterwards, rights, and the timelines kept on disk.
    python -m tests.test_debrief   (uses a throw-away data folder)"""
 import os
 import tempfile
@@ -14,6 +15,7 @@ os.environ["ATC_ADMIN_EMAILS"] = "boss@gmail.com"
 from fastapi.testclient import TestClient  # noqa: E402
 
 from atcsim.server import app, manager  # noqa: E402
+from atcsim.platform import debriefs  # noqa: E402
 
 
 def client(email):
@@ -35,102 +37,121 @@ boss.patch(f"/api/users/{users['pil@gmail.com']['id']}", json={"role": "pilot"})
 for c, n in ((ins, "Ina"), (atc, "Alaa"), (pil, "Pi"), (nosy, "No")):
     c.put("/api/me", json={"first_name": n, "last_name": "X", "licence": "L-" + n})
 
-ex = ins.post("/api/exercises", json={"scenario": "p01_ws_two_merges", "name": "debrief test"}).json()
+ex = ins.post("/api/exercises", json={"scenario": "p02_wn_merges_and_climbs", "name": "debrief test"}).json()
 eid = ex["id"]
 ins.post(f"/api/exercises/{eid}/members", json={"user_id": users["atc@gmail.com"]["id"], "seat": "atc"})
 ins.post(f"/api/exercises/{eid}/members", json={"user_id": users["pil@gmail.com"]["id"], "seat": "pilot"})
-ins.post(f"/sessions/{eid}/control", json={"action": "step", "seconds": 300})
+
+
+def view(c, sid):
+    st = c.get(f"/sessions/{sid}/state").json()
+    return st
+
+
+def sig(st):
+    return {a["callsign"]: (a["assumed"], a["fl"], round(a["x_nm"], 2), round(a["y_nm"], 2), a.get("cleared_fl"))
+            for a in st["aircraft"]}, {k: {f: v for f, v in e.items() if f not in ("t", "by", "time_s")} for k, e in (st.get("entries") or {}).items()}
+
+
+# ---- the exercise: the controller assumes and enters clearances, the pseudo-pilot flies them
+cap = {}
+ins.post(f"/sessions/{eid}/control", json={"action": "step", "seconds": 120})
+done = set()
+for t in range(120, 720, 30):
+    st = view(atc, eid)
+    for a in st["aircraft"]:
+        cs = a["callsign"]
+        if a["on_frequency"] and not a["assumed"]:
+            atc.post(f"/sessions/{eid}/assume/{cs}")
+        elif a["assumed"] and cs not in done and len(done) < 4:
+            fl = a["fl"] // 10 * 10 + (20 if len(done) % 2 else -20)
+            atc.post(f"/sessions/{eid}/entries", json={"callsign": cs, "cfl": fl})
+            pil.post(f"/sessions/{eid}/instructions", json={"callsign": cs, "type": "fl", "value": fl})
+            done.add(cs)
+    if t in (300, 450, 600):
+        cap[t] = sig(view(atc, eid))
+    ins.post(f"/sessions/{eid}/control", json={"action": "step", "seconds": 30})
 ins.post(f"/sessions/{eid}/bookmark", json={"note": "watch the merge"})
-ins.post(f"/sessions/{eid}/control", json={"action": "step", "seconds": 400})
-t_end = ins.get(f"/sessions/{eid}/state").json()["sim_time_s"]
-ok(ins.get(f"/api/debriefs/{eid}").json()["debrief_status"] == "none", "no debrief while the exercise runs")
+ok(len(done) >= 2 and any(v[0] for v in cap[600][0].values()), f"exercise: {len(done)} clearances, aircraft assumed")
 ins.post(f"/api/exercises/{eid}/end")
+
+# ---- afterwards, the controller's own player: the exercise reproduced 1:1
 d = atc.get(f"/api/debriefs/{eid}").json()
-ok(d["debrief_status"] == "ready" and not d["leader"] and d["seat"] == "atc", "ended: the debrief is ready (controller: not the leader)")
-ok(ins.get(f"/api/debriefs/{eid}").json()["leader"], "the instructor leads it")
+ok(d["debrief_status"] == "ready" and d["timelines"][0]["id"] == "orig", "the debrief: the exercise as flown")
+pl = atc.post(f"/api/debriefs/{eid}/player").json()
+sid = pl["sid"]
+ok(not pl["shared"] and pl["can_write"] and pl["can_control"], f"the controller gets their own player ({sid}): play and branch")
+for t in (300, 600):
+    atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": t})
+    got = sig(view(atc, sid))
+    ok(got == cap[t], f"T+{t}: control states, levels, positions and label entries exactly as in the exercise")
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": 300})
+atc.post(f"/sessions/{sid}/control", json={"action": "step", "seconds": 150})
+ok(sig(view(atc, sid)) == cap[450], "played from T+300 to T+450 (re-simulated with the logged actions): identical")
+st = view(atc, sid)
+ok(st["session"]["debrief"]["timeline"] == "orig", "on the exercise's timeline")
+
+# ---- an action creates a new timeline, flown by a synthetic pilot, extrapolated
+cs = next(cs for cs, v in cap[450][0].items() if v[0])
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": cs, "heading": 90})
+ok(r.status_code == 200, f"the controller gives {cs} heading 090 at T+450")
+st = view(atc, sid)
+tl1 = st["session"]["debrief"]["timeline"]
+ok(tl1 == 1 and st["session"]["debrief"]["t0"] == 450, "a new timeline from T+450, the player on it")
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": cs, "cfl": 330})
+tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
+ok(len(tls) == 2 and len(tls[1]["changes"]) == 2, "a second change at the same second: part of the same timeline")
+for _ in range(120):
+    tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
+    if tls[1]["status"] != "computing":
+        break
+    time.sleep(0.5)
+ok(tls[1]["status"] == "ready" and tls[1]["end_t"] > 900 and "losses" in tls[1]["summary"],
+   f"extrapolated to T+{tls[1]['end_t']:.0f}: {tls[1]['summary'].get('losses')} loss(es)")
+atc.post(f"/sessions/{sid}/control", json={"action": "step", "seconds": 180})
+a = next(a for a in view(atc, sid)["aircraft"] if a["callsign"] == cs)
+ok(abs(((a["track_deg"] - 90 + 540) % 360) - 180) < 15, f"the synthetic pilot flew it: {cs} on track {a['track_deg']:.0f}")
+ev = atc.get(f"/api/debriefs/{eid}/timelines/1").json()
+ok(any(e["time_s"] < 450 for e in ev["events"]) and ev["parent"] == "orig", "the new timeline's markers include the history before it")
+# a timeline from that timeline
+cs2 = next(c for c, v in cap[450][0].items() if v[0] and c != cs)
+atc.post(f"/sessions/{sid}/entries", json={"callsign": cs2, "cfl": 250})
+tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
+ok(len(tls) == 3 and tls[2]["parent"] == 1 and tls[2]["t0"] == 630, "a change later on it: a timeline branched from it (T+630)")
+# the original is untouched
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "orig", "t": 600})
+ok(sig(view(atc, sid)) == cap[600], "back on the exercise's timeline: unchanged")
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "1", "t": 600})
+ok(view(atc, sid)["session"]["debrief"]["timeline"] == 1, "switch to timeline 1 at T+600")
+
+# ---- rights
 ok(nosy.get(f"/api/debriefs/{eid}").status_code == 403, "not for others")
-ok(any(x["id"] == eid and x["debrief_status"] == "ready" for x in atc.get("/api/debriefs").json()), "listed on the controller's debriefs page")
-ok(atc.get(f"/debrief/{eid}").status_code == 200 and "cv" in atc.get(f"/debrief/{eid}").text, "the debrief page is the simulator screen")
+isid = ins.post(f"/api/debriefs/{eid}/player").json()["sid"]
+ok(isid != sid and atc.post(f"/sessions/{isid}/control", json={"action": "resume"}).status_code == 403, "nobody runs another member's player")
+ok(atc.post(f"/sessions/{isid}/entries", json={"callsign": cs, "cfl": 300}).status_code == 403, "nor acts on it")
 
-# ---- the original run, read-only
-o = atc.post(f"/api/debriefs/{eid}/open", json={"src": "orig"}).json()
-sid = o["sid"]
-ok(o["kind"] == "orig" and not o["writable"], f"original run opened ({sid}), read-only")
-st = atc.get(f"/sessions/{sid}/state").json()
-ok(abs(st["sim_time_s"] - t_end) <= 10 and st["aircraft"], f"it ends where the exercise ended (T+{st['sim_time_s']:.0f})")
-rec = atc.get(f"/sessions/{sid}/recording").json()
-ok(rec["frames"][0]["t"] <= 5 and rec["frames"][-1]["t"] >= t_end - 10, f"the whole replay: {len(rec['frames'])} frames")
-ok(any(e["type"] == "bookmark" for e in rec["events"]), "with the bookmarks on the timeline")
-cs = st["aircraft"][0]["callsign"]
-ok(ins.post(f"/sessions/{sid}/entries", json={"callsign": cs, "cfl": 300}).status_code == 403, "the original cannot be changed, even by the instructor")
-ok(ins.post(f"/sessions/{sid}/control", json={"action": "resume"}).status_code == 403, "nor run")
-ok(nosy.get(f"/sessions/{sid}/state").status_code == 403, "others cannot see it")
-
-# ---- the session: start, open call
-ok(atc.post(f"/api/debriefs/{eid}/start").status_code == 403, "the controller does not start it")
+# ---- the session: one shared player, the instructor runs it, everybody may act
 ok(ins.post(f"/api/debriefs/{eid}/start").json()["debrief_status"] == "live", "the instructor starts the debrief session")
-ok(any(x["id"] == eid and x["debrief_status"] == "live" for x in atc.get("/api/debriefs").json()), "live on the controller's debriefs page")
-with ins.websocket_connect(f"/debriefs/{eid}/comms") as wi, atc.websocket_connect(f"/debriefs/{eid}/comms") as wa:
-    hi = wi.receive_json()
-    while hi.get("type") != "hello":
-        hi = wi.receive_json()
-    ha = wa.receive_json()
-    while ha.get("type") != "hello":
-        ha = wa.receive_json()
-    ok(hi["open"] and hi["me"]["leader"] and not ha["me"]["leader"], "open call: the instructor leads")
-    wi.send_json({"op": "sync", "s": {"src": "orig", "t": 120, "play": True}})
-    m = wa.receive_json()
-    while m.get("type") != "sync":
-        m = wa.receive_json()
-    ok(m["s"]["t"] == 120, "the controller follows the instructor's replay")
-    wa.send_json({"op": "sync", "s": {"src": "orig", "t": 999}})
-    wa.send_json({"op": "cursor", "x": 10.5, "y": -3})
-    m = wi.receive_json()
-    while m.get("type") not in ("cursor", "sync"):
-        m = wi.receive_json()
-    ok(m["type"] == "cursor" and m["x"] == 10.5, "the controller's sync is ignored, their cursor is shown")
-    wa.send_bytes(bytes([0x7f]) * 320)                      # open call: no push-to-talk needed
-    m = wi.receive_bytes()
-    ok(m[0] == 2 and len(m) == 323, "the controller is heard without push-to-talk")
-    wa.send_json({"op": "mute", "on": True})
-    m = wi.receive_json()
-    while m.get("type") != "roster":
-        m = wi.receive_json()
-    ok(any(r["muted"] for r in m["roster"]), "muted: shown to the others")
-ok(nosy.get(f"/api/debriefs/{eid}").status_code == 403, "outsiders kept out")
+p1, p2 = ins.post(f"/api/debriefs/{eid}/player").json(), atc.post(f"/api/debriefs/{eid}/player").json()
+ok(p1["sid"] == p2["sid"] == eid + "00" and p1["can_control"] and not p2["can_control"] and p2["can_write"],
+   "a shared player: the instructor runs it, the controller may act on it")
+ok(atc.post(f"/sessions/{p1['sid']}/control", json={"action": "resume"}).status_code == 403, "the controller does not run it")
+ins.post(f"/api/debriefs/{eid}/seek", json={"sid": p1["sid"], "t": 300})
+r = atc.post(f"/sessions/{p1['sid']}/release/{next(c for c, v in cap[300][0].items() if v[0])}")
+ok(r.status_code == 200 and len(atc.get(f"/api/debriefs/{eid}").json()["timelines"]) == 4, "the controller decontrols an aircraft: another timeline")
+ok(ins.post(f"/api/debriefs/{eid}/end").json()["debrief_status"] == "done", "the instructor ends it")
+ok(atc.post(f"/api/debriefs/{eid}/player").json()["sid"] == sid, "afterwards: back to one's own player")
 
-# ---- try from here
-ok(atc.post(f"/api/debriefs/{eid}/branches", json={"t": 200}).status_code == 403, "the controller does not branch")
-b = ins.post(f"/api/debriefs/{eid}/branches", json={"t": 205, "name": "turn earlier"}).json()
-bsid = b["sid"]
-ok(b["n"] == 1 and b["t0"] == 200 and b["name"] == "turn earlier", "Try from here: from the 10-second point before (T+200)")
-bst = ins.get(f"/sessions/{bsid}/state").json()
-ok(bst["sim_time_s"] == 200 and bst["session"]["status"] == "paused", "the try starts there, paused")
-brec = ins.get(f"/sessions/{bsid}/recording").json()
-ok(brec["frames"][-1]["t"] <= 200 and brec["frames"][0]["t"] <= 5, "with the history before it on its timeline")
-c2 = next(a for a in bst["aircraft"] if a.get("assumed")) if any(a.get("assumed") for a in bst["aircraft"]) else bst["aircraft"][0]
-cs2 = c2["callsign"]
-r = ins.post(f"/sessions/{bsid}/entries", json={"callsign": cs2, "heading": 270})
-ok(r.status_code == 200, "the instructor gives another clearance in the try")
-ok(ins.post(f"/sessions/{bsid}/control", json={"action": "step", "seconds": 60}).status_code == 200, "and runs it")
-ok(atc.post(f"/sessions/{bsid}/control", json={"action": "resume"}).status_code == 403, "the controller does not run it")
-ok(atc.post(f"/sessions/{bsid}/entries", json={"callsign": cs2, "speed": "M78"}).status_code == 200, "but may try a clearance during the session")
-ok(abs(atc.get(f"/sessions/{sid}/state").json()["sim_time_s"] - t_end) <= 10, "the original run is unchanged")
-lst = atc.get(f"/api/debriefs/{eid}").json()["branches"]
-ok(len(lst) == 1 and lst[0]["by"].startswith("Ina"), "the try is listed for everybody")
-
-# ---- end of the session: everything kept, the controller opens it again
-ok(ins.post(f"/api/debriefs/{eid}/end").json()["debrief_status"] == "done", "the instructor ends the debrief")
-from atcsim.platform import debriefs  # noqa: E402
+# ---- kept on disk
+for _ in range(120):
+    if all(t["status"] != "computing" for t in atc.get(f"/api/debriefs/{eid}").json()["timelines"]):
+        break
+    time.sleep(0.5)
 debriefs.unload(eid)
-ok(bsid not in manager.sessions, "runs unloaded")
-o2 = atc.post(f"/api/debriefs/{eid}/open", json={"src": "1"}).json()
-ok(o2["sid"] == bsid and not o2["writable"], "afterwards the controller reopens the try (read-only)")
-st2 = atc.get(f"/sessions/{bsid}/state").json()
-ok(st2["sim_time_s"] >= 250, f"as it was left (T+{st2['sim_time_s']:.0f})")
-ok(atc.post(f"/sessions/{bsid}/entries", json={"callsign": cs2, "cfl": 300}).status_code == 403, "not changed by the controller afterwards")
-ok(ins.post(f"/sessions/{bsid}/control", json={"action": "step", "seconds": 10}).status_code == 200, "the instructor can still go on with it")
-o3 = atc.post(f"/api/debriefs/{eid}/open", json={"src": "orig"}).json()
-ok(atc.get(f"/sessions/{o3['sid']}/recording").json()["frames"], "and the original replay")
-ok(any(x["id"] == eid and x["debrief_status"] == "done" for x in atc.get("/api/debriefs").json()), "the debrief stays with the exercise")
+debriefs.DEBRIEFS.clear()
+tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
+ok(len(tls) == 4 and tls[1]["status"] == "ready" and tls[2]["parent"] == 1, "the timelines are kept (reloaded from disk)")
+sid = atc.post(f"/api/debriefs/{eid}/player").json()["sid"]
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": 600})
+ok(sig(view(atc, sid)) == cap[600], "and the exercise still reproduces 1:1")
 print("debrief checks passed")

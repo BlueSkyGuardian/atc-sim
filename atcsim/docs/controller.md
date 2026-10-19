@@ -432,14 +432,16 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 
 ## After the exercise
 
-- **Debrief**: the exercise replayed on this radar with its marked moments. When your instructor holds the debrief
-  session, the Debriefs tile on your home page (and the exercise's card) shows **● Join the debrief**:
-  - it is an **open call**: talk freely, no push-to-talk; **🎙 On / 🔇 Muted** in the top bar;
-  - your screen **follows the instructor's** (the run shown, the replay time, the view) and you see their cursor; they
-    see yours. Click the timeline to look at something yourself; **↺ Follow the instructor** brings you back;
-  - the instructor may **try other solutions** from a moment of the run: a live branch (a tab next to *Exercise*)
-    where pilots fly what is entered; you may enter clearances in it too. Your exercise itself is never changed;
-  - afterwards the debrief stays on the exercise's card: open it again whenever you want, the exercise and every try.
+- **Debrief**: the exercise re-simulated on this radar, exactly as you saw it (your assumes, entries, coordination,
+  alerts), with **Play / Pause**, **±30 s**, the speed and the time bar. Open it from the exercise's card or the
+  Debriefs tile, whenever you want:
+  - **try other instructions**: pause where it matters and act on the labels (assume, decontrol, a level, a heading...).
+    Each action creates a **new timeline** from that second; a synthetic pilot flies it, and it is extrapolated to the
+    end of the exercise (the other aircraft do what they did), so you see the outcome in the **Timelines** panel: no
+    loss, or when the first one happens. Switch between timelines to compare; your exercise itself never changes;
+  - when your instructor holds the **debrief session** (**● Join the debrief** on your home page): an open call (talk
+    freely, **🎙 On / 🔇 Muted**), one shared player that the instructor runs, your view follows theirs and you see their
+    cursor. You may act on the picture too: your actions branch timelines everybody sees.
   **Report ↗** gives the run written up: workload, each loss of separation with the clearances before it, requests
   left unanswered, read-backs, infringements, the bookmarks.
 - **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your
@@ -453,7 +455,7 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   times, your profile per dimension, and the list of sessions. Each session shows the scenario's **complexity** and
   **density** as they were when you flew it, so you can see your results against the difficulty.
 
-![The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)](/static/docs/x_debrief.jpg "The debrief session: the exercise replayed, the open call (top), the controller's cursor, Try from here (bottom right)")
+![The debrief session, on the instructor's screen: the open call (top right), the timelines (left), the player's controls, a new timeline being extrapolated](/static/docs/x_debrief.jpg "The debrief session, on the instructor's screen: the open call (top right), the timelines (left), the player's controls, a new timeline being extrapolated")
 
 ![The instructor's evaluation on your home page, to acknowledge with a comment](/static/docs/c_evaluation.jpg "The instructor's evaluation on your home page, to acknowledge with a comment")
 

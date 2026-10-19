@@ -73,19 +73,20 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         if seat is None:
             return "you are not a member of this exercise"
         o = _debrief(sid)
-        if o is not None:
+        if o is not None:                          # a debrief's player (debriefs.py)
             from . import debriefs
             if method in ("GET", "HEAD") or rest in ("/stream", "/comms") or (method == "POST" and rest == "/connect"):
                 return None
+            if rest == "/control":
+                return None if debriefs.can_control(sid, user) else "the instructor runs the debrief session"
             if not debriefs.can_write(sid, user):
-                return ("the exercise's run is kept as it was: Try from here to change it" if o["kind"] == "orig"
-                        else "the instructor leads the tries (open again once the debrief session is on)")
-            if debriefs.is_leader(o["eid"], user):
+                return "this player is not yours"
+            if debriefs.can_control(sid, user):
                 return None
             for pat in WRITE_RIGHTS["atc"]:
                 if re.match(pat, rest):
                     return None
-            return "the instructor runs the simulation in the debrief"
+            return "the instructor runs the debrief session"
         if seat == "instructor" or method in ("GET", "HEAD") or rest in ("/stream", "/comms"):
             return None
         if method == "POST" and rest == "/connect":

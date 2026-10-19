@@ -106,10 +106,8 @@ class Session:
         while not self._stop.is_set():
             if self.status == "running" and self.mode == "realtime":
                 with self.lock:
-                    self.world.step(1.0)
-                    self._maybe_snapshot()
-                    if self.world.finished:
-                        self.status = "finished"
+                    if self.status == "running":
+                        self._tick()
                 next_tick += 1.0 / self.time_factor
                 delay = next_tick - time.monotonic()
                 if delay < -1.0:            # fell behind (e.g. very high time factor) -> resync
@@ -119,6 +117,15 @@ class Session:
             else:
                 next_tick = time.monotonic()
                 self._stop.wait(0.05)
+
+    def _tick(self) -> bool:
+        """One simulated second (the caller holds the lock). False when nothing can advance any more."""
+        self.world.step(1.0)
+        self._maybe_snapshot()
+        if self.world.finished:
+            self.status = "finished"
+            return False
+        return True
 
     def stop(self) -> None:
         self._stop.set()
@@ -148,10 +155,7 @@ class Session:
                     raise ValueError("pause the session (or use stepped mode) before stepping")
                 n = int(max(1, min(float(seconds), 7200)))
                 for _ in range(n):
-                    self.world.step(1.0)
-                    self._maybe_snapshot()
-                    if self.world.finished:
-                        self.status = "finished"
+                    if not self._tick():
                         break
             elif action == "auto_wx":          # simulated pilots deviate around weather by themselves (or not)
                 self.world.auto_wx = bool(time_factor if time_factor is not None else True)

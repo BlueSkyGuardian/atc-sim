@@ -158,6 +158,25 @@ def _pilot_exec(s, request) -> bool:
     return bool(getattr(s, "multi", False)) and seat_for(s.id, _user(request)) in ("pilot", "instructor")
 
 
+def _act(sid: str, request: Request, kind: str, body: dict):
+    """A logged action on a session (see inputs.py): carried out, recorded with its sim time; errors as HTTP."""
+    from . import inputs
+    from .world import InstructionError
+    s = _session(sid)
+    u = _user(request)
+    seat = seat_for(sid, u) if getattr(s, "multi", False) else "instructor"
+    actor = {"id": u.get("id") if u else None, "seat": seat,
+             "name": pex.db.public_user(u)["name"] if u and u.get("id") else (seat or "atc")}
+    try:
+        return inputs.run(s, kind, body, actor)
+    except inputs.Refused as e:
+        raise HTTPException(403, str(e))
+    except KeyError as e:
+        raise HTTPException(404, str(e).strip("'"))
+    except (InstructionError, ValueError) as e:
+        raise HTTPException(400, str(e))
+
+
 @app.get("/api/health")
 def health():
     return {"ok": True, "sessions": len(manager.sessions)}
@@ -323,11 +342,12 @@ def delete_session(sid: str):
 
 
 @app.post("/sessions/{sid}/control")
-def control(sid: str, body: Control):
+def control(sid: str, body: Control, request: Request):
     s = _session(sid)
     try:
         if body.action == "auto_wx":
-            return s.control("auto_wx", time_factor=1.0 if body.value is not False else 0.0)
+            _act(sid, request, "auto_wx", {"value": body.value is not False})
+            return s.summary()
         return s.control(body.action, seconds=body.seconds, time_factor=body.time_factor, mode=body.mode)
     except ValueError as e:
         raise HTTPException(400, str(e))
@@ -369,27 +389,7 @@ def live_action(sid: str, body: LiveAction, request: Request):
     appear: "now" or seconds to its entry), "emergency" (callsign, kind: descent | medical | radio | general,
     aerodrome, why), "clear_emergency" (callsign), "request" (callsign, kind: level | direct | speed | deviation |
     report, value, reason), "area" (area, active)."""
-    from . import live
-    s = _session(sid)
-    who = _who(request, "instructor")
-    with s.lock:
-        w = s.world
-        try:
-            if body.action == "aircraft":
-                return live.add_aircraft(w, body.model_dump(), by=who)
-            if body.action == "emergency":
-                return live.emergency(w, body.callsign or "", body.kind or "general", body.aerodrome, body.why, by=who)
-            if body.action == "clear_emergency":
-                return live.clear_emergency(w, body.callsign or "", by=who)
-            if body.action == "request":
-                return live.request(w, body.callsign or "", body.kind or "", body.value, body.reason or "", by=who)
-            if body.action == "readback_rate":
-                return live.set_readback_rate(w, body.rate or 0.0, by=who)
-            if body.action == "readback_result":
-                return live.readback_result(w, body.trap or 0, bool(body.caught), by=who)
-            return live.set_area(w, body.area or "", bool(body.active), by=who)
-        except ValueError as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "live", body.model_dump())
 
 
 class Bookmark(BaseModel):
@@ -400,10 +400,7 @@ class Bookmark(BaseModel):
 def bookmark(sid: str, body: Bookmark, request: Request):
     """Mark this moment for the debrief (instructor, pseudo-pilots, the solo radar's controller): on the timeline and
     in the debrief, with a note."""
-    from . import debrief
-    s = _session(sid)
-    with s.lock:
-        return debrief.bookmark(s.world, body.note, by=_who(request, ""))
+    return _act(sid, request, "bookmark", {"note": body.note})
 
 
 @app.get("/sessions/{sid}/timeline")
@@ -526,29 +523,15 @@ def instructions(sid: str, body: Union[Instruction, List[Instruction]], request:
     """Issue one instruction or a list. Each gets a record: accepted (executes after pilot delay) or rejected."""
     s = _session(sid)
     items = body if isinstance(body, list) else [body]
-    pilot = _pilot_exec(s, request)
-    if s.multi and seat_for(sid, _user(request)) == "pilot" and any(i.type in ("assume", "release") for i in items):
-        raise HTTPException(403, "the controller assumes aircraft (label or double-click), not the pilot")
-    with s.lock:
-        if s.status == "finished":
-            raise HTTPException(409, "scenario finished")
-        return [s.world.issue(_clean(i.model_dump()), source="pilot" if pilot else "api", by_pilot=pilot)
-                for i in items]
+    if s.status == "finished":
+        raise HTTPException(409, "scenario finished")
+    return _act(sid, request, "instructions", {"items": [_clean(i.model_dump()) for i in items]})
 
 
 @app.post("/sessions/{sid}/command")
 def command(sid: str, body: Command, request: Request):
     """Free-text controller shorthand, e.g. 'RAM101 FL370 H250', 'AFR22 D S3', 'IBE5 UNA'."""
-    s = _session(sid)
-    pilot = _pilot_exec(s, request)
-    with s.lock:
-        try:
-            parsed = parse_command(body.text, s.world)
-        except ValueError as e:
-            raise HTTPException(400, str(e))
-        if s.multi and seat_for(sid, _user(request)) == "pilot" and any(p.get("type") in ("assume", "release") for p in parsed):
-            raise HTTPException(403, "the controller assumes aircraft, not the pilot")
-        return [s.world.issue(p, source="pilot" if pilot else "command", by_pilot=pilot) for p in parsed]
+    return _act(sid, request, "command", {"text": body.text})
 
 
 class Entry(BaseModel):
@@ -568,16 +551,8 @@ class Entry(BaseModel):
 def entries(sid: str, body: Entry, request: Request):
     """Controller's label input (connected mode): what was cleared, as entered in the system. The aircraft does
     not move until the pseudo-pilot executes the clearance given on the frequency. Send "" to clear a field."""
-    s = _session(sid)
-    from .world import InstructionError
     fields = {k: v for k, v in body.model_dump().items() if k != "callsign" and k in body.model_fields_set}
-    u = _user(request)
-    with s.lock:
-        try:
-            e = s.world.enter(body.callsign, fields, who=pex.db.public_user(u)["name"] if u["id"] else "atc")
-            return {**e, "_readback": getattr(s.world, "last_readback", [])}     # solo: what the pilot read back
-        except (InstructionError, ValueError) as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "entries", {"callsign": body.callsign, **fields})     # solo: with what the pilot read back
 
 
 class MtcdProbe(BaseModel):
@@ -603,17 +578,10 @@ class MtcdSettings(BaseModel):
 
 
 @app.post("/sessions/{sid}/mtcd/settings")
-def mtcd_settings(sid: str, body: MtcdSettings):
+def mtcd_settings(sid: str, body: MtcdSettings, request: Request):
     """Set the MTCD look-ahead of this exercise, in minutes (5 to 60). Every seat's MTCD (list, tags, conflict
     display) and the what-if probes then look that far ahead. Controller or instructor."""
-    from . import atctools
-    s = _session(sid)
-    with s.lock:
-        try:
-            v = atctools.set_look_ahead(s.world, body.look_ahead_min * 60)
-        except ValueError as e:
-            raise HTTPException(400, str(e))
-        return {"look_ahead_s": v, "conflicts": atctools.mtcd(s.world)}
+    return _act(sid, request, "mtcd_settings", {"look_ahead_min": body.look_ahead_min})
 
 
 @app.post("/sessions/{sid}/mtcd")
@@ -681,43 +649,21 @@ def cpdlc_command(sid: str, body: CpdlcText, request: Request):
     """The controller's command line, e.g. {"callsign": "RAM201", "text": "CL350 DCT ROLRO"}: an uplink to a connected
     aircraft (or an answer to its request: APP, UNA, SBY, ROG). voice=true, or an aircraft without an active
     connection: only puts the clearance in the system (cleared level, heading, direct, speed...) for a voice clearance."""
-    from . import cpdlc
-    from .world import InstructionError
-    s = _session(sid)
-    with s.lock:
-        try:
-            return cpdlc.command(s.world, body.text, body.callsign, voice=body.voice, who=_who(request, "atc"))
-        except (InstructionError, ValueError) as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "cpdlc_command", {"text": body.text, "callsign": body.callsign, "voice": body.voice})
 
 
 @app.post("/sessions/{sid}/cpdlc/respond")
 def cpdlc_respond(sid: str, body: CpdlcAnswer, request: Request):
     """The pilot answers an uplink: WILCO (the aircraft executes it and the system takes it), UNABLE (reason
     weather / performance), STANDBY, ROGER, AFFIRM, NEGATIVE."""
-    from . import cpdlc
-    from .world import InstructionError
-    s = _session(sid)
-    with s.lock:
-        try:
-            return cpdlc.respond(s.world, body.message_id, body.answer, body.reason, who=_who(request, "pilot"), text=body.text)
-        except (InstructionError, ValueError) as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "cpdlc_respond", body.model_dump())
 
 
 @app.post("/sessions/{sid}/cpdlc/downlink")
 def cpdlc_downlink(sid: str, body: CpdlcDown, request: Request):
     """A pilot request by data link: kind level | climb | descent | direct | speed | deviation | text, with value;
     or request_id = one of the aircraft's pending requests, sent by CPDLC instead of the frequency."""
-    from . import cpdlc
-    from .world import InstructionError
-    s = _session(sid)
-    with s.lock:
-        try:
-            return cpdlc.downlink(s.world, body.callsign, body.kind or "", body.value, body.reason, body.request_id,
-                                  who=_who(request, "pilot"))
-        except (InstructionError, ValueError) as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "cpdlc_downlink", body.model_dump())
 
 
 class ChatIn(BaseModel):
@@ -748,26 +694,8 @@ def chat_messages(sid: str, since: int = 0, station: Optional[str] = None):
 def chat_send(sid: str, body: ChatIn, request: Request):
     """Send a coordination message: {"from": station, "to": station, "text", "callsign", "ref"}. The controller writes
     as our sector (from may be left out) to another station; the pseudo-pilot writes as another sector or unit."""
-    from . import chat
-    s = _session(sid)
-    seat = seat_for(sid, _user(request)) if getattr(s, "multi", False) else "instructor"
-    with s.lock:
-        w = s.world
-        try:
-            own = chat.own_station(w)
-            frm = chat.resolve(w, body.sender) if body.sender else (own if seat == "atc" else None)
-            if frm is None:
-                raise ValueError("from: which station are you writing as?")
-            to = chat.resolve(w, body.to) if body.to else (own if frm != own else None)
-            if to is None:
-                raise ValueError("to: which station?")
-            if seat == "atc" and frm != own:
-                raise HTTPException(403, f"the controller writes as {own}")
-            if seat == "pilot" and frm == own:
-                raise HTTPException(403, f"the pseudo-pilot writes as another sector or unit, not as {own}")
-            return chat.send(w, frm, to, body.text, body.callsign, body.ref, by=_who(request, seat or ""))
-        except ValueError as e:
-            raise HTTPException(400, str(e))
+    return _act(sid, request, "chat", {"text": body.text, "to": body.to, "from": body.sender, "callsign": body.callsign,
+                                       "ref": body.ref})
 
 
 @app.get("/sessions/{sid}/oldi")
@@ -805,22 +733,18 @@ def flightplan_one(sid: str, callsign: str):
 
 
 @app.post("/sessions/{sid}/release/{callsign}")
-def release(sid: str, callsign: str):
+def release(sid: str, callsign: str, request: Request):
     """The controller decontrols an aircraft (by hand). It keeps flying, as another sector's traffic."""
-    s = _session(sid)
-    with s.lock:
-        rec = s.world.issue({"callsign": callsign.upper(), "type": "release"}, source="atc")
+    rec = _act(sid, request, "release", {"callsign": callsign.upper()})
     if rec["status"] == "rejected":
         raise HTTPException(400, rec["reason"])
     return rec
 
 
 @app.post("/sessions/{sid}/assume/{callsign}")
-def assume(sid: str, callsign: str):
+def assume(sid: str, callsign: str, request: Request):
     """The controller assumes an aircraft (on its first call)."""
-    s = _session(sid)
-    with s.lock:
-        rec = s.world.issue({"callsign": callsign.upper(), "type": "assume"}, source="atc")
+    rec = _act(sid, request, "assume", {"callsign": callsign.upper()})
     if rec["status"] == "rejected":
         raise HTTPException(400, rec["reason"])
     return rec
@@ -848,18 +772,9 @@ def areas(sid: str):
 
 
 @app.patch("/sessions/{sid}/areas/{area_id}")
-def patch_area(sid: str, area_id: str, body: AreaPatch):
+def patch_area(sid: str, area_id: str, body: AreaPatch, request: Request):
     """Manually activate/deactivate an area (supervisor action; the published schedule still applies later)."""
-    s = _session(sid)
-    with s.lock:
-        a = s.world.areas.get(area_id)
-        if a is None:
-            raise HTTPException(404, "unknown area")
-        if a.active != body.active:
-            a.active = body.active
-            s.world._event("area_activated" if body.active else "area_deactivated", area_id=a.id, name=a.name,
-                           kind=a.kind, manual=True)
-        return a.snapshot(s.world.t)
+    return _act(sid, request, "area", {"area": area_id, "active": body.active})
 
 
 @app.get("/sessions/{sid}/events")
@@ -907,22 +822,9 @@ def aerodromes(sid: str):
 
 
 @app.patch("/sessions/{sid}/aerodromes/{ad_id}")
-def change_runway(sid: str, ad_id: str, body: RunwayPatch):
+def change_runway(sid: str, ad_id: str, body: RunwayPatch, request: Request):
     """Change the runway in use (supervisor action). Arrivals recompute their top of descent."""
-    s = _session(sid)
-    with s.lock:
-        ad = s.world.aerodromes.get(ad_id)
-        if ad is None:
-            raise HTTPException(404, "unknown aerodrome")
-        if body.runway not in ad.runways:
-            raise HTTPException(400, f"runways: {list(ad.runways)}")
-        if ad.in_use != body.runway:
-            ad.in_use = body.runway
-            s.world._event("runway_change", aerodrome=ad.id, runway=body.runway, manual=True,
-                           text=f"{ad.id} runway in use now {body.runway}")
-            for a in s.world.aircraft.values():
-                a.arr.pop("_last", None)
-        return ad.snapshot()
+    return _act(sid, request, "runway", {"aerodrome": ad_id, "runway": body.runway})
 
 
 # ------------------------------------------------------------------ recording / replay
@@ -1096,26 +998,23 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
     def handle(op: dict):
         kind = op.pop("op", "instruction")
         multi = bool(getattr(s, "multi", False))
-        pilot = multi and seat in ("pilot", "instructor")
         if kind == "control" and not (seat in ("instructor", "pilot") or getattr(s, "solo", False)):
             raise PermissionError("simulation control is for the instructor")
+        from . import inputs
+        actor = {"name": seat or "atc", "seat": seat if multi else "instructor"}
         if seat == "atc" and multi:
             if kind == "entry":
-                with s.lock:
-                    return s.world.enter(op.pop("callsign", ""), op, who="atc")
+                return inputs.run(s, "entries", {"callsign": op.pop("callsign", ""), **op}, actor)
             if kind == "instruction" and op.get("type") in ("assume", "release"):
-                with s.lock:
-                    return s.world.issue(op, source="atc")
+                return inputs.run(s, op["type"], {"callsign": op.get("callsign", "")}, actor)
             raise PermissionError("the controller's seat enters clearances in the labels; the pilot executes them")
-        with s.lock:
-            if kind == "command":
-                return [s.world.issue(p, source="stream", by_pilot=pilot)
-                        for p in parse_command(op.get("text", ""), s.world)]
-            if kind == "control":
-                return s.control(op.get("action", ""), seconds=op.get("seconds", 1), time_factor=op.get("time_factor"))
-            if kind == "entry":
-                return s.world.enter(op.pop("callsign", ""), op, who=seat or "atc")
-            return s.world.issue(op, source="stream", by_pilot=pilot)
+        if kind == "command":
+            return inputs.run(s, "command", {"text": op.get("text", "")}, actor)
+        if kind == "control":
+            return s.control(op.get("action", ""), seconds=op.get("seconds", 1), time_factor=op.get("time_factor"))
+        if kind == "entry":
+            return inputs.run(s, "entries", {"callsign": op.pop("callsign", ""), **op}, actor)
+        return inputs.run(s, "instructions", {"items": [op]}, actor)
 
     send_lock = asyncio.Lock()
 
