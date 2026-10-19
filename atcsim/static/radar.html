@@ -355,6 +355,9 @@
   .mem { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; padding: 2px 0; }
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
   .dot.on { background: var(--accent); }
+  body:not(.solo) #forceBtn { display: none; }
+  #forceBtn.on { background: #5a3d0f; border-color: #c9a227; color: #ffe08a; font-weight: 700; }
+  #radioLog button.frc { border-color: #c9a227; color: #ffe08a; }
   /* ---- debrief on the simulator (debrief.js) */
   body.debrief .simbar, body.debrief #tlCtl, body.debrief #chatBtn, body.debrief #chatToast, body.debrief #legend, body.debrief #ptt,
   body.debrief #phoneBtn, body.debrief #tlBtn { display: none !important; }
@@ -419,7 +422,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>

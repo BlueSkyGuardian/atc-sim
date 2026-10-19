@@ -35,6 +35,8 @@ def describe(kind: str, body: dict) -> str:
     cs = callsign_of(kind, body) or ""
     if kind == "entries":
         parts = []
+        if body.get("force"):
+            parts.append("(forced)")
         for k in ("cfl", "xfl", "heading", "direct", "speed", "wx", "route", "coord", "note"):
             if k in body and body[k] not in (None,):
                 v = body[k]
@@ -96,7 +98,8 @@ def _mtcd_settings(w, body, actor):
 
 def _cpdlc_command(w, body, actor):
     from . import cpdlc
-    return cpdlc.command(w, body["text"], body.get("callsign"), voice=bool(body.get("voice")), who=actor.get("name") or "atc")
+    return cpdlc.command(w, body["text"], body.get("callsign"), voice=bool(body.get("voice")), who=actor.get("name") or "atc",
+                         force=bool(body.get("force")))
 
 
 def _cpdlc_respond(w, body, actor):

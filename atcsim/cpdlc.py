@@ -480,7 +480,7 @@ def _approval(w, down: dict) -> List[dict]:
     raise ValueError("this request is answered with ROGER, UNABLE or a clearance, not APP")
 
 
-def command(w, text: str, callsign: Optional[str] = None, voice: bool = False, who: str = "atc") -> dict:
+def command(w, text: str, callsign: Optional[str] = None, voice: bool = False, who: str = "atc", force: bool = False) -> dict:
     """The controller's command line: an uplink (or an answer to a downlink) to a connected aircraft; with voice=True,
     or to an aircraft without an active connection, only what it puts in the system (a voice clearance)."""
     p = parse(w, text, callsign)
@@ -536,7 +536,7 @@ def command(w, text: str, callsign: Optional[str] = None, voice: bool = False, w
             if any(e.get("code") == "UM169" for e in p["elements"]):
                 raise ValueError(f"free text goes by CPDLC only, and {cs} has no active connection")
             raise ValueError(f"{cs} has no active CPDLC connection" if not voice else "nothing to enter")
-        w.enter(cs, ent, who=who)
+        w.enter(cs, dict(ent, force=True) if force else ent, who=who)
         rb = list(getattr(w, "last_readback", []) or [])
         if getattr(w, "auto_pilot", False):
             note = " · ".join(r["text"][len(cs) + 1:] if r["text"].startswith(cs + " ") else r["text"] for r in rb) or "entered"   # read back

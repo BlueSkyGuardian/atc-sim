@@ -187,7 +187,10 @@ the radio log's pending calls.
 decontrol, a level, a heading, a direct, a speed in the label menus or the command line, an answer to a request... The
 exercise itself is never changed, and the run goes on (on the new timeline) if it was playing.
 
-- With no pseudo-pilot, a **synthetic pseudo-pilot** flies the clearances (and reads them back in the radio log).
+- With no pseudo-pilot, a **synthetic pseudo-pilot** flies the clearances (and reads them back in the radio log). It
+  refuses what it could not do (a heading into weather, a level beyond its performance): **Force** in the radio log
+  makes it fly it anyway, and **Comply** in the toolbar makes it accept everything while on - the point of a what-if
+  is sometimes to see what that clearance would have given.
 - The new timeline is **extrapolated to the end of the exercise** at once: the other aircraft do what was done in the
   exercise (the controller's later actions are replayed), the changed aircraft fly the new clearances. Its outcome
   shows in the **Timelines** panel (left): *no loss*, or the losses and the first one's time.

@@ -410,6 +410,10 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 - **What you enter is flown.** A cleared level, heading, direct, speed, route or weather deviation entered in the
   label menus, or on the command line, is flown by the pilot after a short delay. The pilot reads it back, or says
   *unable* with the reason (performance, weather, outside the levels you can give).
+- **Force**: a refused clearance shows **Force** in the radio log: the pilot flies it anyway (into the weather, as
+  high as the aircraft can climb), to see what it would have given. A forced heading or direct is held through the
+  weather (no deviation of its own) until the next heading, direct or route. **Comply** in the toolbar makes the pilots accept
+  every clearance while it is on (also in the debrief). Speeds outside the aircraft's range stay refused.
 - **The radio log** at the bottom left shows what the pilots say: first calls (with **Assume**), read-backs, unable,
   and their requests with **Approve** / **Unable** (or **Roger** for a report). `APP`, `UNA` and `ROG` on the command
   line do the same.

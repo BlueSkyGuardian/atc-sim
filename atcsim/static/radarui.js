@@ -42,6 +42,17 @@
   };
 
 
+  // ------------------------------------------------------------------ COMPLY (simulated pilots): no refusal for weather or performance
+  const fbtn = $('#forceBtn');
+  function setForce(on) {
+    window.FORCE_CLEARANCE = on;
+    if (fbtn) { fbtn.classList.toggle('on', on); fbtn.textContent = on ? '⚠ COMPLY' : 'Comply'; }
+    try { localStorage.setItem('atc_force', on ? '1' : '0'); } catch (e) {}
+  }
+  let fOn = false; try { fOn = localStorage.getItem('atc_force') === '1'; } catch (e) {}
+  setForce(fOn);
+  if (fbtn) fbtn.onclick = () => setForce(!window.FORCE_CLEARANCE);
+
   // ------------------------------------------------------------------ control bar
   const bar = $('#ctrlRow');
   const canControl = () => !EXID || SEAT === 'instructor' || SEAT === 'pilot' || solo();
@@ -92,7 +103,7 @@
       if (e.seq <= seenSeq) continue;
       seenSeq = e.seq;
       if (e.type === 'checkin' && !e.assumed) said.push({ t: e.time_s, cls: 'call', cs: e.callsign, html: `<b>${esc(e.callsign)}</b> ${esc(e.text.replace(e.callsign + ' ', ''))}` });
-      else if (e.type === 'pilot_readback') said.push({ t: e.time_s, cls: e.ok ? '' : 'bad', html: esc(e.text) });
+      else if (e.type === 'pilot_readback') said.push({ t: e.time_s, cls: e.ok ? '' : 'bad', cs: e.ok ? null : e.callsign, html: esc(e.text) });
       else if (e.type === 'cpdlc' && /^[↑↓]/.test(e.text || '') && e.direction === 'down') said.push({ t: e.time_s, cls: '', html: `<span class="c-dim">CPDLC</span>${esc(e.text.slice(2))}` });
     }
     while (said.length > 40) said.shift();
@@ -107,13 +118,27 @@
     const reqs = (state.pending_requests || []).filter(q => q.kind !== 'checkin' && !byDl.has(q.id));
     const calling = new Set((state.aircraft || []).filter(a => a.on_frequency && !a.assumed && a.status === 'active').map(a => a.callsign));
     const recent = said.filter(x => now - x.t <= KEEP_S && (x.cls !== 'call' || calling.has(x.cs))).slice(-6);
-    const rows = recent.map(x => `<div class="rl ${x.cls}"><span class="c-dim">${fmtT(x.t)}</span>${x.html}${x.cls === 'call' ? ` <span class="rb"><button data-asm="${esc(x.cs)}" title="assume it (A)">Assume</button></span>` : ''}</div>`)
+    const refused = window.lastRefused || {};
+    const rows = recent.map(x => `<div class="rl ${x.cls}"><span class="c-dim">${fmtT(x.t)}</span>${x.html}${x.cls === 'call' ? ` <span class="rb"><button data-asm="${esc(x.cs)}" title="assume it (A)">Assume</button></span>`
+        : x.cls === 'bad' && x.cs && refused[x.cs] ? ` <span class="rb"><button class="frc" data-force="${esc(x.cs)}" title="The pilot flies it anyway (weather, performance): to see what it would have given">Force</button></span>` : ''}</div>`)
       .concat(reqs.slice(-4).map(q => `<div class="rl req"><span class="c-dim">${fmtT(q.time_s)}</span>${esc(q.phraseology)}${q.reason ? ` <span class="c-dim">(${esc(q.reason)})</span>` : ''}
         <span class="rb">${q.type === 'report' ? `<button data-ans="ROG" data-cs="${esc(q.callsign)}">Roger</button>` : `<button class="primary" data-ans="APP" data-cs="${esc(q.callsign)}">Approve</button><button data-ans="UNA" data-cs="${esc(q.callsign)}">Unable</button>`}</span></div>`));
     const html = rows.length ? `<div class="hd">RADIO</div>` + rows.join('') : '';
     if (html !== lastH) { log.innerHTML = html; lastH = html; }
   }
   if (log) log.addEventListener('mousedown', async e => {
+    const fb = e.target.closest('[data-force]');
+    if (fb) {                                          // fly the refused clearance anyway
+      e.preventDefault();
+      const cs = fb.dataset.force, r = (window.lastRefused || {})[cs]; if (!r) return;
+      delete window.lastRefused[cs];
+      try {
+        const body = { ...r.body, force: true };
+        const out = await api(`/sessions/${SID}/${r.kind === 'cpdlc' ? 'cpdlc/command' : 'entries'}`, { method: 'POST', body: JSON.stringify(body) });
+        if (typeof msg === 'function') msg(`${cs}: forced`);
+      } catch (err) { if (typeof msg === 'function') msg(err.message, true); }
+      lastH = ''; renderLog(); return;
+    }
     const a = e.target.closest('[data-asm]');
     if (a) { e.preventDefault(); if (typeof assume === 'function') assume(a.dataset.asm); return; }
     const b = e.target.closest('[data-ans]'); if (!b) return;

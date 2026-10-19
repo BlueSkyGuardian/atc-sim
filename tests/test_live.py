@@ -148,6 +148,24 @@ for c in [c for c, x in we.aircraft.items() if x.assumed] * 4:
 ok(pr and pr["mode"] == "pilot" and pr in [t for t in we.readback_traps] and we.state()["readback_open"], "exercise: a read-back prompt on the pseudo-pilot's To do")
 live.readback_result(we, pr["id"], caught=False)
 ok(pr["status"] == "missed" and we.m["readback"]["missed"] == 1, "the pseudo-pilot reports it missed")
+# ---- comply: a refused clearance flown anyway (what-ifs)
+from atcsim import pilot as _pilot  # noqa: E402
+wf = build_world(load_scenario("w02_west_squall_line"))
+wf.multi, wf.auto_pilot, wf.auto_wx = True, True, True
+for _ in range(400):
+    wf.step(1)
+fc, fh = next((c, h) for c, a in wf.aircraft.items() if a.active for h in range(10, 361, 10) if _pilot.heading_into_weather(wf, a, float(h)))
+wf.issue({"callsign": fc, "type": "assume"}, source="atc")
+wf.enter(fc, {"heading": fh})
+ok(wf.last_readback[0]["status"] == "rejected" and "weather" in wf.last_readback[0]["text"], f"{fc} refuses heading {fh}: weather")
+wf.enter(fc, {"heading": fh, "force": True})
+ok(wf.last_readback[0]["status"] == "accepted" and "force" not in wf.entries[fc], "forced: flown anyway (force is not kept as an entry)")
+for _ in range(300):
+    wf.step(1)
+ok(wf.aircraft[fc].nav_mode == "heading" and abs(((wf.aircraft[fc].target_hdg - fh + 540) % 360) - 180) < 1,
+   "and it keeps that heading into the weather (no deviation of its own)")
+wf.enter(fc, {"cfl": 600, "force": True})
+ok(wf.last_readback[0]["status"] == "accepted", "a level beyond its performance, forced: it climbs as high as it can")
 print("live actions checks passed")
 # ---- debrief and bookmarks
 from atcsim import debrief  # noqa: E402

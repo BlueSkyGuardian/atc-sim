@@ -209,6 +209,7 @@ class World:
         by_pilot: executed by a pseudo-pilot (connected mode) - the aircraft does what it was told on the frequency,
         whether or not the controller has assumed it in the system."""
         itype = str(instr.get("type", "")).lower()
+        force = bool(instr.get("force"))            # "comply": no pilot objection (weather, performance) - for what-ifs
         if itype not in INSTRUCTION_TYPES:
             raise InstructionError(f"unknown instruction type '{itype}', expected one of {INSTRUCTION_TYPES}")
         cs = str(instr.get("callsign", "")).upper()
@@ -243,6 +244,8 @@ class World:
                                    f"{d:.0f} NM before {ac.entry_wp})")
         p = ac.perf
         out = {"type": itype, "callsign": cs}
+        if force:
+            out["force"] = True
         if itype == "assume" and ac.outside:
             raise InstructionError(f"{cs} has left the sector")
         if itype == "assume":
@@ -265,14 +268,18 @@ class World:
                 low, top = 50, 600                 # another sector's instruction: any sensible level
             else:
                 top = self.upper_fl
+            if force:
+                low, top = 50, 600
             if not (low <= fl <= top):
                 raise InstructionError(f"FL{fl} is outside the levels you can assign to {cs} (FL{low}-FL{top})")
             climbing = fl * 100 > ac.alt_ft + 50
             if climbing:
                 mode, val = ac.speed_target(fl * 100.0)
                 ok, why = p.level_available(fl, mode, val, ac.mass)
-                if not ok:
+                if not ok and not force:
                     raise InstructionError(f"{cs} unable FL{fl}: {why}")
+                if not ok:
+                    out["perf_note"] = f"forced: {why} (it climbs as high as it can)"
             out["fl"] = fl
             if instr.get("rate_fpm") is not None:
                 r = float(instr["rate_fpm"])
@@ -280,11 +287,11 @@ class World:
                     raise InstructionError("rate_fpm must be at least 300")
                 if climbing:
                     avail = ac.climb_rate_available((ac.alt_ft + fl * 100.0) / 2)
-                    if r > avail:
+                    if r > avail and not force:
                         raise InstructionError(f"{cs} unable {int(r)} ft/min, best rate about {int(avail // 100 * 100)} ft/min")
                 else:
                     maxd = 1.5 * ac.descent_rate_idle()
-                    if r > maxd:
+                    if r > maxd and not force:
                         raise InstructionError(f"{cs} unable {int(r)} ft/min, best rate about {int(maxd // 100 * 100)} ft/min")
                 out["rate_fpm"] = r
             spec = self._parse_speed(ac, instr, fl * 100.0, allow_value=False)
@@ -302,7 +309,7 @@ class World:
             out["heading"] = 360 if round(h) % 360 == 0 else int(round(h))
             out["turn"] = turn
             if pilot.heading_into_weather(self, ac, float(out["heading"])):
-                if not by_pilot:
+                if not by_pilot and not force:
                     raise InstructionError(f"{cs} unable heading {out['heading']:03d}, weather on that heading")
                 out["wx_note"] = f"weather ahead on heading {out['heading']:03d}"
         elif itype == "direct":
@@ -313,7 +320,7 @@ class World:
                 raise InstructionError(f"{cs} is already at {wp}")
             from .geometry import bearing
             if pilot.heading_into_weather(self, ac, bearing(ac.pos, self.waypoints[wp])):
-                if not by_pilot:                    # the simulated pilot refuses; a pseudo-pilot decides for himself
+                if not by_pilot and not force:                    # the simulated pilot refuses; a pseudo-pilot decides for himself
                     raise InstructionError(f"{cs} unable direct {wp}, weather on the direct track")
                 out["wx_note"] = f"weather on the direct track to {wp}"
             out["waypoint"] = wp
@@ -705,6 +712,9 @@ class World:
 
     def _apply(self, ac: Aircraft, n: dict) -> None:
         t = n["type"]
+        if t in ("heading", "direct", "reroute", "resume", "deviation", "wx_plan"):
+            # a forced lateral clearance: flown through the weather, no deviation of its own until the next one
+            ac.wx["forced"] = bool(n.get("force"))
         if t in ("wx_plan", "deviation"):
             ac.wx["dev_t"] = self.t
         if t == "wx_plan":
@@ -1552,6 +1562,8 @@ class World:
         out = []
         for ins in instrs:
             ins["callsign"] = cs
+            if fields.get("force"):                            # comply: no objection for weather or performance
+                ins["force"] = True
             if not ac.assumed and ins["type"] != "assume":
                 out.append({"status": "rejected", "text": f"{cs} not assumed: entered only"})
                 break

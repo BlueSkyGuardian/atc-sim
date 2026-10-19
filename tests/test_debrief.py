@@ -142,6 +142,22 @@ ok(sig(view(atc, sid)) == cap[600], "back on the exercise's timeline: unchanged"
 atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "1", "t": 600})
 ok(view(atc, sid)["session"]["debrief"]["timeline"] == 1, "switch to timeline 1 at T+600")
 
+# ---- comply: a refused clearance forced in the debrief, kept in its timeline
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "orig", "t": 300})
+fcs = next(c for c, v in cap[300][0].items() if v[0])
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": fcs, "cfl": 600}).json()
+ok(r["_readback"][0]["status"] == "rejected", f"debrief: {fcs} refuses FL600 ({r['_readback'][0]['text']})")
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": fcs, "cfl": 600, "force": True}).json()
+ok(r["_readback"][0]["status"] == "accepted", "forced: flown anyway")
+ftl = view(atc, sid)["session"]["debrief"]["timeline"]
+for _ in range(120):
+    if next(t for t in atc.get(f"/api/debriefs/{eid}").json()["timelines"] if t["id"] == ftl)["status"] != "computing":
+        break
+    time.sleep(0.5)
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": 330})
+a = next(a for a in view(atc, sid)["aircraft"] if a["callsign"] == fcs)
+ok(a["cleared_fl"] == 600, f"replayed on its timeline ({ftl}): still forced (cleared FL{a['cleared_fl']})")
+
 # ---- rights
 ok(nosy.get(f"/api/debriefs/{eid}").status_code == 403, "not for others")
 isid = ins.post(f"/api/debriefs/{eid}/player").json()["sid"]
@@ -156,7 +172,7 @@ ok(p1["sid"] == p2["sid"] == eid + "00" and p1["can_control"] and not p2["can_co
 ok(atc.post(f"/sessions/{p1['sid']}/control", json={"action": "resume"}).status_code == 403, "the controller does not run it")
 ins.post(f"/api/debriefs/{eid}/seek", json={"sid": p1["sid"], "t": 300})
 r = atc.post(f"/sessions/{p1['sid']}/release/{next(c for c, v in cap[300][0].items() if v[0])}")
-ok(r.status_code == 200 and len(atc.get(f"/api/debriefs/{eid}").json()["timelines"]) == 4, "the controller decontrols an aircraft: another timeline")
+ok(r.status_code == 200 and len(atc.get(f"/api/debriefs/{eid}").json()["timelines"]) == 5, "the controller decontrols an aircraft: another timeline")
 ok(ins.post(f"/api/debriefs/{eid}/end").json()["debrief_status"] == "done", "the instructor ends it")
 ok(atc.post(f"/api/debriefs/{eid}/player").json()["sid"] == sid, "afterwards: back to one's own player")
 
@@ -168,7 +184,7 @@ for _ in range(120):
 debriefs.unload(eid)
 debriefs.DEBRIEFS.clear()
 tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
-ok(len(tls) == 4 and tls[1]["status"] == "ready" and tls[2]["parent"] == 1, "the timelines are kept (reloaded from disk)")
+ok(len(tls) == 5 and tls[1]["status"] == "ready" and tls[2]["parent"] == 1, "the timelines are kept (reloaded from disk)")
 sid = atc.post(f"/api/debriefs/{eid}/player").json()["sid"]
 atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": 600})
 ok(sig(view(atc, sid)) == cap[600], "and the exercise still reproduces 1:1")

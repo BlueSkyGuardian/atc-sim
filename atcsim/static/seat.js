@@ -140,6 +140,15 @@
   }
   setInterval(() => document.querySelectorAll('[data-since]').forEach(el => el.textContent = since(+el.dataset.since)), 1000);
 
+  // simulated pilots (solo radar, debrief): COMPLY forces every clearance; a refused one can be forced from the radio log
+  const forceFlag = () => (window.FORCE_CLEARANCE ? { force: true } : {});
+  function noteRefused(cs, kind, body, rb) {
+    window.lastRefused = window.lastRefused || {};
+    if ((rb || []).some(r => r.status === 'rejected')) window.lastRefused[cs] = { kind, body };
+    else delete window.lastRefused[cs];
+  }
+  window.noteRefused = noteRefused;
+
   // ------------------------------------------------------------------ controller: label input
   window.onSelectAircraft = (cs, e, isLabel, field) => {
     if (isLabel && field === 'type' && window.openTypeWin) { openTypeWin(cs); if (SEAT === 'atc') { closeMenu(); return true; } }
@@ -200,7 +209,8 @@
       <datalist id="lmPts">${realPoints(Object.keys(sector.waypoints)).map(n => `<option value="${n}">`).join('')}</datalist>`;
     refreshMenuHead(); menuPos(e); m.classList.add('on');
     const send = async (f, v) => {
-      try { await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify({ callsign: cs, ...(typeof f === 'object' ? f : { [f]: v }) }) });
+      try { const body = { callsign: cs, ...(typeof f === 'object' ? f : { [f]: v }), ...forceFlag() };
+        const rr = await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify(body) }); noteRefused(cs, 'entries', body, rr && rr._readback);
         $('#lmMsg').className = 'c-ok'; $('#lmMsg').textContent = '✓ entered'; if (state.entries) state.entries[cs] = { ...(state.entries[cs] || {}), ...(typeof f === 'object' ? f : { [f]: v }) };
         if (f === 'heading' && v) m.querySelector('[data-f=direct]').value = ''; }
       catch (er) { $('#lmMsg').className = 'c-los'; $('#lmMsg').textContent = er.message; }
@@ -246,7 +256,8 @@
   };
   // ---- small menus, one per value of the label (flat buttons in the label)
   const sendEntry = async (cs, f) => {
-    await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify({ callsign: cs, ...f }) });
+    const body = { callsign: cs, ...f, ...forceFlag() };
+    const rr = await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify(body) }); noteRefused(cs, 'entries', body, rr && rr._readback);
     if (state.entries && !f.route) state.entries[cs] = { ...(state.entries[cs] || {}), ...f };
   };
   const p3 = v => String(Math.round(v)).padStart(3, '0');

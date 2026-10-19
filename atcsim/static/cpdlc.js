@@ -128,7 +128,9 @@
   async function send(voice) {
     const text = inp.value.trim(); if (!text || !SID) return;
     try {
-      const r = await api(`/sessions/${SID}/cpdlc/command`, { method: 'POST', body: JSON.stringify({ text, callsign: cs(), voice }) });
+      const body = { text, callsign: cs(), voice, ...(window.FORCE_CLEARANCE ? { force: true } : {}) };
+      const r = await api(`/sessions/${SID}/cpdlc/command`, { method: 'POST', body: JSON.stringify(body) });
+      if (r.callsign && window.noteRefused) noteRefused(r.callsign, 'cpdlc', body, r.readback);
       const html = r.kind === 'uplink' ? `<div class="cb-ok">↑ sent to ${esc(r.callsign)}: ${esc(r.message.text)}</div>`
         : r.kind === 'entry' ? `<div class="cb-ok">✎ ${esc(r.callsign)}: ${esc(r.note)}</div>` : `<div class="cb-ok">${esc(r.callsign)}: connection updated</div>`;
       result = { html, until: performance.now() + 3500 };

@@ -351,7 +351,7 @@ def update(world: "World", ac: "Aircraft") -> None:
     t = world.t
     period = SCAN_PERIOD_S if world.record else 3 * SCAN_PERIOD_S     # coarser inside look-ahead predictions
     reading_back = any(p["instruction"]["callsign"] == ac.callsign for p in world.pending)
-    if wx.has_precip and t - st["last_scan"] >= period and not reading_back:
+    if wx.has_precip and t - st["last_scan"] >= period and not reading_back and not st.get("forced"):
         st["last_scan"] = t
         _weather_scan(world, ac)
     if ac.assumed and t - st["last_turb_check"] >= TURB_CHECK_S:

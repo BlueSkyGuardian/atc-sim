@@ -545,6 +545,7 @@ class Entry(BaseModel):
     wx: Optional[str] = None
     coord: Optional[str] = None
     route: Optional[Union[str, list]] = None
+    force: Optional[bool] = None              # simulated pilots: fly it whatever the weather or performance (what-ifs)
 
 
 @app.post("/sessions/{sid}/entries")
@@ -602,6 +603,7 @@ class CpdlcText(BaseModel):
     text: str
     callsign: Optional[str] = None
     voice: bool = False
+    force: bool = False                       # simulated pilots: comply whatever the weather or performance
 
 
 class CpdlcAnswer(BaseModel):
@@ -649,7 +651,8 @@ def cpdlc_command(sid: str, body: CpdlcText, request: Request):
     """The controller's command line, e.g. {"callsign": "RAM201", "text": "CL350 DCT ROLRO"}: an uplink to a connected
     aircraft (or an answer to its request: APP, UNA, SBY, ROG). voice=true, or an aircraft without an active
     connection: only puts the clearance in the system (cleared level, heading, direct, speed...) for a voice clearance."""
-    return _act(sid, request, "cpdlc_command", {"text": body.text, "callsign": body.callsign, "voice": body.voice})
+    return _act(sid, request, "cpdlc_command", {"text": body.text, "callsign": body.callsign, "voice": body.voice,
+                                                **({"force": True} if body.force else {})})
 
 
 @app.post("/sessions/{sid}/cpdlc/respond")
