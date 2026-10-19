@@ -448,6 +448,7 @@ class Player(Session):
                          label=deb.run_meta.get("label"), sid=sid, scn=deb.scn,
                          world=deb.load(deb.timelines["orig"].snaps[0][1]))     # no scenario build: a snapshot
         self.deb = deb
+        self.wx_avoid = True                           # simulated pilots of new timelines deviate around weather
         self.tl = deb.timelines["orig"]
         self.multi = True
         self.status = "paused"
@@ -468,7 +469,8 @@ class Player(Session):
         out = super().summary()
         tl = self.tl
         out["debrief"] = {"timeline": tl.id, "frontier": tl.frontier, "end_t": tl.meta.get("end_t", tl.frontier),
-                          "computing": tl.status == "computing", "t0": tl.t0}
+                          "computing": tl.status == "computing", "t0": tl.t0,
+                          "wx_avoid": self.wx_avoid if tl.id == "orig" else bool(getattr(self.world, "auto_wx", True))}
         return out
 
     def timeline(self) -> dict:
@@ -548,6 +550,10 @@ class Player(Session):
         if kind in ("bookmark", "chat", "mtcd_settings"):
             with self.lock:
                 return inputs.apply(self.world, kind, body, actor, logged=False)
+        if kind == "auto_wx":                          # do the simulated pilots avoid weather by themselves?
+            self.wx_avoid = bool(body.get("value", True))
+            if self.tl.id == "orig":                   # the exercise as flown has no simulated pilots: a setting
+                return {"auto_wx": self.wx_avoid}      # for the timelines made from now on
         with self.lock:
             tl, w = self.tl, self.world
             change = {"t": round(w.t, 1), "text": inputs.describe(kind, body), "by": actor.get("name"),
@@ -558,7 +564,7 @@ class Player(Session):
                 self.deb.amend(tl, w, change)
             else:
                 w.auto_pilot = True                    # a synthetic pseudo-pilot flies the clearances
-                w.auto_wx = True
+                w.auto_wx = self.wx_avoid              # and avoids weather by itself, unless switched off
                 out = inputs.apply(w, kind, body, actor)
                 self.tl = self.deb.branch(tl, w, change, actor)
             return out

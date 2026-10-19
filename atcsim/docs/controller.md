@@ -412,7 +412,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   *unable* with the reason (performance, weather, outside the levels you can give).
 - **Force**: a refused clearance shows **Force** in the radio log: the pilot flies it anyway (into the weather, as
   high as the aircraft can climb), to see what it would have given. A forced heading or direct is held through the
-  weather (no deviation of its own) until the next heading, direct or route. **Comply** in the toolbar makes the pilots accept
+  weather (no deviation of its own) until the next heading, direct or route. In the debrief, **WX avoid: OFF** stops
+  the simulated pilots deviating around weather by themselves at all. **Comply** in the toolbar makes the pilots accept
   every clearance while it is on (also in the debrief). Speeds outside the aircraft's range stay refused.
 - **The radio log** at the bottom left shows what the pilots say: first calls (with **Assume**), read-backs, unable,
   and their requests with **Approve** / **Unable** (or **Roger** for a report). `APP`, `UNA` and `ROG` on the command

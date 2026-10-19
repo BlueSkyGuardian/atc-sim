@@ -72,6 +72,7 @@
         <button data-c="start" title="To the start of this timeline">⏮</button><button data-c="back" title="30 s back">−30 s</button>
         <button data-c="play" id="dbPlay" class="primary" title="Play / pause (P)">▶ Play</button><button data-c="fwd" title="30 s forward">+30 s</button>
         <span class="sb-seg">${[1, 2, 5, 10, 30].map(v => `<button data-tf="${v}">×${v}</button>`).join('')}</span>
+        <button data-c="wx" id="dbWx" title="Do the simulated pilots deviate around weather by themselves? Off: they fly what they are cleared to and only ask (you clear deviations). Switching it is a change of the timeline shown (or the setting for the timelines you make, on the exercise as flown).">WX avoid</button>
         <span id="dbT" class="mono"></span><span id="dbTlName"></span>
       </div>`);
     $('#dbBar').addEventListener('click', onBarClick);
@@ -120,6 +121,7 @@
     if (b.dataset.tf) { control({ action: 'set_speed', time_factor: +b.dataset.tf }); return; }
     const c = b.dataset.c, now = state.sim_time_s, d = dbg();
     if (c === 'play') control({ action: state.session.status === 'running' ? 'pause' : 'resume' });
+    else if (c === 'wx') control({ action: 'auto_wx', value: !d.wx_avoid });
     else if (c === 'start') seek(d.timeline === 'orig' ? 0 : d.t0);
     else if (c === 'back') seek(now - 30);
     else if (c === 'fwd') seek(now + 30);
@@ -128,6 +130,7 @@
     if (!state || !state.session) return;
     const d = dbg(), s = state.session, run = s.status === 'running';
     $('#dbPlay').textContent = run ? '❚❚ Pause' : '▶ Play';
+    const wb = $('#dbWx'); if (wb) { const on = d.wx_avoid !== false; wb.textContent = on ? 'WX avoid: on' : 'WX avoid: OFF'; wb.classList.toggle('off', !on); }
     $('#dbCtl').querySelectorAll('[data-tf]').forEach(b => b.classList.toggle('on', +b.dataset.tf === +s.time_factor));
     $('#dbT').textContent = `T+${fmtT(state.sim_time_s)} / ${fmtT(Math.max(d.end_t || 0, d.frontier || 0))}`;
     const t = tlById(d.timeline);

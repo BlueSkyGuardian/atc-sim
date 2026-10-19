@@ -52,6 +52,8 @@ def describe(kind: str, body: dict) -> str:
         return (f"{cs} " if kind == "cpdlc_command" and cs else "") + (body.get("text") or "")
     if kind == "live":
         return f"{body.get('action')} {cs}".strip()
+    if kind == "auto_wx":
+        return "pilots avoid weather: " + ("on" if body.get("value", True) else "off")
     if kind == "area":
         return f"area {body.get('area')} {'on' if body.get('active') else 'off'}"
     if kind == "runway":
