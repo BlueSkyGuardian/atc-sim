@@ -178,20 +178,24 @@ second, so the controller's screen is as it was - control states, entered levels
 the radio log's pending calls.
 
 - **Play / Pause** (or <kbd>P</kbd>), **⏮** to the start, **−30 s / +30 s**, the speed **×1 … ×30** (bottom centre);
-- click or drag the **time bar** to go to a moment; its markers show the losses of separation, requests, entries,
-  bookmarks.
+- click or drag the **time bar** to go to a moment (at once, to the 10-second mark before it); its markers show the
+  losses of separation, requests, entries, bookmarks.
 
 ### Timelines: other solutions
 
-**Any action on the picture creates a new timeline from that second**: assume, decontrol, a level, a heading, a direct,
-a speed in the labels or the command line, an answer to a request... The exercise itself is never changed.
+**Any action on the picture creates a new timeline from that second**, whether it is playing or paused: assume,
+decontrol, a level, a heading, a direct, a speed in the label menus or the command line, an answer to a request... The
+exercise itself is never changed, and the run goes on (on the new timeline) if it was playing.
 
 - With no pseudo-pilot, a **synthetic pseudo-pilot** flies the clearances (and reads them back in the radio log).
 - The new timeline is **extrapolated to the end of the exercise** at once: the other aircraft do what was done in the
   exercise (the controller's later actions are replayed), the changed aircraft fly the new clearances. Its outcome
   shows in the **Timelines** panel (left): *no loss*, or the losses and the first one's time.
-- Further actions **at the same second** are added to that timeline (a solution with several clearances); an action
-  later on branches again (a timeline of a timeline). The time bar shows the branch point (⑂) and the extrapolated part.
+- Further actions **within a minute** of the timeline's last change are added to it (a solution often takes several
+  clearances): it is extrapolated again from there. An action later on branches again (a timeline of a timeline). The
+  time bar shows the branch point (⑂) and the extrapolated part.
+- The extrapolation runs in separate processes, so the radar stays fluid; a new timeline plays on as soon as its first
+  seconds are computed.
 - Click a timeline in the panel to show it at the same moment and compare; double-click its name to rename it.
 
 ![A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)](/static/docs/x_try.jpg "A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)")

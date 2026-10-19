@@ -84,7 +84,7 @@
     let drag = false, lastSeek = 0;
     const tAt = e => tlTime(e);
     tlc.addEventListener('mousedown', e => { e.stopImmediatePropagation(); e.preventDefault(); if (!P.can_control) return; drag = true; seek(tAt(e)); }, true);
-    tlc.addEventListener('mousemove', e => { if (drag && Date.now() - lastSeek > 200) { lastSeek = Date.now(); seek(tAt(e)); } }, true);
+    tlc.addEventListener('mousemove', e => { if (drag && Date.now() - lastSeek > 80) { lastSeek = Date.now(); seek(tAt(e)); } }, true);
     window.addEventListener('mouseup', e => { if (drag) { drag = false; seek(tAt(e)); } }, true);
     tlc.addEventListener('wheel', e => { e.stopImmediatePropagation(); e.preventDefault(); if (P.can_control && state) seek(state.sim_time_s + (e.deltaY > 0 ? 30 : -30)); }, { capture: true, passive: false });
     // cursors on the scope, for the others
@@ -106,10 +106,14 @@
 
   // ------------------------------------------------------------------ the player's controls
   async function control(body) { try { await api(`/sessions/${SID}/control`, { method: 'POST', body: JSON.stringify(body) }); } catch (e) { banner(h(e.message), 4000); } }
-  async function seek(t, timeline) {
+  let seeking = false, nextSeek = null;
+  async function seek(t, timeline) {                 // one at a time; while one runs only the latest is kept
     if (!P.can_control) return;
+    if (seeking) { nextSeek = [t, timeline]; return; }
+    seeking = true;
     try { await api(`/api/debriefs/${DBID}/seek`, { method: 'POST', body: JSON.stringify({ sid: SID, t: t == null ? null : Math.max(0, t), timeline: timeline == null ? null : String(timeline) }) }); }
     catch (e) { banner(h(e.message), 4000); }
+    finally { seeking = false; if (nextSeek) { const n = nextSeek; nextSeek = null; seek(n[0], n[1]); } }
   }
   function onCtl(e) {
     const b = e.target.closest('button'); if (!b || !state) return;
@@ -133,18 +137,23 @@
       const isNew = !known.has(String(d.timeline));
       tlId = d.timeline; tlFetched = 0;
       if (isNew) { known.add(String(d.timeline)); refresh().then(() => { const n = tlById(d.timeline);
-        banner(`⑂ New timeline from T+${fmtT(d.t0)}: <b>${h(n ? n.name : '')}</b>. A synthetic pilot flies the clearances; it is extrapolated to the end of the exercise (the other aircraft do what they did). Further actions at this same second are added to it; later ones branch again.`, 9000); }); }
+        banner(`⑂ New timeline from T+${fmtT(d.t0)}: <b>${h(n ? n.name : '')}</b>. A synthetic pilot flies the clearances; it is extrapolated to the end of the exercise (the other aircraft do what they did). Your next actions within a minute are added to it (one solution, several clearances); later ones branch again.`, 9000); }); }
       render();
     }
     if (Date.now() - tlFetched > (d.computing ? 2500 : 30000)) loadTl(d.timeline);
     render();
   }
+  function setRec() {
+    if (!TL) return;
+    rec = { frames: [{ t: 0, ac: [], req: [], los: [], areas: [] }, { t: TL.frontier, ac: [], req: [], los: [], areas: [] }], events: TL.events, meta: {}, duration_s: Math.max(TL.end_t || 0, (state && state.duration_s) || 0) };
+  }
+  window.addEventListener('sim-rewind', () => { recOffline = true; setRec(); });          // a seek: keep the time bar's markers
   async function loadTl(id) {
     if (id == null) return;
     tlFetched = Date.now();
     try {
       TL = await api(`/api/debriefs/${DBID}/timelines/${id}`);
-      rec = { frames: [{ t: 0, ac: [], req: [], los: [], areas: [] }, { t: TL.frontier, ac: [], req: [], los: [], areas: [] }], events: TL.events, meta: {}, duration_s: Math.max(TL.end_t || 0, (state && state.duration_s) || 0) };
+      setRec();
     } catch (e) {}
   }
   function drawTlExtra(c, X, W, H, dpr) {
@@ -193,7 +202,7 @@
         <div class="n">${t.id === 'orig' ? '●' : '⑂'} <span>${h(t.name)}</span></div><div class="s">${sub} · ${out}</div></div>` +
         (by[String(t.id)] || []).map(c => row(c, depth + 1)).join('');
     };
-    const list = (by[''] || []).map(t => row(t, 0)).join('') + (INFO.timelines.length < 2 ? `<div class="c-dim" style="font-size:11.5px;padding:6px 8px">${P.can_write ? 'Pause where it matters and act on a label (assume, level, heading…): a new timeline starts there.' : ''}</div>` : '');
+    const list = (by[''] || []).map(t => row(t, 0)).join('') + (INFO.timelines.length < 2 ? `<div class="c-dim" style="font-size:11.5px;padding:6px 8px">${P.can_write ? 'Act on a label (assume, level, heading…), playing or paused: a new timeline starts there.' : ''}</div>` : '');
     if (list !== lastList) { $('#dbTlList').innerHTML = list; lastList = list; }
   }
   function onTlClick(e) {

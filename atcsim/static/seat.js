@@ -1,7 +1,7 @@
 // Connected exercise (/x/<id>): the controller's, pseudo-pilot's and instructor's seats on top of the radar page.
 // Uses the radar page's globals (state, sector, SID, SEAT, EXID, selected, api, attach, ...).
 (function () {
-  if (!EXID || DBID) return;
+  if (!EXID) return;                     // (the debrief, DBID: its own start-up in debrief.js; the label menus below serve it)
   const allAc = () => state ? state.aircraft.concat(state.transferred || []) : [];   // incl. those gone to the next sectors
   const SEATN = { instructor: 'Instructor', atc: 'Controller', pilot: 'Pseudo-pilot' };
   const h = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -10,6 +10,7 @@
 
   // ------------------------------------------------------------------ start
   async function init() {
+    if (DBID) return;
     try { EXINFO = await api(`/api/exercises/${EXID}`); }
     catch (e) { document.body.innerHTML = `<p style="padding:30px;font:15px system-ui;color:#c9d6e2">${h(e.message)} · <a style="color:#7fb8ff" href="/">home</a></p>`; return; }
     SEAT = EXINFO.seat;

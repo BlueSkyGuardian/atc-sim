@@ -435,8 +435,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
 - **Debrief**: the exercise re-simulated on this radar, exactly as you saw it (your assumes, entries, coordination,
   alerts), with **Play / Pause**, **±30 s**, the speed and the time bar. Open it from the exercise's card or the
   Debriefs tile, whenever you want:
-  - **try other instructions**: pause where it matters and act on the labels (assume, decontrol, a level, a heading...).
-    Each action creates a **new timeline** from that second; a synthetic pilot flies it, and it is extrapolated to the
+  - **try other instructions**: act on the labels (assume, decontrol, a level, a heading...), playing or paused. An
+    action creates a **new timeline** from that second (your next actions within a minute join it); a synthetic pilot flies it, and it is extrapolated to the
     end of the exercise (the other aircraft do what they did), so you see the outcome in the **Timelines** panel: no
     loss, or when the first one happens. Switch between timelines to compare; your exercise itself never changes;
   - when your instructor holds the **debrief session** (**● Join the debrief** on your home page): an open call (talk

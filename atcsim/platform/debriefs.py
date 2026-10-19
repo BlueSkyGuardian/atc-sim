@@ -47,6 +47,8 @@ manager = None                      # the SessionManager (set by server.py)
 IDLE_S = 30 * 60                    # a player nobody uses any more is unloaded after this
 HORIZON_S = 45 * 60                 # how far a new timeline is extrapolated (and never past the exercise's end)
 SNAP_S = 10.0
+MAX_WORKERS = 3                     # worker processes per debrief (extrapolations at the same time)
+AMEND_S = 60.0                      # actions within this of a timeline's last change are part of it (one solution)
 KEEP_EVENTS = ("separation_loss_start", "area_infringement_start", "pilot_request", "instruction", "instruction_rejected",
                "rvsm_status", "weather_penetration_start", "aircraft_left_sector", "area_activated", "area_deactivated",
                "runway_change", "wrong_direction_level", "rvsm_airspace_violation_start", "bookmark", "live",
@@ -127,6 +129,7 @@ class Timeline:
         self.frontier = snaps[-1][0] if snaps else t0
         self.events: list = meta.get("events", [])
         self.gen = 0
+        self.proc = None
         self.lock = threading.RLock()
 
     @property
@@ -220,6 +223,10 @@ class Debrief:
             orig.meta = {"name": "Exercise as flown", "end_t": snaps[-1][0], "status": "ready", "summary": _summary(last, 0)}
             orig.save_meta()
         self.timelines["orig"] = orig
+        self.duration_s = float(last.duration_s)
+        self.workers: list = []
+        self.wlock = threading.RLock()
+        self._spare()                                  # a warm worker for the first new timeline
         tdir = os.path.join(self.dir, "tl")
         if os.path.isdir(tdir):
             metas = []
@@ -251,7 +258,7 @@ class Debrief:
         return [t.public() for t in self.timelines.values()]
 
     # ---------------------------------------------------------------- new timelines
-    def branch(self, parent: Timeline, w, parent_k: int, change: dict, actor: dict) -> Timeline:
+    def branch(self, parent: Timeline, w, change: dict, actor: dict) -> Timeline:
         """A new timeline from w (the player's world, the change just applied), extrapolated in the background."""
         n = self.next_id()
         d = os.path.join(self.dir, "tl", str(n))
@@ -259,20 +266,26 @@ class Debrief:
         t0 = round(w.t, 1)
         cs = change.get("callsign")
         meta = {"n": n, "name": change["text"], "by": actor.get("name"), "created_at": time.time(), "status": "computing",
-                "parent_k": parent_k, "touched": [cs] if cs else [], "changes": [change], "end_t": t0}
+                "touched": [cs] if cs else [], "changes": [change], "end_t": t0}
         tl = Timeline(n, parent, t0, [], [], meta, d)
-        tl.add_snap(t0, blob_of(w), list(inputs.log(w)))
+        blob, log = blob_of(w), list(inputs.log(w))
+        tl.add_snap(t0, blob, log)
         tl.save_meta()
         self.timelines[n] = tl
-        self.extrapolate(tl)
+        self.extrapolate(tl, t0, blob, log)
         return tl
 
     def amend(self, tl: Timeline, w, change: dict) -> None:
-        """Another change at the timeline's own moment: part of it; its future is computed again."""
+        """Another change soon after the timeline's last one: part of it; its future from there is computed again."""
+        t = round(w.t, 1)
         with tl.lock:
             tl.gen += 1
-            tl.snaps, tl.exact = [], {}
-            open(os.path.join(tl.dir, "snaps.bin"), "wb").close()
+            keep = [x for x in tl.snaps if x[0] < t - 1e-6]
+            tl.snaps, tl.exact = keep, dict(keep)
+            with open(os.path.join(tl.dir, "snaps.bin.tmp"), "wb") as f:
+                for st, b in keep:
+                    f.write(struct.pack("<dI", st, len(b)) + b)
+            os.replace(os.path.join(tl.dir, "snaps.bin.tmp"), os.path.join(tl.dir, "snaps.bin"))
             cs = change.get("callsign")
             if cs and cs not in tl.meta["touched"]:
                 tl.meta["touched"].append(cs)
@@ -280,45 +293,140 @@ class Debrief:
             if len(tl.meta["changes"]) == 2 and tl.meta.get("name") == tl.meta["changes"][0]["text"]:
                 tl.meta["name"] = tl.meta["changes"][0]["text"] + " …"
             tl.meta["status"] = "computing"
-        tl.add_snap(tl.t0, blob_of(w), list(inputs.log(w)))
+        blob, log = blob_of(w), list(inputs.log(w))
+        tl.add_snap(t, blob, log)
         tl.save_meta()
-        self.extrapolate(tl)
+        self.extrapolate(tl, t, blob, log)
 
-    def extrapolate(self, tl: Timeline) -> None:
-        threading.Thread(target=self._extrapolate, args=(tl, tl.gen), daemon=True, name=f"debrief-{self.eid}-{tl.id}").start()
+    def extrapolate(self, tl: Timeline, start_t: float, start_blob: bytes, start_log: list) -> None:
+        """Simulate the timeline from start_t to the end in a worker process (atcsim/xpworker.py), the parent's later
+        actions replayed except those about the changed aircraft; its snapshots are collected as they come."""
+        gen = tl.gen
+        for f in os.listdir(tl.dir):
+            if f.startswith("x") and not f.startswith(f"x{gen}."):
+                try:
+                    os.remove(os.path.join(tl.dir, f))
+                except OSError:
+                    pass
+        job = {"dir": tl.dir, "gen": gen, "scn": self.scn, "scenario_name": self.scenario_name, "start_t": start_t,
+               "start_blob": start_blob, "t0": tl.t0, "touched": list(tl.meta.get("touched") or []),
+               "fut": [i for i in tl.parent.log if i["t"] > start_t + 1e-6],
+               "end": min(float(self.duration_s), tl.t0 + HORIZON_S), "snap_s": SNAP_S,
+               "skip_kinds": sorted(inputs.NOT_REPLAYED_IN_BRANCHES)}
+        jp = os.path.join(tl.dir, f"x{gen}.job")
+        with open(jp, "wb") as f:
+            pickle.dump(job, f, protocol=5)
+        with open(os.path.join(tl.dir, "gen.tmp"), "w") as f:      # an older computation of it stops at this
+            f.write(str(gen))
+        os.replace(os.path.join(tl.dir, "gen.tmp"), os.path.join(tl.dir, "gen"))
+        wk = self._worker()
+        with self.wlock:
+            wk["busy"] = jp
+            wk["proc"].stdin.write(jp + "\n")
+            wk["proc"].stdin.flush()
+        self._spare()
+        threading.Thread(target=self._collect, args=(tl, gen, wk, list(start_log), jp), daemon=True,
+                         name=f"debrief-{self.eid}-{tl.id}").start()
 
-    def _extrapolate(self, tl: Timeline, gen: int) -> None:
-        try:
-            w = self.load(tl.snaps[0][1])
-            parent = tl.parent
-            fut = list(parent.log[tl.meta.get("parent_k", 0):])
-            touched = set(tl.meta.get("touched") or [])
-            end = min(float(w.duration_s), tl.t0 + HORIZON_S)
-            i, last = 0, tl.t0
-            while w.t < end - 1e-6 and not w.finished and tl.gen == gen:
-                w.step(1.0)
-                while i < len(fut) and fut[i]["t"] <= w.t + 1e-6:
-                    inp = fut[i]
-                    i += 1
-                    if inp["kind"] in inputs.NOT_REPLAYED_IN_BRANCHES or inputs.callsign_of(inp["kind"], inp["body"]) in touched:
-                        continue
-                    try:
-                        inputs.apply(w, inp["kind"], inp["body"], {"name": inp.get("by"), "seat": inp.get("seat")})
-                    except Exception:  # noqa: BLE001 - an action that does not fit this timeline any more
-                        pass
-                if w.t - last >= SNAP_S - 1e-6 or w.t >= end - 1e-6 or w.finished:
-                    if not tl.add_snap(w.t, blob_of(w), list(inputs.log(w)), gen):
-                        return
-                    last = w.t
-            with tl.lock:
+    # ---------------------------------------------------------------- warm worker processes
+    def _spawn(self) -> dict:
+        import subprocess
+        import sys
+        root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        env = dict(os.environ, PYTHONPATH=root_dir + os.pathsep + os.environ.get("PYTHONPATH", ""))
+        proc = subprocess.Popen([sys.executable, "-m", "atcsim.xpworker", "--serve", os.path.join(self.dir, "orig", "scenario.json")],
+                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, bufsize=1,
+                                env=env, cwd=root_dir)
+        wk = {"proc": proc, "busy": None, "ready": False}
+
+        def reader():
+            for line in proc.stdout:
+                if line.startswith("ready"):
+                    wk["ready"] = True
+                elif line.startswith("done"):
+                    with self.wlock:
+                        wk["busy"] = None
+        threading.Thread(target=reader, daemon=True).start()
+        self.workers.append(wk)
+        return wk
+
+    def _worker(self) -> dict:
+        """An idle worker (warm when possible), or a new one."""
+        with self.wlock:
+            self.workers = [w for w in self.workers if w["proc"].poll() is None]
+            idle = [w for w in self.workers if not w["busy"]]
+            idle.sort(key=lambda w: not w["ready"])
+            if idle:
+                return idle[0]
+            return self._spawn()
+
+    def _spare(self) -> None:
+        """Keep one warm worker waiting (up to MAX_WORKERS), so the next timeline starts at once."""
+        with self.wlock:
+            alive = [w for w in self.workers if w["proc"].poll() is None]
+            if not any(not w["busy"] for w in alive) and len(alive) < MAX_WORKERS:
+                self._spawn()
+
+    def close(self) -> None:
+        with self.wlock:
+            for w in self.workers:
+                try:
+                    w["proc"].kill()
+                except OSError:
+                    pass
+            self.workers = []
+
+    def _collect(self, tl: Timeline, gen: int, wk: dict, log: list, jp: str) -> None:
+        d = tl.dir
+        sb_p, lg_p, done_p = (os.path.join(d, f"x{gen}{x}") for x in (".bin", ".log", ".done.json"))
+        off, loff, buf = 0, 0, b""
+        while tl.gen == gen:
+            died = wk["proc"].poll() is not None
+            finished = died or os.path.exists(done_p) or wk["busy"] != jp
+            try:                                        # the snapshots first, then the actions up to them
+                if os.path.exists(sb_p):
+                    with open(sb_p, "rb") as f:
+                        f.seek(off)
+                        chunk = f.read()
+                    off += len(chunk)
+                    buf += chunk
+                if os.path.exists(lg_p):
+                    with open(lg_p) as f:
+                        f.seek(loff)
+                        lines = f.read()
+                    cut = lines.rfind("\n") + 1
+                    loff += cut
+                    log += [json.loads(x) for x in lines[:cut].splitlines() if x.strip()]
+            except (OSError, ValueError):
+                pass
+            while len(buf) >= 12:
+                t, n = struct.unpack_from("<dI", buf, 0)
+                if len(buf) < 12 + n:
+                    break
+                blob, buf = buf[12:12 + n], buf[12 + n:]
+                if not tl.add_snap(t, blob, list(log), gen):
+                    return
+            if finished:
                 if tl.gen != gen:
                     return
-                tl.events = _timeline_events(w)
-                tl.meta.update(status="ready", end_t=round(w.t, 1), summary=_summary(w, tl.t0))
-            tl.save_meta()
-        except Exception as e:  # noqa: BLE001
-            tl.meta.update(status="failed", error=f"{type(e).__name__}: {e}")
-            tl.save_meta()
+                if os.path.exists(done_p) and not buf:
+                    done = json.load(open(done_p))
+                    with tl.lock:
+                        tl.events = done["events"]
+                        tl.meta.update(status="ready", end_t=done["end_t"], summary=done["summary"])
+                    tl.save_meta()
+                    for f in os.listdir(d):
+                        if f.startswith(f"x{gen}."):
+                            try:
+                                os.remove(os.path.join(d, f))
+                            except OSError:
+                                pass
+                    return
+                if not os.path.exists(done_p):
+                    tl.meta.update(status="failed", error="the extrapolation stopped" + (" (worker ended)" if died else ""))
+                    tl.save_meta()
+                    return
+            time.sleep(0.3)
 
 
 def get(eid: str) -> Debrief:
@@ -337,7 +445,8 @@ class Player(Session):
 
     def __init__(self, deb: Debrief, sid: str):
         super().__init__(deb.scenario_name, mode="realtime", time_factor=1.0, autostart=False,
-                         label=deb.run_meta.get("label"), sid=sid, scn=deb.scn)
+                         label=deb.run_meta.get("label"), sid=sid, scn=deb.scn,
+                         world=deb.load(deb.timelines["orig"].snaps[0][1]))     # no scenario build: a snapshot
         self.deb = deb
         self.tl = deb.timelines["orig"]
         self.multi = True
@@ -401,18 +510,13 @@ class Player(Session):
         return True
 
     def seek(self, t: float) -> dict:
+        """To the timeline's saved point at or before T+t (every 10 s): instant, no re-simulation needed."""
         with self.lock:
             tl = self.tl
             t = max(0.0, min(float(t), tl.frontier))
             st, blob = tl.at_or_before(t)
             self._swap(self.deb.load(blob))
             self._apply_due()
-            while self.world.t + 1e-6 < t:
-                self.world.step(1.0)
-                b2 = tl.exact_at(self.world.t)
-                if b2 is not None:
-                    self._swap(self.deb.load(b2))
-                self._apply_due()
             self.rewinds += 1
             if self.status == "finished":
                 self.status = "paused"
@@ -439,27 +543,24 @@ class Player(Session):
         return super().control(action, seconds, time_factor, mode)
 
     def on_input(self, kind: str, body: dict, actor: dict):
-        """An action on the timeline shown: a new timeline from this second (or added to this one, when it is the
-        second it was branched at)."""
+        """An action on the timeline shown (playing or paused): a new timeline from this second - or part of the
+        timeline shown when it is one of the debrief's and its last change was less than AMEND_S before."""
         if kind in ("bookmark", "chat", "mtcd_settings"):
             with self.lock:
                 return inputs.apply(self.world, kind, body, actor, logged=False)
         with self.lock:
             tl, w = self.tl, self.world
-            self.status = "paused"
             change = {"t": round(w.t, 1), "text": inputs.describe(kind, body), "by": actor.get("name"),
                       "callsign": inputs.callsign_of(kind, body)}
-            if tl.id != "orig" and abs(w.t - tl.t0) < 0.05:
+            last = max([c["t"] for c in tl.meta.get("changes") or []], default=None)
+            if tl.id != "orig" and last is not None and -0.05 <= w.t - last <= AMEND_S:
                 out = inputs.apply(w, kind, body, actor)
                 self.deb.amend(tl, w, change)
             else:
-                k = len(inputs.log(w))
                 w.auto_pilot = True                    # a synthetic pseudo-pilot flies the clearances
                 w.auto_wx = True
                 out = inputs.apply(w, kind, body, actor)
-                self.tl = self.deb.branch(tl, w, k, change, actor)
-            self.world = self.deb.load(self.tl.snaps[0][1])
-            self.rewinds += 1
+                self.tl = self.deb.branch(tl, w, change, actor)
             return out
 
 
@@ -532,7 +633,7 @@ def unload(eid: Optional[str] = None, idle_only: bool = False) -> None:
             if (eid is None or e == eid) and not any(o["eid"] == e for o in PLAYERS.values()):
                 busy = any(t.status == "computing" for t in DEBRIEFS[e].timelines.values())
                 if not busy:
-                    DEBRIEFS.pop(e, None)
+                    DEBRIEFS.pop(e, None).close()
 
 
 def _gc() -> None:

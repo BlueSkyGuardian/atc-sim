@@ -1027,12 +1027,17 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
         # attached to the next tick when ready, so a slow prediction never delays the picture
         nonlocal last_t, last_seq
         seen_rw = getattr(s, "rewinds", 0)
+        seen_ver = getattr(s, "version", 0)
         while True:
             try:
-                if getattr(s, "rewinds", 0) != seen_rw:     # rewound / restarted: the event log starts again
-                    seen_rw, last_seq, last_t = s.rewinds, 0, -1.0
+                if getattr(s, "rewinds", 0) != seen_rw:     # rewound / restarted / seeked: the event log starts again
+                    ev = s.world.events                       # (its recent part only: a debrief seeks often)
+                    seen_rw, last_t = s.rewinds, -1.0
+                    last_seq = ev[-80]["seq"] if len(ev) > 80 else 0
                 sep_msg = latest_sep["msg"]
-                if s.world.t != last_t or sep_msg is not None:
+                ver = getattr(s, "version", 0)            # something changed without the clock moving (paused)
+                if s.world.t != last_t or sep_msg is not None or ver != seen_ver:
+                    seen_ver = ver
                     t, msg = await run_in_threadpool(build)
                     if sep_msg is not None:
                         msg["separation"] = sep_msg

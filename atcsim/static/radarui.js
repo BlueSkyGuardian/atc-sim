@@ -131,7 +131,7 @@
     seenRw = rw;
     try { rec = null; lastSeq = 0; eventsBuf = []; replayMode = false; replayPlaying = false; } catch (e) {}
     said.length = 0; seenSeq = 0;
-    if (typeof pollEvents === 'function') pollEvents();
+    if (typeof pollEvents === 'function' && !DBID) pollEvents();      // (the debrief's stream sends the recent events)
     window.dispatchEvent(new Event('sim-rewind'));
   }, 400);
   setInterval(renderLog, 700);

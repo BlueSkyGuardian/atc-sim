@@ -118,6 +118,24 @@ cs2 = next(c for c, v in cap[450][0].items() if v[0] and c != cs)
 atc.post(f"/sessions/{sid}/entries", json={"callsign": cs2, "cfl": 250})
 tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
 ok(len(tls) == 3 and tls[2]["parent"] == 1 and tls[2]["t0"] == 630, "a change later on it: a timeline branched from it (T+630)")
+# while it plays: the action does not pause it; another one within a minute joins the same timeline
+atc.post(f"/sessions/{sid}/control", json={"action": "resume"})
+for _ in range(60):
+    st = view(atc, sid)
+    if st["sim_time_s"] >= 640:
+        break
+    time.sleep(0.5)
+ok(st["session"]["status"] == "running" and st["sim_time_s"] >= 640, f"the new timeline plays on while it is extrapolated (T+{st['sim_time_s']:.0f})")
+cs3 = next(c for c, v in cap[450][0].items() if v[0] and c not in (cs, cs2))
+r = atc.post(f"/sessions/{sid}/entries", json={"callsign": cs3, "speed": "M76"})
+st = view(atc, sid)
+tls = atc.get(f"/api/debriefs/{eid}").json()["timelines"]
+ok(r.status_code == 200 and st["session"]["status"] == "running" and len(tls) == 3 and len(tls[2]["changes"]) == 2,
+   "acting while it runs: not paused, and within a minute of the last change it joins that timeline")
+atc.post(f"/sessions/{sid}/control", json={"action": "pause"})
+t0 = time.time()
+atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "orig", "t": 534})
+ok(time.time() - t0 < 1.0 and view(atc, sid)["sim_time_s"] == 530, f"seeking is instant: to the 10-second point (T+530, {time.time() - t0:.2f} s)")
 # the original is untouched
 atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "timeline": "orig", "t": 600})
 ok(sig(view(atc, sid)) == cap[600], "back on the exercise's timeline: unchanged")

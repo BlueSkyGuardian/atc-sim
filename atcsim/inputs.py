@@ -204,7 +204,10 @@ def apply(w, kind: str, body: dict, actor: dict, logged: bool = True):
 def run(s, kind: str, body: dict, actor: dict):
     """An action on a session (from the API): a debrief's player branches its timeline first if needed."""
     hook = getattr(s, "on_input", None)
-    if hook is not None:
-        return hook(kind, body, actor)
-    with s.lock:
-        return apply(s.world, kind, body, actor)
+    try:
+        if hook is not None:
+            return hook(kind, body, actor)
+        with s.lock:
+            return apply(s.world, kind, body, actor)
+    finally:
+        s.version = getattr(s, "version", 0) + 1        # the stream sends the new state even when paused

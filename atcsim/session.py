@@ -45,7 +45,7 @@ def _pid(o):
 class Session:
     def __init__(self, scenario_name: str, mode: str = "realtime", time_factor: float = 1.0,
                  autostart: bool = True, label: Optional[str] = None, auto_assume: Optional[bool] = None,
-                 sid: Optional[str] = None, scn: Optional[dict] = None):
+                 sid: Optional[str] = None, scn: Optional[dict] = None, world: Optional[World] = None):
         if mode not in ("realtime", "stepped"):
             raise ValueError("mode must be 'realtime' or 'stepped'")
         self.id = sid or uuid.uuid4().hex[:8]
@@ -57,7 +57,7 @@ class Session:
         self.scn = scn if scn is not None else load_scenario(scenario_name)
         if auto_assume is not None:
             self.scn["auto_assume"] = bool(auto_assume)
-        self.world: World = build_world(self.scn)
+        self.world: World = world if world is not None else build_world(self.scn)
         self.mode = mode
         self.time_factor = max(0.1, min(float(time_factor), 100.0))
         self.lock = threading.RLock()
