@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI lab</title>
+<link rel="stylesheet" href="/static/app.css">
+<style>
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+  .tabs button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 9px 14px; color: var(--dim); font-weight: 600; }
+  .tabs button.on { color: var(--text); border-bottom-color: var(--magenta); }
+  .pane { display: none; } .pane.on { display: block; }
+  .lead { color: var(--dim); margin: -6px 0 16px; max-width: 900px; }
+  .form { display: grid; grid-template-columns: 170px 1fr; gap: 9px 14px; align-items: center; }
+  .form label { color: var(--dim); font-size: 13px; }
+  .form .full { grid-column: 1 / -1; }
+  .form input[type=text], .form input[type=password], .form input[type=number], .form select, .form textarea { width: 100%; }
+  .form textarea { font: 12.5px/1.45 var(--mono); min-height: 260px; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .hint { color: var(--dim); font-size: 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .run { display: flex; flex-direction: column; gap: 6px; padding: 12px 12px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth); }
+  .run svg { width: 100%; height: 190px; background: #0a1520; border: 1px solid var(--line-2); border-radius: 7px; }
+  .run .t { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 650; }
+  .run .s { color: var(--dim); font-size: 12.5px; }
+  .run .score { font: 700 24px var(--mono); } .score.hi { color: var(--accent); } .score.mid { color: var(--warn); } .score.lo { color: var(--alert); }
+  .run .acts { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .bar { height: 5px; background: #0a1520; border-radius: 3px; overflow: hidden; } .bar i { display: block; height: 100%; background: var(--chart); }
+  .pill.done { color: var(--accent); border-color: #24503f; } .pill.failed { color: #ffb3b3; border-color: #7a3030; }
+  .pill.running { background: #173f33; border-color: #2f7a5f; color: #bff5dc; } .pill.queued { color: var(--warn); border-color: #7a6a2a; }
+  table.t { width: 100%; border-collapse: collapse; font-size: 13px; } table.t th, table.t td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line-2); }
+  table.t th { color: var(--dim); font-weight: 600; }
+  .step { border-top: 1px solid var(--line-2); padding: 9px 2px; font-size: 13px; }
+  .step .h { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .step .ok { color: var(--accent); } .step .ko { color: var(--alert); }
+  .lbl { font-size: 11px; font-weight: 700; padding: 0 7px; border-radius: 9px; border: 1px solid var(--line); }
+  .lbl.good { color: var(--accent); border-color: #24503f; } .lbl.bad { color: #ffb3b3; border-color: #7a3030; } .lbl.neutral { color: var(--dim); }
+  pre.obs { white-space: pre-wrap; font: 11.5px/1.4 var(--mono); background: var(--panel2); border: 1px solid var(--line-2); border-radius: 6px; padding: 8px; max-height: 280px; overflow: auto; }
+  details summary { cursor: pointer; color: var(--sel); font-size: 12px; }
+  .modal.wide { width: min(1000px, 94vw); max-height: 88vh; overflow: auto; }
+  .kpis { display: flex; gap: 22px; flex-wrap: wrap; margin: 8px 0 4px; } .kpis b { font: 700 20px var(--mono); display: block; } .kpis span { color: var(--dim); font-size: 12px; }
+  .chk { display: flex; flex-wrap: wrap; gap: 4px 14px; max-height: 190px; overflow: auto; padding: 6px 8px; background: var(--panel2); border: 1px solid var(--line-2); border-radius: 6px; }
+  .chk label { color: var(--text); font-size: 12.5px; white-space: nowrap; }
+  code.cmd { display: block; white-space: pre-wrap; word-break: break-all; font: 12px var(--mono); background: var(--panel2); border: 1px solid var(--line-2); padding: 6px 8px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>AI lab</h1>
+  <p class="lead">A language model controls the simulation headlessly: it reads the situation, gives instructions (synthetic pilots fly them), and each run is evaluated and kept as labelled experience data for training. Every run can be replayed 1:1 in the debrief.</p>
+  <div class="tabs" id="tabs"><button data-p="runs" class="on">Runs</button><button data-p="models">Models</button><button data-p="agents">Agent profiles</button><button data-p="data">Experiences &amp; datasets</button></div>
+
+  <!-- ===================================================== runs -->
+  <section class="pane on" id="p-runs">
+    <div class="card">
+      <h2 style="margin-top:0">New runs</h2>
+      <div class="form">
+        <label>Scenarios</label><div><input type="search" id="rScnQ" placeholder="filter" style="width:220px;margin-bottom:6px"><div class="chk" id="rScn"></div></div>
+        <label>Model</label><select id="rModel"></select>
+        <label>Agent profile</label><select id="rAgent"></select>
+        <label>Runs per scenario</label><input type="number" id="rRepeat" value="1" min="1" max="50" style="width:90px">
+        <label>Environment</label>
+        <div class="row">
+          <label style="color:var(--text)"><input type="checkbox" id="rWx" checked> pilots avoid weather by themselves</label>
+          <label style="color:var(--text)"><input type="checkbox" id="rForce"> pilots comply with everything (no "unable")</label>
+          <label style="color:var(--text)">read-back errors <select id="rRb"><option value="0">off</option><option value="0.05">1 in 20</option><option value="0.1">1 in 10</option></select></label>
+          <label style="color:var(--text)">stop at <input type="number" id="rEnd" placeholder="end" min="1" style="width:70px"> min</label>
+        </div>
+        <span></span><div class="row"><button class="primary" id="rGo">Start</button><span id="rMsg" class="hint"></span></div>
+      </div>
+    </div>
+    <h2>Runs <span class="dim" id="runsN"></span><span style="flex:1"></span><label class="dim"><select id="runsF"><option value="">all</option><option value="running">running / queued</option><option value="done">finished</option><option value="failed">failed</option></select></label></h2>
+    <div class="cards" id="runs"></div>
+  </section>
+
+  <!-- ===================================================== models -->
+  <section class="pane" id="p-models">
+    <p class="lead">Where the model answers. <b>RunPod serverless</b>: a vLLM worker endpoint (its OpenAI-compatible route <code>https://api.runpod.ai/v2/&lt;endpoint id&gt;/openai/v1</code>, your RunPod API key). <b>OpenAI-compatible</b>: any server with <code>/v1/chat/completions</code> — a RunPod pod running vLLM, TGI or Ollama (<code>https://&lt;pod id&gt;-8000.proxy.runpod.net/v1</code>), or another provider. The <b>built-in baseline</b> is a scripted controller: a reference score, and experience data without a model. API keys are stored encrypted and never shown again.</p>
+    <div class="card"><table class="t" id="mTable"></table><div class="row" style="margin-top:10px"><button class="primary" id="mNew">Add a model</button></div></div>
+    <div class="card" id="mForm" style="margin-top:14px;display:none">
+      <h2 style="margin-top:0" id="mTitle">Model</h2>
+      <div class="form">
+        <label>Name</label><input type="text" id="mName" placeholder="e.g. Qwen2.5-7B on RunPod">
+        <label>Kind</label><select id="mKind"><option value="runpod">RunPod serverless (vLLM)</option><option value="openai">OpenAI-compatible server</option><option value="baseline">Built-in baseline (no model)</option></select>
+        <label class="k-rp">RunPod endpoint id</label><input class="k-rp" type="text" id="mEp" placeholder="e.g. vllm-abc123xyz">
+        <label class="k-oa">Base URL</label><input class="k-oa" type="text" id="mUrl" placeholder="https://<pod id>-8000.proxy.runpod.net/v1">
+        <label class="k-m">Model name</label><input class="k-m" type="text" id="mModel" placeholder="the Hugging Face model deployed, e.g. Qwen/Qwen2.5-7B-Instruct">
+        <label class="k-m">API key</label><div class="k-m"><input type="password" id="mKey" autocomplete="new-password" placeholder="RunPod API key (rpa_…)"><div class="hint" id="mKeyHint"></div></div>
+        <label class="k-m">Temperature</label><input class="k-m" type="number" id="mTemp" value="0.2" step="0.1" min="0" max="2" style="width:90px">
+        <label class="k-m">Max answer tokens</label><input class="k-m" type="number" id="mTok" value="600" min="50" max="8000" style="width:90px">
+        <label class="k-m">Timeout (s)</label><input class="k-m" type="number" id="mTo" value="180" min="5" max="900" style="width:90px">
+        <label class="k-m">Retries</label><input class="k-m" type="number" id="mRet" value="3" min="0" max="10" style="width:90px">
+        <label class="k-m">JSON mode</label><label class="k-m" style="color:var(--text)"><input type="checkbox" id="mJson"> ask for a JSON object (response_format), when the server supports it</label>
+        <span></span><div class="row"><button class="primary" id="mSave">Save</button><button id="mCancel">Cancel</button><span id="mMsg" class="hint"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== agents -->
+  <section class="pane" id="p-agents">
+    <p class="lead">What the model is told and shown, and how often it decides. The situation is sent as text (the controller's picture: your aircraft, those calling, inbound traffic, pilot requests, predicted conflicts, weather, active areas); the model answers with JSON instructions from a fixed set.</p>
+    <div class="row" style="margin-bottom:12px"><select id="aSel"></select><button id="aNew">New profile</button><button id="aDel">Delete</button></div>
+    <div class="card">
+      <div class="form">
+        <label>Name</label><input type="text" id="aName">
+        <label>System prompt</label><div><textarea id="aPrompt"></textarea><div class="row"><button class="small" id="aReset">Default prompt</button><span class="hint">ends with the instruction set (keep it: the answers are parsed as that JSON)</span></div></div>
+        <label>Decides every</label><div class="row"><input type="number" id="aInt" min="5" max="600" style="width:80px"> s of simulated time <label style="color:var(--text)"><input type="checkbox" id="aTrig"> and at once when an aircraft calls, a request comes or a conflict under 5 min appears</label></div>
+        <label>Memory</label><div class="row"><input type="number" id="aHist" min="0" max="10" style="width:80px"> previous decisions sent with each new one</div>
+        <label>Max instructions</label><div class="row"><input type="number" id="aMax" min="1" max="40" style="width:80px"> per decision</div>
+        <label>The situation shows</label><div class="row">
+          <label style="color:var(--text)"><input type="checkbox" id="oConf"> predicted conflicts (MTCD)</label>
+          <label style="color:var(--text)"><input type="checkbox" id="oWx"> weather ahead</label>
+          <label style="color:var(--text)"><input type="checkbox" id="oInb"> inbound traffic</label>
+          <label style="color:var(--text)"><input type="checkbox" id="oRte"> routes</label>
+          <label style="color:var(--text)">at most <input type="number" id="oMax" min="5" max="100" style="width:64px"> aircraft per list</label></div>
+        <span></span><div class="row"><button class="primary" id="aSave">Save</button><span id="aMsg" class="hint"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== experiences -->
+  <section class="pane" id="p-data">
+    <p class="lead">Every decision of every finished run is an experience: the situation shown, the model's answer, the instructions and the pilots' replies, a reward and a label (good / neutral / bad) from what followed, and the judge's grade when a run was judged. Select some and export them as a dataset (JSONL) for training — download it, or give its link to a RunPod pod.</p>
+    <div class="card">
+      <div class="form">
+        <label>Scenarios</label><div class="chk" id="dScn"></div>
+        <label>Models</label><div class="chk" id="dMod"></div>
+        <label>Runs scoring at least</label><input type="number" id="dMin" placeholder="any" style="width:90px">
+        <label>Decisions labelled</label><div class="row"><label style="color:var(--text)"><input type="checkbox" class="dLab" value="good" checked> good</label><label style="color:var(--text)"><input type="checkbox" class="dLab" value="neutral" checked> neutral</label><label style="color:var(--text)"><input type="checkbox" class="dLab" value="bad"> bad</label></div>
+        <label>Judge grade at least</label><input type="number" id="dGrade" placeholder="any" min="1" max="5" style="width:90px">
+        <label>Matching</label><div class="kpis" id="dStats"></div>
+        <label>Format</label><select id="dFmt"><option value="chat">chat — fine-tuning examples (messages: system, situation, answer)</option><option value="trajectories">trajectories — whole runs, rewards per decision (RL / offline RL)</option><option value="steps">steps — the decisions as recorded</option></select>
+        <label>Dataset name</label><input type="text" id="dName" placeholder="e.g. merges-good-v1">
+        <span></span><div class="row"><button class="primary" id="dGo">Create the dataset</button><span id="dMsg" class="hint"></span></div>
+      </div>
+    </div>
+    <h2>Datasets</h2>
+    <div class="card"><table class="t" id="dTable"></table></div>
+  </section>
+</main>
+<script src="/static/common.js"></script>
+<script>
+let MODELS = [], AGENTS = [], AGDEF = null, SCN = [], RUNS = [], editModel = null, curAgent = null;
+const val = id => $('#' + id).value;
+$$('#tabs button').forEach(b => b.onclick = () => { $$('#tabs button').forEach(x => x.classList.toggle('on', x === b)); $$('.pane').forEach(p => p.classList.toggle('on', p.id === 'p-' + b.dataset.p)); if (b.dataset.p === 'data') loadData(); });
+
+// ------------------------------------------------------------- models
+async function loadModels() {
+  MODELS = await api('/api/ai/models');
+  $('#mTable').innerHTML = `<tr><th>Name</th><th>Kind</th><th>Where</th><th>Model</th><th>Key</th><th></th></tr>` + (MODELS.length ? MODELS.map(m => `<tr><td><b>${esc(m.name)}</b></td>
+    <td>${{ runpod: 'RunPod serverless', openai: 'OpenAI-compatible', baseline: 'Built-in baseline' }[m.kind]}</td>
+    <td class="hint">${esc(m.kind === 'runpod' ? m.endpoint_id : m.kind === 'openai' ? m.base_url : '—')}</td><td>${esc(m.model || '—')}</td><td class="hint">${esc(m.key_hint || (m.kind === 'baseline' ? '' : 'none'))}</td>
+    <td class="row" style="justify-content:flex-end"><button class="small" data-mt="${m.id}">Test</button><button class="small" data-me="${m.id}">Edit</button><button class="small" data-md="${m.id}">Delete</button></td></tr>
+    <tr id="mt${m.id}" style="display:none"><td colspan="6"><pre class="obs"></pre></td></tr>`).join('') : '<tr><td colspan="6" class="hint">No model yet. Add one — or the built-in baseline to try the pipeline.</td></tr>');
+  $$('[data-mt]').forEach(b => b.onclick = async () => { const tr = $('#mt' + b.dataset.mt); tr.style.display = ''; tr.querySelector('pre').textContent = 'testing… (a serverless endpoint may take a minute to start)';
+    try { tr.querySelector('pre').textContent = JSON.stringify(await post(`/api/ai/models/${b.dataset.mt}/test`), null, 2); } catch (e) { tr.querySelector('pre').textContent = e.message; } });
+  $$('[data-me]').forEach(b => b.onclick = () => openModel(MODELS.find(m => m.id === +b.dataset.me)));
+  $$('[data-md]').forEach(b => b.onclick = async () => { if (!confirm('Delete this model?')) return; await api(`/api/ai/models/${b.dataset.md}`, { method: 'DELETE' }); loadModels(); });
+  fillSelects();
+}
+function kindVis() { const k = val('mKind'); $$('.k-rp').forEach(e => e.style.display = k === 'runpod' ? '' : 'none'); $$('.k-oa').forEach(e => e.style.display = k === 'openai' ? '' : 'none'); $$('.k-m').forEach(e => e.style.display = k === 'baseline' ? 'none' : ''); }
+$('#mKind').onchange = kindVis;
+function openModel(m) {
+  editModel = m || null; $('#mForm').style.display = ''; $('#mTitle').textContent = m ? 'Edit ' + m.name : 'New model'; $('#mMsg').textContent = '';
+  const p = (m && m.params) || {};
+  $('#mName').value = m ? m.name : ''; $('#mKind').value = m ? m.kind : 'runpod'; $('#mEp').value = m ? m.endpoint_id || '' : ''; $('#mUrl').value = m ? m.base_url || '' : '';
+  $('#mModel').value = m ? m.model || '' : ''; $('#mKey').value = ''; $('#mKeyHint').textContent = m && m.has_key ? `stored (${m.key_hint}) — leave empty to keep it` : '';
+  $('#mTemp').value = p.temperature ?? 0.2; $('#mTok').value = p.max_tokens ?? 600; $('#mTo').value = p.timeout_s ?? 180; $('#mRet').value = p.retries ?? 3; $('#mJson').checked = !!p.json_mode;
+  kindVis(); $('#mForm').scrollIntoView({ block: 'nearest' });
+}
+$('#mNew').onclick = () => openModel(null);
+$('#mCancel').onclick = () => { $('#mForm').style.display = 'none'; };
+$('#mSave').onclick = async () => {
+  const body = { name: val('mName') || 'model', kind: val('mKind'), endpoint_id: val('mEp'), base_url: val('mUrl'), model: val('mModel'),
+    params: { temperature: +val('mTemp'), max_tokens: +val('mTok'), timeout_s: +val('mTo'), retries: +val('mRet'), json_mode: $('#mJson').checked } };
+  if (val('mKey') || !editModel) body.api_key = val('mKey');
+  try { await api(editModel ? `/api/ai/models/${editModel.id}` : '/api/ai/models', { method: editModel ? 'PUT' : 'POST', body: JSON.stringify(body) });
+    $('#mForm').style.display = 'none'; loadModels(); } catch (e) { $('#mMsg').textContent = e.message; $('#mMsg').className = 'hint c-los'; }
+};
+
+// ------------------------------------------------------------- agents
+async function loadAgents(sel) {
+  const r = await api('/api/ai/agents'); AGENTS = r.agents; AGDEF = r.defaults;
+  $('#aSel').innerHTML = AGENTS.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+  if (sel) $('#aSel').value = sel; showAgent(); fillSelects();
+}
+function showAgent() {
+  curAgent = AGENTS.find(a => a.id === +val('aSel')); if (!curAgent) return; const c = curAgent.config, o = c.observation || {};
+  $('#aName').value = curAgent.name; $('#aPrompt').value = c.system_prompt; $('#aInt').value = c.interval_s; $('#aTrig').checked = c.event_triggers !== false;
+  $('#aHist').value = c.history; $('#aMax').value = c.max_actions; $('#oConf').checked = o.conflicts !== false; $('#oWx').checked = o.weather !== false;
+  $('#oInb').checked = o.inbound !== false; $('#oRte').checked = o.routes !== false; $('#oMax').value = o.max_aircraft || 40;
+}
+$('#aSel').onchange = showAgent;
+$('#aReset').onclick = () => { $('#aPrompt').value = AGDEF.system_prompt; };
+const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'),
+  max_actions: +val('aMax'), observation: { conflicts: $('#oConf').checked, weather: $('#oWx').checked, inbound: $('#oInb').checked, routes: $('#oRte').checked, max_aircraft: +val('oMax') } } });
+$('#aSave').onclick = async () => { try { await api(`/api/ai/agents/${curAgent.id}`, { method: 'PUT', body: JSON.stringify(agentBody()) }); $('#aMsg').textContent = '✓ saved'; loadAgents(curAgent.id); } catch (e) { $('#aMsg').textContent = e.message; } };
+$('#aNew').onclick = async () => { const r = await post('/api/ai/agents', { name: 'New profile', config: AGDEF }); loadAgents(r.id); };
+$('#aDel').onclick = async () => { if (!curAgent || !confirm('Delete this profile?')) return; await api(`/api/ai/agents/${curAgent.id}`, { method: 'DELETE' }); loadAgents(); };
+
+// ------------------------------------------------------------- runs
+function fillSelects() {
+  $('#rModel').innerHTML = MODELS.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('') || '<option value="">add a model first</option>';
+  $('#rAgent').innerHTML = AGENTS.map(a => `<option value="${a.id}">${esc(a.name)}</option>`).join('');
+}
+function renderScn() {
+  const q = val('rScnQ').toLowerCase(), keep = new Set($$('#rScn input:checked').map(i => i.value));
+  $('#rScn').innerHTML = SCN.filter(s => !q || (s.name + ' ' + (s.title || '')).toLowerCase().includes(q))
+    .map(s => `<label title="${esc(s.title || '')}"><input type="checkbox" value="${esc(s.name)}" ${keep.has(s.name) ? 'checked' : ''}> ${esc(s.name)}</label>`).join('');
+}
+$('#rScnQ').oninput = renderScn;
+$('#rGo').onclick = async () => {
+  const scenarios = $$('#rScn input:checked').map(i => i.value);
+  const env = { auto_wx: $('#rWx').checked, force: $('#rForce').checked, readback_rate: +val('rRb') };
+  if (+val('rEnd')) env.end_s = +val('rEnd') * 60;
+  try { const r = await post('/api/ai/runs', { scenarios, model_id: +val('rModel'), agent_id: +val('rAgent'), repeat: +val('rRepeat') || 1, env });
+    $('#rMsg').textContent = `✓ ${r.runs.length} run${r.runs.length > 1 ? 's' : ''} queued`; loadRuns(); } catch (e) { $('#rMsg').textContent = e.message; }
+};
+function svgPreview(p) {
+  if (!p) return '<svg></svg>';
+  const [x0, y0, x1, y1] = p.bbox, pad = 20, W = x1 - x0 + 2 * pad, H = y1 - y0 + 2 * pad;
+  const P = pts => pts.map(q => `${(q[0] - x0 + pad).toFixed(1)},${(y1 - q[1] + pad).toFixed(1)}`).join(' ');
+  const col = cs => `hsl(${[...cs].reduce((a, c) => a + c.charCodeAt(0), 0) * 47 % 360} 60% 66%)`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    <polygon points="${P(p.outline)}" fill="#11243a" stroke="#3b6e93" stroke-width="1.2"/>
+    ${(p.sectors || []).map(s => `<polygon points="${P(s)}" fill="none" stroke="#27405a" stroke-width=".8"/>`).join('')}
+    ${Object.entries(p.tracks || {}).map(([cs, t]) => `<polyline points="${P(t)}" fill="none" stroke="${col(cs)}" stroke-width="1.1" opacity=".85"/>`).join('')}
+    ${(p.losses || []).map(l => `<circle cx="${(l.x - x0 + pad).toFixed(1)}" cy="${(y1 - l.y + pad).toFixed(1)}" r="7" fill="none" stroke="#ff5a5a" stroke-width="2.4"><title>${esc((l.aircraft || []).join(' × '))} at T+${fmtT(l.t)}, ${l.min_nm} NM</title></circle>`).join('')}
+  </svg>`;
+}
+async function loadRuns() {
+  RUNS = await api('/api/ai/runs'); const f = val('runsF');
+  const L = RUNS.filter(r => !f || (f === 'running' ? ['running', 'queued'].includes(r.status) : f === 'done' ? ['done', 'stopped'].includes(r.status) : r.status === f));
+  $('#runsN').textContent = `${L.length} of ${RUNS.length}`;
+  const html = L.map(r => {
+    const ev = r.evaluation || {}, sc = r.score, cls = sc == null ? '' : sc >= 85 ? 'hi' : sc >= 60 ? 'mid' : 'lo', pg = r.progress || {};
+    return `<div class="run"><div class="t"><span>${esc(r.scenario)}</span><span class="pill ${r.status}">${r.status.toUpperCase()}</span></div>
+      <div class="s">${esc(r.model_name)} · ${esc(r.agent_name)} · ${fmtDate(r.created_at)}</div>
+      ${r.preview ? svgPreview(r.preview) : `<svg></svg>`}
+      ${['running', 'queued'].includes(r.status) ? `<div class="bar"><i style="width:${Math.min(100, 100 * (pg.t || 0) / (pg.duration || 2700))}%"></i></div><div class="s">T+${fmtT(pg.t)} · ${pg.decisions || 0} decisions${pg.errors ? ` · <span class="c-los">${pg.errors} model errors</span>` : ''}${pg.last && pg.last.actions && pg.last.actions.length ? ' · last: ' + esc(pg.last.actions.slice(0, 2).join('; ')) : ''}</div>` : ''}
+      ${sc != null ? `<div class="row" style="justify-content:space-between"><span class="score ${cls}">${sc}</span><span class="s">${ev.losses} loss${ev.losses === 1 ? '' : 'es'} · ${ev.decisions} decisions · ${ev.actions} instructions${ev.refused ? ` · ${ev.refused} refused` : ''}</span></div>` : ''}
+      ${r.error ? `<div class="s c-los">${esc(r.error)}</div>` : ''}
+      ${r.judge ? `<div class="s">judge (${esc(r.judge.model)}): ${r.judge.status === 'done' ? `mean grade <b>${r.judge.mean_grade ?? '–'}</b>/5` : `grading ${r.judge.done || 0}/${r.judge.total || '…'}`}</div>` : ''}
+      <div class="acts"><button class="small" data-steps="${r.id}">Decisions</button>
+        ${['done', 'stopped'].includes(r.status) ? `<a href="/debrief/${r.exercise_id}" target="_blank"><button class="small primary">Replay in the debrief</button></a><button class="small" data-judge="${r.id}">Judge</button>` : ''}
+        ${['running', 'queued'].includes(r.status) ? `<button class="small" data-stop="${r.id}">Stop</button>` : `<button class="small" data-del="${r.id}">Delete</button>`}</div></div>`;
+  }).join('') || '<div class="hint">No run yet.</div>';
+  if ($('#runs').dataset.h !== html) {
+    $('#runs').innerHTML = html; $('#runs').dataset.h = html;
+    $$('[data-steps]').forEach(b => b.onclick = () => showSteps(b.dataset.steps));
+    $$('[data-stop]').forEach(b => b.onclick = async () => { await post(`/api/ai/runs/${b.dataset.stop}/stop`); loadRuns(); });
+    $$('[data-del]').forEach(b => b.onclick = async () => { if (!confirm('Delete this run, its replay and its experiences?')) return; await api(`/api/ai/runs/${b.dataset.del}`, { method: 'DELETE' }); loadRuns(); });
+    $$('[data-judge]').forEach(b => b.onclick = () => judge(b.dataset.judge));
+  }
+}
+$('#runsF').onchange = loadRuns;
+function judge(id) {
+  const ms = MODELS.filter(m => m.kind !== 'baseline');
+  modal(`<h3>Judge the decisions</h3><p class="hint">A second model grades each decision (1–5) with a critique, from what it saw, what it did and what followed. The grades go with the experiences (filter datasets by grade).</p>
+    <div class="form"><label>Judge model</label><select id="jM">${ms.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select>
+    <label>Every</label><div class="row"><input type="number" id="jE" value="1" min="1" style="width:70px"> decision(s)</div>
+    <span></span><div class="row"><button class="primary" id="jGo" ${ms.length ? '' : 'disabled'}>Start</button><span class="hint" id="jMsg">${ms.length ? '' : 'add a language model first'}</span></div></div>`, (m, close) => {
+    m.querySelector('#jGo').onclick = async () => { try { await post(`/api/ai/runs/${id}/judge`, { model_id: +m.querySelector('#jM').value, every: +m.querySelector('#jE').value || 1 }); close(); loadRuns(); } catch (e) { m.querySelector('#jMsg').textContent = e.message; } };
+  });
+}
+async function showSteps(id, offset = 0) {
+  const [r, d] = await Promise.all([api(`/api/ai/runs/${id}`), api(`/api/ai/runs/${id}/steps?offset=${offset}&limit=40`)]);
+  const ev = r.evaluation;
+  const head = `<h3>${esc(r.scenario)} · ${esc(r.model_name)} <span class="hint">${esc(r.agent_name)}</span></h3>
+    ${ev ? `<div class="kpis"><div><b>${ev.score}</b><span>score</span></div><div><b>${ev.losses}</b><span>losses</span></div><div><b>${ev.decisions}</b><span>decisions</span></div><div><b>${ev.actions}</b><span>instructions</span></div><div><b>${ev.refused}</b><span>refused</span></div><div><b>${ev.mean_response_s ?? '–'}</b><span>request answer (s)</span></div></div>
+      <div class="hint">${(ev.penalties || []).map(p => `${esc(p.what)} ${p.count} → −${p.penalty}`).join(' · ') || 'no penalty'}</div>` : ''}
+    <div class="row" style="margin:8px 0">${r.exercise_id && ev ? `<a href="/debrief/${r.exercise_id}" target="_blank"><button class="small primary">Replay in the debrief</button></a>` : ''}<span class="hint">decisions ${offset + 1}–${offset + d.steps.length} of ${d.total}</span>
+      ${offset > 0 ? `<button class="small" id="sPrev">← earlier</button>` : ''}${offset + 40 < d.total ? `<button class="small" id="sNext">later →</button>` : ''}</div>`;
+  const steps = d.steps.map(s => `<div class="step"><div class="h"><b class="mono">T+${fmtT(s.t)}</b>${s.label ? `<span class="lbl ${s.label}">${s.label} ${s.reward > 0 ? '+' : ''}${s.reward}</span>` : ''}
+      <span class="hint">${esc((s.label_why || []).join(' · '))}</span>${s.latency_s != null ? `<span class="hint">${s.latency_s} s</span>` : ''}
+      ${s.judge && s.judge.grade ? `<span class="lbl">judge ${s.judge.grade}/5</span>` : ''}</div>
+      ${s.reasoning ? `<div>${esc(s.reasoning)}</div>` : ''}
+      ${s.error ? `<div class="ko">model error: ${esc(s.error)}</div>` : ''}${s.parse_error ? `<div class="ko">unreadable answer: ${esc(s.parse_error)}</div>` : ''}
+      ${(s.results || []).map(x => `<div class="${x.ok ? 'ok' : 'ko'}">${x.ok ? '✓' : '✗'} <span class="mono">${esc(JSON.stringify(x.action))}</span> — ${esc(x.text)}</div>`).join('') || (s.error ? '' : '<div class="hint">no instruction</div>')}
+      ${s.judge && s.judge.critique ? `<div class="hint">judge: ${esc(s.judge.critique)}</div>` : ''}
+      <details><summary>situation shown</summary><pre class="obs">${esc((s.feedback ? 'RESULT OF YOUR LAST INSTRUCTIONS: ' + s.feedback + '\n\n' : '') + s.observation)}</pre></details>
+      <details><summary>raw answer</summary><pre class="obs">${esc(s.response || '')}</pre></details></div>`).join('');
+  const bg = document.querySelector('.modal-bg'); if (bg) bg.remove();
+  modal(head + steps, m => { m.classList.add('wide');
+    const p = m.querySelector('#sPrev'), n = m.querySelector('#sNext');
+    if (p) p.onclick = () => showSteps(id, Math.max(0, offset - 40)); if (n) n.onclick = () => showSteps(id, offset + 40); });
+}
+
+// ------------------------------------------------------------- experiences & datasets
+function filters() {
+  return { scenarios: $$('#dScn input:checked').map(i => i.value), models: $$('#dMod input:checked').map(i => i.value),
+    min_score: val('dMin') === '' ? null : +val('dMin'), labels: $$('.dLab:checked').map(i => i.value), min_grade: val('dGrade') === '' ? null : +val('dGrade') };
+}
+async function loadData() {
+  const done = RUNS.filter(r => ['done', 'stopped'].includes(r.status));
+  const sc = [...new Set(done.map(r => r.scenario))], mo = [...new Set(done.map(r => r.model_name))];
+  const keep = id => new Set($$(`#${id} input:checked`).map(i => i.value));
+  const ks = keep('dScn'), km = keep('dMod');
+  $('#dScn').innerHTML = sc.map(s => `<label><input type="checkbox" value="${esc(s)}" ${ks.has(s) ? 'checked' : ''}> ${esc(s)}</label>`).join('') || '<span class="hint">no finished run</span>';
+  $('#dMod').innerHTML = mo.map(s => `<label><input type="checkbox" value="${esc(s)}" ${km.has(s) ? 'checked' : ''}> ${esc(s)}</label>`).join('') || '<span class="hint">—</span>';
+  $$('#p-data input').forEach(i => i.onchange = stats); stats();
+  const ds = await api('/api/ai/datasets');
+  $('#dTable').innerHTML = `<tr><th>Name</th><th>Format</th><th>Records</th><th>Runs</th><th>Size</th><th>Created</th><th></th></tr>` + (ds.map(d => `<tr><td><b>${esc(d.name)}</b></td><td>${d.format}</td><td>${d.records}</td><td>${d.runs}</td><td>${(d.bytes / 1024).toFixed(0)} KB</td><td>${fmtDate(d.created_at)}</td>
+    <td class="row" style="justify-content:flex-end"><a href="${d.download}"><button class="small">Download</button></a><button class="small" data-link="${esc(d.link)}">RunPod link</button><button class="small" data-dd="${d.id}">Delete</button></td></tr>`).join('') || '<tr><td colspan="7" class="hint">No dataset yet.</td></tr>');
+  $$('[data-dd]').forEach(b => b.onclick = async () => { if (!confirm('Delete this dataset file?')) return; await api(`/api/ai/datasets/${b.dataset.dd}`, { method: 'DELETE' }); loadData(); });
+  $$('[data-link]').forEach(b => b.onclick = () => modal(`<h3>Dataset link</h3><p class="hint">Whoever has this link can download the dataset: give it to the training machine (a RunPod pod), not in public places.</p>
+    <code class="cmd">${esc(b.dataset.link)}</code><p class="hint" style="margin-top:10px">On the pod:</p><code class="cmd">wget -O /workspace/data/atc.jsonl "${esc(b.dataset.link)}"</code>
+    <div class="row" style="margin-top:10px"><button class="primary" id="cpL">Copy the link</button></div>`, (m) => { m.querySelector('#cpL').onclick = () => navigator.clipboard.writeText(b.dataset.link); }));
+}
+async function stats() {
+  try { const s = await post('/api/ai/experiences/stats', filters());
+    $('#dStats').innerHTML = `<div><b>${s.runs}</b><span>runs</span></div><div><b>${s.decisions}</b><span>decisions</span></div><div><b class="c-ok">${s.by_label.good || 0}</b><span>good</span></div><div><b>${s.by_label.neutral || 0}</b><span>neutral</span></div><div><b class="c-los">${s.by_label.bad || 0}</b><span>bad</span></div>`; } catch (e) {}
+}
+$('#dGo').onclick = async () => { try { const d = await post('/api/ai/datasets', { name: val('dName'), format: val('dFmt'), filters: filters() }); $('#dMsg').textContent = `✓ ${d.records} records`; loadData(); } catch (e) { $('#dMsg').textContent = e.message; } };
+
+(async () => {
+  await header('/ai');
+  SCN = await api('/api/scenarios').catch(() => []);
+  renderScn();
+  await Promise.all([loadModels(), loadAgents()]);
+  await loadRuns();
+  setInterval(loadRuns, 3000);
+})();
+</script>
+</body>
+</html>

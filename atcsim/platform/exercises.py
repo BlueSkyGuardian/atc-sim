@@ -56,6 +56,7 @@ DOC_PAGES = [  # (slug, title, group)
     ("instructor", "Instructor and admin manual", "User manuals"),
     ("designer", "Scenario designer", "Scenarios"),
     ("scenario-json", "Scenario JSON reference", "Scenarios"),
+    ("ai", "AI lab: models controlling the simulation", "Scenarios"),
     ("scenarios", "Scenario library and progression", "Scenarios"),
     ("weather", "Weather modelling", "Models"),
     ("aircraft", "Aircraft, pilots and airspace", "Models"),
@@ -368,6 +369,7 @@ def exercises(request: Request, pictures: bool = False, live: bool = False, limi
     else:
         rows = db.q("SELECT e.* FROM exercises e JOIN exercise_members m ON m.exercise_id=e.id WHERE m.user_id=? "
                     "ORDER BY e.created_at DESC LIMIT ?", (u["id"], limit))
+    rows = [e for e in rows if not e.get("ai")]          # AI lab runs: on the AI lab page
     if live:
         rows = [e for e in rows if manager and e["id"] in manager.sessions]
     return [_summary(e, u, with_picture=pictures and seat_for(e["id"], u) == "instructor") for e in rows]

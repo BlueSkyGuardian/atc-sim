@@ -85,7 +85,8 @@ administrator. Complete your profile (first name, last name, licence number).
 Everything lives in the `atc-data` Docker volume: `atcsim.db` (accounts, scenario sharing, exercises),
 `recordings/<exercise>/exercise.mp4` and the raw material it was made from, `debriefs/<exercise>/` (the whole run of
 each ended exercise for its debrief on the simulator, and the alternatives tried in it: a few MB per hour flown), and
-`secret.key`.
+`ai/` (the AI lab's runs, their decisions and the exported datasets) and `secret.key` (it also encrypts the
+AI lab's API keys: keep it, or the keys must be entered again).
 Scenarios saved with the designer are in `scenarios/` on the host.
 
 ```bash
@@ -118,3 +119,11 @@ certificate with Caddy: `caddy reverse-proxy --from <your-ip>.nip.io --to localh
 Running exercises are saved in the data volume (`/data/live/<exercise>`) every 10 simulated seconds. A
 `docker compose up -d --build` (or a crash) does not lose them: when the server starts again they are back, paused
 at their last save, and the instructor presses Run. The save is removed when the exercise ends.
+
+
+## AI lab
+
+The AI lab calls the models' APIs from the server (outbound HTTPS to `api.runpod.ai`, or your pod's proxy URL).
+`ATC_AI_PARALLEL` (default 2) sets how many headless runs go at the same time; each runs in its own process and uses
+about one CPU core while the model is answering quickly. A dataset's *RunPod link* is
+`<ATC_PUBLIC_URL>/ai-data/<id>/<token>.jsonl`: set `ATC_PUBLIC_URL` so the link is reachable from the pod.

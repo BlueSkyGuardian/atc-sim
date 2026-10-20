@@ -9,3 +9,4 @@ itsdangerous>=2.1
 httpx>=0.27
 pillow>=10.1
 # ffmpeg (system package) encodes the .mp4 recordings
+cryptography>=41

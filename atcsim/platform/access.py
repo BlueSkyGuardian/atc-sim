@@ -19,8 +19,9 @@ from . import config, db
 from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
-          "/help", "/help/", "/api/help", "/api/help/", "/api/landing")       # the documentation is public
-PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/admin", "/profile", "/x/", "/stats", "/help")
+          "/help", "/help/", "/api/help", "/api/help/", "/api/landing",
+          "/ai-data/")            # datasets for a training machine (RunPod pod): the link's token is the access       # the documentation is public
+PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/ai", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)

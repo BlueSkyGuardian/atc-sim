@@ -238,6 +238,11 @@ bar) opens the written report of the run:
 
 ![The written report: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions](/static/docs/x_report.jpg "The written report: workload, losses with the clearances before them, bookmarks, requests, read-backs, live actions")
 
+## AI lab
+
+Models (RunPod or any OpenAI-compatible server) can control the simulation headlessly; each run is scored,
+its decisions labelled, and it can be replayed in the debrief like an exercise. See the [AI lab manual](ai.md).
+
 ## Statistics
 
 *Stats → As instructor*:

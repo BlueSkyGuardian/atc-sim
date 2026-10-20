@@ -43,7 +43,7 @@ def _name(uid: Optional[int]) -> str:
 
 
 def _ended(where: str, args=()) -> List[dict]:
-    return db.q(f"SELECT * FROM exercises WHERE ended_at IS NOT NULL AND {where} ORDER BY created_at", args)
+    return db.q(f"SELECT * FROM exercises WHERE ended_at IS NOT NULL AND COALESCE(ai, 0)=0 AND {where} ORDER BY created_at", args)
 
 
 # ------------------------------------------------------------------ evaluations
@@ -151,7 +151,7 @@ def controller_sessions(uid: int, instructor: Optional[int] = None) -> List[dict
                 "m.seat='atc' AND e.ended_at IS NOT NULL" + (" AND e.instructor_id=?" if instructor else "") +
                 " ORDER BY e.created_at", (uid, instructor) if instructor else (uid,))
     if instructor is None:
-        rows += db.q("SELECT * FROM exercises WHERE instructor_id=? AND multi=0 AND ended_at IS NOT NULL", (uid,))
+        rows += db.q("SELECT * FROM exercises WHERE instructor_id=? AND multi=0 AND ended_at IS NOT NULL AND COALESCE(ai, 0)=0", (uid,))
     rows = list({e["id"]: e for e in rows}.values())       # a solo exercise is both (owner and controller)
     rows.sort(key=lambda e: e["created_at"])
     out = []

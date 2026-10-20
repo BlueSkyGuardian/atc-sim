@@ -277,3 +277,26 @@ python examples/baseline_agent.py --scenario p03_ocn_isolated_storms --realtime 
 
 Agents see the same picture as a controller and never see future requests. Score them with
 `/sessions/{id}/metrics`.
+
+
+## AI lab
+
+Instructors and administrators. See the [AI lab manual](ai.md).
+
+| Method | Path | What |
+|---|---|---|
+| GET / POST | `/api/ai/models` | Models: `{"name", "kind": "runpod" \| "openai" \| "baseline", "endpoint_id", "base_url", "model", "api_key", "params": {"temperature", "max_tokens", "timeout_s", "retries", "json_mode"}}`. Keys are stored encrypted and never returned (`has_key`, `key_hint`) |
+| PUT / DELETE | `/api/ai/models/{id}` | Edit (no `api_key`: kept) / delete |
+| POST | `/api/ai/models/{id}/test` | The models served and one short answer, with its latency |
+| GET / POST | `/api/ai/agents` | Agent profiles: `{"name", "config": {"system_prompt", "interval_s", "event_triggers", "history", "max_actions", "observation": {...}}}`; `defaults` |
+| PUT / DELETE | `/api/ai/agents/{id}` | |
+| GET / POST | `/api/ai/runs` | Runs (newest first, with progress, evaluation, preview) / queue runs: `{"scenarios": [...], "model_id", "agent_id", "repeat", "env": {"auto_wx", "force", "readback_rate", "end_s"}}` |
+| GET / DELETE | `/api/ai/runs/{id}` | One run (evaluation, preview, written report, agent profile used) / delete it, its replay and its experiences |
+| GET | `/api/ai/runs/{id}/steps?offset&limit` | Its decisions: `observation`, `struct`, `feedback`, `response`, `reasoning`, `results`, `latency_s`, `usage`, `reward`, `label`, `label_why`, `judge` |
+| POST | `/api/ai/runs/{id}/stop` · `/judge` | Stop (still evaluated) / judge its decisions: `{"model_id", "every"}` |
+| POST | `/api/ai/experiences/stats` | Filters `{"scenarios", "models", "min_score", "labels", "min_grade"}` → runs, decisions, by label |
+| GET / POST | `/api/ai/datasets` | Datasets / export one: `{"name", "format": "chat" \| "trajectories" \| "steps", "filters"}` |
+| GET | `/api/ai/datasets/{id}/file` | The JSONL file |
+| GET | `/ai-data/{id}/{token}.jsonl` | The same file without signing in, for a training machine (the token is the access) |
+
+A run is also an exercise (`exercise_id`, not listed with the people's exercises): `/debrief/{exercise_id}` replays it.
