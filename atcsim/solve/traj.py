@@ -1,12 +1,13 @@
 """Piecewise-linear 4D trajectories: the system's prediction of each aircraft (as the conflict detection makes it:
-route legs at the ground speed, climbs and descents at the present or a nominal rate, then level), and the same with
+route legs at the ground speed, climbs and descents at the present rate, else the aircraft's own climb or idle descent rate, then level), and the same with
 a clearance applied.
 
 A trajectory is breakpoints t (s, from now, 0 .. horizon) with the position x, y (NM) and altitude z (ft) at each;
 between two breakpoints the aircraft moves in a straight line at constant speed and vertical speed, so the closest
 point of approach of two trajectories is exact leg by leg (cpa.py).
 
-Clearances take time to act: a speed change after SPEED_DELAY_S, a turn after a delay growing with its angle, a level
+A turn the aircraft is making (after passing a point, or towards a new direct) is modelled like a heading: half of
+it flown on the present track. Clearances take time to act: a speed change after SPEED_DELAY_S, a turn after a delay growing with its angle, a level
 change after the pilot's delay. Candidates:
   speed       "M74", "0.74", "280" (IAS kt)
   heading     a heading, flown for `for_s` seconds then direct to the route point after the next one (a delaying vector
@@ -84,11 +85,41 @@ def _horizontal(pts: List[Tuple[float, float]], gs0: float, gs1: float, t_switch
     return ts, xs, ys
 
 
-def _vertical(alt0: float, cfl_ft: float, vs_fpm: float, delay: float, H: float) -> Tuple[List[float], List[float]]:
+def _perf_rate(a, climbing: bool) -> Optional[float]:
+    """The aircraft's own rate (ft/min) for a new climb or descent: its available climb rate, or its idle descent
+    rate (speedbrakes out when it is high on its profile) - not a nominal figure: a descent at 3500 ft/min through
+    another aircraft's level a minute earlier than a nominal 2000 ft/min would predict is a conflict missed."""
+    try:
+        if climbing:
+            r = float(a.climb_rate_available())
+        else:
+            from ..aircraft import SPEEDBRAKE_FACTOR
+            r = float(a.descent_rate_idle()) * (SPEEDBRAKE_FACTOR if getattr(a, "speedbrake", False) else 1.0)
+        return r if r > 300 else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def _vertical(alt0: float, cfl_ft: float, vs_fpm: float, delay: float, H: float, a=None,
+              rates: str = "expected") -> Tuple[List[float], List[float]]:
+    """rates: "expected" (the aircraft's own), or the bounds of what it may do, "fast" (descents with speedbrakes)
+    and "slow" (the lesser of its own and the nominal rate): a level change is checked with both bounds, the
+    window in which it passes through another's level lying between theirs."""
     dz = cfl_ft - alt0
     if abs(dz) < 50:
         return [0.0, H], [alt0, alt0]
-    rate = abs(vs_fpm) if vs_fpm * dz > 0 and abs(vs_fpm) > 300 and delay <= 0 else (1500.0 if dz > 0 else 2000.0)
+    nominal = 1500.0 if dz > 0 else 2000.0
+    if vs_fpm * dz > 0 and abs(vs_fpm) > 300 and delay <= 0:
+        rate = abs(vs_fpm)
+    else:
+        own = (_perf_rate(a, dz > 0) if a is not None else None) or nominal
+        if rates == "fast":
+            from ..aircraft import SPEEDBRAKE_FACTOR
+            rate = max(own, nominal) * (1.0 if dz > 0 else SPEEDBRAKE_FACTOR / (SPEEDBRAKE_FACTOR if getattr(a, "speedbrake", False) else 1.0))
+        elif rates == "slow":
+            rate = min(own, nominal)
+        else:
+            rate = own
     t_lv = delay + abs(dz) / rate * 60.0
     ts, zs = [0.0], [alt0]
     if delay > 0:
@@ -114,7 +145,7 @@ def route_ahead(w, a) -> List[str]:
 
 
 def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, for_s: Optional[float] = None,
-          direct: Optional[str] = None, cfl: Optional[int] = None) -> Traj:
+          direct: Optional[str] = None, cfl: Optional[int] = None, rates: str = "expected") -> Traj:
     """The predicted trajectory of aircraft a over H seconds, with an optional clearance."""
     from .. import atctools
     ent = dict(w.entries.get(a.callsign, {}))
@@ -138,10 +169,22 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
             ahead = route_ahead(w, a)
             rejoin = ahead[1:] if len(ahead) > 1 else ahead
             pts, hdg = [tuple(p0), tuple(p1), tuple(p2)] + [w.waypoints[p] for p in rejoin], None
+    elif len(pts) >= 2:
+        # a turn in progress or to come at once (past a point, a new direct): the track changes at a standard rate,
+        # modelled as for a heading, half the turn on the present track; without it the prediction cuts the corner
+        p0 = np.array(pts[0], dtype=float)
+        d = np.array(pts[1], dtype=float) - p0
+        L = float(np.hypot(*d))
+        if L > 1e-6:
+            brg = math.degrees(math.atan2(d[0], d[1])) % 360
+            turn = abs((brg - a.trk + 180) % 360 - 180)
+            lead = gs0 / 3600.0 * turn / TURN_RATE_DPS / 2
+            if turn > 5 and lead < 0.8 * L:
+                pts = [tuple(p0), tuple(p0 + _unit(a.trk) * lead)] + list(pts[1:])
     th, xh, yh = _horizontal(pts, gs0, gs1, t_sw, H, hdg)
     cfl_ft = atctools._system_cfl(w, a, ent)
     lvl_delay = PILOT_DELAY_S if cfl is not None and abs(cfl * 100 - a.cleared_alt_ft) > 50 else 0.0
-    tv, zv = _vertical(a.alt_ft, cfl_ft, a.vs_fpm, lvl_delay, H)
+    tv, zv = _vertical(a.alt_ft, cfl_ft, a.vs_fpm, lvl_delay, H, a, rates)
     return _merge(a.callsign, th, xh, yh, tv, zv, H, bool(a.non_rvsm() if callable(a.non_rvsm) else a.non_rvsm), bool(getattr(a, "formation", None)))
 
 

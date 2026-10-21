@@ -1,0 +1,196 @@
+{
+ "t": 300.0,
+ "n_active": 15,
+ "sep_h": 7.0,
+ "conflicts": [
+  [
+   "EWG3KP",
+   "IBE3247",
+   1.02,
+   215.7699138361197,
+   600.0,
+   1000.0
+  ]
+ ],
+ "cpa900": [
+  3.820199830714189e-15,
+  830.3669760545447,
+  215.7699138361197
+ ],
+ "mover": "EWG3KP",
+ "other": "IBE3247",
+ "gs": 356.4686503881918,
+ "t_grid": 0.30852794647216797,
+ "n_grid": 555,
+ "sols": [
+  [
+   "direct",
+   "EWG3KP direct TOVRA",
+   1.1,
+   8.6,
+   true,
+   9.4
+  ],
+  [
+   "direct",
+   "EWG3KP direct VEDOD",
+   1.15,
+   9.3,
+   true,
+   10.1
+  ],
+  [
+   "heading",
+   "EWG3KP heading 210 for 2 min, then resume",
+   1.37,
+   8.5,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 210 for 4 min, then resume",
+   1.42,
+   10.3,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 200 for 2 min, then resume",
+   1.43,
+   9.8,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 210 for 6 min, then resume",
+   1.47,
+   11.6,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "IBE3247 heading 237 for 6 min, then resume",
+   1.47,
+   10.7,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 200 for 4 min, then resume",
+   1.48,
+   11.5,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "IBE3247 heading 247 for 4 min, then resume",
+   1.48,
+   10.1,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 185 for 2 min, then resume",
+   1.52,
+   11.5,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "EWG3KP heading 200 for 6 min, then resume",
+   1.53,
+   11.5,
+   null,
+   null
+  ],
+  [
+   "heading",
+   "IBE3247 heading 247 for 6 min, then resume",
+   1.53,
+   11.5,
+   null,
+   null
+  ]
+ ],
+ "optimal": [
+  "EWG3KP direct TOVRA",
+  "EWG3KP direct VEDOD"
+ ],
+ "move": null,
+ "priority": "no priority between them (entered together)",
+ "mach0": 0.78,
+ "speed_curve": [
+  [
+   0.71,
+   3.3923089995575695
+  ],
+  [
+   0.72,
+   2.8201695802820574
+  ],
+  [
+   0.73,
+   2.204537330297378
+  ],
+  [
+   0.74,
+   1.547371397729302
+  ],
+  [
+   0.75,
+   0.8525441837284816
+  ],
+  [
+   0.76,
+   0.12602838928876114
+  ],
+  [
+   0.77,
+   0.12276566811789116
+  ],
+  [
+   0.78,
+   1.0194177943024423
+  ],
+  [
+   0.79,
+   1.9160699204870104
+  ],
+  [
+   0.8,
+   2.81272204667157
+  ],
+  [
+   0.81,
+   3.6640073843092473
+  ],
+  [
+   0.82,
+   4.35541437454426
+  ]
+ ],
+ "vo": {
+  "IBE3247": 116,
+  "NOZ4381P": 37,
+  "BAW9522": 20
+ },
+ "free_arcs": [
+  [
+   69,
+   221
+  ],
+  [
+   338,
+   31
+  ]
+ ],
+ "trk": 229.73054822303752
+}

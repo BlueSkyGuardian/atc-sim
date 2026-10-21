@@ -1,0 +1,4830 @@
+{
+ "6d0aec87dcaf": {
+  "kind": "baseline",
+  "scenario": "s01_basic_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 6.5,
+   "assume_mean_s": 2.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 1,
+    "answered": 1,
+    "mean_wait_s": 2.0,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 8.0
+   },
+   "decisions": 42,
+   "actions": 6,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.02,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "AFR452",
+    "heading": 236
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "optimal",
+    "best": [
+     "AFR452 heading 237 for 4 min, then resume",
+     "RAM201 heading 123 for 4 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "AFR452\u00d7RAM201: AFR452 heading 236",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R002 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "81679e91fe66": {
+  "kind": "baseline",
+  "scenario": "s02_climb_request_into_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 5.0,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 2,
+    "answered": 2,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 2,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 7.5
+   },
+   "decisions": 41,
+   "actions": 5,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 41,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "ff9706bea549": {
+  "kind": "baseline",
+  "scenario": "s03_descent_through_opposite",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 2,
+    "answered": 2,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 2,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 21.0
+   },
+   "decisions": 42,
+   "actions": 5,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R002 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "ec4d79a9ba6e": {
+  "kind": "baseline",
+  "scenario": "s05_slowdown_on_converging_exit",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 4,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 3.7,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 3.7,
+    "max_wait_s": 5.0
+   },
+   "transfers": {
+    "left": 3,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 15.5
+   },
+   "decisions": 39,
+   "actions": 8,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1140.0
+  },
+  "error": null,
+  "n_steps": 39,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RAM740",
+    "heading": 186
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM740",
+    "speed": "SN"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "RAM740",
+     "SVA112"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM740",
+     "SVA112"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM740",
+     "SVA112"
+    ],
+    "grade": "feasible",
+    "best": [
+     "RAM740 speed M73"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM740\u00d7SVA112: RAM740 heading 186",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "ef5622ad9f9b": {
+  "kind": "baseline",
+  "scenario": "s08_simultaneous_level_requests",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 6,
+   "requests_expired": 0,
+   "mean_response_s": 3.0,
+   "assume_mean_s": 4.3,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 4.3,
+    "max_wait_s": 6.0
+   },
+   "transfers": {
+    "left": 0,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": null
+   },
+   "decisions": 42,
+   "actions": 6,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "R005 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R006 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "d046f533924a": {
+  "kind": "baseline",
+  "scenario": "s06_speed_up_into_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.4,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 5,
+   "requests_expired": 0,
+   "mean_response_s": 2.5,
+   "assume_mean_s": 3.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 3.0,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 3,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 12.5
+   },
+   "decisions": 44,
+   "actions": 12,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1180.0
+  },
+  "error": null,
+  "n_steps": 44,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.02,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "KLM88B",
+    "speed": "M80"
+   },
+   {
+    "type": "clear",
+    "callsign": "KLM88B",
+    "heading": 146
+   },
+   {
+    "type": "clear",
+    "callsign": "KLM88B",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE612",
+    "speed": "SN"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "other",
+    "best": [
+     "KLM88B heading 156 for 4 min, then resume",
+     "KLM88B heading 146 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "optimal",
+    "best": [
+     "KLM88B heading 156 for 2 min, then resume",
+     "KLM88B heading 156 for 4 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "R005 approved",
+   "routine",
+   "routine",
+   "routine",
+   "IBE612\u00d7KLM88B: KLM88B speed M80",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "IBE612\u00d7KLM88B: KLM88B heading 146",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "99cb378db711": {
+  "kind": "baseline",
+  "scenario": "p01_ws_two_merges",
+  "status": "done",
+  "score": 74.4,
+  "evaluation": {
+   "score": 74.4,
+   "penalties": [
+    {
+     "what": "losses of separation",
+     "count": 1,
+     "per": 25,
+     "penalty": 25
+    },
+    {
+     "what": "minutes in loss of separation",
+     "count": 0.3,
+     "per": 2,
+     "penalty": 0.6
+    }
+   ],
+   "losses": 1,
+   "min_sep_nm": 6.54,
+   "infringements": 0,
+   "requests": 10,
+   "requests_expired": 0,
+   "mean_response_s": 4.0,
+   "assume_mean_s": 2.6,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.6,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 5,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 11.0
+   },
+   "decisions": 45,
+   "actions": 21,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 18,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 45,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.05,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.06,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.08,
+   0.11
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 137
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 135
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 123
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 127
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "other",
+    "best": [
+     "RAM1311 heading 097 for 6 min, then resume",
+     "RAM1311 heading 087 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "other",
+    "best": [
+     "RAM1311 heading 085 for 4 min, then resume",
+     "RAM1311 heading 085 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "other",
+    "best": []
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "other",
+    "best": []
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 137",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 135",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R007 unable",
+   "routine",
+   "routine",
+   "routine",
+   "R009 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 123",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 127 (nothing better)"
+  ]
+ },
+ "1cd759a80579": {
+  "kind": "baseline",
+  "scenario": "p05_ws_storms_arrivals",
+  "status": "done",
+  "score": 95.0,
+  "evaluation": {
+   "score": 95.0,
+   "penalties": [
+    {
+     "what": "RVSM violations",
+     "count": 1,
+     "per": 5,
+     "penalty": 5
+    },
+    {
+     "what": "extra track miles",
+     "count": 0.9,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 16,
+   "requests_expired": 0,
+   "mean_response_s": 3.2,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 11,
+    "answered": 11,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 3.0
+   },
+   "transfers": {
+    "left": 9,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 17.3
+   },
+   "decisions": 46,
+   "actions": 25,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 41,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 46,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.0,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.0,
+   0.02,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "R001 approved",
+   "routine",
+   "R002 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R008 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R011 approved",
+   "routine",
+   "routine",
+   "R013 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "7203cbfc0d9c": {
+  "kind": "baseline",
+  "scenario": "s10_busy_mixed",
+  "status": "done",
+  "score": 70.0,
+  "evaluation": {
+   "score": 70.0,
+   "penalties": [
+    {
+     "what": "area infringements",
+     "count": 3,
+     "per": 10,
+     "penalty": 30
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 3,
+   "requests": 13,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 3.4,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 9,
+    "answered": 9,
+    "mean_wait_s": 3.4,
+    "max_wait_s": 12.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 15.0
+   },
+   "decisions": 50,
+   "actions": 34,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 11,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 50,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.15,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.1,
+   0.0,
+   0.0,
+   0.01,
+   0.02,
+   0.02,
+   0.01,
+   0.02,
+   0.06,
+   0.08,
+   0.01,
+   0.01,
+   0.0,
+   0.01,
+   0.01,
+   0.05,
+   0.06,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.02,
+   0.0,
+   0.03,
+   0.01,
+   0.0,
+   0.0,
+   0.02,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "speed": "M78"
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 133
+   },
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "heading": 174
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 185
+   },
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "speed": "M80"
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 187
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "heading": 308
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 127
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "speed": "M80"
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "heading": 338
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "other",
+    "best": [
+     "TAP7 heading 174 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM602 heading 183 for 4 min, then resume",
+     "RAM602 heading 198 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "optimal",
+    "best": [
+     "TAP7 heading 174 for 4 min, then resume",
+     "TAP7 heading 174 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM602 heading 185 for 6 min, then resume",
+     "RAM602 heading 195 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM602 heading 185 for 6 min, then resume",
+     "RAM602 heading 195 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "other",
+    "best": [
+     "VLG33 heading 243 for 4 min, then resume",
+     "VLG33 heading 228 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "other",
+    "best": [
+     "AFR11 FL330"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "other",
+    "best": [
+     "RAM602 heading 198 for 6 min, then resume",
+     "RAM602 heading 213 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "other",
+    "best": [
+     "VLG33 heading 243 for 4 min, then resume",
+     "VLG33 heading 228 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "DLH5"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "other",
+    "best": [
+     "VLG33 heading 228 for 2 min, then resume",
+     "VLG33 heading 348 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "other",
+    "best": [
+     "SWR40 heading 149 for 4 min, then resume",
+     "SWR40 heading 134 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "other",
+    "best": [
+     "VLG33 heading 348 for 6 min, then resume",
+     "VLG33 heading 003 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "other",
+    "best": [
+     "VLG33 heading 348 for 6 min, then resume",
+     "VLG33 heading 003 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "optimal",
+    "best": [
+     "VLG33 heading 348 for 6 min, then resume",
+     "VLG33 heading 003 for 4 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "AFR11\u00d7TAP7: TAP7 speed M78; AFR11\u00d7RAM602: RAM602 heading 133",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "AFR11\u00d7TAP7: TAP7 heading 174; AFR11\u00d7RAM602: RAM602 heading 185",
+   "routine",
+   "R009 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R011 unable",
+   "EZY8\u00d7VLG33: VLG33 speed M80",
+   "AFR11\u00d7RAM602: AFR11 asked FL390; RAM602\u00d7SWR40: RAM602 heading 187",
+   "routine",
+   "routine",
+   "routine",
+   "R012 approved",
+   "routine",
+   "R013 approved; EZY8\u00d7VLG33: VLG33 heading 308",
+   "RAM602\u00d7SWR40: RAM602 heading 127",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "EZY8\u00d7VLG33: VLG33 speed M80",
+   "routine",
+   "routine",
+   "routine",
+   "EZY8\u00d7VLG33: VLG33 heading 338",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "a13fb01a4fe2": {
+  "kind": "baseline",
+  "scenario": "p02_wn_merges_and_climbs",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 12,
+   "requests_expired": 0,
+   "mean_response_s": 4.8,
+   "assume_mean_s": 2.9,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.9,
+    "max_wait_s": 7.0
+   },
+   "transfers": {
+    "left": 9,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 11.6
+   },
+   "decisions": 47,
+   "actions": 25,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 30,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 47,
+  "decide_s": [
+   0.0,
+   0.09,
+   0.0,
+   0.01,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.18,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.0,
+   0.12,
+   0.01,
+   0.0,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "EWG3KP",
+    "heading": 209
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM7768X",
+    "heading": 284
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM7768X",
+    "heading": 304
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "feasible",
+    "best": [
+     "EWG3KP direct ERMED",
+     "EWG3KP direct TOVRA"
+    ]
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM4143P",
+     "RAM7768X"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM7768X heading 334 for 6 min, then resume",
+     "RAM7768X heading 274 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM7768X heading 334 for 6 min, then resume",
+     "RAM7768X heading 274 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "IBE4343",
+     "RAM7768X"
+    ],
+    "grade": "feasible",
+    "best": [
+     "RAM7768X direct BEXAL",
+     "RAM7768X direct KOMUT"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "EWG3KP\u00d7IBE3247: EWG3KP heading 209",
+   "routine",
+   "routine",
+   "R001 approved",
+   "routine",
+   "R002 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM4143P\u00d7RAM7768X: RAM7768X heading 284",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "IBE4343\u00d7RAM7768X: RAM7768X heading 304",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R010 approved",
+   "routine",
+   "R011 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "254ec9824212": {
+  "kind": "solver",
+  "scenario": "s01_basic_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 6.5,
+   "assume_mean_s": 2.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 1,
+    "answered": 1,
+    "mean_wait_s": 2.0,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 8.0
+   },
+   "decisions": 42,
+   "actions": 9,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.29,
+   0.26,
+   0.3,
+   0.21,
+   0.27,
+   0.34,
+   0.0,
+   0.25,
+   0.87,
+   0.27,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "AFR452",
+    "speed": "M75"
+   },
+   {
+    "type": "clear",
+    "callsign": "AFR452",
+    "speed": "M69"
+   },
+   {
+    "type": "clear",
+    "callsign": "AFR452",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "AFR452",
+    "heading": 227
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "optimal",
+    "best": [
+     "AFR452 speed M75",
+     "RAM201 speed M75"
+    ]
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "optimal",
+    "best": [
+     "AFR452 speed M69"
+    ]
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR452",
+     "RAM201"
+    ],
+    "grade": "optimal",
+    "best": [
+     "AFR452 heading 227 for 6 min, then resume",
+     "RAM201 heading 153 for 6 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "AFR452\u00d7RAM201: AFR452 speed M75",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "AFR452\u00d7RAM201: AFR452 speed M69",
+   "routine",
+   "routine",
+   "routine",
+   "AFR452\u00d7RAM201: AFR452 heading 227 for 6 min, then resume",
+   "R002 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "f2bf3f16dbd4": {
+  "kind": "solver",
+  "scenario": "s02_climb_request_into_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 5.0,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 2,
+    "answered": 2,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 2,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 7.5
+   },
+   "decisions": 41,
+   "actions": 5,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 41,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "dce2e94ebdcd": {
+  "kind": "solver",
+  "scenario": "s03_descent_through_opposite",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 3,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 2,
+    "answered": 2,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 2.0
+   },
+   "transfers": {
+    "left": 2,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 21.0
+   },
+   "decisions": 42,
+   "actions": 5,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R002 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "051c93e783ed": {
+  "kind": "baseline",
+  "scenario": "p06_wn_capacity_sequencing",
+  "status": "done",
+  "score": 74.0,
+  "evaluation": {
+   "score": 74.0,
+   "penalties": [
+    {
+     "what": "losses of separation",
+     "count": 1,
+     "per": 25,
+     "penalty": 25
+    },
+    {
+     "what": "minutes in loss of separation",
+     "count": 0.4,
+     "per": 2,
+     "penalty": 0.8
+    },
+    {
+     "what": "extra track miles",
+     "count": 4.8,
+     "per": 0.05,
+     "penalty": 0.2
+    }
+   ],
+   "losses": 1,
+   "min_sep_nm": 6.62,
+   "infringements": 0,
+   "requests": 22,
+   "requests_expired": 0,
+   "mean_response_s": 4.5,
+   "assume_mean_s": 3.2,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 13,
+    "answered": 13,
+    "mean_wait_s": 3.2,
+    "max_wait_s": 6.0
+   },
+   "transfers": {
+    "left": 11,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 9.5
+   },
+   "decisions": 54,
+   "actions": 44,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 58,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 54,
+  "decide_s": [
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.02,
+   0.02,
+   0.17,
+   0.01,
+   0.01,
+   0.02,
+   0.02,
+   0.02,
+   0.01,
+   0.02,
+   0.04,
+   0.02,
+   0.01,
+   0.01,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.07,
+   0.0,
+   0.22,
+   0.11,
+   0.32,
+   0.0,
+   0.03,
+   0.14,
+   0.01,
+   0.16,
+   0.0,
+   0.02,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.0,
+   0.02,
+   0.01,
+   0.15,
+   0.01,
+   0.02,
+   0.03,
+   0.02,
+   0.02,
+   0.01,
+   0.15,
+   0.01,
+   0.01
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RAM3126",
+    "heading": 212
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM3126",
+    "heading": 141
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM3126",
+    "heading": 127
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM3126",
+    "heading": 162
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM4830",
+    "heading": 130
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM4830",
+    "heading": 143
+   },
+   {
+    "type": "clear",
+    "callsign": "RYR7HB",
+    "heading": 15
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1219",
+    "heading": 104
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "CFG7749X",
+     "RAM3126"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "CFG7749X",
+     "RAM3126"
+    ],
+    "grade": "other",
+    "best": [
+     "CFG7749X FL320"
+    ]
+   },
+   {
+    "pair": [
+     "CFG7749X",
+     "RAM3126"
+    ],
+    "grade": "other",
+    "best": []
+   },
+   {
+    "pair": [
+     "CFG7749X",
+     "RAM3126"
+    ],
+    "grade": "other",
+    "best": []
+   },
+   {
+    "pair": [
+     "RAM4830",
+     "RAM8596K"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM4830 heading 140 for 2 min, then resume",
+     "RAM4830 heading 130 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM4830",
+     "RAM8596K"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM4830 heading 143 for 2 min, then resume",
+     "RAM4830 heading 143 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1219",
+     "RYR7HB"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RYR7HB heading 015 for 4 min, then resume",
+     "RYR7HB heading 015 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1219",
+     "RYR7HB"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM1219 heading 104 for 4 min, then resume",
+     "RAM1219 heading 104 for 6 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 approved",
+   "R004 approved",
+   "RAM3126\u00d7TOM8377: RAM3126 heading 212",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R011 approved",
+   "routine",
+   "routine",
+   "R013 approved",
+   "R014 unable",
+   "routine",
+   "CFG7749X\u00d7RAM3126: RAM3126 heading 141",
+   "CFG7749X\u00d7RAM3126: RAM3126 heading 127",
+   "CFG7749X\u00d7RAM3126: RAM3126 heading 162 (nothing better)",
+   "routine",
+   "R015 approved",
+   "RAM4830\u00d7RAM8596K: RAM4830 heading 130",
+   "routine",
+   "RAM4830\u00d7RAM8596K: RAM4830 heading 143",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R019 unable",
+   "routine",
+   "RAM1219\u00d7RYR7HB: RYR7HB heading 015",
+   "routine",
+   "R020 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1219\u00d7RYR7HB: RAM1219 heading 104",
+   "routine",
+   "routine"
+  ]
+ },
+ "bea275e1b30b": {
+  "kind": "solver",
+  "scenario": "s05_slowdown_on_converging_exit",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 4,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 3.7,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 3.7,
+    "max_wait_s": 5.0
+   },
+   "transfers": {
+    "left": 3,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 13.0
+   },
+   "decisions": 40,
+   "actions": 7,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1140.0
+  },
+  "error": null,
+  "n_steps": 40,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.54,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RAM740",
+    "speed": "M73"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "RAM740",
+     "SVA112"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM740 speed M73"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "routine",
+   "routine",
+   "RAM740\u00d7SVA112: RAM740 speed M73",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "6504cb09b36a": {
+  "kind": "solver",
+  "scenario": "s06_speed_up_into_crossing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [
+    {
+     "what": "extra track miles",
+     "count": 0.1,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 5,
+   "requests_expired": 0,
+   "mean_response_s": 2.5,
+   "assume_mean_s": 3.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 3.0,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 3,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 17.0
+   },
+   "decisions": 43,
+   "actions": 10,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1190.0
+  },
+  "error": null,
+  "n_steps": 43,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.0,
+   0.21,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "KLM88B",
+    "heading": 156
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE612",
+    "speed": "SN"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "IBE612",
+     "KLM88B"
+    ],
+    "grade": "optimal",
+    "best": [
+     "KLM88B heading 156 for 4 min, then resume",
+     "KLM88B heading 146 for 2 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "R005 approved",
+   "routine",
+   "routine",
+   "routine",
+   "IBE612\u00d7KLM88B: KLM88B heading 156 for 4 min, then resume",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "877b95186b8c": {
+  "kind": "solver",
+  "scenario": "s08_simultaneous_level_requests",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 6,
+   "requests_expired": 0,
+   "mean_response_s": 3.0,
+   "assume_mean_s": 4.3,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 3,
+    "answered": 3,
+    "mean_wait_s": 4.3,
+    "max_wait_s": 6.0
+   },
+   "transfers": {
+    "left": 0,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": null
+   },
+   "decisions": 42,
+   "actions": 6,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 3,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 42,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R004 approved",
+   "R005 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R006 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "856b6aeadd79": {
+  "kind": "baseline",
+  "scenario": "c01_cta_moderate_wx",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 16,
+   "requests_expired": 0,
+   "mean_response_s": 2.8,
+   "assume_mean_s": 2.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.0,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 4.0
+   },
+   "decisions": 46,
+   "actions": 19,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 48,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 46,
+  "decide_s": [
+   0.0,
+   0.01,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.03,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.13,
+   0.0,
+   0.01,
+   0.02,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.01,
+   0.03,
+   0.02,
+   0.01,
+   0.0,
+   0.01
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RAM1408",
+    "heading": 32
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "EWG4UA",
+     "RAM1408"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM1408 heading 033 for 6 min, then resume",
+     "RAM1408 heading 353 for 6 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R005 approved",
+   "R007 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R009 approved",
+   "routine",
+   "R010 approved",
+   "R011 approved; EWG4UA\u00d7RAM1408: RAM1408 heading 032",
+   "routine",
+   "routine",
+   "R013 unable",
+   "routine",
+   "routine",
+   "R015 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R016 approved"
+  ]
+ },
+ "7edfd9341bd2": {
+  "kind": "solver",
+  "scenario": "p01_ws_two_merges",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 10,
+   "requests_expired": 0,
+   "mean_response_s": 4.0,
+   "assume_mean_s": 2.6,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.6,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 5,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 11.0
+   },
+   "decisions": 44,
+   "actions": 21,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 18,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 44,
+  "decide_s": [
+   0.01,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   1.0,
+   0.0,
+   0.02,
+   0.01,
+   0.01,
+   1.09,
+   0.0,
+   0.01,
+   0.02,
+   2.06,
+   1.08,
+   0.0,
+   0.01,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.01,
+   0.0,
+   0.01
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "TAP1478",
+    "heading": 184
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 97
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1311",
+    "heading": 140
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "optimal",
+    "best": [
+     "TAP1478 heading 184 for 4 min, then resume",
+     "TAP1478 heading 224 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM1311 heading 097 for 4 min, then resume",
+     "RAM1311 heading 097 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM1311",
+     "TAP1478"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM1311 heading 140 for 6 min, then resume",
+     "RAM1311 heading 085 for 4 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: TAP1478 heading 184 for 4 min, then resume",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 097 for 4 min, then resume",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1311\u00d7TAP1478: RAM1311 heading 140 for 6 min, then resume",
+   "routine",
+   "routine",
+   "routine",
+   "R007 unable",
+   "routine",
+   "routine",
+   "routine",
+   "R009 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "fc64546f89b6": {
+  "kind": "solver",
+  "scenario": "s10_busy_mixed",
+  "status": "done",
+  "score": 70.0,
+  "evaluation": {
+   "score": 70.0,
+   "penalties": [
+    {
+     "what": "area infringements",
+     "count": 3,
+     "per": 10,
+     "penalty": 30
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 3,
+   "requests": 13,
+   "requests_expired": 0,
+   "mean_response_s": 0.0,
+   "assume_mean_s": 4.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 9,
+    "answered": 9,
+    "mean_wait_s": 4.0,
+    "max_wait_s": 12.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 10.0
+   },
+   "decisions": 46,
+   "actions": 29,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 11,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 46,
+  "decide_s": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.01,
+   0.01,
+   1.09,
+   0.01,
+   0.01,
+   0.58,
+   4.54,
+   0.79,
+   0.01,
+   0.03,
+   0.83,
+   0.01,
+   0.02,
+   0.02,
+   0.03,
+   0.02,
+   0.02,
+   0.9,
+   0.02,
+   1.21,
+   0.03,
+   0.02,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.02,
+   0.01,
+   0.02,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.01,
+   0.0
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "heading": 174
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 183
+   },
+   {
+    "type": "clear",
+    "callsign": "EZY8",
+    "heading": 353
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM602",
+    "heading": 104
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "heading": 243
+   },
+   {
+    "type": "clear",
+    "callsign": "DLH5",
+    "heading": 308
+   },
+   {
+    "type": "clear",
+    "callsign": "VLG33",
+    "heading": 24
+   },
+   {
+    "type": "clear",
+    "callsign": "TAP7",
+    "speed": "SN"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "AFR11",
+     "TAP7"
+    ],
+    "grade": "optimal",
+    "best": [
+     "TAP7 heading 174 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM602 heading 183 for 4 min, then resume",
+     "RAM602 heading 198 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "optimal",
+    "best": [
+     "EZY8 heading 353 for 6 min, then resume",
+     "EZY8 heading 313 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "RAM602",
+     "SWR40"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "AFR11",
+     "RAM602"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM602 heading 104 for 6 min, then resume",
+     "RAM602 heading 179 for 4 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "optimal",
+    "best": [
+     "VLG33 heading 243 for 4 min, then resume",
+     "VLG33 heading 228 for 2 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "AFR11",
+     "DLH5"
+    ],
+    "grade": "optimal",
+    "best": [
+     "DLH5 heading 308 for 4 min, then resume",
+     "DLH5 heading 308 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "EZY8",
+     "VLG33"
+    ],
+    "grade": "optimal",
+    "best": [
+     "VLG33 heading 024 for 4 min, then resume",
+     "VLG33 heading 004 for 4 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "AFR11\u00d7TAP7: TAP7 heading 174 for 6 min, then resume; AFR11\u00d7RAM602: RAM602 heading 183 for 4 min, then resume",
+   "routine",
+   "routine",
+   "EZY8\u00d7VLG33: EZY8 heading 353 for 6 min, then resume",
+   "routine",
+   "AFR11\u00d7RAM602: RAM602 heading 104 for 6 min, then resume",
+   "routine",
+   "R009 approved",
+   "EZY8\u00d7VLG33: VLG33 heading 243 for 4 min, then resume",
+   "routine",
+   "routine",
+   "routine",
+   "R011 unable",
+   "routine",
+   "routine",
+   "AFR11\u00d7DLH5: DLH5 heading 308 for 4 min, then resume",
+   "R012 approved",
+   "EZY8\u00d7VLG33: VLG33 heading 024 for 4 min, then resume",
+   "R013 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "42b65963be84": {
+  "kind": "solver",
+  "scenario": "p05_ws_storms_arrivals",
+  "status": "done",
+  "score": 95.0,
+  "evaluation": {
+   "score": 95.0,
+   "penalties": [
+    {
+     "what": "RVSM violations",
+     "count": 1,
+     "per": 5,
+     "penalty": 5
+    },
+    {
+     "what": "extra track miles",
+     "count": 0.9,
+     "per": 0.05,
+     "penalty": 0.0
+    }
+   ],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 16,
+   "requests_expired": 0,
+   "mean_response_s": 3.2,
+   "assume_mean_s": 1.5,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 11,
+    "answered": 11,
+    "mean_wait_s": 1.5,
+    "max_wait_s": 3.0
+   },
+   "transfers": {
+    "left": 9,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 17.3
+   },
+   "decisions": 46,
+   "actions": 25,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 41,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 46,
+  "decide_s": [
+   0.02,
+   0.02,
+   0.02,
+   0.05,
+   0.03,
+   0.03,
+   0.03,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   0.03,
+   0.03,
+   0.03,
+   0.03,
+   0.02,
+   0.03,
+   0.03,
+   0.04,
+   0.02,
+   0.03,
+   0.05,
+   0.03,
+   0.03,
+   0.02,
+   0.03,
+   0.04,
+   0.03,
+   0.04,
+   0.05,
+   0.01,
+   0.05,
+   0.06,
+   0.03,
+   0.05,
+   0.03,
+   0.02,
+   0.03,
+   0.04,
+   0.03,
+   0.03,
+   0.05,
+   0.02,
+   0.03,
+   0.03
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "R001 approved",
+   "routine",
+   "R002 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R008 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R011 approved",
+   "routine",
+   "routine",
+   "R013 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine"
+  ]
+ },
+ "c3f4c6f5f2b0": {
+  "kind": "solver",
+  "scenario": "p02_wn_merges_and_climbs",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 12,
+   "requests_expired": 0,
+   "mean_response_s": 3.5,
+   "assume_mean_s": 2.2,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.2,
+    "max_wait_s": 7.0
+   },
+   "transfers": {
+    "left": 8,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 12.3
+   },
+   "decisions": 45,
+   "actions": 29,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 30,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 45,
+  "decide_s": [
+   1.32,
+   0.01,
+   0.02,
+   0.02,
+   0.03,
+   0.01,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   0.01,
+   0.01,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   1.89,
+   0.04,
+   0.03,
+   1.73,
+   1.72,
+   1.55,
+   0.04,
+   0.04,
+   1.01,
+   1.24,
+   0.03,
+   0.02,
+   1.15,
+   1.26,
+   1.27,
+   0.03,
+   0.02,
+   0.01,
+   1.11,
+   0.97
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "EWG3KP",
+    "direct": "ERMED"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "M76"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "M75"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "M75"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "M74"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "SN"
+   },
+   {
+    "type": "clear",
+    "callsign": "IBE3247",
+    "speed": "M74"
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "EWG3KP direct ERMED",
+     "EWG3KP direct TOVRA"
+    ]
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "IBE3247 speed M76",
+     "IBE3247 speed M75"
+    ]
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "IBE3247 speed M75",
+     "IBE3247 speed M74"
+    ]
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "IBE3247 speed M75",
+     "IBE3247 speed M74"
+    ]
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "IBE3247 speed M74"
+    ]
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "left alone"
+   },
+   {
+    "pair": [
+     "EWG3KP",
+     "IBE3247"
+    ],
+    "grade": "optimal",
+    "best": [
+     "IBE3247 speed M74"
+    ]
+   }
+  ],
+  "reasons": [
+   "EWG3KP\u00d7IBE3247: EWG3KP direct ERMED",
+   "routine",
+   "routine",
+   "routine",
+   "R001 approved",
+   "routine",
+   "R002 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "EWG3KP\u00d7IBE3247: IBE3247 speed M76",
+   "routine",
+   "routine",
+   "routine",
+   "EWG3KP\u00d7IBE3247: IBE3247 speed M75",
+   "routine",
+   "routine",
+   "R010 approved",
+   "R011 unable",
+   "EWG3KP\u00d7IBE3247: IBE3247 speed M75",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "EWG3KP\u00d7IBE3247: IBE3247 speed M74",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "EWG3KP\u00d7IBE3247: IBE3247 speed M74"
+  ]
+ },
+ "d8ee7bce2172": {
+  "kind": "solver",
+  "scenario": "p06_wn_capacity_sequencing",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 26,
+   "requests_expired": 0,
+   "mean_response_s": 4.6,
+   "assume_mean_s": 3.2,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 13,
+    "answered": 13,
+    "mean_wait_s": 3.2,
+    "max_wait_s": 6.0
+   },
+   "transfers": {
+    "left": 11,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 10.8
+   },
+   "decisions": 52,
+   "actions": 40,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 58,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 52,
+  "decide_s": [
+   0.01,
+   0.02,
+   0.02,
+   0.01,
+   0.02,
+   0.04,
+   0.04,
+   0.04,
+   0.03,
+   0.04,
+   0.03,
+   0.04,
+   0.03,
+   0.04,
+   0.04,
+   0.04,
+   0.04,
+   0.03,
+   0.03,
+   0.04,
+   0.03,
+   0.06,
+   0.01,
+   0.03,
+   0.04,
+   0.04,
+   0.03,
+   0.1,
+   0.06,
+   0.02,
+   0.03,
+   0.03,
+   0.06,
+   0.02,
+   0.02,
+   0.03,
+   0.02,
+   0.05,
+   0.03,
+   0.06,
+   0.02,
+   1.68,
+   0.02,
+   0.05,
+   0.02,
+   0.03,
+   0.02,
+   0.02,
+   1.84,
+   0.03,
+   0.01,
+   0.02
+  ],
+  "clearances": [
+   {
+    "type": "clear",
+    "callsign": "RYR7HB",
+    "heading": 15
+   },
+   {
+    "type": "clear",
+    "callsign": "RAM1219",
+    "heading": 104
+   }
+  ],
+  "grades": [
+   {
+    "pair": [
+     "RAM1219",
+     "RYR7HB"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RYR7HB heading 015 for 4 min, then resume",
+     "RYR7HB heading 015 for 6 min, then resume"
+    ]
+   },
+   {
+    "pair": [
+     "RAM1219",
+     "RYR7HB"
+    ],
+    "grade": "optimal",
+    "best": [
+     "RAM1219 heading 104 for 4 min, then resume",
+     "RAM1219 heading 104 for 6 min, then resume"
+    ]
+   }
+  ],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R003 approved",
+   "R004 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R011 approved",
+   "routine",
+   "R013 unable",
+   "R014 unable",
+   "routine",
+   "routine",
+   "R015 unable",
+   "R016 unable",
+   "routine",
+   "routine",
+   "R017 approved",
+   "R018 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R022 unable",
+   "routine",
+   "RAM1219\u00d7RYR7HB: RYR7HB heading 015 for 4 min, then resume",
+   "routine",
+   "R023 unable",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "RAM1219\u00d7RYR7HB: RAM1219 heading 104 for 4 min, then resume",
+   "R026 approved",
+   "routine",
+   "routine"
+  ]
+ },
+ "593d6ee514ad": {
+  "kind": "solver",
+  "scenario": "c01_cta_moderate_wx",
+  "status": "done",
+  "score": 100.0,
+  "evaluation": {
+   "score": 100.0,
+   "penalties": [],
+   "losses": 0,
+   "min_sep_nm": null,
+   "infringements": 0,
+   "requests": 16,
+   "requests_expired": 0,
+   "mean_response_s": 2.8,
+   "assume_mean_s": 2.0,
+   "never_assumed": 0,
+   "first_calls": {
+    "calls": 8,
+    "answered": 8,
+    "mean_wait_s": 2.0,
+    "max_wait_s": 4.0
+   },
+   "transfers": {
+    "left": 1,
+    "never": 0,
+    "late": 0,
+    "mean_delay_s": 4.0
+   },
+   "decisions": 46,
+   "actions": 17,
+   "refused": 0,
+   "unreadable": 0,
+   "aircraft": 48,
+   "sim_time_s": 1200.0
+  },
+  "error": null,
+  "n_steps": 46,
+  "decide_s": [
+   0.03,
+   0.02,
+   0.02,
+   0.02,
+   0.03,
+   0.02,
+   0.03,
+   0.03,
+   0.01,
+   0.02,
+   0.02,
+   0.01,
+   0.01,
+   0.01,
+   0.03,
+   0.02,
+   0.02,
+   0.03,
+   0.03,
+   0.02,
+   0.03,
+   0.02,
+   0.05,
+   0.04,
+   0.03,
+   0.03,
+   0.03,
+   0.02,
+   0.05,
+   0.02,
+   0.02,
+   0.05,
+   0.04,
+   0.03,
+   0.02,
+   0.03,
+   0.03,
+   0.02,
+   0.03,
+   0.02,
+   0.03,
+   0.03,
+   0.04,
+   0.04,
+   0.02,
+   0.03
+  ],
+  "clearances": [],
+  "grades": [],
+  "reasons": [
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R005 approved",
+   "R007 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R009 approved",
+   "routine",
+   "R010 unable",
+   "R011 approved",
+   "routine",
+   "routine",
+   "R013 unable",
+   "routine",
+   "routine",
+   "R015 approved",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "routine",
+   "R016 approved"
+  ]
+ }
+}

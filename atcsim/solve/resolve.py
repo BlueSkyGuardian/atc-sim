@@ -127,6 +127,20 @@ def _text(kind: str, cs: str, prm: dict) -> str:
     return cs
 
 
+def check_clearance(w, a, H: float, prm: dict, trajs: Dict, sh: float):
+    """(ok, d_min, trajectory) of aircraft a with the clearance prm against everyone else. A level change is checked
+    at the fastest and the slowest rate it may climb or descend at (both must be clear)."""
+    Tm = traj.build(w, a, H, **prm)
+    ok, dmin = _check(Tm, trajs, {a.callsign}, sh)
+    if ok and prm.get("cfl") is not None and abs(int(prm["cfl"]) * 100 - a.alt_ft) >= 50:
+        for r in ("fast", "slow"):
+            ok2, d2 = _check(traj.build(w, a, H, rates=r, **prm), trajs, {a.callsign}, sh)
+            ok, dmin = ok and ok2, min(dmin, d2)
+            if not ok:
+                break
+    return ok, dmin, Tm
+
+
 def _check(Tm, trajs: Dict, skip: set, sh: float):
     """(ok, d_min) of a trajectory against every other trajectory but `skip`."""
     dmin = math.inf
@@ -232,8 +246,7 @@ def solve(w, pair: Optional[tuple] = None, H: float = H_DEFAULT, asked: Optional
             for kind, prm, acts, cost, ask in _candidates(w, a, st[cs], asked):
                 if not lateral_ok and kind in ("heading", "direct"):
                     continue                      # Hamilton-Jacobi: no turn of this aircraft can separate it in time
-                Tm = traj.build(w, a, H, **prm)
-                ok, dmin = _check(Tm, trajs, {cs}, sh)
+                ok, dmin, Tm = check_clearance(w, a, H, prm, trajs, sh)
                 scored.append((ok, dmin, kind, prm, acts, cost, ask, Tm))
                 if ok:
                     sols.append(Solution(cs, kind, acts, _text(kind, cs, prm), cost + (5.0 if moved_prio else 0.0),

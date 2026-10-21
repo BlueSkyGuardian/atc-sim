@@ -240,10 +240,10 @@ class Baseline:
                 if r["type"] == "altitude" and r.get("value"):
                     from ..aircraft import level_parity_ok
                     acx, fl = w.aircraft[r["callsign"]], int(r["value"])
-                    ok = not atctools.probe(w, r["callsign"], cfl=fl).get("conflicts") and (
+                    ok = self._free(w, r["callsign"], cfl=fl) and (
                         level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
                 elif r["type"] == "direct" and r.get("value"):
-                    ok = not atctools.probe(w, r["callsign"], direct=str(r["value"])).get("conflicts")
+                    ok = self._free(w, r["callsign"], direct=str(r["value"]))
             except Exception:  # noqa: BLE001
                 ok = False
             acts.append({"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"})
@@ -255,8 +255,7 @@ class Baseline:
                 ok_ = True
                 if nm:
                     try:
-                        ok_ = not [x for x in atctools.probe(w, cs, speed=f"M{int(round(nm * 100))}").get("conflicts") or []
-                                   if x["time_to_conflict_s"] <= 600]
+                        ok_ = self._free(w, cs, speed=f"M{int(round(nm * 100))}", within_s=600)
                     except Exception:  # noqa: BLE001
                         ok_ = False
                 if ok_:
@@ -268,13 +267,19 @@ class Baseline:
                 ahead = [p for p in acx.route[acx.next_index:] if not str(p).startswith("@") and p in w.waypoints]
                 if ahead:
                     try:
-                        cl = [x for x in atctools.probe(w, cs, direct=ahead[0]).get("conflicts") or [] if x["time_to_conflict_s"] <= 600]
+                        free = self._free(w, cs, direct=ahead[0], within_s=600)
                     except Exception:  # noqa: BLE001
-                        cl = [1]
-                    if not cl:
+                        free = False
+                    if free:
                         acts.append({"type": "resume", "callsign": cs})
         return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
 
+
+    def _free(self, w, cs: str, cfl=None, direct=None, speed=None, within_s: Optional[float] = None) -> bool:
+        """No predicted conflict for cs with this clearance (the radar's probe, over its look-ahead or within_s)."""
+        from .. import atctools
+        cl = atctools.probe(w, cs, cfl=cfl, direct=direct, speed=speed).get("conflicts") or []
+        return not [x for x in cl if within_s is None or x["time_to_conflict_s"] <= within_s]
 
     def _resolve(self, w, st, mine, acts, why) -> set:
         """Predicted conflicts: the aircraft without priority, by speed, else a heading, else a level (asked first)."""
@@ -339,6 +344,19 @@ class SolverAgent(Baseline):
     leaves no conflict with anyone, in the controller's order (speed < direct / heading < level, the aircraft without
     priority), checked leg by leg and confirmed by running the simulation ahead; levels asked to the pilot first unless
     urgent. The routine work (assume, transfer, requests, resume, speeds back to normal) as the baseline."""
+
+    def _free(self, w, cs: str, cfl=None, direct=None, speed=None, within_s: Optional[float] = None) -> bool:
+        """The probe, and the solver's own check: the exact closest approach of the trajectory with this clearance to
+        every other one over 10 minutes, with the solver's margin (a sampled probe can miss a climb or descent through
+        another aircraft's level)."""
+        from ..solve import resolve, traj
+        if not super()._free(w, cs, cfl=cfl, direct=direct, speed=speed, within_s=within_s):
+            return False
+        key = round(w.t, 1)
+        if getattr(self, "_trajs_t", None) != key:
+            self._trajs, self._trajs_t = traj.build_all(w, resolve.H_DEFAULT), key
+        prm = {k: v for k, v in (("speed", speed), ("direct", direct), ("cfl", cfl)) if v is not None}
+        return resolve.check_clearance(w, w.aircraft[cs], resolve.H_DEFAULT, prm, self._trajs, float(w.sep_h))[0]
 
     def _resolve(self, w, st, mine, acts, why) -> set:
         from ..solve import resolve

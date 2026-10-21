@@ -187,7 +187,9 @@ The radio log of the replay shows the controller's side too: *identified* when t
 - **OpenAI-compatible server**: any server with `/v1/chat/completions` — a RunPod pod running vLLM, TGI or Ollama
   (`https://<pod id>-8000.proxy.runpod.net/v1`), or another provider. Its base URL, model name and key.
 - **Built-in solver**: the conflict solver flies the run on its own (no model). It assumes, transfers and answers
-  requests as the baseline, and for each conflict applies the best solution of the solver (below). The reference for
+  requests as the baseline — a level, direct or resume is given only when the radar's probe and the solver's own
+  check (exact closest approach, a level change at the fastest and slowest rate the aircraft may fly) both find it
+  clear — and for each conflict applies the best solution of the solver (below). The reference for
   what the solver alone achieves.
 - **Built-in baseline**: a scripted controller (assumes what calls, answers requests with a conflict probe, resolves
   conflicts under 8 minutes with a level change checked by the probe). A reference score for the models, and a way to
