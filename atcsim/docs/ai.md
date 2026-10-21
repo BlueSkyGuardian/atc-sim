@@ -70,6 +70,19 @@ What is shown is set in the agent profile: TO DO list, positions and geometry, p
 inbound traffic, routes, list length, and the sector briefing. About 1,500 tokens of briefing and prompt, plus
 1,000-3,000 per situation (busy sectors): give the endpoint a context of 8192 tokens, 16384 for dense scenarios.
 
+### Priority, speed, what was left undone
+
+Each conflict line says which aircraft to move: an aircraft maintaining its level has priority in it, so the one
+climbing or descending (or not at its requested level) moves (*PRIORITY: IBE3247 is level at FL350 and keeps
+priority; EWG3KP is changing level → move EWG3KP, not the other*), and the conflict-free levels are given for that
+one. For aircraft in trail to a common point it says whether speed works and which (*speed works: IBE3247 Mach 0.74
+(now 0.78) gives 9 NM behind EWG3KP at IBALU*), or that it does not. A conflict still there at the next decisions
+is marked *shown since T+05:30 and still unsolved*.
+
+After each decision, what the model left undone from its TO DO is fed back with the next situation (*LEFT UNDONE
+FROM YOUR TO DO: not assumed (still calling you): IBE4343; conflicts left unsolved: EWG3KP×IBE3247*), and shown
+in *Decisions*.
+
 ### Arrival sequences
 
 Arrivals are the flights whose exit is a sequencing fix (e.g. MARJA and SALCA for GMMN). Each one's line says so
@@ -132,7 +145,10 @@ The radio log of the replay shows the controller's side too: *identified* when t
   conflicts under 8 minutes with a level change checked by the probe). A reference score for the models, and a way to
   produce experience data without a model.
 
-Temperature, answer length, timeout, retries and JSON mode (`response_format`, when the server supports it) are per
+**Context length** is the endpoint's maximum model length (RunPod: *MAX_MODEL_LEN*): every prompt is kept under it,
+minus the answer length — earlier decisions are left out first, then further queries (each decision says so, with
+its prompt size in tokens). A prompt over the endpoint's limit is refused or cut by the server, and the model then
+loses its instructions: set it right. Temperature, answer length, timeout, retries and JSON mode (`response_format`, when the server supports it) are per
 model. **Test** checks the connection (the models served, one short answer and its latency). API keys are stored
 encrypted and never shown again (leave the field empty when editing to keep the key).
 
@@ -151,6 +167,8 @@ Choose scenarios (several at once), the model, the agent profile, how many runs 
 - **pilots avoid weather by themselves** (on by default) — off: they fly what they are cleared to and only ask;
 - **pilots comply with everything** — no *unable* for weather or performance;
 - **read-back errors** — synthetic pilots sometimes read back a wrong value;
+- **assume automatically** / **transfer automatically** — the system does them, the model only separates and
+  sequences (a simpler task, to start with or for a small model);
 - **stop at** — a shorter run than the scenario.
 
 ### Watch live

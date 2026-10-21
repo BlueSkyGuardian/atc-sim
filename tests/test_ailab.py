@@ -131,6 +131,25 @@ try:
        "watch: staff only")
     ok(ins.get(f"/ai/watch/{m1['id']}").status_code == 200, "watch page")
 
+    ok(any(s.get("missed") for s in s0) and any("LEFT UNDONE FROM YOUR TO DO" in (s.get("feedback") or "") for s in s0),
+       "what the model left undone from TO DO is fed back")
+    ok(all(s.get("prompt_tokens_est") for s in s0), "prompt size recorded per decision")
+    small = ins.post("/api/ai/models", json={"name": "Mock small context", "kind": "openai", "base_url": f"http://127.0.0.1:{PORT}/v1",
+                                             "model": "mock-controller", "api_key": "k", "params": {"timeout_s": 20, "retries": 1, "context_tokens": 7000}}).json()
+    r3 = ins.post("/api/ai/runs", json={"scenarios": ["p02_wn_merges_and_climbs"], "model_id": small["id"], "agent_id": a0["id"],
+                                        "env": {"end_s": 420, "auto_assume": True, "auto_transfer": True}}).json()["runs"][0]
+    for _ in range(300):
+        x3 = ins.get(f"/api/ai/runs/{r3}").json()
+        if x3["status"] in ("done", "failed"):
+            break
+        time.sleep(1)
+    s3 = ins.get(f"/api/ai/runs/{r3}/steps?limit=200").json()["steps"]
+    ok(x3["status"] == "done" and any(s.get("trimmed") for s in s3) and max(s["prompt_tokens_est"] for s in s3) <= 7000 - 600,
+       f"a small context: older decisions / queries left out to fit (max ~{max(s['prompt_tokens_est'] for s in s3)} tokens)")
+    ok(not any("not assumed" in m or "not transferred" in m for s in s3 for m in s.get("missed") or [])
+       and x3["evaluation"]["never_assumed"] == 0, "assume / transfer automatically: not asked of the model")
+    ins.delete(f"/api/ai/runs/{r3}")
+
     # ---- the run in the debrief
     eid = m1["exercise_id"]
     ok(all(x["id"] != eid for x in ins.get("/api/exercises").json()), "AI runs are not listed with the exercises")

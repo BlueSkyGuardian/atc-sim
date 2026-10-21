@@ -171,6 +171,14 @@ def run(job: dict) -> None:
     if max_actions == 12:                                  # the former default: too few with ten aircraft calling
         max_actions = 30
     force = bool(env.get("force"))
+    auto_assume, auto_transfer = bool(env.get("auto_assume")), bool(env.get("auto_transfer"))
+    if auto_assume:
+        w.auto_assume = True                               # aircraft call already assumed: the model only separates
+    ctx = int((prov.get("params") or {}).get("context_tokens") or 8192)
+    ans_tokens = int((prov.get("params") or {}).get("max_tokens") or 600)
+    budget = max(1500, ctx - ans_tokens - 200)
+    est = lambda ms: sum(len(m["content"]) for m in ms) / 3.2 + 8 * len(ms)      # tokens, roughly (3.2 characters each)
+    conf_seen: dict = {}
     history, feedback, steps = [], None, []
     next_t, last_t = 0.0, -1e9
     seen_calls, seen_reqs, seen_conf = set(), set(), set()
@@ -199,9 +207,30 @@ def run(job: dict) -> None:
                 due = trigger()
             if due:
                 trigger()
-                text, struct = obs_mod.observe(w, agent_cfg.get("observation") or {})
-                msgs = agents.messages(system, text, history[-n_hist:] if n_hist else [], feedback)
-                rec = {"i": len(steps), "t": round(w.t, 1), "observation": text, "struct": struct, "feedback": feedback}
+                from .. import atctools
+                live_pairs = {"×".join(sorted(c["aircraft"])) for c in atctools.mtcd(w)}
+                for k in list(conf_seen):
+                    if k not in live_pairs:
+                        conf_seen.pop(k)
+                for k in live_pairs:
+                    conf_seen.setdefault(k, w.t)
+                if auto_transfer:
+                    with s.lock:
+                        for a in list(w.aircraft.values()):
+                            if a.outside and a.assumed:
+                                inputs.apply(w, "release", {"callsign": a.callsign}, {"name": "auto transfer", "seat": "atc"})
+                text, struct = obs_mod.observe(w, {**(agent_cfg.get("observation") or {}), "_seen": conf_seen})
+                hist = history[-n_hist:] if n_hist else []
+                msgs = agents.messages(system, text, hist, feedback)
+                trimmed = []
+                while hist and est(msgs) > budget:               # keep within the model's context: older decisions go first
+                    hist = hist[1:]
+                    msgs = agents.messages(system, text, hist, feedback)
+                    trimmed.append("memory")
+                rec = {"i": len(steps), "t": round(w.t, 1), "observation": text, "struct": struct, "feedback": feedback,
+                       "prompt_tokens_est": int(est(msgs))}
+                if trimmed:
+                    rec["trimmed"] = f"{len(trimmed)} earlier decision(s) left out to fit the context ({ctx} tokens)"
                 prog.update(thinking=True, t=round(w.t, 1))
                 _write(prog_p, prog)
                 if watch.on():
@@ -217,6 +246,9 @@ def run(job: dict) -> None:
                     rounds = []
                     while qs and not isinstance(agent, agents.Baseline):
                         left = q_rounds - len(rounds)
+                        if left > 0 and est(msgs) + 1200 > budget:      # no room for another round in the context
+                            left = 0
+                            rec["trimmed"] = (rec.get("trimmed", "") + "; " if rec.get("trimmed") else "") + "no more queries: the context is full"
                         if left <= 0:
                             if not acts:                       # out of questions and no instructions
                                 rounds.append({"response": answer, "queries": qs, "results": [],
@@ -249,6 +281,35 @@ def run(job: dict) -> None:
                     answer = None
                 fb = [f"{'OK' if r['ok'] else 'REFUSED'} {json.dumps(r['action'])}: {r['text']}" for r in rec["results"]]
                 feedback = ("; ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
+                td = struct.get("todo") or {}
+                done = {(str(r["action"].get("type", "")).lower(), str(r["action"].get("callsign") or r["action"].get("request_id") or "").upper())
+                        for r in rec["results"] if r.get("ok")}
+                did = lambda t, x: (t, x.upper()) in done
+                missed = []
+                if td.get("assume") and not auto_assume:
+                    m_ = [c for c in td["assume"] if not did("assume", c)]
+                    if m_:
+                        missed.append("not assumed (still calling you): " + ", ".join(m_))
+                if td.get("transfer") and not auto_transfer:
+                    m_ = [c for c in td["transfer"] if not did("decontrol", c)]
+                    if m_:
+                        missed.append("not transferred: " + ", ".join(m_))
+                if td.get("answer"):
+                    m_ = [q for q in td["answer"] if not did("reply", q)]
+                    if m_:
+                        missed.append("requests not answered: " + ", ".join(m_))
+                acted = {x[1] for x in done}
+                if td.get("solve"):
+                    m_ = ["×".join(p) for p in td["solve"] if not set(x.upper() for x in p) & acted]
+                    if m_:
+                        missed.append("conflicts left unsolved: " + ", ".join(m_))
+                if td.get("resume"):
+                    m_ = [c for c in td["resume"] if c.upper() not in acted]
+                    if m_:
+                        missed.append("not resumed: " + ", ".join(m_))
+                if missed and answer is not None:
+                    rec["missed"] = missed
+                    feedback = ((feedback + ". ") if feedback else "") + "LEFT UNDONE FROM YOUR TO DO: " + "; ".join(missed)
                 if (rec.get("queries") or [{}])[-1].get("note"):
                     feedback = ((feedback + "; ") if feedback else "") + ("queries are not available (or none left): answer with instructions"
                                                                           if not q_rounds else "no query round left: answer with instructions")

@@ -23,7 +23,7 @@ Actions (use only these; an empty list means nothing to do now):
   {"type": "clear", "callsign": "RAM123", "cfl": 370}      cleared flight level (multiple of 10)
   {"type": "clear", "callsign": "RAM123", "heading": 250}  fly heading (degrees)
   {"type": "clear", "callsign": "RAM123", "direct": "ROLRO"}  proceed direct to a point of its route or the map
-  {"type": "clear", "callsign": "RAM123", "speed": "M76"}  Mach (M76) or indicated speed in knots ("280")
+  {"type": "clear", "callsign": "RAM123", "speed": "M76"}  Mach (M76) or indicated speed in knots ("280"); "SN" = resume normal speed
   {"type": "clear", "callsign": "RAM123", "xfl": 350}      exit level coordinated with the next unit
   {"type": "resume", "callsign": "RAM123"}                 resume own navigation after a heading
   {"type": "reply", "request_id": "R004", "decision": "approve"}   or "unable"

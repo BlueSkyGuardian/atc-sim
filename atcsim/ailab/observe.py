@@ -153,6 +153,60 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[f
     return " · ".join(str(p) for p in parts if p), st
 
 
+def _moving(a: dict) -> bool:
+    return abs(a.get("vertical_speed_fpm") or 0) > 200 or (a.get("cleared_fl") or a["fl"]) != a["fl"]
+
+
+def priority(A: dict, B: dict) -> Tuple[Optional[str], str]:
+    """Which aircraft to move: the one changing level (an aircraft maintaining its level has priority in it), else
+    the one not at its flight-plan cruise level. (None, reason) when both are equal."""
+    ma, mb = _moving(A), _moving(B)
+    if ma != mb:
+        mv, keep = (A, B) if ma else (B, A)
+        return mv["callsign"], f"{keep['callsign']} is level at FL{keep['fl']:03d} and keeps priority; {mv['callsign']} is changing level"
+    if not ma:
+        def at_cruise(x):
+            c = str((x.get("flight_plan") or {}).get("cruise") or "").upper().lstrip("F")
+            return c.isdigit() and int(c) == x["fl"]
+        ca, cb = at_cruise(A), at_cruise(B)
+        if ca != cb:
+            mv, keep = (B, A) if ca else (A, B)
+            return mv["callsign"], f"both level; {keep['callsign']} is at its requested cruise level, {mv['callsign']} is not"
+        return None, "both level"
+    return None, "both changing level"
+
+
+def speed_fix(w, A: dict, B: dict, common: str, ea: float, eb: float, sep_h: float) -> Optional[str]:
+    """In trail to a common point: the speed that gives the spacing there (lead faster / follower slower)."""
+    lead, fol, el, ef = (A, B, ea, eb) if ea <= eb else (B, A, eb, ea)
+    gs_f = fol.get("gs_kt") or 0
+    if gs_f < 150:
+        return None
+    need = (sep_h + 2) / gs_f * 3600 - (ef - el)          # seconds still missing at the point (2 NM margin)
+    if need <= 0:
+        return f"in trail via {common}: {fol['callsign']} {abs(ef - el) * gs_f / 3600:.0f} NM behind {lead['callsign']} there — enough, keep the speeds"
+    D = ef * gs_f / 3600                                   # follower's distance to the point
+    if D < 5:
+        return None
+    gs_new = D / (D / gs_f + need / 3600)
+    d_gs = gs_f - gs_new
+    m = fol.get("mach") or 0
+    tas = max(1.0, (fol.get("tas_kt") or gs_f))
+    d_m = d_gs * (m / tas) if m else 0
+    if fol.get("speed_mode") == "mach" and m:
+        new_m = math.floor((m - d_m) * 100) / 100
+        if m - new_m <= 0.06 and new_m >= 0.70:
+            return (f"speed works: {fol['callsign']} Mach {new_m:.2f} (now {m:.2f}) gives {sep_h + 2:g} NM behind {lead['callsign']} at {common}"
+                    f"; or {lead['callsign']} faster")
+        return f"speed alone is not enough ({fol['callsign']} would need Mach {m - d_m:.2f}): a level change, or speed and a short vector"
+    ias = fol.get("ias_kt") or 0
+    if ias:
+        new_ias = int(round((ias - d_gs * ias / tas) / 10) * 10)
+        if ias - new_ias <= 40 and new_ias >= 250:
+            return f"speed works: {fol['callsign']} {new_ias} kt IAS (now {ias}) gives {sep_h + 2:g} NM behind {lead['callsign']} at {common}"
+    return f"speed alone is not enough: a level change, or speed and a short vector"
+
+
 def _free_levels(w, a: dict) -> List[str]:
     """Conflict-free levels near the aircraft's (the probe), with the direction rule."""
     from .. import atctools
@@ -263,7 +317,13 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
         todo.append("ANSWER the pilot requests: " + ", ".join(r["id"] for r in reqs))
     urgent = [c for c in cf if c["time_to_conflict_s"] <= SOLVE_S and not c.get("current")]
     if urgent:
-        todo.append("SOLVE the conflicts: " + ", ".join(f"{c['aircraft'][0]}×{c['aircraft'][1]} in {_t(c['time_to_conflict_s'])}" for c in urgent))
+        seen = o.get("_seen") or {}
+
+        def since(c):
+            k = "×".join(sorted(c["aircraft"]))
+            return f", shown since T+{_t(seen[k])} and still unsolved" if k in seen and w.t - seen[k] >= 25 else ""
+        todo.append("SOLVE the conflicts NOW, while there is time (do not wait for them to get close): " + ", ".join(
+            f"{c['aircraft'][0]}×{c['aircraft'][1]} in {_t(c['time_to_conflict_s'])}{since(c)}" for c in urgent))
     seq_rows, seq_todo = [], []
     if getattr(w, "seq", None):
         from .. import arrivals
@@ -384,9 +444,18 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                     if ea is not None and eb is not None:
                         txt += f"; both route via {common}: {a} in {_t(ea)}, {b} in {_t(eb)} ({abs(ea - eb):.0f} s apart)"
                         geo["common"] = common
+                        if hints and ang < 60:
+                            sp = speed_fix(w, A, B, common, ea, eb, c.get("required_horizontal_nm") or sep_h)
+                            if sp:
+                                txt += f"; {sp}"
+                                geo["speed"] = sp
                 if hints:
-                    for X in (A, B):
-                        if X.get("assumed"):
+                    mv, why = priority(A, B)
+                    txt += f"; PRIORITY: {why}" + (f" → move {mv}, not the other" if mv else "")
+                    geo["move"] = mv
+                if hints:
+                    for X in ((by_cs.get(geo["move"]),) if geo.get("move") else (A, B)):
+                        if X and X.get("assumed"):
                             fl = _free_levels(w, X)
                             txt += f"; conflict-free levels for {X['callsign']}: {', '.join(fl) if fl else 'none nearby'}"
                             geo["free_" + X["callsign"]] = fl
