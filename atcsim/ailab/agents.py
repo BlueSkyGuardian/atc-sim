@@ -73,6 +73,7 @@ class ChatModel:
         prm = p.get("params") or {}
         self.temperature = float(prm.get("temperature", 0.2))
         self.max_tokens = int(prm.get("max_tokens", 600))
+        self.context = int(prm.get("context_tokens") or 0)
         self.timeout = float(prm.get("timeout_s", 180))
         self.retries = int(prm.get("retries", 3))
         self.json_mode = bool(prm.get("json_mode", False))
@@ -87,7 +88,11 @@ class ChatModel:
 
     def chat(self, messages: List[dict]) -> Tuple[str, dict, float]:
         import httpx
-        body = {"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
+        mt = self.max_tokens
+        if self.context:                     # prompt + answer must fit the endpoint's context: cap the answer length
+            est_prompt = int(sum(len(m.get("content") or "") for m in messages) / 2.5) + 300
+            mt = max(256, min(mt, self.context - est_prompt))
+        body = {"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": mt}
         plain = getattr(self, "_plain", False)                 # this endpoint refused the optional fields before
         if self.json_mode and not plain:
             body["response_format"] = {"type": "json_object"}

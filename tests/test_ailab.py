@@ -94,6 +94,11 @@ try:
         ok('"ok"' in txt_c and waits and time.time() - t_c >= 35, f"a worker still starting (502 for 40 s): the first call waits for it ({time.time() - t_c:.0f} s, {len(waits)} waits)")
     finally:
         cold.kill()
+    cmx = agents.ChatModel({"kind": "openai", "base_url": f"http://127.0.0.1:{PORT}/v1", "model": "m", "api_key": "k",
+                            "params": {"max_tokens": 32768, "context_tokens": 32768}})
+    cmx.chat([{"role": "system", "content": "s" * 3000}, {"role": "user", "content": 'Reply with {"ok": true}'}])
+    mt_sent = httpx.get(f"http://127.0.0.1:{PORT}/last").json()["max_tokens"]
+    ok(mt_sent < 32768 - 1000, f"an answer length as large as the context is capped to leave room for the prompt ({mt_sent})")
     from atcsim.ailab import actions as A0
     acts0, _, err0 = A0.parse('<think>{"actions": [{"type": "nope"}]} long thoughts</think>\n{"reasoning": "r", "actions": [{"type": "assume", "callsign": "X1"}]}')
     ok(not err0 and acts0 == [{"type": "assume", "callsign": "X1"}], "a reasoning model's <think> part is not taken for the answer")
