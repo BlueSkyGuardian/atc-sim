@@ -26,6 +26,9 @@ def last():
 @app.post("/v1/chat/completions")
 async def chat(request: Request):
     body = await request.json()
+    if os.environ.get("MOCK_STRICT") and ("chat_template_kwargs" in body or "response_format" in body):
+        from fastapi.responses import HTMLResponse          # like a llama.cpp worker behind RunPod's gateway
+        return HTMLResponse("<!DOCTYPE html><html><body>502 Bad gateway</body></html>", status_code=502)
     calls["n"] += 1
     calls["last"] = body
     user = body["messages"][-1]["content"]

@@ -88,12 +88,15 @@ class ChatModel:
     def chat(self, messages: List[dict]) -> Tuple[str, dict, float]:
         import httpx
         body = {"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
-        if self.json_mode:
+        plain = getattr(self, "_plain", False)                 # this endpoint refused the optional fields before
+        if self.json_mode and not plain:
             body["response_format"] = {"type": "json_object"}
         if self.thinking == "off":
-            body["chat_template_kwargs"] = {"enable_thinking": False}        # vLLM: Qwen3-style templates
+            if not plain:
+                body["chat_template_kwargs"] = {"enable_thinking": False}    # vLLM / recent llama.cpp templates
             if "qwen3" in self.model.lower() and messages and "/no_think" not in messages[0]["content"]:
                 body["messages"] = [dict(messages[0], content=messages[0]["content"] + "\n/no_think")] + list(messages[1:])
+        extras = [k for k in ("response_format", "chat_template_kwargs") if k in body]
         last = None
         first = not getattr(self, "_answered", False)
         # the first call may wake a serverless endpoint (cold start: minutes): it waits longer
@@ -103,14 +106,31 @@ class ChatModel:
             try:
                 r = httpx.post(self.url + "/chat/completions", headers=self.headers(), json=body,
                                timeout=httpx.Timeout(tmo, connect=30.0))
-                if r.status_code >= 500 or r.status_code == 429:
-                    raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
+                if r.status_code >= 400 and extras and r.status_code != 429 and time.time() - t0 < 60:
+                    # refused at once: maybe an optional field this server does not take (llama.cpp workers and
+                    # response_format / chat_template_kwargs): once more without them, and so from now on
+                    self._plain = True
+                    for x in extras:
+                        body.pop(x, None)
+                    extras = []
+                    r = httpx.post(self.url + "/chat/completions", headers=self.headers(), json=body,
+                                   timeout=httpx.Timeout(tmo, connect=30.0))
                 if r.status_code >= 400:
-                    raise ValueError(f"HTTP {r.status_code}: {r.text[:300]}")      # not retried: configuration
+                    txt = r.text.strip()
+                    if txt.startswith("<"):
+                        txt = ("an HTML error page from the endpoint's gateway (the worker failed or rejected the request:"
+                               " see the endpoint's logs)")
+                    if r.status_code >= 500 or r.status_code == 429:
+                        raise RuntimeError(f"HTTP {r.status_code}: {txt[:300]}")
+                    raise ValueError(f"HTTP {r.status_code}: {txt[:300]}")      # not retried: configuration
                 d = r.json()
                 msg = (d.get("choices") or [{}])[0].get("message", {}) or {}
                 text = msg.get("content") or ""
                 usage = dict(d.get("usage") or {})
+                tm = d.get("timings") or {}                          # llama.cpp: prompt and generation speeds
+                for k_ in ("prompt_per_second", "predicted_per_second", "prompt_n", "cache_n"):
+                    if isinstance(tm.get(k_), (int, float)):
+                        usage[k_] = round(tm[k_], 1)
                 rc = msg.get("reasoning_content") or msg.get("reasoning") or ""
                 if rc:
                     usage["reasoning_chars"] = len(rc)

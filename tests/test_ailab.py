@@ -70,6 +70,18 @@ try:
     lb = httpx.get(f"http://127.0.0.1:{PORT}/last").json()
     ok(lb.get("chat_template_kwargs") == {"enable_thinking": False} and lb["messages"][0]["content"].endswith("/no_think"),
        "thinking off by default: enable_thinking=false (and /no_think for Qwen3)")
+    strict = subprocess.Popen([sys.executable, "-m", "tests.mock_llm", str(PORT + 2)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                              env=dict(os.environ, MOCK_STRICT="1"))
+    try:
+        time.sleep(2.5)
+        cms = agents.ChatModel({"kind": "openai", "base_url": f"http://127.0.0.1:{PORT + 2}/v1", "model": "Qwen3.8-27B", "api_key": "k",
+                                "params": {"json_mode": True, "retries": 0}})
+        txt_s, _, _ = cms.chat([{"role": "system", "content": "sys"}, {"role": "user", "content": 'Reply with {"ok": true}'}])
+        lb = httpx.get(f"http://127.0.0.1:{PORT + 2}/last").json()
+        ok('"ok"' in txt_s and "chat_template_kwargs" not in lb and "response_format" not in lb and lb["messages"][0]["content"].endswith("/no_think")
+           and cms._plain, "a server that refuses the optional fields (502): sent again without them, and so from then on")
+    finally:
+        strict.kill()
     from atcsim.ailab import actions as A0
     acts0, _, err0 = A0.parse('<think>{"actions": [{"type": "nope"}]} long thoughts</think>\n{"reasoning": "r", "actions": [{"type": "assume", "callsign": "X1"}]}')
     ok(not err0 and acts0 == [{"type": "assume", "callsign": "X1"}], "a reasoning model's <think> part is not taken for the answer")
