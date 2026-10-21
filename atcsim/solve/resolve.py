@@ -21,7 +21,7 @@ import types
 from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional
 
-from . import cpa, traj
+from . import cpa, hj, traj
 
 MARGIN_NM = 1.0
 H_DEFAULT = 600.0
@@ -212,11 +212,24 @@ def solve(w, pair: Optional[tuple] = None, H: float = H_DEFAULT, asked: Optional
         order = [x for x in ([mv, p.b if mv == p.a else p.a] if mv else [p.a, p.b]) if x in mine or not only_assumed]
         sols: List[Solution] = []
         partial = {}
+        hjv = {}
         for k, cs in enumerate(order):
             a = w.aircraft[cs]
             moved_prio = bool(mv) and cs != mv
             scored = []
+            other_cs = p.b if cs == p.a else p.a
+            lateral_ok = True
+            if p.t_first is not None and p.t_first <= hj.T_S and abs(a.vs_fpm) < 300 and abs(w.aircraft[other_cs].vs_fpm) < 300:
+                try:
+                    hv = hj.can_turn_away(w, cs, other_cs)
+                except Exception:  # noqa: BLE001
+                    hv = None
+                if hv is not None:
+                    hjv[cs] = hv
+                    lateral_ok = hv["turn_enough"]
             for kind, prm, acts, cost, ask in _candidates(w, a, st[cs], asked):
+                if not lateral_ok and kind in ("heading", "direct"):
+                    continue                      # Hamilton-Jacobi: no turn of this aircraft can separate it in time
                 Tm = traj.build(w, a, H, **prm)
                 ok, dmin = _check(Tm, trajs, {cs}, sh)
                 scored.append((ok, dmin, kind, prm, acts, cost, ask, Tm))
@@ -250,7 +263,7 @@ def solve(w, pair: Optional[tuple] = None, H: float = H_DEFAULT, asked: Optional
         sols = [s for s in sols if s.confirmed is not False]
         best = next((s for s in sols if s.confirmed is not False), None)
         optimal = [s for s in sols if best and s.kind == best.kind and s.cost <= best.cost + OPT_TOL and s.confirmed is not False]
-        sets.append({"pair": [p.a, p.b], "t_first": p.t_first, "d_min": round(p.d_min, 1), "priority": why, "move": mv,
+        sets.append({"pair": [p.a, p.b], "t_first": p.t_first, "d_min": round(p.d_min, 1), "priority": why, "move": mv, "hj": hjv,
                      "solutions": sols, "optimal": optimal})
     return {"t": w.t, "conflicts": confs, "sets": sets}
 
@@ -260,6 +273,9 @@ def describe(res: Dict, limit: int = 3) -> List[str]:
     for s in res["sets"]:
         a, b = s["pair"]
         head = f"{a}×{b} (closest {s['d_min']} NM in {int((s['t_first'] or 0) // 60):02d}:{int((s['t_first'] or 0) % 60):02d})"
+        for m, hv in (s.get("hj") or {}).items():
+            if not hv["turn_enough"]:
+                head += f" [{m}: no turn can separate it in time]"
         if not s["solutions"]:
             out.append(f"{head}: no single clearance or pair found that leaves everyone separated — combine, or act on other traffic")
             continue
