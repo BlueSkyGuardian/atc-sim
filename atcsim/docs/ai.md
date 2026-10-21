@@ -70,6 +70,22 @@ What is shown is set in the agent profile: TO DO list, positions and geometry, p
 inbound traffic, routes, list length, and the sector briefing. About 1,500 tokens of briefing and prompt, plus
 1,000-3,000 per situation (busy sectors): give the endpoint a context of 8192 tokens, 16384 for dense scenarios.
 
+### Rules and corrections
+
+With **rules** on (agent profile, on by default), a clearance that breaks the semicircular rule — a cruising or exit
+level not of the aircraft's direction — is refused with the levels to use (*FL360 is not a level of IBE4343's
+direction (southbound: odd levels; e.g. 350, 370)*); arrivals descending to their destination are exempt. A
+descent given to an arrival long before its top of descent, when it has not asked, is given but noted (*early*) and
+counts against the decision; a field the instruction set does not have is ignored and reported.
+
+With **corrections** (1 round by default), an answer with refused instructions, unknown fields or that cannot be read
+goes straight back to the model in the same decision (*YOUR ANSWER HAD ERRORS. The other instructions were given;
+these were NOT: ...*), and its corrected instructions are given. The first mistakes still count in the evaluation; the
+correction turns are kept in the chat datasets. The next situation starts with the errors of the last decision.
+
+Arrivals show their **top of descent** (*top of descent in 60NM (it will ask for descent there: keep it at its level
+until then), latest descent for the agreed level in 66NM*): the pilot asks for descent there.
+
 ### Priority, speed, what was left undone
 
 Each conflict line says which aircraft to move: an aircraft maintaining its level has priority in it, so the one

@@ -56,7 +56,8 @@
     const steps = (info.steps || []).slice().reverse().map(s => {
       const res = (s.results || []).map(r => `<div class="${r.ok ? 'ok' : 'ko'}">${r.ok ? '✓' : '✗'} ${h(r.text)}</div>`).join('');
       const err = s.error ? `<div class="ko">no answer: ${h(s.error)}</div>` : s.parse_error ? `<div class="ko">unreadable answer: ${h(s.parse_error)}</div>` : '';
-      const qs = (s.queries || []).map(q => (q.results || []).map(x => `<div class="c-dim" style="font-size:11.5px">? ${h(x.result)}</div>`).join('')).join('');
+      const qs = (s.queries || []).map(q => q.kind === 'correction' ? '<div class="ko">↺ refused, sent back for a correction</div>'
+        : (q.results || []).map(x => `<div class="c-dim" style="font-size:11.5px">? ${h(x.result)}</div>`).join('')).join('');
       return `<div class="aiw-st"><div class="hd"><b class="mono">T+${fmtT(s.t)}</b><span class="c-dim">${s.latency_s != null ? s.latency_s + ' s' : ''}</span>${s.label ? `<span class="lb ${h(s.label)}">${h(s.label)} ${s.reward > 0 ? '+' : ''}${s.reward}</span>` : ''}</div>` +
         qs + (s.reasoning ? `<div class="rs">${h(s.reasoning)}</div>` : '') + (res || (!err ? '<div class="c-dim">no instruction</div>' : '')) + err + `</div>`;
     }).join('') || '<div class="c-dim">No decision yet.</div>';

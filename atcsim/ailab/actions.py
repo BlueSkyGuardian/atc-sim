@@ -84,8 +84,58 @@ def parse(text: str) -> Tuple[List[dict], str, str]:
     return [], "", "no JSON object in the answer"
 
 
-def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: bool = False) -> List[dict]:
-    """Apply the actions in order; one result per action: {"action", "ok", "text"}."""
+ALLOWED_CLEAR = ("cfl", "xfl", "heading", "direct", "speed")
+
+
+def _parity_levels(fl: int, southbound: bool) -> str:
+    from ..aircraft import level_parity_ok
+    near = [x for x in range(fl - 30, fl + 31, 10) if x != fl and level_parity_ok(x, southbound)][:4]
+    near.sort(key=lambda x: abs(x - fl))
+    return ", ".join(str(x) for x in near[:2])
+
+
+def check_rules(w, ac, a: dict) -> List[str]:
+    """The rules a clearance must respect (semicircular rule for cruising and exit levels): refusal texts."""
+    from ..aircraft import level_parity_ok
+    out = []
+    side = "southbound: odd levels" if ac.southbound else "northbound: even levels"
+    for k in ("cfl", "xfl"):
+        if a.get(k) in (None, ""):
+            continue
+        try:
+            fl = int(str(a[k]).upper().lstrip("FL").lstrip("F"))
+        except ValueError:
+            out.append(f"{k} {a[k]!r} is not a flight level (e.g. 350)")
+            continue
+        going_down = fl * 100 < ac.alt_ft - 300 and w.descending_to_destination(ac, fl)
+        if k == "cfl" and going_down:
+            continue                                   # arrivals descending: the rule does not apply
+        if not level_parity_ok(fl, ac.southbound):
+            out.append(f"FL{fl} is not a level of {ac.callsign}'s direction ({side}; e.g. {_parity_levels(fl, ac.southbound)}): "
+                       f"semicircular rule, nothing was given")
+    return out
+
+
+def early_descent(w, ac, a: dict) -> str:
+    """An arrival cleared down long before its top of descent (it has not asked): a note (not refused)."""
+    from .observe import arrival_info
+    arr = arrival_info(w, ac)
+    if a.get("cfl") in (None, "") or not arr.get("fix"):
+        return ""
+    try:
+        fl = int(str(a["cfl"]).upper().lstrip("FL").lstrip("F"))
+    except ValueError:
+        return ""
+    tod = arr.get("tod_in_nm")
+    asked = any(r.callsign == ac.callsign and r.status == "pending" and r.kind == "descent" for r in w.requests.values())
+    if fl * 100 < ac.alt_ft - 300 and tod is not None and tod > 25 and not asked:
+        return f" (early: its top of descent is in {tod:.0f} NM and it has not asked — arrivals are descended when they ask, or for a conflict)"
+    return ""
+
+
+def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: bool = False, rules: bool = True) -> List[dict]:
+    """Apply the actions in order; one result per action: {"action", "ok", "text"}. With rules, a clearance that
+    breaks the semicircular rule is refused (with the levels to use)."""
     from .. import inputs
     from ..world import InstructionError
     out = []
@@ -110,7 +160,12 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                              "it is not on your frequency yet (INBOUND): wait until it calls you, then assume it")
                     raise ValueError(f"{cs} is not assumed, nothing was given to the pilot; {where} with "
                                      f'{{"type": "assume", "callsign": "{cs}"}}, then clear it')
-                extra = sorted(k for k in a if k not in ("type", "callsign", "cfl", "xfl", "heading", "direct", "speed"))
+                extra = sorted(k for k in a if k not in ("type", "callsign") + ALLOWED_CLEAR)
+                if rules and t == "clear":
+                    bad = check_rules(w, ac, a)
+                    if bad:
+                        raise ValueError("; ".join(bad))
+                note = early_descent(w, ac, a) if t == "clear" else ""
                 body = {"callsign": cs}
                 if t == "resume":
                     body["heading"] = ""
@@ -129,10 +184,16 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                 r = inputs.apply(w, "entries", body, actor)
                 rb = r.get("_readback") or []
                 ok = not any(x.get("status") == "rejected" for x in rb)
-                txt = " · ".join(x.get("text", "") for x in rb) or "entered"
+                txt = (" · ".join(x.get("text", "") for x in rb) or "entered") + note
                 if extra:
-                    txt += f" (ignored unknown field{'s' if len(extra) > 1 else ''}: {', '.join(extra)})"
-                out.append({"action": a, "ok": ok, "text": txt})
+                    txt += (f" (IGNORED: {', '.join(repr(e) for e in extra)} {'is not a field' if len(extra) == 1 else 'are not fields'}"
+                            f" — a clear takes only {', '.join(ALLOWED_CLEAR)})")
+                res = {"action": a, "ok": ok, "text": txt}
+                if note:
+                    res["early"] = True
+                if extra:
+                    res["unknown_fields"] = extra
+                out.append(res)
             elif t == "reply":
                 rid = str(a.get("request_id", ""))
                 q = w.requests.get(rid)

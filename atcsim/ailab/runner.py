@@ -171,6 +171,8 @@ def run(job: dict) -> None:
     if max_actions == 12:                                  # the former default: too few with ten aircraft calling
         max_actions = 30
     force = bool(env.get("force"))
+    rules_on = agent_cfg.get("rules", True) is not False
+    fix_rounds = int(agent_cfg.get("correction_rounds", 1) or 0)
     auto_assume, auto_transfer = bool(env.get("auto_assume")), bool(env.get("auto_transfer"))
     if auto_assume:
         w.auto_assume = True                               # aircraft call already assumed: the model only separates
@@ -269,18 +271,58 @@ def run(job: dict) -> None:
                             if isinstance(v, (int, float)):
                                 usage[k] = (usage.get(k) or 0) + v
                         acts, reasoning, perr, qs = act_mod.parse_full(answer)
+                    with s.lock:
+                        results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                    last = results
+                    n_fix = 0
+                    while (fix_rounds > n_fix and not isinstance(agent, agents.Baseline)
+                           and (perr or any(not r["ok"] or r.get("unknown_fields") for r in last)) and est(msgs) + 900 < budget):
+                        bad = [r for r in last if not r["ok"] or r.get("unknown_fields")]
+                        if perr:
+                            rec["unreadable_first"] = perr
+                            follow = (f"YOUR ANSWER COULD NOT BE READ ({perr}). Answer again now with ONE JSON object: "
+                                      '{"reasoning": "...", "actions": [...]} and nothing else.')
+                        else:
+                            follow = ("YOUR ANSWER HAD ERRORS. The other instructions were given; these were NOT:\n"
+                                      + "\n".join(f"- {json.dumps(r['action'])} -> {r['text']}" for r in bad)
+                                      + "\nAnswer again now with ONLY the corrected instructions for these (an empty actions list to drop them), "
+                                        "same JSON format.")
+                        rounds.append({"kind": "correction", "response": answer, "reasoning": reasoning, "results": last,
+                                       "followup": follow})
+                        msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
+                        answer, u2, l2 = agent.chat(msgs)
+                        lat += l2
+                        for k, v in (u2 or {}).items():
+                            if isinstance(v, (int, float)):
+                                usage[k] = (usage.get(k) or 0) + v
+                        acts, reasoning2, perr, _ = act_mod.parse_full(answer)
+                        reasoning = reasoning2 or reasoning
+                        with s.lock:
+                            last = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                        for r in last:
+                            r["correction"] = True
+                        results = results + last
+                        n_fix += 1
+                    if n_fix:
+                        rec["corrections"] = n_fix
                     if rounds:
                         rec["queries"] = rounds
-                    with s.lock:
-                        results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force)
                     rec.update(response=answer, reasoning=reasoning, parse_error=perr or None, results=results,
                                latency_s=round(lat, 2), usage=usage)
                 except Exception as e:  # noqa: BLE001 - the model did not answer: the traffic goes on
                     rec.update(response=None, error=str(e)[:500], results=[], latency_s=round(time.time() - t0, 2))
                     prog["errors"] += 1
                     answer = None
-                fb = [f"{'OK' if r['ok'] else 'REFUSED'} {json.dumps(r['action'])}: {r['text']}" for r in rec["results"]]
-                feedback = ("; ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
+                fixed = {str(r["action"].get("callsign", "")).upper() for r in rec["results"] if r.get("correction") and r["ok"]}
+                errs = [r for r in rec["results"] if (not r["ok"] or r.get("unknown_fields") or r.get("early"))
+                        and not (not r.get("correction") and str(r["action"].get("callsign", "")).upper() in fixed)]
+                given = [r for r in rec["results"] if r["ok"]]
+                fb = []
+                if errs:
+                    fb.append("ERRORS — read them and do not repeat them: " + " | ".join(f"{json.dumps(r['action'])} -> {r['text']}" for r in errs))
+                if given:
+                    fb.append("given: " + "; ".join(r["text"] for r in given))
+                feedback = (". ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
                 td = struct.get("todo") or {}
                 done = {(str(r["action"].get("type", "")).lower(), str(r["action"].get("callsign") or r["action"].get("request_id") or "").upper())
                         for r in rec["results"] if r.get("ok")}

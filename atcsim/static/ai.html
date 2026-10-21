@@ -109,6 +109,8 @@
         <label>Decides every</label><div class="row"><input type="number" id="aInt" min="5" max="600" style="width:80px"> s of simulated time <label style="color:var(--text)"><input type="checkbox" id="aTrig"> and at once when an aircraft calls, a request comes or a conflict under 5 min appears</label></div>
         <label>Sector briefing</label><label style="color:var(--text)"><input type="checkbox" id="aBrief"> sent with the system prompt: the sector, points with positions, routes, separation rules, semicircular rule, how aircraft behave</label>
         <label>Queries</label><div class="row"><label style="color:var(--text)"><input type="checkbox" id="aQ"> the model may ask the simulator questions before it decides (probe a clearance, free levels, geometry, distances, route, traffic near, sequence):</label> up to <input type="number" id="aQR" min="1" max="6" style="width:60px"> rounds per decision</div>
+        <label>Rules</label><div class="row"><label style="color:var(--text)"><input type="checkbox" id="aRules"> refuse clearances that break the semicircular rule (with the levels to use)</label>
+          <span>· corrections: <input type="number" id="aFix" min="0" max="3" style="width:56px"> round(s) — a refused or unreadable answer goes back to the model at once, in the same decision</span></div>
         <label>Memory</label><div class="row"><input type="number" id="aHist" min="0" max="10" style="width:80px"> previous decisions sent with each new one</div>
         <label>Max instructions</label><div class="row"><input type="number" id="aMax" min="1" max="60" style="width:80px"> per decision</div>
         <label>The situation shows</label><div class="row">
@@ -197,11 +199,12 @@ function showAgent() {
   $('#aHist').value = c.history; $('#aMax').value = c.max_actions; $('#oConf').checked = o.conflicts !== false; $('#oWx').checked = o.weather !== false;
   $('#oInb').checked = o.inbound !== false; $('#oRte').checked = o.routes !== false; $('#oMax').value = o.max_aircraft || 40;
   $('#oPos').checked = o.positions !== false; $('#oTodo').checked = o.todo !== false; $('#oHint').checked = o.hints !== false; $('#aBrief').checked = c.briefing !== false;
+  $('#aRules').checked = c.rules !== false; $('#aFix').value = c.correction_rounds ?? 1;
   $('#aQ').checked = !!c.queries; $('#aQR').value = c.query_rounds || 3;
 }
 $('#aSel').onchange = showAgent;
 $('#aReset').onclick = () => { $('#aPrompt').value = AGDEF.system_prompt; };
-const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'), briefing: $('#aBrief').checked, queries: $('#aQ').checked, query_rounds: +val('aQR') || 3,
+const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'), briefing: $('#aBrief').checked, queries: $('#aQ').checked, rules: $('#aRules').checked, correction_rounds: +val('aFix'), query_rounds: +val('aQR') || 3,
   max_actions: +val('aMax'), observation: { conflicts: $('#oConf').checked, weather: $('#oWx').checked, inbound: $('#oInb').checked, routes: $('#oRte').checked,
   positions: $('#oPos').checked, todo: $('#oTodo').checked, hints: $('#oHint').checked, max_aircraft: +val('oMax') } } });
 $('#aSave').onclick = async () => { try { await api(`/api/ai/agents/${curAgent.id}`, { method: 'PUT', body: JSON.stringify(agentBody()) }); $('#aMsg').textContent = '✓ saved'; loadAgents(curAgent.id); } catch (e) { $('#aMsg').textContent = e.message; } };
@@ -284,14 +287,16 @@ async function showSteps(id, offset = 0) {
   const steps = d.steps.map(s => `<div class="step"><div class="h"><b class="mono">T+${fmtT(s.t)}</b>${s.label ? `<span class="lbl ${s.label}">${s.label} ${s.reward > 0 ? '+' : ''}${s.reward}</span>` : ''}
       <span class="hint">${esc((s.label_why || []).join(' · '))}</span>${s.latency_s != null ? `<span class="hint">${s.latency_s} s</span>` : ''}${(s.usage && s.usage.prompt_tokens) || s.prompt_tokens_est ? `<span class="hint">prompt ${(s.usage && s.usage.prompt_tokens) || '~' + s.prompt_tokens_est} tok</span>` : ''}
       ${s.judge && s.judge.grade ? `<span class="lbl">judge ${s.judge.grade}/5</span>` : ''}</div>
-      ${(s.queries || []).map((q, k) => `<div class="hint" style="margin:3px 0">asked (round ${k + 1})${q.reasoning ? ': ' + esc(q.reasoning) : ''}</div>` +
+      ${(s.queries || []).map((q, k) => q.kind === 'correction' ? `<div class="hint" style="margin:3px 0;color:#f2b84b">first answer refused, sent back for a correction:</div>` +
+        (q.results || []).filter(x => !x.ok || x.unknown_fields).map(x => `<div class="ko" style="font-size:12px">✗ <span class="mono">${esc(JSON.stringify(x.action))}</span> — ${esc(x.text)}</div>`).join('') :
+        `<div class="hint" style="margin:3px 0">asked (round ${k + 1})${q.reasoning ? ': ' + esc(q.reasoning) : ''}</div>` +
         (q.results || []).map(x => `<div class="${x.ok ? '' : 'ko'}" style="font-size:12px">? <span class="mono">${esc(JSON.stringify(x.query))}</span> → ${esc(x.result)}</div>`).join('') +
         (q.note ? `<div class="ko" style="font-size:12px">${esc(q.note)}</div>` : '')).join('')}
       ${s.reasoning ? `<div>${esc(s.reasoning)}</div>` : ''}
       ${(s.missed || []).length ? `<div class="ko" style="font-size:12px">left undone: ${esc(s.missed.join(' · '))}</div>` : ''}
       ${s.trimmed ? `<div class="hint" style="color:#f2b84b">${esc(s.trimmed)}</div>` : ''}
       ${s.error ? `<div class="ko">model error: ${esc(s.error)}</div>` : ''}${s.parse_error ? `<div class="ko">unreadable answer: ${esc(s.parse_error)}</div>` : ''}
-      ${(s.results || []).map(x => `<div class="${x.ok ? 'ok' : 'ko'}">${x.ok ? '✓' : '✗'} <span class="mono">${esc(JSON.stringify(x.action))}</span> — ${esc(x.text)}</div>`).join('') || (s.error ? '' : '<div class="hint">no instruction</div>')}
+      ${(s.results || []).map(x => `<div class="${x.ok ? 'ok' : 'ko'}">${x.ok ? '✓' : '✗'}${x.correction ? ' <span class="hint">(corrected)</span>' : ''} <span class="mono">${esc(JSON.stringify(x.action))}</span> — ${esc(x.text)}</div>`).join('') || (s.error ? '' : '<div class="hint">no instruction</div>')}
       ${s.judge && s.judge.critique ? `<div class="hint">judge: ${esc(s.judge.critique)}</div>` : ''}
       <details><summary>situation shown</summary><pre class="obs">${esc((s.feedback ? 'RESULT OF YOUR LAST INSTRUCTIONS: ' + s.feedback + '\n\n' : '') + s.observation)}</pre></details>
       <details><summary>raw answer</summary><pre class="obs">${esc(s.response || '')}</pre></details></div>`).join('');

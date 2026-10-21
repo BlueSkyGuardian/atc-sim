@@ -62,7 +62,7 @@ def score(w, steps: List[dict]) -> dict:
     sep, asp, wx = m.get("separation") or {}, m.get("airspace") or {}, m.get("weather") or {}
     req, asm, tr = m.get("requests") or {}, m.get("assumption") or {}, m.get("traffic") or {}
     refused = sum(1 for s in steps for r in s.get("results") or [] if not r.get("ok"))
-    unread = sum(1 for s in steps if s.get("parse_error"))
+    unread = sum(1 for s in steps if s.get("parse_error") or s.get("unreadable_first"))
     mean_rt = req.get("mean_response_time_s")
     xf, fc = transfers(w), first_calls(w)
     pen = [
@@ -157,11 +157,21 @@ def label(w, steps: List[dict]) -> None:
         if stale:
             r -= 2 * len(stale)
             why.append(f"-{2 * len(stale)} requests left waiting")
+        n_early = sum(1 for x in s.get("results") or [] if x.get("early"))
+        if n_early:
+            r -= n_early
+            why.append(f"-{n_early} arrival descended early (before its top of descent, not asked)")
+        n_unk = sum(1 for x in s.get("results") or [] if x.get("unknown_fields"))
+        if n_unk:
+            r -= n_unk
+            why.append(f"-{n_unk} unknown field(s) used")
+        if s.get("corrections"):
+            why.append(f"needed {s['corrections']} correction(s)")
         nref = sum(1 for x in s.get("results") or [] if not x.get("ok"))
         if nref:
             r -= nref
             why.append(f"-{nref} refused/invalid")
-        if s.get("parse_error"):
+        if s.get("parse_error") or s.get("unreadable_first"):
             r -= 2
             why.append("-2 unreadable answer")
         s["reward"] = round(r, 1)

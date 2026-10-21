@@ -92,14 +92,15 @@ def _one(w, q: dict) -> str:
         base = int(round((ac.cleared_alt_ft or ac.alt_ft) / 100))
         cand = [base + d for d in (10, -10, 20, -20, 30, -30, 40, -40, 50, -50, 60, -60) if 100 <= base + d <= w.upper_fl]
         p = atctools.probe(w, ac.callsign, levels=cand)["levels"]
-        ok = [f"{fl}{'' if level_parity_ok(fl, ac.southbound) else '(wrong direction)'}" for fl in cand if not p.get(str(fl))]
+        ok = [f"{fl}" for fl in cand if not p.get(str(fl)) and (level_parity_ok(fl, ac.southbound)
+                                                                    or (fl * 100 < ac.alt_ft - 300 and w.descending_to_destination(ac, fl)))]
         if not ok:
             from .observe import regain
             rg = regain(w, ac.callsign, cand)
             if rg:
                 return f"{ac.callsign} at FL{base}: in conflict at every level now; separation comes back soonest at " + ", ".join(rg)
         bad = [f"{fl}(conflict {p[str(fl)][0]['with']} in {_t(p[str(fl)][0]['in_s'])})" for fl in cand if p.get(str(fl))]
-        return f"{ac.callsign} at FL{base}: conflict-free {', '.join(ok) or 'none'}; not free: {', '.join(bad) or 'none'}"
+        return f"{ac.callsign} at FL{base}: conflict-free (of its direction) {', '.join(ok) or 'none'}; not free: {', '.join(bad) or 'none'}"
     if kind == "geometry":
         a, b = _ac(w, q.get("a") or q.get("callsign")), _ac(w, q.get("b") or q.get("other"))
         pa, pb = (a.x, a.y), (b.x, b.y)

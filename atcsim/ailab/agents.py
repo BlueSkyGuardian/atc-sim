@@ -26,9 +26,11 @@ At every decision, in this order:
    - aircraft routing via the same point (the conflict line says so, with both times): a level change, or a speed for one of them to put them in trail; headings only if no level works;
    - a heading turns an aircraft away from its route for good: give one only with a plan (about 30-60 degrees off its track, away from the other), and resume it as soon as it is listed under RESUME.
 5. RESUME every aircraft listed under RESUME (on a heading and now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
-6. SEQUENCE the arrivals (ARRIVAL SEQUENCES, and SEQUENCE in TO DO): each arrival must cross its fix at the agreed level (letter of agreement, e.g. FL250) and the agreed distance behind the one ahead. Descend them in time (before their latest descent point), keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
+6. SEQUENCE the arrivals (SEQUENCE in TO DO, within about 15 minutes of their fix): each must cross its fix at the agreed level (e.g. FL250) and the agreed distance behind the one ahead. An arrival stays at its level until its top of descent, where the pilot asks for descent (a pilot request): approve it then, to the agreed level. Do not descend arrivals earlier unless a conflict needs it. Keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
 7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
 The exit level (XFL, "exit FL350 to WS") is the level the aircraft leaves your sector at, coordinated with the next sector; it is its current level unless you change it. Change it (clear xfl) only together with a level change that it will keep until the exit, and only to a level of its direction of flight.
+SEMICIRCULAR RULE, always: a cruising level or an exit level must be of the aircraft's direction (southbound odd: 290, 310, 330, 350, 370, 390, 410; northbound even: 280, 300, 320, 340, 360, 380, 400); only arrivals descending to their destination are exempt. A clearance to a wrong level is refused.
+When an answer of yours is refused (ERRORS), read why and correct it: assume before clearing, use only the fields of the instruction set, levels of the right direction.
 Never let two aircraft be closer than the separation minimum horizontally AND vertically. Never instruct an aircraft that is not assumed. Use only the callsigns and points of the situation and the briefing.
 Give every needed instruction in one answer (several actions in the list); an empty list only when TO DO NOW is empty and nothing needs solving.
 
@@ -37,6 +39,7 @@ Give every needed instruction in one answer (several actions in the list); an em
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
 LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
+                          "0792535b15f97a9805bdd21dea9f589a6bd1606a13ce9781995f22d8cca22496",
                           "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
                           "9950dd11812cc5ef998b7940e97d603867928b95fab03bf8dc13175d307f04df",
                           "b4875a13f01be8c1a78ffc4f4b94a2fba95fa20d3e8aa3a04fb7b92c5fae6534"}
@@ -156,7 +159,10 @@ class Baseline:
             ok = True
             try:
                 if r["type"] == "altitude" and r.get("value"):
-                    ok = not atctools.probe(w, r["callsign"], cfl=int(r["value"])).get("conflicts")
+                    from ..aircraft import level_parity_ok
+                    acx, fl = w.aircraft[r["callsign"]], int(r["value"])
+                    ok = not atctools.probe(w, r["callsign"], cfl=fl).get("conflicts") and (
+                        level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
                 elif r["type"] == "direct" and r.get("value"):
                     ok = not atctools.probe(w, r["callsign"], direct=str(r["value"])).get("conflicts")
             except Exception:  # noqa: BLE001
@@ -171,11 +177,20 @@ class Baseline:
             if not pair or any(x in touched for x in c["aircraft"]):
                 continue
             done = False
+            from .observe import priority
+            from ..aircraft import level_parity_ok
+            if len(pair) == 2:                      # the aircraft maintaining its level keeps it: move the other first
+                mv, _ = priority(mine[pair[0]], mine[pair[1]])
+                if mv == pair[1]:
+                    pair = [pair[1], pair[0]]
             for cs in pair:
                 a = mine[cs]
-                for d in (10, -10, 20, -20):
+                for d in (20, -20, 40, -40, 10, -10):
                     fl = int(a["cleared_fl"]) + d
                     if fl < 100 or fl > w.upper_fl:
+                        continue
+                    acx = w.aircraft[cs]
+                    if not level_parity_ok(fl, acx.southbound) and not (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)):
                         continue
                     try:
                         if not atctools.probe(w, cs, cfl=fl).get("conflicts"):

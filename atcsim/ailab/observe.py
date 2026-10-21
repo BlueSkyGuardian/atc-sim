@@ -119,12 +119,16 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[f
     if fp.get("destination"):
         parts.append(f"to {fp.get('destination')}")
     acx = w.aircraft.get(cs)
-    arr = getattr(acx, "arr", None) or {}
+    arr = arrival_info(w, acx)
     if arr.get("fix") and arr["fix"] in getattr(w, "seq", {}):
         sq = w.seq[arr["fix"]]
         txt = f"ARRIVAL via {arr['fix']}: {arr.get('letter_of_agreement') or sq.describe()}"
+        tod = arr.get("tod_in_nm")
+        if tod is not None:
+            txt += (f", top of descent in {tod:.0f}NM (it will ask for descent there: keep it at its level until then)" if tod > 0
+                    else f", past its top of descent by {-tod:.0f}NM")
         if arr.get("loa_latest_descent_in_nm") is not None:
-            txt += f", latest descent in {arr['loa_latest_descent_in_nm']:.0f}NM"
+            txt += f", latest descent for the agreed level in {arr['loa_latest_descent_in_nm']:.0f}NM"
         parts.append(txt)
     xfl, nu = co.get("xfl"), co.get("next_unit") or a.get("next_unit")
     if xfl and nu:
@@ -151,6 +155,20 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[f
     if resume is not None:
         st["resume_ok"] = resume["ok"]
     return " · ".join(str(p) for p in parts if p), st
+
+
+def arrival_info(w, ac) -> dict:
+    """An arrival's descent figures (top of descent, latest descent for the agreed level), computed now if the
+    simulator has not yet."""
+    arr = dict(getattr(ac, "arr", None) or {})
+    if arr.get("fix") and arr.get("tod_in_nm") is None and arr["fix"] in getattr(w, "seq", {}):
+        try:
+            from .. import arrivals
+            if arr["fix"] in [p for p in ac.route if not str(p).startswith("@")]:
+                arr.update(arrivals.compute(w, ac))
+        except Exception:  # noqa: BLE001
+            pass
+    return arr
 
 
 def _moving(a: dict) -> bool:
@@ -220,8 +238,9 @@ def _free_levels(w, a: dict) -> List[str]:
         return []
     out = []
     for fl in cand:
-        if not p["levels"].get(str(fl)):
-            out.append(f"{fl}" + ("" if ac is None or level_parity_ok(fl, ac.southbound) else "(wrong direction)"))
+        down_arr = ac is not None and fl * 100 < ac.alt_ft - 300 and w.descending_to_destination(ac, fl)
+        if not p["levels"].get(str(fl)) and (ac is None or down_arr or level_parity_ok(fl, ac.southbound)):
+            out.append(f"{fl}")
     if not out:
         out = regain(w, a["callsign"], cand)
     return out[:4]
@@ -334,6 +353,8 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                 continue
             seq_rows.append(f)
             for r in rows:
+                if r["eta_s"] - w.t > 900:                   # sequencing starts about 15 minutes from the fix
+                    continue
                 if r["callsign"] in mine_cs and r.get("spacing_ok") is False:
                     seq_todo.append(f"{r['callsign']} only {r['spacing_to_preceding_nm']:.0f} NM behind the one ahead at {f['fix']} "
                                     f"(needs {f['spacing_nm']:g})")
@@ -395,7 +416,7 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
 
     # ---- arrival sequences
     if seq_rows:
-        lines.append("\nARRIVAL SEQUENCES (in order at each fix):")
+        lines.append("\nARRIVAL SEQUENCES (in order at each fix; act on the spacing only within about 15 minutes of the fix):")
         for f in seq_rows:
             rows = [r for r in f.get("inbound") or [] if r.get("status") != "not yet visible"]
             lines.append(f"- {f['fix']} for {f['aerodrome']} ({f.get('letter_of_agreement') or ''}): " + "; ".join(

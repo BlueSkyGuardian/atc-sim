@@ -190,7 +190,7 @@ class AgentIn(BaseModel):
 def _agent_defaults() -> dict:
     from ..ailab import agents, observe
     return {"system_prompt": agents.DEFAULT_SYSTEM_PROMPT, "interval_s": 30, "event_triggers": True, "history": 2,
-            "max_actions": 30, "briefing": True, "queries": True, "query_rounds": 3, "observation": dict(observe.DEFAULTS)}
+            "max_actions": 30, "briefing": True, "queries": True, "query_rounds": 3, "rules": True, "correction_rounds": 1, "observation": dict(observe.DEFAULTS)}
 
 
 @router.get("/api/ai/agents")

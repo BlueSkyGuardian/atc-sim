@@ -94,7 +94,7 @@ try:
     st = ins.get(f"/api/ai/runs/{m1['id']}/steps?limit=200").json()
     s0 = st["steps"]
     ok(st["total"] == ev["decisions"] and all("label" in s and "reward" in s for s in s0), "every decision labelled and rewarded")
-    ok(any(s.get("parse_error") and s["label"] == "bad" for s in s0), "an unreadable answer: labelled bad")
+    ok(any((s.get("parse_error") or s.get("unreadable_first")) and "-2 unreadable answer" in s["label_why"] for s in s0), "an unreadable answer: penalised (even once corrected)")
     ok(any("+1 assumed" in s["label_why"] for s in s0) and any("answered" in " ".join(s["label_why"]) for s in s0), "assuming who calls, answering requests: rewarded")
     ok(any(any("left alone, lost" in w for w in s["label_why"]) and s["label"] == "bad" for s in s0), "a conflict shown and left alone that became a loss: bad")
     ok(any("RESULT OF YOUR LAST INSTRUCTIONS" in (s.get("feedback") or "") or s.get("feedback") for s in s0[1:]), "the pilots' answers fed back to the model")
@@ -119,7 +119,13 @@ try:
     rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": 360}], {"name": "AI", "seat": "atc"})
     ok(not rr[0]["ok"] and '"type": "assume"' in rr[0]["text"], "clearing an aircraft not assumed: the refusal says to assume it first")
     rr = A.apply(ss.world, [{"type": "assume", "callsign": cs}, {"type": "clear", "callsign": cs, "heading": 200, "distance": "8NM"}], {"name": "AI", "seat": "atc"})
-    ok(rr[0]["ok"] and rr[1]["ok"] and "ignored unknown field: distance" in rr[1]["text"], "assume + clear in one answer; an unknown field reported")
+    ok(rr[0]["ok"] and rr[1]["ok"] and "'distance' is not a field" in rr[1]["text"], "assume + clear in one answer; an unknown field reported")
+    acx = ss.world.aircraft[cs]
+    wrong = next(f for f in (360, 350, 340, 370) if not __import__("atcsim.aircraft", fromlist=["x"]).level_parity_ok(f, acx.southbound))
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": wrong}], {"name": "AI", "seat": "atc"})
+    ok(not rr[0]["ok"] and "semicircular rule" in rr[0]["text"], f"a level of the wrong direction is refused: {rr[0]['text'][:90]}")
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": wrong}], {"name": "AI", "seat": "atc"}, rules=False)
+    ok(rr[0]["ok"], "... unless the profile's rules are off")
     ss.stop()
 
     # ---- watch live (read-only)
@@ -134,6 +140,9 @@ try:
     ok(any(s.get("missed") for s in s0) and any("LEFT UNDONE FROM YOUR TO DO" in (s.get("feedback") or "") for s in s0),
        "what the model left undone from TO DO is fed back")
     ok(all(s.get("prompt_tokens_est") for s in s0), "prompt size recorded per decision")
+    cd = [s for s in s0 if s.get("corrections")]
+    ok(cd and any(r.get("correction") for r in cd[0]["results"]) and any(q.get("kind") == "correction" for q in cd[0]["queries"]),
+       f"a refused or unreadable answer is sent back for a correction in the same decision ({len(cd)} decisions)")
     small = ins.post("/api/ai/models", json={"name": "Mock small context", "kind": "openai", "base_url": f"http://127.0.0.1:{PORT}/v1",
                                              "model": "mock-controller", "api_key": "k", "params": {"timeout_s": 20, "retries": 1, "context_tokens": 7000}}).json()
     r3 = ins.post("/api/ai/runs", json={"scenarios": ["p02_wn_merges_and_climbs"], "model_id": small["id"], "agent_id": a0["id"],
@@ -178,6 +187,8 @@ try:
     recs = [json.loads(x) for x in ins.get(da["download"]).text.strip().splitlines()]
     ok(any("ANSWERS TO YOUR QUERIES" in m["content"] for r_ in recs for m in r_["messages"] if m["role"] == "user"),
        "chat dataset: the query rounds are in the conversations")
+    ok(any("YOUR ANSWER HAD ERRORS" in m["content"] or "COULD NOT BE READ" in m["content"] for r_ in recs for m in r_["messages"] if m["role"] == "user"),
+       "chat dataset: the corrections are in the conversations")
     ok(rec["messages"][0]["role"] == "system" and rec["messages"][-1]["role"] == "assistant" and rec["meta"]["label"] == "good", "chat format: system, situation, (queries,) answer (+ labels)")
     link = d["link"].split("://", 1)[1].split("/", 1)[1]
     ok(anon.get("/" + link).status_code == 200 and anon.get("/" + link.replace(".jsonl", "x.jsonl")).status_code == 404,
