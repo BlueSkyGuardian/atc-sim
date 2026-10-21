@@ -148,6 +148,34 @@ class ChatModel:
             except Exception as e:  # noqa: BLE001 - timeouts, cold starts, 5xx: retry with a pause
                 last = e
                 time.sleep(min(30, 3 * (k + 1)))
+        if first and str(last).startswith(("HTTP 5", "HTTP 429")):
+            # the first call: a serverless worker may still be starting (minutes: loading, compiling) and its
+            # gateway answer 502/503 at once meanwhile. Keep asking, every 15 s, up to the first-call limit.
+            t_start, n = time.time(), 0
+            while time.time() - t_start < tmo:
+                n += 1
+                cb = getattr(self, "on_wait", None)
+                if cb:
+                    cb(f"the endpoint is not ready yet ({str(last)[:120]}): asking again every 15 s, "
+                       f"{int(time.time() - t_start)} s so far")
+                time.sleep(15)
+                try:
+                    r = httpx.post(self.url + "/chat/completions", headers=self.headers(), json=body,
+                                   timeout=httpx.Timeout(tmo, connect=30.0))
+                    if r.status_code < 400:
+                        d = r.json()
+                        msg = (d.get("choices") or [{}])[0].get("message", {}) or {}
+                        self._answered = True
+                        return msg.get("content") or "", dict(d.get("usage") or {}), time.time() - t_start
+                    if r.status_code < 500 and r.status_code != 429:
+                        raise ValueError(f"HTTP {r.status_code}: {r.text.strip()[:300]}")
+                    last = RuntimeError(f"HTTP {r.status_code}")
+                except ValueError:
+                    raise
+                except (httpx.ReadTimeout, httpx.WriteTimeout) as e:
+                    raise RuntimeError(f"no answer within {tmo:.0f} s") from e
+                except Exception as e:  # noqa: BLE001
+                    last = e
         raise RuntimeError(f"no answer after {self.retries + 1} tries: {last}")
 
     def models(self) -> list:
@@ -162,6 +190,7 @@ def test(p: dict) -> dict:
     if p.get("kind") == "baseline":
         return {"ok": True, "note": "the built-in baseline needs no connection"}
     m = ChatModel(dict(p, params=dict(p.get("params") or {}, retries=0)))
+    m._answered = True                      # a quick check: no waiting for a cold worker here
     out = {"url": m.url}
     try:
         out["models"] = m.models()

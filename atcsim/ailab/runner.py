@@ -221,6 +221,11 @@ def run(job: dict) -> None:
     if not isinstance(agent, agents.Baseline):
         prog.update(status="waking the model")
         _write(prog_p, prog)
+
+        def waiting(msg):
+            prog.update(status="waking the model", last={"t": 0, "reasoning": msg, "actions": [], "error": None})
+            _write(prog_p, prog)
+        agent.on_wait = waiting
         try:
             agent.chat([{"role": "system", "content": "Answer with a JSON object only."},
                         {"role": "user", "content": 'Reply with {"ready": true}'}])
@@ -230,8 +235,9 @@ def run(job: dict) -> None:
             prog.update(status="failed", error=f"the model did not answer before the start: {e}"[:500])
             _write(prog_p, prog)
             raise RuntimeError(f"the model did not answer before the start: {e}")
-        prog.update(status="running")
+        prog.update(status="running", last=None)
         _write(prog_p, prog)
+        agent.on_wait = None
     with open(steps_p, "a") as sf:
         try:
             while w.t < end - 1e-6 and not w.finished:

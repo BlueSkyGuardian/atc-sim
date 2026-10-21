@@ -82,6 +82,18 @@ try:
            and cms._plain, "a server that refuses the optional fields (502): sent again without them, and so from then on")
     finally:
         strict.kill()
+    cold = subprocess.Popen([sys.executable, "-m", "tests.mock_llm", str(PORT + 3)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                            env=dict(os.environ, MOCK_COLD_S="40"))
+    try:
+        time.sleep(2)
+        cmc = agents.ChatModel({"kind": "openai", "base_url": f"http://127.0.0.1:{PORT + 3}/v1", "model": "m", "api_key": "k", "params": {"retries": 1}})
+        waits = []
+        cmc.on_wait = waits.append
+        t_c = time.time()
+        txt_c, _, _ = cmc.chat([{"role": "system", "content": "s"}, {"role": "user", "content": 'Reply with {"ok": true}'}])
+        ok('"ok"' in txt_c and waits and time.time() - t_c >= 35, f"a worker still starting (502 for 40 s): the first call waits for it ({time.time() - t_c:.0f} s, {len(waits)} waits)")
+    finally:
+        cold.kill()
     from atcsim.ailab import actions as A0
     acts0, _, err0 = A0.parse('<think>{"actions": [{"type": "nope"}]} long thoughts</think>\n{"reasoning": "r", "actions": [{"type": "assume", "callsign": "X1"}]}')
     ok(not err0 and acts0 == [{"type": "assume", "callsign": "X1"}], "a reasoning model's <think> part is not taken for the answer")

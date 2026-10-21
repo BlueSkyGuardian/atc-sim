@@ -2,6 +2,7 @@
 it is sent and answers like a lazy controller - assume who calls, transfer what has left, approve the requests - with, every fifth call,
 an answer that cannot be read, to exercise the error paths.   python -m tests.mock_llm <port>"""
 import asyncio
+import time
 import json
 import os
 import re
@@ -10,6 +11,7 @@ import sys
 from fastapi import FastAPI, Request
 
 app = FastAPI()
+START = time.time()
 calls = {"n": 0, "last": None}
 
 
@@ -26,6 +28,9 @@ def last():
 @app.post("/v1/chat/completions")
 async def chat(request: Request):
     body = await request.json()
+    if os.environ.get("MOCK_COLD_S") and time.time() - START < float(os.environ["MOCK_COLD_S"]):
+        from fastapi.responses import HTMLResponse          # a serverless worker still starting
+        return HTMLResponse("<!DOCTYPE html><html><body>502</body></html>", status_code=502)
     if os.environ.get("MOCK_STRICT") and ("chat_template_kwargs" in body or "response_format" in body):
         from fastapi.responses import HTMLResponse          # like a llama.cpp worker behind RunPod's gateway
         return HTMLResponse("<!DOCTYPE html><html><body>502 Bad gateway</body></html>", status_code=502)
