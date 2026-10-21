@@ -41,6 +41,34 @@ solutions. Right: over speed alone (all below $\Sh+m$).}
 \label{fig:sets}
 \end{figure}
 
+\paragraph{The whole solution space.} \Cref{fig:space} draws the control space of both aircraft of the pair, one
+family of clearances per column, on a common scale of $\Phi$. Of the \spTotal\ candidates the pilots would fly,
+\spFeas\ leave everyone separated by the margin: speed \spSpdOk\ of \spSpdN, direct \spDctOk\ of \spDctN, delaying
+vector \spHdgOk\ of \spHdgN, level \spLvlOk\ of \spLvlN. The families behave very differently. Speed alone never reaches the margin. Only
+\exA's shortcuts work. Among the vectors, \exA\ must turn left by $20^\circ$ or more, while \exB\ has two separate
+regions --- a right turn, or a left turn of $60^\circ$ or more --- so the solution set of one aircraft need not be
+connected. Nearly every level works, but each one the pilot did not request must be asked first. \Cref{fig:costphi} sets every candidate by its
+cost against $\Phi$: the solution set is the part above the line $\Phi=\Sh+m$, and the optimal set (circled) its
+leftmost points --- the cheapest kind of clearance that works, not the one that separates most.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figs/f8_space.pdf}
+\caption{The solution space of the worked example, for each aircraft of the pair (rows) and each family of clearances
+(columns): $\Phi(u)$, the closest the aircraft then comes to anyone, on a common scale (capped at 15\NM). Dashed:
+$\Phi=\Sh+m$. Filled markers and bars: candidates in the solution set; open: candidates that leave a conflict. Speed:
+the continuous curve over Mach and the candidates of the grid; direct: the points ahead on the route; vector: $\Phi$
+over heading change and duration with the grid's candidates; level: the levels of the aircraft's direction it can fly
+(\emph{ask}: not requested, to be asked first).}
+\label{fig:space}
+\end{figure}
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.92\linewidth]{figs/f9_cost_phi.pdf}
+\caption{Every candidate of the worked example by its cost $J(u)$ and its separation $\Phi(u)$ (filled: \exA; open:
+\exB). Shaded: the solution set. Circled: the optimal set.}
+\label{fig:costphi}
+\end{figure}
+
 \subsection{Exact CPA against sampling}
 
 Over \cpaSits\ situations taken every two minutes in ten scenarios (aircraft not controlled), the \cpaPairs\ pairs

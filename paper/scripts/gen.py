@@ -32,6 +32,11 @@ best = [s for s in A["sols"] if s[1] in A["optimal"]]
 put("exBest", " and ".join(f"\\emph{{{s[1].replace(A['mover'] + ' ', '')}}} (confirmed {s[5]}\\NM)" for s in best))
 vos = A["vo"]; put("exVO", ", ".join(f"{k} {v}$^\\circ$" for k, v in vos.items()))
 
+FD = json.load(open(f"{D}/fig_d.json"))
+put("spTotal", FD["total"]); put("spFeas", FD["feasible"])
+for k, nm in (("speed", "Spd"), ("direct", "Dct"), ("heading", "Hdg"), ("level", "Lvl")):
+    put(f"sp{nm}N", FD["counts"][k][0]); put(f"sp{nm}Ok", FD["counts"][k][1])
+
 # ---- CPA vs sampling
 rows = B["rows"]
 DT = [1, 5, 10, 20, 30, 60]
