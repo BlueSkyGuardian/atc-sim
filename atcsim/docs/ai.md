@@ -164,7 +164,14 @@ The radio log of the replay shows the controller's side too: *identified* when t
 **Context length** is the endpoint's maximum model length (RunPod: *MAX_MODEL_LEN*): every prompt is kept under it,
 minus the answer length — earlier decisions are left out first, then further queries (each decision says so, with
 its prompt size in tokens). A prompt over the endpoint's limit is refused or cut by the server, and the model then
-loses its instructions: set it right. Temperature, answer length, timeout, retries and JSON mode (`response_format`, when the server supports it) are per
+loses its instructions: set it right. The first call of a run waits at least 10 minutes (a serverless endpoint may be waking up); after that, a call
+that gets no answer within the timeout is **not sent again** — the endpoint may still be working on it, and on RunPod
+a timed-out request stays queued and billed — the decision is skipped and the traffic goes on. Retries are only for
+requests that never reached the server (connection refused, 5xx, 429). After 3 decisions in a row without an answer
+the run stops by itself, to save cost. **Stop** interrupts a run at once, even in the middle of a model call, and it
+is still evaluated.
+
+Temperature, answer length, timeout, retries and JSON mode (`response_format`, when the server supports it) are per
 model. **Test** checks the connection (the models served, one short answer and its latency). API keys are stored
 encrypted and never shown again (leave the field empty when editing to keep the key).
 

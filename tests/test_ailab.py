@@ -159,6 +159,41 @@ try:
        and x3["evaluation"]["never_assumed"] == 0, "assume / transfer automatically: not asked of the model")
     ins.delete(f"/api/ai/runs/{r3}")
 
+    # ---- stop during a long model call; a model that never answers stops the run by itself
+    slow = subprocess.Popen([sys.executable, "-m", "tests.mock_llm", str(PORT + 1)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                            env=dict(os.environ, MOCK_DELAY="120"))
+    try:
+        time.sleep(2)
+        sm = ins.post("/api/ai/models", json={"name": "Slow", "kind": "openai", "base_url": f"http://127.0.0.1:{PORT + 1}/v1", "model": "mock-controller",
+                                              "api_key": "k", "params": {"timeout_s": 300, "retries": 3}}).json()
+        r4 = ins.post("/api/ai/runs", json={"scenarios": ["p02_wn_merges_and_climbs"], "model_id": sm["id"], "agent_id": a0["id"], "env": {"end_s": 600}}).json()["runs"][0]
+        for _ in range(60):
+            if (ins.get(f"/api/ai/runs/{r4}").json().get("progress") or {}).get("thinking"):
+                break
+            time.sleep(0.5)
+        t_stop = time.time()
+        ins.post(f"/api/ai/runs/{r4}/stop")
+        for _ in range(120):
+            x4 = ins.get(f"/api/ai/runs/{r4}").json()
+            if x4["status"] not in ("running", "queued"):
+                break
+            time.sleep(0.5)
+        ok(x4["status"] == "stopped" and time.time() - t_stop < 30, f"stop during a model call: stopped in {time.time() - t_stop:.0f} s, still evaluated")
+        ins.delete(f"/api/ai/runs/{r4}")
+        dead = ins.post("/api/ai/models", json={"name": "Dead", "kind": "openai", "base_url": "http://127.0.0.1:9/v1", "model": "x",
+                                                "api_key": "k", "params": {"timeout_s": 5, "retries": 0}}).json()
+        r5 = ins.post("/api/ai/runs", json={"scenarios": ["p02_wn_merges_and_climbs"], "model_id": dead["id"], "agent_id": a0["id"], "env": {"end_s": 2400}}).json()["runs"][0]
+        for _ in range(240):
+            x5 = ins.get(f"/api/ai/runs/{r5}").json()
+            if x5["status"] not in ("running", "queued"):
+                break
+            time.sleep(0.5)
+        ok(x5["status"] == "stopped" and "did not answer" in (x5.get("error") or "") and x5["evaluation"]["decisions"] <= 4,
+           f"a model that never answers: the run stops by itself ({x5.get('error')})")
+        ins.delete(f"/api/ai/runs/{r5}")
+    finally:
+        slow.kill()
+
     # ---- the run in the debrief
     eid = m1["exercise_id"]
     ok(all(x["id"] != eid for x in ins.get("/api/exercises").json()), "AI runs are not listed with the exercises")

@@ -89,19 +89,28 @@ class ChatModel:
         if self.json_mode:
             body["response_format"] = {"type": "json_object"}
         last = None
+        first = not getattr(self, "_answered", False)
+        # the first call may wake a serverless endpoint (cold start: minutes): it waits longer
+        tmo = max(self.timeout, float(getattr(self, "first_timeout", 600))) if first else self.timeout
         for k in range(self.retries + 1):
             t0 = time.time()
             try:
-                r = httpx.post(self.url + "/chat/completions", headers=self.headers(), json=body, timeout=self.timeout)
+                r = httpx.post(self.url + "/chat/completions", headers=self.headers(), json=body,
+                               timeout=httpx.Timeout(tmo, connect=30.0))
                 if r.status_code >= 500 or r.status_code == 429:
                     raise RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
                 if r.status_code >= 400:
                     raise ValueError(f"HTTP {r.status_code}: {r.text[:300]}")      # not retried: configuration
                 d = r.json()
                 text = (d.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+                self._answered = True
                 return text, d.get("usage") or {}, time.time() - t0
             except ValueError:
                 raise
+            except (httpx.ReadTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as e:
+                # the request reached the server, which may still be working on it (a RunPod job keeps running):
+                # sending it again would only queue another job and bill both. Give up on this decision.
+                raise RuntimeError(f"no answer within {tmo:.0f} s (not re-sent: the endpoint may still be processing it)") from e
             except Exception as e:  # noqa: BLE001 - timeouts, cold starts, 5xx: retry with a pause
                 last = e
                 time.sleep(min(30, 3 * (k + 1)))

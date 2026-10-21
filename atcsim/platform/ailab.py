@@ -263,7 +263,7 @@ def _row(r: dict, full: bool = False) -> dict:
     out["env"] = json.loads(r["env"] or "{}")
     if r["status"] in ("queued", "running"):
         p = _progress(r["id"])
-        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last", "thinking", "querying")}
+        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last", "thinking", "querying", "stop_reason")}
     res = json.loads(r["result"]) if r["result"] else None
     if res:
         out["evaluation"] = res.get("evaluation")
@@ -356,8 +356,8 @@ def _finish(r: dict) -> None:
         pass
     if res:
         ev = res["evaluation"]
-        db.x("UPDATE ai_runs SET status=?, score=?, result=?, finished_at=?, error=NULL WHERE id=?",
-             ("stopped" if res.get("stopped") else "done", ev["score"], json.dumps(res), time.time(), rid))
+        db.x("UPDATE ai_runs SET status=?, score=?, result=?, finished_at=?, error=? WHERE id=?",
+             ("stopped" if res.get("stopped") else "done", ev["score"], json.dumps(res), time.time(), p.get("stop_reason"), rid))
         db.x("UPDATE exercises SET metrics=?, sim_time_s=?, debrief=?, ended_at=? WHERE id=?",
              (json.dumps(res.get("metrics") or {}), ev.get("sim_time_s"), json.dumps(res.get("report")) if res.get("report") else None,
               time.time(), r["exercise_id"]))
@@ -447,6 +447,17 @@ def run_stop(rid: str, request: Request):
         db.x("UPDATE ai_runs SET status='cancelled', finished_at=? WHERE id=?", (time.time(), rid))
     elif r["status"] == "running":
         open(os.path.join(_run_dir(rid), "stop"), "w").close()      # ends at the next second, still evaluated
+        pr = _procs.get(rid)
+
+        def interrupt():                                # in a model call (it may wait minutes): interrupt it
+            time.sleep(2)
+            if pr is not None and pr.poll() is None:
+                pr.terminate()                          # SIGTERM: the runner leaves the call and evaluates
+                try:
+                    pr.wait(30)
+                except subprocess.TimeoutExpired:
+                    pr.kill()
+        threading.Thread(target=interrupt, daemon=True).start()
     return {"id": rid}
 
 

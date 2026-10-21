@@ -133,6 +133,17 @@ def _summary_metrics(w) -> dict:
     return summarize_metrics(w)
 
 
+class Stopped(BaseException):
+    """A person stopped the run (SIGTERM from the server): out of any model call at once, then evaluate."""
+
+
+def _on_term(signum, frame):
+    raise Stopped()
+
+
+MAX_FAILED_DECISIONS = 3      # the model did not answer this many decisions in a row: the run stops (cost)
+
+
 def run(job: dict) -> None:
     from .. import inputs, live, debrief as debrief_mod
     from ..session import Session
@@ -199,184 +210,196 @@ def run(job: dict) -> None:
         seen_conf.clear(); seen_conf.update(st_conf)
         return new
 
+    import signal
+    signal.signal(signal.SIGTERM, _on_term)
+    failed_row = 0
     with open(steps_p, "a") as sf:
-        while w.t < end - 1e-6 and not w.finished:
-            if os.path.exists(stop_p):
-                prog["status"] = "stopping"
-                break
-            due = w.t >= next_t - 1e-6
-            if not due and agent_cfg.get("event_triggers", True) and w.t - last_t >= 10 and int(w.t) % 5 == 0:
-                due = trigger()
-            if due:
-                trigger()
-                from .. import atctools
-                live_pairs = {"×".join(sorted(c["aircraft"])) for c in atctools.mtcd(w)}
-                for k in list(conf_seen):
-                    if k not in live_pairs:
-                        conf_seen.pop(k)
-                for k in live_pairs:
-                    conf_seen.setdefault(k, w.t)
-                if auto_transfer:
-                    with s.lock:
-                        for a in list(w.aircraft.values()):
-                            if a.outside and a.assumed:
-                                inputs.apply(w, "release", {"callsign": a.callsign}, {"name": "auto transfer", "seat": "atc"})
-                text, struct = obs_mod.observe(w, {**(agent_cfg.get("observation") or {}), "_seen": conf_seen})
-                hist = history[-n_hist:] if n_hist else []
-                msgs = agents.messages(system, text, hist, feedback)
-                trimmed = []
-                while hist and est(msgs) > budget:               # keep within the model's context: older decisions go first
-                    hist = hist[1:]
+        try:
+            while w.t < end - 1e-6 and not w.finished:
+                if os.path.exists(stop_p):
+                    prog["status"] = "stopping"
+                    break
+                due = w.t >= next_t - 1e-6
+                if not due and agent_cfg.get("event_triggers", True) and w.t - last_t >= 10 and int(w.t) % 5 == 0:
+                    due = trigger()
+                if due:
+                    trigger()
+                    from .. import atctools
+                    live_pairs = {"×".join(sorted(c["aircraft"])) for c in atctools.mtcd(w)}
+                    for k in list(conf_seen):
+                        if k not in live_pairs:
+                            conf_seen.pop(k)
+                    for k in live_pairs:
+                        conf_seen.setdefault(k, w.t)
+                    if auto_transfer:
+                        with s.lock:
+                            for a in list(w.aircraft.values()):
+                                if a.outside and a.assumed:
+                                    inputs.apply(w, "release", {"callsign": a.callsign}, {"name": "auto transfer", "seat": "atc"})
+                    text, struct = obs_mod.observe(w, {**(agent_cfg.get("observation") or {}), "_seen": conf_seen})
+                    hist = history[-n_hist:] if n_hist else []
                     msgs = agents.messages(system, text, hist, feedback)
-                    trimmed.append("memory")
-                rec = {"i": len(steps), "t": round(w.t, 1), "observation": text, "struct": struct, "feedback": feedback,
-                       "prompt_tokens_est": int(est(msgs))}
-                if trimmed:
-                    rec["trimmed"] = f"{len(trimmed)} earlier decision(s) left out to fit the context ({ctx} tokens)"
-                prog.update(thinking=True, t=round(w.t, 1))
-                _write(prog_p, prog)
-                if watch.on():
-                    watch.publish(w, force=True)
-                t0 = time.time()
-                try:
-                    if isinstance(agent, agents.Baseline):
-                        answer, usage, lat = agent.decide(w), {}, time.time() - t0
-                    else:
-                        answer, usage, lat = agent.chat(msgs)
-                    usage = dict(usage or {})
-                    acts, reasoning, perr, qs = act_mod.parse_full(answer)
-                    rounds = []
-                    while qs and not isinstance(agent, agents.Baseline):
-                        left = q_rounds - len(rounds)
-                        if left > 0 and est(msgs) + 1200 > budget:      # no room for another round in the context
-                            left = 0
-                            rec["trimmed"] = (rec.get("trimmed", "") + "; " if rec.get("trimmed") else "") + "no more queries: the context is full"
-                        if left <= 0:
-                            if not acts:                       # out of questions and no instructions
-                                rounds.append({"response": answer, "queries": qs, "results": [],
-                                               "note": "no query rounds left"})
-                            break
-                        with s.lock:
-                            res = q_mod.answer(w, qs)
-                        follow = ("ANSWERS TO YOUR QUERIES:\n" + q_mod.as_text(res) +
-                                  (f"\n\nNow give your instructions (or more queries: {left - 1} round{'s' if left - 1 != 1 else ''} left)."
-                                   if left - 1 > 0 else "\n\nNow give your instructions (no query left for this decision)."))
-                        rounds.append({"response": answer, "reasoning": reasoning, "queries": qs, "results": res, "followup": follow})
-                        msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
-                        prog.update(querying=len(rounds))
-                        _write(prog_p, prog)
-                        answer, u2, l2 = agent.chat(msgs)
-                        lat += l2
-                        for k, v in (u2 or {}).items():
-                            if isinstance(v, (int, float)):
-                                usage[k] = (usage.get(k) or 0) + v
-                        acts, reasoning, perr, qs = act_mod.parse_full(answer)
-                    with s.lock:
-                        results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
-                    last = results
-                    n_fix = 0
-                    while (fix_rounds > n_fix and not isinstance(agent, agents.Baseline)
-                           and (perr or any(not r["ok"] or r.get("unknown_fields") for r in last)) and est(msgs) + 900 < budget):
-                        bad = [r for r in last if not r["ok"] or r.get("unknown_fields")]
-                        if perr:
-                            rec["unreadable_first"] = perr
-                            follow = (f"YOUR ANSWER COULD NOT BE READ ({perr}). Answer again now with ONE JSON object: "
-                                      '{"reasoning": "...", "actions": [...]} and nothing else.')
+                    trimmed = []
+                    while hist and est(msgs) > budget:               # keep within the model's context: older decisions go first
+                        hist = hist[1:]
+                        msgs = agents.messages(system, text, hist, feedback)
+                        trimmed.append("memory")
+                    rec = {"i": len(steps), "t": round(w.t, 1), "observation": text, "struct": struct, "feedback": feedback,
+                           "prompt_tokens_est": int(est(msgs))}
+                    if trimmed:
+                        rec["trimmed"] = f"{len(trimmed)} earlier decision(s) left out to fit the context ({ctx} tokens)"
+                    prog.update(thinking=True, t=round(w.t, 1))
+                    _write(prog_p, prog)
+                    if watch.on():
+                        watch.publish(w, force=True)
+                    t0 = time.time()
+                    try:
+                        if isinstance(agent, agents.Baseline):
+                            answer, usage, lat = agent.decide(w), {}, time.time() - t0
                         else:
-                            follow = ("YOUR ANSWER HAD ERRORS. The other instructions were given; these were NOT:\n"
-                                      + "\n".join(f"- {json.dumps(r['action'])} -> {r['text']}" for r in bad)
-                                      + "\nAnswer again now with ONLY the corrected instructions for these (an empty actions list to drop them), "
-                                        "same JSON format.")
-                        rounds.append({"kind": "correction", "response": answer, "reasoning": reasoning, "results": last,
-                                       "followup": follow})
-                        msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
-                        answer, u2, l2 = agent.chat(msgs)
-                        lat += l2
-                        for k, v in (u2 or {}).items():
-                            if isinstance(v, (int, float)):
-                                usage[k] = (usage.get(k) or 0) + v
-                        acts, reasoning2, perr, _ = act_mod.parse_full(answer)
-                        reasoning = reasoning2 or reasoning
+                            answer, usage, lat = agent.chat(msgs)
+                        usage = dict(usage or {})
+                        acts, reasoning, perr, qs = act_mod.parse_full(answer)
+                        rounds = []
+                        while qs and not isinstance(agent, agents.Baseline):
+                            left = q_rounds - len(rounds)
+                            if left > 0 and est(msgs) + 1200 > budget:      # no room for another round in the context
+                                left = 0
+                                rec["trimmed"] = (rec.get("trimmed", "") + "; " if rec.get("trimmed") else "") + "no more queries: the context is full"
+                            if left <= 0:
+                                if not acts:                       # out of questions and no instructions
+                                    rounds.append({"response": answer, "queries": qs, "results": [],
+                                                   "note": "no query rounds left"})
+                                break
+                            with s.lock:
+                                res = q_mod.answer(w, qs)
+                            follow = ("ANSWERS TO YOUR QUERIES:\n" + q_mod.as_text(res) +
+                                      (f"\n\nNow give your instructions (or more queries: {left - 1} round{'s' if left - 1 != 1 else ''} left)."
+                                       if left - 1 > 0 else "\n\nNow give your instructions (no query left for this decision)."))
+                            rounds.append({"response": answer, "reasoning": reasoning, "queries": qs, "results": res, "followup": follow})
+                            msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
+                            prog.update(querying=len(rounds))
+                            _write(prog_p, prog)
+                            answer, u2, l2 = agent.chat(msgs)
+                            lat += l2
+                            for k, v in (u2 or {}).items():
+                                if isinstance(v, (int, float)):
+                                    usage[k] = (usage.get(k) or 0) + v
+                            acts, reasoning, perr, qs = act_mod.parse_full(answer)
                         with s.lock:
-                            last = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
-                        for r in last:
-                            r["correction"] = True
-                        results = results + last
-                        n_fix += 1
-                    if n_fix:
-                        rec["corrections"] = n_fix
-                    if rounds:
-                        rec["queries"] = rounds
-                    rec.update(response=answer, reasoning=reasoning, parse_error=perr or None, results=results,
-                               latency_s=round(lat, 2), usage=usage)
-                except Exception as e:  # noqa: BLE001 - the model did not answer: the traffic goes on
-                    rec.update(response=None, error=str(e)[:500], results=[], latency_s=round(time.time() - t0, 2))
-                    prog["errors"] += 1
-                    answer = None
-                fixed = {str(r["action"].get("callsign", "")).upper() for r in rec["results"] if r.get("correction") and r["ok"]}
-                errs = [r for r in rec["results"] if (not r["ok"] or r.get("unknown_fields") or r.get("early"))
-                        and not (not r.get("correction") and str(r["action"].get("callsign", "")).upper() in fixed)]
-                given = [r for r in rec["results"] if r["ok"]]
-                fb = []
-                if errs:
-                    fb.append("ERRORS — read them and do not repeat them: " + " | ".join(f"{json.dumps(r['action'])} -> {r['text']}" for r in errs))
-                if given:
-                    fb.append("given: " + "; ".join(r["text"] for r in given))
-                feedback = (". ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
-                td = struct.get("todo") or {}
-                done = {(str(r["action"].get("type", "")).lower(), str(r["action"].get("callsign") or r["action"].get("request_id") or "").upper())
-                        for r in rec["results"] if r.get("ok")}
-                did = lambda t, x: (t, x.upper()) in done
-                missed = []
-                if td.get("assume") and not auto_assume:
-                    m_ = [c for c in td["assume"] if not did("assume", c)]
-                    if m_:
-                        missed.append("not assumed (still calling you): " + ", ".join(m_))
-                if td.get("transfer") and not auto_transfer:
-                    m_ = [c for c in td["transfer"] if not did("decontrol", c)]
-                    if m_:
-                        missed.append("not transferred: " + ", ".join(m_))
-                if td.get("answer"):
-                    m_ = [q for q in td["answer"] if not did("reply", q)]
-                    if m_:
-                        missed.append("requests not answered: " + ", ".join(m_))
-                acted = {x[1] for x in done}
-                if td.get("solve"):
-                    m_ = ["×".join(p) for p in td["solve"] if not set(x.upper() for x in p) & acted]
-                    if m_:
-                        missed.append("conflicts left unsolved: " + ", ".join(m_))
-                if td.get("resume"):
-                    m_ = [c for c in td["resume"] if c.upper() not in acted]
-                    if m_:
-                        missed.append("not resumed: " + ", ".join(m_))
-                if missed and answer is not None:
-                    rec["missed"] = missed
-                    feedback = ((feedback + ". ") if feedback else "") + "LEFT UNDONE FROM YOUR TO DO: " + "; ".join(missed)
-                if (rec.get("queries") or [{}])[-1].get("note"):
-                    feedback = ((feedback + "; ") if feedback else "") + ("queries are not available (or none left): answer with instructions"
-                                                                          if not q_rounds else "no query round left: answer with instructions")
-                if rec.get("parse_error"):
-                    feedback = f"your answer could not be read ({rec['parse_error']}): answer with one JSON object"
-                if answer is not None:
-                    history.append({"observation": text, "response": answer})
-                steps.append(rec)
-                sf.write(json.dumps(rec) + "\n")
-                sf.flush()
-                last_t, next_t = w.t, w.t + interval
+                            results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                        last = results
+                        n_fix = 0
+                        while (fix_rounds > n_fix and not isinstance(agent, agents.Baseline)
+                               and (perr or any(not r["ok"] or r.get("unknown_fields") for r in last)) and est(msgs) + 900 < budget):
+                            bad = [r for r in last if not r["ok"] or r.get("unknown_fields")]
+                            if perr:
+                                rec["unreadable_first"] = perr
+                                follow = (f"YOUR ANSWER COULD NOT BE READ ({perr}). Answer again now with ONE JSON object: "
+                                          '{"reasoning": "...", "actions": [...]} and nothing else.')
+                            else:
+                                follow = ("YOUR ANSWER HAD ERRORS. The other instructions were given; these were NOT:\n"
+                                          + "\n".join(f"- {json.dumps(r['action'])} -> {r['text']}" for r in bad)
+                                          + "\nAnswer again now with ONLY the corrected instructions for these (an empty actions list to drop them), "
+                                            "same JSON format.")
+                            rounds.append({"kind": "correction", "response": answer, "reasoning": reasoning, "results": last,
+                                           "followup": follow})
+                            msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
+                            answer, u2, l2 = agent.chat(msgs)
+                            lat += l2
+                            for k, v in (u2 or {}).items():
+                                if isinstance(v, (int, float)):
+                                    usage[k] = (usage.get(k) or 0) + v
+                            acts, reasoning2, perr, _ = act_mod.parse_full(answer)
+                            reasoning = reasoning2 or reasoning
+                            with s.lock:
+                                last = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                            for r in last:
+                                r["correction"] = True
+                            results = results + last
+                            n_fix += 1
+                        if n_fix:
+                            rec["corrections"] = n_fix
+                        if rounds:
+                            rec["queries"] = rounds
+                        rec.update(response=answer, reasoning=reasoning, parse_error=perr or None, results=results,
+                                   latency_s=round(lat, 2), usage=usage)
+                    except Exception as e:  # noqa: BLE001 - the model did not answer: the traffic goes on
+                        rec.update(response=None, error=str(e)[:500], results=[], latency_s=round(time.time() - t0, 2))
+                        prog["errors"] += 1
+                        answer = None
+                    fixed = {str(r["action"].get("callsign", "")).upper() for r in rec["results"] if r.get("correction") and r["ok"]}
+                    errs = [r for r in rec["results"] if (not r["ok"] or r.get("unknown_fields") or r.get("early"))
+                            and not (not r.get("correction") and str(r["action"].get("callsign", "")).upper() in fixed)]
+                    given = [r for r in rec["results"] if r["ok"]]
+                    fb = []
+                    if errs:
+                        fb.append("ERRORS — read them and do not repeat them: " + " | ".join(f"{json.dumps(r['action'])} -> {r['text']}" for r in errs))
+                    if given:
+                        fb.append("given: " + "; ".join(r["text"] for r in given))
+                    feedback = (". ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
+                    td = struct.get("todo") or {}
+                    done = {(str(r["action"].get("type", "")).lower(), str(r["action"].get("callsign") or r["action"].get("request_id") or "").upper())
+                            for r in rec["results"] if r.get("ok")}
+                    did = lambda t, x: (t, x.upper()) in done
+                    missed = []
+                    if td.get("assume") and not auto_assume:
+                        m_ = [c for c in td["assume"] if not did("assume", c)]
+                        if m_:
+                            missed.append("not assumed (still calling you): " + ", ".join(m_))
+                    if td.get("transfer") and not auto_transfer:
+                        m_ = [c for c in td["transfer"] if not did("decontrol", c)]
+                        if m_:
+                            missed.append("not transferred: " + ", ".join(m_))
+                    if td.get("answer"):
+                        m_ = [q for q in td["answer"] if not did("reply", q)]
+                        if m_:
+                            missed.append("requests not answered: " + ", ".join(m_))
+                    acted = {x[1] for x in done}
+                    if td.get("solve"):
+                        m_ = ["×".join(p) for p in td["solve"] if not set(x.upper() for x in p) & acted]
+                        if m_:
+                            missed.append("conflicts left unsolved: " + ", ".join(m_))
+                    if td.get("resume"):
+                        m_ = [c for c in td["resume"] if c.upper() not in acted]
+                        if m_:
+                            missed.append("not resumed: " + ", ".join(m_))
+                    if missed and answer is not None:
+                        rec["missed"] = missed
+                        feedback = ((feedback + ". ") if feedback else "") + "LEFT UNDONE FROM YOUR TO DO: " + "; ".join(missed)
+                    if (rec.get("queries") or [{}])[-1].get("note"):
+                        feedback = ((feedback + "; ") if feedback else "") + ("queries are not available (or none left): answer with instructions"
+                                                                              if not q_rounds else "no query round left: answer with instructions")
+                    if rec.get("parse_error"):
+                        feedback = f"your answer could not be read ({rec['parse_error']}): answer with one JSON object"
+                    if answer is not None:
+                        history.append({"observation": text, "response": answer})
+                    failed_row = failed_row + 1 if rec.get("error") else 0
+                    if failed_row >= MAX_FAILED_DECISIONS:
+                        prog["stop_reason"] = (f"the model did not answer {failed_row} decisions in a row "
+                                               f"({rec.get('error')}): run stopped to save cost")
+                        open(stop_p, "a").close()
+                    steps.append(rec)
+                    sf.write(json.dumps(rec) + "\n")
+                    sf.flush()
+                    last_t, next_t = w.t, w.t + interval
+                    if watch.on():
+                        watch.publish(w, force=True)
+                        watch.reset()
+                    prog.update(thinking=False, querying=0, t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
+                                "actions": [r["text"] for r in rec["results"]][:6], "error": rec.get("error")})
+                    _write(prog_p, prog)
+                with s.lock:
+                    s._tick()
                 if watch.on():
-                    watch.publish(w, force=True)
-                    watch.reset()
-                prog.update(thinking=False, querying=0, t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
-                            "actions": [r["text"] for r in rec["results"]][:6], "error": rec.get("error")})
-                _write(prog_p, prog)
-            with s.lock:
-                s._tick()
-            if watch.on():
-                watch.publish(w)
-                watch.pace(w)
-            if int(w.t) % 30 == 0:
-                prog["t"] = round(w.t, 1)
-                _write(prog_p, prog)
+                    watch.publish(w)
+                    watch.pace(w)
+                if int(w.t) % 30 == 0:
+                    prog["t"] = round(w.t, 1)
+                    _write(prog_p, prog)
+        except Stopped:
+            prog["status"] = "stopping"
+            open(stop_p, "a").close()
     # ---- the end: kept, evaluated, labelled
     with s.lock:
         s._snapshot()
