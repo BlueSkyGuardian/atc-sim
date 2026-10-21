@@ -192,8 +192,8 @@ class ChatModel:
 
 def test(p: dict) -> dict:
     """Check a model configuration: its model list (when served) and one short answer."""
-    if p.get("kind") == "baseline":
-        return {"ok": True, "note": "the built-in baseline needs no connection"}
+    if p.get("kind") in ("baseline", "solver"):
+        return {"ok": True, "note": f"the built-in {p.get('kind')} needs no connection"}
     m = ChatModel(dict(p, params=dict(p.get("params") or {}, retries=0)))
     m._answered = True                      # a quick check: no waiting for a cold worker here
     out = {"url": m.url}
@@ -248,6 +248,37 @@ class Baseline:
                 ok = False
             acts.append({"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"})
             why.append(f"{r['id']} {'approved' if ok else 'unable'}")
+        touched = self._resolve(w, st, mine, acts, why)
+        for cs, a in mine.items():               # speeds back to normal once no longer needed
+            if a.get("speed_assigned_by_atc") and cs not in touched and not any(cs in c["aircraft"] for c in atctools.mtcd(w)):
+                nm = (a.get("speed_pair") or {}).get("mach")
+                ok_ = True
+                if nm:
+                    try:
+                        ok_ = not [x for x in atctools.probe(w, cs, speed=f"M{int(round(nm * 100))}").get("conflicts") or []
+                                   if x["time_to_conflict_s"] <= 600]
+                    except Exception:  # noqa: BLE001
+                        ok_ = False
+                if ok_:
+                    acts.append({"type": "clear", "callsign": cs, "speed": "SN"})
+                    touched.add(cs)
+        for cs, a in mine.items():               # back on route once resuming is conflict-free (the probe)
+            if a.get("nav_mode") == "heading" and cs not in touched and w.t - getattr(self, "_acted", {}).get(cs, -1e9) >= 60:
+                acx = w.aircraft[cs]
+                ahead = [p for p in acx.route[acx.next_index:] if not str(p).startswith("@") and p in w.waypoints]
+                if ahead:
+                    try:
+                        cl = [x for x in atctools.probe(w, cs, direct=ahead[0]).get("conflicts") or [] if x["time_to_conflict_s"] <= 600]
+                    except Exception:  # noqa: BLE001
+                        cl = [1]
+                    if not cl:
+                        acts.append({"type": "resume", "callsign": cs})
+        return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
+
+
+    def _resolve(self, w, st, mine, acts, why) -> set:
+        """Predicted conflicts: the aircraft without priority, by speed, else a heading, else a level (asked first)."""
+        from .. import atctools
         touched = set()
         from .observe import priority, solutions
         from . import actions as act_mod
@@ -300,35 +331,56 @@ class Baseline:
                 acts.append({"type": "clear", "callsign": cs, "heading": h})
                 why.append(f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs} heading {h:03d} (nothing better)")
                 touched.add(cs)
-        for cs, a in mine.items():               # speeds back to normal once no longer needed
-            if a.get("speed_assigned_by_atc") and cs not in touched and not any(cs in c["aircraft"] for c in atctools.mtcd(w)):
-                nm = (a.get("speed_pair") or {}).get("mach")
-                ok_ = True
-                if nm:
-                    try:
-                        ok_ = not [x for x in atctools.probe(w, cs, speed=f"M{int(round(nm * 100))}").get("conflicts") or []
-                                   if x["time_to_conflict_s"] <= 600]
-                    except Exception:  # noqa: BLE001
-                        ok_ = False
-                if ok_:
-                    acts.append({"type": "clear", "callsign": cs, "speed": "SN"})
-                    touched.add(cs)
-        for cs, a in mine.items():               # back on route once resuming is conflict-free (the probe)
-            if a.get("nav_mode") == "heading" and cs not in touched and w.t - getattr(self, "_acted", {}).get(cs, -1e9) >= 60:
-                acx = w.aircraft[cs]
-                ahead = [p for p in acx.route[acx.next_index:] if not str(p).startswith("@") and p in w.waypoints]
-                if ahead:
-                    try:
-                        cl = [x for x in atctools.probe(w, cs, direct=ahead[0]).get("conflicts") or [] if x["time_to_conflict_s"] <= 600]
-                    except Exception:  # noqa: BLE001
-                        cl = [1]
-                    if not cl:
-                        acts.append({"type": "resume", "callsign": cs})
-        return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
+        return touched
 
+
+class SolverAgent(Baseline):
+    """The solver as the controller (atcsim/solve): each predicted conflict resolved by the cheapest clearance that
+    leaves no conflict with anyone, in the controller's order (speed < direct / heading < level, the aircraft without
+    priority), checked leg by leg and confirmed by running the simulation ahead; levels asked to the pilot first unless
+    urgent. The routine work (assume, transfer, requests, resume, speeds back to normal) as the baseline."""
+
+    def _resolve(self, w, st, mine, acts, why) -> set:
+        from ..solve import resolve
+        from . import actions as act_mod
+        touched = set()
+        asked = getattr(self, "asked", None) or {}
+        last = getattr(self, "_acted", {})
+        res = resolve.solve(w, asked=asked, rollout=1)
+        for s_ in sorted(res["sets"], key=lambda x: x["t_first"] if x["t_first"] is not None else 1e9):
+            urgent = (s_["t_first"] or 0) <= act_mod.URGENT_S
+            if not urgent and any(w.t - last.get(x, -1e9) < 120 for x in s_["pair"]):
+                continue                                    # a clearance given less than 2 min ago: let it work
+            best = (s_["optimal"] or s_["solutions"] or [None])[0]
+            if best is None or set(best.mover.split("+")) & touched:
+                continue
+            tag = f"{s_['pair'][0]}×{s_['pair'][1]}"
+            if best.needs_ask and not urgent:
+                for a_ in best.actions:
+                    if a_.get("cfl") is not None:
+                        q = (asked.get(a_["callsign"]) or {}).get(int(a_["cfl"]))
+                        if q and q["ok"] and q["t"] < w.t:
+                            acts.append(a_)
+                            why.append(f"{tag}: {best.text}")
+                        elif not q:
+                            acts.append({"type": "ask", "callsign": a_["callsign"], "cfl": a_["cfl"]})
+                            why.append(f"{tag}: asked {a_['callsign']} FL{a_['cfl']}")
+                    else:
+                        acts.append(a_)
+            else:
+                acts.extend(best.actions)
+                why.append(f"{tag}: {best.text}")
+            for m in best.mover.split("+"):
+                touched.add(m)
+                self._acted = dict(getattr(self, "_acted", {}), **{m: w.t})
+        return touched
 
 def make(p: dict):
-    return Baseline() if p.get("kind") == "baseline" else ChatModel(p)
+    if p.get("kind") == "baseline":
+        return Baseline()
+    if p.get("kind") == "solver":
+        return SolverAgent()
+    return ChatModel(p)
 
 
 def messages(system: str, observation: str, history: List[dict], feedback: Optional[str]) -> List[dict]:

@@ -41,7 +41,7 @@ _procs: dict = {}                    # run id -> Popen
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS ai_models (
-  id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, kind TEXT NOT NULL,  -- runpod | openai | baseline
+  id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, kind TEXT NOT NULL,  -- runpod | openai | baseline | solver
   endpoint_id TEXT, base_url TEXT, model TEXT, api_key TEXT, params TEXT,
   created_by INTEGER, created_at REAL
 );
@@ -127,13 +127,13 @@ def _model(mid: int, secret: bool = False) -> dict:
 
 
 def _check_model(b: ModelIn) -> None:
-    if b.kind not in ("runpod", "openai", "baseline"):
-        raise HTTPException(400, "kind: runpod, openai or baseline")
+    if b.kind not in ("runpod", "openai", "baseline", "solver"):
+        raise HTTPException(400, "kind: runpod, openai, baseline or solver")
     if b.kind == "runpod" and not (b.endpoint_id or "").strip():
         raise HTTPException(400, "the RunPod endpoint id")
     if b.kind == "openai" and not (b.base_url or "").startswith(("http://", "https://")):
         raise HTTPException(400, "the base URL (https://…/v1)")
-    if b.kind != "baseline" and not (b.model or "").strip():
+    if b.kind not in ("baseline", "solver") and not (b.model or "").strip():
         raise HTTPException(400, "the model name (the Hugging Face model deployed, or its served name)")
 
 
@@ -489,7 +489,7 @@ def run_judge(rid: str, b: JudgeIn, request: Request):
     if r is None or r["status"] not in ("done", "stopped"):
         raise HTTPException(409, "the run is not finished")
     m = _model(b.model_id, secret=True)
-    if m["kind"] == "baseline":
+    if m["kind"] in ("baseline", "solver"):
         raise HTTPException(400, "the judge is a language model")
     db.x("UPDATE ai_runs SET judge=? WHERE id=?", (json.dumps({"status": "running", "model": m["name"], "done": 0}), rid))
     threading.Thread(target=_judge, args=(rid, m, max(1, b.every)), daemon=True).start()

@@ -157,6 +157,16 @@ def label(w, steps: List[dict]) -> None:
         if stale:
             r -= 2 * len(stale)
             why.append(f"-{2 * len(stale)} requests left waiting")
+        for g in s.get("grades") or []:
+            if g["grade"] == "optimal":
+                r += 2
+                why.append(f"+2 {'×'.join(g['pair'])}: the solver's best")
+            elif g["grade"] == "feasible":
+                r += 1
+                why.append(f"+1 {'×'.join(g['pair'])}: a valid solution, not the best")
+            elif g["grade"] == "other":
+                r -= 1
+                why.append(f"-1 {'×'.join(g['pair'])}: not a solution (best: {', '.join(g.get('best') or []) or '-'})")
         n_early = sum(1 for x in s.get("results") or [] if x.get("early"))
         if n_early:
             r -= n_early

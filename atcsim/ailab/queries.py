@@ -23,6 +23,8 @@ with your instructions (or more queries, up to {rounds} rounds per decision, {pe
   {"q": "route", "callsign": "RAM123"}                      its route ahead: points with distances and times
   {"q": "near", "callsign": "RAM123", "radius_nm": 30}     aircraft within a radius of an aircraft (or "point": "IBALU"), with level and distance
   {"q": "sequence", "fix": "MARJA"}                         arrivals to that sequencing fix in order, spacing, the agreed crossing level
+  {"q": "solve", "pair": ["RAM123", "IBE45"]}               the solver: every clearance that leaves no conflict with anyone, best first (no pair: all conflicts)
+  {"q": "headings", "callsign": "RAM123"}                   the headings that keep it clear of everyone (velocity obstacles), straight ahead
 Ask only what helps the decision; most decisions need no query."""
 
 
@@ -168,7 +170,16 @@ def _one(w, q: dict) -> str:
                             + ("" if i.get("spacing_ok", True) else " (TOO CLOSE)") for i in f.get("inbound") or [])
             out.append(f"{f['fix']} for {f['aerodrome']}: {f.get('letter_of_agreement') or ''}; in order: {inb or 'none'}")
         return " | ".join(out)
-    raise ValueError(f"unknown query '{kind}' (probe, levels, geometry, distance, route, near, sequence)")
+    if kind == "solve":
+        from ..solve import resolve
+        pr = q.get("pair") or ([q["a"], q["b"]] if q.get("a") and q.get("b") else None)
+        res = resolve.solve(w, pair=tuple(x.upper() for x in pr) if pr else None, rollout=1)
+        lines = resolve.describe(res)
+        return " | ".join(lines) if lines else "no predicted conflict" + (f" between {pr[0]} and {pr[1]}" if pr else "")
+    if kind == "headings":
+        from ..solve import vo
+        return vo.summary(w, _ac(w, q.get("callsign")).callsign)
+    raise ValueError(f"unknown query '{kind}' (probe, levels, geometry, distance, route, near, sequence, solve, headings)")
 
 
 def answer(w, queries: List[dict]) -> List[dict]:

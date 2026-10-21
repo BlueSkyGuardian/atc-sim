@@ -18,7 +18,7 @@ import math
 from typing import Dict, List, Optional, Tuple
 
 DEFAULTS = {"conflicts": True, "weather": True, "inbound": True, "routes": True, "positions": True, "todo": True,
-            "hints": True, "max_aircraft": 40}
+            "hints": True, "solver": True, "max_aircraft": 40}
 SOLVE_S = 600            # conflicts listed in TO DO under this time
 
 
@@ -374,6 +374,17 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                             if not [x for x in cc if x["time_to_conflict_s"] <= SOLVE_S]:
                                 resume[a["callsign"]]["levels"] = [fl]
                                 break
+    solver = {}
+    if hints and o.get("solver", True):
+        try:
+            from ..solve import resolve
+            res = resolve.solve(w, asked=o.get("_asked") or {}, rollout=1)
+            for st_ in res["sets"]:
+                solver["×".join(sorted(st_["pair"]))] = st_
+        except Exception:  # noqa: BLE001 - the hints are a help, the situation goes on without them
+            solver = {}
+    struct["solver"] = {k: {"optimal": [x.public() for x in v["optimal"]], "solutions": [x.public() for x in v["solutions"][:8]],
+                            "move": v["move"]} for k, v in solver.items()}
     cf = []
     if o.get("conflicts"):
         relevant = {a["callsign"] for a in mine + calling}
@@ -530,7 +541,20 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                     mv, why = priority(A, B, w)
                     txt += f"; PRIORITY: {why}" + (f" → move {mv}, not the other" if mv else "")
                     geo["move"] = mv
-                if hints and not c.get("current"):
+                sv_ = solver.get("×".join(sorted([a, b])))
+                if hints and sv_ is not None and not c.get("current"):
+                    opt = sv_["optimal"] or sv_["solutions"][:1]
+                    rest = [x for x in sv_["solutions"] if x not in opt][:3]
+                    if opt:
+                        txt += ("; SOLVER (conflict-free with everyone, in the order speed, heading, level): BEST "
+                                + " or ".join(x.text + (" (ask the pilot first)" if x.needs_ask else "") for x in opt[:3])
+                                + (f"; other options: {'; '.join(x.text for x in rest)}" if rest else ""))
+                    else:
+                        txt += "; SOLVER: no single clearance leaves everyone separated: combine, or act on other traffic"
+                    for m_, hv in (sv_.get("hj") or {}).items():
+                        if not hv["turn_enough"]:
+                            txt += f"; {m_}: no turn can separate it in time (only a level)"
+                elif hints and not c.get("current"):
                     for X in ((by_cs.get(geo["move"]),) if geo.get("move") else (A, B)):
                         if X and X.get("assumed"):
                             so = solutions(w, X)

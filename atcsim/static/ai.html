@@ -82,7 +82,7 @@
       <h2 style="margin-top:0" id="mTitle">Model</h2>
       <div class="form">
         <label>Name</label><input type="text" id="mName" placeholder="e.g. Qwen2.5-7B on RunPod">
-        <label>Kind</label><select id="mKind"><option value="runpod">RunPod serverless (vLLM)</option><option value="openai">OpenAI-compatible server</option><option value="baseline">Built-in baseline (no model)</option></select>
+        <label>Kind</label><select id="mKind"><option value="runpod">RunPod serverless (vLLM)</option><option value="openai">OpenAI-compatible server</option><option value="baseline">Built-in baseline (no model)</option><option value="solver">Built-in solver (no model)</option></select>
         <label class="k-rp">RunPod endpoint id</label><input class="k-rp" type="text" id="mEp" placeholder="e.g. vllm-abc123xyz">
         <label class="k-oa">Base URL</label><input class="k-oa" type="text" id="mUrl" placeholder="https://<pod id>-8000.proxy.runpod.net/v1">
         <label class="k-m">Model name</label><input class="k-m" type="text" id="mModel" placeholder="the Hugging Face model deployed, e.g. Qwen/Qwen2.5-7B-Instruct">
@@ -121,6 +121,7 @@
           <label style="color:var(--text)"><input type="checkbox" id="oRte"> routes</label>
           <label style="color:var(--text)" title="Positions (x, y in NM) of the aircraft, and the geometry of each conflict"><input type="checkbox" id="oPos"> positions and geometry</label>
           <label style="color:var(--text)" title="The work waiting, at the top: assume, transfer, answer, solve, resume"><input type="checkbox" id="oTodo"> TO DO list</label>
+          <label style="color:var(--text)" title="The solver's solution set for each conflict (every clearance that leaves no conflict with anyone, best first)"><input type="checkbox" id="oSolv"> solver solutions</label>
           <label style="color:var(--text)" title="The conflict probe: conflict-free levels for the aircraft in conflict, whether an aircraft on a heading can resume, whether a requested level is free"><input type="checkbox" id="oHint"> probe results</label>
           <label style="color:var(--text)">at most <input type="number" id="oMax" min="5" max="100" style="width:64px"> aircraft per list</label></div>
         <span></span><div class="row"><button class="primary" id="aSave">Save</button><span id="aMsg" class="hint"></span></div>
@@ -158,8 +159,8 @@ $$('#tabs button').forEach(b => b.onclick = () => { $$('#tabs button').forEach(x
 async function loadModels() {
   MODELS = await api('/api/ai/models');
   $('#mTable').innerHTML = `<tr><th>Name</th><th>Kind</th><th>Where</th><th>Model</th><th>Key</th><th></th></tr>` + (MODELS.length ? MODELS.map(m => `<tr><td><b>${esc(m.name)}</b></td>
-    <td>${{ runpod: 'RunPod serverless', openai: 'OpenAI-compatible', baseline: 'Built-in baseline' }[m.kind]}</td>
-    <td class="hint">${esc(m.kind === 'runpod' ? m.endpoint_id : m.kind === 'openai' ? m.base_url : '—')}</td><td>${esc(m.model || '—')}</td><td class="hint">${esc(m.key_hint || (m.kind === 'baseline' ? '' : 'none'))}</td>
+    <td>${{ runpod: 'RunPod serverless', openai: 'OpenAI-compatible', baseline: 'Built-in baseline', solver: 'Built-in solver' }[m.kind]}</td>
+    <td class="hint">${esc(m.kind === 'runpod' ? m.endpoint_id : m.kind === 'openai' ? m.base_url : '—')}</td><td>${esc(m.model || '—')}</td><td class="hint">${esc(m.key_hint || (['baseline', 'solver'].includes(m.kind) ? '' : 'none'))}</td>
     <td class="row" style="justify-content:flex-end"><button class="small" data-mt="${m.id}">Test</button><button class="small" data-me="${m.id}">Edit</button><button class="small" data-md="${m.id}">Delete</button></td></tr>
     <tr id="mt${m.id}" style="display:none"><td colspan="6"><pre class="obs"></pre></td></tr>`).join('') : '<tr><td colspan="6" class="hint">No model yet. Add one — or the built-in baseline to try the pipeline.</td></tr>');
   $$('[data-mt]').forEach(b => b.onclick = async () => { const tr = $('#mt' + b.dataset.mt); tr.style.display = ''; tr.querySelector('pre').textContent = 'testing… (a serverless endpoint may take a minute to start)';
@@ -168,7 +169,7 @@ async function loadModels() {
   $$('[data-md]').forEach(b => b.onclick = async () => { if (!confirm('Delete this model?')) return; await api(`/api/ai/models/${b.dataset.md}`, { method: 'DELETE' }); loadModels(); });
   fillSelects();
 }
-function kindVis() { const k = val('mKind'); $$('.k-rp').forEach(e => e.style.display = k === 'runpod' ? '' : 'none'); $$('.k-oa').forEach(e => e.style.display = k === 'openai' ? '' : 'none'); $$('.k-m').forEach(e => e.style.display = k === 'baseline' ? 'none' : ''); }
+function kindVis() { const k = val('mKind'); $$('.k-rp').forEach(e => e.style.display = k === 'runpod' ? '' : 'none'); $$('.k-oa').forEach(e => e.style.display = k === 'openai' ? '' : 'none'); $$('.k-m').forEach(e => e.style.display = ['baseline', 'solver'].includes(k) ? 'none' : ''); }
 $('#mKind').onchange = kindVis;
 function openModel(m) {
   editModel = m || null; $('#mForm').style.display = ''; $('#mTitle').textContent = m ? 'Edit ' + m.name : 'New model'; $('#mMsg').textContent = '';
@@ -199,7 +200,7 @@ function showAgent() {
   $('#aName').value = curAgent.name; $('#aPrompt').value = c.system_prompt; $('#aInt').value = c.interval_s; $('#aTrig').checked = c.event_triggers !== false;
   $('#aHist').value = c.history; $('#aMax').value = c.max_actions; $('#oConf').checked = o.conflicts !== false; $('#oWx').checked = o.weather !== false;
   $('#oInb').checked = o.inbound !== false; $('#oRte').checked = o.routes !== false; $('#oMax').value = o.max_aircraft || 40;
-  $('#oPos').checked = o.positions !== false; $('#oTodo').checked = o.todo !== false; $('#oHint').checked = o.hints !== false; $('#aBrief').checked = c.briefing !== false;
+  $('#oPos').checked = o.positions !== false; $('#oTodo').checked = o.todo !== false; $('#oHint').checked = o.hints !== false; $('#oSolv').checked = o.solver !== false; $('#aBrief').checked = c.briefing !== false;
   $('#aRules').checked = c.rules !== false; $('#aFix').value = c.correction_rounds ?? 1;
   $('#aQ').checked = !!c.queries; $('#aQR').value = c.query_rounds || 3;
 }
@@ -207,7 +208,7 @@ $('#aSel').onchange = showAgent;
 $('#aReset').onclick = () => { $('#aPrompt').value = AGDEF.system_prompt; };
 const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'), briefing: $('#aBrief').checked, queries: $('#aQ').checked, rules: $('#aRules').checked, correction_rounds: +val('aFix'), query_rounds: +val('aQR') || 3,
   max_actions: +val('aMax'), observation: { conflicts: $('#oConf').checked, weather: $('#oWx').checked, inbound: $('#oInb').checked, routes: $('#oRte').checked,
-  positions: $('#oPos').checked, todo: $('#oTodo').checked, hints: $('#oHint').checked, max_aircraft: +val('oMax') } } });
+  positions: $('#oPos').checked, todo: $('#oTodo').checked, hints: $('#oHint').checked, solver: $('#oSolv').checked, max_aircraft: +val('oMax') } } });
 $('#aSave').onclick = async () => { try { await api(`/api/ai/agents/${curAgent.id}`, { method: 'PUT', body: JSON.stringify(agentBody()) }); $('#aMsg').textContent = '✓ saved'; loadAgents(curAgent.id); } catch (e) { $('#aMsg').textContent = e.message; } };
 $('#aNew').onclick = async () => { const r = await post('/api/ai/agents', { name: 'New profile', config: AGDEF }); loadAgents(r.id); };
 $('#aDel').onclick = async () => { if (!curAgent || !confirm('Delete this profile?')) return; await api(`/api/ai/agents/${curAgent.id}`, { method: 'DELETE' }); loadAgents(); };
@@ -269,7 +270,7 @@ async function loadRuns() {
 }
 $('#runsF').onchange = loadRuns;
 function judge(id) {
-  const ms = MODELS.filter(m => m.kind !== 'baseline');
+  const ms = MODELS.filter(m => !['baseline', 'solver'].includes(m.kind));
   modal(`<h3>Judge the decisions</h3><p class="hint">A second model grades each decision (1–5) with a critique, from what it saw, what it did and what followed. The grades go with the experiences (filter datasets by grade).</p>
     <div class="form"><label>Judge model</label><select id="jM">${ms.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select>
     <label>Every</label><div class="row"><input type="number" id="jE" value="1" min="1" style="width:70px"> decision(s)</div>

@@ -128,6 +128,43 @@ class Watch:
         self.anchor = None
 
 
+def _match(action: dict, sol: dict) -> bool:
+    for x in sol.get("actions") or []:
+        if str(x.get("callsign", "")).upper() != str(action.get("callsign", "")).upper():
+            continue
+        if x.get("speed") is not None and action.get("speed") is not None:
+            return str(x["speed"]).upper().lstrip("M") == str(action["speed"]).upper().lstrip("M")
+        if x.get("heading") is not None and action.get("heading") is not None:
+            return abs((int(x["heading"]) - int(action["heading"]) + 180) % 360 - 180) <= 10
+        if x.get("cfl") is not None and action.get("cfl") is not None:
+            return int(x["cfl"]) == int(action["cfl"])
+        if x.get("direct") and action.get("direct"):
+            return str(x["direct"]).upper() == str(action["direct"]).upper()
+    return False
+
+
+def grade(struct: dict, results: list) -> list:
+    """Each conflict the solver saw at this decision, against what the model did: optimal (in the solver's best set),
+    feasible (another solution of the set), other (a clearance on those aircraft that is not a solution), or left
+    alone; an 'ask' for a level of the set counts as that level."""
+    out = []
+    given = [r["action"] for r in results if r.get("ok") and r["action"].get("type") in ("clear", "ask")]
+    for key, sv in (struct.get("solver") or {}).items():
+        pair = key.split("×")
+        acts = [x for x in given if str(x.get("callsign", "")).upper() in pair]
+        if not acts:
+            out.append({"pair": pair, "grade": "left alone"})
+            continue
+        if any(_match(x, s_) for x in acts for s_ in sv.get("optimal") or []):
+            g = "optimal"
+        elif any(_match(x, s_) for x in acts for s_ in sv.get("solutions") or []):
+            g = "feasible"
+        else:
+            g = "other"
+        out.append({"pair": pair, "grade": g, "best": [s_["text"] for s_ in (sv.get("optimal") or [])[:2]]})
+    return out
+
+
 def _summary_metrics(w) -> dict:
     from ..platform.exercises import summarize_metrics
     return summarize_metrics(w)
@@ -365,6 +402,9 @@ def run(job: dict) -> None:
                     if given:
                         fb.append("given: " + "; ".join(r["text"] for r in given))
                     feedback = (". ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
+                    g = grade(struct, rec["results"])
+                    if g:
+                        rec["grades"] = g
                     td = struct.get("todo") or {}
                     done = {(str(r["action"].get("type", "")).lower(), str(r["action"].get("callsign") or r["action"].get("request_id") or "").upper())
                             for r in rec["results"] if r.get("ok")}

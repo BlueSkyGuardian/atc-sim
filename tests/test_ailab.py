@@ -246,6 +246,34 @@ try:
     finally:
         slow.kill()
 
+    # ---- the solver: as a controller, as hints and grades, as a question
+    sv_m = ins.post("/api/ai/models", json={"name": "Solver", "kind": "solver"}).json()
+    r6 = ins.post("/api/ai/runs", json={"scenarios": ["p02_wn_merges_and_climbs"], "model_id": sv_m["id"], "agent_id": a0["id"], "env": {"end_s": 600}}).json()["runs"][0]
+    for _ in range(300):
+        x6 = ins.get(f"/api/ai/runs/{r6}").json()
+        if x6["status"] in ("done", "failed"):
+            break
+        time.sleep(1)
+    s6 = ins.get(f"/api/ai/runs/{r6}/steps?limit=200").json()["steps"]
+    ok(x6["status"] == "done" and x6["evaluation"]["losses"] == 0 and any("×" in (s.get("reasoning") or "") for s in s6),
+       f"the solver flies a run on its own: score {x6['score']}, no loss, its resolutions: " + "; ".join(s["reasoning"] for s in s6 if "×" in (s.get("reasoning") or ""))[:160])
+    ins.delete(f"/api/ai/runs/{r6}")
+    ok(any("SOLVER" in (s.get("observation") or "") for s in s0), "the model is shown the solver's solutions for each conflict")
+    gr = [g for s in s0 for g in s.get("grades") or []]
+    ok(gr and {g["grade"] for g in gr} <= {"optimal", "feasible", "other", "left alone"}, f"each decision graded against the solution set: {sorted({g['grade'] for g in gr})}")
+    from atcsim.ailab import queries as Q
+    from atcsim.session import Session as S2
+    s7 = S2("p02_wn_merges_and_climbs", mode="stepped", autostart=False); s7.stop(); s7.solo = True
+    while s7.world.t < 300:
+        s7._tick()
+    for a_ in s7.world.aircraft.values():
+        if a_.active and a_.on_frequency:
+            a_.assumed = True
+    qa = Q.answer(s7.world, [{"q": "solve"}, {"q": "headings", "callsign": "EWG3KP"}])
+    ok(qa[0]["ok"] and "BEST" in qa[0]["result"] and qa[1]["ok"] and "conflict-free headings" in qa[1]["result"],
+       f"questions: solve ({qa[0]['result'][:90]}…), headings")
+    s7.stop()
+
     # ---- the run in the debrief
     eid = m1["exercise_id"]
     ok(all(x["id"] != eid for x in ins.get("/api/exercises").json()), "AI runs are not listed with the exercises")
