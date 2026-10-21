@@ -93,7 +93,8 @@ class ChatModel:
             body["response_format"] = {"type": "json_object"}
         if self.thinking == "off":
             if not plain:
-                body["chat_template_kwargs"] = {"enable_thinking": False}    # vLLM / recent llama.cpp templates
+                # Qwen3 / Qwen3.x templates: enable_thinking; Qwen3.8 also reasoning_effort (unknown keys are ignored)
+                body["chat_template_kwargs"] = {"enable_thinking": False, "reasoning_effort": "none"}
             if "qwen3" in self.model.lower() and messages and "/no_think" not in messages[0]["content"]:
                 body["messages"] = [dict(messages[0], content=messages[0]["content"] + "\n/no_think")] + list(messages[1:])
         extras = [k for k in ("response_format", "chat_template_kwargs") if k in body]

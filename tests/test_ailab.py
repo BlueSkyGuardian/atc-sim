@@ -68,7 +68,7 @@ try:
     cmq = agents.ChatModel({"kind": "openai", "base_url": f"http://127.0.0.1:{PORT}/v1", "model": "Qwen/Qwen3-8B", "api_key": "k", "params": {}})
     cmq.chat([{"role": "system", "content": "sys"}, {"role": "user", "content": 'Reply with {"ok": true}'}])
     lb = httpx.get(f"http://127.0.0.1:{PORT}/last").json()
-    ok(lb.get("chat_template_kwargs") == {"enable_thinking": False} and lb["messages"][0]["content"].endswith("/no_think"),
+    ok((lb.get("chat_template_kwargs") or {}).get("enable_thinking") is False and lb["messages"][0]["content"].endswith("/no_think"),
        "thinking off by default: enable_thinking=false (and /no_think for Qwen3)")
     strict = subprocess.Popen([sys.executable, "-m", "tests.mock_llm", str(PORT + 2)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                               env=dict(os.environ, MOCK_STRICT="1"))
