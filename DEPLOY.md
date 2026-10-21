@@ -131,6 +131,8 @@ about one CPU core while the model is answering quickly. A dataset's *RunPod lin
 ## Conflict solver
 
 The solver (Solver panel on the solo radar, *Built-in solver* in the AI lab, solver hints for models) needs no
-setup. Close-range checks use Hamilton-Jacobi tables, built in the background the first time they are needed
-(about a minute per table, 5 tables per separation minimum) and kept in `DATA_DIR/hj`. To build them ahead, after an
-update: `docker compose exec atcsim python -m atcsim.solve.hj 5 7` (the separation minima in use, NM).
+setup. Its close-range Hamilton-Jacobi tables (separation minima 5 and 7 NM, five speed ratios, about 1 MB each) are
+built ahead and shipped in `atcsim/solve/tables`. A table is used only if it was built for the present parameters;
+a missing or outdated one (another minimum, a changed horizon or grid) is built in the background the first time it
+is needed, about a minute each, into `DATA_DIR/hj`. After changing the reachability parameters in
+`atcsim/solve/hj.py`, rebuild the shipped tables and commit them: `python -m atcsim.solve.hj --ship 5 7`.

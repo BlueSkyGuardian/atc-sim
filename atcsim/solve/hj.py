@@ -82,19 +82,38 @@ def build_table(ratio: float, sh: float = 5.0, n: int = 101, nth: int = 60, T: f
 _cache: Dict[Tuple[float, float], Dict] = {}
 
 
+SHIPPED = os.path.join(os.path.dirname(__file__), "tables")   # built once and kept in the repository
+
+
+def _fits(t: Dict, ratio: float, sh: float) -> bool:
+    """A stored table is used only if it was built for the present dynamics and grid."""
+    try:
+        return (abs(float(t["T"]) - T_S) < 1e-6 and abs(float(t["v1"]) - V1_NM_S) < 1e-9
+                and abs(float(t["ratio"]) - ratio) < 1e-6 and abs(float(t["sh"]) - sh) < 1e-6
+                and abs(float(t["xs"][-1]) - L_NM) < 1e-6)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
 def table(ratio: float, sh: float, build_if_missing: bool = True, **kw) -> Optional[Dict]:
+    """The table of the nearest speed ratio: the one shipped with the code, else one built in the data folder,
+    else built now (or None, when build_if_missing is off)."""
     r = min(RATIOS, key=lambda x: abs(x - ratio))
     key = (r, round(sh, 1))
     if key in _cache:
         return _cache[key]
-    p = os.path.join(_dir(), f"hj_r{r:.1f}_s{sh:.1f}.npz")
-    if os.path.exists(p):
-        z = np.load(p)
-        _cache[key] = {k: z[k] for k in z.files}
-        return _cache[key]
+    name = f"hj_r{r:.1f}_s{sh:.1f}.npz"
+    for p in (os.path.join(SHIPPED, name), os.path.join(_dir(), name)):
+        if os.path.exists(p):
+            z = np.load(p)
+            t = {k: z[k] for k in z.files}
+            if _fits(t, r, round(sh, 1)):
+                _cache[key] = t
+                return t
     if not build_if_missing:
         return None
     t = build_table(r, sh, **kw)
+    p = os.path.join(_dir(), name)
     tmp = p + f".{os.getpid()}.tmp.npz"
     np.savez_compressed(tmp, **t)
     os.replace(tmp, p)                      # never a half-written table for another process
@@ -176,11 +195,18 @@ def can_turn_away(w, mover: str, other: str, build: bool = False) -> Optional[Di
     return {"value": v, "turn_enough": v > MARGIN, "rel": (round(x, 1), round(y, 1), round(math.degrees(th)))}
 
 
-if __name__ == "__main__":                          # python -m atcsim.solve.hj 5 7   (separation minima, NM)
+if __name__ == "__main__":
+    # python -m atcsim.solve.hj 5 7            build the tables of these minima (NM) in the data folder if missing
+    # python -m atcsim.solve.hj --ship 5 7     rebuild them into atcsim/solve/tables (to commit with the code)
     import sys
     import time
-    for sh_ in [float(x) for x in sys.argv[1:]] or [5.0, 7.0]:
+    ship = "--ship" in sys.argv
+    for sh_ in [float(x) for x in sys.argv[1:] if x != "--ship"] or [5.0, 7.0]:
         for r_ in RATIOS:
             t0 = time.time()
-            table(r_, sh_)
+            if ship:
+                os.makedirs(SHIPPED, exist_ok=True)
+                np.savez_compressed(os.path.join(SHIPPED, f"hj_r{r_:.1f}_s{sh_:.1f}.npz"), **build_table(r_, sh_))
+            else:
+                table(r_, sh_)
             print(f"S={sh_:g} NM, speed ratio {r_}: {time.time() - t0:.0f} s")
