@@ -4,7 +4,7 @@
 //   'm' mouse position (20 per second while it moves), 'c' / 'd' clicks and double-clicks (and what was clicked)
 // Positions are CSS pixels relative to the scope. Times are this page's clock; the server converts them.
 (function () {
-  if (!EXID || DBID) return;
+  if (!EXID || DBID || AIW) return;
   const scope = document.getElementById('scope'), q = [];
   let mouse = null, sentMouse = null, lastV = '', lastO = '', started = false;
   const now = () => Math.round(performance.now());

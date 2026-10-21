@@ -4,7 +4,7 @@ Score (0-100): 100 minus penalties, each listed with its count, so a score can a
   loss of separation 25 each + 2 per minute of loss, infringement of an active area 10, weather penetration 5,
   RVSM violation 5, wrong-direction exit 3, request expired 4 / still pending at the end 2, slow answers (mean over
   60 s) 1 per 30 s, aircraft never assumed after calling 3, assumed more than 30 s after calling 1,
-  instruction refused (unable / invalid) 1, answer that could not be read 2, extra track miles 0.05 per NM.
+  aircraft not transferred 2 min after leaving 2, transferred late 1, instruction refused (unable / invalid) 1, answer that could not be read 2, extra track miles 0.05 per NM.
 
 Per decision (experience labels), from what happened after it:
   +1   per calling aircraft it assumed, +1 per pilot request it answered
@@ -12,6 +12,8 @@ Per decision (experience labels), from what happened after it:
   -8   per loss starting in the 10 minutes after it, between aircraft it acted on or was shown in conflict
   -5   per conflict it was shown under 5 min and left alone (no action on either aircraft) that became a loss
   -2   per request waiting more than 2 min that it left unanswered
+  +1   per aircraft that had left the sector it transferred (decontrolled)
+  -1   per aircraft calling it left unanswered, per aircraft that left over 2 min ago it did not transfer
   -1   per instruction refused, -2 if its answer could not be read
   label: good (reward > 0), bad (< 0), neutral (0).
 """
@@ -22,6 +24,38 @@ from typing import List
 LOOK_S = 600.0
 
 
+def transfers(w) -> dict:
+    """Aircraft that left the sector (still assumed) and when they were decontrolled (transferred)."""
+    left, rel = {}, {}
+    for e in w.events:
+        if e["type"] in ("aircraft_exited", "aircraft_left_sector"):
+            left.setdefault(e["callsign"], e["time_s"])
+        elif e["type"] == "released":
+            rel[e["callsign"]] = e["time_s"]
+    out = {"left": 0, "late": [], "never": [], "delays": []}
+    for cs, t in left.items():
+        ac = w.aircraft.get(cs)
+        if ac is None or (ac.released and cs in rel and rel[cs] < t):
+            continue                                       # decontrolled before it left
+        out["left"] += 1
+        if cs in rel and rel[cs] >= t:
+            out["delays"].append(rel[cs] - t)
+            if rel[cs] - t > 120:
+                out["late"].append(cs)
+        elif ac.assumed and w.t - t > 120:
+            out["never"].append(cs)
+    return out
+
+
+def first_calls(w) -> dict:
+    """First calls: how many, how many answered (assumed), how long they waited."""
+    calls = [a for a in w.aircraft.values() if a.first_contact_t is not None and a.first_contact_t > 1.0
+             and (a.assumed_t is not None or w.t - a.first_contact_t > 60)]       # (a call in the last minute: no time yet)
+    waits = [a.assumed_t - a.first_contact_t for a in calls if a.assumed_t is not None and a.assumed_t >= a.first_contact_t]
+    return {"calls": len(calls), "answered": len(waits), "mean_wait_s": round(sum(waits) / len(waits), 1) if waits else None,
+            "max_wait_s": round(max(waits), 1) if waits else None}
+
+
 def score(w, steps: List[dict]) -> dict:
     m = w.metrics()
     sep, asp, wx = m.get("separation") or {}, m.get("airspace") or {}, m.get("weather") or {}
@@ -29,6 +63,7 @@ def score(w, steps: List[dict]) -> dict:
     refused = sum(1 for s in steps for r in s.get("results") or [] if not r.get("ok"))
     unread = sum(1 for s in steps if s.get("parse_error"))
     mean_rt = req.get("mean_response_time_s")
+    xf, fc = transfers(w), first_calls(w)
     pen = [
         ("losses of separation", sep.get("loss_events", 0), 25),
         ("minutes in loss of separation", round((sep.get("loss_seconds") or 0) / 60, 1), 2),
@@ -41,6 +76,8 @@ def score(w, steps: List[dict]) -> dict:
         ("slow answers (30 s over 60 s mean)", round(max(0.0, ((mean_rt or 0) - 60) / 30), 1), 1),
         ("aircraft never assumed", len(asm.get("never_assumed") or []), 3),
         ("assumed late (over 30 s)", asm.get("late_over_30s", 0), 1),
+        ("aircraft not transferred (still assumed 2 min after leaving)", len(xf["never"]), 2),
+        ("transferred late (over 2 min after leaving)", len(xf["late"]), 1),
         ("instructions refused or invalid", refused, 1),
         ("answers that could not be read", unread, 2),
         ("extra track miles", round(tr.get("extra_track_miles") or 0, 1), 0.05),
@@ -53,6 +90,8 @@ def score(w, steps: List[dict]) -> dict:
             "infringements": asp.get("infringement_events", 0), "requests": req.get("total", 0),
             "requests_expired": (req.get("by_status") or {}).get("expired", 0), "mean_response_s": mean_rt,
             "assume_mean_s": asm.get("mean_delay_s"), "never_assumed": len(asm.get("never_assumed") or []),
+            "first_calls": fc, "transfers": {"left": xf["left"], "never": len(xf["never"]), "late": len(xf["late"]),
+                                             "mean_delay_s": round(sum(xf["delays"]) / len(xf["delays"]), 1) if xf["delays"] else None},
             "decisions": len(steps), "actions": sum(len(s.get("results") or []) for s in steps),
             "refused": refused, "unreadable": unread, "aircraft": tr.get("total"), "sim_time_s": round(w.t, 1)}
 
@@ -88,6 +127,20 @@ def label(w, steps: List[dict]) -> None:
             if t < lt <= t + LOOK_S and (la & acted):
                 r -= 8
                 why.append(f"-8 loss {'×'.join(sorted(la))} at T+{int(lt // 60):02d}:{int(lt % 60):02d}")
+        gone = {x["callsign"] for x in shown.get("to_decontrol") or []}
+        n_dec = sum(1 for x in s.get("results") or [] if x.get("ok") and x["action"].get("type") == "decontrol"
+                    and str(x["action"].get("callsign", "")).upper() in gone)
+        if n_dec:
+            r += n_dec
+            why.append(f"+{n_dec} transferred")
+        stale_out = [x for x in shown.get("to_decontrol") or [] if (x.get("since_s") or 0) > 120 and x["callsign"] not in acted]
+        if stale_out:
+            r -= len(stale_out)
+            why.append(f"-{len(stale_out)} not transferred (left over 2 min ago)")
+        waiting = [x for x in shown.get("calling") or [] if x["callsign"] not in acted]
+        if waiting:
+            r -= len(waiting)
+            why.append(f"-{len(waiting)} first call{'s' if len(waiting) > 1 else ''} not answered")
         answered = {str(x["action"].get("request_id")) for x in s.get("results") or [] if x["action"].get("type") == "reply"}
         stale = [q for q in shown.get("requests") or [] if q.get("age_s", 0) > 120 and q["id"] not in answered]
         if stale:

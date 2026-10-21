@@ -11,6 +11,10 @@ Files written in the run's folder (read by the server while it runs):
   result.json     at the end: score, evaluation, preview, the written debrief report
   experiences.jsonl   the decisions with their reward and label (after the evaluation)
 A file named "stop" in the folder ends the run early (it is still evaluated and kept).
+
+Watch live: while the server keeps "watch.json" fresh ({"factor": 0 | x, "until": epoch}), the world is written to
+"live.snap" twice a second (and at every decision), and with a factor the run is paced to that many simulated
+seconds per second, so a person can follow it on the radar. Nobody watching: full speed, nothing written.
 """
 from __future__ import annotations
 
@@ -53,6 +57,77 @@ def preview(w) -> dict:
             "tracks": tracks, "losses": losses}
 
 
+def _blob(w) -> bytes:
+    import io
+    import pickle
+    import zlib
+    from ..session import _pid
+    rec = w.recording
+    w.recording = {"every_s": rec["every_s"], "frames": [], "meta": rec["meta"]}
+
+    class _P(pickle.Pickler):
+        def persistent_id(self, o):
+            return _pid(o)
+    try:
+        f = io.BytesIO()
+        _P(f, protocol=5).dump(w)
+    finally:
+        w.recording = rec
+    return zlib.compress(f.getvalue(), 1)
+
+
+class Watch:
+    """Someone watches the run live: publish the world, pace the clock."""
+
+    def __init__(self, rd: str):
+        self.p, self.live = os.path.join(rd, "watch.json"), os.path.join(rd, "live.snap")
+        self.checked, self.until, self.factor, self.last = 0.0, 0.0, 0.0, 0.0
+        self.anchor = None
+
+    def on(self) -> bool:
+        now = time.time()
+        if now - self.checked > 0.5:
+            self.checked = now
+            try:
+                with open(self.p) as f:
+                    j = json.load(f)
+                f2 = float(j.get("factor") or 0)
+                if f2 != self.factor:
+                    self.anchor = None
+                self.until, self.factor = float(j.get("until") or 0), f2
+            except (OSError, ValueError):
+                self.until = 0.0
+        return now < self.until
+
+    def publish(self, w, force: bool = False) -> None:
+        now = time.time()
+        if not force and now - self.last < 0.5:
+            return
+        self.last = now
+        try:
+            with open(self.live + ".tmp", "wb") as f:
+                f.write(_blob(w))
+            os.replace(self.live + ".tmp", self.live)
+        except OSError:
+            pass
+
+    def pace(self, w) -> None:
+        if self.factor <= 0:
+            return
+        now = time.time()
+        if self.anchor is None:
+            self.anchor = (now, w.t)
+            return
+        ahead = (w.t - self.anchor[1]) / self.factor - (now - self.anchor[0])
+        if ahead > 0:
+            time.sleep(min(ahead, 2.0))
+        elif ahead < -2.0:
+            self.anchor = (now, w.t)         # fell behind (a slow step): start again from here
+
+    def reset(self) -> None:
+        self.anchor = None
+
+
 def _summary_metrics(w) -> dict:
     from ..platform.exercises import summarize_metrics
     return summarize_metrics(w)
@@ -82,7 +157,7 @@ def run(job: dict) -> None:
     prog["duration"] = end
     actor = {"name": job.get("actor_name") or "AI", "seat": "atc", "id": None}
     agent = agents.make(prov)
-    system = agent_cfg.get("system_prompt") or agents.DEFAULT_SYSTEM_PROMPT
+    system = agents.system_prompt(agent_cfg.get("system_prompt"))
     interval = max(5.0, float(agent_cfg.get("interval_s", 30)))
     n_hist = int(agent_cfg.get("history", 2))
     max_actions = int(agent_cfg.get("max_actions", 12))
@@ -92,6 +167,7 @@ def run(job: dict) -> None:
     seen_calls, seen_reqs, seen_conf = set(), set(), set()
     prog["status"] = "running"
     stop_p = os.path.join(rd, "stop")
+    watch = Watch(rd)
 
     def trigger() -> bool:
         from .. import atctools
@@ -117,6 +193,10 @@ def run(job: dict) -> None:
                 text, struct = obs_mod.observe(w, agent_cfg.get("observation") or {})
                 msgs = agents.messages(system, text, history[-n_hist:] if n_hist else [], feedback)
                 rec = {"i": len(steps), "t": round(w.t, 1), "observation": text, "struct": struct, "feedback": feedback}
+                prog.update(thinking=True, t=round(w.t, 1))
+                _write(prog_p, prog)
+                if watch.on():
+                    watch.publish(w, force=True)
                 t0 = time.time()
                 try:
                     if isinstance(agent, agents.Baseline):
@@ -142,11 +222,17 @@ def run(job: dict) -> None:
                 sf.write(json.dumps(rec) + "\n")
                 sf.flush()
                 last_t, next_t = w.t, w.t + interval
-                prog.update(t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
+                if watch.on():
+                    watch.publish(w, force=True)
+                    watch.reset()
+                prog.update(thinking=False, t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
                             "actions": [r["text"] for r in rec["results"]][:6], "error": rec.get("error")})
                 _write(prog_p, prog)
             with s.lock:
                 s._tick()
+            if watch.on():
+                watch.publish(w)
+                watch.pace(w)
             if int(w.t) % 30 == 0:
                 prog["t"] = round(w.t, 1)
                 _write(prog_p, prog)
@@ -168,7 +254,9 @@ def run(job: dict) -> None:
     _write(os.path.join(rd, "result.json"), {"evaluation": ev, "preview": preview(w), "report": report,
                                              "stopped": os.path.exists(stop_p),
                                              "metrics": _summary_metrics(w)})
-    prog.update(status="done", t=round(w.t, 1), finished_at=time.time(), score=ev["score"])
+    if watch.on():
+        watch.publish(w, force=True)
+    prog.update(status="done", t=round(w.t, 1), finished_at=time.time(), score=ev["score"], thinking=False)
     _write(prog_p, prog)
 
 

@@ -99,6 +99,32 @@ try:
     ok(any(any("left alone, lost" in w for w in s["label_why"]) and s["label"] == "bad" for s in s0), "a conflict shown and left alone that became a loss: bad")
     ok(any("RESULT OF YOUR LAST INSTRUCTIONS" in (s.get("feedback") or "") or s.get("feedback") for s in s0[1:]), "the pilots' answers fed back to the model")
     ok("api_key" not in json.dumps(ins.get(f"/api/ai/runs/{m1['id']}").json()), "no key in a run's details")
+    fc, xf = ev["first_calls"], ev["transfers"]
+    ok(fc["calls"] > 0 and fc["answered"] == fc["calls"], f"first calls answered: {fc['answered']}/{fc['calls']}, mean wait {fc['mean_wait_s']} s")
+    ok(xf["left"] > 0 and xf["never"] == 0, f"aircraft that left were transferred: {xf['left'] - xf['never']}/{xf['left']}")
+    ok(any(any(w.endswith("transferred") for w in s["label_why"]) for s in s0), "transferring what left: rewarded")
+    ok(any("LEFT YOUR SECTOR" in (s.get("observation") or "") for s in s0), "the model is shown the aircraft that left, to transfer")
+    from atcsim.ailab import actions as A
+    from atcsim.session import Session
+    ss = Session("p02_wn_merges_and_climbs", mode="stepped", autostart=False)
+    ss.stop(); ss.solo = True
+    while not any(a.on_frequency and not a.assumed and a.active for a in ss.world.aircraft.values()):
+        ss._tick()
+    cs = next(a.callsign for a in ss.world.aircraft.values() if a.on_frequency and not a.assumed and a.active)
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": 360}], {"name": "AI", "seat": "atc"})
+    ok(not rr[0]["ok"] and '"type": "assume"' in rr[0]["text"], "clearing an aircraft not assumed: the refusal says to assume it first")
+    rr = A.apply(ss.world, [{"type": "assume", "callsign": cs}, {"type": "clear", "callsign": cs, "heading": 200, "distance": "8NM"}], {"name": "AI", "seat": "atc"})
+    ok(rr[0]["ok"] and rr[1]["ok"] and "ignored unknown field: distance" in rr[1]["text"], "assume + clear in one answer; an unknown field reported")
+    ss.stop()
+
+    # ---- watch live (read-only)
+    wv = ins.post(f"/api/ai/runs/{m1['id']}/watch", json={"factor": 4}).json()
+    ok(wv["sid"].endswith("ff") and ins.get(f"/sessions/{wv['sid']}/state").status_code == 200, "watch: a radar session on the run")
+    ok(ins.post(f"/sessions/{wv['sid']}/control", json={"action": "resume"}).status_code == 403 and
+       ins.post(f"/sessions/{wv['sid']}/assume/{cs}").status_code == 403, "watch: look only")
+    ok(atc.post(f"/api/ai/runs/{m1['id']}/watch", json={}).status_code == 403 and atc.get(f"/sessions/{wv['sid']}/state").status_code == 403,
+       "watch: staff only")
+    ok(ins.get(f"/ai/watch/{m1['id']}").status_code == 200, "watch page")
 
     # ---- the run in the debrief
     eid = m1["exercise_id"]

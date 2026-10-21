@@ -1,7 +1,9 @@
 """A stand-in for a model server (OpenAI-compatible chat completions), for the AI lab tests: it reads the situation
-it is sent and answers like a lazy controller - assume who calls, approve the requests - with, every fifth call,
+it is sent and answers like a lazy controller - assume who calls, transfer what has left, approve the requests - with, every fifth call,
 an answer that cannot be read, to exercise the error paths.   python -m tests.mock_llm <port>"""
+import asyncio
 import json
+import os
 import re
 import sys
 
@@ -29,9 +31,12 @@ async def chat(request: Request):
     else:
         calling = re.findall(r"^- ([A-Z0-9]+) ·", user.split("CALLING YOU")[1].split("\n\n")[0], re.M) if "CALLING YOU" in user else []
         reqs = re.findall(r"^- (R\d+):", user.split("PILOT REQUESTS")[1].split("\n\n")[0], re.M) if "PILOT REQUESTS" in user else []
-        acts = [{"type": "assume", "callsign": c} for c in calling] + [{"type": "reply", "request_id": r, "decision": "approve"} for r in reqs]
+        gone = re.findall(r"^- ([A-Z0-9]+) FL", user.split("LEFT YOUR SECTOR")[1].split("\n\n")[0], re.M) if "LEFT YOUR SECTOR" in user else []
+        acts = [{"type": "assume", "callsign": c} for c in calling] + [{"type": "decontrol", "callsign": c} for c in gone] + [{"type": "reply", "request_id": r, "decision": "approve"} for r in reqs]
         acts.append({"type": "clear", "callsign": "NOSUCH1", "cfl": 300}) if calls["n"] % 7 == 0 else None
         text = "```json\n" + json.dumps({"reasoning": f"{len(calling)} calling, {len(reqs)} requests", "actions": acts}) + "\n```"
+    if os.environ.get("MOCK_DELAY"):
+        await asyncio.sleep(float(os.environ["MOCK_DELAY"]))
     return {"id": "x", "object": "chat.completion", "choices": [{"index": 0, "message": {"role": "assistant", "content": text}}],
             "usage": {"prompt_tokens": len(user) // 4, "completion_tokens": len(text) // 4}}
 

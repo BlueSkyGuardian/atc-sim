@@ -12,12 +12,19 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
-  #app { display: grid; grid-template-columns: 1fr 400px; grid-template-rows: 1fr 230px; height: 100vh; }
+  #app { display: grid; grid-template-columns: 1fr 400px; grid-template-rows: 1fr var(--tlh, 230px); height: 100vh; }
   #map { position: relative; overflow: hidden; grid-column: 1; grid-row: 1; }
   #map canvas { display: block; width: 100%; height: 100%; }
-  #tlWrap { grid-column: 1; grid-row: 2; border-top: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: #0b1724; }
+  #tlWrap { grid-column: 1; grid-row: 2; border-top: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: #0b1724; position: relative; }
+  #tlGrip { position: absolute; left: 0; right: 0; top: -4px; height: 8px; cursor: row-resize; z-index: 3; }
+  #tlGrip:hover, #tlGrip.on { background: linear-gradient(transparent 3px, #3b6e93 3px, #3b6e93 5px, transparent 5px); }
+  #tlBar input#tlFilter { width: 110px; padding: 2px 6px; font-size: 12px; }
+  #tlBar button.on { background: #1f4a6e; color: #fff; }
+  #tlCount { font-size: 11.5px; }
+  #tlBar > * { white-space: nowrap; flex-shrink: 0; } #tlBar label { display: inline-flex; gap: 3px; align-items: center; }
+  #tlBar .tl-help { font-size: 11.5px; cursor: help; }
   #tlBar { display: flex; gap: 6px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
-  #tlScroll { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+  #tlScroll { flex: 1; overflow-y: scroll; overflow-x: hidden; position: relative; scrollbar-color: #3b6e93 #0b1724; }
   #tl { display: block; width: 100%; cursor: col-resize; }
   #tlRuler { display: block; width: 100%; height: 24px; cursor: col-resize; }
   aside { grid-column: 2; grid-row: 1 / span 2; background: var(--panel); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
@@ -79,6 +86,7 @@
     <div id="status"></div>
   </div>
   <div id="tlWrap">
+    <div id="tlGrip" title="Drag to make the timeline taller or shorter (double-click: show every lane)"></div>
     <div id="tlBar">
       <button id="play" title="Play / pause (Space)">▶</button>
       <select id="playSpeed"><option>10</option><option selected>30</option><option>60</option><option>120</option></select>
@@ -89,7 +97,11 @@
       <select id="wxProduct" title="weather product"><option value="composite">composite</option><option value="cappi">CAPPI at FL</option></select>
       <input id="wxFl" type="number" value="350" step="10" style="width:64px">
       <span style="flex:1"></span>
-      <span class="c-dim" style="font-size:11.5px">wheel = scrub · ctrl+wheel = zoom · drag a bar or marker to re-time it</span>
+      <input id="tlFilter" type="search" placeholder="filter callsigns" title="Only the aircraft whose callsign contains this text (several: separate with spaces)">
+      <button id="tlConf" title="Only the aircraft with a planned conflict">conflicts only</button>
+      <button id="tlAll" title="Make the timeline tall enough to show every lane (again: back to the height before)">⇕ Show all</button>
+      <span id="tlCount" class="c-dim"></span>
+      <span class="c-dim tl-help" title="Wheel: move the time cursor · over the callsigns: scroll the lanes · ctrl+wheel: zoom in time · drag a bar or a marker to re-time it · drag the top edge of the timeline to resize it">ⓘ wheel · drag</span>
     </div>
     <canvas id="tlRuler"></canvas>
     <div id="tlScroll"><canvas id="tl"></canvas></div>
@@ -1076,7 +1088,7 @@ function draw() {
 
 // ============================================================ timeline
 const tl = $('#tl'), tctx = tl.getContext('2d'), ruler = $('#tlRuler'), rctx = ruler.getContext('2d');
-const LANE_H = 16, LABEL_W = 96;
+let LANE_H = 16; const LABEL_W = 96;
 let tlz = { t0: 0, t1: 1800 }, lanes = [], tlHits = [];
 function tlX(t) { const W = ruler.clientWidth; return LABEL_W + (W - LABEL_W - 10) * (t - tlz.t0) / (tlz.t1 - tlz.t0); }
 function tlT(x) { const W = ruler.clientWidth; return tlz.t0 + (x - LABEL_W) / (W - LABEL_W - 10) * (tlz.t1 - tlz.t0); }
@@ -1086,13 +1098,54 @@ function buildLanes() {
   lanes = [{ kind: 'wx', label: 'weather' }, ...scn.areas.map((a, i) => ({ kind: 'area', i, label: `area ${a.id}` }))];
   const g = lastGoodComp, ac = [...scn.aircraft];
   if (g) ac.sort((a, b) => ((g.aircraft[a.callsign] || {}).entry_s ?? 1e9) - ((g.aircraft[b.callsign] || {}).entry_s ?? 1e9));
-  for (const a of ac) lanes.push({ kind: 'ac', cs: a.callsign, label: a.callsign });
+  const words = ($('#tlFilter').value || '').toUpperCase().split(/[\s,]+/).filter(Boolean);
+  const confl = new Set(), confOnly = $('#tlConf').classList.contains('on');
+  if (confOnly && g) for (const k of g.planned_conflicts) for (const c of k.aircraft) confl.add(c);
+  let shown = 0;
+  for (const a of ac) {
+    if (words.length && !words.some(w => a.callsign.toUpperCase().includes(w))) continue;
+    if (confOnly && !confl.has(a.callsign)) continue;
+    lanes.push({ kind: 'ac', cs: a.callsign, label: a.callsign }); shown++;
+  }
+  const n = scn.aircraft.length;
+  $('#tlCount').textContent = shown === n ? `${n} aircraft` : `${shown} of ${n} aircraft`;
 }
+// the timeline's height: dragged (kept in this browser), or tall enough for every lane
+let tlH = 230, tlPrevH = null;
+try { tlH = Math.max(120, +(localStorage.getItem('dz_tlh') || 230)); } catch (e) {}
+function setTlH(h, keep = true) {
+  tlH = Math.round(Math.max(110, Math.min(window.innerHeight - 160, h)));
+  $('#app').style.setProperty('--tlh', tlH + 'px');
+  if (keep) { try { localStorage.setItem('dz_tlh', String(tlH)); } catch (e) {} }
+  resize(); if (typeof draw === 'function') try { draw(); } catch (e) {}
+  drawTimeline();
+}
+function tlShowAll() {
+  if (tlPrevH != null) { const h = tlPrevH; tlPrevH = null; LANE_H = 16; $('#tlAll').classList.remove('on'); setTlH(h); return; }
+  tlPrevH = tlH; $('#tlAll').classList.add('on');
+  const chrome = $('#tlBar').offsetHeight + $('#tlRuler').offsetHeight + 8;
+  const room = Math.round(window.innerHeight * 0.62) - chrome - 6;
+  LANE_H = Math.max(9, Math.min(16, Math.floor(room / Math.max(1, lanes.length))));   // compact lanes when they do not fit
+  setTlH(chrome + lanes.length * LANE_H + 6, false);
+}
+(function () {
+  const grip = $('#tlGrip'); let d = null;
+  grip.addEventListener('mousedown', e => { d = { y: e.clientY, h: tlH }; grip.classList.add('on'); e.preventDefault(); });
+  window.addEventListener('mousemove', e => { if (d) { tlPrevH = null; LANE_H = 16; $('#tlAll').classList.remove('on'); setTlH(d.h + (d.y - e.clientY)); } });
+  window.addEventListener('mouseup', () => { if (d) { d = null; grip.classList.remove('on'); } });
+  grip.addEventListener('dblclick', tlShowAll);
+  $('#tlAll').onclick = tlShowAll;
+  $('#tlFilter').addEventListener('input', () => { $('#tlScroll').scrollTop = 0; drawTimeline(); });
+  $('#tlConf').onclick = () => { $('#tlConf').classList.toggle('on'); $('#tlScroll').scrollTop = 0; drawTimeline(); };
+  document.addEventListener('DOMContentLoaded', () => $('#app').style.setProperty('--tlh', tlH + 'px'));
+  $('#app').style.setProperty('--tlh', tlH + 'px');
+})();
 function drawTimeline() {
   if (!scn) return;
   const dpr = devicePixelRatio;
   if (tlz.t1 > scn.duration_s + 60 || tlz.t1 - tlz.t0 < 60) { tlz.t1 = Math.min(tlz.t1, scn.duration_s + 60); if (tlz.t1 - tlz.t0 < 60) tlz.t0 = Math.max(-60, tlz.t1 - 60); }
   buildLanes();
+  const lk = LANE_H / 16;
   const Wc = $('#tlScroll').clientWidth, Hc = lanes.length * LANE_H + 6;
   if (tl.width !== Math.round(Wc * dpr) || tl.height !== Math.round(Hc * dpr)) { tl.width = Wc * dpr; tl.height = Hc * dpr; tl.style.height = Hc + 'px'; }
   const rw = ruler.getBoundingClientRect(); if (ruler.width !== Math.round(rw.width * dpr)) { ruler.width = rw.width * dpr; ruler.height = rw.height * dpr; }
@@ -1114,44 +1167,44 @@ function drawTimeline() {
     const y = li * LANE_H + 3, isSel = (ln.kind === 'ac' && sel && sel.kind === 'ac' && sel.cs === ln.cs) || (ln.kind === 'area' && sel && sel.kind === 'area' && sel.i === ln.i);
     if (isSel) { ctx2.fillStyle = '#16273a'; ctx2.fillRect(0, y - 1, Wc, LANE_H); }
     else if (li % 2) { ctx2.fillStyle = '#0f171f'; ctx2.fillRect(0, y - 1, Wc, LANE_H); }
-    ctx2.font = '11px ui-monospace,monospace'; ctx2.fillStyle = isSel ? '#7fb8ff' : '#8a9bb0';
+    ctx2.font = `${Math.max(8, Math.min(11, LANE_H - 4))}px ui-monospace,monospace`; ctx2.fillStyle = isSel ? '#7fb8ff' : '#8a9bb0';
     let lab = ln.label;
     if (ln.kind === 'ac' && g && g.aircraft[ln.cs]) lab = `${ln.cs} ${g.aircraft[ln.cs].fl}`;
-    ctx2.fillText(lab, 4, y + 11);
+    ctx2.fillText(lab, 4, y + 11 * lk);
     ctx2.save(); ctx2.beginPath(); ctx2.rect(LABEL_W, 0, Wc - LABEL_W, Hc); ctx2.clip();
     if (ln.kind === 'wx') {
       (scn.weather.cells || []).forEach((c, i) => { const lt = c.lifetime_s || 5400, tb = (c.at_time || 0) - (c.age_s ?? lt * 0.4);
-        const x0 = tlX(tb), x1 = tlX(tb + lt), xa = tlX(c.at_time || 0); ctx2.fillStyle = '#d05ad033'; ctx2.fillRect(x0, y + 3, x1 - x0, LANE_H - 7);
-        ctx2.fillStyle = sel && sel.kind === 'cell' && sel.i === i ? '#ffffff' : '#ff7af0'; ctx2.fillRect(xa - 2, y + 1, 4, LANE_H - 3);
+        const x0 = tlX(tb), x1 = tlX(tb + lt), xa = tlX(c.at_time || 0); ctx2.fillStyle = '#d05ad033'; ctx2.fillRect(x0, y + 3 * lk, x1 - x0, LANE_H - 7 * lk);
+        ctx2.fillStyle = sel && sel.kind === 'cell' && sel.i === i ? '#ffffff' : '#ff7af0'; ctx2.fillRect(xa - 2, y + 1 * lk, 4, LANE_H - 3 * lk);
         tlHits.push({ kind: 'cell', i, x: xa, y, field: 'at_time' }); });
       const lbl = convList().map(c => `${c.regime.replace('_', ' ')} ${c.intensity || 'strong'}`).concat((scn.weather.stratiform || []).length ? [`${scn.weather.stratiform.length} rain area(s)`] : []).join(' + ');
-      if (lbl) { ctx2.fillStyle = '#d05ad0aa'; ctx2.fillText(lbl, LABEL_W + 6, y + 11); }
+      if (lbl) { ctx2.fillStyle = '#d05ad0aa'; ctx2.fillText(lbl, LABEL_W + 6, y + 11 * lk); }
     } else if (ln.kind === 'area') {
       const a = scn.areas[ln.i], sch = [...(a.schedule || [])].sort((p, q) => p.time - q.time); let on = !!a.active, t0 = 0;
       const col = AREA_COL[a.kind] || '#e0c13c';
-      const seg = (ta, tb) => { ctx2.fillStyle = col + '66'; ctx2.fillRect(tlX(ta), y + 3, tlX(tb) - tlX(ta), LANE_H - 7); };
+      const seg = (ta, tb) => { ctx2.fillStyle = col + '66'; ctx2.fillRect(tlX(ta), y + 3 * lk, tlX(tb) - tlX(ta), LANE_H - 7 * lk); };
       for (const e of sch) { if (on) seg(t0, e.time); on = !!e.active; t0 = e.time; }
       if (on) seg(t0, scn.duration_s);
-      (a.schedule || []).forEach((e, k) => { const x = tlX(e.time); ctx2.fillStyle = e.active ? col : '#8a9bb0'; ctx2.fillRect(x - 2, y + 1, 4, LANE_H - 3);
+      (a.schedule || []).forEach((e, k) => { const x = tlX(e.time); ctx2.fillStyle = e.active ? col : '#8a9bb0'; ctx2.fillRect(x - 2, y + 1 * lk, 4, LANE_H - 3 * lk);
         tlHits.push({ kind: 'sched', i: ln.i, k, x, y }); });
     } else {
       const info = g && g.aircraft[ln.cs], plan = g && g.plans[ln.cs];
       if (info && plan && plan.length) {
         const x0 = tlX(plan[0][0]), xe = tlX(info.entry_s), x1 = tlX(info.exit_s ?? plan[plan.length - 1][0]);
-        ctx2.fillStyle = '#2a3a4a'; ctx2.fillRect(x0, y + 4, xe - x0, LANE_H - 9);
-        ctx2.fillStyle = isSel ? '#3f78b5' : info.military ? '#5f6fb0' : info.rvsm !== 'approved' ? '#a07a3a' : '#2f7a5f'; ctx2.fillRect(xe, y + 3, x1 - xe, LANE_H - 7);
+        ctx2.fillStyle = '#2a3a4a'; ctx2.fillRect(x0, y + 4 * lk, xe - x0, LANE_H - 9 * lk);
+        ctx2.fillStyle = isSel ? '#3f78b5' : info.military ? '#5f6fb0' : info.rvsm !== 'approved' ? '#a07a3a' : '#2f7a5f'; ctx2.fillRect(xe, y + 3 * lk, x1 - xe, LANE_H - 7 * lk);
         tlHits.push({ kind: 'bar', cs: ln.cs, x0: xe, x1, y });
         const a = scn.aircraft.find(q => q.callsign === ln.cs);
-        if (a && a.reach) { const xr = tlX(a.reach.time); ctx2.fillStyle = '#cfe3ff'; ctx2.beginPath(); ctx2.moveTo(xr, y + 2); ctx2.lineTo(xr + 3, y + 7); ctx2.lineTo(xr, y + 12); ctx2.lineTo(xr - 3, y + 7); ctx2.fill(); }
+        if (a && a.reach) { const xr = tlX(a.reach.time); ctx2.fillStyle = '#cfe3ff'; ctx2.beginPath(); ctx2.moveTo(xr, y + 2 * lk); ctx2.lineTo(xr + 3, y + 7 * lk); ctx2.lineTo(xr, y + 12 * lk); ctx2.lineTo(xr - 3, y + 7 * lk); ctx2.fill(); }
       }
-      for (const k of confBy[ln.cs] || []) { ctx2.fillStyle = k.inside ? '#ff5a5a' : '#ff5a5a66'; ctx2.fillRect(tlX(k.start_s), y + 9, Math.max(3, tlX(k.end_s) - tlX(k.start_s)), 4); }
-      for (const l of lossBy[ln.cs] || []) { ctx2.fillStyle = '#ffffff'; ctx2.fillRect(tlX(l.start_s), y + 1, Math.max(3, tlX(l.end_s || l.start_s) - tlX(l.start_s)), 3); }
+      for (const k of confBy[ln.cs] || []) { ctx2.fillStyle = k.inside ? '#ff5a5a' : '#ff5a5a66'; ctx2.fillRect(tlX(k.start_s), y + 9 * lk, Math.max(3, tlX(k.end_s) - tlX(k.start_s)), 4); }
+      for (const l of lossBy[ln.cs] || []) { ctx2.fillStyle = '#ffffff'; ctx2.fillRect(tlX(l.start_s), y + 1 * lk, Math.max(3, tlX(l.end_s || l.start_s) - tlX(l.start_s)), 3); }
       scn.requests.forEach((r, i) => { if (r.callsign.toUpperCase() !== ln.cs) return; const x = tlX(r.time), s = sel && sel.kind === 'req' && sel.i === i;
-        ctx2.fillStyle = s ? '#ffffff' : '#7fb8ff'; ctx2.beginPath(); ctx2.arc(x, y + 7, 4.5, 0, Math.PI * 2); ctx2.fill();
-        ctx2.fillStyle = '#0b1016'; ctx2.font = 'bold 8px system-ui'; ctx2.fillText({ altitude: 'L', direct: 'D', speed: 'S', weather_deviation: 'W', descent: '↓' }[r.type] || '?', x - 2.5, y + 10);
+        ctx2.fillStyle = s ? '#ffffff' : '#7fb8ff'; ctx2.beginPath(); ctx2.arc(x, y + 7 * lk, 4.5 * lk, 0, Math.PI * 2); ctx2.fill();
+        ctx2.fillStyle = '#0b1016'; ctx2.font = `bold ${Math.round(8 * lk)}px system-ui`; ctx2.fillText({ altitude: 'L', direct: 'D', speed: 'S', weather_deviation: 'W', descent: '↓' }[r.type] || '?', x - 2.5, y + 10 * lk);
         tlHits.push({ kind: 'req', i, x, y }); });
       scn.events.forEach((r, i) => { if (r.callsign.toUpperCase() !== ln.cs) return; const x = tlX(r.time), s = sel && sel.kind === 'evt' && sel.i === i;
-        ctx2.fillStyle = s ? '#ffffff' : '#f2b84b'; ctx2.fillRect(x - 4, y + 3, 8, 8); tlHits.push({ kind: 'evt', i, x, y }); });
+        ctx2.fillStyle = s ? '#ffffff' : '#f2b84b'; ctx2.fillRect(x - 4 * lk, y + 3 * lk, 8 * lk, 8 * lk); tlHits.push({ kind: 'evt', i, x, y }); });
     }
     ctx2.restore();
   });
@@ -1213,6 +1266,7 @@ window.addEventListener('mouseup', () => {
 for (const c of [tl, ruler]) c.addEventListener('wheel', e => {
   if (!scn) return; e.preventDefault();
   const r = c.getBoundingClientRect(), tm = tlT(e.clientX - r.left);
+  if (c === tl && e.clientX - r.left < LABEL_W && !(e.ctrlKey || e.metaKey)) { $('#tlScroll').scrollTop += e.deltaY; return; }
   if (e.ctrlKey || e.metaKey) {
     const f = e.deltaY < 0 ? 0.8 : 1.25, n0 = tm - (tm - tlz.t0) * f, n1 = tm + (tlz.t1 - tm) * f;
     tlz = { t0: Math.max(-60, n0), t1: Math.min(scn.duration_s + 60, n1) };

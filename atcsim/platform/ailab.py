@@ -201,7 +201,13 @@ def agents_list(request: Request):
         db.x("INSERT INTO ai_agents (name, config, created_by, created_at) VALUES (?,?,?,?)",
              ("Default controller", json.dumps(_agent_defaults()), None, time.time()))
         rows = db.q("SELECT * FROM ai_agents ORDER BY id")
-    return {"agents": [{"id": r["id"], "name": r["name"], "config": {**_agent_defaults(), **json.loads(r["config"])}} for r in rows],
+    from ..ailab import agents as _ag
+
+    def cfg(r):
+        c = {**_agent_defaults(), **json.loads(r["config"])}
+        c["system_prompt"] = _ag.system_prompt(c.get("system_prompt"))
+        return c
+    return {"agents": [{"id": r["id"], "name": r["name"], "config": cfg(r)} for r in rows],
             "defaults": _agent_defaults()}
 
 
@@ -255,7 +261,7 @@ def _row(r: dict, full: bool = False) -> dict:
     out["env"] = json.loads(r["env"] or "{}")
     if r["status"] in ("queued", "running"):
         p = _progress(r["id"])
-        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last")}
+        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last", "thinking")}
     res = json.loads(r["result"]) if r["result"] else None
     if res:
         out["evaluation"] = res.get("evaluation")
@@ -639,3 +645,137 @@ def ai_page(request: Request):
     from .exercises import page
     _staff(request)
     return page("ai.html")
+
+
+
+# ------------------------------------------------------------------ watch a run live
+WATCH_FACTORS = (0, 1, 2, 4, 8, 16)          # 0: full speed (the radar jumps); else simulated seconds per second
+WATCHERS: dict = {}                           # sid -> {"rid", "touch"}
+_wlock = threading.Lock()
+
+
+def watch_sid(eid: str) -> str:
+    return eid + "ff"
+
+
+def watch_lookup(sid: str) -> Optional[dict]:
+    """A watch session id (<exercise>ff): {"eid", "rid"} when it is open, else None."""
+    if len(sid) != 10 or not sid.endswith("ff"):
+        return None
+    return WATCHERS.get(sid)
+
+
+def _watch_session(rid: str, r: dict):
+    from ..session import Session
+    from . import debriefs
+
+    class WatchSession(Session):
+        """The radar of a running AI run: the world the runner publishes (live.snap), read-only."""
+
+        def __init__(self):
+            from ..scenario import load_scenario
+            super().__init__(r["scenario"], mode="realtime", autostart=False, sid=watch_sid(r["exercise_id"]),
+                             scn=load_scenario(r["scenario"]), label=f"AI run {rid} (live)")
+            self.solo = True
+            self.status = "paused"
+            self.version = 0
+            self._mt = None
+            self._live = os.path.join(_run_dir(rid), "live.snap")
+            threading.Thread(target=self._follow, daemon=True, name=f"watch-{rid}").start()
+
+        def _snapshot(self) -> None:
+            pass
+
+        def _maybe_snapshot(self) -> None:
+            pass
+
+        def _persist(self, rewrite: bool = False) -> None:
+            pass
+
+        def _follow(self) -> None:
+            while not self._stop.is_set():
+                try:
+                    mt = os.stat(self._live).st_mtime_ns
+                    if mt != self._mt:
+                        with open(self._live, "rb") as f:
+                            blob = f.read()
+                        w = self._load_world(blob)
+                        with self.lock:
+                            self.world = w
+                            self.status = "finished" if w.finished else "running"
+                            self.version += 1
+                        self._mt = mt
+                except (OSError, EOFError, ValueError):
+                    pass
+                except Exception:  # noqa: BLE001 - a half-written file: the next one
+                    pass
+                self._stop.wait(0.2)
+
+    sid = watch_sid(r["exercise_id"])
+    with _wlock:
+        s = debriefs.manager.sessions.get(sid)
+        if s is None:
+            s = WatchSession()
+            with debriefs.manager.lock:
+                debriefs.manager.sessions[sid] = s
+        WATCHERS[sid] = {"rid": rid, "eid": r["exercise_id"], "touch": time.time()}
+    return s
+
+
+def _watch_gc() -> None:
+    from . import debriefs
+    while True:
+        time.sleep(15)
+        now = time.time()
+        with _wlock:
+            for sid, o in list(WATCHERS.items()):
+                if now - o["touch"] > 60:
+                    WATCHERS.pop(sid, None)
+                    with debriefs.manager.lock:
+                        s = debriefs.manager.sessions.pop(sid, None)
+                    if s:
+                        s.stop()
+
+
+threading.Thread(target=_watch_gc, daemon=True, name="ai-watch-gc").start()
+
+
+class WatchIn(BaseModel):
+    factor: float = 4
+
+
+@router.post("/api/ai/runs/{rid}/watch")
+def run_watch(rid: str, b: WatchIn, request: Request):
+    """Open (or keep open: call it every few seconds) the live view of a run; the run is paced to factor
+    simulated seconds per second while somebody watches (0: full speed). Returns the session to show on the
+    radar, the progress, and the latest decisions."""
+    _staff(request)
+    r = db.q1("SELECT * FROM ai_runs WHERE id=?", (rid,))
+    if r is None:
+        raise HTTPException(404, "no such run")
+    if r["status"] in ("queued", "running"):
+        with open(os.path.join(_run_dir(rid), "watch.json.tmp"), "w") as f:
+            json.dump({"factor": max(0.0, min(float(b.factor), 64.0)), "until": time.time() + 10}, f)
+        os.replace(os.path.join(_run_dir(rid), "watch.json.tmp"), os.path.join(_run_dir(rid), "watch.json"))
+    s = _watch_session(rid, r)
+    st = run_steps(rid, request, offset=max(0, _count_steps(rid) - 8), limit=8)
+    return {"sid": s.id, "status": r["status"], "name": f"{r['model_name']} · {r['scenario']}", "exercise_id": r["exercise_id"],
+            "progress": _progress(rid), "steps": [{k: x.get(k) for k in ("i", "t", "reasoning", "results", "error", "parse_error",
+                                                                          "latency_s", "label", "reward")} for x in st["steps"]],
+            "factors": WATCH_FACTORS, "score": r["score"], "live": os.path.exists(os.path.join(_run_dir(rid), "live.snap"))}
+
+
+def _count_steps(rid: str) -> int:
+    p = os.path.join(_run_dir(rid), "steps.jsonl")
+    try:
+        with open(p, "rb") as f:
+            return sum(1 for _ in f)
+    except OSError:
+        return 0
+
+
+@router.get("/ai/watch/{rid}", include_in_schema=False)
+def watch_page(rid: str, request: Request):
+    from .exercises import page
+    _staff(request)
+    return page("radar.html")

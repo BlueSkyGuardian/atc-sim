@@ -296,6 +296,7 @@ Instructors and administrators. See the [AI lab manual](ai.md).
 | POST | `/api/ai/runs/{id}/stop` · `/judge` | Stop (still evaluated) / judge its decisions: `{"model_id", "every"}` |
 | POST | `/api/ai/experiences/stats` | Filters `{"scenarios", "models", "min_score", "labels", "min_grade"}` → runs, decisions, by label |
 | GET / POST | `/api/ai/datasets` | Datasets / export one: `{"name", "format": "chat" \| "trajectories" \| "steps", "filters"}` |
+| POST | `/api/ai/runs/{id}/watch` | `{"factor": 0-16}`: open (call every few seconds to keep open) the live view; the run is paced while watched (0: full speed). Returns the read-only session `sid` (`<exercise>ff`), progress and the latest decisions. Page: `/ai/watch/{id}` |
 | GET | `/api/ai/datasets/{id}/file` | The JSONL file |
 | GET | `/ai-data/{id}/{token}.jsonl` | The same file without signing in, for a training machine (the token is the access) |
 

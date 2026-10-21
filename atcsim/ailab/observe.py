@@ -55,6 +55,8 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict) -> Tuple[str, dict]:
         parts.append(f"to {fp.get('destination')}")
     if xfl and exitp:
         parts.append(f"exit FL{xfl:03d} to {exitp}")
+    if a.get("to_exit_nm") is not None and a.get("assumed"):
+        parts.append(f"leaves your sector in {a['to_exit_nm']:.0f}NM")
     if a.get("weather_ahead_nm") is not None and opts.get("weather"):
         parts.append(f"WEATHER {a['weather_ahead_nm']:.0f}NM ahead")
     if a.get("emergency"):
@@ -90,13 +92,28 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
         struct["mine"].append(s)
     if not mine:
         lines.append("- none")
-    lines.append(f"\nCALLING YOU (on frequency, not yet assumed: assume them) — {len(calling)}:")
+    lines.append(f"\nCALLING YOU (first call on your frequency, waiting for you: answer with assume) — {len(calling)}:")
     for a in calling[:o["max_aircraft"]]:
         txt, s = _ac_line(w, a, {}, coord.get(a["callsign"], {}), o)
+        ac = w.aircraft.get(a["callsign"])
+        fc = getattr(ac, "first_contact_t", None)
+        if fc is not None:
+            txt += f" · called {_t(w.t - fc)} ago"
+            s["waiting_s"] = round(w.t - fc)
         lines.append("- " + txt)
         struct["calling"].append(s)
     if not calling:
         lines.append("- none")
+    gone = [a for a in st.get("transferred") or [] if a.get("assumed")]
+    struct["to_decontrol"] = []
+    if gone:
+        lines.append(f"\nLEFT YOUR SECTOR, still assumed (transfer them: decontrol) — {len(gone)}:")
+        for a in gone[:o["max_aircraft"]]:
+            ac = w.aircraft.get(a["callsign"])
+            out_t = getattr(ac, "ghost_until", None)
+            since = None if out_t is None or out_t < 0 else max(0.0, w.t - (out_t - w.persist_s))
+            lines.append(f"- {a['callsign']} FL{a['fl']:03d}" + (f", left {_t(since)} ago" if since is not None else ""))
+            struct["to_decontrol"].append({"callsign": a["callsign"], "since_s": None if since is None else round(since)})
     if o.get("inbound"):
         inb = st.get("inbound") or []
         if inb:

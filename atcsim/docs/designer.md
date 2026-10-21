@@ -24,8 +24,10 @@ the traps bite.
 
 ![The designer: map in the centre, timeline below, the Scenario / Selected / Check & preview tabs on the right](/static/docs/d_designer.jpg "The designer: map in the centre, timeline below, the Scenario / Selected / Check & preview tabs on the right")
 
-Timeline controls: use the wheel to move the cursor, <kbd>Ctrl</kbd>+wheel to zoom, and <kbd>Shift</kbd>+wheel to
-scroll the lanes. **▶** plays at the chosen speed (×10–×120). Markers: ◆ the aircraft's timing point, ● pilot
+Timeline controls: use the wheel to move the cursor, <kbd>Ctrl</kbd>+wheel to zoom, and the wheel over the
+callsigns (or <kbd>Shift</kbd>+wheel) to scroll the lanes. With many aircraft: drag the timeline's top edge to make
+it taller (kept in your browser), **⇕ Show all** to see every lane at once (lanes get thinner when they must; again
+to go back), **filter callsigns** (several: separated by spaces) and **conflicts only**. **▶** plays at the chosen speed (×10–×120). Markers: ◆ the aircraft's timing point, ● pilot
 requests (L level, D direct, S speed), ■ RVSM events. A red underline marks a planned conflict, a white one a loss
 in the preview run.
 

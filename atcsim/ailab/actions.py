@@ -19,7 +19,7 @@ from typing import List, Tuple
 SCHEMA = """Answer with ONE JSON object and nothing else:
 {"reasoning": "<one or two short sentences>", "actions": [<actions>]}
 Actions (use only these; an empty list means nothing to do now):
-  {"type": "assume", "callsign": "RAM123"}                 take control of an aircraft calling you
+  {"type": "assume", "callsign": "RAM123"}                 answer an aircraft calling you (radar contact): it is then yours
   {"type": "clear", "callsign": "RAM123", "cfl": 370}      cleared flight level (multiple of 10)
   {"type": "clear", "callsign": "RAM123", "heading": 250}  fly heading (degrees)
   {"type": "clear", "callsign": "RAM123", "direct": "ROLRO"}  proceed direct to a point of its route or the map
@@ -27,7 +27,7 @@ Actions (use only these; an empty list means nothing to do now):
   {"type": "clear", "callsign": "RAM123", "xfl": 350}      exit level coordinated with the next unit
   {"type": "resume", "callsign": "RAM123"}                 resume own navigation after a heading
   {"type": "reply", "request_id": "R004", "decision": "approve"}   or "unable"
-  {"type": "decontrol", "callsign": "RAM123"}              release an aircraft that has left your sector
+  {"type": "decontrol", "callsign": "RAM123"}              transfer an aircraft to the next unit: when it leaves your sector
 Several fields may go in one "clear" (e.g. cfl and heading)."""
 
 
@@ -76,6 +76,15 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                 ok = r.get("status") != "rejected"
                 out.append({"action": a, "ok": ok, "text": r.get("reason") or f"{cs} decontrolled"})
             elif t in ("clear", "resume"):
+                ac = w.aircraft.get(cs)
+                if ac is None or not (ac.active or ac.outside):
+                    raise ValueError(f"{cs}: no such aircraft in your traffic (check the callsign)")
+                if not ac.assumed:
+                    where = ("it is calling you: answer it first" if ac.on_frequency else
+                             "it is not on your frequency yet (INBOUND): wait until it calls you, then assume it")
+                    raise ValueError(f"{cs} is not assumed, nothing was given to the pilot; {where} with "
+                                     f'{{"type": "assume", "callsign": "{cs}"}}, then clear it')
+                extra = sorted(k for k in a if k not in ("type", "callsign", "cfl", "xfl", "heading", "direct", "speed"))
                 body = {"callsign": cs}
                 if t == "resume":
                     body["heading"] = ""
@@ -94,7 +103,10 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                 r = inputs.apply(w, "entries", body, actor)
                 rb = r.get("_readback") or []
                 ok = not any(x.get("status") == "rejected" for x in rb)
-                out.append({"action": a, "ok": ok, "text": " · ".join(x.get("text", "") for x in rb) or "entered"})
+                txt = " · ".join(x.get("text", "") for x in rb) or "entered"
+                if extra:
+                    txt += f" (ignored unknown field{'s' if len(extra) > 1 else ''}: {', '.join(extra)})"
+                out.append({"action": a, "ok": ok, "text": txt})
             elif t == "reply":
                 rid = str(a.get("request_id", ""))
                 q = w.requests.get(rid)

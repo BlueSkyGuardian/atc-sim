@@ -13,11 +13,23 @@ from typing import List, Optional, Tuple
 from .actions import SCHEMA
 
 DEFAULT_SYSTEM_PROMPT = """You are an en-route air traffic controller (area control centre, radar). You control the aircraft you have assumed in your sector.
-Your goals, in order: 1) keep every pair of aircraft separated (the minimum is given; never let two aircraft be closer horizontally AND vertically); 2) keep aircraft out of active restricted areas and out of weather they cannot fly through; 3) assume aircraft calling you without delay and answer pilot requests promptly (approve when it is safe); 4) let aircraft leave at their exit level, as efficiently as possible (few heading vectors, direct routings when safe).
+Your goals, in order: 1) keep every pair of aircraft separated (the minimum is given; never let two aircraft be closer horizontally AND vertically); 2) keep aircraft out of active restricted areas and out of weather they cannot fly through; 3) answer every first call at once (assume the aircraft listed as CALLING YOU, at the first decision you see them) and answer pilot requests promptly (approve when it is safe); transfer (decontrol) every aircraft listed as LEFT YOUR SECTOR; 4) let aircraft leave at their exit level, as efficiently as possible (few heading vectors, direct routings when safe).
 Resolve predicted conflicts early, usually with a level change of one aircraft (1000 ft steps; respect RVSM), or a heading for a few minutes, or speed control on converging tracks. Do not give a level that creates a new conflict. Give few, clear instructions.
+Only aircraft in YOUR AIRCRAFT accept clearances. An aircraft in CALLING YOU must be assumed first (the assume and its clearances may go in the same answer, assume first). INBOUND aircraft are not on your frequency yet: plan for them, do not instruct them.
 Every few moments you receive the situation; answer with the instructions to give now.
 
 """ + SCHEMA
+
+
+# earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
+LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b"}
+
+
+def system_prompt(p: str) -> str:
+    import hashlib
+    if not p or hashlib.sha256(p.strip().encode()).hexdigest() in LEGACY_DEFAULT_PROMPTS:
+        return DEFAULT_SYSTEM_PROMPT
+    return p
 
 
 def runpod_base(endpoint_id: str) -> str:

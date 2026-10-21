@@ -103,6 +103,8 @@
       if (e.seq <= seenSeq) continue;
       seenSeq = e.seq;
       if (e.type === 'checkin' && !e.assumed) said.push({ t: e.time_s, cls: 'call', cs: e.callsign, html: `<b>${esc(e.callsign)}</b> ${esc(e.text.replace(e.callsign + ' ', ''))}` });
+      else if (e.type === 'assumed' && !/again/.test(e.text || '')) said.push({ t: e.time_s, cls: 'atc', html: `<span class="c-dim">ATC</span><b>${esc(e.callsign)}</b> identified` });
+      else if (e.type === 'released') said.push({ t: e.time_s, cls: 'atc', html: `<span class="c-dim">ATC</span><b>${esc(e.callsign)}</b> ${e.unit ? 'contact ' + esc(e.unit) + ', ' : ''}good day` });
       else if (e.type === 'pilot_readback') said.push({ t: e.time_s, cls: e.ok ? '' : 'bad', cs: e.ok ? null : e.callsign, html: esc(e.text) });
       else if (e.type === 'cpdlc' && /^[↑↓]/.test(e.text || '') && e.direction === 'down') said.push({ t: e.time_s, cls: '', html: `<span class="c-dim">CPDLC</span>${esc(e.text.slice(2))}` });
     }
@@ -156,7 +158,7 @@
     seenRw = rw;
     try { rec = null; lastSeq = 0; eventsBuf = []; replayMode = false; replayPlaying = false; } catch (e) {}
     said.length = 0; seenSeq = 0;
-    if (typeof pollEvents === 'function' && !DBID) pollEvents();      // (the debrief's stream sends the recent events)
+    if (typeof pollEvents === 'function' && !DBID && !AIW) pollEvents();      // (the debrief's stream sends the recent events)
     window.dispatchEvent(new Event('sim-rewind'));
   }, 400);
   setInterval(renderLog, 700);

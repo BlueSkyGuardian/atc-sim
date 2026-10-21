@@ -45,10 +45,17 @@ class _Req:                      # minimal request-like view of an ASGI scope fo
 def seat_for(sid: str, user: dict) -> Optional[str]:
     if config.AUTH == "off" or user.get("id") == 0:
         return "instructor"
+    if _watch(sid) is not None:        # the live view of an AI run: staff, read-only
+        return "atc" if user.get("role") in ("instructor", "admin") else None
     o = _debrief(sid)
     if o is not None:                  # a debrief's run: everybody sees the controller's screen
         return "atc" if db.seat_of(o["eid"], user) else None
     return db.seat_of(sid, user)
+
+
+def _watch(sid: str) -> Optional[dict]:
+    from . import ailab
+    return ailab.watch_lookup(sid)
 
 
 def _debrief(sid: str) -> Optional[dict]:
@@ -73,6 +80,9 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         seat = seat_for(sid, user)
         if seat is None:
             return "you are not a member of this exercise"
+        if _watch(sid) is not None:                # an AI run, live: look only
+            return None if method in ("GET", "HEAD") or rest in ("/stream",) or (method == "POST" and rest == "/connect") \
+                else "this is a live view of an AI run: look only"
         o = _debrief(sid)
         if o is not None:                          # a debrief's player (debriefs.py)
             from . import debriefs
@@ -123,7 +133,7 @@ class AccessMiddleware:
         if scope["type"] == "websocket":
             await send({"type": "websocket.close", "code": 4403})
             return
-        is_page = method == "GET" and (path in PAGES or path.startswith(("/x/", "/help/", "/debrief/")) or path == "/designer")
+        is_page = method == "GET" and (path in PAGES or path.startswith(("/x/", "/help/", "/debrief/", "/ai/watch/")) or path == "/designer")
         if is_page and user is None:
             resp = RedirectResponse("/login?next=" + path, status_code=303)
         else:

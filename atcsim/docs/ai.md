@@ -31,8 +31,10 @@ SEPARATION 7 NM or 1000 ft (2000 ft for non-RVSM aircraft in RVSM airspace). Lev
 YOUR AIRCRAFT (assumed) — 12:
 - EWG3KP · A320 · FL350= · trk 229 gs 356 · M78 · direct IBALU 50NM then ERMED · to GCFV · exit FL350 to WS
 - RAM2880A · B738 · FL240= · trk 012 gs 444 · 300kt · direct OSLAD 94NM · to LEMD · exit FL240 to LECS
-CALLING YOU (on frequency, not yet assumed: assume them) — 1:
-- IBE4343 · B738 · FL350= · trk 204 gs 407 · M78 · direct CTAVE 184NM · to GCRR · exit FL350 to WS
+CALLING YOU (first call on your frequency, waiting for you: answer with assume) — 1:
+- IBE4343 · B738 · FL350= · trk 204 gs 407 · M78 · direct CTAVE 184NM · to GCRR · exit FL350 to WS · called 00:12 ago
+LEFT YOUR SECTOR, still assumed (transfer them: decontrol) — 1:
+- NOZ7983 FL300, left 00:40 ago
 INBOUND (not on frequency yet) — 7:
 - EZY7537K A319 FL330 entering at KORNO in 01:55, route KORNO ABODA IBALU ERMED to GCFV
 PILOT REQUESTS waiting for your answer — 1:
@@ -55,8 +57,15 @@ profile (conflicts, weather, inbound traffic, routes, list length).
   {"type": "decontrol", "callsign": "NOZ7983"}]}
 ```
 
-An answer that is not readable JSON, or an instruction that is refused, is fed back to the model at the next
-decision point, and counts in the evaluation.
+Only assumed aircraft take clearances: an aircraft calling is answered with *assume* (the assume and its clearances
+may go in the same answer), and an aircraft that has left the sector is transferred with *decontrol*. An answer that
+is not readable JSON, or an instruction that is refused, is fed back to the model at the next decision point with
+what to do instead (e.g. *IBS7794 is not assumed, nothing was given to the pilot; it is calling you: answer it first
+with {"type": "assume", "callsign": "IBS7794"}, then clear it*), and counts in the evaluation. A field the
+instruction set does not have is ignored and reported.
+
+The radio log of the replay shows the controller's side too: *identified* when the model assumes an aircraft,
+*contact (next unit)* when it transfers one.
 
 ## Models
 
@@ -93,6 +102,14 @@ Choose scenarios (several at once), the model, the agent profile, how many runs 
 - **read-back errors** — synthetic pilots sometimes read back a wrong value;
 - **stop at** — a shorter run than the scenario.
 
+### Watch live
+
+**● Watch live** on a running run opens it on the radar (look only): the traffic as the model controls it, and a
+panel with its latest decisions — the reasoning, each instruction with the pilot's answer, *the model is deciding*
+while it waits for the model (the simulation waits too). **Speed while you watch** paces the run at ×1 to ×16
+(simulated seconds per second); **Full** lets it go as fast as the model answers (the picture jumps). Nobody
+watching: the run goes at full speed again. When it ends: **Replay in the debrief**.
+
 Each run's card shows its progress (simulated time, decisions, the last instructions), then its **preview** (every
 track, red circles where separation was lost), its score, and buttons: **Decisions** (every decision: the situation
 shown, the reasoning, the instructions and the pilots' answers, the label and its reasons, the raw answer), **Replay in
@@ -105,13 +122,15 @@ the debrief**, **Judge**, **Stop**, **Delete**.
 **Score** (0–100): 100 minus penalties, each listed with its count — loss of separation 25 each and 2 per minute of
 loss; infringement of an active area 10; weather penetration 5; RVSM violation 5; wrong-direction exit 3; request
 expired 4, still pending at the end 2; slow answers (mean over 60 s) 1 per 30 s; aircraft never assumed 3, assumed more
-than 30 s after calling 1; instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
+than 30 s after calling 1; aircraft not transferred 2 minutes after leaving the sector 2, transferred late 1;
+instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
 
 **Each decision** gets a reward and a label from what happened after it:
 
 | | |
 |---|---|
-| +1 | per calling aircraft assumed, per pilot request answered |
+| +1 | per calling aircraft assumed, per pilot request answered, per aircraft that had left transferred |
+| −1 | per aircraft calling it left unanswered, per aircraft that left over 2 min ago it did not transfer |
 | +3 | per predicted conflict it was shown (under 10 min) and acted on, that did not become a loss |
 | −8 | per loss starting in the 10 minutes after it, between aircraft it acted on |
 | −5 | per conflict it was shown under 5 min and left alone, that became a loss |
@@ -136,5 +155,7 @@ models, runs scoring at least…, labels, judge grade at least…) and exports t
 
 **Download** it, or use its **RunPod link** on the training machine (`wget -O /workspace/data/atc.jsonl "<link>"`):
 whoever has the link can download the dataset, so give it to the pod, not in public places.
+
+The run card also shows *first calls answered* and *transferred* (out of how many).
 
 ![Selecting experiences and exporting a dataset](/static/docs/ai_data.jpg "Selecting experiences and exporting a dataset")

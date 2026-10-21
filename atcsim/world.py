@@ -476,7 +476,7 @@ class World:
             a.assumed, a.released = False, True
             rec.update(status="executed", execute_at_s=round(self.t, 1))
             self.instructions.append(rec)
-            self._event("released", callsign=cs, outside=a.outside,
+            self._event("released", callsign=cs, outside=a.outside, unit=getattr(a, "next_unit", None),
                         text=f"{cs} decontrolled" + ("" if a.outside else " (still inside the sector)"))
             return rec
         if norm["type"] == "assume":

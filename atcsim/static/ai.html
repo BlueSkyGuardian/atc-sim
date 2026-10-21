@@ -236,13 +236,13 @@ async function loadRuns() {
     return `<div class="run"><div class="t"><span>${esc(r.scenario)}</span><span class="pill ${r.status}">${r.status.toUpperCase()}</span></div>
       <div class="s">${esc(r.model_name)} · ${esc(r.agent_name)} · ${fmtDate(r.created_at)}</div>
       ${r.preview ? svgPreview(r.preview) : `<svg></svg>`}
-      ${['running', 'queued'].includes(r.status) ? `<div class="bar"><i style="width:${Math.min(100, 100 * (pg.t || 0) / (pg.duration || 2700))}%"></i></div><div class="s">T+${fmtT(pg.t)} · ${pg.decisions || 0} decisions${pg.errors ? ` · <span class="c-los">${pg.errors} model errors</span>` : ''}${pg.last && pg.last.actions && pg.last.actions.length ? ' · last: ' + esc(pg.last.actions.slice(0, 2).join('; ')) : ''}</div>` : ''}
-      ${sc != null ? `<div class="row" style="justify-content:space-between"><span class="score ${cls}">${sc}</span><span class="s">${ev.losses} loss${ev.losses === 1 ? '' : 'es'} · ${ev.decisions} decisions · ${ev.actions} instructions${ev.refused ? ` · ${ev.refused} refused` : ''}</span></div>` : ''}
+      ${['running', 'queued'].includes(r.status) ? `<div class="bar"><i style="width:${Math.min(100, 100 * (pg.t || 0) / (pg.duration || 2700))}%"></i></div><div class="s">T+${fmtT(pg.t)} · ${pg.decisions || 0} decisions${pg.errors ? ` · <span class="c-los">${pg.errors} model errors</span>` : ''}${pg.thinking ? ' · <span style="color:#ffd166">model deciding…</span>' : ''}${pg.last && pg.last.actions && pg.last.actions.length ? ' · last: ' + esc(pg.last.actions.slice(0, 2).join('; ')) : ''}</div>` : ''}
+      ${sc != null ? `<div class="row" style="justify-content:space-between"><span class="score ${cls}">${sc}</span><span class="s">${ev.losses} loss${ev.losses === 1 ? '' : 'es'} · ${ev.decisions} decisions · ${ev.actions} instructions${ev.refused ? ` · ${ev.refused} refused` : ''}${ev.first_calls ? ` · first calls answered ${ev.first_calls.answered}/${ev.first_calls.calls}` : ''}${ev.transfers && ev.transfers.left ? ` · transferred ${ev.transfers.left - ev.transfers.never}/${ev.transfers.left}` : ''}</span></div>` : ''}
       ${r.error ? `<div class="s c-los">${esc(r.error)}</div>` : ''}
       ${r.judge ? `<div class="s">judge (${esc(r.judge.model)}): ${r.judge.status === 'done' ? `mean grade <b>${r.judge.mean_grade ?? '–'}</b>/5` : `grading ${r.judge.done || 0}/${r.judge.total || '…'}`}</div>` : ''}
       <div class="acts"><button class="small" data-steps="${r.id}">Decisions</button>
         ${['done', 'stopped'].includes(r.status) ? `<a href="/debrief/${r.exercise_id}" target="_blank"><button class="small primary">Replay in the debrief</button></a><button class="small" data-judge="${r.id}">Judge</button>` : ''}
-        ${['running', 'queued'].includes(r.status) ? `<button class="small" data-stop="${r.id}">Stop</button>` : `<button class="small" data-del="${r.id}">Delete</button>`}</div></div>`;
+        ${['running', 'queued'].includes(r.status) ? `<a href="/ai/watch/${r.id}" target="_blank"><button class="small primary">● Watch live</button></a><button class="small" data-stop="${r.id}">Stop</button>` : `<button class="small" data-del="${r.id}">Delete</button>`}</div></div>`;
   }).join('') || '<div class="hint">No run yet.</div>';
   if ($('#runs').dataset.h !== html) {
     $('#runs').innerHTML = html; $('#runs').dataset.h = html;
