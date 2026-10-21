@@ -37,6 +37,11 @@ put("spTotal", FD["total"]); put("spFeas", FD["feasible"])
 for k, nm in (("speed", "Spd"), ("direct", "Dct"), ("heading", "Hdg"), ("level", "Lvl")):
     put(f"sp{nm}N", FD["counts"][k][0]); put(f"sp{nm}Ok", FD["counts"][k][1])
 
+FE = json.load(open(f"{D}/fig_e.json"))
+put("jtA", FE["A"]); put("jtB", FE["B"]); put("jtT", FE["t"]); put("jtN", FE["n"]); put("jtTau", int(FE["tau"] // 60))
+put("jtPair", f"{FE['pair_ok_pct']:.0f}"); put("jtOk", f"{FE['ok_pct']:.0f}"); put("jtMs", f"{FE['ms_per_point']:.2f}")
+put("jtPhiZero", f"{FE['phi0']:.1f}"); put("jtSh", f"{FE['sh']:g}")
+
 # ---- CPA vs sampling
 rows = B["rows"]
 DT = [1, 5, 10, 20, 30, 60]

@@ -69,6 +69,28 @@ over heading change and duration with the grid's candidates; level: the levels o
 \label{fig:costphi}
 \end{figure}
 
+\paragraph{Two clearances at once.} When no single clearance works, the solver searches pairs (\cref{sec:sets}).
+\Cref{fig:joint} shows what that search is over, in a busier situation: scenario s10 at T+\jtT\,s, where \jtA\ and
+\jtB, both at FL370 with $\Sh=\jtSh\NM$, would pass \jtPhiZero\NM\ apart, in busy traffic: the vectors of \jtA\ also bring it
+near RYR3, TAP7 and SWR40. Both are given a \jtTau-minute delaying vector, each heading change on one axis, and the
+surface is $\Phi$, the closest either then comes to anyone ($37\times37=\jtN$ combinations, \jtMs\,ms each). The
+single-clearance solutions lie on the two axes, where one aircraft keeps its route; here neither axis reaches the
+plane $\Phi=\Sh+m$. Separating the pair alone is easy: \jtPair\% of the plane does it (dotted). Leaving everyone
+separated is not: the third aircraft --- mainly RYR3, TAP7 and SWR40 --- cut that down to \jtOk\%, in two regions.
+In both, \jtA\ turns left; \jtB\ then turns right by about $40^\circ$ or more, or left by about $30^\circ$ or more ---
+far enough that neither meets the others. This is
+the reason the separation function takes the minimum over everyone: the dotted contour, the answer of a pairwise
+method, is mostly made of clearances that create a new conflict.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\linewidth]{figs/f10_joint_heading.pdf}
+\caption{Joint heading space of a conflicting pair (scenario s10): both aircraft vectored for \jtTau\ minutes, then
+resuming. Left: the surface of $\Phi$ over the two heading changes and the plane $\Phi=\Sh+m$. Right: top view; orange:
+the solution set's boundary, dotted: the same boundary for the pair alone, ignoring everyone else; solid and dashed
+axes: one aircraft keeps its route (single clearances); cross: no action.}
+\label{fig:joint}
+\end{figure}
+
 \subsection{Exact CPA against sampling}
 
 Over \cpaSits\ situations taken every two minutes in ten scenarios (aircraft not controlled), the \cpaPairs\ pairs
