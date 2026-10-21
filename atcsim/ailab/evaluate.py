@@ -13,6 +13,7 @@ Per decision (experience labels), from what happened after it:
   -5   per conflict it was shown under 5 min and left alone (no action on either aircraft) that became a loss
   -2   per request waiting more than 2 min that it left unanswered
   +1   per aircraft that had left the sector it transferred (decontrolled)
+  +1   per aircraft on a heading shown as clear to resume that it resumed (resume or a direct); -1 if left on it
   -1   per aircraft calling it left unanswered, per aircraft that left over 2 min ago it did not transfer
   -1   per instruction refused, -2 if its answer could not be read
   label: good (reward > 0), bad (< 0), neutral (0).
@@ -137,6 +138,16 @@ def label(w, steps: List[dict]) -> None:
         if stale_out:
             r -= len(stale_out)
             why.append(f"-{len(stale_out)} not transferred (left over 2 min ago)")
+        td = shown.get("todo") or {}
+        res_cs = set(td.get("resume") or [])
+        resumed = {str(x["action"].get("callsign", "")).upper() for x in s.get("results") or [] if x.get("ok")
+                   and (x["action"].get("type") == "resume" or x["action"].get("direct"))}
+        if res_cs & resumed:
+            r += len(res_cs & resumed)
+            why.append(f"+{len(res_cs & resumed)} resumed when clear")
+        if res_cs - acted:
+            r -= len(res_cs - acted)
+            why.append(f"-{len(res_cs - acted)} left on a heading though clear to resume")
         waiting = [x for x in shown.get("calling") or [] if x["callsign"] not in acted]
         if waiting:
             r -= len(waiting)

@@ -120,4 +120,6 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                 raise ValueError(f"unknown action type '{t}'")
         except (InstructionError, ValueError, KeyError) as e:
             out.append({"action": a, "ok": False, "text": str(e).strip("'")})
+    for a in actions[max_actions:]:
+        out.append({"action": a, "ok": False, "text": f"not given: more than {max_actions} instructions in one answer (give it next time)"})
     return out

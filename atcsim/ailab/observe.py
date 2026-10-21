@@ -1,14 +1,25 @@
 """The situation as the controller's screen shows it, written as compact text for a language model.
 
 observe(w, opts) -> (text, struct). The struct is what was shown, kept with the decision (experience data).
-Options (agent profile): conflicts (MTCD), weather, inbound, routes, max_aircraft.
+
+The text starts with TO DO NOW: the work waiting (aircraft calling to assume, aircraft that left to transfer,
+requests to answer, conflicts to solve, aircraft on a heading that can resume), then the details: every aircraft
+with its position, level, route, RVSM status, the last instruction it was given and, for an aircraft on a heading,
+whether resuming its route now is conflict-free; the conflicts with their geometry (distance and bearing now, angle
+between the tracks, a common point and both times to it) and the levels that are conflict-free for each aircraft
+(the conflict probe, as the controller's label menu has it).
+
+Options (agent profile): conflicts (MTCD), weather, inbound, routes, positions, todo, hints (probe: free levels,
+resume check, requests), max_aircraft.
 """
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
-DEFAULTS = {"conflicts": True, "weather": True, "inbound": True, "routes": True, "max_aircraft": 40}
+DEFAULTS = {"conflicts": True, "weather": True, "inbound": True, "routes": True, "positions": True, "todo": True,
+            "hints": True, "max_aircraft": 40}
+SOLVE_S = 600            # conflicts listed in TO DO under this time
 
 
 def _t(s: float) -> str:
@@ -16,14 +27,62 @@ def _t(s: float) -> str:
     return f"{s // 60:02d}:{s % 60:02d}"
 
 
-def _dist(w, a: dict, wp: str):
-    p = w.waypoints.get(wp)
-    if not p:
+def _dist_xy(p, q) -> float:
+    return math.hypot(q[0] - p[0], q[1] - p[1])
+
+
+def _brg(p, q) -> int:
+    return int(round(math.degrees(math.atan2(q[0] - p[0], q[1] - p[1])) % 360)) or 360
+
+
+def _ahead(w, cs: str) -> List[str]:
+    ac = w.aircraft.get(cs)
+    if ac is None:
+        return []
+    return [p for p in ac.route[ac.next_index:] if not str(p).startswith("@") and p in w.waypoints]
+
+
+def _eta(w, a: dict, point: str) -> Optional[float]:
+    """Seconds to a point along the route (own navigation only)."""
+    if a.get("nav_mode") not in ("lnav", None) or not a.get("gs_kt"):
         return None
-    return math.hypot(p[0] - a["x_nm"], p[1] - a["y_nm"])
+    pos, d = (a["x_nm"], a["y_nm"]), 0.0
+    for p in _ahead(w, a["callsign"]):
+        q = w.waypoints[p]
+        d += _dist_xy(pos, q)
+        pos = q
+        if p == point:
+            return d / a["gs_kt"] * 3600
+    return None
 
 
-def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict) -> Tuple[str, dict]:
+def _last_instructions(w) -> Dict[str, Tuple[float, str]]:
+    from .. import inputs
+    out = {}
+    for x in inputs.log(w):
+        if x.get("kind") == "entries":
+            cs = str((x.get("body") or {}).get("callsign", "")).upper()
+            b = x.get("body") or {}
+            parts = []
+            for k in ("cfl", "xfl", "heading", "direct", "speed"):
+                v = b.get(k)
+                if v is None or (v == "" and k != "heading"):
+                    continue
+                parts.append("RESUME own navigation" if k == "heading" and v == "" else f"{k.upper()} {v}")
+            if parts:
+                out[cs] = (float(x.get("t", 0)), " ".join(parts))
+    return out
+
+
+def _rvsm(a: dict) -> str:
+    r = a.get("rvsm")
+    st = r.get("status") if isinstance(r, dict) else r
+    if st in (None, "approved", True):
+        return ""
+    return "NON-RVSM" if st in ("non_approved", False) else f"RVSM {str(st).upper()}"
+
+
+def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[float, str]], resume: Optional[dict]) -> Tuple[str, dict]:
     cs = a["callsign"]
     vs = a.get("vertical_speed_fpm") or 0
     trend = "↑" if vs > 200 else "↓" if vs < -200 else "="
@@ -35,41 +94,73 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict) -> Tuple[str, dict]:
     else:
         spd = f"{a.get('ias_kt')}kt"
     nav = a.get("nav_mode")
+    ahead = _ahead(w, cs)
     if nav == "heading":
-        lat = f"heading {int(a.get('assigned_heading') or a['heading']):03d}"
+        lat = f"ON HEADING {int(a.get('assigned_heading') or a['heading']):03d} (off its route"
+        lat += f", route continues {' '.join(ahead[:4])})" if ahead else ")"
     elif nav == "wxdev":
         lat = "deviating for weather"
     else:
-        route = [p for p in (a.get("route") or []) if not str(p).startswith("@")]
-        nxt = a.get("next_waypoint") or (route[0] if route else None)
-        d = _dist(w, a, nxt) if nxt else None
+        nxt = ahead[0] if ahead else a.get("next_waypoint")
+        d = _dist_xy((a["x_nm"], a["y_nm"]), w.waypoints[nxt]) if nxt in w.waypoints else None
         lat = f"direct {nxt}" + (f" {d:.0f}NM" if d is not None else "") if nxt else "own navigation"
-        if opts.get("routes") and route:
-            i = route.index(nxt) if nxt in route else 0
-            lat += " then " + " ".join(route[i + 1:i + 5]) if len(route) > i + 1 else ""
+        if opts.get("routes") and len(ahead) > 1:
+            lat += " then " + " ".join(ahead[1:5])
     fp = a.get("flight_plan") or {}
-    exitp = co.get("next_unit")
-    xfl = co.get("xfl")
-    parts = [cs, a.get("type", ""), lvl, f"trk {int(a['track_deg']):03d} gs {a['gs_kt']}", spd, lat]
+    parts = [cs, a.get("type", "")]
+    if opts.get("positions"):
+        parts.append(f"at ({a['x_nm']:.0f},{a['y_nm']:.0f})")
+    parts += [lvl, f"trk {int(a['track_deg']):03d} gs {a['gs_kt']}", spd, lat]
+    rv = _rvsm(a)
+    if rv:
+        parts.append(rv)
+    if a.get("formation"):
+        parts.append("MILITARY FORMATION (2000 ft from everyone)")
     if fp.get("destination"):
         parts.append(f"to {fp.get('destination')}")
-    if xfl and exitp:
-        parts.append(f"exit FL{xfl:03d} to {exitp}")
+    xfl, nu = co.get("xfl"), co.get("next_unit") or a.get("next_unit")
+    if xfl and nu:
+        parts.append(f"exit FL{xfl:03d} to {nu}")
     if a.get("to_exit_nm") is not None and a.get("assumed"):
         parts.append(f"leaves your sector in {a['to_exit_nm']:.0f}NM")
     if a.get("weather_ahead_nm") is not None and opts.get("weather"):
         parts.append(f"WEATHER {a['weather_ahead_nm']:.0f}NM ahead")
     if a.get("emergency"):
         parts.append(f"EMERGENCY {a['emergency']}")
-    if ent:
-        e = " ".join(f"{k.upper()} {v}" for k, v in ent.items() if k not in ("t",) and v not in (None, ""))
-        if e:
-            parts.append(f"[entered: {e}]")
+    if last:
+        parts.append(f"your last instruction: {last[1]} ({_t(w.t - last[0])} ago)")
+    if resume is not None:
+        if resume["ok"]:
+            parts.append("resuming its route now: no conflict")
+        else:
+            fl = resume.get("levels")
+            parts.append(f"resuming now would conflict with {resume['with']} in {_t(resume['in_s'])}"
+                         + (f" (resumed at FL{fl[0]}: no conflict)" if fl else ""))
     st = {"callsign": cs, "type": a.get("type"), "fl": a["fl"], "cleared_fl": a.get("cleared_fl"), "vs": vs,
           "trk": int(a["track_deg"]), "gs": a["gs_kt"], "x": round(a["x_nm"], 1), "y": round(a["y_nm"], 1),
-          "nav": nav, "next": a.get("next_waypoint"), "assumed": a.get("assumed"), "on_frequency": a.get("on_frequency"),
-          "xfl": xfl, "dest": fp.get("destination")}
+          "nav": nav, "next": ahead[0] if ahead else None, "assumed": a.get("assumed"), "on_frequency": a.get("on_frequency"),
+          "xfl": xfl, "dest": fp.get("destination"), "rvsm": rv or "approved"}
+    if resume is not None:
+        st["resume_ok"] = resume["ok"]
     return " · ".join(str(p) for p in parts if p), st
+
+
+def _free_levels(w, a: dict) -> List[str]:
+    """Conflict-free levels near the aircraft's (the probe), with the direction rule."""
+    from .. import atctools
+    from ..aircraft import level_parity_ok
+    ac = w.aircraft.get(a["callsign"])
+    base = int(a.get("cleared_fl") or a["fl"])
+    cand = [base + d for d in (10, -10, 20, -20, 30, -30, 40, -40) if 100 <= base + d <= w.upper_fl]
+    try:
+        p = atctools.probe(w, a["callsign"], levels=cand)
+    except Exception:  # noqa: BLE001
+        return []
+    out = []
+    for fl in cand:
+        if not p["levels"].get(str(fl)):
+            out.append(f"{fl}" + ("" if ac is None or level_parity_ok(fl, ac.southbound) else "(wrong direction)"))
+    return out[:4]
 
 
 def observe(w, opts: Dict = None) -> Tuple[str, dict]:
@@ -79,22 +170,89 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
     sep_h = st.get("separation_minimum_nm") or 5
     coord, entries = st.get("coord") or {}, st.get("entries") or {}
     acs = [a for a in st["aircraft"] if a.get("status") == "active"]
+    by_cs = {a["callsign"]: a for a in acs}
     mine = [a for a in acs if a.get("assumed")]
     calling = [a for a in acs if a.get("on_frequency") and not a.get("assumed")]
+    gone = [a for a in st.get("transferred") or [] if a.get("assumed")]
+    reqs = [r for r in st.get("pending_requests") or [] if r.get("kind") != "checkin"]
+    last = _last_instructions(w)
+    hints = bool(o.get("hints"))
+    struct = {"t": round(w.t, 1), "mine": [], "calling": [], "requests": [], "conflicts": [], "losses": [], "to_decontrol": [],
+              "todo": {}}
+
+    # what the probe says: resuming the aircraft on a heading, the levels requested
+    resume = {}
+    if hints:
+        for a in mine:
+            if a.get("nav_mode") == "heading":
+                ah = _ahead(w, a["callsign"])
+                if ah:
+                    try:
+                        c = atctools.probe(w, a["callsign"], direct=ah[0]).get("conflicts") or []
+                    except Exception:  # noqa: BLE001
+                        c = []
+                    c = [x for x in c if x["time_to_conflict_s"] <= SOLVE_S]
+                    resume[a["callsign"]] = {"ok": not c, "with": c and [y for y in c[0]["aircraft"] if y != a["callsign"]][0],
+                                             "in_s": c and c[0]["time_to_conflict_s"]}
+                    if c:                                   # a level that would let it resume
+                        from ..aircraft import level_parity_ok
+                        acx = w.aircraft[a["callsign"]]
+                        base = int(a.get("cleared_fl") or a["fl"])
+                        for d in (20, -20, 40, -40, 10, -10):
+                            fl = base + d
+                            if not (100 <= fl <= w.upper_fl) or not level_parity_ok(fl, acx.southbound):
+                                continue
+                            try:
+                                cc = atctools.probe(w, a["callsign"], cfl=fl, direct=ah[0]).get("conflicts") or []
+                            except Exception:  # noqa: BLE001
+                                cc = []
+                            if not [x for x in cc if x["time_to_conflict_s"] <= SOLVE_S]:
+                                resume[a["callsign"]]["levels"] = [fl]
+                                break
+    cf = []
+    if o.get("conflicts"):
+        relevant = {a["callsign"] for a in mine + calling}
+        cf = [c for c in atctools.mtcd(w) if set(c["aircraft"]) & relevant][:12]
+
+    # ---- TO DO NOW
     lines = [f"TIME T+{_t(w.t)} (exercise {_t(w.duration_s)}), UTC {st.get('utc', '')}",
-             f"SEPARATION {sep_h:g} NM or 1000 ft (2000 ft for non-RVSM aircraft in RVSM airspace). "
+             f"SEPARATION {sep_h:g} NM or 1000 ft (2000 ft with a non-RVSM aircraft in FL290-410, and above FL410). "
              f"Levels you can assign: FL100-FL{w.upper_fl}."]
-    struct = {"t": round(w.t, 1), "mine": [], "calling": [], "requests": [], "conflicts": [], "losses": []}
+    todo = []
+    if calling:
+        todo.append("ASSUME (they are calling you; answer them all now): " + ", ".join(
+            f"{a['callsign']} (waiting {_t(w.t - (getattr(w.aircraft.get(a['callsign']), 'first_contact_t', None) or w.t))})" for a in calling))
+    if gone:
+        todo.append("TRANSFER = decontrol (they have left your sector): " + ", ".join(a["callsign"] for a in gone))
+    if reqs:
+        todo.append("ANSWER the pilot requests: " + ", ".join(r["id"] for r in reqs))
+    urgent = [c for c in cf if c["time_to_conflict_s"] <= SOLVE_S and not c.get("current")]
+    if urgent:
+        todo.append("SOLVE the conflicts: " + ", ".join(f"{c['aircraft'][0]}×{c['aircraft'][1]} in {_t(c['time_to_conflict_s'])}" for c in urgent))
+    rs = [cs for cs, r in resume.items() if r["ok"]]
+    if rs:
+        todo.append("RESUME (on a heading, now clear of conflict): " + ", ".join(rs))
+    hold = [cs for cs, r in resume.items() if not r["ok"]]
+    if hold:
+        todo.append("WATCH (on a heading, not clear yet: keep the heading or solve otherwise, then resume): " + ", ".join(hold))
+    if o.get("todo"):
+        lines.append("\nTO DO NOW:")
+        lines += ["- " + x for x in todo] or ["- nothing pending: check the conflicts and the aircraft on headings"]
+    struct["todo"] = {"assume": [a["callsign"] for a in calling], "transfer": [a["callsign"] for a in gone],
+                      "answer": [r["id"] for r in reqs], "solve": [c["aircraft"] for c in urgent], "resume": rs, "hold": hold}
+
+    # ---- the aircraft
     lines.append(f"\nYOUR AIRCRAFT (assumed) — {len(mine)}:")
     for a in mine[:o["max_aircraft"]]:
-        txt, s = _ac_line(w, a, entries.get(a["callsign"], {}), coord.get(a["callsign"], {}), o)
+        txt, s = _ac_line(w, a, entries.get(a["callsign"], {}), coord.get(a["callsign"], {}), o, last.get(a["callsign"]),
+                          resume.get(a["callsign"]))
         lines.append("- " + txt)
         struct["mine"].append(s)
     if not mine:
         lines.append("- none")
     lines.append(f"\nCALLING YOU (first call on your frequency, waiting for you: answer with assume) — {len(calling)}:")
     for a in calling[:o["max_aircraft"]]:
-        txt, s = _ac_line(w, a, {}, coord.get(a["callsign"], {}), o)
+        txt, s = _ac_line(w, a, {}, coord.get(a["callsign"], {}), o, None, None)
         ac = w.aircraft.get(a["callsign"])
         fc = getattr(ac, "first_contact_t", None)
         if fc is not None:
@@ -104,8 +262,6 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
         struct["calling"].append(s)
     if not calling:
         lines.append("- none")
-    gone = [a for a in st.get("transferred") or [] if a.get("assumed")]
-    struct["to_decontrol"] = []
     if gone:
         lines.append(f"\nLEFT YOUR SECTOR, still assumed (transfer them: decontrol) — {len(gone)}:")
         for a in gone[:o["max_aircraft"]]:
@@ -117,30 +273,59 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
     if o.get("inbound"):
         inb = st.get("inbound") or []
         if inb:
-            lines.append(f"\nINBOUND (not on frequency yet) — {len(inb)}:")
+            lines.append(f"\nINBOUND (not on frequency yet: plan for them, you cannot instruct them) — {len(inb)}:")
             for i in sorted(inb, key=lambda i: i.get("time_to_entry_s") or 0)[:12]:
                 lines.append(f"- {i['callsign']} {i.get('type', '')} FL{i.get('fl', 0):03d} entering at {i.get('entry_waypoint')}"
                              f" in {_t(i.get('time_to_entry_s') or 0)}, route {' '.join(i.get('route') or [])}"
                              + (f" to {i['destination']}" if i.get("destination") else ""))
-    reqs = [r for r in st.get("pending_requests") or [] if r.get("kind") != "checkin"]
+
+    # ---- requests
     lines.append(f"\nPILOT REQUESTS waiting for your answer — {len(reqs)}:")
     for r in reqs:
-        lines.append(f"- {r['id']}: {r['phraseology']}" + (f" ({r['reason']})" if r.get("reason") else "")
-                     + f", waiting {_t(w.t - r['time_s'])}")
+        txt = f"- {r['id']}: {r['phraseology']}" + (f" ({r['reason']})" if r.get("reason") else "") + f", waiting {_t(w.t - r['time_s'])}"
+        if hints and r.get("type") in ("altitude", "climb", "descent") and str(r.get("value", "")).upper().lstrip("F").lstrip("L").isdigit():
+            fl = int(str(r["value"]).upper().lstrip("F").lstrip("L"))
+            try:
+                c = atctools.probe(w, r["callsign"], levels=[fl])["levels"].get(str(fl)) or []
+                txt += " · probe: " + ("no conflict at FL%03d" % fl if not c else f"conflict with {c[0]['with']} in {_t(c[0]['in_s'])}")
+            except Exception:  # noqa: BLE001
+                pass
+        lines.append(txt)
         struct["requests"].append({"id": r["id"], "callsign": r["callsign"], "type": r["type"], "value": r.get("value"),
                                    "reason": r.get("reason"), "age_s": round(w.t - r["time_s"])})
     if not reqs:
         lines.append("- none")
+
+    # ---- conflicts, with their geometry
     if o.get("conflicts"):
-        relevant = {a["callsign"] for a in mine + calling}
-        cf = [c for c in atctools.mtcd(w) if set(c["aircraft"]) & relevant][:12]
-        lines.append(f"\nPREDICTED CONFLICTS (system trajectories, next {int(atctools.look_ahead(w) // 60)} min) — {len(cf)}:")
+        lines.append(f"\nPREDICTED CONFLICTS (system trajectories as cleared now, next {int(atctools.look_ahead(w) // 60)} min) — {len(cf)}:")
         for c in cf:
             a, b = c["aircraft"]
-            lines.append(f"- {a} × {b}: in {_t(c['time_to_conflict_s'])}, closest {c['min_horizontal_nm']} NM / "
-                         f"{c['vertical_ft']} ft (levels {c['levels'][0]}/{c['levels'][1]})")
+            A, B = by_cs.get(a), by_cs.get(b)
+            txt = (f"- {a} × {b}: {'NOW' if c.get('current') else 'in ' + _t(c['time_to_conflict_s'])}, closest {c['min_horizontal_nm']} NM / "
+                   f"{c['vertical_ft']} ft (levels {c['levels'][0]}/{c['levels'][1]}; needs {c.get('required_horizontal_nm', sep_h):g} NM or "
+                   f"{c.get('required_vertical_ft', 1000)} ft)")
+            geo = {}
+            if A and B:
+                pa, pb = (A["x_nm"], A["y_nm"]), (B["x_nm"], B["y_nm"])
+                ang = abs((A["track_deg"] - B["track_deg"] + 180) % 360 - 180)
+                kind = "same direction" if ang < 45 else "opposite" if ang > 135 else "crossing"
+                txt += f"; now {_dist_xy(pa, pb):.0f} NM apart, {b} bears {_brg(pa, pb):03d} from {a}; tracks {int(A['track_deg']):03d}/{int(B['track_deg']):03d} ({kind}, {ang:.0f}°)"
+                common = next((p for p in _ahead(w, a) if p in set(_ahead(w, b))), None)
+                if common:
+                    ea, eb = _eta(w, A, common), _eta(w, B, common)
+                    if ea is not None and eb is not None:
+                        txt += f"; both route via {common}: {a} in {_t(ea)}, {b} in {_t(eb)} ({abs(ea - eb):.0f} s apart)"
+                        geo["common"] = common
+                if hints:
+                    for X in (A, B):
+                        if X.get("assumed"):
+                            fl = _free_levels(w, X)
+                            txt += f"; conflict-free levels for {X['callsign']}: {', '.join(fl) if fl else 'none nearby'}"
+                            geo["free_" + X["callsign"]] = fl
+            lines.append(txt)
             struct["conflicts"].append({"aircraft": [a, b], "in_s": c["time_to_conflict_s"], "min_nm": c["min_horizontal_nm"],
-                                        "vertical_ft": c["vertical_ft"]})
+                                        "vertical_ft": c["vertical_ft"], **geo})
         if not cf:
             lines.append("- none")
     los = st.get("current_losses") or []

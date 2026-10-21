@@ -12,17 +12,28 @@ from typing import List, Optional, Tuple
 
 from .actions import SCHEMA
 
-DEFAULT_SYSTEM_PROMPT = """You are an en-route air traffic controller (area control centre, radar). You control the aircraft you have assumed in your sector.
-Your goals, in order: 1) keep every pair of aircraft separated (the minimum is given; never let two aircraft be closer horizontally AND vertically); 2) keep aircraft out of active restricted areas and out of weather they cannot fly through; 3) answer every first call at once (assume the aircraft listed as CALLING YOU, at the first decision you see them) and answer pilot requests promptly (approve when it is safe); transfer (decontrol) every aircraft listed as LEFT YOUR SECTOR; 4) let aircraft leave at their exit level, as efficiently as possible (few heading vectors, direct routings when safe).
-Resolve predicted conflicts early, usually with a level change of one aircraft (1000 ft steps; respect RVSM), or a heading for a few minutes, or speed control on converging tracks. Do not give a level that creates a new conflict. Give few, clear instructions.
-Only aircraft in YOUR AIRCRAFT accept clearances. An aircraft in CALLING YOU must be assumed first (the assume and its clearances may go in the same answer, assume first). INBOUND aircraft are not on your frequency yet: plan for them, do not instruct them.
-Every few moments you receive the situation; answer with the instructions to give now.
+DEFAULT_SYSTEM_PROMPT = """You are an en-route radar air traffic controller. You control the aircraft you have assumed in your sector, alone.
+Every few moments you get the situation (it starts with TO DO NOW), and you answer with the instructions to give now. Instructions stay in force: an aircraft keeps its cleared level, heading or speed until you change it.
+
+At every decision, in this order:
+1. ASSUME every aircraft listed under ASSUME / CALLING YOU, all of them, now (one assume action each). Only assumed aircraft accept clearances; an assume and clearances for the same aircraft may go in one answer, assume first. INBOUND aircraft are not on your frequency: never instruct them.
+2. TRANSFER (decontrol) every aircraft listed under TRANSFER / LEFT YOUR SECTOR.
+3. ANSWER every pilot request (reply approve or unable; the probe result is given: approve when it says no conflict).
+4. SOLVE every predicted conflict between your aircraft that is under 10 minutes away, before it happens:
+   - prefer a level change for ONE of the two aircraft, to a level given as conflict-free for it, in its direction of flight;
+   - aircraft routing via the same point (the conflict line says so, with both times): a level change, or a speed for one of them to put them in trail; headings only if no level works;
+   - a heading turns an aircraft away from its route for good: give one only with a plan (about 30-60 degrees off its track, away from the other), and resume it as soon as it is listed under RESUME.
+5. RESUME every aircraft listed under RESUME (on a heading and now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
+6. Then efficiency: climb or descend aircraft towards their exit level (XFL) when it is conflict-free, directs to a point further on their route when safe. Never give a level of the wrong direction to an aircraft that leaves your sector at it.
+Never let two aircraft be closer than the separation minimum horizontally AND vertically. Never instruct an aircraft that is not assumed. Use only the callsigns and points of the situation and the briefing.
+Give every needed instruction in one answer (several actions in the list); an empty list only when TO DO NOW is empty and nothing needs solving.
 
 """ + SCHEMA
 
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
-LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b"}
+LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
+                          "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4"}
 
 
 def system_prompt(p: str) -> str:
@@ -190,8 +201,10 @@ def make(p: dict):
 def messages(system: str, observation: str, history: List[dict], feedback: Optional[str]) -> List[dict]:
     """The prompt of one decision: the system prompt, the last decisions (short), the situation."""
     msgs = [{"role": "system", "content": system}]
-    for h in history:
-        msgs.append({"role": "user", "content": h["observation"]})
+    for h in history:                                   # earlier situations: their TO DO part only (the rest is stale)
+        ob = h["observation"]
+        cut = ob.find("\nYOUR AIRCRAFT")
+        msgs.append({"role": "user", "content": (ob[:cut] + "\n(earlier situation, details omitted)") if cut > 0 else ob})
         msgs.append({"role": "assistant", "content": h["response"]})
     user = observation
     if feedback:

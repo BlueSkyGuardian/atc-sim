@@ -190,7 +190,7 @@ class AgentIn(BaseModel):
 def _agent_defaults() -> dict:
     from ..ailab import agents, observe
     return {"system_prompt": agents.DEFAULT_SYSTEM_PROMPT, "interval_s": 30, "event_triggers": True, "history": 2,
-            "max_actions": 12, "observation": dict(observe.DEFAULTS)}
+            "max_actions": 30, "briefing": True, "observation": dict(observe.DEFAULTS)}
 
 
 @router.get("/api/ai/agents")
@@ -206,6 +206,8 @@ def agents_list(request: Request):
     def cfg(r):
         c = {**_agent_defaults(), **json.loads(r["config"])}
         c["system_prompt"] = _ag.system_prompt(c.get("system_prompt"))
+        if int(c.get("max_actions") or 0) == 12:          # the former default: too few with ten aircraft calling
+            c["max_actions"] = 30
         return c
     return {"agents": [{"id": r["id"], "name": r["name"], "config": cfg(r)} for r in rows],
             "defaults": _agent_defaults()}

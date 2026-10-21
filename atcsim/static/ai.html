@@ -104,13 +104,17 @@
         <label>Name</label><input type="text" id="aName">
         <label>System prompt</label><div><textarea id="aPrompt"></textarea><div class="row"><button class="small" id="aReset">Default prompt</button><span class="hint">ends with the instruction set (keep it: the answers are parsed as that JSON)</span></div></div>
         <label>Decides every</label><div class="row"><input type="number" id="aInt" min="5" max="600" style="width:80px"> s of simulated time <label style="color:var(--text)"><input type="checkbox" id="aTrig"> and at once when an aircraft calls, a request comes or a conflict under 5 min appears</label></div>
+        <label>Sector briefing</label><label style="color:var(--text)"><input type="checkbox" id="aBrief"> sent with the system prompt: the sector, points with positions, routes, separation rules, semicircular rule, how aircraft behave</label>
         <label>Memory</label><div class="row"><input type="number" id="aHist" min="0" max="10" style="width:80px"> previous decisions sent with each new one</div>
-        <label>Max instructions</label><div class="row"><input type="number" id="aMax" min="1" max="40" style="width:80px"> per decision</div>
+        <label>Max instructions</label><div class="row"><input type="number" id="aMax" min="1" max="60" style="width:80px"> per decision</div>
         <label>The situation shows</label><div class="row">
           <label style="color:var(--text)"><input type="checkbox" id="oConf"> predicted conflicts (MTCD)</label>
           <label style="color:var(--text)"><input type="checkbox" id="oWx"> weather ahead</label>
           <label style="color:var(--text)"><input type="checkbox" id="oInb"> inbound traffic</label>
           <label style="color:var(--text)"><input type="checkbox" id="oRte"> routes</label>
+          <label style="color:var(--text)" title="Positions (x, y in NM) of the aircraft, and the geometry of each conflict"><input type="checkbox" id="oPos"> positions and geometry</label>
+          <label style="color:var(--text)" title="The work waiting, at the top: assume, transfer, answer, solve, resume"><input type="checkbox" id="oTodo"> TO DO list</label>
+          <label style="color:var(--text)" title="The conflict probe: conflict-free levels for the aircraft in conflict, whether an aircraft on a heading can resume, whether a requested level is free"><input type="checkbox" id="oHint"> probe results</label>
           <label style="color:var(--text)">at most <input type="number" id="oMax" min="5" max="100" style="width:64px"> aircraft per list</label></div>
         <span></span><div class="row"><button class="primary" id="aSave">Save</button><span id="aMsg" class="hint"></span></div>
       </div>
@@ -188,11 +192,13 @@ function showAgent() {
   $('#aName').value = curAgent.name; $('#aPrompt').value = c.system_prompt; $('#aInt').value = c.interval_s; $('#aTrig').checked = c.event_triggers !== false;
   $('#aHist').value = c.history; $('#aMax').value = c.max_actions; $('#oConf').checked = o.conflicts !== false; $('#oWx').checked = o.weather !== false;
   $('#oInb').checked = o.inbound !== false; $('#oRte').checked = o.routes !== false; $('#oMax').value = o.max_aircraft || 40;
+  $('#oPos').checked = o.positions !== false; $('#oTodo').checked = o.todo !== false; $('#oHint').checked = o.hints !== false; $('#aBrief').checked = c.briefing !== false;
 }
 $('#aSel').onchange = showAgent;
 $('#aReset').onclick = () => { $('#aPrompt').value = AGDEF.system_prompt; };
-const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'),
-  max_actions: +val('aMax'), observation: { conflicts: $('#oConf').checked, weather: $('#oWx').checked, inbound: $('#oInb').checked, routes: $('#oRte').checked, max_aircraft: +val('oMax') } } });
+const agentBody = () => ({ name: val('aName'), config: { system_prompt: val('aPrompt'), interval_s: +val('aInt'), event_triggers: $('#aTrig').checked, history: +val('aHist'), briefing: $('#aBrief').checked,
+  max_actions: +val('aMax'), observation: { conflicts: $('#oConf').checked, weather: $('#oWx').checked, inbound: $('#oInb').checked, routes: $('#oRte').checked,
+  positions: $('#oPos').checked, todo: $('#oTodo').checked, hints: $('#oHint').checked, max_aircraft: +val('oMax') } } });
 $('#aSave').onclick = async () => { try { await api(`/api/ai/agents/${curAgent.id}`, { method: 'PUT', body: JSON.stringify(agentBody()) }); $('#aMsg').textContent = '✓ saved'; loadAgents(curAgent.id); } catch (e) { $('#aMsg').textContent = e.message; } };
 $('#aNew').onclick = async () => { const r = await post('/api/ai/agents', { name: 'New profile', config: AGDEF }); loadAgents(r.id); };
 $('#aDel').onclick = async () => { if (!curAgent || !confirm('Delete this profile?')) return; await api(`/api/ai/agents/${curAgent.id}`, { method: 'DELETE' }); loadAgents(); };

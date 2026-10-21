@@ -24,27 +24,51 @@ retried, and the traffic goes on if it still does not.
 
 ### What the model sees
 
+Once per run, with the system prompt (so with every request): a **sector briefing** — the sector and its
+boundary, the coordinates used (x east, y north, in NM; how to get a heading and a distance from them), every point
+with its position, the main routes and airways, the entry and exit points, the separation rules (horizontal minimum,
+1000 / 2000 ft with RVSM, above FL410, military formations), the semicircular rule, and how aircraft behave (a
+heading is flown until the controller clears them again).
+
+At each decision, the situation, starting with the work waiting:
+
 ```
-TIME T+05:00 (exercise 45:00), UTC 13:05
-SEPARATION 7 NM or 1000 ft (2000 ft for non-RVSM aircraft in RVSM airspace). Levels you can assign: FL100-FL460.
+TIME T+06:40 (exercise 45:00), UTC 13:07
+SEPARATION 7 NM or 1000 ft (2000 ft with a non-RVSM aircraft in FL290-410, and above FL410). Levels you can assign: FL100-FL460.
+
+TO DO NOW:
+- ASSUME (they are calling you; answer them all now): IBE4343 (waiting 03:45), BAW9522 (waiting 03:03)
+- TRANSFER = decontrol (they have left your sector): RYR1173X, NOZ7983
+- ANSWER the pilot requests: R001, R002
+- SOLVE the conflicts: NOZ4381P×EZY7537K in 04:10
+- WATCH (on a heading, not clear yet: keep the heading or solve otherwise, then resume): EWG3KP
 
 YOUR AIRCRAFT (assumed) — 12:
-- EWG3KP · A320 · FL350= · trk 229 gs 356 · M78 · direct IBALU 50NM then ERMED · to GCFV · exit FL350 to WS
-- RAM2880A · B738 · FL240= · trk 012 gs 444 · 300kt · direct OSLAD 94NM · to LEMD · exit FL240 to LECS
-CALLING YOU (first call on your frequency, waiting for you: answer with assume) — 1:
-- IBE4343 · B738 · FL350= · trk 204 gs 407 · M78 · direct CTAVE 184NM · to GCRR · exit FL350 to WS · called 00:12 ago
-LEFT YOUR SECTOR, still assumed (transfer them: decontrol) — 1:
-- NOZ7983 FL300, left 00:40 ago
-INBOUND (not on frequency yet) — 7:
-- EZY7537K A319 FL330 entering at KORNO in 01:55, route KORNO ABODA IBALU ERMED to GCFV
-PILOT REQUESTS waiting for your answer — 1:
-- R001: RAM2880A requesting FL340 (requesting cruise level), waiting 03:22
-PREDICTED CONFLICTS (system trajectories, next 20 min) — 1:
-- EWG3KP × IBE3247: in 03:20, closest 3.7 NM / 0 ft (levels 350/350)
+- EWG3KP · A320 · at (159,131) · FL350= · trk 270 gs 340 · M78 · ON HEADING 270 (off its route, route continues IBALU ERMED)
+  · to GCFV · exit FL350 to WS · leaves your sector in 158NM · your last instruction: HEADING 270 (04:40 ago)
+  · resuming now would conflict with IBE3247 in 03:20 (resumed at FL370: no conflict)
+- IBE3247 · A21N · at (160,123) · FL350= · trk 217 gs 372 · M78 · direct IBALU 43NM then ERMED · to GCLP · exit FL350 to WS
+CALLING YOU ... · called 03:45 ago
+LEFT YOUR SECTOR, still assumed (transfer them: decontrol) ...
+INBOUND (not on frequency yet: plan for them, you cannot instruct them) ...
+PILOT REQUESTS waiting for your answer — 2:
+- R001: RAM2880A requesting FL340 (requesting cruise level), waiting 05:02 · probe: no conflict at FL340
+PREDICTED CONFLICTS (system trajectories as cleared now, next 20 min) — 1:
+- NOZ4381P × EZY7537K: in 04:10, closest 2.1 NM / 0 ft (levels 350/350; needs 7 NM or 1000 ft); now 21 NM apart,
+  EZY7537K bears 035 from NOZ4381P; tracks 229/236 (same direction, 7°); both route via IBALU: NOZ4381P in 05:12,
+  EZY7537K in 05:40 (28 s apart); conflict-free levels for NOZ4381P: 370, 330
 ```
 
-plus weather ahead of an aircraft, current losses of separation and active areas. What is shown is set in the agent
-profile (conflicts, weather, inbound traffic, routes, list length).
+Each aircraft: position, level and trend, route ahead, RVSM status when not approved, exit level and next unit,
+distance to leaving the sector, weather ahead, **the last instruction it was given**, and for an aircraft on a
+heading whether resuming now is conflict-free (or at which level it would be). Each conflict: the geometry (distance
+and bearing now, the angle between the tracks, a common point with both times) and the conflict-free levels — the
+probe, as in the controller's label menu. Earlier decisions are sent again (the profile's *memory*) as their TO DO
+part and the model's answer only, so a stale picture does not mislead it.
+
+What is shown is set in the agent profile: TO DO list, positions and geometry, probe results, conflicts, weather,
+inbound traffic, routes, list length, and the sector briefing. About 1,500 tokens of briefing and prompt, plus
+1,000-3,000 per situation (busy sectors): give the endpoint a context of 8192 tokens, 16384 for dense scenarios.
 
 ### The instruction set
 
@@ -129,7 +153,8 @@ instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
 
 | | |
 |---|---|
-| +1 | per calling aircraft assumed, per pilot request answered, per aircraft that had left transferred |
+| +1 | per calling aircraft assumed, per pilot request answered, per aircraft that had left transferred, per aircraft resumed when shown clear to resume |
+| −1 | per aircraft left on a heading though shown clear to resume |
 | −1 | per aircraft calling it left unanswered, per aircraft that left over 2 min ago it did not transfer |
 | +3 | per predicted conflict it was shown (under 10 min) and acted on, that did not become a loss |
 | −8 | per loss starting in the 10 minutes after it, between aircraft it acted on |

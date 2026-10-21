@@ -158,9 +158,14 @@ def run(job: dict) -> None:
     actor = {"name": job.get("actor_name") or "AI", "seat": "atc", "id": None}
     agent = agents.make(prov)
     system = agents.system_prompt(agent_cfg.get("system_prompt"))
+    if agent_cfg.get("briefing", True):
+        from .briefing import briefing
+        system = system + "\n\n" + briefing(w)
     interval = max(5.0, float(agent_cfg.get("interval_s", 30)))
     n_hist = int(agent_cfg.get("history", 2))
-    max_actions = int(agent_cfg.get("max_actions", 12))
+    max_actions = int(agent_cfg.get("max_actions", 30))
+    if max_actions == 12:                                  # the former default: too few with ten aircraft calling
+        max_actions = 30
     force = bool(env.get("force"))
     history, feedback, steps = [], None, []
     next_t, last_t = 0.0, -1e9
