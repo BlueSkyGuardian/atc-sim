@@ -127,3 +127,10 @@ The AI lab calls the models' APIs from the server (outbound HTTPS to `api.runpod
 `ATC_AI_PARALLEL` (default 2) sets how many headless runs go at the same time; each runs in its own process and uses
 about one CPU core while the model is answering quickly. A dataset's *RunPod link* is
 `<ATC_PUBLIC_URL>/ai-data/<id>/<token>.jsonl`: set `ATC_PUBLIC_URL` so the link is reachable from the pod.
+
+## Conflict solver
+
+The solver (Solver panel on the solo radar, *Built-in solver* in the AI lab, solver hints for models) needs no
+setup. Close-range checks use Hamilton-Jacobi tables, built in the background the first time they are needed
+(about a minute per table, 5 tables per separation minimum) and kept in `DATA_DIR/hj`. To build them ahead, after an
+update: `docker compose exec atcsim python -m atcsim.solve.hj 5 7` (the separation minima in use, NM).

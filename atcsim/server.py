@@ -557,6 +557,45 @@ def entries(sid: str, body: Entry, request: Request):
     return _act(sid, request, "entries", {"callsign": body.callsign, **fields})     # solo: with what the pilot read back
 
 
+@app.get("/sessions/{sid}/solve")
+def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None, horizon_s: float = Query(600, ge=120, le=1200),
+          rollout: int = Query(2, ge=0, le=4)):
+    """The conflict solver: for each predicted conflict involving an assumed aircraft, the set of clearances (speed,
+    direct, delaying vector, level, or a pair of them) that leave everyone separated, ranked speed first, then
+    heading, then level, the aircraft with priority in its level left alone where possible; the best ones confirmed by
+    running a copy of the simulation ahead. Each solution's "actions" can be sent as they are to /entries.
+    Recomputed at most every 5 simulated seconds."""
+    import threading
+    from .solve import resolve
+    s = _session(sid)
+    with s.lock:
+        import json as _json
+        key = (int(s.world.t // 5), callsign, other, horizon_s, rollout, getattr(s, "rewinds", 0),
+               hash(_json.dumps(s.world.entries, sort_keys=True, default=str)),
+               tuple(sorted(c for c, a in s.world.aircraft.items() if a.active and a.assumed)))
+        c = getattr(s, "_solve_cache", None)
+        if c and c[0] == key:
+            return c[1]
+        w = resolve.clone(s.world)
+    lk = s.__dict__.setdefault("_solve_lock", threading.Lock())
+    with lk:
+        c = getattr(s, "_solve_cache", None)
+        if c and c[0] == key:
+            return c[1]
+        res = resolve.solve(w, (callsign, other) if callsign and other else None, horizon_s, rollout=rollout)
+        if callsign and not other:
+            res["sets"] = [x for x in res["sets"] if callsign in x["pair"]]
+        out = {"sim_time_s": round(w.t, 1), "horizon_s": horizon_s, "conflicts": [
+            {"pair": x["pair"], "t_first_s": None if x["t_first"] is None else round(x["t_first"]), "d_min_nm": x["d_min"],
+             "move": x["move"], "priority": x["priority"],
+             "turn_enough": {m: hv["turn_enough"] for m, hv in (x.get("hj") or {}).items()},
+             "optimal": [o.text for o in x["optimal"]],
+             "solutions": [o.public() for o in x["solutions"]]} for x in res["sets"]],
+            "text": resolve.describe(res)}
+        s._solve_cache = (key, out)
+        return out
+
+
 class MtcdProbe(BaseModel):
     callsign: str
     cfl: Optional[int] = None

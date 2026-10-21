@@ -356,6 +356,26 @@
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
   .dot.on { background: var(--accent); }
   body:not(.solo) #forceBtn { display: none; }
+  body:not(.solver-ok) #solveBtn { display: none; }
+  #solveBtn.on { border-color: var(--chart) !important; color: var(--sel) !important; }
+  #solvePanel { position: absolute; right: 10px; top: 96px; z-index: 5; width: 360px; max-width: calc(100% - 20px); max-height: calc(100% - 170px); overflow: auto;
+    display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 12px; background: rgba(11, 23, 36, .92); border: 1px solid var(--line); border-radius: 8px; padding: 8px; color: #cfe0ee; }
+  #solvePanel[hidden] { display: none; }
+  body:not(.solver-ok) #solvePanel { display: none; }
+  #solvePanel .hd { color: var(--dim); font-size: 10.5px; letter-spacing: .06em; }
+  #solvePanel .sv-c { border-left: 3px solid #c9a227; padding: 4px 0 4px 8px; display: flex; flex-direction: column; gap: 3px; }
+  #solvePanel .sv-h a { color: var(--sel); cursor: pointer; font-weight: 700; }
+  #solvePanel .sv-prio { color: #9fb4c7; font-size: 11px; }
+  #solvePanel .sv-warn { color: #ffb3b3; font-size: 11px; }
+  #solvePanel .sv-sol { display: grid; grid-template-columns: 52px 1fr auto auto; gap: 6px; align-items: center; padding: 2px 0; }
+  #solvePanel .sv-sol.best .sv-t { color: #dffbef; font-weight: 700; }
+  #solvePanel .sv-k { font-size: 9.5px; letter-spacing: .05em; text-align: center; border-radius: 4px; padding: 1px 3px; background: #1c3856; color: #9fd0ff; }
+  #solvePanel .k-heading, #solvePanel .k-direct { background: #2b3b1c; color: #c9f29a; } #solvePanel .k-level { background: #4a2f12; color: #ffd08a; } #solvePanel .k-pair { background: #3d1c4a; color: #e6b3ff; }
+  #solvePanel .sv-d { color: #9fb4c7; font-size: 11px; white-space: nowrap; }
+  #solvePanel .sv-ask { font-size: 9.5px; border: 1px solid #c9a227; color: #ffe08a; border-radius: 4px; padding: 0 3px; font-weight: 400; }
+  #solvePanel button { padding: 1px 7px; font-size: 11px; }
+  #solvePanel .sv-res { border-left: 3px solid #7fd18b; padding: 3px 0 3px 8px; } #solvePanel .sv-res.due { border-left-color: #ff6b6b; color: #ffc9c9; }
+  #solvePanel .rb { display: inline-flex; gap: 4px; margin-left: 6px; }
   #forceBtn.on { background: #5a3d0f; border-color: #c9a227; color: #ffe08a; font-weight: 700; }
   #radioLog button.frc { border-color: #c9a227; color: #ffe08a; }
   /* ---- debrief on the simulator (debrief.js) */
@@ -441,7 +461,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -460,6 +480,7 @@
       <button id="sbEnd" class="sb-end" title="End: it is kept in your exercises and statistics, with its recording">End</button>
     </div>
     <div id="radioLog" aria-live="polite"></div>
+    <div id="solvePanel" hidden></div>
     <div id="ptt" class="ex-only"><span class="k" id="pttKey" title="Hold the space bar (or this button) to transmit on the frequency">🎙 hold SPACE to transmit</span><span id="rxBox"></span></div>
     <button id="phoneBtn" class="ex-only atc-only" title="Telephone lines">☎</button>
     <div id="phonePanel"><div class="c-dim" style="font-size:11px;margin-bottom:6px">Call an adjacent unit</div><div class="units" id="atcUnits"></div></div>
@@ -1827,5 +1848,6 @@ requestAnimationFrame(draw);
 <script src="/static/uirec.js"></script>
 <script src="/static/debrief.js"></script>
 <script src="/static/aiwatch.js"></script>
+<script src="/static/solver.js"></script>
 </body>
 </html>

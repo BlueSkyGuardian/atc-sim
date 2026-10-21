@@ -47,6 +47,7 @@ The toolbar changes **your view only**, never the simulation:
 | **CHAT** | Coordination chat with the other sectors and units (key <kbd>T</kbd>); the count of unread messages |
 | **HUD** | Show or hide the information box (saved in your browser) |
 | **Timeline** | Solo radar (and the instructor): show or hide the replay timeline under the scope |
+| **Solver** | Solo radar: the conflict solver's suggestions for each predicted conflict (see below) |
 | **?** | Keyboard shortcuts |
 | UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
 | ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
@@ -429,6 +430,18 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   box), **▶ Replay** plays from there, **Live** returns to the live picture. Its markers show losses of separation,
   requests and instructions. **Timeline** in the toolbar hides or shows it. **⤺ Resume from T+…** puts the
   simulation back to the cursor (paused): try another plan from there.
+- **Solver** in the toolbar opens the conflict solver. For each predicted conflict with one of your aircraft (over
+  10 minutes) it lists the clearances that leave **everyone** separated, not only the pair — in the order a
+  controller would use them: **speed**, then a **direct** or a **delaying vector** (a heading for 2, 4 or 6 minutes,
+  then resume), then a **level**, and a pair of clearances when no single one works. The aircraft that has priority in
+  its level (level before changing level; then the first in the sector) is left alone where possible; the reason is
+  shown. A ✓ before the distance means the solution was checked by running the simulation ahead (the closest anyone
+  then comes, in NM); the others are the prediction. *ask first* marks a level the pilot did not request: ask whether
+  it is acceptable before giving it. *too close for a turn* means no heading of that aircraft can separate it in time.
+  **Apply** enters the clearance in the label, as you would; after a delaying vector the panel keeps a **Resume**
+  reminder with its countdown. The list follows the traffic every 5 simulated seconds.
+
+  ![The solver panel](/static/docs/s_solver.jpg "The solver panel: the conflict, its solutions in order, checked ones with ✓")
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
   its **debrief**.

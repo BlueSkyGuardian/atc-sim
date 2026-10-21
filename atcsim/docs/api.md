@@ -162,6 +162,7 @@ CLIMB TO, `UM74` PROCEED DIRECT TO, `UM117` CONTACT, `DM9` REQUEST CLIMB TO, …
 | POST | `/sessions/{id}/probe` | What-if: `{"instructions": [...], "horizon_s": 600}`. Runs the candidate clearances on a copy and returns the conflicts they would create or solve. Changes nothing |
 | GET | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories over the look-ahead (`look_ahead_s`, 20 min by default) |
 | POST | `/sessions/{id}/mtcd/settings` | Set the exercise's MTCD look-ahead: `{"look_ahead_min": 30}`, 5 to 60. Controller or instructor. Also used by the probes; the state carries it as `mtcd_look_s` |
+| GET | `/sessions/{id}/solve` | The conflict solver: for each predicted conflict with an assumed aircraft, `solutions` (each with `kind` speed / direct / heading / level / pair, `text`, `actions` to send to `/entries`, `cost`, `d_min`, `needs_ask`, `priority_moved`, `confirmed`, `confirmed_min_nm`), `optimal`, the aircraft to `move` and why (`priority`), `turn_enough`. Query `callsign`, `other`, `horizon_s` (600), `rollout` (2: solutions confirmed by running the simulation ahead) |
 | POST | `/sessions/{id}/mtcd` | Probe one aircraft: `{"callsign", "cfl"}` / `"heading"` / `"direct"`, or `{"callsign", "levels": [310, 330, 350]}` for the level-probe colours |
 | GET | `/sessions/{id}/oldi?since=&callsign=` | OLDI messages (ABI, ACT, REV, PHONE; sent / received; LAM) and each aircraft's cleared, exit and coordinated levels |
 | GET | `/sessions/{id}/flightplans` · `/flightplans/{cs}` | Every flight plan · one: FPL message, decoded items, estimates over the points ahead, coordination, correlation |
@@ -285,7 +286,7 @@ Instructors and administrators. See the [AI lab manual](ai.md).
 
 | Method | Path | What |
 |---|---|---|
-| GET / POST | `/api/ai/models` | Models: `{"name", "kind": "runpod" \| "openai" \| "baseline", "endpoint_id", "base_url", "model", "api_key", "params": {"temperature", "max_tokens", "timeout_s", "retries", "json_mode"}}`. Keys are stored encrypted and never returned (`has_key`, `key_hint`) |
+| GET / POST | `/api/ai/models` | Models: `{"name", "kind": "runpod" \| "openai" \| "baseline" \| "solver", "endpoint_id", "base_url", "model", "api_key", "params": {"temperature", "max_tokens", "timeout_s", "retries", "json_mode"}}`. Keys are stored encrypted and never returned (`has_key`, `key_hint`) |
 | PUT / DELETE | `/api/ai/models/{id}` | Edit (no `api_key`: kept) / delete |
 | POST | `/api/ai/models/{id}/test` | The models served and one short answer, with its latency |
 | GET / POST | `/api/ai/agents` | Agent profiles: `{"name", "config": {"system_prompt", "interval_s", "event_triggers", "history", "max_actions", "observation": {...}}}`; `defaults` |

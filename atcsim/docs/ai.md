@@ -121,6 +121,19 @@ with the letter of agreement (*ARRIVAL via SALCA: level FL250, 10 NM in trail, l
 ahead (*TOO CLOSE* under the agreed spacing). TO DO adds *SEQUENCE* when one is too close or must start down soon.
 Aircraft on the same route (en-route traffic) appear in the conflict lines with their common point and both times.
 
+### The solver's solutions
+
+With *solver solutions* on (agent profile), each conflict line ends with the solver's answer: *SOLVER (conflict-free
+with everyone, in the order speed, heading, level): BEST EWG3KP direct TOVRA [confirmed: 9.4 NM]; other options: …*.
+The solver predicts every aircraft's trajectory (route, ground speed with the wind, climb and descent), computes the
+exact closest point of approach of each pair leg by leg, and for the aircraft to move tries speeds, directs, delaying
+vectors (2, 4 or 6 minutes then resume) and levels — only those its pilot would fly — keeping those that leave it
+separated from **every** aircraft, ranked speed, heading, level (the aircraft with priority moved only when nothing
+else works; a level not requested must be asked first). The best are confirmed by running a copy of the simulation
+ahead. Close in, a Hamilton-Jacobi reachability table says whether any turn can still separate the pair in time
+(*no turn can separate it in time*: only a level will). Each decision is then graded against the solution set:
+*optimal* (one of the best), *feasible* (another solution), *other*, or *left alone*.
+
 ### Queries: the model asks before it decides
 
 With *queries* on (agent profile, on by default, up to 3 rounds per decision), the model may answer
@@ -136,6 +149,8 @@ and the model answers again (instructions, or more queries). The simulation wait
 | `{"q": "route", "callsign": "X"}` | its route ahead: points with distances and times |
 | `{"q": "near", "point": "IBALU", "radius_nm": 30}` | traffic within a radius of a point or an aircraft |
 | `{"q": "sequence", "fix": "MARJA"}` | the arrivals to that fix in order, spacing, the agreed level |
+| `{"q": "solve"}` (optionally `"a"`, `"b"`) | the conflict solver: for each conflict, the clearances that leave everyone separated, best first, and which were confirmed by running the simulation ahead |
+| `{"q": "headings", "callsign": "X"}` | its conflict-free headings at its speed (velocity obstacles of the traffic around, 10 minutes straight ahead) |
 
 The questions and answers are kept with the decision (shown in *Decisions* and in *Watch live*), and the **chat**
 datasets include them as turns of the conversation, so a model trained on them learns to check before acting.
@@ -171,6 +186,9 @@ The radio log of the replay shows the controller's side too: *identified* when t
   keep the timeout generous (180 s) and a few retries.
 - **OpenAI-compatible server**: any server with `/v1/chat/completions` — a RunPod pod running vLLM, TGI or Ollama
   (`https://<pod id>-8000.proxy.runpod.net/v1`), or another provider. Its base URL, model name and key.
+- **Built-in solver**: the conflict solver flies the run on its own (no model). It assumes, transfers and answers
+  requests as the baseline, and for each conflict applies the best solution of the solver (below). The reference for
+  what the solver alone achieves.
 - **Built-in baseline**: a scripted controller (assumes what calls, answers requests with a conflict probe, resolves
   conflicts under 8 minutes with a level change checked by the probe). A reference score for the models, and a way to
   produce experience data without a model.
@@ -249,6 +267,7 @@ instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
 | −5 | per conflict it was shown under 5 min and left alone, that became a loss |
 | −2 | per request waiting more than 2 min it left unanswered |
 | −1 / −2 | per instruction refused / for an unreadable answer |
+| +2 / +1 / −1 | per conflict acted on with one of the solver's best solutions / another of its solutions / a clearance outside the solution set |
 
 *good* (reward above 0), *bad* (below 0), *neutral*.
 

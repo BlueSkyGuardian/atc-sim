@@ -145,6 +145,8 @@ def clone(w):
     from ..platform.debriefs import blob_of
     w2 = Session._load_world(types.SimpleNamespace(world=w), blob_of(w))
     w2.record = False
+    w2.auto_pilot = True          # the pilots fly what is entered (as on the solo radar), whatever the session's mode
+    w2.readback_rate = 0.0        # and read it back right: the rollout judges the clearance, not a mishearing
     return w2
 
 
