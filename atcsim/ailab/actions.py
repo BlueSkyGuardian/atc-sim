@@ -48,7 +48,7 @@ def parse_full(text: str) -> Tuple[List[dict], str, str, List[dict]]:
 
 
 def _candidates(text: str) -> List[str]:
-    s = (text or "").strip()
+    s = (text or "").split("</think>")[-1].strip()
     m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", s, re.S)
     cand = [m.group(1)] if m else []
     i, j = s.find("{"), s.rfind("}")
@@ -61,7 +61,11 @@ def parse(text: str) -> Tuple[List[dict], str, str]:
     """The model's answer -> (actions, reasoning, error). Tolerates text around the JSON and ```json fences."""
     if not text:
         return [], "", "empty answer"
+    if "</think>" in text:                                  # a reasoning model's thinking before its answer
+        text = text.split("</think>")[-1]
     s = text.strip()
+    if not s:
+        return [], "", "empty answer (only thinking)"
     m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", s, re.S)
     cand = [m.group(1)] if m else []
     i, j = s.find("{"), s.rfind("}")

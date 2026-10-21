@@ -89,6 +89,7 @@
         <label class="k-m">API key</label><div class="k-m"><input type="password" id="mKey" autocomplete="new-password" placeholder="RunPod API key (rpa_…)"><div class="hint" id="mKeyHint"></div></div>
         <label class="k-m">Temperature</label><input class="k-m" type="number" id="mTemp" value="0.2" step="0.1" min="0" max="2" style="width:90px">
         <label class="k-m">Max answer tokens</label><input class="k-m" type="number" id="mTok" value="600" min="50" max="8000" style="width:90px">
+        <label class="k-m">Thinking</label><div class="k-m row"><select id="mThink"><option value="off">off (answer directly)</option><option value="on">on (reasoning models think first)</option></select><span class="hint">Qwen3, DeepSeek-R1 and other reasoning models write thousands of hidden tokens before answering: minutes per decision. Off sends enable_thinking=false (and /no_think to Qwen3).</span></div>
         <label class="k-m">Context length</label><div class="k-m row"><input type="number" id="mCtx" value="8192" min="1024" max="262144" step="1024" style="width:90px"><span class="hint">tokens: the endpoint's max model length (RunPod: MAX_MODEL_LEN). Prompts are kept under it (older decisions, then extra queries, are left out)</span></div>
         <label class="k-m">Timeout (s)</label><input class="k-m" type="number" id="mTo" value="180" min="5" max="900" style="width:90px">
         <label class="k-m">Retries</label><input class="k-m" type="number" id="mRet" value="3" min="0" max="10" style="width:90px">
@@ -174,14 +175,14 @@ function openModel(m) {
   const p = (m && m.params) || {};
   $('#mName').value = m ? m.name : ''; $('#mKind').value = m ? m.kind : 'runpod'; $('#mEp').value = m ? m.endpoint_id || '' : ''; $('#mUrl').value = m ? m.base_url || '' : '';
   $('#mModel').value = m ? m.model || '' : ''; $('#mKey').value = ''; $('#mKeyHint').textContent = m && m.has_key ? `stored (${m.key_hint}) — leave empty to keep it` : '';
-  $('#mTemp').value = p.temperature ?? 0.2; $('#mTok').value = p.max_tokens ?? 600; $('#mTo').value = p.timeout_s ?? 180; $('#mCtx').value = p.context_tokens ?? 8192; $('#mRet').value = p.retries ?? 3; $('#mJson').checked = !!p.json_mode;
+  $('#mTemp').value = p.temperature ?? 0.2; $('#mTok').value = p.max_tokens ?? 600; $('#mTo').value = p.timeout_s ?? 180; $('#mCtx').value = p.context_tokens ?? 8192; $('#mThink').value = p.thinking || 'off'; $('#mRet').value = p.retries ?? 3; $('#mJson').checked = !!p.json_mode;
   kindVis(); $('#mForm').scrollIntoView({ block: 'nearest' });
 }
 $('#mNew').onclick = () => openModel(null);
 $('#mCancel').onclick = () => { $('#mForm').style.display = 'none'; };
 $('#mSave').onclick = async () => {
   const body = { name: val('mName') || 'model', kind: val('mKind'), endpoint_id: val('mEp'), base_url: val('mUrl'), model: val('mModel'),
-    params: { temperature: +val('mTemp'), max_tokens: +val('mTok'), timeout_s: +val('mTo'), context_tokens: +val('mCtx') || 8192, retries: +val('mRet'), json_mode: $('#mJson').checked } };
+    params: { temperature: +val('mTemp'), max_tokens: +val('mTok'), timeout_s: +val('mTo'), context_tokens: +val('mCtx') || 8192, thinking: val('mThink'), retries: +val('mRet'), json_mode: $('#mJson').checked } };
   if (val('mKey') || !editModel) body.api_key = val('mKey');
   try { await api(editModel ? `/api/ai/models/${editModel.id}` : '/api/ai/models', { method: editModel ? 'PUT' : 'POST', body: JSON.stringify(body) });
     $('#mForm').style.display = 'none'; loadModels(); } catch (e) { $('#mMsg').textContent = e.message; $('#mMsg').className = 'hint c-los'; }
@@ -285,7 +286,7 @@ async function showSteps(id, offset = 0) {
     <div class="row" style="margin:8px 0">${r.exercise_id && ev ? `<a href="/debrief/${r.exercise_id}" target="_blank"><button class="small primary">Replay in the debrief</button></a>` : ''}<span class="hint">decisions ${offset + 1}–${offset + d.steps.length} of ${d.total}</span>
       ${offset > 0 ? `<button class="small" id="sPrev">← earlier</button>` : ''}${offset + 40 < d.total ? `<button class="small" id="sNext">later →</button>` : ''}</div>`;
   const steps = d.steps.map(s => `<div class="step"><div class="h"><b class="mono">T+${fmtT(s.t)}</b>${s.label ? `<span class="lbl ${s.label}">${s.label} ${s.reward > 0 ? '+' : ''}${s.reward}</span>` : ''}
-      <span class="hint">${esc((s.label_why || []).join(' · '))}</span>${s.latency_s != null ? `<span class="hint">${s.latency_s} s</span>` : ''}${(s.usage && s.usage.prompt_tokens) || s.prompt_tokens_est ? `<span class="hint">prompt ${(s.usage && s.usage.prompt_tokens) || '~' + s.prompt_tokens_est} tok</span>` : ''}
+      <span class="hint">${esc((s.label_why || []).join(' · '))}</span>${s.latency_s != null ? `<span class="hint">${s.latency_s} s</span>` : ''}${(s.usage && s.usage.prompt_tokens) || s.prompt_tokens_est ? `<span class="hint">prompt ${(s.usage && s.usage.prompt_tokens) || '~' + s.prompt_tokens_est} tok</span>` : ''}${s.usage && s.usage.completion_tokens ? `<span class="hint" title="tokens the model generated (thinking included) and its speed">answer ${s.usage.completion_tokens} tok${s.latency_s ? ' · ' + Math.round(s.usage.completion_tokens / s.latency_s) + ' tok/s' : ''}${s.usage.reasoning_chars ? ' · thinking ' + Math.round(s.usage.reasoning_chars / 1000) + 'k chars' : ''}</span>` : ''}
       ${s.judge && s.judge.grade ? `<span class="lbl">judge ${s.judge.grade}/5</span>` : ''}</div>
       ${(s.queries || []).map((q, k) => q.kind === 'correction' ? `<div class="hint" style="margin:3px 0;color:#f2b84b">first answer refused, sent back for a correction:</div>` +
         (q.results || []).filter(x => !x.ok || x.unknown_fields).map(x => `<div class="ko" style="font-size:12px">✗ <span class="mono">${esc(JSON.stringify(x.action))}</span> — ${esc(x.text)}</div>`).join('') :

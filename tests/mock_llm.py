@@ -18,6 +18,11 @@ def models():
     return {"data": [{"id": "mock-controller"}]}
 
 
+@app.get("/last")
+def last():
+    return calls["last"] or {}
+
+
 @app.post("/v1/chat/completions")
 async def chat(request: Request):
     body = await request.json()

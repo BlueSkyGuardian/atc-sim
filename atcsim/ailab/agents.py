@@ -76,6 +76,8 @@ class ChatModel:
         self.timeout = float(prm.get("timeout_s", 180))
         self.retries = int(prm.get("retries", 3))
         self.json_mode = bool(prm.get("json_mode", False))
+        # reasoning models (Qwen3, DeepSeek-R1...) think before answering: thousands of tokens, minutes per decision
+        self.thinking = str(prm.get("thinking", "off")).lower()
 
     def headers(self) -> dict:
         h = {"Content-Type": "application/json"}
@@ -88,6 +90,10 @@ class ChatModel:
         body = {"model": self.model, "messages": messages, "temperature": self.temperature, "max_tokens": self.max_tokens}
         if self.json_mode:
             body["response_format"] = {"type": "json_object"}
+        if self.thinking == "off":
+            body["chat_template_kwargs"] = {"enable_thinking": False}        # vLLM: Qwen3-style templates
+            if "qwen3" in self.model.lower() and messages and "/no_think" not in messages[0]["content"]:
+                body["messages"] = [dict(messages[0], content=messages[0]["content"] + "\n/no_think")] + list(messages[1:])
         last = None
         first = not getattr(self, "_answered", False)
         # the first call may wake a serverless endpoint (cold start: minutes): it waits longer
@@ -102,9 +108,16 @@ class ChatModel:
                 if r.status_code >= 400:
                     raise ValueError(f"HTTP {r.status_code}: {r.text[:300]}")      # not retried: configuration
                 d = r.json()
-                text = (d.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+                msg = (d.get("choices") or [{}])[0].get("message", {}) or {}
+                text = msg.get("content") or ""
+                usage = dict(d.get("usage") or {})
+                rc = msg.get("reasoning_content") or msg.get("reasoning") or ""
+                if rc:
+                    usage["reasoning_chars"] = len(rc)
+                if "<think>" in text:
+                    usage["reasoning_chars"] = usage.get("reasoning_chars", 0) + len(text.split("</think>")[0])
                 self._answered = True
-                return text, d.get("usage") or {}, time.time() - t0
+                return text, usage, time.time() - t0
             except ValueError:
                 raise
             except (httpx.ReadTimeout, httpx.WriteTimeout, httpx.PoolTimeout) as e:

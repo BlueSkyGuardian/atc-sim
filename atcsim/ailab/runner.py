@@ -189,7 +189,7 @@ def run(job: dict) -> None:
         w.auto_assume = True                               # aircraft call already assumed: the model only separates
     ctx = int((prov.get("params") or {}).get("context_tokens") or 8192)
     ans_tokens = int((prov.get("params") or {}).get("max_tokens") or 600)
-    budget = max(1500, ctx - ans_tokens - 200)
+    budget = max(1500, ctx - min(ans_tokens, max(1000, ctx // 4)) - 200)   # (a huge answer length does not eat the prompt)
     est = lambda ms: sum(len(m["content"]) for m in ms) / 3.2 + 8 * len(ms)      # tokens, roughly (3.2 characters each)
     conf_seen: dict = {}
     history, feedback, steps = [], None, []

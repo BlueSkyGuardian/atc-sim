@@ -64,6 +64,16 @@ try:
         time.sleep(0.5)
     ok(t.get("ok") and t.get("models") == ["mock-controller"] and '"ok"' in t.get("answer", ""), f"connection test: models and an answer ({t.get('latency_s')} s)")
 
+    import httpx
+    cmq = agents.ChatModel({"kind": "openai", "base_url": f"http://127.0.0.1:{PORT}/v1", "model": "Qwen/Qwen3-8B", "api_key": "k", "params": {}})
+    cmq.chat([{"role": "system", "content": "sys"}, {"role": "user", "content": 'Reply with {"ok": true}'}])
+    lb = httpx.get(f"http://127.0.0.1:{PORT}/last").json()
+    ok(lb.get("chat_template_kwargs") == {"enable_thinking": False} and lb["messages"][0]["content"].endswith("/no_think"),
+       "thinking off by default: enable_thinking=false (and /no_think for Qwen3)")
+    from atcsim.ailab import actions as A0
+    acts0, _, err0 = A0.parse('<think>{"actions": [{"type": "nope"}]} long thoughts</think>\n{"reasoning": "r", "actions": [{"type": "assume", "callsign": "X1"}]}')
+    ok(not err0 and acts0 == [{"type": "assume", "callsign": "X1"}], "a reasoning model's <think> part is not taken for the answer")
+
     # ---- agent profile
     ag = ins.get("/api/ai/agents").json()
     a0 = ag["agents"][0]
@@ -99,9 +109,8 @@ try:
     ok(any(any("left alone, lost" in w for w in s["label_why"]) and s["label"] == "bad" for s in s0), "a conflict shown and left alone that became a loss: bad")
     ok(any("RESULT OF YOUR LAST INSTRUCTIONS" in (s.get("feedback") or "") or s.get("feedback") for s in s0[1:]), "the pilots' answers fed back to the model")
     ok("api_key" not in json.dumps(ins.get(f"/api/ai/runs/{m1['id']}").json()), "no key in a run's details")
-    qd = [s for s in s0 if s.get("queries")]
-    ok(qd and all(r["results"] for r in qd[0]["queries"]) and any("NM apart" in x["result"] for x in qd[0]["queries"][0]["results"])
-       and any(not x["ok"] for x in qd[0]["queries"][0]["results"]) and qd[0].get("results") is not None,
+    qd = [q for s in s0 for q in s.get("queries") or [] if q.get("kind") != "correction" and q.get("results")]
+    ok(qd and any("NM apart" in x["result"] for x in qd[0]["results"]) and any(not x["ok"] for x in qd[0]["results"]),
        f"queries: the model asked, the simulator answered (geometry, levels, probe, route; an unknown one refused), then it decided ({len(qd)} decisions)")
     ok("TO DO NOW" in s0[3]["observation"] and "at (" in s0[3]["observation"], "the situation starts with TO DO NOW, with positions")
     fc, xf = ev["first_calls"], ev["transfers"]

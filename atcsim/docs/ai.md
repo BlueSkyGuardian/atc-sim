@@ -161,6 +161,12 @@ The radio log of the replay shows the controller's side too: *identified* when t
   conflicts under 8 minutes with a level change checked by the probe). A reference score for the models, and a way to
   produce experience data without a model.
 
+**Thinking** (off by default): reasoning models — Qwen3, DeepSeek-R1 and their kin — write a long hidden reasoning
+before every answer, often thousands of tokens: minutes per decision on a 27B model. *Off* sends
+`enable_thinking: false` (vLLM chat templates) and, for Qwen3, `/no_think`; a `<think>` part left in an answer is
+never taken for the answer. Each decision in *Decisions* shows the tokens it generated and the speed (tokens per
+second), so a model that thinks shows at once.
+
 **Context length** is the endpoint's maximum model length (RunPod: *MAX_MODEL_LEN*): every prompt is kept under it,
 minus the answer length — earlier decisions are left out first, then further queries (each decision says so, with
 its prompt size in tokens). A prompt over the endpoint's limit is refused or cut by the server, and the model then
