@@ -70,6 +70,33 @@ What is shown is set in the agent profile: TO DO list, positions and geometry, p
 inbound traffic, routes, list length, and the sector briefing. About 1,500 tokens of briefing and prompt, plus
 1,000-3,000 per situation (busy sectors): give the endpoint a context of 8192 tokens, 16384 for dense scenarios.
 
+### Arrival sequences
+
+Arrivals are the flights whose exit is a sequencing fix (e.g. MARJA and SALCA for GMMN). Each one's line says so
+with the letter of agreement (*ARRIVAL via SALCA: level FL250, 10 NM in trail, latest descent in 34NM*), and
+**ARRIVAL SEQUENCES** lists them in order at each fix, with the time to the fix and the distance behind the one
+ahead (*TOO CLOSE* under the agreed spacing). TO DO adds *SEQUENCE* when one is too close or must start down soon.
+Aircraft on the same route (en-route traffic) appear in the conflict lines with their common point and both times.
+
+### Queries: the model asks before it decides
+
+With *queries* on (agent profile, on by default, up to 3 rounds per decision), the model may answer
+`{"reasoning": "...", "queries": [...]}` instead of instructions; the simulator answers with the radar's own tools,
+and the model answers again (instructions, or more queries). The simulation waits meanwhile.
+
+| Query | Answer |
+|---|---|
+| `{"q": "probe", "callsign": "X", "cfl": 370}` (or `heading`, `direct`, together) | the conflicts that clearance would give, over the MTCD look-ahead (and whether the level is of its direction) |
+| `{"q": "levels", "callsign": "X"}` | its conflict-free levels within ±6000 ft, and the others with their conflict; in a loss of separation, the levels that separate soonest |
+| `{"q": "geometry", "a": "X", "b": "Y"}` | distance and bearing now, tracks, closing speed, vertical distance, closest point of approach straight ahead |
+| `{"q": "distance", "from": "X", "to": "IBALU"}` | distance, bearing (and time, from an aircraft), between aircraft and/or points |
+| `{"q": "route", "callsign": "X"}` | its route ahead: points with distances and times |
+| `{"q": "near", "point": "IBALU", "radius_nm": 30}` | traffic within a radius of a point or an aircraft |
+| `{"q": "sequence", "fix": "MARJA"}` | the arrivals to that fix in order, spacing, the agreed level |
+
+The questions and answers are kept with the decision (shown in *Decisions* and in *Watch live*), and the **chat**
+datasets include them as turns of the conversation, so a model trained on them learns to check before acting.
+
 ### The instruction set
 
 ```

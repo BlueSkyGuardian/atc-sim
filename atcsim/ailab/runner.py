@@ -163,6 +163,10 @@ def run(job: dict) -> None:
         system = system + "\n\n" + briefing(w)
     interval = max(5.0, float(agent_cfg.get("interval_s", 30)))
     n_hist = int(agent_cfg.get("history", 2))
+    from . import queries as q_mod
+    q_rounds = int(agent_cfg.get("query_rounds", 0) or 0) if agent_cfg.get("queries") else 0
+    if q_rounds:
+        system = system + "\n\n" + q_mod.help_text(q_rounds)
     max_actions = int(agent_cfg.get("max_actions", 30))
     if max_actions == 12:                                  # the former default: too few with ten aircraft calling
         max_actions = 30
@@ -208,7 +212,33 @@ def run(job: dict) -> None:
                         answer, usage, lat = agent.decide(w), {}, time.time() - t0
                     else:
                         answer, usage, lat = agent.chat(msgs)
-                    acts, reasoning, perr = act_mod.parse(answer)
+                    usage = dict(usage or {})
+                    acts, reasoning, perr, qs = act_mod.parse_full(answer)
+                    rounds = []
+                    while qs and not isinstance(agent, agents.Baseline):
+                        left = q_rounds - len(rounds)
+                        if left <= 0:
+                            if not acts:                       # out of questions and no instructions
+                                rounds.append({"response": answer, "queries": qs, "results": [],
+                                               "note": "no query rounds left"})
+                            break
+                        with s.lock:
+                            res = q_mod.answer(w, qs)
+                        follow = ("ANSWERS TO YOUR QUERIES:\n" + q_mod.as_text(res) +
+                                  (f"\n\nNow give your instructions (or more queries: {left - 1} round{'s' if left - 1 != 1 else ''} left)."
+                                   if left - 1 > 0 else "\n\nNow give your instructions (no query left for this decision)."))
+                        rounds.append({"response": answer, "reasoning": reasoning, "queries": qs, "results": res, "followup": follow})
+                        msgs = msgs + [{"role": "assistant", "content": answer}, {"role": "user", "content": follow}]
+                        prog.update(querying=len(rounds))
+                        _write(prog_p, prog)
+                        answer, u2, l2 = agent.chat(msgs)
+                        lat += l2
+                        for k, v in (u2 or {}).items():
+                            if isinstance(v, (int, float)):
+                                usage[k] = (usage.get(k) or 0) + v
+                        acts, reasoning, perr, qs = act_mod.parse_full(answer)
+                    if rounds:
+                        rec["queries"] = rounds
                     with s.lock:
                         results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force)
                     rec.update(response=answer, reasoning=reasoning, parse_error=perr or None, results=results,
@@ -219,6 +249,9 @@ def run(job: dict) -> None:
                     answer = None
                 fb = [f"{'OK' if r['ok'] else 'REFUSED'} {json.dumps(r['action'])}: {r['text']}" for r in rec["results"]]
                 feedback = ("; ".join(fb) if fb else None) if answer is not None else f"no answer ({rec.get('error')})"
+                if (rec.get("queries") or [{}])[-1].get("note"):
+                    feedback = ((feedback + "; ") if feedback else "") + ("queries are not available (or none left): answer with instructions"
+                                                                          if not q_rounds else "no query round left: answer with instructions")
                 if rec.get("parse_error"):
                     feedback = f"your answer could not be read ({rec['parse_error']}): answer with one JSON object"
                 if answer is not None:
@@ -230,7 +263,7 @@ def run(job: dict) -> None:
                 if watch.on():
                     watch.publish(w, force=True)
                     watch.reset()
-                prog.update(thinking=False, t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
+                prog.update(thinking=False, querying=0, t=round(w.t, 1), decisions=len(steps), last={"t": rec["t"], "reasoning": rec.get("reasoning"),
                             "actions": [r["text"] for r in rec["results"]][:6], "error": rec.get("error")})
                 _write(prog_p, prog)
             with s.lock:

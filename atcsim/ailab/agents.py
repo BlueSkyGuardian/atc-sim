@@ -24,7 +24,9 @@ At every decision, in this order:
    - aircraft routing via the same point (the conflict line says so, with both times): a level change, or a speed for one of them to put them in trail; headings only if no level works;
    - a heading turns an aircraft away from its route for good: give one only with a plan (about 30-60 degrees off its track, away from the other), and resume it as soon as it is listed under RESUME.
 5. RESUME every aircraft listed under RESUME (on a heading and now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
-6. Then efficiency: climb or descend aircraft towards their exit level (XFL) when it is conflict-free, directs to a point further on their route when safe. Never give a level of the wrong direction to an aircraft that leaves your sector at it.
+6. SEQUENCE the arrivals (ARRIVAL SEQUENCES, and SEQUENCE in TO DO): each arrival must cross its fix at the agreed level (letter of agreement, e.g. FL250) and the agreed distance behind the one ahead. Descend them in time (before their latest descent point), keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
+7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
+The exit level (XFL, "exit FL350 to WS") is the level the aircraft leaves your sector at, coordinated with the next sector; it is its current level unless you change it. Change it (clear xfl) only together with a level change that it will keep until the exit, and only to a level of its direction of flight.
 Never let two aircraft be closer than the separation minimum horizontally AND vertically. Never instruct an aircraft that is not assumed. Use only the callsigns and points of the situation and the briefing.
 Give every needed instruction in one answer (several actions in the list); an empty list only when TO DO NOW is empty and nothing needs solving.
 
@@ -33,7 +35,8 @@ Give every needed instruction in one answer (several actions in the list); an em
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
 LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
-                          "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4"}
+                          "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
+                          "b4875a13f01be8c1a78ffc4f4b94a2fba95fa20d3e8aa3a04fb7b92c5fae6534"}
 
 
 def system_prompt(p: str) -> str:

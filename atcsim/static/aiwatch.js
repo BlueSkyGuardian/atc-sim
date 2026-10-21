@@ -52,12 +52,13 @@
     const status = st === 'queued' ? 'Waiting for its turn in the queue…'
       : !running ? `Run ${h(st)}. ${info.live ? '' : 'It ran before anybody watched: '}<a href="/debrief/${info.exercise_id}">replay it in the debrief</a>.`
       : !info.live ? 'Starting… the picture appears at the next second.'
-      : thinking ? `<span class="aiw-think">● the model is deciding</span> <span class="c-dim">(the simulation waits)</span>` : 'Flying…';
+      : thinking ? `<span class="aiw-think">● the model is ${p.querying ? 'asking the simulator (round ' + p.querying + ')' : 'deciding'}</span> <span class="c-dim">(the simulation waits)</span>` : 'Flying…';
     const steps = (info.steps || []).slice().reverse().map(s => {
       const res = (s.results || []).map(r => `<div class="${r.ok ? 'ok' : 'ko'}">${r.ok ? '✓' : '✗'} ${h(r.text)}</div>`).join('');
       const err = s.error ? `<div class="ko">no answer: ${h(s.error)}</div>` : s.parse_error ? `<div class="ko">unreadable answer: ${h(s.parse_error)}</div>` : '';
+      const qs = (s.queries || []).map(q => (q.results || []).map(x => `<div class="c-dim" style="font-size:11.5px">? ${h(x.result)}</div>`).join('')).join('');
       return `<div class="aiw-st"><div class="hd"><b class="mono">T+${fmtT(s.t)}</b><span class="c-dim">${s.latency_s != null ? s.latency_s + ' s' : ''}</span>${s.label ? `<span class="lb ${h(s.label)}">${h(s.label)} ${s.reward > 0 ? '+' : ''}${s.reward}</span>` : ''}</div>` +
-        (s.reasoning ? `<div class="rs">${h(s.reasoning)}</div>` : '') + (res || (!err ? '<div class="c-dim">no instruction</div>' : '')) + err + `</div>`;
+        qs + (s.reasoning ? `<div class="rs">${h(s.reasoning)}</div>` : '') + (res || (!err ? '<div class="c-dim">no instruction</div>' : '')) + err + `</div>`;
     }).join('') || '<div class="c-dim">No decision yet.</div>';
     const html = `<div class="hd2"><b>The model</b><span class="mono">T+${fmtT(t)} / ${fmtT((state && state.duration_s) || p.duration || 0)} · ${p.decisions || 0} decisions</span></div>
       <div class="aiw-status">${status}</div>${speeds}<div class="aiw-list">${steps}</div>`;

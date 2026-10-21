@@ -118,6 +118,14 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[f
         parts.append("MILITARY FORMATION (2000 ft from everyone)")
     if fp.get("destination"):
         parts.append(f"to {fp.get('destination')}")
+    acx = w.aircraft.get(cs)
+    arr = getattr(acx, "arr", None) or {}
+    if arr.get("fix") and arr["fix"] in getattr(w, "seq", {}):
+        sq = w.seq[arr["fix"]]
+        txt = f"ARRIVAL via {arr['fix']}: {arr.get('letter_of_agreement') or sq.describe()}"
+        if arr.get("loa_latest_descent_in_nm") is not None:
+            txt += f", latest descent in {arr['loa_latest_descent_in_nm']:.0f}NM"
+        parts.append(txt)
     xfl, nu = co.get("xfl"), co.get("next_unit") or a.get("next_unit")
     if xfl and nu:
         parts.append(f"exit FL{xfl:03d} to {nu}")
@@ -160,7 +168,30 @@ def _free_levels(w, a: dict) -> List[str]:
     for fl in cand:
         if not p["levels"].get(str(fl)):
             out.append(f"{fl}" + ("" if ac is None or level_parity_ok(fl, ac.southbound) else "(wrong direction)"))
+    if not out:
+        out = regain(w, a["callsign"], cand)
     return out[:4]
+
+
+def regain(w, cs: str, cand: List[int]) -> List[str]:
+    """In a loss of separation (every level 'conflicts now'): the levels that give separation back soonest."""
+    from .. import atctools
+    from ..aircraft import level_parity_ok
+    ac = w.aircraft.get(cs)
+    try:
+        p = atctools.probe(w, cs, levels=cand)["levels"]
+    except Exception:  # noqa: BLE001
+        return []
+    ends = []
+    for fl in cand:
+        cl = p.get(str(fl)) or []
+        if cl and all(c["in_s"] <= 1 for c in cl):
+            full = atctools.probe(w, cs, cfl=fl).get("conflicts") or []
+            if full and all(c["time_to_conflict_s"] <= 1 for c in full):
+                end = max(c["time_to_conflict_s"] + c.get("duration_s", 0) for c in full)
+                ends.append((end, abs(fl * 100 - (ac.alt_ft if ac else 0)), fl))
+    ends.sort()
+    return [f"{fl} (separated again in {_t(e)}{'' if ac is None or level_parity_ok(fl, ac.southbound) else ', wrong direction'})" for e, _, fl in ends[:3]]
 
 
 def observe(w, opts: Dict = None) -> Tuple[str, dict]:
@@ -219,6 +250,10 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
              f"SEPARATION {sep_h:g} NM or 1000 ft (2000 ft with a non-RVSM aircraft in FL290-410, and above FL410). "
              f"Levels you can assign: FL100-FL{w.upper_fl}."]
     todo = []
+    los_now = st.get("current_losses") or []
+    if los_now:
+        todo.append("LOSS OF SEPARATION NOW, act first (a level change, vertical speed matters): " + ", ".join(
+            "×".join(p.get("aircraft", [])) for p in los_now))
     if calling:
         todo.append("ASSUME (they are calling you; answer them all now): " + ", ".join(
             f"{a['callsign']} (waiting {_t(w.t - (getattr(w.aircraft.get(a['callsign']), 'first_contact_t', None) or w.t))})" for a in calling))
@@ -229,6 +264,25 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
     urgent = [c for c in cf if c["time_to_conflict_s"] <= SOLVE_S and not c.get("current")]
     if urgent:
         todo.append("SOLVE the conflicts: " + ", ".join(f"{c['aircraft'][0]}×{c['aircraft'][1]} in {_t(c['time_to_conflict_s'])}" for c in urgent))
+    seq_rows, seq_todo = [], []
+    if getattr(w, "seq", None):
+        from .. import arrivals
+        mine_cs = {a["callsign"] for a in mine + calling}
+        for f in arrivals.sequence_status(w):
+            rows = [r for r in f.get("inbound") or [] if r.get("status") != "not yet visible"]
+            if not rows:
+                continue
+            seq_rows.append(f)
+            for r in rows:
+                if r["callsign"] in mine_cs and r.get("spacing_ok") is False:
+                    seq_todo.append(f"{r['callsign']} only {r['spacing_to_preceding_nm']:.0f} NM behind the one ahead at {f['fix']} "
+                                    f"(needs {f['spacing_nm']:g})")
+                ld = r.get("loa_latest_descent_in_nm")
+                tgt = f.get("cross_at_fl")
+                if r["callsign"] in mine_cs and tgt and ld is not None and ld < 20 and (r.get("cleared_fl") or 0) > tgt:
+                    seq_todo.append(f"{r['callsign']} must descend to FL{tgt} for {f['fix']} (latest descent in {max(0, ld):.0f} NM)")
+    if seq_todo:
+        todo.append("SEQUENCE the arrivals: " + "; ".join(seq_todo))
     rs = [cs for cs, r in resume.items() if r["ok"]]
     if rs:
         todo.append("RESUME (on a heading, now clear of conflict): " + ", ".join(rs))
@@ -278,6 +332,19 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                 lines.append(f"- {i['callsign']} {i.get('type', '')} FL{i.get('fl', 0):03d} entering at {i.get('entry_waypoint')}"
                              f" in {_t(i.get('time_to_entry_s') or 0)}, route {' '.join(i.get('route') or [])}"
                              + (f" to {i['destination']}" if i.get("destination") else ""))
+
+    # ---- arrival sequences
+    if seq_rows:
+        lines.append("\nARRIVAL SEQUENCES (in order at each fix):")
+        for f in seq_rows:
+            rows = [r for r in f.get("inbound") or [] if r.get("status") != "not yet visible"]
+            lines.append(f"- {f['fix']} for {f['aerodrome']} ({f.get('letter_of_agreement') or ''}): " + "; ".join(
+                f"{r['callsign']} FL{r.get('fl', 0):03d} at the fix in {_t(r['eta_s'] - w.t)}"
+                + (f", {r['spacing_to_preceding_nm']:.0f} NM behind the one ahead" if r.get("spacing_to_preceding_nm") is not None else "")
+                + (" (TOO CLOSE)" if r.get("spacing_ok") is False else "")
+                + ("" if r.get("status") == "on frequency" else " (not on your frequency yet)") for r in rows))
+            struct.setdefault("sequences", []).append({"fix": f["fix"], "order": [r["callsign"] for r in rows],
+                                                       "too_close": [r["callsign"] for r in rows if r.get("spacing_ok") is False]})
 
     # ---- requests
     lines.append(f"\nPILOT REQUESTS waiting for your answer — {len(reqs)}:")

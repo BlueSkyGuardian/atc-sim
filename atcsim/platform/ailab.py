@@ -190,7 +190,7 @@ class AgentIn(BaseModel):
 def _agent_defaults() -> dict:
     from ..ailab import agents, observe
     return {"system_prompt": agents.DEFAULT_SYSTEM_PROMPT, "interval_s": 30, "event_triggers": True, "history": 2,
-            "max_actions": 30, "briefing": True, "observation": dict(observe.DEFAULTS)}
+            "max_actions": 30, "briefing": True, "queries": True, "query_rounds": 3, "observation": dict(observe.DEFAULTS)}
 
 
 @router.get("/api/ai/agents")
@@ -263,7 +263,7 @@ def _row(r: dict, full: bool = False) -> dict:
     out["env"] = json.loads(r["env"] or "{}")
     if r["status"] in ("queued", "running"):
         p = _progress(r["id"])
-        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last", "thinking")}
+        out["progress"] = {k: p.get(k) for k in ("status", "t", "duration", "decisions", "errors", "last", "thinking", "querying")}
     res = json.loads(r["result"]) if r["result"] else None
     if res:
         out["evaluation"] = res.get("evaluation")
@@ -555,6 +555,10 @@ class DatasetIn(BaseModel):
 def _chat_record(s: dict) -> dict:
     from ..ailab import agents
     msgs = agents.messages(s.get("system_prompt") or agents.DEFAULT_SYSTEM_PROMPT, s["observation"], [], s.get("feedback"))
+    for rd in s.get("queries") or []:                 # the questions asked and the simulator's answers, in order
+        if rd.get("followup"):
+            msgs.append({"role": "assistant", "content": rd.get("response") or ""})
+            msgs.append({"role": "user", "content": rd["followup"]})
     msgs.append({"role": "assistant", "content": s.get("response") or ""})
     return {"messages": msgs, "meta": {"run": s.get("run_id"), "t": s["t"], "scenario": s.get("scenario"), "label": s.get("label"),
                                        "reward": s.get("reward"), "episode_score": s.get("episode_score"),
@@ -762,7 +766,7 @@ def run_watch(rid: str, b: WatchIn, request: Request):
     s = _watch_session(rid, r)
     st = run_steps(rid, request, offset=max(0, _count_steps(rid) - 8), limit=8)
     return {"sid": s.id, "status": r["status"], "name": f"{r['model_name']} · {r['scenario']}", "exercise_id": r["exercise_id"],
-            "progress": _progress(rid), "steps": [{k: x.get(k) for k in ("i", "t", "reasoning", "results", "error", "parse_error",
+            "progress": _progress(rid), "steps": [{k: x.get(k) for k in ("i", "t", "reasoning", "results", "error", "parse_error", "queries",
                                                                           "latency_s", "label", "reward")} for x in st["steps"]],
             "factors": WATCH_FACTORS, "score": r["score"], "live": os.path.exists(os.path.join(_run_dir(rid), "live.snap"))}
 

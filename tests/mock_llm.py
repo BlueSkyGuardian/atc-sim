@@ -26,6 +26,13 @@ async def chat(request: Request):
     user = body["messages"][-1]["content"]
     if "Reply with" in user:
         text = '{"ok": true}'
+    elif calls["n"] % 3 == 0 and "ANSWERS TO YOUR QUERIES" not in user and "QUERIES (optional)" in body["messages"][0]["content"] \
+            and len(re.findall(r"^- ([A-Z0-9]+) ·", user.split("YOUR AIRCRAFT")[1].split("\n\n")[0], re.M)) >= 2:
+        mine = re.findall(r"^- ([A-Z0-9]+) ·", user.split("YOUR AIRCRAFT")[1].split("\n\n")[0], re.M)
+        text = json.dumps({"reasoning": "checking", "queries": [{"q": "geometry", "a": mine[0], "b": mine[1]},
+                                                                  {"q": "levels", "callsign": mine[0]},
+                                                                  {"q": "probe", "callsign": mine[0], "cfl": 370},
+                                                                  {"q": "route", "callsign": mine[1]}, {"q": "nonsense"}]})
     elif calls["n"] % 5 == 0:
         text = "I think we should climb someone."             # not JSON: an unreadable answer
     else:

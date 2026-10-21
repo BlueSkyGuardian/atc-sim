@@ -99,6 +99,11 @@ try:
     ok(any(any("left alone, lost" in w for w in s["label_why"]) and s["label"] == "bad" for s in s0), "a conflict shown and left alone that became a loss: bad")
     ok(any("RESULT OF YOUR LAST INSTRUCTIONS" in (s.get("feedback") or "") or s.get("feedback") for s in s0[1:]), "the pilots' answers fed back to the model")
     ok("api_key" not in json.dumps(ins.get(f"/api/ai/runs/{m1['id']}").json()), "no key in a run's details")
+    qd = [s for s in s0 if s.get("queries")]
+    ok(qd and all(r["results"] for r in qd[0]["queries"]) and any("NM apart" in x["result"] for x in qd[0]["queries"][0]["results"])
+       and any(not x["ok"] for x in qd[0]["queries"][0]["results"]) and qd[0].get("results") is not None,
+       f"queries: the model asked, the simulator answered (geometry, levels, probe, route; an unknown one refused), then it decided ({len(qd)} decisions)")
+    ok("TO DO NOW" in s0[3]["observation"] and "at (" in s0[3]["observation"], "the situation starts with TO DO NOW, with positions")
     fc, xf = ev["first_calls"], ev["transfers"]
     ok(fc["calls"] > 0 and fc["answered"] == fc["calls"], f"first calls answered: {fc['answered']}/{fc['calls']}, mean wait {fc['mean_wait_s']} s")
     ok(xf["left"] > 0 and xf["never"] == 0, f"aircraft that left were transferred: {xf['left'] - xf['never']}/{xf['left']}")
@@ -150,7 +155,11 @@ try:
     ok(d["records"] == s["by_label"]["good"] and d["link"].endswith(".jsonl"), f"chat dataset: {d['records']} good decisions")
     lines = ins.get(d["download"]).text.strip().splitlines()
     rec = json.loads(lines[0])
-    ok([m["role"] for m in rec["messages"]] == ["system", "user", "assistant"] and rec["meta"]["label"] == "good", "chat format: system, situation, answer (+ labels)")
+    da = ins.post("/api/ai/datasets", json={"name": "all chat", "format": "chat", "filters": {"labels": ["good", "neutral", "bad"]}}).json()
+    recs = [json.loads(x) for x in ins.get(da["download"]).text.strip().splitlines()]
+    ok(any("ANSWERS TO YOUR QUERIES" in m["content"] for r_ in recs for m in r_["messages"] if m["role"] == "user"),
+       "chat dataset: the query rounds are in the conversations")
+    ok(rec["messages"][0]["role"] == "system" and rec["messages"][-1]["role"] == "assistant" and rec["meta"]["label"] == "good", "chat format: system, situation, (queries,) answer (+ labels)")
     link = d["link"].split("://", 1)[1].split("/", 1)[1]
     ok(anon.get("/" + link).status_code == 200 and anon.get("/" + link.replace(".jsonl", "x.jsonl")).status_code == 404,
        "the link works without signing in (training machine), a wrong token does not")

@@ -31,6 +31,32 @@ Actions (use only these; an empty list means nothing to do now):
 Several fields may go in one "clear" (e.g. cfl and heading)."""
 
 
+def parse_full(text: str) -> Tuple[List[dict], str, str, List[dict]]:
+    """(actions, reasoning, error, queries): an answer may hold queries instead of actions (queries.py)."""
+    acts, reasoning, err = parse(text)
+    qs = []
+    if not err:
+        for c in _candidates(text):
+            try:
+                d = json.loads(c)
+            except ValueError:
+                continue
+            if isinstance(d, dict) and isinstance(d.get("queries"), list):
+                qs = [q for q in d["queries"] if isinstance(q, dict)]
+            break
+    return acts, reasoning, err, qs
+
+
+def _candidates(text: str) -> List[str]:
+    s = (text or "").strip()
+    m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", s, re.S)
+    cand = [m.group(1)] if m else []
+    i, j = s.find("{"), s.rfind("}")
+    if i >= 0 and j > i:
+        cand.append(s[i:j + 1])
+    return cand
+
+
 def parse(text: str) -> Tuple[List[dict], str, str]:
     """The model's answer -> (actions, reasoning, error). Tolerates text around the JSON and ```json fences."""
     if not text:
