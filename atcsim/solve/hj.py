@@ -1,8 +1,8 @@
 """Hamilton-Jacobi reachability for a pair at close range: can the aircraft we move still avoid the other by turning
 alone (at up to a standard-rate turn), the other flying straight on?
 
-Relative state of the other aircraft in the frame of the one we move (x ahead, y to the right... here x along its
-track, y to its left), and the heading difference theta = psi_other - psi_mover:
+Relative state of the other aircraft in the frame of the one we move (x along its track, y to its right), and the
+track difference theta = psi_other - psi_mover (clockwise, like compass tracks):
 
     x' = -v1 + v2 cos(theta) + u y
     y' =        v2 sin(theta) - u x
@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import math
 import os
+import time
 from typing import Dict, Optional, Tuple
 
 import numpy as np
@@ -94,7 +95,9 @@ def table(ratio: float, sh: float, build_if_missing: bool = True, **kw) -> Optio
     if not build_if_missing:
         return None
     t = build_table(r, sh, **kw)
-    np.savez_compressed(p, **t)
+    tmp = p + f".{os.getpid()}.tmp.npz"
+    np.savez_compressed(tmp, **t)
+    os.replace(tmp, p)                      # never a half-written table for another process
     _cache[key] = t
     return t
 
@@ -111,23 +114,38 @@ def ensure_async(sh: float) -> None:
     if key in _building:
         return
     _building.add(key)
+    lock = os.path.join(_dir(), f"building_s{key:.1f}.lock")
+    try:                                    # one builder across processes (each AI-lab run is a process of its own)
+        if os.path.exists(lock) and time.time() - os.path.getmtime(lock) > 1800:
+            os.unlink(lock)                 # left by a builder that died
+        os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+    except OSError:
+        return
 
     def run():
-        for r in RATIOS:
+        try:
+            for r in RATIOS:
+                try:
+                    table(r, sh)
+                except Exception:  # noqa: BLE001
+                    pass
+        finally:
             try:
-                table(r, sh)
-            except Exception:  # noqa: BLE001
+                os.unlink(lock)
+            except OSError:
                 pass
     threading.Thread(target=run, daemon=True, name=f"hj-{key}").start()
 
 
 def relative_state(a, b) -> Tuple[float, float, float]:
-    """b seen from a: x along a's track, y to its left (NM), theta = track_b - track_a (rad)."""
+    """b seen from a, in the frame of the tables: x along a's track, y to its RIGHT (NM), theta = track_b - track_a
+    (rad, clockwise like the tracks). With compass (clockwise) angles the dynamics y' = v2 sin(theta) - u x hold for
+    y positive to the right; y to the left would give the mirror-image encounter (checked against simulated turns)."""
     psi = math.radians(a.trk)
     dxe, dyn = b.x - a.x, b.y - a.y                  # east, north
     ux, uy = math.sin(psi), math.cos(psi)            # a's track unit vector (east, north)
     x = dxe * ux + dyn * uy
-    y = -dxe * uy + dyn * ux                         # left of track positive
+    y = dxe * uy - dyn * ux                          # right of track positive
     return x, y, math.radians(b.trk - a.trk) % (2 * math.pi)
 
 
