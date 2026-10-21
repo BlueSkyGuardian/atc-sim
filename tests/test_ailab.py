@@ -188,8 +188,8 @@ try:
             if x5["status"] not in ("running", "queued"):
                 break
             time.sleep(0.5)
-        ok(x5["status"] == "stopped" and "did not answer" in (x5.get("error") or "") and x5["evaluation"]["decisions"] <= 4,
-           f"a model that never answers: the run stops by itself ({x5.get('error')})")
+        ok(x5["status"] == "failed" and "before the start" in (x5.get("error") or ""),
+           f"a model that does not answer: the run ends before the simulation starts ({x5.get('error')[:80]})")
         ins.delete(f"/api/ai/runs/{r5}")
     finally:
         slow.kill()

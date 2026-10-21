@@ -42,7 +42,7 @@ async def chat(request: Request):
         acts = [{"type": "assume", "callsign": c} for c in calling] + [{"type": "decontrol", "callsign": c} for c in gone] + [{"type": "reply", "request_id": r, "decision": "approve"} for r in reqs]
         acts.append({"type": "clear", "callsign": "NOSUCH1", "cfl": 300}) if calls["n"] % 7 == 0 else None
         text = "```json\n" + json.dumps({"reasoning": f"{len(calling)} calling, {len(reqs)} requests", "actions": acts}) + "\n```"
-    if os.environ.get("MOCK_DELAY"):
+    if os.environ.get("MOCK_DELAY") and "Reply with" not in user:
         await asyncio.sleep(float(os.environ["MOCK_DELAY"]))
     return {"id": "x", "object": "chat.completion", "choices": [{"index": 0, "message": {"role": "assistant", "content": text}}],
             "usage": {"prompt_tokens": len(user) // 4, "completion_tokens": len(text) // 4}}

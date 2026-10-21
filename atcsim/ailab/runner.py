@@ -213,6 +213,25 @@ def run(job: dict) -> None:
     import signal
     signal.signal(signal.SIGTERM, _on_term)
     failed_row = 0
+    # the first picture: the scenario's aircraft appear at the first simulated second
+    with s.lock:
+        while w.t < 1.0 and not w.finished:
+            s._tick()
+    # wake the model before the clock matters (a serverless endpoint may need minutes to start)
+    if not isinstance(agent, agents.Baseline):
+        prog.update(status="waking the model")
+        _write(prog_p, prog)
+        try:
+            agent.chat([{"role": "system", "content": "Answer with a JSON object only."},
+                        {"role": "user", "content": 'Reply with {"ready": true}'}])
+        except Stopped:
+            raise
+        except Exception as e:  # noqa: BLE001
+            prog.update(status="failed", error=f"the model did not answer before the start: {e}"[:500])
+            _write(prog_p, prog)
+            raise RuntimeError(f"the model did not answer before the start: {e}")
+        prog.update(status="running")
+        _write(prog_p, prog)
     with open(steps_p, "a") as sf:
         try:
             while w.t < end - 1e-6 and not w.finished:
@@ -430,6 +449,10 @@ def main(argv) -> int:
         job = json.load(f)
     try:
         run(job)
+    except Stopped:
+        p = os.path.join(job["dir"], "progress.json")
+        _write(p, {"status": "failed", "error": "stopped before the simulation started"})
+        return 1
     except Exception as e:  # noqa: BLE001
         p = os.path.join(job["dir"], "progress.json")
         prog = {}

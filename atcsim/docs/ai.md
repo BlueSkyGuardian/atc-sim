@@ -164,7 +164,7 @@ The radio log of the replay shows the controller's side too: *identified* when t
 **Context length** is the endpoint's maximum model length (RunPod: *MAX_MODEL_LEN*): every prompt is kept under it,
 minus the answer length — earlier decisions are left out first, then further queries (each decision says so, with
 its prompt size in tokens). A prompt over the endpoint's limit is refused or cut by the server, and the model then
-loses its instructions: set it right. The first call of a run waits at least 10 minutes (a serverless endpoint may be waking up); after that, a call
+loses its instructions: set it right. Before the clock starts, the simulation is advanced to its first picture (the scenario's aircraft appear at the first second) and the model is woken with a one-line test call: a model that does not answer then ends the run before anything is simulated. That first call waits at least 10 minutes (a serverless endpoint may be waking up); after that, a call
 that gets no answer within the timeout is **not sent again** — the endpoint may still be working on it, and on RunPod
 a timed-out request stays queued and billed — the decision is skipped and the traffic goes on. Retries are only for
 requests that never reached the server (connection refused, 5xx, 429). After 3 decisions in a row without an answer
