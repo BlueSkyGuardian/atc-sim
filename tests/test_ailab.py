@@ -164,6 +164,20 @@ try:
     ok(not rr[0]["ok"] and "semicircular rule" in rr[0]["text"], f"a level of the wrong direction is refused: {rr[0]['text'][:90]}")
     rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": wrong}], {"name": "AI", "seat": "atc"}, rules=False)
     ok(rr[0]["ok"], "... unless the profile's rules are off")
+    asked = {}
+    acx = ss.world.aircraft[cs]
+    from atcsim.aircraft import level_parity_ok as lpo
+    up = next(f for f in range(int(acx.alt_ft / 100) + 10, 420, 10) if lpo(f, acx.southbound) and f != int(str(acx.flight_plan.get("cruise", "F0")).lstrip("F")))
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": up}], {"name": "AI", "seat": "atc"}, asked=asked)
+    urgent = any(cs in c["aircraft"] and c["time_to_conflict_s"] <= 120 for c in __import__("atcsim.atctools", fromlist=["x"]).mtcd(ss.world))
+    ok(urgent or (not rr[0]["ok"] and "ask the pilot first" in rr[0]["text"]), f"a level the pilot did not ask for is refused: ask first ({rr[0]['text'][:70]})")
+    rr = A.apply(ss.world, [{"type": "ask", "callsign": cs, "cfl": up}, {"type": "clear", "callsign": cs, "cfl": up}], {"name": "AI", "seat": "atc"}, asked=asked)
+    ok(rr[0]["ok"] and ("affirm" in rr[0]["text"] or "negative" in rr[0]["text"]) and (urgent or not rr[1]["ok"]),
+       f"ask: the pilot answers ({rr[0]['text']}); not in the same answer as the clearance")
+    for _ in range(5):
+        ss._tick()
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": up}], {"name": "AI", "seat": "atc"}, asked=asked)
+    ok(rr[0]["ok"] == asked[cs][up]["ok"] or urgent, "after the pilot's affirm, the level is given (after a negative, refused)")
     ss.stop()
 
     # ---- watch live (read-only)

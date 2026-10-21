@@ -192,6 +192,8 @@ def run(job: dict) -> None:
     budget = max(1500, ctx - min(ans_tokens, max(1000, ctx // 4)) - 200)   # (a huge answer length does not eat the prompt)
     est = lambda ms: sum(len(m["content"]) for m in ms) / 3.2 + 8 * len(ms)      # tokens, roughly (3.2 characters each)
     conf_seen: dict = {}
+    asked: dict = {}                 # the pilots' answers to "able / interested FLxxx?": {callsign: {fl: {t, ok, text}}}
+    agent.asked = asked
     history, feedback, steps = [], None, []
     next_t, last_t = 0.0, -1e9
     seen_calls, seen_reqs, seen_conf = set(), set(), set()
@@ -261,7 +263,7 @@ def run(job: dict) -> None:
                             for a in list(w.aircraft.values()):
                                 if a.outside and a.assumed:
                                     inputs.apply(w, "release", {"callsign": a.callsign}, {"name": "auto transfer", "seat": "atc"})
-                    text, struct = obs_mod.observe(w, {**(agent_cfg.get("observation") or {}), "_seen": conf_seen})
+                    text, struct = obs_mod.observe(w, {**(agent_cfg.get("observation") or {}), "_seen": conf_seen, "_asked": asked})
                     hist = history[-n_hist:] if n_hist else []
                     msgs = agents.messages(system, text, hist, feedback)
                     trimmed = []
@@ -312,7 +314,7 @@ def run(job: dict) -> None:
                                     usage[k] = (usage.get(k) or 0) + v
                             acts, reasoning, perr, qs = act_mod.parse_full(answer)
                         with s.lock:
-                            results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                            results = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on, asked=asked)
                         last = results
                         n_fix = 0
                         while (fix_rounds > n_fix and not isinstance(agent, agents.Baseline)
@@ -338,7 +340,7 @@ def run(job: dict) -> None:
                             acts, reasoning2, perr, _ = act_mod.parse_full(answer)
                             reasoning = reasoning2 or reasoning
                             with s.lock:
-                                last = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on)
+                                last = act_mod.apply(w, acts, actor, max_actions=max_actions, force=force, rules=rules_on, asked=asked)
                             for r in last:
                                 r["correction"] = True
                             results = results + last

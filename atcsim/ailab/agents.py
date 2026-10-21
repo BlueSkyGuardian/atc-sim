@@ -20,11 +20,10 @@ At every decision, in this order:
 2. TRANSFER (decontrol) every aircraft listed under TRANSFER / LEFT YOUR SECTOR.
 3. ANSWER every pilot request (reply approve or unable; the probe result is given: approve when it says no conflict).
 4. SOLVE every predicted conflict between your aircraft as soon as it is listed (under 10 minutes): act at the first decision you see it, not when the aircraft are close. A conflict listed again "still unsolved" means your last decision did not solve it.
-   - PRIORITY: an aircraft maintaining its level has priority in it; move the other one (the one climbing or descending, or not at its requested level). The conflict line says which one to move: follow it unless it is impossible;
-   - prefer a level change for that ONE aircraft, to a level given as conflict-free for it, in its direction of flight;
-   - SPEED is a normal tool: Mach (e.g. "M76", 0.01 = about 6 kt) or IAS ("280") for aircraft in trail or converging on the same point: slow the one behind, or speed up the one ahead (usual range M0.74-0.82). The conflict line says when speed works and which speed; cancel it with "speed": "SN" (resume normal speed) when no longer needed;
-   - aircraft routing via the same point (the conflict line says so, with both times): a level change, or a speed for one of them to put them in trail; headings only if no level works;
-   - a heading turns an aircraft away from its route for good: give one only with a plan (about 30-60 degrees off its track, away from the other), and resume it as soon as it is listed under RESUME.
+   - PRIORITY: move only ONE aircraft, the one without priority. An aircraft maintaining its level has priority over one climbing or descending; between two level aircraft, the one that entered your sector FIRST keeps its level. Do not move an aircraft that did nothing wrong. The conflict line says which one to move.
+   - ORDER OF SOLUTIONS, always: 1) SPEED (Mach "M74" or IAS "280", for traffic in trail, merging or converging: slow the one behind or speed up the one ahead), 2) HEADING (a turn of 10-45 degrees, or a delaying vector, then resume as soon as it is listed under RESUME), 3) LEVEL, last. The conflict line lists the conflict-free options in this order: take the first that works.
+   - LEVELS: never give an aircraft a level it did not ask for without asking first: {"type": "ask", "callsign": "X", "cfl": 370}; the pilot answers at the next decision (affirm, or negative with a reason), and only after "affirm" do you clear it. Exceptions: the level it requested, its flight-plan cruise level, arrivals descending, and a conflict under 2 minutes or a loss of separation (then give the level at once). A level given without asking is refused.
+   - Cancel a speed when it is no longer needed: "speed": "SN" (resume normal speed).
 5. RESUME every aircraft listed under RESUME (on a heading and now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
 6. SEQUENCE the arrivals (SEQUENCE in TO DO, within about 15 minutes of their fix): each must cross its fix at the agreed level (e.g. FL250) and the agreed distance behind the one ahead. An arrival stays at its level until its top of descent, where the pilot asks for descent (a pilot request): approve it then, to the agreed level. Do not descend arrivals earlier unless a conflict needs it. Keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
 7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
@@ -39,6 +38,7 @@ Give every needed instruction in one answer (several actions in the list); an em
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
 LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
+                          "8e537bb41ac6b8514fab28e5397556850845c71db08acdd8aa724a2ed110af61",
                           "0792535b15f97a9805bdd21dea9f589a6bd1606a13ce9781995f22d8cca22496",
                           "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
                           "9950dd11812cc5ef998b7940e97d603867928b95fab03bf8dc13175d307f04df",
@@ -213,7 +213,9 @@ def test(p: dict) -> dict:
 # ------------------------------------------------------------------ the built-in baseline
 class Baseline:
     """A scripted controller: assumes what calls, decontrols what has left, answers requests with a conflict probe,
-    resolves predicted conflicts under 8 minutes with a level change (or else a heading) checked by the probe.
+    resolves predicted conflicts under 8 minutes moving the aircraft without priority, by speed, else a heading (then
+    resume), else a level (asked to the pilot first unless urgent), each checked by the probe; speeds back to normal
+    once no longer needed.
     A reference point for the models, and a way to produce experience data without a model."""
 
     def decide(self, w) -> str:
@@ -247,48 +249,81 @@ class Baseline:
             acts.append({"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"})
             why.append(f"{r['id']} {'approved' if ok else 'unable'}")
         touched = set()
+        from .observe import priority, solutions
+        from . import actions as act_mod
+        asked = getattr(self, "asked", None) or {}
+        st_by = {a["callsign"]: a for a in st["aircraft"]}
         for c in atctools.mtcd(w):
             if c["time_to_conflict_s"] > 480:
                 continue
             pair = [x for x in c["aircraft"] if x in mine and x not in touched]
             if not pair or any(x in touched for x in c["aircraft"]):
                 continue
-            done = False
-            from .observe import priority
-            from ..aircraft import level_parity_ok
-            if len(pair) == 2:                      # the aircraft maintaining its level keeps it: move the other first
-                mv, _ = priority(mine[pair[0]], mine[pair[1]])
+            if len(pair) == 2:                      # priority keeps its level: move the other first
+                mv, _ = priority(st_by[pair[0]], st_by[pair[1]], w)
                 if mv == pair[1]:
                     pair = [pair[1], pair[0]]
-            for cs in pair:
-                a = mine[cs]
-                for d in (20, -20, 40, -40, 10, -10):
-                    fl = int(a["cleared_fl"]) + d
-                    if fl < 100 or fl > w.upper_fl:
+            done = False
+            urgent = c.get("current") or c["time_to_conflict_s"] <= act_mod.URGENT_S
+            last = getattr(self, "_acted", {})
+            if not urgent and any(w.t - last.get(x, -1e9) < 120 for x in pair):
+                continue                            # acted on it less than 2 min ago: let the clearance work
+            for cs in pair:                         # 1) speed, 2) heading (then resume), 3) level (asked first)
+                so = solutions(w, st_by[cs])
+                tag = f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs}"
+                if so["speed"]:
+                    acts.append({"type": "clear", "callsign": cs, "speed": so["speed"][0]})
+                    why.append(f"{tag} speed {so['speed'][0]}")
+                elif so["heading"]:
+                    acts.append({"type": "clear", "callsign": cs, "heading": int(so["heading"][0])})
+                    why.append(f"{tag} heading {so['heading'][0]}")
+                elif so["level"]:
+                    fl = int(so["level"][0])
+                    q = (asked.get(cs) or {}).get(fl)
+                    if urgent or (q and q["ok"] and q["t"] < w.t):
+                        acts.append({"type": "clear", "callsign": cs, "cfl": fl})
+                        why.append(f"{tag} FL{fl}")
+                    elif not q:
+                        acts.append({"type": "ask", "callsign": cs, "cfl": fl})
+                        why.append(f"{tag} asked FL{fl}")
+                    else:
                         continue
-                    acx = w.aircraft[cs]
-                    if not level_parity_ok(fl, acx.southbound) and not (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)):
-                        continue
-                    try:
-                        if not atctools.probe(w, cs, cfl=fl).get("conflicts"):
-                            acts.append({"type": "clear", "callsign": cs, "cfl": fl})
-                            why.append(f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs} to FL{fl}")
-                            touched.add(cs)
-                            done = True
-                            break
-                    except Exception:  # noqa: BLE001
-                        pass
-                if done:
-                    break
-            if not done:
+                else:
+                    continue
+                touched.add(cs)
+                self._acted = dict(getattr(self, "_acted", {}), **{cs: w.t})
+                done = True
+                break
+            if not done and urgent:
                 cs = pair[0]
                 h = (int(mine[cs]["track_deg"]) + 30) % 360 or 360
                 acts.append({"type": "clear", "callsign": cs, "heading": h})
-                why.append(f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs} heading {h:03d}")
+                why.append(f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs} heading {h:03d} (nothing better)")
                 touched.add(cs)
-        for cs, a in mine.items():               # back on route once clear of conflict
-            if a.get("nav_mode") == "heading" and cs not in touched and not any(cs in c["aircraft"] for c in atctools.mtcd(w)):
-                acts.append({"type": "resume", "callsign": cs})
+        for cs, a in mine.items():               # speeds back to normal once no longer needed
+            if a.get("speed_assigned_by_atc") and cs not in touched and not any(cs in c["aircraft"] for c in atctools.mtcd(w)):
+                nm = (a.get("speed_pair") or {}).get("mach")
+                ok_ = True
+                if nm:
+                    try:
+                        ok_ = not [x for x in atctools.probe(w, cs, speed=f"M{int(round(nm * 100))}").get("conflicts") or []
+                                   if x["time_to_conflict_s"] <= 600]
+                    except Exception:  # noqa: BLE001
+                        ok_ = False
+                if ok_:
+                    acts.append({"type": "clear", "callsign": cs, "speed": "SN"})
+                    touched.add(cs)
+        for cs, a in mine.items():               # back on route once resuming is conflict-free (the probe)
+            if a.get("nav_mode") == "heading" and cs not in touched and w.t - getattr(self, "_acted", {}).get(cs, -1e9) >= 60:
+                acx = w.aircraft[cs]
+                ahead = [p for p in acx.route[acx.next_index:] if not str(p).startswith("@") and p in w.waypoints]
+                if ahead:
+                    try:
+                        cl = [x for x in atctools.probe(w, cs, direct=ahead[0]).get("conflicts") or [] if x["time_to_conflict_s"] <= 600]
+                    except Exception:  # noqa: BLE001
+                        cl = [1]
+                    if not cl:
+                        acts.append({"type": "resume", "callsign": cs})
         return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
 
 

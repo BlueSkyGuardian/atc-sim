@@ -86,7 +86,21 @@ correction turns are kept in the chat datasets. The next situation starts with t
 Arrivals show their **top of descent** (*top of descent in 60NM (it will ask for descent there: keep it at its level
 until then), latest descent for the agreed level in 66NM*): the pilot asks for descent there.
 
-### Priority, speed, what was left undone
+### Priority, order of solutions, asking before a level
+
+Only one aircraft of a conflict is moved, the one without priority: an aircraft maintaining its level has priority
+over one climbing or descending, and between two level aircraft the one that entered the sector first keeps its
+level. The solutions are taken in this order: **speed**, then a **heading** (then resume), then a **level** — each
+conflict line lists the conflict-free options for the aircraft to move, in that order, checked by the probe with a
+margin (a speed or a turn takes time to act).
+
+A level the aircraft did not request is never given straight away: the model asks
+(`{"type": "ask", "callsign": "X", "cfl": 370}`), the synthetic pilot answers at the next decision — *affirm*, or
+*negative* (unable for performance, weather, RVSM, or preferring to stay near its requested cruise level) — and the
+level is cleared only after an affirm. Exempt: the level it requested, its flight-plan cruise level, arrivals
+descending, and a conflict under 2 minutes or a loss in progress. A level given without asking is refused (rules on).
+
+### What was left undone
 
 Each conflict line says which aircraft to move: an aircraft maintaining its level has priority in it, so the one
 climbing or descending (or not at its requested level) moves (*PRIORITY: IBE3247 is level at FL350 and keeps

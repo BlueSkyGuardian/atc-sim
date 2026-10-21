@@ -15,7 +15,7 @@ MAX_PER_ROUND = 8
 QUERY_HELP = """QUERIES (optional): before giving instructions you may ask the simulator questions. Answer with
 {"reasoning": "<why>", "queries": [<queries>]} (no actions in that answer); you get the answers, then you answer again
 with your instructions (or more queries, up to {rounds} rounds per decision, {per} queries per round). The simulation waits.
-  {"q": "probe", "callsign": "RAM123", "cfl": 370}           conflicts it would have with this clearance (any of cfl, heading, direct; together allowed)
+  {"q": "probe", "callsign": "RAM123", "speed": "M74"}       conflicts it would have with this clearance (any of speed, heading, direct, cfl; together allowed)
   {"q": "probe", "callsign": "RAM123", "heading": 250}
   {"q": "levels", "callsign": "RAM123"}                     its conflict-free levels (with the direction rule)
   {"q": "geometry", "a": "RAM123", "b": "IBE45"}            distance and bearing now, tracks, closing speed, closest point of approach if both keep going straight
@@ -70,9 +70,9 @@ def _one(w, q: dict) -> str:
     kind = str(q.get("q") or q.get("type") or "").lower()
     if kind == "probe":
         ac = _ac(w, q.get("callsign"))
-        ov = {k: q[k] for k in ("cfl", "heading", "direct") if q.get(k) not in (None, "")}
+        ov = {k: q[k] for k in ("cfl", "heading", "direct", "speed") if q.get(k) not in (None, "")}
         if not ov:
-            raise ValueError("probe: give cfl, heading and/or direct")
+            raise ValueError("probe: give cfl, heading, direct and/or speed")
         if "cfl" in ov:
             ov["cfl"] = int(ov["cfl"])
         if "heading" in ov:

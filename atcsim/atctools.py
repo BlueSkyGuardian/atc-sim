@@ -115,8 +115,25 @@ def _path(w, a, ent: dict, heading: Optional[float] = None, direct: Optional[str
     return pts, None
 
 
-def _sample(a, pts: List[tuple], heading: Optional[float], times: np.ndarray, alt0: float, cfl: float) -> np.ndarray:
-    gs = max(a.gs, a.tas, 150.0)
+def speed_factor(a, speed) -> float:
+    """Ground speed ratio of a speed clearance ("M74", "0.74", "280" IAS kt) to the present speed, at the present level
+    (the change is taken as immediate: a probe, not a profile)."""
+    s = str(speed).strip().upper()
+    try:
+        if s.startswith("M") or (s.replace(".", "", 1).isdigit() and float(s) < 2):
+            m = float(s.lstrip("M"))
+            m = m / 100 if m > 2 else m
+            new = a.perf.tas_for("mach", m, a.alt_ft)
+        else:
+            new = a.perf.tas_for("cas", float(s), a.alt_ft)
+        return max(0.6, min(1.4, new / max(a.tas, 100.0)))
+    except (ValueError, AttributeError, TypeError):
+        return 1.0
+
+
+def _sample(a, pts: List[tuple], heading: Optional[float], times: np.ndarray, alt0: float, cfl: float,
+            gs_factor: float = 1.0) -> np.ndarray:
+    gs = max(a.gs, a.tas, 150.0) * gs_factor
     d = gs * times / 3600.0
     out = np.zeros((len(times), 3))
     if heading is not None or len(pts) < 2:
@@ -164,8 +181,10 @@ def _trajectories(w, acs, times, override: Optional[dict] = None) -> Dict[str, n
     out = {}
     for a in acs:
         ent = dict(w.entries.get(a.callsign, {}))
-        hd, dc = None, None
+        hd, dc, gf = None, None, 1.0
         if override and override.get("callsign") == a.callsign:
+            if override.get("speed"):
+                gf = speed_factor(a, override["speed"])
             if override.get("cfl") is not None:
                 ent["cfl"] = int(override["cfl"])
             if override.get("heading"):
@@ -173,7 +192,7 @@ def _trajectories(w, acs, times, override: Optional[dict] = None) -> Dict[str, n
             if override.get("direct"):
                 dc = str(override["direct"]).upper()
         pts, heading = _path(w, a, ent, hd, dc)
-        out[a.callsign] = _sample(a, pts, heading, times, a.alt_ft, _system_cfl(w, a, ent))
+        out[a.callsign] = _sample(a, pts, heading, times, a.alt_ft, _system_cfl(w, a, ent), gf)
     return out
 
 
@@ -255,7 +274,7 @@ def mtcd(w, look_s: Optional[float] = None, step_s: float = MTCD_STEP_S) -> List
     return res
 
 
-def probe(w, callsign: str, cfl=None, heading=None, direct=None, levels: Optional[List[int]] = None) -> dict:
+def probe(w, callsign: str, cfl=None, heading=None, direct=None, levels: Optional[List[int]] = None, speed=None) -> dict:
     """What-if for one aircraft: the conflicts it would have with another level / heading / direct (over the
     exercise's MTCD look-ahead)."""
     cs = callsign.upper()
@@ -278,8 +297,8 @@ def probe(w, callsign: str, cfl=None, heading=None, direct=None, levels: Optiona
             out["levels"][str(int(fl))] = [{"with": [x for x in c["aircraft"] if x != cs][0],
                                             "in_s": c["time_to_conflict_s"], "min_nm": c["min_horizontal_nm"]}
                                            for c in cs_list]
-    if cfl is not None or heading or direct:
-        out["conflicts"] = run({"cfl": cfl, "heading": heading, "direct": direct})
+    if cfl is not None or heading or direct or speed:
+        out["conflicts"] = run({"cfl": cfl, "heading": heading, "direct": direct, "speed": speed})
     return out
 
 
