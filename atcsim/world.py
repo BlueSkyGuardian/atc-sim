@@ -15,6 +15,8 @@ import numpy as np
 from . import arrivals, pilot
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
+MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
+MAX_IAS_CHANGE_KT = 20.0     # and by at most this from its own indicated airspeed
 INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
                      "reroute", "wx_clear")
 MAX_EVENTS = 20000
@@ -387,6 +389,23 @@ class World:
             out["decision"] = "approved" if dec.startswith("approv") else "unable"
         return out
 
+    @staticmethod
+    def speed_change_too_large(ac, spec: dict) -> str:
+        """'' when a speed is within the usual adjustment of the aircraft's own speed (±0.03 Mach, ±20 kt); else why."""
+        if ac is None or not spec:
+            return ""
+        try:
+            mode, val = ac.normal_speed()
+        except Exception:  # noqa: BLE001
+            return ""
+        if spec.get("mach") is not None and mode == "mach" and abs(spec["mach"] - val) > MAX_MACH_CHANGE + 1e-6:
+            return (f"M.{int(round(spec['mach'] * 100))} is {abs(spec['mach'] - val):.2f} from {ac.callsign}'s own M.{int(round(val * 100))}: "
+                    f"a speed is adjusted by at most {MAX_MACH_CHANGE:.2f}")
+        if spec.get("ias_kt") is not None and mode != "mach" and abs(spec["ias_kt"] - val) > MAX_IAS_CHANGE_KT + 0.5:
+            return (f"{int(spec['ias_kt'])} kt is {abs(spec['ias_kt'] - val):.0f} kt from {ac.callsign}'s own {int(val)} kt: "
+                    f"a speed is adjusted by at most {int(MAX_IAS_CHANGE_KT)} kt")
+        return ""
+
     def parse_limit(self, v, allow_point: bool = True) -> Optional[dict]:
         """The limit of a heading or speed clearance: {"min": 5} / {"nm": 20} / {"until": "IBALU"}; accepted as such
         or as text "5MIN", "5 MIN", "20NM", "IBALU" (a point: speeds only). None when no limit is given."""
@@ -662,11 +681,16 @@ class World:
         if n.get("type") in ("heading", "speed"):
             if n["type"] == "speed" and (n.get("speed") or {}).get("resume_normal"):
                 return []
+            out_w = []
+            if n["type"] == "speed":
+                why = self.speed_change_too_large(self.aircraft.get(n["callsign"]), n.get("speed") or {})
+                if why:
+                    out_w.append(why)
             if not n.get("limit"):
                 self.m["no_limit"] = self.m.get("no_limit", 0) + 1
-                return [f"{n['type']} without a limit: give it in minutes or miles"
-                        + (" (or until a point)" if n["type"] == "speed" else "")]
-            return []
+                return out_w + [f"{n['type']} without a limit: give it in minutes or miles"
+                                + (" (or until a point)" if n["type"] == "speed" else "")]
+            return out_w
         if n.get("type") != "altitude":
             return []
         ac = self.aircraft.get(n["callsign"])
@@ -782,6 +806,14 @@ class World:
         if norm["type"] == "wx_plan":
             return
         for req in self.requests.values():
+            if (req.status == "unable" and req.callsign == norm["callsign"] and req.type == norm["type"]
+                    and req.type in ("altitude", "direct")
+                    and (norm.get("fl") == req.value if req.type == "altitude" else norm.get("waypoint") == req.value)):
+                req.status = "approved"                  # refused at first, given later when it became possible
+                req.resolved_by = instr_id
+                self._event("request_resolved", request_id=req.id, callsign=req.callsign, status="approved",
+                            later=True, response_time_s=round(self.t - req.time, 1))
+                continue
             if req.status != "pending" or req.callsign != norm["callsign"]:
                 continue
             if req.type == "report":

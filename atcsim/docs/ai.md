@@ -141,6 +141,14 @@ Aircraft on the same route (en-route traffic) appear in the conflict lines with 
   within 20 minutes (**EXIT SPACING**, and *SPACE at the exit* in TO DO) with the solver's options; each crossing
   closer than agreed costs 5 points.
 - **Departures** from GMMN ask for their final level on first contact (a pilot request to answer).
+- **Requests.** A request in conflict is not refused while a speed or a vector makes it separated: the request line
+  says so (*SOLVER: approve WITH {"type": "clear", "callsign": "RAM101", "cfl": 370, "heading": 196, "limit": "4MIN",
+  "then": "S3"}*), the vector or speed going to the requesting aircraft or, failing that, to the aircraft in the way.
+  Close in (under 5 minutes, both level) a vector is proposed only if the reachability tables say a turn can still
+  separate them. A refused request is remembered: **ACCOMMODATE** in TO DO lists those that have become possible, to
+  give without waiting for the pilot to ask again. The built-in solver does all this by itself.
+- **Speeds** are adjusted by at most ±0.03 Mach (±20 kt) from the aircraft's own speed; a larger change is refused
+  (rules on).
 
 ### The solver's solutions
 

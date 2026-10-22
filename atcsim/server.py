@@ -577,7 +577,8 @@ def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None,
         import json as _json
         key = (int(s.world.t // 5), callsign, other, horizon_s, rollout, getattr(s, "rewinds", 0),
                hash(_json.dumps(s.world.entries, sort_keys=True, default=str)),
-               tuple(sorted(c for c, a in s.world.aircraft.items() if a.active and a.assumed)))
+               tuple(sorted(c for c, a in s.world.aircraft.items() if a.active and a.assumed)),
+               tuple(sorted(q.id for q in s.world.requests.values() if q.status == "pending")))
         c = getattr(s, "_solve_cache", None)
         if c and c[0] == key:
             return c[1]
@@ -598,6 +599,22 @@ def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None,
              "optimal": [o.text for o in x["optimal"]],
              "solutions": [o.public() for o in x["solutions"]]} for x in res["sets"]],
             "text": resolve.describe(res)}
+        # pending level / direct requests of the controller's aircraft: as asked, with a speed or vector, or not now
+        reqs = []
+        for q in w.requests.values():
+            ac_q = w.aircraft.get(q.callsign)
+            if q.status != "pending" or q.type not in ("altitude", "direct") or ac_q is None or not ac_q.active or not ac_q.assumed:
+                continue
+            try:
+                v = str(q.value).upper()
+                rq = {"cfl": int(v.lstrip("F").lstrip("L"))} if q.type == "altitude" else {"direct": v}
+                sol = resolve.accommodate(w, q.callsign, rq)
+            except Exception:  # noqa: BLE001
+                continue
+            reqs.append({"request_id": q.id, "callsign": q.callsign, "text": q.phrase(), "possible": sol is not None,
+                         "as_asked": bool(sol) and len(sol["actions"]) == 1 and not (set(sol["actions"][0]) - {"type", "callsign", "cfl", "direct"}),
+                         "actions": sol["actions"] if sol else [], "how": sol["text"] if sol else "nothing makes it separated now"})
+        out["requests"] = reqs
         s._solve_cache = (key, out)
         return out
 

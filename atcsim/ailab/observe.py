@@ -14,6 +14,8 @@ resume check, requests), max_aircraft.
 """
 from __future__ import annotations
 
+import json
+
 import math
 from typing import Dict, List, Optional, Tuple
 
@@ -238,17 +240,18 @@ def solutions(w, X: dict, sep_s: float = 600) -> Dict[str, List[str]]:
     # a speed takes time to act (the aircraft accelerates or slows a few knots a second) and a turn takes a minute:
     # an option counts only if it still works with part of its effect (a margin), and only when there is time
     soon = min([c["time_to_conflict_s"] for c in atctools.mtcd(w) if cs in c["aircraft"]] or [1e9])
-    if X.get("speed_mode") == "mach" and X.get("mach") and soon >= 180:
-        m0 = round(X["mach"], 2)
-        for d in (-0.02, -0.04, +0.02, -0.06):
+    mode_n, val_n = ac.normal_speed()                 # within ±0.03 Mach / ±20 kt of its own speed
+    if mode_n == "mach" and soon >= 180:
+        m0 = round(val_n, 2)
+        for d in (-0.02, -0.03, +0.02, +0.03):
             m = round(m0 + d, 2)
-            if 0.70 <= m <= 0.84 and free(speed=f"M{m0 + 0.6 * d:.3f}"):
+            if m <= 0.86 and free(speed=f"M{m0 + 0.6 * d:.3f}"):
                 out["speed"].append(f"M{int(round(m * 100))}")
                 if len(out["speed"]) == 2:
                     break
-    elif X.get("ias_kt") and soon >= 180:
-        v0 = int(round(X["ias_kt"] / 10) * 10)
-        for d in (-20, -30, +20, -40):
+    elif mode_n != "mach" and soon >= 180:
+        v0 = int(round(val_n / 10) * 10)
+        for d in (-10, -20, +10, +20):
             v = v0 + d
             if 210 <= v <= 340 and free(speed=str(v0 + 0.6 * d)):
                 out["speed"].append(str(v))
@@ -457,6 +460,40 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                     seq_todo.append(f"{r['callsign']} must descend to FL{tgt} for {f['fix']} (latest descent in {max(0, ld):.0f} NM)")
     if seq_todo:
         todo.append("SEQUENCE the arrivals: " + "; ".join(seq_todo))
+    # requests refused earlier that nothing stands against any more: to be given now (the pilot does not ask again)
+    if hints:
+        try:
+            from . import actions as act_mod
+            from ..aircraft import level_parity_ok
+            from ..solve import resolve as _rs
+            pend = {r["callsign"] for r in st.get("pending_requests") or []}
+            acc = []
+            for q in act_mod.refused_requests(w):
+                acx = w.aircraft[q.callsign]
+                if q.callsign in pend:
+                    continue
+                if q.type == "altitude":
+                    fl = act_mod._fl(q.value)
+                    clr, txt = {"cfl": fl}, f"FL{fl}"
+                    if not (level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl))):
+                        continue
+                    instr = {"type": "altitude", "fl": fl}
+                    probe_kw = {"cfl": fl}
+                else:
+                    clr, txt = {"direct": str(q.value).upper()}, f"direct {str(q.value).upper()}"
+                    instr = {"type": "direct", "waypoint": clr["direct"]}
+                    probe_kw = {"direct": clr["direct"]}
+                if not act_mod._flyable_now(w, acx, instr) or (atctools.probe(w, q.callsign, **probe_kw).get("conflicts") or []):
+                    continue
+                if not _rs.positive(w, q.callsign, _rs.clearance_params(w, acx, clr))["positive"]:
+                    continue
+                t_ = q.resolved_time or q.time
+                acc.append(f"{q.callsign} {txt} (its request {q.id}, refused at T+{_t(t_)}: nothing stands against it now)")
+            if acc:
+                todo.append("ACCOMMODATE the requests you refused earlier, now possible (give them without waiting to be asked again): " + "; ".join(acc))
+                struct["accommodate"] = acc
+        except Exception:  # noqa: BLE001
+            pass
     rs = [cs for cs, r in resume.items() if r["ok"]]
     if rs:
         todo.append("RESUME (on a heading, now clear of conflict): " + ", ".join(rs))
@@ -529,6 +566,21 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
             try:
                 c = atctools.probe(w, r["callsign"], levels=[fl])["levels"].get(str(fl)) or []
                 txt += " · probe: " + ("no conflict at FL%03d" % fl if not c else f"conflict with {c[0]['with']} in {_t(c[0]['in_s'])}")
+            except Exception:  # noqa: BLE001
+                pass
+        if hints and o.get("solver", True) and r.get("type") in ("altitude", "direct") and r.get("value"):
+            # with the solver: the request as asked if separated, else with a speed / vector that makes it so
+            try:
+                from ..solve import resolve as _rs
+                v = str(r["value"]).upper()
+                req = {"cfl": int(v.lstrip("F").lstrip("L"))} if r["type"] == "altitude" else {"direct": v}
+                sol = _rs.accommodate(w, r["callsign"], req, o.get("_asked") or {})
+                if sol is None:
+                    txt += " · SOLVER: nothing makes it separated now: unable (give it later when possible)"
+                elif len(sol["actions"]) > 1 or set(sol["actions"][0]) - {"type", "callsign", "cfl", "direct"}:
+                    txt += " · SOLVER: approve WITH " + "; ".join(json.dumps(x) for x in sol["actions"])
+                else:
+                    txt += " · SOLVER: separated as asked: approve"
             except Exception:  # noqa: BLE001
                 pass
         lines.append(txt)

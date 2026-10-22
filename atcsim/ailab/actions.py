@@ -137,6 +137,16 @@ def check_rules(w, ac, a: dict) -> List[str]:
     if a.get("speed") not in (None, "") and str(a["speed"]).upper() != "SN" and a.get("limit") in (None, ""):
         out.append(f'speed {a["speed"]} for {ac.callsign} without its limit: give "limit" ("10MIN", "40NM" or a point '
                    f'past the traffic); nothing was given')
+    sp = str(a.get("speed") or "").upper().strip()
+    if sp and sp != "SN":
+        try:
+            spec = ({"mach": float(sp.lstrip("M")) / (100 if float(sp.lstrip("M")) > 2 else 1)} if sp.startswith("M") or float(sp) < 2
+                    else {"ias_kt": float(sp)})
+            why = w.speed_change_too_large(ac, spec)
+            if why:
+                out.append(why + "; nothing was given")
+        except ValueError:
+            pass
     side = "southbound: odd levels" if ac.southbound else "northbound: even levels"
     for k in ("cfl", "xfl"):
         if a.get(k) in (None, ""):
@@ -156,6 +166,50 @@ def check_rules(w, ac, a: dict) -> List[str]:
 
 
 ASK_VALID_S = 900           # a pilot's "affirm" to "are you able / interested FLxxx?" holds this long
+REFUSED_KEEP_S = 1800       # a request refused ("unable") is remembered this long, to be given when it becomes possible
+
+
+def _flyable_now(w, ac, instr: dict) -> bool:
+    """The pilot's own check of a clearance (performance, weather, RVSM)."""
+    from ..world import InstructionError
+    try:
+        w.validate(dict(instr, callsign=ac.callsign))
+        return True
+    except InstructionError:
+        return False
+
+
+def refused_requests(w) -> list:
+    """Requests the controller refused that the pilot still wants: the aircraft is still ours and does not have it
+    (a level not cleared, a direct not flown), and has not asked anything else of that kind since. Newest per
+    aircraft and kind."""
+    out = {}
+    for r in sorted(w.requests.values(), key=lambda q: q.time):
+        if r.type not in ("altitude", "direct"):
+            continue
+        key = (r.callsign, r.type)
+        if r.status != "unable":
+            out.pop(key, None)                             # a newer request of that kind replaces the refused one
+            continue
+        if w.t - (r.resolved_time or r.time) > REFUSED_KEEP_S:
+            continue
+        ac = w.aircraft.get(r.callsign)
+        if ac is None or not ac.active or not ac.assumed:
+            continue
+        if r.type == "altitude":
+            try:
+                fl = _fl(r.value)
+            except ValueError:
+                continue
+            if abs(ac.cleared_alt_ft - fl * 100) < 50:
+                continue                                   # given since
+        else:
+            wp = str(r.value).upper()
+            ahead = [p for p in ac.route[ac.next_index:] if p in w.waypoints]
+            if wp not in ahead or (ahead and ahead[0] == wp and ac.nav_mode == "lnav"):
+                continue                                   # passed, or already flying direct to it
+        out[key] = r
+    return list(out.values())
 URGENT_S = 120              # a conflict this close (or a loss): a level may be given without asking
 
 
@@ -190,6 +244,10 @@ def level_needs_asking(w, ac, fl: int, asked: dict) -> str:
     if any(r.callsign == ac.callsign and r.status == "pending" and str(r.value or "").upper().lstrip("F").lstrip("L").isdigit()
            and _fl(r.value) == fl for r in w.requests.values()):
         return ""                                          # it asked for this level
+    if any(r.callsign == ac.callsign and r.type == "altitude" and r.status == "unable" and _fl(r.value) == fl
+           and w.t - (r.resolved_time or r.time) <= REFUSED_KEEP_S for r in w.requests.values()
+           if str(r.value or "").upper().lstrip("F").lstrip("L").isdigit()):
+        return ""                                          # it asked for this level earlier (refused then)
     cruise = str((ac.flight_plan or {}).get("cruise") or "").upper().lstrip("F")
     if cruise.isdigit() and int(cruise) == fl:
         return ""                                          # back to its requested cruise level

@@ -475,6 +475,15 @@ class Aircraft:
         mode, val = self.speed_target(a)
         return -self.perf.roc_fpm(a, mode, val, self.mass, "idle")
 
+    def normal_speed(self, alt_ft: Optional[float] = None) -> Tuple[str, float]:
+        """(mode, value) the aircraft flies at a level with no speed assigned: its own Mach / IAS schedule."""
+        saved = (self.spd_mach, self.spd_cas, self.spd_ias_now)
+        try:
+            self.spd_mach, self.spd_cas, self.spd_ias_now = None, None, False
+            return self.speed_target(self.alt_ft if alt_ft is None else alt_ft)
+        finally:
+            self.spd_mach, self.spd_cas, self.spd_ias_now = saved
+
     def max_fl(self) -> int:
         mode, val = self.speed_target()
         return self.perf.max_fl(mode, val, self.mass)

@@ -463,8 +463,11 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   shown. A ✓ before the distance means the solution was checked by running the simulation ahead (the closest anyone
   then comes, in NM); the others are the prediction. *ask first* marks a level the pilot did not request: ask whether
   it is acceptable before giving it. *too close for a turn* means no heading of that aircraft can separate it in time.
-  **Apply** enters the clearance in the label, as you would; after a delaying vector the panel keeps a **Resume**
-  reminder with its countdown. The list follows the traffic every 5 simulated seconds.
+  **Apply** enters the clearance in the label, as you would; a vector or speed goes with its limit. The panel also
+  lists the pilots' **requests** waiting for you (green): *AS ASKED* when the requested level or direct is separated
+  from everyone, *WITH* a speed or vector that makes it so (for the aircraft asking, or the one in the way), or *NOT NOW*
+  when nothing does. Speeds are proposed within ±0.03 Mach (±20 kt) of the aircraft's own speed; a larger change
+  entered by hand is flown with a warning. The list follows the traffic every 5 simulated seconds.
 
   ![The solver panel](/static/docs/s_solver.jpg "The solver panel: the conflict, its solutions in order, checked ones with ✓")
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.

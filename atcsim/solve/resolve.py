@@ -79,21 +79,27 @@ def _candidates(w, a, st: dict, asked: Optional[dict], t_pass: Optional[float] =
     re_hdg = 0.6 if a.nav_mode == "heading" else 0.0
     hold_s = max(240.0, math.ceil(((t_pass or 300.0) + 60.0) / 60.0) * 60.0)
     lim_txt = f"{int(hold_s // 60)}MIN"
-    # speed
-    if st.get("speed_mode") == "mach" and st.get("mach"):
-        m0 = round(st["mach"], 2)
+    # speed: within ±0.03 Mach (±20 kt) of the aircraft's OWN speed - never a reduction on top of a reduction
+    from ..world import MAX_MACH_CHANGE, MAX_IAS_CHANGE_KT
+    mode_n, val_n = a.normal_speed()
+    cur_m = st.get("mach") if st.get("speed_mode") == "mach" else None
+    if mode_n == "mach":
         mmo = getattr(a.perf, "mmo", 0.86)
-        for d in (-0.02, -0.03, -0.04, -0.05, -0.06, +0.01, +0.02, +0.03):
-            m = round(m0 + d, 2)
-            if 0.68 <= m <= min(0.86, mmo - 0.01) and _flyable(w, a, {"type": "speed", "mach": m}):
+        for d in (-0.01, -0.02, -0.03, +0.01, +0.02, +0.03):
+            m = round(val_n + d, 2)
+            if abs(m - val_n) > MAX_MACH_CHANGE + 1e-6 or (cur_m and abs(m - cur_m) < 0.005):
+                continue
+            if m <= min(0.86, mmo - 0.01) and _flyable(w, a, {"type": "speed", "mach": m}):
                 sp = f"M{int(round(m * 100))}"
                 out.append(("speed", {"speed": sp, "speed_for_s": hold_s},
                             [{"type": "clear", "callsign": cs, "speed": sp, "limit": lim_txt}], abs(d) / 0.01 * 0.08 + re_spd, False))
-    elif st.get("ias_kt"):
-        v0 = int(round(st["ias_kt"] / 10) * 10)
-        for d in (-20, -30, -40, -50, +20, +30):
+    else:
+        v0 = int(round(val_n / 10) * 10)
+        for d in (-10, -20, +10, +20):
             v = v0 + d
-            if 210 <= v <= 340 and _flyable(w, a, {"type": "speed", "ias_kt": v}):
+            if abs(v - val_n) > MAX_IAS_CHANGE_KT + 5 or not (210 <= v <= 340):
+                continue
+            if _flyable(w, a, {"type": "speed", "ias_kt": v}):
                 out.append(("speed", {"speed": str(v), "speed_for_s": hold_s},
                             [{"type": "clear", "callsign": cs, "speed": str(v), "limit": lim_txt}], abs(d) / 10 * 0.08 + re_spd, False))
     # direct (shortcut to a later point of its route)
@@ -455,3 +461,75 @@ def positive(w, cs: str, prm: dict, trajs: Optional[Dict] = None, H: float = H_D
     ok = after >= sh or (urgent and after >= before + 1.0)
     return {"positive": bool(ok), "after_nm": None if math.isinf(after) else round(after, 1),
             "before_nm": None if math.isinf(before) else round(before, 1), "with": who}
+
+
+def accommodate(w, cs: str, req: dict, asked: Optional[dict] = None, H: float = H_DEFAULT) -> Optional[dict]:
+    """A pilot's request (req: {"cfl": 370} or {"direct": "IBALU"}) made possible: the request alone if it is clear of
+    everyone; else with a speed or a vector of the requesting aircraft, or of the aircraft in the way (an aircraft that
+    did nothing is moved only when the requester cannot be); None when nothing makes it separated - then it is refused.
+    Close in (a conflict under 5 minutes, both level), a vector is tried only if the reachability tables say a turn can
+    still separate the pair. Returns {"actions": [...], "text": "...", "cost": c}."""
+    a = w.aircraft.get(cs)
+    if a is None:
+        return None
+    sh = float(w.sep_h)
+    trajs = traj.build_all(w, H)
+    st = {x["callsign"]: x for x in w.state()["aircraft"]}
+    base_act = {"type": "clear", "callsign": cs, **({"cfl": int(req["cfl"])} if req.get("cfl") is not None else {"direct": req["direct"]})}
+    ok, _, Tm = check_clearance(w, a, H, req, trajs, sh)
+    if ok:
+        return {"actions": [base_act], "text": f"{cs}: request given as asked", "cost": 0.0}
+    # who is in the way of the request (at either rate bound for a level)
+    variants = [Tm] + ([traj.build(w, a, H, rates=r, **req) for r in ("fast", "slow")] if req.get("cfl") is not None else [])
+    blocking = {}
+    for o, To in trajs.items():
+        if o == cs:
+            continue
+        for V in variants:
+            p = cpa.pair(V, To, sh)
+            if p.d_min < sh + MARGIN_NM:
+                blocking[o] = min(blocking.get(o, 1e9), p.t_first if p.t_first is not None else (p.t_min or 0.0))
+    if not blocking:
+        return None
+
+    def turn_ok(mover, other):
+        t_f = blocking.get(other)
+        if t_f is None or t_f > hj.T_S or abs(w.aircraft[mover].vs_fpm) > 300 or abs(w.aircraft[other].vs_fpm) > 300:
+            return True
+        try:
+            hv = hj.can_turn_away(w, mover, other)
+        except Exception:  # noqa: BLE001
+            hv = None
+        return True if hv is None else hv["turn_enough"]
+    best = None
+    # 1) the requesting aircraft: the request with a speed (or, for a level, a vector)
+    lateral_ok = all(turn_ok(cs, o) for o in blocking)
+    for kind, prm, acts, cost, ask in _candidates(w, a, st[cs], asked, max(blocking.values()) + 120.0):
+        if kind not in ("speed", "heading") or (kind == "heading" and (req.get("direct") or not lateral_ok)):
+            continue
+        ok2, d2, _ = check_clearance(w, a, H, {**req, **prm}, trajs, sh)
+        if ok2 and (best is None or cost < best["cost"]):
+            act = {**base_act, **{k: v for k, v in acts[0].items() if k not in ("type", "callsign")}}
+            best = {"actions": [act], "cost": cost, "text": f"{cs}: request given with {_text(kind, cs, prm).replace(cs + ' ', '')}"}
+    # 2) the aircraft in the way (ours only), the request given as asked
+    if len(blocking) == 1:
+        o = next(iter(blocking))
+        ao = w.aircraft[o]
+        if ao.active and ao.assumed and o in st:
+            T2 = dict(trajs)
+            T2[cs] = Tm
+            lat_o = turn_ok(o, cs)
+            for kind, prm, acts, cost, ask in _candidates(w, ao, st[o], asked, blocking[o] + 120.0):
+                if kind not in ("speed", "heading", "direct") or (kind == "heading" and not lat_o):
+                    continue
+                cost += 2.0                                   # moving an aircraft that asked for nothing
+                if best is not None and cost >= best["cost"]:
+                    continue
+                ok_o, _, To_new = check_clearance(w, ao, H, prm, T2, sh)
+                if not ok_o:
+                    continue
+                ok_r, _, _ = check_clearance(w, a, H, req, {**trajs, o: To_new}, sh)
+                if ok_r:
+                    best = {"actions": [acts[0], base_act], "cost": cost,
+                            "text": f"{cs}: request given, {_text(kind, o, prm)} to make room"}
+    return best

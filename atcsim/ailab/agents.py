@@ -19,7 +19,7 @@ Every few moments you get the situation (it starts with TO DO NOW, and with what
 At every decision, in this order:
 1. ASSUME every aircraft listed under ASSUME / CALLING YOU, all of them, now (one assume action each). Only assumed aircraft accept clearances; an assume and clearances for the same aircraft may go in one answer, assume first. INBOUND aircraft are not on your frequency: never instruct them.
 2. TRANSFER (decontrol) every aircraft listed under TRANSFER / LEFT YOUR SECTOR.
-3. ANSWER every pilot request (reply approve or unable; the probe result is given: approve when it says no conflict).
+3. ANSWER every pilot request (reply approve or unable; the probe result is given: approve when it says no conflict). A request in conflict is not refused while a speed or a vector makes it separated: give it with that clearance (the SOLVER line on the request says how), and refuse only when nothing does. A request you refused is not forgotten: when the reason is gone (listed under ACCOMMODATE), give it (clear the level or the direct) without waiting for the pilot to ask again.
 4. SOLVE every predicted conflict between your aircraft as soon as it is listed (under 10 minutes): act at the first decision you see it, not when the aircraft are close. A conflict listed again "still unsolved" means your last decision did not solve it.
    - PRIORITY: move only ONE aircraft, the one without priority. An aircraft maintaining its level has priority over one climbing or descending; between two level aircraft, the one that entered your sector FIRST keeps its level. Do not move an aircraft that did nothing wrong. The conflict line says which one to move.
    - ORDER OF SOLUTIONS, always: 1) SPEED (Mach "M74" or IAS "280", for traffic in trail, merging or converging: slow the one behind or speed up the one ahead), 2) HEADING (a turn of 10-45 degrees, or a delaying vector), 3) LEVEL, last; a level may be given with a rate ("rate": "1500-") to climb or descend two aircraft together. The conflict line lists the conflict-free options in this order: take the first that works.
@@ -45,7 +45,8 @@ LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353
                           "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
                           "9950dd11812cc5ef998b7940e97d603867928b95fab03bf8dc13175d307f04df",
                           "b4875a13f01be8c1a78ffc4f4b94a2fba95fa20d3e8aa3a04fb7b92c5fae6534",
-                          "a34586a01e13850d72651aea46ea0874a1e60bb13160dab8aca08f738cb1c54c"}
+                          "a34586a01e13850d72651aea46ea0874a1e60bb13160dab8aca08f738cb1c54c",
+                          "29440cc7e0259f984332c4bd848bf7cf26352fa0b45dbe94d2d1190070bc56bf"}
 
 
 def system_prompt(p: str) -> str:
@@ -238,23 +239,21 @@ class Baseline:
             if r["type"] == "report":
                 acts.append({"type": "reply", "request_id": r["id"], "decision": "approve"})
                 continue
-            ok = True
-            try:
-                if r["type"] == "altitude" and r.get("value"):
-                    from ..aircraft import level_parity_ok
-                    acx, fl = w.aircraft[r["callsign"]], int(r["value"])
-                    ok = self._free(w, r["callsign"], cfl=fl) and (
-                        level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
-                elif r["type"] == "direct" and r.get("value"):
-                    ok = self._free(w, r["callsign"], direct=str(r["value"]))
-                elif r["type"] == "speed" and r.get("value"):
-                    v = str(r["value"]).upper()
-                    ok = self._free(w, r["callsign"], speed=v if v.startswith("M") or not v.replace(".", "").isdigit() or float(v) > 2
-                                    else f"M{int(round(float(v) * 100))}")
-            except Exception:  # noqa: BLE001
-                ok = False
-            acts.append({"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"})
-            why.append(f"{r['id']} {'approved' if ok else 'unable'}")
+            a_, w_ = self._answer_request(w, r)
+            acts += a_
+            why += w_
+        # requests refused earlier: given as soon as nothing stands against them any more (probe, positive separation,
+        # direction of flight, the pilot's own check) - the pilot is not asked to call again
+        from . import actions as act_mod
+        pending_cs = {r["callsign"] for r in st.get("pending_requests") or []}
+        for q in act_mod.refused_requests(w):
+            if q.callsign in mine and q.callsign not in pending_cs:
+                try:
+                    a_, w_ = self._accommodate_later(w, q)
+                except Exception:  # noqa: BLE001
+                    continue
+                acts += a_
+                why += w_
         touched = self._resolve(w, st, mine, acts, why)
         for cs, a in mine.items():               # speeds back to normal once no longer needed
             if (a.get("speed_assigned_by_atc") and cs not in touched and "speed" not in (a.get("clearance_limits") or {})
@@ -289,6 +288,44 @@ class Baseline:
         self._spd_given = given
         return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
 
+
+    def _answer_request(self, w, r: dict):
+        """(actions, notes) answering a pending request: approved when the probe finds it clear, else unable."""
+        ok = True
+        try:
+            if r["type"] == "altitude" and r.get("value"):
+                from ..aircraft import level_parity_ok
+                acx, fl = w.aircraft[r["callsign"]], int(r["value"])
+                ok = self._free(w, r["callsign"], cfl=fl) and (
+                    level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
+            elif r["type"] == "direct" and r.get("value"):
+                ok = self._free(w, r["callsign"], direct=str(r["value"]))
+            elif r["type"] == "speed" and r.get("value"):
+                v = str(r["value"]).upper()
+                ok = self._free(w, r["callsign"], speed=v if v.startswith("M") or not v.replace(".", "").isdigit() or float(v) > 2
+                                else f"M{int(round(float(v) * 100))}")
+        except Exception:  # noqa: BLE001
+            ok = False
+        return ([{"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"}],
+                [f"{r['id']} {'approved' if ok else 'unable'}"])
+
+    def _accommodate_later(self, w, q):
+        """(actions, notes) for a request refused earlier: given when nothing stands against it any more."""
+        from . import actions as act_mod
+        from ..aircraft import level_parity_ok
+        cs, acx = q.callsign, w.aircraft[q.callsign]
+        t_ = int(q.resolved_time or q.time)
+        if q.type == "altitude":
+            fl = act_mod._fl(q.value)
+            if ((level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
+                    and act_mod._flyable_now(w, acx, {"type": "altitude", "fl": fl}) and self._free(w, cs, cfl=fl)):
+                return ([{"type": "clear", "callsign": cs, "cfl": fl}],
+                        [f"{cs} FL{fl}: its request {q.id}, refused at T+{t_ // 60:02d}:{t_ % 60:02d}, now possible"])
+        else:
+            wp = str(q.value).upper()
+            if act_mod._flyable_now(w, acx, {"type": "direct", "waypoint": wp}) and self._free(w, cs, direct=wp):
+                return ([{"type": "clear", "callsign": cs, "direct": wp}], [f"{cs} direct {wp}: its request {q.id}, refused earlier, now possible"])
+        return [], []
 
     def _free(self, w, cs: str, cfl=None, direct=None, speed=None, within_s: Optional[float] = None) -> bool:
         """No predicted conflict for cs with this clearance (the radar's probe, over its look-ahead or within_s)."""
@@ -361,6 +398,49 @@ class SolverAgent(Baseline):
     leaves no conflict with anyone, in the controller's order (speed < direct / heading < level, the aircraft without
     priority), checked leg by leg and confirmed by running the simulation ahead; levels asked to the pilot first unless
     urgent. The routine work (assume, transfer, requests, resume, speeds back to normal) as the baseline."""
+
+    def _request_solution(self, w, cs: str, req: dict):
+        """The request made possible (resolve.accommodate): as asked, or with a speed / vector of the requester or of
+        the aircraft in the way; None when nothing makes it separated. The direction of flight and the pilot's own
+        check come first."""
+        from ..solve import resolve
+        from . import actions as act_mod
+        from ..aircraft import level_parity_ok
+        acx = w.aircraft[cs]
+        if req.get("cfl") is not None:
+            fl = int(req["cfl"])
+            if not (level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl))):
+                return None
+            if not act_mod._flyable_now(w, acx, {"type": "altitude", "fl": fl}):
+                return None
+        elif not act_mod._flyable_now(w, acx, {"type": "direct", "waypoint": req["direct"]}):
+            return None
+        return resolve.accommodate(w, cs, req, getattr(self, "asked", None) or {})
+
+    def _answer_request(self, w, r: dict):
+        if r["type"] not in ("altitude", "direct") or not r.get("value"):
+            return super()._answer_request(w, r)
+        cs = r["callsign"]
+        req = {"cfl": int(r["value"])} if r["type"] == "altitude" else {"direct": str(r["value"]).upper()}
+        try:
+            sol = self._request_solution(w, cs, req)
+        except Exception:  # noqa: BLE001
+            sol = None
+        if sol is None:
+            return [{"type": "reply", "request_id": r["id"], "decision": "unable"}], [f"{r['id']} unable (nothing makes it separated)"]
+        if len(sol["actions"]) == 1 and set(sol["actions"][0]) <= {"type", "callsign", "cfl", "direct"}:
+            return [{"type": "reply", "request_id": r["id"], "decision": "approve"}], [f"{r['id']} approved"]
+        self._acted = dict(getattr(self, "_acted", {}), **{a_["callsign"]: w.t for a_ in sol["actions"]})
+        return list(sol["actions"]), [f"{r['id']} approved: {sol['text']}"]
+
+    def _accommodate_later(self, w, q):
+        req = {"cfl": int(str(q.value).upper().lstrip("FL").lstrip("F"))} if q.type == "altitude" else {"direct": str(q.value).upper()}
+        sol = self._request_solution(w, q.callsign, req)
+        if sol is None:
+            return [], []
+        t_ = int(q.resolved_time or q.time)
+        self._acted = dict(getattr(self, "_acted", {}), **{a_["callsign"]: w.t for a_ in sol["actions"]})
+        return list(sol["actions"]), [f"its request {q.id} (refused at T+{t_ // 60:02d}:{t_ % 60:02d}) now given: {sol['text']}"]
 
     def _free(self, w, cs: str, cfl=None, direct=None, speed=None, within_s: Optional[float] = None) -> bool:
         """The probe, and the solver's own check: the exact closest approach of the trajectory with this clearance to
