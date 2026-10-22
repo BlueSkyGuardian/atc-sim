@@ -118,7 +118,9 @@ def _path(w, a, ent: dict, heading: Optional[float] = None, direct: Optional[str
 def speed_factor(a, speed) -> float:
     """Ground speed ratio of a speed clearance ("M74", "0.74", "280" IAS kt) to the present speed, at the present level
     (the change is taken as immediate: a probe, not a profile)."""
-    s = str(speed).strip().upper()
+    s = str(speed).strip().upper().split("/")[0]          # "M76/K280": the Mach part (at the present level)
+    if s.startswith("K"):
+        s = s[1:]
     try:
         if s.startswith("M") or (s.replace(".", "", 1).isdigit() and float(s) < 2):
             m = float(s.lstrip("M"))

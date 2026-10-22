@@ -1,7 +1,8 @@
 """Heading-only sequencing by ellipses.
 
-A follower at P must reach a sequence point T having flown a path of length L (so that it is the required spacing S
-behind the leader there: L = v2 * t1 + S, t1 the leader's time to T, v2 the follower's ground speed). Flying a heading
+A follower at P must reach a sequence point T having flown a path of length L, so that when it crosses T the leader is
+the required spacing S past it: L = v2 * (t1 + S / v1), t1 the leader's time to T, v1 its ground speed after T, v2 the
+follower's (L = v2 t1 + S when they fly the same speed). Flying a heading
 to a turn point M and then direct to T, the path is |PM| + |MT|: the turn points with |PM| + |MT| = L form the ellipse
 with foci P and T and major axis 2a = L (2c = |PT|, b^2 = a^2 - c^2). From the focus P, the ray of heading psi meets it
 at distance
@@ -65,12 +66,14 @@ def family(P, T, L: float, S: float, headings=None) -> List[Dict]:
     return out
 
 
-def required_path(leader_time_s: float, follower_gs: float, S: float) -> float:
-    """L = v2 * t1 + S: the follower's path to T so that it is S behind when the leader crosses T (no wind)."""
-    return follower_gs / 3600.0 * leader_time_s + S
+def required_path(leader_time_s: float, follower_gs: float, S: float, leader_gs: Optional[float] = None) -> float:
+    """The follower's path to T so that the leader is S past T when the follower crosses it (no wind):
+    L = v2 * (t1 + S / v1); with v1 = v2 it is L = v2 t1 + S."""
+    return follower_gs / 3600.0 * (leader_time_s + S / (leader_gs or follower_gs) * 3600.0)
 
 
-def with_wind(P, T, t1_s: float, S: float, tas: float, wind, heading: float, iters: int = 4) -> Optional[Dict]:
+def with_wind(P, T, t1_s: float, S: float, tas: float, wind, heading: float, iters: int = 4,
+              g_lead: Optional[float] = None) -> Optional[Dict]:
     """The same construction in a constant wind W (kt, toward east / north). In the frame of the air mass the aircraft
     flies straight lines at its true airspeed V while the sequence point drifts with -W: arriving at T at time t_A, the
     turn points (in that frame) are on the ellipse with foci P and T - W t_A and major axis 2a = V t_A. The follower must
@@ -83,7 +86,7 @@ def with_wind(P, T, t1_s: float, S: float, tas: float, wind, heading: float, ite
     g_f = wind_gs(tas, (Wx, Wy), u)
     out = None
     for _ in range(iters):
-        tA = (t1_s + S / g_f * 3600.0) / 3600.0                     # hours
+        tA = (t1_s + S / (g_lead or g_f) * 3600.0) / 3600.0         # hours
         F2 = (T[0] - Wx * tA, T[1] - Wy * tA)
         e = ellipse(P, F2, tas * tA)
         if e is None:

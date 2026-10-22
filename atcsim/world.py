@@ -1727,8 +1727,9 @@ class World:
                     raise InstructionError("rate: ft/min, e.g. 1500 (or greater) or 1500- (or less)")
             elif k == "speed":
                 v = str(v).upper().replace(" ", "")
-                if not re.match(r"^(M0?\.?\d{2}|\d{3}(KT)?|S\d{3}|K\d{3}|SN|MIN|MAX)$", v):
-                    raise InstructionError("speed: M78, 280 (kt), SN (resume normal)")
+                if not re.match(r"^(M0?\.?\d{2}|\d{3}(KT)?|S\d{3}|K\d{3}|SN|MIN|MAX|M0?\.?\d{2}/K?\d{3})$", v):
+                    raise InstructionError("speed: M78, 280 (kt), K280 (on conversion), M78/K280 (descent: Mach then IAS), "
+                                           "SN (resume normal)")
             else:
                 v = str(v)[:40]
             e[k] = v
@@ -1777,8 +1778,11 @@ class World:
             m = re.match(r"^M0?\.?(\d{2})$", v)
             sl = f.get("slim") or e_now.get("slim")
             n0 = len(instrs)
+            mk = re.match(r"^M0?\.?(\d{2})/K?(\d{3})$", v)          # descent speed: a Mach, then an IAS on conversion
             if v == "SN":
                 instrs.append({"type": "speed", "resume_normal": True})
+            elif mk:
+                instrs.append({"type": "speed", "mach": int(mk.group(1)) / 100.0, "conversion_kt": int(mk.group(2))})
             elif m:
                 instrs.append({"type": "speed", "mach": int(m.group(1)) / 100.0})
             elif re.match(r"^K\d{3}$", v):

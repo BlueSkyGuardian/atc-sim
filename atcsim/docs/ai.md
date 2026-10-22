@@ -161,15 +161,35 @@ Aircraft on the same route (en-route traffic) appear in the conflict lines with 
 
 Aircraft that will leave by the same exit too close, or whose routes join ahead at levels not separated, are
 sequenced as a group (`solve/sequence.py`): first come first served where the routes join, each at least the
-agreed spacing (10 NM) behind the one ahead there and at the exit, from the times **assigned** to the ones ahead.
+agreed spacing (10 NM) behind the one ahead there and at the exit, from the times **assigned** to the ones ahead. The
+spacing is measured **when the one behind crosses the point**: the one ahead must then be 10 NM past it. When it is
+too late to sequence them where their routes join, the vectors go direct to the exit (separated at the join, the
+spacing at the exit).
 A speed is used when it is enough (own Mach −0.03 at most, none for a climbing departure), given at the latest
 moment that still works, at once if the aircraft is gaining on the one ahead at the same level. Otherwise a vector on
 its **sequencing ellipse** (`solve/ellipse.py`: foci the aircraft and the point, major axis the path that puts it the
 spacing behind; in the wind, in the frame of the air mass), for the time that gives exactly the spacing, then direct
 the point: aircraft in the same stream fanned out to the same side, each further than the one ahead, the later turned
-first, each resuming after the one ahead; converging streams turned to whichever side diverges. No vector longer than
-15 minutes, none that would take the aircraft past its point and turn it back more than 90°. The plan is checked in
-the trajectory model (every pair separated until they leave the sector), and its clearances are issued when due.
+first, each resuming after the one ahead; converging streams turned to whichever side diverges. The turn is not a
+fixed step: every heading (in 5° units) on the ellipse is a solution with its own time on the heading — a small turn
+held long or a larger one held briefly, depending on the delay still to absorb and the distance left — and the one
+taken is the cheapest (each degree of turn, and 4° per minute on the heading; for an aircraft already on a vector,
+the change from its present heading) that passes every check. No vector longer than 15 minutes, none that would take
+the aircraft past its point and turn it back more than 90°, none that would take it out of the sector. The plan is
+checked in the trajectory model (every pair separated until they leave the sector), and its clearances are issued
+when due.
+
+**Arrivals** (TERTO for GCRR, MARJA and SALCA for GMMN) are planned per sequencing fix with its letter of agreement
+(FL250 at the fix, 10 NM in trail whatever their present levels): the in-trail sequence as above, built on
+trajectories that include each one's descent (the true airspeed falls in the descent: an aircraft that goes down
+earlier slows earlier, the one behind gains), then each **descent** once its separation is certain — at its planned
+descent point (the same distance before the fix for all, so that the trail is kept), with its **descent speed**
+(its Mach, then 280 kt on conversion: `"speed": "M78/K280"`). Traffic that is not descending and whose level the
+descent crosses is **not moved**: the descent is given earlier or later, with a rate (*at 3000 ft/min or greater*,
+through its level first; *1000 ft/min or less*, behind it), or stopped above its level and continued when clear.
+Each descent is checked again against the traffic as it is when it comes due (traffic that entered meanwhile counts);
+the pilot's request for descent stays open until the plan gives it. A new arrival makes a new plan (the clearances
+given stay in force, and an aircraft already on a vector keeps it if it can).
 
 ### The solver's solutions
 

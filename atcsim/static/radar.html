@@ -361,7 +361,24 @@
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
   .dot.on { background: var(--accent); }
   body:not(.solo) #forceBtn { display: none; }
-  body:not(.solver-ok) #solveBtn { display: none; }
+  body:not(.solver-ok) #solveBtn, body:not(.solver-ok) #seqBtn, body:not(.solver-ok) #seqPanel { display: none; }
+  #seqBtn.on { border-color: #5ad1e6 !important; color: var(--sel) !important; }
+  #seqPanel { position: absolute; left: 10px; bottom: 84px; z-index: 5; width: 380px; max-width: calc(100% - 20px); max-height: 44%; overflow: auto;
+    background: rgba(11, 23, 36, .92); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-family: var(--mono); font-size: 12px;
+    color: #cfe0ee; display: flex; flex-direction: column; gap: 6px; }
+  #seqPanel[hidden] { display: none; }
+  #seqPanel .hd { color: var(--dim); font-size: 10.5px; letter-spacing: .06em; display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+  #seqPanel .sq-hint { color: #9fb4c7; }
+  #seqPanel .sq-ac { display: inline-block; border-radius: 4px; padding: 0 5px; margin: 0 3px 2px 0; font-weight: 700; color: #0d1b2a; }
+  #seqPanel .sq-step { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; border-left: 3px solid #5ad1e6; padding-left: 6px; }
+  #seqPanel .sq-step.later { border-left-color: #c9a227; }
+  #seqPanel .sq-hdgs { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+  #seqPanel .sq-h { font: 11px ui-monospace, monospace; padding: 0 4px; border-radius: 3px; border: 1px solid #2c4a66; cursor: pointer; background: #12263a; color: #cfe3f5; }
+  #seqPanel .sq-h.no { opacity: .35; cursor: default; }
+  #seqPanel .sq-h.pick { border-color: #ffe08a; color: #ffe08a; }
+  #seqPanel .sq-h.chosen { background: #1f4d2b; border-color: #7fd18b; }
+  #seqPanel button { padding: 1px 7px; font-size: 11px; }
+  #seqPanel .warn { color: #ffb3b3; }
   #solveBtn.on { border-color: var(--chart) !important; color: var(--sel) !important; }
   #solvePanel { position: absolute; right: 10px; top: 96px; z-index: 5; width: 360px; max-width: calc(100% - 20px); max-height: calc(100% - 170px); overflow: auto;
     display: flex; flex-direction: column; gap: 6px; font-family: var(--mono); font-size: 12px; background: rgba(11, 23, 36, .92); border: 1px solid var(--line); border-radius: 8px; padding: 8px; color: #cfe0ee; }
@@ -467,7 +484,7 @@
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="seqBtn" title="Sequencing tool: click two or more aircraft, then the point where they must be in trail; shows each follower's sequencing ellipse and the headings that give the spacing (Esc to leave)">Sequence</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -487,6 +504,7 @@
     </div>
     <div id="radioLog" aria-live="polite"></div>
     <div id="solvePanel" hidden></div>
+    <div id="seqPanel" hidden></div>
     <div id="ptt" class="ex-only"><span class="k" id="pttKey" title="Hold the space bar (or this button) to transmit on the frequency">🎙 hold SPACE to transmit</span><span id="rxBox"></span></div>
     <button id="phoneBtn" class="ex-only atc-only" title="Telephone lines">☎</button>
     <div id="phonePanel"><div class="c-dim" style="font-size:11px;margin-bottom:6px">Call an adjacent unit</div><div class="units" id="atcUnits"></div></div>
@@ -1211,6 +1229,7 @@ cv.addEventListener('mousedown', e => {
   if (e.button === 1) { e.preventDefault(); const l = labelAt(e), cs = l ? l.cs : nearestAircraft(e);   // middle click: info window on it
     if (cs && window.pinInfo) pinInfo(cs); return; }
   if (e.button !== 0) return;
+  if (window.seqToolActive && seqToolActive()) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true, seq: true }; return; }
   if (window.routeEditActive && routeEditActive()) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true }; return; }
   const [qx, qy] = canvasPt(e), rh = rblRects.find(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1);
   if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false }; return; }
@@ -1238,7 +1257,7 @@ window.addEventListener('mouseup', e => {
   if (e.button !== 0) return;
   if (drag && (drag.rbl || drag.mt)) { drag = null; return; }
   clearTimeout(pressTimer);
-  if (drag && drag.re) { const d0 = drag; drag = null; if (!d0.moved && window.routeEditClick) routeEditClick(e); return; }
+  if (drag && drag.re) { const d0 = drag; drag = null; if (!d0.moved) { if (d0.seq) seqToolClick(e); else if (window.routeEditClick) routeEditClick(e); } return; }
   if (drag && drag.long) { if (!drag.menu && routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
   if (drag && !drag.moved && drag.label && (rblMode || e.shiftKey)) { if (e.shiftKey && !rblMode) setRblMode(true); rblPick(nearestAircraft(e) || drag.label); drag = null; return; }
   if (drag && !drag.moved) { if (drag.label) { selected = drag.label;
@@ -1253,7 +1272,7 @@ window.addEventListener('mousemove', e => {
     const l = e.target === cv ? labelAt(e) : null, f = l ? fieldAt(e) : null;
     hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
     const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
-    cv.style.cursor = window.routeEditActive && routeEditActive() ? 'copy' : f && (SEAT === 'atc' || f.f === 'type') ? 'pointer'
+    cv.style.cursor = (window.seqToolActive && seqToolActive()) || (window.routeEditActive && routeEditActive()) ? 'copy' : f && (SEAT === 'atc' || f.f === 'type') ? 'pointer'
       : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) || (window.mtcdLabelAt && mtcdLabelAt(qx, qy)) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
@@ -1826,6 +1845,7 @@ function draw() {
   drawRoute(byCs);
   if (window.drawMtcd) drawMtcd(byCs);
   if (window.drawRouteEdit) drawRouteEdit(byCs);
+  if (window.drawSeqTool) drawSeqTool(byCs);
   drawRbls(byCs);
   if (rblDrag && rblDrag.from) {                      // the line being dragged: bearing, range, ΔFL and CPA live
     snapMark(rblDrag.from, byCs);
@@ -1855,5 +1875,6 @@ requestAnimationFrame(draw);
 <script src="/static/debrief.js"></script>
 <script src="/static/aiwatch.js"></script>
 <script src="/static/solver.js"></script>
+<script src="/static/seqtool.js"></script>
 </body>
 </html>

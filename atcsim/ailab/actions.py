@@ -27,7 +27,8 @@ Actions (use only these; an empty list means nothing to do now):
                                                            fly heading (degrees) WITH ITS LIMIT ("5MIN" or "20NM"); at the
                                                            limit the pilot proceeds direct to "then" (or resumes own navigation)
   {"type": "clear", "callsign": "RAM123", "direct": "ROLRO"}  proceed direct to a point of its route or the map
-  {"type": "clear", "callsign": "RAM123", "speed": "M76", "limit": "IBALU"}   Mach (M76) or indicated speed in knots
+  {"type": "clear", "callsign": "RAM123", "speed": "M76", "limit": "IBALU"}   Mach (M76) or indicated speed in knots;
+                                                           descent speed: "M76/K280" (Mach, then 280 kt on conversion)
                                                            ("280") WITH ITS LIMIT ("10MIN", "40NM" or a point); at the limit
                                                            the pilot resumes normal speed. "SN" = resume normal speed now
   {"type": "clear", "callsign": "RAM123", "xfl": 350}      exit level coordinated with the next unit
@@ -137,8 +138,8 @@ def check_rules(w, ac, a: dict) -> List[str]:
     if a.get("speed") not in (None, "") and str(a["speed"]).upper() != "SN" and a.get("limit") in (None, ""):
         out.append(f'speed {a["speed"]} for {ac.callsign} without its limit: give "limit" ("10MIN", "40NM" or a point '
                    f'past the traffic); nothing was given')
-    sp = str(a.get("speed") or "").upper().strip()
-    if sp and sp != "SN":
+    sp = str(a.get("speed") or "").upper().strip().split("/")[0]     # "M76/K280": the Mach part is checked
+    if sp and sp != "SN" and not sp.startswith("K"):
         try:
             spec = ({"mach": float(sp.lstrip("M")) / (100 if float(sp.lstrip("M")) > 2 else 1)} if sp.startswith("M") or float(sp) < 2
                     else {"ias_kt": float(sp)})

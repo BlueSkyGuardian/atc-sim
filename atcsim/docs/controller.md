@@ -473,6 +473,18 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   final level follows when it is clear. *ruled out* lists the plausible clearances the rules set aside, by rule. The list follows the traffic every 5 simulated seconds.
 
   ![The solver panel](/static/docs/s_solver.jpg "The solver panel: the conflict, its solutions in order, checked ones with ✓")
+- **Sequence** in the toolbar opens the sequencing tool. Click two or more aircraft on the scope (click one again to
+  remove it), then the point where they must be in trail. They are sequenced first come, first served at that point,
+  10 NM in trail (the agreement's spacing at a sequencing fix), measured when the one behind crosses it. For each
+  follower the scope shows its **sequencing ellipse** (dashed, in its colour): the points where, turning direct to the
+  point, it ends up exactly the spacing behind the one ahead — one focus on the aircraft, the other on the point, the
+  wind included. The dots on it are the **headings that can be given** (labelled every 10°), the solid line the one
+  the plan takes (*heading 190 for 39 NM, then direct IBALU*). The panel lists the plan's clearances (a speed first
+  when it is enough, otherwise the fan of vectors, checked against all the traffic) with **Apply**, and for each
+  follower the headings within the rules with their time on the heading: click one to see it on the scope and apply
+  it (that one is the geometry only, not checked against the other traffic). Headings off the direction of flight,
+  over 15 minutes, or too small or too large a turn are left out. The picture follows the traffic every 10 seconds;
+  <kbd>Esc</kbd> or ✕ leaves the tool.
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
   its **debrief**.

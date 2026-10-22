@@ -319,6 +319,37 @@ try:
     good = R.positive(w11, "EWG3KP", {"direct": "TOVRA"})
     ok(not bad["positive"] and good["positive"], f"positive separation: staying on track {bad}, direct TOVRA {good}")
 
+    # ---- sequencing: arrivals to TERTO under the solver (in trail, level at the fix, the overflight left alone), and
+    # the controller's sequencing tool (ellipses and headings)
+    from atcsim.ailab import agents as AG, actions as AC
+    from atcsim.solve import sequence as SQ
+    s12 = S3("s19_terto_arrivals_crossing", mode="stepped", autostart=False); s12.stop(); s12.solo = True; w12 = s12.world
+    ag12, nxt, why12, acts12 = AG.make({"kind": "solver"}), 0.0, [], []
+    while w12.t < 2200 and not w12.finished:
+        if w12.t >= nxt:
+            d12 = json.loads(ag12.decide(w12)); nxt = w12.t + 10
+            if d12["actions"]:
+                AC.apply(w12, d12["actions"], {"name": "solver", "seat": "atc"}, rules=True)
+                acts12 += d12["actions"]; why12.append(d12["reasoning"])
+        s12._tick()
+    xs = w12.m["sequencing"].get("TERTO", [])
+    ok(len(xs) == 3 and all(x["spacing_ok"] and x["level_ok"] for x in xs)
+       and not [e for e in w12.events if e["type"] == "separation_loss_start"],
+       f"arrivals to TERTO: in trail and at FL250 at the fix, no loss: {[(x['callsign'], x['fl'], x['spacing_nm']) for x in xs]}")
+    ok(any(str(a_.get("speed", "")).endswith("/K280") and a_.get("cfl") == 250 for a_ in acts12)
+       and not any(a_.get("callsign") == "TAP1471" for a_ in acts12 if a_.get("type") == "clear"),
+       "each descent given with its descent speed (Mach, then 280 kt on conversion); the overflight is not moved")
+    s13 = S3("s18_exit_sequence_three", mode="stepped", autostart=False); s13.stop(); s13.solo = True; w13 = s13.world
+    while w13.t < 300:
+        s13._tick()
+    T13 = SQ.tool(R.clone(w13), ["RAM1201", "IBE3302", "BAW2477"], "IBALU")
+    f13 = T13["aircraft"].get("BAW2477") or {}
+    ok(T13["ok"] and T13["sequence"] == ["RAM1201", "IBE3302", "BAW2477"] and sum(1 for q in f13.get("ellipse", []) if q) > 90
+       and any(h["ok"] for h in f13.get("headings", [])) and T13["steps"],
+       f"the sequencing tool: order, ellipses, assignable headings, plan ({'; '.join(T13['notes'])[:160]})")
+    ok(all(x["spacing_nm"] is not None and x["spacing_nm"] >= 10.0 for x in T13["spacing"]),
+       f"the plan's spacing, measured when the one behind crosses: {T13['spacing']}")
+
     # ---- the run in the debrief
     eid = m1["exercise_id"]
     ok(all(x["id"] != eid for x in ins.get("/api/exercises").json()), "AI runs are not listed with the exercises")

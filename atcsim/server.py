@@ -561,6 +561,28 @@ def entries(sid: str, body: Entry, request: Request):
     return _act(sid, request, "entries", {"callsign": body.callsign, **fields})     # solo: with what the pilot read back
 
 
+class SequenceReq(BaseModel):
+    callsigns: List[str] = Field(..., description="the aircraft to sequence (two or more)")
+    point: str = Field(..., description="the point where they must be in trail (a waypoint on their routes)")
+    spacing_nm: Optional[float] = Field(None, description="in-trail spacing at the point (default: the letter of agreement's)")
+
+
+@app.post("/sessions/{sid}/sequence")
+def sequence_tool(sid: str, body: SequenceReq):
+    """The controller's sequencing tool: the aircraft chosen in trail at the point chosen. For each follower, its
+    sequencing ellipse (the turn points that put it exactly the spacing behind the one ahead, wind included) and every
+    heading on it with its time and distance and whether the rules allow it; the plan (speed first, then a fan of
+    vectors, checked against all the traffic) with its clearances, ready for /entries."""
+    from .solve import resolve, sequence as seq_mod
+    s = _session(sid)
+    with s.lock:
+        w = resolve.clone(s.world)
+    try:
+        return {"sim_time_s": round(w.t, 1), **seq_mod.tool(w, [c.upper() for c in body.callsigns], body.point, body.spacing_nm)}
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
 @app.get("/sessions/{sid}/solve")
 def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None, horizon_s: float = Query(600, ge=120, le=1200),
           rollout: int = Query(2, ge=0, le=4)):

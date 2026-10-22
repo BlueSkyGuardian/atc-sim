@@ -27,7 +27,7 @@ At every decision, in this order:
    - POSITIVE SEPARATION: give a clearance, or approve a request, only when separation is assured for the whole manoeuvre (the probe or the solver says so); never one that only might work.
    - LEVELS: never give an aircraft a level it did not ask for without asking first: {"type": "ask", "callsign": "X", "cfl": 370}; the pilot answers at the next decision (affirm, or negative with a reason), and only after "affirm" do you clear it. Exceptions: the level it requested, its flight-plan cruise level, arrivals descending, and a conflict under 2 minutes or a loss of separation (then give the level at once). A level given without asking is refused.
 5. RESUME an aircraft listed under RESUME (on a heading without a limit, now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
-6. SEQUENCE the arrivals (SEQUENCE in TO DO, within about 15 minutes of their fix): each must cross its fix at the agreed level (e.g. FL250) and the agreed distance behind the one ahead. An arrival stays at its level until its top of descent, where the pilot asks for descent (a pilot request): approve it then, to the agreed level. Do not descend arrivals earlier unless a conflict needs it. Keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
+6. SEQUENCE the arrivals (SEQUENCE in TO DO): each crosses its fix at the agreed level (e.g. FL250) and the agreed distance behind the one ahead (measured when it crosses). Make the spacing first (speed; if not enough, headings with their limit then direct the fix), then descend each one early enough, with its descent speed: {"type": "clear", "callsign": "X", "cfl": 250, "speed": "M78/K280", "limit": "TERTO"}. Traffic level in the way is not moved: time the descent, give a rate, or stop above it.
 7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
 The exit level (XFL, "exit FL350 to WS") is the level the aircraft leaves your sector at, coordinated with the next sector; it is its current level unless you change it. Change it (clear xfl) only together with a level change that it will keep until the exit, and only to a level of its direction of flight.
 SEMICIRCULAR RULE, always: a cruising level or an exit level must be of the aircraft's direction (southbound odd: 290, 310, 330, 350, 370, 390, 410; northbound even: 280, 300, 320, 340, 360, 380, 400); only arrivals descending to their destination are exempt. A clearance to a wrong level is refused.
@@ -39,7 +39,8 @@ Give every needed instruction in one answer (several actions in the list); an em
 
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
-LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
+LEGACY_DEFAULT_PROMPTS = {"53a5624a4c0f4b4979ef146b41b629fc4f701e1837aba0fa648eab3a04738d93",
+                          "0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
                           "8e537bb41ac6b8514fab28e5397556850845c71db08acdd8aa724a2ed110af61",
                           "0792535b15f97a9805bdd21dea9f589a6bd1606a13ce9781995f22d8cca22496",
                           "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
@@ -283,7 +284,7 @@ class Baseline:
                         acts.append({"type": "resume", "callsign": cs})
         given = getattr(self, "_spd_given", set())
         for x in acts:
-            if x.get("type") == "clear" and x.get("speed"):
+            if x.get("type") == "clear" and x.get("speed") and "/" not in str(x["speed"]):   # not a descent speed
                 (given.discard if str(x["speed"]).upper() == "SN" else given.add)(x["callsign"])
         self._spd_given = given
         return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
@@ -421,6 +422,16 @@ class SolverAgent(Baseline):
         if r["type"] not in ("altitude", "direct") or not r.get("value"):
             return super()._answer_request(w, r)
         cs = r["callsign"]
+        if r.get("kind") == "descent" or r["type"] == "altitude":
+            # an arrival in a sequence plan: its descent is the plan's, given when its separation is certain
+            try:
+                self._arrival_plans(w, {c for c, a in w.aircraft.items() if a.assumed and a.active})
+            except Exception:  # noqa: BLE001
+                pass
+            for key, pl in (self.__dict__.get("_seq_plans") or {}).items():
+                if key.startswith("ARR:") and any(st["callsign"] == cs and "cfl" in st["action"] and i not in pl["issued"]
+                                                  for i, st in enumerate(pl["plan"]["steps"])):
+                    return [], []                 # the request stays open: answered by the plan's descent
         req = {"cfl": int(r["value"])} if r["type"] == "altitude" else {"direct": str(r["value"]).upper()}
         try:
             sol = self._request_solution(w, cs, req)
@@ -467,7 +478,7 @@ class SolverAgent(Baseline):
         plans = self.__dict__.setdefault("_seq_plans", {})
         touched = set()
         for x in list(plans):                             # a plan holds 30 minutes, or until it is done
-            if w.t - plans[x]["t"] > 1800 or not any(w.aircraft[c].active for c in plans[x]["plan"]["sequence"] if c in w.aircraft):
+            if (not x.startswith("ARR:") and w.t - plans[x]["t"] > 1800) or not any(w.aircraft[c].active for c in plans[x]["plan"]["sequence"] if c in w.aircraft):
                 plans.pop(x)
         try:
             viol = exits.conflicts(w)
@@ -494,7 +505,11 @@ class SolverAgent(Baseline):
                     targets.add(xa if xa in common else last)     # to the exit when they leave together
         except Exception:  # noqa: BLE001
             pass
+        self._arrival_plans(w, set(mine))
         for x in sorted(targets):
+            mem = [c for c in sequence.members_of(w, x) if c in mine]
+            if mem and all(w.aircraft[c].destination and (w.aircraft[c].arr or {}).get("fix") for c in mem):
+                continue                                  # arrivals: their sequencing fix's plan
             if x in plans or any(x in pl["plan"].get("sequence_points", []) for pl in plans.values()):
                 continue
             try:
@@ -505,15 +520,63 @@ class SolverAgent(Baseline):
                 plans[x] = {"plan": P, "t": w.t, "issued": set()}
                 why.append(f"sequence at {P['point']} for {x}: " + " → ".join(P["sequence"]))
         for x, pl in plans.items():
-            for i, stp in enumerate(pl["plan"]["steps"]):
+            for i, stp in enumerate(list(pl["plan"]["steps"])):
                 if i in pl["issued"] or stp["at_s"] > w.t + 1:
                     continue
+                if x.startswith("ARR:") and "cfl" in stp["action"] and not stp.get("rechecked"):
+                    # a descent: checked again against the traffic as it is now (some may not have been there)
+                    sp = str(stp["action"].get("speed") or "")
+                    mach = int(sp[1:3]) / 100.0 if sp.startswith("M") else None
+                    try:
+                        d = sequence.descent_now(w, stp["callsign"], pl["plan"]["fix"], mach)
+                    except Exception:  # noqa: BLE001
+                        d = None
+                    if d is None or not d["steps"]:
+                        stp["at_s"] = w.t + 60.0          # nothing clear now: kept level, looked at again in a minute
+                        continue
+                    first = d["steps"][0]
+                    stp.update(action=first["action"], why=first["why"], at_s=first["at_s"])
+                    if len(d["steps"]) > 1:
+                        pl["plan"]["steps"].append({**d["steps"][1], "rechecked": True})
+                    if first["at_s"] > w.t + 1:
+                        continue                          # later than planned: when it is due
                 acts.append(stp["action"])
                 why.append(stp["why"])
                 pl["issued"].add(i)
                 self._acted = dict(getattr(self, "_acted", {}), **{stp["callsign"]: w.t})
             touched |= set(pl["plan"]["sequence"])
         return touched
+
+    def _arrival_plans(self, w, mine: set) -> None:
+        """Arrivals to a sequencing fix (TERTO for GCRR, MARJA and SALCA for GMMN): one plan per fix for the assumed
+        arrivals still to be sequenced or cleared down to the LoA level - the in-trail sequence and each descent;
+        planned again when an arrival joins (the clearances given stay in force)."""
+        from ..solve import sequence
+        if getattr(self, "_arr_t", None) == w.t:
+            return
+        self._arr_t = w.t
+        plans = self.__dict__.setdefault("_seq_plans", {})
+        for fix, sq in (getattr(w, "seq", None) or {}).items():
+            fl = int(sq.cross_at_fl or sq.cross_at_or_below_fl or sq.min_fl)
+            members = sorted(c for c in sequence.arrivals_to(w, fix) if c in mine)
+            todo = [c for c in members if w.aircraft[c].cleared_alt_ft > fl * 100 + 50]
+            key = "ARR:" + fix
+            old = plans.get(key)
+            if not members:
+                plans.pop(key, None)
+                continue
+            if old is not None and (old["members"] == members or not todo):
+                continue                                  # the plan holds until a new arrival joins
+            if not todo:
+                continue
+            try:
+                P = sequence.plan(w, fix, members=members)
+            except Exception:  # noqa: BLE001
+                continue
+            if P.get("ok") and P.get("steps"):
+                plans[key] = {"plan": P, "t": w.t, "issued": set(), "members": members}
+            elif old is not None:
+                old["t"] = w.t                            # the plan in force is kept (no better one now)
 
     def _resolve(self, w, st, mine, acts, why) -> set:
         from ..solve import resolve
