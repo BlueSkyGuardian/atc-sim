@@ -40,6 +40,14 @@ The exact figures of each file are on the home page (aircraft per hour) and in i
 LoA levels and RVSM events at capacity. Steps 7–8 band-box two sectors at capacity. Steps 9–12 are the top of the
 scale: slightly over capacity, severe or hidden weather, everything at once.
 
+## Casablanca ACC
+
+| Scenario | Sectors | Traffic | What it trains |
+|---|---|---|---|
+| `s20_casablanca_north` | N | 10 aircraft, 45 min | A first look at the North sector: a crossing over RBT, a climb request into it, an area activating over MARJA–LAKAM |
+| `s21_casablanca_north_gmmn_gmme` | N | 30 aircraft, 60 min | GMMN arrival sequences at LAKAM (two waves), RAVOL and BISMI, GMME arrivals at FAHIM / ENNAV; GMMN / GMME departures climbing against arrivals and into the UN871 and UB11 streams; RBT crossing, a UN871 overtake, a UB11 speed trap, an opposite-direction climb request on UG5; GMD 21 active across UN726 |
+| `s22_casablanca_south_gmmx_gmad` | C + SS | 26 aircraft, 60 min | GMMX arrivals at MABAP from three airways, GMAD arrivals merging at AGALI, TEKNA and OLOMA; GMMX / GMAD / GMMZ departures climbing against the arrivals; crossings at AGOVA and TOPMA, a UR975 overtake, the ADM convergence; GMD 30 active across UL102 |
+
 ## Training sector scenarios
 
 | Scenario | Weather | What it tests |

@@ -312,7 +312,7 @@ SCHEMA = {
                                      "description": "arrival: the pilot asks for descent at its top of descent; false = only "
                                                     "when a scripted 'descent' request says so"},
             "direction": {"enum": ["southbound", "northbound"]},
-            "dep": {"type": "string"}, "dest": {"type": "string"}, "rfl": {"type": "integer", "minimum": 100, "maximum": 600},
+            "dep": {"type": "string"}, "dest": {"type": "string"}, "rfl": {"type": "integer", "minimum": 100, "maximum": 600}, "cfl": {"type": "integer", "minimum": 50, "maximum": 600, "description": "cleared level at the start (a departure released climbing by approach)"},
             "rvsm": {"type": "boolean"}, "military": {"type": "boolean"},
             "formation": {"anyOf": [{"type": "integer", "minimum": 2},
                                     {"type": "object", "properties": {"size": {"type": "integer", "minimum": 2},

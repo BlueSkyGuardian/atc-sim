@@ -111,6 +111,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `load` | number 0–1 | 0.5 | Mass = OEW + load × (MTOW − OEW). Lighter aircraft climb higher (long-haul at the start of a crossing: ~0.6–0.8; end of flight: ~0.3) |
 | `mass_kg` | number | — | Mass in kg instead of `load`; must be between OEW and MTOW |
 | `rfl` | integer | — | Requested final level of a departure climbing through the sector: the pilot asks for it on first contact, and it is the flight plan's cruise level. Departures from GMMN without `rfl` get one from their performance and direction (the highest few levels they can reach at their weight) |
+| `cfl` | integer | — | Cleared level at the start, different from `fl`: a departure released by approach climbing (e.g. `"fl": 150, "cfl": 190` with a `start` at a TMA point, and an `rfl` it asks for on first contact). Casablanca departures from GMMN, GMME, GMMX, GMAD and GMMZ ask for their final level |
 | `dep`, `dest` | ICAO codes | generated | Departure and destination aerodromes (flight plan, onward routing, arrival behaviour). An aircraft whose route ends at a sequencing fix is an arrival to that fix's aerodrome |
 | `arrival` | boolean | `true` | `false` = an overflight even if the route ends at a sequencing fix (no descent request, no LoA) |
 | `auto_descent_request` | boolean | `true` | arrival: `false` = the pilot asks for descent only when a scripted `"descent"` request says so (to set who asks first in a wave); refused, it asks again 90 s later |
@@ -256,6 +257,12 @@ those.
 
 An active area is drawn on the scope, and flying into it is an infringement. Pilots do not avoid areas by
 themselves: that is the controller's job.
+
+**Arrivals into a TMA below the sector.** In the CTA Casablanca the aerodromes are under the sectors: an arrival
+whose route ends at one of the airspace's sequencing fixes inside the controlled area (LAKAM, RAVOL, BISMI for GMMN;
+FAHIM, ENNAV for GMME; MABAP, OBOGA for GMMX; AGALI, OLOMA, TEKNA for GMAD; MAXOR, LARAP for GMMZ) is handed down
+to approach at that fix - on its route, or within 2.5 NM of it on vectors or a direct - and scored against the
+letter of agreement (FL200, 10 NM in trail, placeholders).
 
 **Published areas (Agadir).** The airspace file holds the AIP Maroc ENR 5.1 areas: 12 prohibited (GMP 01, 02,
 11, 14–22), 7 restricted (GMR 02, 04A, 05, 06, 09, 11, 12) and 26 danger areas (GMD 01–07, 11–13, 21–26, 28–38),

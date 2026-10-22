@@ -1,0 +1,580 @@
+{
+  "name": "s22_casablanca_south_gmmx_gmad",
+  "title": "Casablanca South: GMMX, GMAD and GMMZ arrivals and departures",
+  "description": "Casablanca ACC, Central (133.100) and South-South (126.700) band-boxed, one hour. GMMX arrivals from the north converge on MABAP (UR722 via FOBAC, UB11 via FACAS, UN869 via PELAX), one from the east at OBOGA. GMAD arrivals merge at AGALI (UR724 from ESS, UH400 from MAK), one from Laayoune at TEKNA, one on UG850 at OLOMA. Occasional Ouarzazate traffic (MAXOR in, RATVA out). Letter of agreement with the approaches: cleared FL200 at the fix (still descending is fine), 10 NM in trail. Departures are released climbing FL190 and ask for their cruising level. Transit traffic on UM372, UW900, UG664, UR975, UG850, UN869, UL102, UA600 and UJ744. GMD 30 (GND-FL460, Midelt) is notified active from T+15 min. Northerly low-level wind, westerlies aloft, no storms.",
+  "design_notes": "MABAP (T+16.5 to T+18.5): RAM1203 (FOBAC FL330), EZY7311 (FACAS FL350), the heavy TOM6KJ (PELAX FL370), RYR77QA (FOBAC FL310) - three entries, four aircraft in 110 s. RAM1300 (GMMX departure released FL190 at MABAP at T+15) asks FL360 and climbs north on UB11 through the arrivals' descents. AGALI (T+26 to T+27): TOM3NP and the A332 CFG1KR on UR724, TVF7720 on UH400 from MAK; RAM1006 (GMAD to LFPO, released at AGALI at T+23) climbs north on UR724 against them. TEKNA: RAM1407 departs south on UA600 (T+31.5, asks FL330) head-on with the arrival BIN420 (FL340, TEKNA at T+34) under RAM1291 (UA600 south FL350). Watch ADM: RAM1291 (UA600) leaves it southbound at FL350 just as the UR975 pair (FL350) passes it - an unplanned-looking convergence. OLOMA: RAM1622 (GMMX departure on UG850 south, asks FL350) ahead of the arrival RYR2AG (FL310) and opposite TVF4410 (UG850 north FL360). Crossings at FL370: SWR254 (UM372) and RAM287 (UW900) at AGOVA at T+22; SWR254 again with AFR1580 (UG664) at TOPMA at T+37. Overtake: UAE751 (B77W M0.85) catches RAM1527 (B738 M0.76) on UR975 at FL350 before the GCCC boundary. IBE3871 (UN869 FL390) asks FL350 at T+27.5 while the AGALI and MABAP traffic is around. GMD 30 activates at T+15: RAM1891 (UL102 westbound FL360, entering from East about T+21 straight into the area, RUBAB at T+33) needs a reroute coordinated with East before it enters. Ouarzazate: RAM1717 to MAXOR (FL290), RAM1718 out of RATVA at T+41.5 on UQ401 / UM372 to Fes.",
+  "airspace": "agadir",
+  "control": [
+    "C",
+    "SS"
+  ],
+  "duration_s": 3600,
+  "complexity": 4,
+  "start_utc": "14:00",
+  "weather": {
+    "seed": 222,
+    "temperature": {
+      "surface_c": 27,
+      "tropopause_fl": 390
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 20,
+          "kt": 10
+        },
+        {
+          "fl": 200,
+          "dir": 330,
+          "kt": 30
+        },
+        {
+          "fl": 350,
+          "dir": 300,
+          "kt": 45
+        },
+        {
+          "fl": 450,
+          "dir": 290,
+          "kt": 30
+        }
+      ],
+      "noise_kt": 4
+    }
+  },
+  "published_areas": {
+    "GMD30": {
+      "active": false,
+      "schedule": [
+        {
+          "time": 900,
+          "active": true
+        }
+      ]
+    }
+  },
+  "areas": [],
+  "requests": [
+    {
+      "time": 1650,
+      "callsign": "IBE3871",
+      "type": "altitude",
+      "value": 350,
+      "reason": "turbulence reported at FL390"
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "RAM1203",
+      "type": "B738",
+      "route": [
+        "CSD",
+        "FOBAC",
+        "MABAP"
+      ],
+      "fl": 330,
+      "dep": "LFPO",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "MABAP",
+        "time": 1000
+      }
+    },
+    {
+      "callsign": "EZY7311",
+      "type": "A320",
+      "route": [
+        "SLK",
+        "PELAX",
+        "FACAS",
+        "MABAP"
+      ],
+      "fl": 350,
+      "dep": "EGGW",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "MABAP",
+        "time": 1025
+      }
+    },
+    {
+      "callsign": "TOM6KJ",
+      "type": "B789",
+      "route": [
+        "SLK",
+        "PELAX",
+        "MABAP"
+      ],
+      "fl": 370,
+      "dep": "EGKK",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "MABAP",
+        "time": 1060
+      },
+      "load": 0.6
+    },
+    {
+      "callsign": "RYR77QA",
+      "type": "B738",
+      "route": [
+        "CSD",
+        "FOBAC",
+        "MABAP"
+      ],
+      "fl": 310,
+      "dep": "EIDW",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "MABAP",
+        "time": 1110
+      }
+    },
+    {
+      "callsign": "RAM1300",
+      "type": "B738",
+      "route": [
+        "MABAP",
+        "FACAS",
+        "PELAX",
+        "SLK"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 360,
+      "dep": "GMMX",
+      "dest": "LFPO",
+      "start": {
+        "point": "MABAP",
+        "time": 900
+      }
+    },
+    {
+      "callsign": "RAM1561",
+      "type": "E190",
+      "route": [
+        "FES",
+        "NEVEK",
+        "ERLAM",
+        "TIXAL",
+        "VALBA",
+        "OBOGA"
+      ],
+      "fl": 330,
+      "dep": "GMFF",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "OBOGA",
+        "time": 1700
+      }
+    },
+    {
+      "callsign": "TOM3NP",
+      "type": "B738",
+      "route": [
+        "MOKRI",
+        "ESS",
+        "DENOB",
+        "AGALI"
+      ],
+      "fl": 350,
+      "dep": "EGCC",
+      "dest": "GMAD",
+      "reach": {
+        "waypoint": "AGALI",
+        "time": 1550
+      }
+    },
+    {
+      "callsign": "TVF7720",
+      "type": "A320",
+      "route": [
+        "MAK",
+        "GOSNO",
+        "MIMRO",
+        "AGALI"
+      ],
+      "fl": 330,
+      "dep": "LFPO",
+      "dest": "GMAD",
+      "reach": {
+        "waypoint": "AGALI",
+        "time": 1570
+      }
+    },
+    {
+      "callsign": "CFG1KR",
+      "type": "A332",
+      "route": [
+        "MOKRI",
+        "ESS",
+        "DENOB",
+        "AGALI"
+      ],
+      "fl": 370,
+      "dep": "EDDF",
+      "dest": "GMAD",
+      "reach": {
+        "waypoint": "AGALI",
+        "time": 1615
+      },
+      "load": 0.55
+    },
+    {
+      "callsign": "RAM1006",
+      "type": "B738",
+      "route": [
+        "AGALI",
+        "DENOB",
+        "ESS",
+        "MOKRI"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 340,
+      "dep": "GMAD",
+      "dest": "LFPO",
+      "start": {
+        "point": "AGALI",
+        "time": 1380
+      }
+    },
+    {
+      "callsign": "BIN420",
+      "type": "B738",
+      "route": [
+        "LAY",
+        "SOLNA",
+        "AMLOK",
+        "TEKNA"
+      ],
+      "fl": 340,
+      "dep": "GMML",
+      "dest": "GMAD",
+      "reach": {
+        "waypoint": "TEKNA",
+        "time": 2050
+      }
+    },
+    {
+      "callsign": "RAM1407",
+      "type": "E190",
+      "route": [
+        "TEKNA",
+        "AMLOK",
+        "SOLNA",
+        "LAY"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 330,
+      "dep": "GMAD",
+      "dest": "GMML",
+      "start": {
+        "point": "TEKNA",
+        "time": 1900
+      }
+    },
+    {
+      "callsign": "RYR2AG",
+      "type": "B738",
+      "route": [
+        "MAK",
+        "LISRA",
+        "BIDLA",
+        "OLOMA"
+      ],
+      "fl": 310,
+      "dep": "LEBL",
+      "dest": "GMAD",
+      "reach": {
+        "waypoint": "OLOMA",
+        "time": 2400
+      }
+    },
+    {
+      "callsign": "RAM1622",
+      "type": "B738",
+      "route": [
+        "LISRA",
+        "BIDLA",
+        "OLOMA",
+        "ADM",
+        "BULOK",
+        "SOMOM",
+        "DEVLA"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 350,
+      "dep": "GMMX",
+      "dest": "GCLP",
+      "start": {
+        "point": "LISRA",
+        "time": 2120
+      }
+    },
+    {
+      "callsign": "RAM1717",
+      "type": "E190",
+      "route": [
+        "MAK",
+        "MOKIR",
+        "MAXOR"
+      ],
+      "fl": 290,
+      "dep": "GMMN",
+      "dest": "GMMZ",
+      "reach": {
+        "waypoint": "MAXOR",
+        "time": 1350
+      },
+      "rfl": 290
+    },
+    {
+      "callsign": "RAM1718",
+      "type": "E190",
+      "route": [
+        "RATVA",
+        "RUBAB",
+        "BML",
+        "DIDOV",
+        "SODSA",
+        "FES"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 280,
+      "dep": "GMMZ",
+      "dest": "GMFF",
+      "start": {
+        "point": "RATVA",
+        "time": 2500
+      }
+    },
+    {
+      "callsign": "SWR254",
+      "type": "A333",
+      "route": [
+        "FES",
+        "SODSA",
+        "DIDOV",
+        "BML",
+        "RAVMA",
+        "AGOVA",
+        "ABDOR",
+        "KUDAX",
+        "MAK",
+        "TOPMA",
+        "DIVUX",
+        "BULIS"
+      ],
+      "fl": 370,
+      "dep": "LSZH",
+      "dest": "GOOY",
+      "reach": {
+        "waypoint": "AGOVA",
+        "time": 1300
+      }
+    },
+    {
+      "callsign": "RAM287",
+      "type": "B738",
+      "route": [
+        "SAK",
+        "SLK",
+        "PIXOV",
+        "MOGBI",
+        "TIXAL",
+        "AGOVA",
+        "MOGVA",
+        "OZT"
+      ],
+      "fl": 370,
+      "dep": "GMMN",
+      "dest": "GMMZ",
+      "reach": {
+        "waypoint": "AGOVA",
+        "time": 1312
+      },
+      "arrival": false
+    },
+    {
+      "callsign": "AFR1580",
+      "type": "A20N",
+      "route": [
+        "ERA",
+        "LARAP",
+        "OZT",
+        "LINVA",
+        "TOPMA",
+        "ABATO",
+        "KEGAG",
+        "ADM",
+        "TAGOG",
+        "DOGAN",
+        "SONSO"
+      ],
+      "fl": 370,
+      "dep": "LFML",
+      "dest": "GCLP",
+      "reach": {
+        "waypoint": "TOPMA",
+        "time": 2240
+      }
+    },
+    {
+      "callsign": "RAM1527",
+      "type": "B738",
+      "route": [
+        "CSD",
+        "NIKZO",
+        "BENOV",
+        "MAGAV",
+        "NAMIR",
+        "EKTAL",
+        "ADM",
+        "ARSOL",
+        "DIDAN",
+        "MOROX",
+        "ECHED"
+      ],
+      "fl": 350,
+      "dep": "GMMN",
+      "dest": "GOOY",
+      "reach": {
+        "waypoint": "MAGAV",
+        "time": 1150
+      },
+      "mach": 0.76,
+      "rfl": 350
+    },
+    {
+      "callsign": "UAE751",
+      "type": "B77W",
+      "route": [
+        "CSD",
+        "NIKZO",
+        "BENOV",
+        "MAGAV",
+        "NAMIR",
+        "EKTAL",
+        "ADM",
+        "ARSOL",
+        "DIDAN",
+        "MOROX",
+        "ECHED"
+      ],
+      "fl": 350,
+      "dep": "OMDB",
+      "dest": "SBGR",
+      "reach": {
+        "waypoint": "MAGAV",
+        "time": 1235
+      },
+      "mach": 0.85,
+      "load": 0.7
+    },
+    {
+      "callsign": "TVF4410",
+      "type": "B738",
+      "route": [
+        "DEVLA",
+        "SOMOM",
+        "BULOK",
+        "ADM",
+        "OLOMA",
+        "BIDLA",
+        "LISRA",
+        "MAK",
+        "OBOGA",
+        "VALBA",
+        "TIXAL",
+        "ERLAM",
+        "NEVEK",
+        "FES"
+      ],
+      "fl": 360,
+      "dep": "GCLP",
+      "dest": "LFPO",
+      "reach": {
+        "waypoint": "OLOMA",
+        "time": 2300
+      }
+    },
+    {
+      "callsign": "IBE3871",
+      "type": "A321",
+      "route": [
+        "PELAX",
+        "MABAP",
+        "ADM",
+        "RUSIK"
+      ],
+      "fl": 390,
+      "dep": "LEMD",
+      "dest": "GCLP",
+      "reach": {
+        "waypoint": "ADM",
+        "time": 1750
+      }
+    },
+    {
+      "callsign": "RAM1891",
+      "type": "B738",
+      "route": [
+        "ERA",
+        "RUBAB",
+        "AGOVA"
+      ],
+      "fl": 360,
+      "dep": "GMFK",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "RUBAB",
+        "time": 2000
+      },
+      "arrival": false
+    },
+    {
+      "callsign": "RAM1291",
+      "type": "B788",
+      "route": [
+        "ADM",
+        "TEKNA",
+        "AMLOK",
+        "SOLNA",
+        "LAY"
+      ],
+      "fl": 350,
+      "dep": "GMMN",
+      "dest": "GOOY",
+      "reach": {
+        "waypoint": "AMLOK",
+        "time": 2150
+      },
+      "rfl": 350
+    },
+    {
+      "callsign": "RAM1855",
+      "type": "B738",
+      "route": [
+        "MAK",
+        "MOKIR",
+        "MAXOR",
+        "OZT",
+        "BAGBO"
+      ],
+      "fl": 330,
+      "dep": "GMMX",
+      "dest": "DAAG",
+      "reach": {
+        "waypoint": "MAXOR",
+        "time": 2650
+      },
+      "arrival": false
+    }
+  ],
+  "expected": {}
+}

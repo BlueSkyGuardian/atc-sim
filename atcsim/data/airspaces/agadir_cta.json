@@ -2285,6 +2285,40 @@
     }
    ],
    "runway_in_use": "auto"
+  },
+  {
+   "id": "GMME",
+   "name": "Rabat-Sale",
+   "coord": "340305N 0064505W",
+   "elev_ft": 276,
+   "runways": [
+    {
+     "id": "03",
+     "heading": 35
+    },
+    {
+     "id": "21",
+     "heading": 215
+    }
+   ],
+   "runway_in_use": "auto"
+  },
+  {
+   "id": "GMMZ",
+   "name": "Ouarzazate",
+   "coord": "305620N 0065432W",
+   "elev_ft": 3782,
+   "runways": [
+    {
+     "id": "12",
+     "heading": 117
+    },
+    {
+     "id": "30",
+     "heading": 297
+    }
+   ],
+   "runway_in_use": "auto"
   }
  ],
  "sequencing": [
@@ -3281,7 +3315,114 @@
    "unit": "ACC CASABLANCA",
    "address": "GMMM",
    "callsign": "CASABLANCA",
-   "short": "Casablanca CTA"
+   "short": "Casablanca CTA",
+   "sequencing": [
+    {
+     "fix": "LAKAM",
+     "aerodrome": "GMMN",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "RAVOL",
+     "aerodrome": "GMMN",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "BISMI",
+     "aerodrome": "GMMN",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "FAHIM",
+     "aerodrome": "GMME",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "ENNAV",
+     "aerodrome": "GMME",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "MABAP",
+     "aerodrome": "GMMX",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "OBOGA",
+     "aerodrome": "GMMX",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "AGALI",
+     "aerodrome": "GMAD",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "OLOMA",
+     "aerodrome": "GMAD",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "TEKNA",
+     "aerodrome": "GMAD",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "MAXOR",
+     "aerodrome": "GMMZ",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    },
+    {
+     "fix": "LARAP",
+     "aerodrome": "GMMZ",
+     "spacing_nm": 10,
+     "cross_at_fl": 200,
+     "min_fl": 200
+    }
+   ],
+   "sequencing_note": "Arrivals leave the CTA CASABLANCA downwards into the TMAs at a fix on the TMA boundary: GMMN at LAKAM (from Agadir West North via MARJA / SALCA), RAVOL (from the west via NISBA, from the south via MOKRI) and BISMI (from the east on UR975, from the north on UB11); GMME at FAHIM (from the north) and ENNAV (from the east); GMMX at MABAP (UR722 / UB11 / UN869 from the north) and OBOGA (UG850 from the east); GMAD at AGALI (UR724 / UH400), OLOMA (UG850) and TEKNA (UA600 from the south); GMMZ at MAXOR (UJ744) and LARAP (UG664). The letter of agreement asks for arrivals cleared to FL200 at the fix (they may still be descending) and 10 NM in trail: placeholders until the unit's real letters of agreement are entered. Departures from these aerodromes call climbing to FL190 (released by approach) and ask for their final level.",
+   "descent_destinations": [
+    "GMMN",
+    "GMME",
+    "GMMX",
+    "GMAD",
+    "GMMZ",
+    "GMMI",
+    "GMFF",
+    "GMFO",
+    "GMTT",
+    "GMFK",
+    "GMML"
+   ],
+   "departures_request_rfl": [
+    "GMMN",
+    "GMME",
+    "GMMX",
+    "GMAD",
+    "GMMZ"
+   ]
   }
  },
  "default_control": [

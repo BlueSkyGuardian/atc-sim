@@ -402,6 +402,8 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
             ac.arr["auto"] = False                  # asks for descent only when the scenario's requests say so
     dest = str(a.get("dest") or ac.destination or "ZZZZ").upper()
     ac.rfl = _requested_level(a, ac, asp, fl)
+    if a.get("cfl") is not None:           # cleared level at the start: a departure released climbing by approach
+        ac.initial_cfl = int(str(a["cfl"]).upper().lstrip("FL").lstrip("F"))
     spd_mode, spd_val = ac.speed_target(fl * 100.0)
     ac.flight_plan = {
         "callsign": cs, "aircraft_type": perf.icao, "wake": _wake(perf),
@@ -418,6 +420,11 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     ac.route_before = [w for w in filed[:filed.index(route[0])] if w in waypoints] if route[0] in filed else []
     ac.prev_unit, ac.next_unit = flightplan.adjacent_units(asp, names, idx_entry, idx_exit, waypoints,
                                                             str(a.get("dep") or ""), str(a.get("dest") or ac.destination or ""))
+    if ac.destination and route[-1] not in asp.boundary_points:
+        ac.next_unit = ac.destination              # handed down to that aerodrome's approach at the fix
+    dep_ad = str(a.get("dep") or "").upper()
+    if start_name and asp.inside(waypoints[start_name]) and dep_ad in {x["id"] for x in asp.default_aerodromes}:
+        ac.prev_unit = dep_ad                      # released by the departure aerodrome's approach
     ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
     return ac
 
@@ -513,8 +520,9 @@ def build_world(scn: dict) -> World:
         aerodromes, seqfixes = arrivals.build(scn, waypoints, weather, asp)
     except ValueError as e:
         raise ScenarioError(str(e))
-    # only the sequencing fixes on the boundary of the controlled area are ours (a single sector may not have any)
-    seqfixes = {k: v for k, v in seqfixes.items() if k in asp.boundary_points}
+    # only the sequencing fixes on the boundary of the controlled area are ours (a single sector may not have any),
+    # and those inside it, where arrivals leave it downwards into an approach area (TMA)
+    seqfixes = {k: v for k, v in seqfixes.items() if k in asp.boundary_points or asp.inside(waypoints[k])}
     pre_entry_nm = float(scn.get("pre_entry_nm", 30.0))     # aircraft appear this far before their entry point
     checkin_nm = float(scn.get("checkin_nm", 10.0))         # and call on frequency this far before it
     start_min = flightplan.parse_hhmm(scn.get("start_utc"), 12 * 60)   # UTC time of day at T+0 (flight plans, ETOs)

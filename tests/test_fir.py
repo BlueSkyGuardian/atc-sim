@@ -50,7 +50,7 @@ c = A.get("agadir", ["N", "E", "C", "SS"])
 ok(c.unit == "ACC CASABLANCA" and c.notes["cpdlc"]["address"] == "GMMM" and "GMAC" in c.notes["cpdlc"]["units"],
    "Casablanca control: own unit Casablanca, Agadir adjacent")
 ok(c.point_info["IBALU"].get("external") and not c.point_info["LAKAM"].get("external"), "points swap sides")
-ok(not c.default_sequencing, "no Agadir arrival sequencing from Casablanca")
+ok(not {"TERTO", "MARJA", "SALCA"} & {q["fix"] for q in c.default_sequencing}, "no Agadir arrival sequencing from Casablanca")
 try:
     A.get("agadir", ["WN", "N"])
     ok(False, "mixed control areas refused")
@@ -62,16 +62,35 @@ ok(w.env.airspace.controlled == ["N"], "s20 controls Casablanca North")
 x = w.aircraft["RAM970"]
 ok(x.prev_unit == "GMAC" and x.next_unit == "E", f"from Agadir, to East: {x.prev_unit} {x.next_unit}")
 ok(len([k for k in w.areas if k.startswith("GM")]) == 45, "the 45 ENR 5.1 areas are in the scenario")
-ok(w.areas["GMP02"].active and w.areas["GMP02"].relevant and not w.areas["GMD25"].active, "GMP active, GMD inactive")
+ok(w.areas["GMP02"].active and w.areas["GMP02"].relevant and not w.areas["GMD21"].active, "GMP active, GMD inactive")
 for _ in range(620):
     w.step(1)
-ok(w.areas["GMD25"].active, "GMD 25 activates on its schedule")
-snap = w.areas["GMD25"].snapshot(w.t)
-ok(snap["designator"] == "GMD 25" and snap["published"], "designator and published flag")
+ok(w.areas["GMD21"].active, "GMD 21 activates on its schedule")
+snap = w.areas["GMD21"].snapshot(w.t)
+ok(snap["designator"] == "GMD 21" and snap["published"], "designator and published flag")
 
 w2 = build_world(load_scenario("s18_exit_sequence_three"))
 ok(not w2.areas["GMP02"].relevant, "a Casablanca area does not count for an Agadir sector")
 s = load_scenario("s18_exit_sequence_three")
 s["published_areas"] = False
 ok(not build_world(s).areas, "published_areas false leaves them out")
+
+# arrivals handed down into a TMA at a fix inside the sector, departures released climbing
+w = build_world(load_scenario("s21_casablanca_north_gmmn_gmme"))
+a, d0 = w.aircraft["RAM763"], w.aircraft["RAM1474"]
+ok(a.arr.get("fix") == "LAKAM" and a.destination == "GMMN" and a.next_unit == "GMMN", "GMMN arrival to LAKAM, next unit GMMN approach")
+ok(d0.prev_unit == "GMMN" and d0.rfl == 300 and d0.initial_cfl == 190, "GMMN departure released by approach climbing FL190, asks FL300")
+for _ in range(1200):
+    w.step(1)
+    for x in w.aircraft.values():
+        if x.active and x.on_frequency and not x.assumed:
+            w.issue({"callsign": x.callsign, "type": "assume"})
+    if w.t == 900:
+        ok(d0.cleared_alt_ft == 19000 and d0.alt_ft > 15500, f"climbing to FL190 after its release ({d0.alt_ft:.0f} ft)")
+ok(a.status == "exited" and a.exit_point == "LAKAM", "the arrival handed over at LAKAM")
+cr = w.metrics()["sequencing"]["crossings"]
+ok("LAKAM" in cr and any(c["callsign"] == "RAM763" for c in cr["LAKAM"]), "and scored at the fix")
+s2 = build_world(load_scenario("s22_casablanca_south_gmmx_gmad"))
+ok(s2.env.airspace.controlled == ["C", "SS"] and {"MABAP", "AGALI", "TEKNA", "MAXOR"} <= set(s2.seq),
+   "South (C+SS): GMMX / GMAD / GMMZ sequencing fixes")
 print("FIR ok")

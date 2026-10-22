@@ -1,0 +1,625 @@
+{
+  "name": "s21_casablanca_north_gmmn_gmme",
+  "title": "Casablanca North: GMMN and GMME arrivals and departures",
+  "description": "Casablanca ACC, North sector (125.500) open alone, one hour. GMMN arrivals in three streams - from Agadir West North via MARJA and SALCA to LAKAM, from the west via NISBA and from the south via MOKRI to RAVOL, from the east on UR975 and from the north on UB11 to BISMI - and GMME arrivals to FAHIM and ENNAV. Letter of agreement with approach: cleared FL200 at the fix (still descending is fine), 10 NM in trail. GMMN and GMME departures are released climbing FL190 and ask for their cruising level (UN871 via BAKIM, UR722 via LAKAM, UB11 via TUSOR, UN869 south). Transit traffic on UB11, UN869, UA411, UN871, UG5, UN726 and UM240. GMD 21 (FL150-FL460, Al Hoceima) is notified active from T+15 min. Westerly flow, no storms.",
+  "design_notes": "LAKAM wave 1 (T+17 to T+19): RAM763 (MARJA FL330), TAP1032 and the heavy RAM203 behind it (SALCA, FL350 / FL370), EZY9113 (MARJA FL330) - four within 100 s; RAM203 is fast and must not be first by default, the order and 10 NM come from speed and early vectors. RAM1474 (GMMN to LPPT, released FL190 at T+14) asks FL300 and climbs straight up UR722 against the MARJA arrivals: give the climb only above / after them or vector it. RAVOL (T+27): IBE3920 from NISBA and RAM1407 from MOKRI converge 25 s apart. BISMI (T+32 to T+34): RAM571 and the B77W SVA285 on UR975, AFR1396 on UB11 behind the UB11 southbound pair. Crossings: IBE3871 (UN869) and RAM1110 (UA411) at FL370 over RBT at T+21 (1 NM if nothing is done). Overtake: ETH712 (B77W M0.85) catches VLG8122 (A320 M0.76) on UN871 at FL360 before ADUBI, and the BAKIM departures RAM970 (asks FL360) and RAM1352 (asks FL380) join that stream. Speed trap: EZY62LK (M0.80) behind RYR4CW (M0.76), both FL350 on UB11 southbound, 10 NM apart at BARIS, closing. RAM756 (GMMN departure on UB11 north at T+34) asks FL360 = the level of TVF3302, northbound on UB11 ahead of it: a climb into its trail. AFR1450 northbound on UG5 at FL380 asks FL400 at T+28 while TAP1652 southbound at FL390 is opposite on the same airway: unable until passed. GMD 21 activates at T+15: RAM517 (UN726 east, TNR at T+28) must be rerouted before TTN-ALM (coordinate with East). Second LAKAM wave at T+45: RAM1425 (MARJA FL310), DLH4AM and the heavy RAM211 (SALCA, FL350 / FL330).",
+  "airspace": "agadir",
+  "control": [
+    "N"
+  ],
+  "duration_s": 3600,
+  "complexity": 4,
+  "start_utc": "09:00",
+  "weather": {
+    "seed": 211,
+    "temperature": {
+      "surface_c": 21,
+      "tropopause_fl": 380
+    },
+    "wind": {
+      "profile": [
+        {
+          "fl": 0,
+          "dir": 300,
+          "kt": 12
+        },
+        {
+          "fl": 200,
+          "dir": 285,
+          "kt": 40
+        },
+        {
+          "fl": 350,
+          "dir": 275,
+          "kt": 60
+        },
+        {
+          "fl": 450,
+          "dir": 270,
+          "kt": 40
+        }
+      ],
+      "noise_kt": 5
+    }
+  },
+  "published_areas": {
+    "GMD21": {
+      "active": false,
+      "schedule": [
+        {
+          "time": 900,
+          "active": true
+        }
+      ]
+    }
+  },
+  "areas": [],
+  "requests": [
+    {
+      "time": 1690,
+      "callsign": "AFR1450",
+      "type": "altitude",
+      "value": 400,
+      "reason": "better ride reported at FL400"
+    }
+  ],
+  "aircraft": [
+    {
+      "callsign": "RAM763",
+      "type": "B738",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA",
+        "LAKAM"
+      ],
+      "fl": 330,
+      "dep": "LPPT",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 1050
+      }
+    },
+    {
+      "callsign": "TAP1032",
+      "type": "A20N",
+      "route": [
+        "IBALU",
+        "SALCA",
+        "LAKAM"
+      ],
+      "fl": 350,
+      "dep": "LPMA",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 1075
+      }
+    },
+    {
+      "callsign": "RAM203",
+      "type": "B788",
+      "route": [
+        "IBALU",
+        "SALCA",
+        "LAKAM"
+      ],
+      "fl": 370,
+      "dep": "KJFK",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 1110
+      },
+      "load": 0.55
+    },
+    {
+      "callsign": "EZY9113",
+      "type": "A320",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA",
+        "LAKAM"
+      ],
+      "fl": 330,
+      "dep": "EGKK",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 1150
+      }
+    },
+    {
+      "callsign": "RAM1474",
+      "type": "E190",
+      "route": [
+        "MOKDA",
+        "LAKAM",
+        "MARJA",
+        "ABODA",
+        "AMSEL"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 300,
+      "dep": "GMMN",
+      "dest": "LPPT",
+      "start": {
+        "point": "MOKDA",
+        "time": 840
+      }
+    },
+    {
+      "callsign": "IBE3920",
+      "type": "A321",
+      "route": [
+        "IBALU",
+        "NISBA",
+        "RAVOL"
+      ],
+      "fl": 350,
+      "dep": "LEMD",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "RAVOL",
+        "time": 1640
+      }
+    },
+    {
+      "callsign": "RAM1407",
+      "type": "B738",
+      "route": [
+        "ESS",
+        "MOKRI",
+        "RAVOL"
+      ],
+      "fl": 330,
+      "dep": "GOOY",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "RAVOL",
+        "time": 1665
+      }
+    },
+    {
+      "callsign": "RAM571",
+      "type": "B738",
+      "route": [
+        "FES",
+        "POBUB",
+        "SADIC",
+        "DONAS",
+        "BISMI"
+      ],
+      "fl": 330,
+      "dep": "LFML",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "BISMI",
+        "time": 1950
+      }
+    },
+    {
+      "callsign": "AFR1396",
+      "type": "A320",
+      "route": [
+        "GALTO",
+        "TTN",
+        "BARIS",
+        "TUSOR",
+        "DIRAD",
+        "BISMI"
+      ],
+      "fl": 350,
+      "dep": "LFPO",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "BISMI",
+        "time": 1985
+      }
+    },
+    {
+      "callsign": "SVA285",
+      "type": "B77W",
+      "route": [
+        "FES",
+        "POBUB",
+        "SADIC",
+        "DONAS",
+        "BISMI"
+      ],
+      "fl": 370,
+      "dep": "OEJN",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "BISMI",
+        "time": 2030
+      },
+      "load": 0.6
+    },
+    {
+      "callsign": "RAM1425",
+      "type": "E190",
+      "route": [
+        "AMSEL",
+        "ABODA",
+        "MARJA",
+        "LAKAM"
+      ],
+      "fl": 310,
+      "dep": "LPPT",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 2700
+      }
+    },
+    {
+      "callsign": "DLH4AM",
+      "type": "A20N",
+      "route": [
+        "IBALU",
+        "SALCA",
+        "LAKAM"
+      ],
+      "fl": 350,
+      "dep": "EDDF",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 2725
+      }
+    },
+    {
+      "callsign": "RAM211",
+      "type": "B789",
+      "route": [
+        "IBALU",
+        "SALCA",
+        "LAKAM"
+      ],
+      "fl": 330,
+      "dep": "KMIA",
+      "dest": "GMMN",
+      "reach": {
+        "waypoint": "LAKAM",
+        "time": 2760
+      },
+      "load": 0.5
+    },
+    {
+      "callsign": "RAM977",
+      "type": "B738",
+      "route": [
+        "GALTO",
+        "FAHIM"
+      ],
+      "fl": 330,
+      "dep": "LFPO",
+      "dest": "GMME",
+      "reach": {
+        "waypoint": "FAHIM",
+        "time": 1400
+      }
+    },
+    {
+      "callsign": "VLG8541",
+      "type": "A320",
+      "route": [
+        "FES",
+        "DEMUM",
+        "IPLOS",
+        "VARAS",
+        "ENNAV"
+      ],
+      "fl": 310,
+      "dep": "LEBL",
+      "dest": "GMME",
+      "reach": {
+        "waypoint": "ENNAV",
+        "time": 2250
+      }
+    },
+    {
+      "callsign": "RAM970",
+      "type": "B738",
+      "route": [
+        "REVMI",
+        "BAKIM",
+        "OSDAM",
+        "ADUBI"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 360,
+      "dep": "GMMN",
+      "dest": "LEMD",
+      "start": {
+        "point": "REVMI",
+        "time": 1320
+      }
+    },
+    {
+      "callsign": "RAM1352",
+      "type": "A21N",
+      "route": [
+        "MOKIB",
+        "BAKIM",
+        "OSDAM",
+        "ADUBI"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 380,
+      "dep": "GMME",
+      "dest": "LFPO",
+      "start": {
+        "point": "MOKIB",
+        "time": 1450
+      }
+    },
+    {
+      "callsign": "RAM756",
+      "type": "B738",
+      "route": [
+        "ESALA",
+        "TUSOR",
+        "BARIS",
+        "TTN",
+        "GALTO"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 360,
+      "dep": "GMMN",
+      "dest": "EBBR",
+      "start": {
+        "point": "ESALA",
+        "time": 2050
+      }
+    },
+    {
+      "callsign": "RAM1505",
+      "type": "B738",
+      "route": [
+        "KOTAG",
+        "PELAX",
+        "MABAP"
+      ],
+      "fl": 150,
+      "cfl": 190,
+      "rfl": 350,
+      "dep": "GMMN",
+      "dest": "GOOY",
+      "start": {
+        "point": "KOTAG",
+        "time": 2350
+      }
+    },
+    {
+      "callsign": "IBE3871",
+      "type": "A321",
+      "route": [
+        "GALTO",
+        "RBT",
+        "SLK",
+        "PELAX",
+        "MABAP"
+      ],
+      "fl": 370,
+      "dep": "LEMD",
+      "dest": "GOOY",
+      "reach": {
+        "waypoint": "RBT",
+        "time": 1250
+      }
+    },
+    {
+      "callsign": "RAM1110",
+      "type": "B738",
+      "route": [
+        "SALCA",
+        "LAKAM",
+        "RBT",
+        "VARAS",
+        "IPLOS",
+        "DEMUM",
+        "FES"
+      ],
+      "fl": 370,
+      "dep": "GMAD",
+      "dest": "GMFO",
+      "reach": {
+        "waypoint": "RBT",
+        "time": 1262
+      }
+    },
+    {
+      "callsign": "ETH712",
+      "type": "B77W",
+      "route": [
+        "ESS",
+        "NIRAL",
+        "OSDAM",
+        "ADUBI"
+      ],
+      "fl": 360,
+      "dep": "GOOY",
+      "dest": "LIMC",
+      "reach": {
+        "waypoint": "OSDAM",
+        "time": 1525
+      },
+      "mach": 0.85,
+      "load": 0.7
+    },
+    {
+      "callsign": "VLG8122",
+      "type": "A320",
+      "route": [
+        "ESS",
+        "NIRAL",
+        "OSDAM",
+        "ADUBI"
+      ],
+      "fl": 360,
+      "dep": "GMAD",
+      "dest": "LEBL",
+      "reach": {
+        "waypoint": "OSDAM",
+        "time": 1500
+      },
+      "mach": 0.76
+    },
+    {
+      "callsign": "RYR4CW",
+      "type": "B738",
+      "route": [
+        "GALTO",
+        "TTN",
+        "BARIS",
+        "TUSOR",
+        "DIRAD",
+        "BISMI",
+        "SLK",
+        "PELAX",
+        "FACAS"
+      ],
+      "fl": 350,
+      "dep": "EGSS",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "BARIS",
+        "time": 700
+      },
+      "mach": 0.76
+    },
+    {
+      "callsign": "EZY62LK",
+      "type": "A320",
+      "route": [
+        "GALTO",
+        "TTN",
+        "BARIS",
+        "TUSOR",
+        "DIRAD",
+        "BISMI",
+        "SLK",
+        "PELAX",
+        "FACAS"
+      ],
+      "fl": 350,
+      "dep": "EGKK",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "BARIS",
+        "time": 780
+      },
+      "mach": 0.8
+    },
+    {
+      "callsign": "TVF3302",
+      "type": "B738",
+      "route": [
+        "FACAS",
+        "PELAX",
+        "SLK",
+        "BISMI",
+        "DIRAD",
+        "TUSOR",
+        "BARIS",
+        "TTN",
+        "GALTO"
+      ],
+      "fl": 360,
+      "dep": "GMMX",
+      "dest": "LFPO",
+      "reach": {
+        "waypoint": "TUSOR",
+        "time": 2280
+      }
+    },
+    {
+      "callsign": "TAP1652",
+      "type": "A20N",
+      "route": [
+        "KORIS",
+        "VAGNO",
+        "ROMSO",
+        "TOLSI",
+        "AGDAL",
+        "SAK",
+        "RALEK",
+        "VONCI"
+      ],
+      "fl": 390,
+      "dep": "LPPT",
+      "dest": "GMMX",
+      "reach": {
+        "waypoint": "TOLSI",
+        "time": 1800
+      }
+    },
+    {
+      "callsign": "AFR1450",
+      "type": "A320",
+      "route": [
+        "VONCI",
+        "RALEK",
+        "SAK",
+        "AGDAL",
+        "TOLSI",
+        "ROMSO",
+        "VAGNO",
+        "KORIS"
+      ],
+      "fl": 380,
+      "dep": "GMMX",
+      "dest": "LFPO",
+      "reach": {
+        "waypoint": "TOLSI",
+        "time": 1830
+      }
+    },
+    {
+      "callsign": "RAM517",
+      "type": "B738",
+      "route": [
+        "BAMBA",
+        "ABIRO",
+        "TNR",
+        "NARMI",
+        "TTN",
+        "ALM"
+      ],
+      "fl": 370,
+      "dep": "LPPT",
+      "dest": "GMMW",
+      "reach": {
+        "waypoint": "TNR",
+        "time": 1700
+      }
+    },
+    {
+      "callsign": "IBE3301",
+      "type": "A320",
+      "route": [
+        "TNR",
+        "MADOV",
+        "IXODA",
+        "ATVAR",
+        "FES"
+      ],
+      "fl": 350,
+      "dep": "LEMD",
+      "dest": "GMFF",
+      "reach": {
+        "waypoint": "MADOV",
+        "time": 1200
+      }
+    }
+  ],
+  "expected": {}
+}

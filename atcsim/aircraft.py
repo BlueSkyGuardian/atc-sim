@@ -226,6 +226,8 @@ class Aircraft:
         self.next_index = max(1, nxt)
         self.leg_from = pts[self.next_index - 1]
         self.alt_ft = self.cleared_alt_ft = self.fl * 100.0
+        if getattr(self, "initial_cfl", None):          # a departure released climbing (an arrival descending)
+            self.cleared_alt_ft = float(self.initial_cfl) * 100.0
         self.tas = self.perf.tas_for(*self.speed_target(), self.alt_ft)
         course = bearing(self.leg_from, pts[self.next_index])
         u, v = env.weather.at(self.x, self.y, self.alt_ft / 100, t)
@@ -324,6 +326,17 @@ class Aircraft:
         if outside:
             return None
 
+        if self.arr and self.entered and self.nav_mode != "lnav":
+            # an arrival on vectors / a direct handed over at its fix inside the sector (to the approach unit below)
+            fx = self.arr.get("fix")
+            if fx in env.waypoints and fx not in getattr(env.airspace, "boundary_points", {}):
+                d = dist(self.pos, env.waypoints[fx])
+                prev = getattr(self, "_fix_d", None)
+                self._fix_d = d
+                if d <= 2.5 or (d <= 6.0 and prev is not None and d > prev):
+                    self.status, self.exit_point = "exited", fx
+                    self.end_time = None
+                    return "exited"
         if env.airspace.inside(self.pos):
             self.entered = True
         elif self.entered:
