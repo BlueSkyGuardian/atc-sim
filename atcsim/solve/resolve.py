@@ -128,7 +128,8 @@ def generate(w, a, st: dict, t_pass: Optional[float] = None, target_fl: Optional
                         "acts": [{"type": "clear", "callsign": cs, "speed": str(v), "limit": lim_txt}],
                         "cost": abs(d) / 10 * 0.08 + re_spd, "check": {"type": "speed", "ias_kt": v}})
     ahead = traj.route_ahead(w, a)
-    for k, p in enumerate(ahead[1:4], start=1):
+    in_sector = [p for p in a.route[a.next_index:] if p in w.waypoints and not str(p).startswith("@")]
+    for k, p in enumerate([p for p in ahead[1:4] if p in in_sector], start=1):   # not past its exit (the next unit's)
         out.append({"kind": "direct", "prm": {"direct": p}, "acts": [{"type": "clear", "callsign": cs, "direct": p}],
                     "cost": 1.0 + 0.05 * k, "check": {"type": "direct", "waypoint": p}})
     brg_r, brg_x = route_bearings(w, a)

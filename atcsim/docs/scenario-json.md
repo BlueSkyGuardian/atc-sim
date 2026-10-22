@@ -112,6 +112,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `rfl` | integer | — | Requested final level of a departure climbing through the sector: the pilot asks for it on first contact, and it is the flight plan's cruise level. Departures from GMMN without `rfl` get one from their performance and direction (the highest few levels they can reach at their weight) |
 | `dep`, `dest` | ICAO codes | generated | Departure and destination aerodromes (flight plan, onward routing, arrival behaviour). An aircraft whose route ends at a sequencing fix is an arrival to that fix's aerodrome |
 | `arrival` | boolean | `true` | `false` = an overflight even if the route ends at a sequencing fix (no descent request, no LoA) |
+| `auto_descent_request` | boolean | `true` | arrival: `false` = the pilot asks for descent only when a scripted `"descent"` request says so (to set who asks first in a wave); refused, it asks again 90 s later |
 | `direction` | `"southbound"` / `"northbound"` | from the route | Overrides the direction used for the semicircular rule |
 | `rvsm` | boolean | type's default | RVSM approval. `false` for an aircraft not approved (ferry flights, old aircraft). In RVSM airspace (FL290–FL410) it needs 2000 ft and its presence there is a violation |
 | `military` | boolean | type's category | State / military flight (`MIL` tag, `STS/STATE`) |

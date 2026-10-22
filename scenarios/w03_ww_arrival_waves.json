@@ -1,0 +1,931 @@
+{
+ "name": "w03_ww_arrival_waves",
+ "title": "West sectors: waves of arrivals for TERTO and MARJA",
+ "airspace": "agadir",
+ "control": [
+  "WN",
+  "WS"
+ ],
+ "duration_s": 4800,
+ "complexity": 5,
+ "start_utc": "07:30",
+ "description": "West sectors band-boxed (WW). Three waves of Lanzarote (GCRR) arrivals for TERTO - 4, then 5, then 6 aircraft - from KORNO via ABODA-IBALU-ERMED-TOVRA-VEDOD and from TAKAV direct VEDOD, merging at VEDOD; and three waves of Casablanca (GMMN) arrivals for MARJA (then LAKAM) - 2, then 3, then 4 - from AMSEL, KORNO and RUNAX via ABODA. Letters of agreement: cleared FL250 at TERTO / MARJA, 10 NM in trail. The arrivals ask for descent near VEDOD / ABODA, not always in the order of the sequence. Overflights for Gran Canaria and Fuerteventura on the same axes, and traffic crossing the ABODA-MARJA leg, stay at their levels in the way of the descents; GMMN departures climb against the arrivals.",
+ "design_notes": "GCRR waves at VEDOD about 2100, 3200, 4300 s; GMMN waves at ABODA about 700, 1800, 2900 s. Same-level merges (loss if left alone): RYR72TK/TOM4HB at VEDOD FL370 40 s apart, VLG81KP/EZY88QP FL370 22 s, RYR33VN/EXS7NC FL370 25 s, RAM949/RAM1471 at ABODA FL370 25 s. Descent requests come between 30 s and 5 min before the merge point, sometimes the follower first. In the way: IBE3518/EZY91WP/EWG14T (KORNO-ABODA at FL310/330 just after each GMMN wave), BAW2581/NOZ418/SAS77K (RUNAX-IBALU crossing ABODA-MARJA at FL330/310), TOM67G/RYR8C/TOM2DM/TAP1129 (GCLP/GCFV on the TERTO axes), TAP1066 head-on on MARJA-ABODA at FL320, RAM1290 GMMN departure climbing to FL360 against GMMN wave 2, RAM2210 (SALCA-IBALU) climbing to FL350 into GCRR wave 3 at IBALU, BCS51 northbound asking FL400 as the TAKAV stream at FL390 crosses it.",
+ "weather": {
+  "seed": 31,
+  "temperature": {
+   "surface_c": 22,
+   "tropopause_fl": 380,
+   "lapse_c_per_kft": 2.0
+  },
+  "wind": {
+   "profile": [
+    {
+     "fl": 0,
+     "dir": 30,
+     "kt": 12
+    },
+    {
+     "fl": 250,
+     "dir": 290,
+     "kt": 35
+    },
+    {
+     "fl": 350,
+     "dir": 280,
+     "kt": 50
+    },
+    {
+     "fl": 450,
+     "dir": 280,
+     "kt": 40
+    }
+   ]
+  }
+ },
+ "aircraft": [
+  {
+   "callsign": "RYR72TK",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "EGSS",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 2100
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EZY43RF",
+   "type": "A320",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 350,
+   "dep": "EGGW",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 2175
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EXS21LZ",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 390,
+   "dep": "EGCC",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 2180
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "TOM4HB",
+   "type": "B38M",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "EGKK",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 2140
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "VLG81KP",
+   "type": "A320",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "LEBL",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3228
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RYR5WD",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 350,
+   "dep": "EIDW",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3212
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EZY88QP",
+   "type": "A20N",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "LFPG",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3250
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EWG6LA",
+   "type": "A320",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 390,
+   "dep": "EDDL",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3290
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "BAW2RF",
+   "type": "A321",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 350,
+   "dep": "EGLL",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3322
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RYR33VN",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "EGPH",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4200
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "TOM9KX",
+   "type": "B738",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 350,
+   "dep": "EGBB",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4232
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EXS7NC",
+   "type": "B738",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "EGNM",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4225
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "IBS41D",
+   "type": "A21N",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 390,
+   "dep": "LEMD",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4302
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "EZY12AJ",
+   "type": "A320",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 350,
+   "dep": "EGGD",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4344
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "TRA5TP",
+   "type": "B738",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 370,
+   "dep": "EHAM",
+   "dest": "GCRR",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4380
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM761",
+   "type": "B738",
+   "route": [
+    "AMSEL",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 350,
+   "dep": "LFPO",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 700
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM973",
+   "type": "B788",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 370,
+   "dep": "EGLL",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 735
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM1347",
+   "type": "B738",
+   "route": [
+    "RUNAX",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 370,
+   "dep": "LFPG",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 1750
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM803",
+   "type": "B739",
+   "route": [
+    "AMSEL",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 350,
+   "dep": "EBBR",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 1782
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM1123",
+   "type": "B789",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 390,
+   "dep": "EDDF",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 1820
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM949",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 370,
+   "dep": "LSZH",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 2850
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM655",
+   "type": "B738",
+   "route": [
+    "RUNAX",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 350,
+   "dep": "LFML",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 2882
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM1471",
+   "type": "B788",
+   "route": [
+    "AMSEL",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 370,
+   "dep": "LEMD",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 2875
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "RAM519",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "MARJA"
+   ],
+   "fl": 350,
+   "dep": "LIRF",
+   "dest": "GMMN",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 2962
+   },
+   "auto_descent_request": false
+  },
+  {
+   "callsign": "IBE3518",
+   "type": "A320",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 310,
+   "dep": "LEMD",
+   "dest": "GCLP",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 760
+   }
+  },
+  {
+   "callsign": "BAW2581",
+   "type": "A321",
+   "route": [
+    "RUNAX",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 330,
+   "dep": "EGLL",
+   "dest": "GCLP",
+   "reach": {
+    "point": [
+     184.0,
+     131.0
+    ],
+    "time": 835
+   }
+  },
+  {
+   "callsign": "TOM67G",
+   "type": "B738",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 390,
+   "dep": "EGCC",
+   "dest": "GCFV",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 2260
+   }
+  },
+  {
+   "callsign": "EZY91WP",
+   "type": "A20N",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 330,
+   "dep": "EGGW",
+   "dest": "GCFV",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 1845
+   }
+  },
+  {
+   "callsign": "NOZ418",
+   "type": "B738",
+   "route": [
+    "RUNAX",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 310,
+   "dep": "ENGM",
+   "dest": "GCLP",
+   "reach": {
+    "point": [
+     184.0,
+     131.0
+    ],
+    "time": 1890
+   }
+  },
+  {
+   "callsign": "RYR8C",
+   "type": "B738",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 330,
+   "dep": "EIDW",
+   "dest": "GCLP",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3140
+   }
+  },
+  {
+   "callsign": "TOM2DM",
+   "type": "B738",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 330,
+   "dep": "EGNX",
+   "dest": "GCFV",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 3360
+   }
+  },
+  {
+   "callsign": "SAS77K",
+   "type": "A21N",
+   "route": [
+    "RUNAX",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 330,
+   "dep": "ESSA",
+   "dest": "GCLP",
+   "reach": {
+    "point": [
+     184.0,
+     131.0
+    ],
+    "time": 2990
+   }
+  },
+  {
+   "callsign": "EWG14T",
+   "type": "A320",
+   "route": [
+    "KORNO",
+    "ABODA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 310,
+   "dep": "EDDK",
+   "dest": "GCFV",
+   "reach": {
+    "waypoint": "ABODA",
+    "time": 2905
+   }
+  },
+  {
+   "callsign": "TAP1129",
+   "type": "A21N",
+   "route": [
+    "TAKAV",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 390,
+   "dep": "LPPT",
+   "dest": "GCLP",
+   "reach": {
+    "waypoint": "VEDOD",
+    "time": 4430
+   }
+  },
+  {
+   "callsign": "TAP1066",
+   "type": "A20N",
+   "route": [
+    "MARJA",
+    "ABODA",
+    "AMSEL"
+   ],
+   "fl": 320,
+   "dep": "GCLP",
+   "dest": "LPPT",
+   "reach": {
+    "waypoint": "MARJA",
+    "time": 2960
+   }
+  },
+  {
+   "callsign": "RAM1290",
+   "type": "B738",
+   "route": [
+    "MARJA",
+    "ABODA",
+    "AMSEL"
+   ],
+   "fl": 260,
+   "dep": "GMMN",
+   "dest": "LFPO",
+   "reach": {
+    "waypoint": "MARJA",
+    "time": 1700
+   },
+   "rfl": 360
+  },
+  {
+   "callsign": "RAM2210",
+   "type": "B738",
+   "route": [
+    "SALCA",
+    "IBALU",
+    "ERMED",
+    "TOVRA",
+    "VEDOD",
+    "TERTO"
+   ],
+   "fl": 260,
+   "dep": "GMMN",
+   "dest": "GCLP",
+   "reach": {
+    "waypoint": "SALCA",
+    "time": 1890
+   },
+   "rfl": 350
+  },
+  {
+   "callsign": "BCS51",
+   "type": "A332",
+   "route": [
+    "VASTO",
+    "SULAM",
+    "DIMSA",
+    "IBLIV",
+    "SUNID",
+    "AKUDA"
+   ],
+   "fl": 380,
+   "dep": "GCTS",
+   "dest": "EGKK",
+   "reach": {
+    "waypoint": "SUNID",
+    "time": 560
+   }
+  }
+ ],
+ "requests": [
+  {
+   "time": 420,
+   "callsign": "BCS51",
+   "type": "altitude",
+   "value": 400,
+   "reason": "requesting FL400, better winds"
+  },
+  {
+   "time": 535,
+   "callsign": "RAM973",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 580,
+   "callsign": "RAM761",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 1602,
+   "callsign": "RAM803",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 1690,
+   "callsign": "RAM1347",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 1780,
+   "callsign": "RAM1123",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 1885,
+   "callsign": "EZY43RF",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 1900,
+   "callsign": "RYR72TK",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 1910,
+   "callsign": "TOM4HB",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 2070,
+   "callsign": "EXS21LZ",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 2642,
+   "callsign": "RAM655",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 2700,
+   "callsign": "RAM949",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 2785,
+   "callsign": "RAM1471",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 2932,
+   "callsign": "RAM519",
+   "type": "descent",
+   "reason": "descent for Casablanca"
+  },
+  {
+   "time": 2952,
+   "callsign": "RYR5WD",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 2980,
+   "callsign": "EWG6LA",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 3078,
+   "callsign": "VLG81KP",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 3142,
+   "callsign": "BAW2RF",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 3160,
+   "callsign": "EZY88QP",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 3925,
+   "callsign": "EXS7NC",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 3992,
+   "callsign": "TOM9KX",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 4080,
+   "callsign": "RYR33VN",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 4144,
+   "callsign": "EZY12AJ",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 4220,
+   "callsign": "TRA5TP",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  },
+  {
+   "time": 4242,
+   "callsign": "IBS41D",
+   "type": "descent",
+   "reason": "descent for Lanzarote"
+  }
+ ],
+ "expected": {
+  "passive": {
+   "allow_left_sector": true,
+   "los": true,
+   "pairs": [
+    [
+     "RYR72TK",
+     "TOM4HB"
+    ],
+    [
+     "RAM1471",
+     "RAM949"
+    ],
+    [
+     "EZY88QP",
+     "VLG81KP"
+    ],
+    [
+     "EXS7NC",
+     "RYR33VN"
+    ]
+   ]
+  }
+ }
+}

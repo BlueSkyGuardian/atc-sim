@@ -842,6 +842,11 @@
     "coord": "335938N 0081432W",
     "region": "Casablanca",
     "source": "AIP Maroc ENR 4.4 (06 AUG 2026)"
+   },
+   "LAKAM": {
+    "coord": "341114N 0074418W",
+    "region": "Casablanca",
+    "source": "unit (34.187222, -7.738333): GMMN arrivals after MARJA"
    }
   }
  },
@@ -1330,6 +1335,18 @@
      {
       "points": [
        "BALNO"
+      ]
+     }
+    ]
+   },
+   {
+    "at": "MARJA",
+    "side": "exit",
+    "dest": "GMMN",
+    "options": [
+     {
+      "points": [
+       "LAKAM"
       ]
      }
     ]

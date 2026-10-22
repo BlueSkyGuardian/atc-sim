@@ -43,18 +43,30 @@ MARGIN_NM = 0.5
 HDG_UNIT = 5               # headings are given in 5 degree units
 MAX_TURN_DEG = 70.0        # largest sequencing turn tried
 TURN_PER_MIN = 4.0         # cost: one minute on a vector weighs as 4 degrees of turn (shorter vectors, less wind error)
-MAX_REFINE = 10            # candidate headings refined in the trajectory model, cheapest first
+MAX_REFINE = 30            # candidate headings refined in the trajectory model, cheapest first
 CONVERSION_KT = 280        # descent IAS after conversion when the aircraft's own is not known
+ARR_DESCENT_BEFORE_S = 300.0   # an arrival is planned down about 5 minutes before its fix at the latest (near VEDOD,
+                               # ABODA), earlier at its own top of descent; it may still be descending at the fix
+ARR_PLAN_S = 1500.0        # arrivals are sequenced from 25 minutes before their fix (not earlier: the picture changes)
 MIN_IAS = 250              # never below 250 kt unless the pilot has said it can
 MAX_TURN_BACK_DEG = 90.0   # at the end of a vector, the turn towards the point is at most this
 MAX_VECTOR_S = 900.0       # a sequencing vector lasts at most 15 minutes: beyond, another solution (direct, level)
 
 
-def members_of(w, T_name: str, only_assumed: bool = True) -> List[str]:
+def eta_s(w, a, T_name: str) -> Optional[float]:
+    """Time to T_name along the route ahead at the present ground speed (s), or None."""
+    d = traj._along_to([a.pos] + [w.waypoints[x] for x in traj.route_ahead(w, a)], w.waypoints[T_name])
+    return None if d is None else d / max(a.gs, 150.0) * 3600.0
+
+
+def members_of(w, T_name: str, only_assumed: bool = True, max_eta_s: float = 1800.0) -> List[str]:
+    """The aircraft going to T_name within max_eta_s (those further away are sequenced when they come closer)."""
     out = []
     for cs, a in w.aircraft.items():
         if a.active and (a.assumed or not only_assumed) and T_name in traj.route_ahead(w, a):
-            out.append(cs)
+            e = eta_s(w, a, T_name)
+            if e is None or e <= max_eta_s:
+                out.append(cs)
     return out
 
 
@@ -136,7 +148,10 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
     descents to the LoA level are planned as well (descents=None: when T_name is a sequencing fix)."""
     from .resolve import departing
     sq = seqfix_of(w, T_name)
-    arrival = sq is not None
+    arrival = sq is not None and (not members or any(
+        w.aircraft[c].destination and (w.aircraft[c].arr or {}).get("fix") == T_name for c in members if c in w.aircraft))
+    if not arrival:
+        sq = None                                          # overflights leaving by a sequencing fix: the exit's LoA
     if descents is None:
         descents = arrival
     S = float(S if S is not None else (sq.spacing_nm if arrival else exits.required_nm(w)))
@@ -163,6 +178,10 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
             base[cs] = _adj(w, w.aircraft[cs], base[cs])
     cross = {cs: _cross(base[cs], p) for cs in members if cs in base}
     seq = sorted([cs for cs in cross if cross[cs] is not None], key=lambda c: cross[c])
+    if use_merge and T_name != fix_name and len(seq) < len(cross):
+        # some of them no longer pass the merge point (a vector direct to the fix): sequenced at the fix itself
+        return {"ok": False, "why": f"not all via {T_name}", "sequence": seq, "steps": [], "point": T_name, "S": S,
+                "targets": {}, "spacing": [], "notes": [], "fix": fix_name}
     t_out = [c for c in (_cross(base[cs], last_pt) for cs in seq) if c is not None]
     CLEAR_UNTIL["t"] = (max(t_out) + 900.0) if t_out else None
     CLEAR_UNTIL["pt"] = last_pt
@@ -253,6 +272,8 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
         conv_of, desc = {}, {}                 # the IAS on conversion of each (asked of the leader), the descents
         for k, cs in enumerate(seq):
             a = w.aircraft[cs]
+            if not (a.destination and (a.arr or {}).get("fix") == fix_name):
+                continue                                   # an overflight in the sequence: no descent
             if a.cleared_alt_ft <= fl_loa * 100 + 50:
                 conv_of[cs] = float(getattr(a, "spd_cas", None) or own_conversion(a))
                 continue
@@ -365,7 +386,7 @@ DESCEND = {"fix": None, "fl": None}   # arrivals being planned: their trajectori
 
 def _nominal_t(a, Tr, fix_pt, fl) -> Optional[float]:
     """When an arrival is planned to start down to fl (s from now): at its own top of descent (where its pilot would
-    ask), and in any case cleared a minute before the fix. It need not be level there: the letter of agreement is met
+    ask), at the latest about five minutes before the fix. It need not be level there: the letter of agreement is met
     by an aircraft cleared to the agreed level, still descending to it at the fix."""
     t_fix = _cross(Tr, fix_pt)
     dz = a.alt_ft - fl * 100.0
@@ -380,7 +401,7 @@ def _nominal_t(a, Tr, fix_pt, fl) -> Optional[float]:
         except Exception:  # noqa: BLE001
             r = 1800.0
         t_own = t_fix - dz / r * 60.0 - 60.0
-    return max(0.0, min(t_own, t_fix - 60.0))
+    return max(0.0, min(t_own, t_fix - ARR_DESCENT_BEFORE_S))
 
 
 def _adj(w, a, Tr, mach: Optional[float] = None):

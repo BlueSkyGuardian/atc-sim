@@ -30,6 +30,7 @@ A scenario is a JSON document:
       "mach": 0.78,            # optional filed cruise Mach (default: type's typical cruise Mach, OpenAP WRAP)
       "load": 0.5,             # optional: mass = OEW + load * (MTOW - OEW); or "mass_kg": 65000
       "arrival": true,         # exiting at a sequencing fix = arrival to its aerodrome; false = overflight
+      "auto_descent_request": false,   # arrival: asks for descent only by the scenario's "descent" requests
       # timing - exactly one of (ground speed with wind is used to work out the entry time):
       "entry_time": 60                                     # appears at route[0] at t=60 s
       "reach": {"waypoint": "S3", "time": 900}             # is AT that waypoint at t=900 s
@@ -395,6 +396,8 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
             and (not dest_fp or dest_fp == seqfixes[route[-1]].aerodrome)):   # arrival behind the fix
         ac.destination = seqfixes[route[-1]].aerodrome
         ac.arr = {"fix": route[-1]}
+        if a.get("auto_descent_request") is False:
+            ac.arr["auto"] = False                  # asks for descent only when the scenario's requests say so
     dest = str(a.get("dest") or ac.destination or "ZZZZ").upper()
     ac.rfl = _requested_level(a, ac, asp, fl)
     spd_mode, spd_val = ac.speed_target(fl * 100.0)

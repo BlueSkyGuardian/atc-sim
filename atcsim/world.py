@@ -1036,6 +1036,8 @@ class World:
                 if rtype == "weather_deviation":
                     ac.wx.update(phase="requested", request_id=req.id, requested_at=t_next, repeated=False,
                                  plan=value, scripted=True)
+                if kind == "descent" and ac.destination:       # the pilot repeats it while nothing is given
+                    ac.arr.update(_req=req.id, _req_t=t_next)
                 self._event("pilot_request", request_id=req.id, callsign=req.callsign, request_type=req.type,
                             value=req.value, reason=req.reason, text=req.phrase(), kind=kind)
         # 3b. scripted aircraft events (RVSM capability), never in prediction

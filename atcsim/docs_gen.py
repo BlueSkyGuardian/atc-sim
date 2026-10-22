@@ -300,6 +300,9 @@ SCHEMA = {
             "load": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.5},
             "mass_kg": {"type": "number"},
             "arrival": {"type": "boolean"},
+            "auto_descent_request": {"type": "boolean", "default": True,
+                                     "description": "arrival: the pilot asks for descent at its top of descent; false = only "
+                                                    "when a scripted 'descent' request says so"},
             "direction": {"enum": ["southbound", "northbound"]},
             "dep": {"type": "string"}, "dest": {"type": "string"}, "rfl": {"type": "integer", "minimum": 100, "maximum": 600},
             "rvsm": {"type": "boolean"}, "military": {"type": "boolean"},

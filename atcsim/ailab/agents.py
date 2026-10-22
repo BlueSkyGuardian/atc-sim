@@ -509,13 +509,14 @@ class SolverAgent(Baseline):
             pass
         self._arrival_plans(w, set(mine))
         for x in sorted(targets):
-            mem = [c for c in sequence.members_of(w, x) if c in mine]
-            if mem and all(w.aircraft[c].destination and (w.aircraft[c].arr or {}).get("fix") for c in mem):
-                continue                                  # arrivals: their sequencing fix's plan
+            mem = [c for c in sequence.members_of(w, x) if c in mine
+                   and not (w.aircraft[c].destination and (w.aircraft[c].arr or {}).get("fix"))]   # arrivals: their fix's plan
+            if len(mem) < 2 or "ARR:" + x in plans:
+                continue                                  # (overflights at a sequencing fix: in its arrival plan)
             if x in plans or any(x in pl["plan"].get("sequence_points", []) for pl in plans.values()):
                 continue
             try:
-                P = sequence.plan(w, x, members=[c for c in sequence.members_of(w, x) if c in mine])
+                P = sequence.plan(w, x, members=mem, descents=False)
             except Exception:  # noqa: BLE001
                 continue
             if P.get("ok") and P.get("steps"):
@@ -569,8 +570,16 @@ class SolverAgent(Baseline):
         plans = self.__dict__.setdefault("_seq_plans", {})
         for fix, sq in (getattr(w, "seq", None) or {}).items():
             fl = int(sq.cross_at_fl or sq.cross_at_or_below_fl or sq.min_fl)
-            members = sorted(c for c in sequence.arrivals_to(w, fix) if c in mine)
-            todo = [c for c in members if w.aircraft[c].cleared_alt_ft > fl * 100 + 50]
+            members = []
+            for c in sorted(c for c in sequence.arrivals_to(w, fix) if c in mine):
+                e_ = sequence.eta_s(w, w.aircraft[c], fix)     # within reach of the plan: at the fix in 25 min or less
+                if e_ is not None and e_ <= sequence.ARR_PLAN_S:
+                    members.append(c)
+            if members:                                  # overflights leaving by the same fix join the stream (no descent)
+                from ..solve import exits as exits_mod
+                members = sorted(set(members) | {c for c in sequence.members_of(w, fix, max_eta_s=sequence.ARR_PLAN_S)
+                                                 if c in mine and exits_mod.exit_of(w, w.aircraft[c]) == fix})
+            todo = [c for c in members if w.aircraft[c].cleared_alt_ft > fl * 100 + 50 and w.aircraft[c].destination]
             key = "ARR:" + fix
             old = plans.get(key)
             if not members:

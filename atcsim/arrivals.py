@@ -320,7 +320,8 @@ def update(world: "World", ac: "Aircraft") -> None:
         return
     if st.get("_unable_at") is not None and world.t - st["_unable_at"] < RETRY_AFTER_UNABLE_S:
         return
-    if tod <= REQUEST_AHEAD_NM:
+    scripted_again = st.get("auto", True) is False and req is not None and req.status == "unable"
+    if (tod <= REQUEST_AHEAD_NM and st.get("auto", True) is not False) or scripted_again:
         cur = int(round(ac.alt_ft / 100.0))
         target = seq.target_fl if (seq.target_fl and cur > seq.target_fl + 5) else seq.min_fl
         further = cur < int(round(ac.fl)) - 5
