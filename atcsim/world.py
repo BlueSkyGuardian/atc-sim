@@ -238,14 +238,14 @@ class World:
                 raise InstructionError(f"{cs} is not under your control")
             return {"type": "release", "callsign": cs}
         ac = self.aircraft.get(cs)
-        if by_pilot and ac is not None and ac.outside:
-            pass                                     # gone to the next sector: the pseudo-pilot still flies it
-        else:
+        if ac is not None and ac.outside:
+            pass                                     # gone to the next sector: it still flies; the controller may still act
+        else:                                        # on it (and coordinates it with the next unit: a warning says so)
             ac = self.get_active(cs)
-        if not ac.on_frequency and not by_pilot:
+        if not ac.on_frequency and not by_pilot and not ac.assumed and not ac.outside:
             d = dist(ac.pos, self.waypoints[ac.entry_wp])
             raise InstructionError(f"{cs} is not on your frequency yet (still with the previous sector, "
-                                   f"{d:.0f} NM before {ac.entry_wp})")
+                                   f"{d:.0f} NM before {ac.entry_wp}): assume it early to act on it (and coordinate)")
         p = ac.perf
         out = {"type": itype, "callsign": cs}
         if force:
@@ -259,6 +259,9 @@ class World:
         is_checkin_reply = (itype == "reply" and str(instr.get("request_id", "")) in self.requests
                             and self.requests[str(instr["request_id"])].kind == "checkin")
         if not ac.assumed and not is_checkin_reply and not by_pilot:
+            if ac.outside or ac.released:
+                raise InstructionError(f"{cs} has been transferred: assume it again to act on it ({cs} ASSUME), and "
+                                       f"coordinate with {ac.next_unit or 'the next unit'}")
             raise InstructionError(f"{cs} is calling you but not assumed: assume it first ({cs} ASSUME)")
         if itype == "altitude":
             fl = int(instr.get("fl", instr.get("value", -1)))
@@ -605,7 +608,7 @@ class World:
             self.m["instructions_issued"] += 1
         cs = norm["callsign"]
 
-        rec["warnings"] = self._warnings(norm)
+        rec["warnings"] = self._warnings(norm) + ([] if by_pilot else self._outside_note(norm))
         if norm.get("wx_note"):
             rec["warnings"].append(norm.pop("wx_note"))
         if rec["warnings"] and norm["type"] == "altitude":
@@ -675,6 +678,25 @@ class World:
         self.instructions.append(rec)
         self._event("instruction", instruction_id=rec["id"], callsign=cs, text=self.phrase(norm))
         return rec
+
+    def _outside_note(self, n: dict) -> List[str]:
+        """A clearance to an aircraft outside the sector - not yet in (still with the previous unit) or already out
+        (gone to the next one): given, and to be coordinated with that unit (counted)."""
+        if n.get("type") in ("assume", "release", "wx_clear", "reply"):
+            return []
+        ac = self.aircraft.get(n.get("callsign"))
+        if ac is None:
+            return []
+        if ac.outside:
+            unit = ac.next_unit or "the next unit"
+            where = "has left your sector"
+        elif not ac.entered or not ac.on_frequency:
+            unit = ac.prev_unit or "the previous unit"
+            where = "is not in your sector yet"
+        else:
+            return []
+        self.m["outside_clearances"] = self.m.get("outside_clearances", 0) + 1
+        return [f"{ac.callsign} {where}: coordinate this clearance with {unit}"]
 
     def _warnings(self, n: dict) -> List[str]:
         """System alerts on a clearance (accepted anyway: the controller may have a reason)."""

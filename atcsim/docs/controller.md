@@ -190,6 +190,10 @@ and, when needed, *✓ coordinated by phone*.
 - **Decontrol** with *Decontrol* in the callsign menu, <kbd>U</kbd>, or `CS REL` in a shorthand. An aircraft that
   leaves the sector stays assumed, with a full label and *DECONTROL →unit* blinking, until you decontrol it. It
   then turns grey as another sector's traffic.
+- **Acting outside the sector**: an aircraft you have assumed can be given clearances before it enters (early
+  assume) and after it has left (still assumed, or assumed again after a decontrol). They are flown, with a warning
+  *not in your sector yet / has left your sector: coordinate this clearance with* the unit concerned (counted in the
+  exercise's statistics): follow it up with a coordination.
 - **Re-assume** a decontrolled aircraft: its grey label's callsign is a button with *Assume*.
 
 Losses of separation, area infringements and weather penetrations count only for aircraft on your frequency.

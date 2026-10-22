@@ -28,7 +28,9 @@ for _ in range(60):
 ok(((a.x - p0[0]) ** 2 + (a.y - p0[1]) ** 2) ** .5 > 5, "keeps flying in the next sector")
 ok(a.next_wp in a.route_after or a.nav_mode == "heading", f"follows its onward route ({a.next_wp})")
 ok(ex in [t["callsign"] for t in w.state()["transferred"]], "still on the picture")
-ok(w.issue({"callsign": ex, "type": "heading", "heading": 90})["status"] == "rejected", "controller instructions refused")
+_r = w.issue({"callsign": ex, "type": "heading", "heading": 90, "limit": "3MIN"})
+ok(_r["status"] != "rejected" and any("coordinate" in x for x in _r.get("warnings") or []),
+   f"a controller's clearance after the exit is flown, with a reminder to coordinate: {_r.get('warnings')}")
 ok(w.issue({"callsign": ex, "type": "heading", "heading": 90}, by_pilot=True)["status"] != "rejected", "pilot still flies it")
 ok(w.issue({"callsign": ex, "type": "release"})["status"] == "executed" and a.released and not a.assumed, "decontrolled")
 r = w.issue({"callsign": ex, "type": "altitude", "fl": a.fl // 10 * 10 - 20}, by_pilot=True)
