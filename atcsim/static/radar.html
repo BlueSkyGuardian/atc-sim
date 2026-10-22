@@ -361,7 +361,8 @@
   .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #333; margin-right: 5px; }
   .dot.on { background: var(--accent); }
   body:not(.solo) #forceBtn { display: none; }
-  body:not(.solver-ok) #solveBtn, body:not(.solver-ok) #seqBtn, body:not(.solver-ok) #seqPanel { display: none; }
+  body:not(.solver-ok) #solveBtn { display: none; }
+  body:not(.seq-ok) #seqBtn, body:not(.seq-ok) #seqPanel { display: none; }
   #seqBtn.on { border-color: #5ad1e6 !important; color: var(--sel) !important; }
   #seqPanel { position: absolute; left: 10px; bottom: 84px; z-index: 5; width: 380px; max-width: calc(100% - 20px); max-height: 44%; overflow: auto;
     background: rgba(11, 23, 36, .92); border: 1px solid var(--line); border-radius: 8px; padding: 8px; font-family: var(--mono); font-size: 12px;

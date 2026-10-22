@@ -474,7 +474,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   final level follows when it is clear. *ruled out* lists the plausible clearances the rules set aside, by rule. The list follows the traffic every 5 simulated seconds.
 
   ![The solver panel](/static/docs/s_solver.jpg "The solver panel: the conflict, its solutions in order, checked ones with ✓")
-- **Sequence** in the toolbar opens the sequencing tool. Click two or more aircraft on the scope (click one again to
+- **Sequence** in the toolbar opens the sequencing tool (here, in the sandbox, and on the controller's seat of an
+  exercise). Click two or more aircraft on the scope (click one again to
   remove it), then the point where they must be in trail. They are sequenced first come, first served at that point,
   10 NM in trail (the agreement's spacing at a sequencing fix), measured when the one behind crosses it. For each
   follower the scope shows its **sequencing ellipse** (dashed, in its colour): the points where, turning direct to the

@@ -1,4 +1,4 @@
-// Solo radar (and sandbox): the controller's sequencing tool. "Sequence" on, click two or more aircraft, then the
+// Solo radar, sandbox and the controller's seat in an exercise: the controller's sequencing tool. "Sequence" on, click two or more aircraft, then the
 // point where they must be in trail: the server sequences them first come, first served (POST /sequence) and the
 // scope shows, for each follower, its sequencing ellipse - the turn points that put it exactly the spacing behind the
 // one ahead when it crosses the point, wind included - with the headings that can be given on it (dots, labelled
@@ -10,7 +10,10 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const btn = $('#seqBtn'), box = $('#seqPanel');
   if (!btn || !box) return;
-  const allowed = () => !DBID && !AIW && SID && (!EXID || (EXINFO && EXINFO.solo));
+  // the solo radar, the sandbox and the controller's (or instructor's) seat in an exercise; not the pseudo-pilot, a
+  // debrief or an AI run being watched
+  const allowed = () => !DBID && !AIW && SID && SEAT !== 'pilot';
+  setInterval(() => document.body.classList.toggle('seq-ok', !!allowed()), 1000);
   const COLORS = ['#7fd18b', '#5ad1e6', '#ffb86b', '#e6b3ff', '#ffe08a', '#ff8fa3', '#9fd0ff', '#c9f29a'];
   let on = false, sel = [], point = null, data = null, err = '', busy = false, lastKey = '';
   const pick = {};                         // callsign -> heading shown (from the panel)
@@ -64,7 +67,7 @@
     const now = state ? state.sim_time_s : 0;
     const chips = sel.map(cs => `<span class="sq-ac" style="background:${colorOf(cs)}">${esc(cs)}</span>`).join('') || '<span class="c-dim">none</span>';
     let body = `<div><span class="c-dim">aircraft</span> ${chips} <span class="c-dim">at</span> <b>${esc(point || '—')}</b></div>`;
-    if (!allowed()) body += '<div class="c-dim">The sequencing tool is on the solo radar and in the sandbox.</div>';
+    if (!allowed()) body += '<div class="c-dim">The sequencing tool is for the controller (solo radar, sandbox, the controller\'s seat in an exercise).</div>';
     else if (sel.length < 2 || !point) body += `<div class="sq-hint">Click ${sel.length < 2 ? 'two or more aircraft' : ''}${sel.length < 2 && !point ? ', then ' : ''}${!point ? 'the point where they must be in trail' : ''} on the scope (click an aircraft again to remove it, Esc to leave).</div>`;
     else if (err) body += `<div class="warn">${esc(err)}</div>`;
     else if (!data) body += '<div class="c-dim">computing…</div>';
