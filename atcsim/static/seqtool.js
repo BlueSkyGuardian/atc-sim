@@ -14,7 +14,7 @@
   // debrief or an AI run being watched
   const allowed = () => !DBID && !AIW && SID && SEAT !== 'pilot';
   setInterval(() => document.body.classList.toggle('seq-ok', !!allowed()), 1000);
-  const COLORS = ['#7fd18b', '#5ad1e6', '#ffb86b', '#e6b3ff', '#ffe08a', '#ff8fa3', '#9fd0ff', '#c9f29a'];
+  const COLORS = ['#8fcfa0', '#7fc4dc', '#e2b07e', '#c3a6e0', '#d9cc86', '#e09aa6', '#9db8e0', '#b5d38e'];   // muted
   let on = false, sel = [], point = null, data = null, err = '', busy = false, lastKey = '';
   const pick = {};                         // callsign -> heading shown (from the panel)
   const mmss = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.round(s) % 60).padStart(2, '0')}`;
@@ -86,7 +86,7 @@
         const all = a.headings.filter(h => h.leg_nm != null), hs = all.filter(h => h.ok);
         const outN = all.length - hs.length;
         const pk = pick[cs];
-        body += `<div><b style="color:${colorOf(cs)}">${esc(cs)}</b> <span class="c-dim">behind ${esc(a.ahead)} · its ellipse: headings that give the spacing (time on heading)</span>
+        body += `<div data-cs="${esc(cs)}"><b style="color:${colorOf(cs)}">${esc(cs)}</b> <span class="c-dim">behind ${esc(a.ahead)} · its ellipse: headings that give the spacing (time on heading)</span>
           <div class="sq-hdgs">${hs.length ? '' : '<span class="warn">no heading within the rules</span>'}${hs.map(h => `<span class="sq-h ${h.ok ? '' : 'no'} ${pk === h.heading ? 'pick' : ''} ${a.chosen_heading === h.heading ? 'chosen' : ''}"
             ${h.ok ? `data-pick="${esc(cs)}:${h.heading}"` : ''} title="${h.ok ? `${h.side}${h.turn}°, ${h.leg_nm} NM, ${mmss(h.time_s)}` : 'not allowed: ' + esc({ direction: 'off its direction of flight', 'too long': 'more than 15 minutes on the heading', turn: 'turn too small or too large', fan: 'not on the side / not more than the one ahead', ellipse: 'cannot give the spacing' }[h.why_not] || h.why_not)}">${String(h.heading).padStart(3, '0')}<span class="c-dim"> ${Math.round(h.time_s / 60)}'</span></span>`).join('')}${outN ? `<span class="c-dim" title="on the ellipse but off the direction of flight, over 15 minutes, too small or too large a turn">+${outN} outside the rules</span>` : ''}</div>`;
         if (pk != null) {
@@ -136,54 +136,92 @@
   });
 
   // ---------------------------------------------------------------- drawing on the scope
+  // Drawing: quiet by default - the whole ellipse a faint hairline, only the arc of the headings that can be given
+  // drawn plainly (ticks every 10 degrees, the end headings labelled), the heading the plan takes (or the one picked)
+  // as a thin leg + direct with a small label. The follower in focus (picked or under the mouse in the panel) is drawn
+  // in full, the others dimmed.
+  let focus = null;
+  box.addEventListener('mouseover', e => { const r = e.target.closest('[data-cs]'); const f = r ? r.dataset.cs : null; if (f !== focus) focus = f; });
+  box.addEventListener('mouseleave', () => { focus = null; });
+  const hex2 = v => Math.max(0, Math.min(255, Math.round(v * 255))).toString(16).padStart(2, '0');
+  function label(txt, x, y, col, dpr) {
+    ctx.lineWidth = 3 * dpr; ctx.strokeStyle = (typeof TH !== 'undefined' && TH.bg) || '#0b1724'; ctx.lineJoin = 'round';
+    ctx.strokeText(txt, x, y); ctx.fillStyle = col; ctx.fillText(txt, x, y);
+  }
+  function runs(hs) {                       // consecutive allowed headings (5 degree steps), across 360 too
+    const ok = hs.filter(h => h.ok && h.turn_point).map(h => h.heading % 360).sort((a, b) => a - b);
+    const out = []; let cur = [];
+    for (const h of ok) { if (cur.length && h - cur[cur.length - 1] > 5) { out.push(cur); cur = []; } cur.push(h); }
+    if (cur.length) out.push(cur);
+    if (out.length > 1 && out[0][0] === 0 && out[out.length - 1][out[out.length - 1].length - 1] === 355) out[0] = out.pop().concat(out[0]);
+    return out;
+  }
   window.drawSeqTool = function (byCs) {
     if (!on || !allowed()) return;
-    const dpr = devicePixelRatio;
+    const dpr = devicePixelRatio, focusCs = focus || Object.keys(pick).find(c => pick[c] != null) || null;
     ctx.save();
-    ctx.font = `${10 * dpr}px ui-monospace,monospace`;
-    for (const cs of sel) {                                    // the aircraft chosen: a ring in its colour
+    ctx.font = `${9.5 * dpr}px ui-monospace,monospace`; ctx.textBaseline = 'middle';
+    for (const cs of sel) {                                    // the aircraft chosen: a thin ring, its rank
       const a = byCs[cs]; if (!a) continue;
-      const [x, y] = toPx(a.x_nm, a.y_nm);
-      ctx.strokeStyle = colorOf(cs); ctx.lineWidth = 2 * dpr;
-      ctx.beginPath(); ctx.arc(x, y, 11 * dpr, 0, Math.PI * 2); ctx.stroke();
+      const [x, y] = toPx(a.x_nm, a.y_nm), col = colorOf(cs);
+      ctx.strokeStyle = col + 'b0'; ctx.lineWidth = 1.2 * dpr;
+      ctx.beginPath(); ctx.arc(x, y, 9 * dpr, 0, Math.PI * 2); ctx.stroke();
       const k = data && data.sequence ? data.sequence.indexOf(cs) : -1;
-      if (k >= 0) { ctx.fillStyle = colorOf(cs); ctx.fillText(String(k + 1), x - 3 * dpr, y - 14 * dpr); }
+      if (k >= 0) label(String(k + 1), x - 12 * dpr, y - 12 * dpr, col, dpr);
     }
     const wp = sector && sector.waypoints;
-    if (point && wp && wp[point]) {                           // the sequencing point: a diamond
-      const [x, y] = toPx(...wp[point]), r = 8 * dpr;
-      ctx.strokeStyle = '#5ad1e6'; ctx.lineWidth = 2 * dpr;
+    if (point && wp && wp[point]) {                           // the sequencing point: a small diamond
+      const [x, y] = toPx(...wp[point]), r = 6 * dpr;
+      ctx.strokeStyle = '#9fd0e6'; ctx.lineWidth = 1.2 * dpr;
       ctx.beginPath(); ctx.moveTo(x, y - r); ctx.lineTo(x + r, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r, y); ctx.closePath(); ctx.stroke();
     }
     if (data && data.aircraft) {
       const T = data.point_xy;
       for (const cs of data.sequence) {
-        const a = data.aircraft[cs]; if (!a) continue;
-        const col = colorOf(cs);
-        if (a.path && a.path.length > 1) {                    // as planned (thin): to the point
-          ctx.strokeStyle = col + '66'; ctx.lineWidth = 1 * dpr; ctx.setLineDash([]);
-          ctx.beginPath(); a.path.forEach((p, i) => { const [x, y] = toPx(p[0], p[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
-        }
-        if (!a.ellipse) continue;
-        ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]);   // the ellipse
+        const a = data.aircraft[cs]; if (!a || !a.ellipse) continue;
+        const col = colorOf(cs), dim = focusCs && focusCs !== cs ? 0.35 : 1;
+        const pt = hd => a.ellipse[Math.round(((hd % 360) + 360) % 360 / 2) % a.ellipse.length];
+        // the whole ellipse: a faint hairline
+        ctx.strokeStyle = col + hex2(0.18 * dim); ctx.lineWidth = 1 * dpr;
         ctx.beginPath(); let pen = false;
         a.ellipse.forEach(p => { if (!p) { pen = false; return; } const [x, y] = toPx(p[0], p[1]); if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y); pen = true; });
-        ctx.stroke(); ctx.setLineDash([]);
-        const [ax, ay] = toPx(a.x, a.y);
-        for (const h of a.headings || []) {                   // the headings that can be given: dots at their turn points
-          if (!h.ok || !h.turn_point) continue;
-          const [x, y] = toPx(...h.turn_point);
-          ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, 2.2 * dpr, 0, Math.PI * 2); ctx.fill();
-          if (h.heading % 10 === 0) { ctx.fillStyle = col + 'cc'; ctx.fillText(String(h.heading).padStart(3, '0'), x + 4 * dpr, y - 3 * dpr); }
+        ctx.stroke();
+        // the arc of the headings that can be given, with its ticks
+        for (const r of runs(a.headings || [])) {
+          ctx.strokeStyle = col + hex2(0.7 * dim); ctx.lineWidth = 1.6 * dpr;
+          ctx.beginPath(); pen = false;
+          for (let k = 0; k < r.length; k++) {
+            const h0 = r[k], h1 = k + 1 < r.length ? r[k + 1] : r[k];
+            const span = ((h1 - h0) + 360) % 360;
+            for (let d = 0; d <= Math.max(span, 0); d += 1) {
+              const p = pt(h0 + d); if (!p) continue;
+              const [x, y] = toPx(p[0], p[1]); if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y); pen = true;
+            }
+          }
+          ctx.stroke();
+          for (const h of r) {
+            if (h % 10) continue;
+            const p = pt(h), q = pt(h + 2); if (!p || !q) continue;
+            const [x, y] = toPx(p[0], p[1]), [qx, qy] = toPx(q[0], q[1]);
+            const L = Math.hypot(qx - x, qy - y) || 1, nx = -(qy - y) / L * 3.5 * dpr, ny = (qx - x) / L * 3.5 * dpr;
+            ctx.beginPath(); ctx.moveTo(x - nx, y - ny); ctx.lineTo(x + nx, y + ny); ctx.stroke();
+          }
+          if (dim === 1) for (const h of [r[0], r[r.length - 1]]) {      // the two ends of the arc labelled
+            const p = pt(h); if (!p) continue;
+            const [x, y] = toPx(p[0], p[1]);
+            label(String(h || 360).padStart(3, '0'), x + 5 * dpr, y, col + 'cc', dpr);
+          }
         }
         const show = pick[cs] != null ? pick[cs] : a.chosen_heading;   // the heading shown: picked, else the plan's
         const h = show != null && (a.headings || []).find(q => q.heading === show && q.turn_point);
         if (h) {
-          const [mx, my] = toPx(...h.turn_point), [tx, ty] = toPx(T[0], T[1]);
-          ctx.strokeStyle = col; ctx.lineWidth = (pick[cs] != null ? 2.4 : 1.8) * dpr;
-          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(mx, my); ctx.lineTo(tx, ty); ctx.stroke();
-          ctx.fillStyle = col;
-          ctx.fillText(`${String(h.heading).padStart(3, '0')} ${Math.round(h.leg_nm)}NM ${Math.round(h.time_s / 60)}'`, (ax + mx) / 2 + 6 * dpr, (ay + my) / 2);
+          const [ax, ay] = toPx(a.x, a.y), [mx, my] = toPx(...h.turn_point), [tx, ty] = toPx(T[0], T[1]);
+          ctx.strokeStyle = col + hex2(0.9 * dim); ctx.lineWidth = 1.3 * dpr;
+          ctx.setLineDash(pick[cs] != null ? [6 * dpr, 4 * dpr] : []);
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(mx, my); ctx.lineTo(tx, ty); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = col + hex2(dim); ctx.beginPath(); ctx.arc(mx, my, 2.5 * dpr, 0, Math.PI * 2); ctx.fill();
+          if (dim === 1) label(`${String(h.heading).padStart(3, '0')} · ${Math.round(h.leg_nm)} NM · ${Math.round(h.time_s / 60)}'`,
+            (ax + mx) / 2 + 8 * dpr, (ay + my) / 2, col, dpr);
         }
       }
     }

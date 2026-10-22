@@ -486,7 +486,10 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   follower the headings within the rules with their time on the heading: click one to see it on the scope and apply
   it (that one is the geometry only, not checked against the other traffic). Headings off the direction of flight,
   over 15 minutes, or too small or too large a turn are left out. The picture follows the traffic every 10 seconds;
-  <kbd>Esc</kbd> or ✕ leaves the tool.
+  <kbd>Esc</kbd> or ✕ leaves the tool. While it is on, the labels work as usual (click, drag, menus); an aircraft is
+  added to or removed from the sequence by a click on its symbol. Each ellipse is a faint line, with the arc of the
+  headings that can be given drawn plainly (a tick every 10°, its two ends labelled); moving the mouse over a
+  follower in the panel, or picking one of its headings, brings it forward and dims the others.
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
   its **debrief**.
