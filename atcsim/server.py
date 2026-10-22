@@ -546,6 +546,10 @@ class Entry(BaseModel):
     wx: Optional[str] = None
     coord: Optional[str] = None
     route: Optional[Union[str, list]] = None
+    hlim: Optional[str] = None                # limit of the heading: "5MIN", "20NM"
+    then: Optional[str] = None                # after the heading's limit: direct to this point
+    slim: Optional[str] = None                # limit of the speed: "10MIN", "40NM", a point
+    rate: Optional[Union[int, str]] = None    # rate with the level: 1500 (ft/min or greater), "1500-" (or less)
     force: Optional[bool] = None              # simulated pilots: fly it whatever the weather or performance (what-ifs)
 
 
@@ -560,7 +564,8 @@ def entries(sid: str, body: Entry, request: Request):
 @app.get("/sessions/{sid}/solve")
 def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None, horizon_s: float = Query(600, ge=120, le=1200),
           rollout: int = Query(2, ge=0, le=4)):
-    """The conflict solver: for each predicted conflict involving an assumed aircraft, the set of clearances (speed,
+    """The conflict solver: for each predicted conflict involving an assumed aircraft (kind "conflict"), and each pair
+    leaving by the same exit closer than the letter of agreement's spacing (kind "exit"), the set of clearances (speed,
     direct, delaying vector, level, or a pair of them) that leave everyone separated, ranked speed first, then
     heading, then level, the aircraft with priority in its level left alone where possible; the best ones confirmed by
     running a copy of the simulation ahead. Each solution's "actions" can be sent as they are to /entries.
@@ -586,7 +591,8 @@ def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None,
         if callsign and not other:
             res["sets"] = [x for x in res["sets"] if callsign in x["pair"]]
         out = {"sim_time_s": round(w.t, 1), "horizon_s": horizon_s, "conflicts": [
-            {"pair": x["pair"], "t_first_s": None if x["t_first"] is None else round(x["t_first"]), "d_min_nm": x["d_min"],
+            {"pair": x["pair"], "kind": x.get("kind", "conflict"), "exit": x.get("exit"), "required_nm": x.get("required_nm"),
+             "t_first_s": None if x["t_first"] is None else round(x["t_first"]), "d_min_nm": x["d_min"],
              "move": x["move"], "priority": x["priority"],
              "turn_enough": {m: hv["turn_enough"] for m, hv in (x.get("hj") or {}).items()},
              "optimal": [o.text for o in x["optimal"]],

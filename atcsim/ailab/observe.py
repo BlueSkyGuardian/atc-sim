@@ -95,9 +95,26 @@ def _ac_line(w, a: dict, ent: dict, co: dict, opts: dict, last: Optional[Tuple[f
         spd = f"{a.get('ias_kt')}kt"
     nav = a.get("nav_mode")
     ahead = _ahead(w, cs)
+    lims = a.get("clearance_limits") or {}
+
+    def _left(L):
+        if L.get("until_t") is not None:
+            r = max(0, int(L["until_t"] - w.t))
+            return f"{r // 60:02d}:{r % 60:02d} left"
+        if L.get("nm_left") is not None:
+            return f"{max(0, L['nm_left']):.0f}NM left"
+        return f"until {L.get('until_wp')}" if L.get("until_wp") else ""
+    if a.get("speed_assigned_by_atc"):
+        L = lims.get("speed")
+        spd += (f" (assigned, {_left(L)}, then normal speed)" if L else " (assigned, NO LIMIT)")
     if nav == "heading":
         lat = f"ON HEADING {int(a.get('assigned_heading') or a['heading']):03d} (off its route"
         lat += f", route continues {' '.join(ahead[:4])})" if ahead else ")"
+        L = lims.get("heading")
+        if L:
+            lat += f" — limit {_left(L)}, then " + (f"direct {L['then']}" if L.get("then") else "own navigation")
+        else:
+            lat += " — NO LIMIT"
     elif nav == "wxdev":
         lat = "deviating for weather"
     else:
@@ -349,8 +366,8 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
     resume = {}
     if hints:
         for a in mine:
-            if a.get("nav_mode") == "heading":
-                ah = _ahead(w, a["callsign"])
+            if a.get("nav_mode") == "heading" and "heading" not in (a.get("clearance_limits") or {}):
+                ah = _ahead(w, a["callsign"])                # (with a limit, the pilot resumes at it)
                 if ah:
                     try:
                         c = atctools.probe(w, a["callsign"], direct=ah[0]).get("conflicts") or []
@@ -380,7 +397,7 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
             from ..solve import resolve
             res = resolve.solve(w, asked=o.get("_asked") or {}, rollout=1)
             for st_ in res["sets"]:
-                solver["×".join(sorted(st_["pair"]))] = st_
+                solver["×".join(sorted(st_["pair"])) + ("@exit" if st_.get("kind") == "exit" else "")] = st_
         except Exception:  # noqa: BLE001 - the hints are a help, the situation goes on without them
             solver = {}
     struct["solver"] = {k: {"optimal": [x.public() for x in v["optimal"]], "solutions": [x.public() for x in v["solutions"][:8]],
@@ -415,6 +432,10 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
             return f", shown since T+{_t(seen[k])} and still unsolved" if k in seen and w.t - seen[k] >= 25 else ""
         todo.append("SOLVE the conflicts NOW, while there is time (do not wait for them to get close): " + ", ".join(
             f"{c['aircraft'][0]}×{c['aircraft'][1]} in {_t(c['time_to_conflict_s'])}{since(c)}" for c in urgent))
+    exq = [v for k, v in solver.items() if k.endswith("@exit")]
+    if exq:
+        todo.append("SPACE at the exit (letter of agreement): " + "; ".join(
+            f"{v['pair'][1]} {v['d_min']} NM behind {v['pair'][0]} at {v['exit']} (needs {v['required_nm']:g})" for v in exq))
     seq_rows, seq_todo = [], []
     if getattr(w, "seq", None):
         from .. import arrivals
@@ -578,6 +599,19 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
                                         "vertical_ft": c["vertical_ft"], **geo})
         if not cf:
             lines.append("- none")
+        # spacing at the exit (letter of agreement): same exit, levels not separated vertically
+        ex = [v for k, v in solver.items() if k.endswith("@exit")]
+        if ex:
+            lines.append(f"\nEXIT SPACING (same exit point, levels not vertically separated: {ex[0]['required_nm']:g} NM in trail at the exit, before transfer) — {len(ex)}:")
+            for v in ex:
+                a_, b_ = v["pair"]
+                txt = (f"- {b_} will cross {v['exit']} only {v['d_min']} NM behind {a_} (in {_t(v['t_first'])}); {v['priority']}")
+                opt = v["optimal"] or v["solutions"][:1]
+                if hints:
+                    txt += ("; SOLVER: BEST " + " or ".join(x.text for x in opt[:3])) if opt else "; SOLVER: nothing found alone"
+                lines.append(txt)
+                struct.setdefault("exit_spacing", []).append({"leader": a_, "follower": b_, "exit": v["exit"], "spacing_nm": v["d_min"],
+                                                              "in_s": v["t_first"]})
     los = st.get("current_losses") or []
     if los:
         lines.append("\nLOSS OF SEPARATION NOW: " + "; ".join(" × ".join(p.get("aircraft", [])) for p in los))

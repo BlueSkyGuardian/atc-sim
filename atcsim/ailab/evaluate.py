@@ -65,6 +65,10 @@ def score(w, steps: List[dict]) -> dict:
     unread = sum(1 for s in steps if s.get("parse_error") or s.get("unreadable_first"))
     mean_rt = req.get("mean_response_time_s")
     xf, fc = transfers(w), first_calls(w)
+    given = [r for s in steps for r in s.get("results") or [] if r.get("ok")]
+    unsafe = sum(1 for r in given if r.get("positive") is False)
+    nolimit = sum(1 for r in given if r["action"].get("type") == "clear" and not r["action"].get("limit")
+                  and (r["action"].get("heading") not in (None, "") or str(r["action"].get("speed") or "SN").upper() != "SN"))
     pen = [
         ("losses of separation", sep.get("loss_events", 0), 25),
         ("minutes in loss of separation", round((sep.get("loss_seconds") or 0) / 60, 1), 2),
@@ -72,6 +76,9 @@ def score(w, steps: List[dict]) -> dict:
         ("weather penetrations", len(wx.get("penetrations") or []), 5),
         ("RVSM violations", len((m.get("rvsm") or {}).get("violations") or []), 5),
         ("wrong-direction exits", len((m.get("semicircular") or {}).get("wrong_direction_exits") or []), 3),
+        ("exit spacing below the letter of agreement", len((m.get("semicircular") or {}).get("exit_spacing_violations") or []), 5),
+        ("clearances without positive separation", unsafe, 3),
+        ("headings or speeds without a limit", nolimit, 1),
         ("requests expired", (req.get("by_status") or {}).get("expired", 0), 4),
         ("requests still pending at the end", (req.get("by_status") or {}).get("pending", 0), 2),
         ("slow answers (30 s over 60 s mean)", round(max(0.0, ((mean_rt or 0) - 60) / 30), 1), 1),
@@ -94,7 +101,8 @@ def score(w, steps: List[dict]) -> dict:
             "first_calls": fc, "transfers": {"left": xf["left"], "never": len(xf["never"]), "late": len(xf["late"]),
                                              "mean_delay_s": round(sum(xf["delays"]) / len(xf["delays"]), 1) if xf["delays"] else None},
             "decisions": len(steps), "actions": sum(len(s.get("results") or []) for s in steps),
-            "refused": refused, "unreadable": unread, "aircraft": tr.get("total"), "sim_time_s": round(w.t, 1)}
+            "refused": refused, "unreadable": unread, "not_positive": unsafe, "no_limit": nolimit,
+            "exit_spacing": len((m.get("semicircular") or {}).get("exit_spacing_violations") or []), "aircraft": tr.get("total"), "sim_time_s": round(w.t, 1)}
 
 
 def label(w, steps: List[dict]) -> None:
@@ -167,6 +175,15 @@ def label(w, steps: List[dict]) -> None:
             elif g["grade"] == "other":
                 r -= 1
                 why.append(f"-1 {'×'.join(g['pair'])}: not a solution (best: {', '.join(g.get('best') or []) or '-'})")
+        unsafe = [x for x in s.get("results") or [] if x.get("ok") and x.get("positive") is False]
+        if unsafe:
+            r -= 2 * len(unsafe)
+            why.append(f"-{2 * len(unsafe)} clearance{'s' if len(unsafe) > 1 else ''} without positive separation")
+        nolim = [x for x in s.get("results") or [] if x.get("ok") and x["action"].get("type") == "clear" and not x["action"].get("limit")
+                 and (x["action"].get("heading") not in (None, "") or str(x["action"].get("speed") or "SN").upper() != "SN")]
+        if nolim:
+            r -= len(nolim)
+            why.append(f"-{len(nolim)} heading/speed without a limit")
         n_early = sum(1 for x in s.get("results") or [] if x.get("early"))
         if n_early:
             r -= n_early

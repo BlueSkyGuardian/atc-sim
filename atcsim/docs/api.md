@@ -128,6 +128,11 @@ move aircraft):
  "wx": "L20", "note": "PSN rpt", "coord": "phone", "route": ["3103N01244W", "VASTO"]}
 ```
 
+With a clearance, what qualifies it: `"hlim"` (the heading's limit, `"4MIN"` / `"20NM"`) and `"then"` (the point to
+proceed to at it), `"slim"` (the speed's limit, `"10MIN"` / `"40NM"` / a point), `"rate"` (with a level: `1500` = at
+1500 ft/min or greater, `"1500-"` = or less). In the instructions API the same are `"limit"` (`{"min": 4}`,
+`{"nm": 20}`, `{"until": "IBALU"}` or the text forms), `"then"`, and `"rate_fpm"` with `"rate_mode"` (`min` / `max`).
+
 Entries drive the labels, MTCD, route adherence and OLDI. An empty string clears a field.
 
 ## CPDLC
@@ -162,7 +167,7 @@ CLIMB TO, `UM74` PROCEED DIRECT TO, `UM117` CONTACT, `DM9` REQUEST CLIMB TO, …
 | POST | `/sessions/{id}/probe` | What-if: `{"instructions": [...], "horizon_s": 600}`. Runs the candidate clearances on a copy and returns the conflicts they would create or solve. Changes nothing |
 | GET | `/sessions/{id}/mtcd` | Medium-term conflicts between the system trajectories over the look-ahead (`look_ahead_s`, 20 min by default) |
 | POST | `/sessions/{id}/mtcd/settings` | Set the exercise's MTCD look-ahead: `{"look_ahead_min": 30}`, 5 to 60. Controller or instructor. Also used by the probes; the state carries it as `mtcd_look_s` |
-| GET | `/sessions/{id}/solve` | The conflict solver: for each predicted conflict with an assumed aircraft, `solutions` (each with `kind` speed / direct / heading / level / pair, `text`, `actions` to send to `/entries`, `cost`, `d_min`, `needs_ask`, `priority_moved`, `confirmed`, `confirmed_min_nm`), `optimal`, the aircraft to `move` and why (`priority`), `turn_enough`. Query `callsign`, `other`, `horizon_s` (600), `rollout` (2: solutions confirmed by running the simulation ahead) |
+| GET | `/sessions/{id}/solve` | The conflict solver: for each predicted conflict with an assumed aircraft (`kind` `"conflict"`), and each pair leaving by the same exit closer than the letter of agreement (`kind` `"exit"`, with `exit` and `required_nm`), `solutions` (each with `kind` speed / direct / heading / level / pair, `text`, `actions` to send to `/entries`, `cost`, `d_min`, `needs_ask`, `priority_moved`, `confirmed`, `confirmed_min_nm`), `optimal`, the aircraft to `move` and why (`priority`), `turn_enough`. Query `callsign`, `other`, `horizon_s` (600), `rollout` (2: solutions confirmed by running the simulation ahead) |
 | POST | `/sessions/{id}/mtcd` | Probe one aircraft: `{"callsign", "cfl"}` / `"heading"` / `"direct"`, or `{"callsign", "levels": [310, 330, 350]}` for the level-probe colours |
 | GET | `/sessions/{id}/oldi?since=&callsign=` | OLDI messages (ABI, ACT, REV, PHONE; sent / received; LAM) and each aircraft's cleared, exit and coordinated levels |
 | GET | `/sessions/{id}/flightplans` · `/flightplans/{cs}` | Every flight plan · one: FPL message, decoded items, estimates over the points ahead, coordination, correlation |

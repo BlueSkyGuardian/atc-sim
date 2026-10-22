@@ -121,6 +121,27 @@ with the letter of agreement (*ARRIVAL via SALCA: level FL250, 10 NM in trail, l
 ahead (*TOO CLOSE* under the agreed spacing). TO DO adds *SEQUENCE* when one is too close or must start down soon.
 Aircraft on the same route (en-route traffic) appear in the conflict lines with their common point and both times.
 
+### Limits, rates, positive separation, exits
+
+- **Limits.** Every heading and speed is given with its limit: `{"type": "clear", "callsign": "X", "heading": 250,
+  "limit": "4MIN", "then": "ERMED"}`, `{"type": "clear", "callsign": "X", "speed": "M74", "limit": "IBALU"}` (minutes,
+  miles, or a point for a speed). At the limit the pilot goes back to the route (or `then`) or to its normal speed by
+  itself. With the rules on, a heading or speed without a limit is refused; with them off it is flown and costs 1
+  point. The situation shows each limit and the time left (*ON HEADING 174 — limit 05:14 left, then direct S1*,
+  *M74 (assigned, 10:34 left, then normal speed)*).
+- **Rates.** A level may carry a rate: `"rate": "1500"` (at 1500 ft/min or greater) or `"1500-"` (or less) — to climb
+  or descend two aircraft together, or to pass another's level later.
+- **Positive separation.** Every clearance and every approved request is checked when it is given, for the whole
+  manoeuvre (the exact closest approach of the aircraft's trajectory with it against everyone, a level change at the
+  fastest and slowest rate it may fly). One that does not keep the aircraft at the minimum from everyone — except, in
+  an urgent situation (a loss, or a conflict under 2 minutes), one that opens the distance by a mile or more — is
+  given but marked *NOT POSITIVE SEPARATION* in the feedback, costs 3 points and −2 in the labels.
+- **Exit spacing.** Aircraft leaving by the same exit point at levels not vertically separated must be 10 NM apart
+  in trail when they cross it (the letter of agreement). The situation lists the pairs predicted closer than that
+  within 20 minutes (**EXIT SPACING**, and *SPACE at the exit* in TO DO) with the solver's options; each crossing
+  closer than agreed costs 5 points.
+- **Departures** from GMMN ask for their final level on first contact (a pilot request to answer).
+
 ### The solver's solutions
 
 With *solver solutions* on (agent profile), each conflict line ends with the solver's answer: *SOLVER (conflict-free
@@ -255,7 +276,8 @@ the debrief**, **Judge**, **Stop**, **Delete**.
 loss; infringement of an active area 10; weather penetration 5; RVSM violation 5; wrong-direction exit 3; request
 expired 4, still pending at the end 2; slow answers (mean over 60 s) 1 per 30 s; aircraft never assumed 3, assumed more
 than 30 s after calling 1; aircraft not transferred 2 minutes after leaving the sector 2, transferred late 1;
-instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
+instruction refused 1; unreadable answer 2; exit crossed closer than the letter of agreement 5; clearance without
+positive separation 3; heading or speed without a limit 1; extra track miles 0.05 per NM.
 
 **Each decision** gets a reward and a label from what happened after it:
 
@@ -270,6 +292,7 @@ instruction refused 1; unreadable answer 2; extra track miles 0.05 per NM.
 | −2 | per request waiting more than 2 min it left unanswered |
 | −1 / −2 | per instruction refused / for an unreadable answer |
 | +2 / +1 / −1 | per conflict acted on with one of the solver's best solutions / another of its solutions / a clearance outside the solution set |
+| −2 / −1 | per clearance without positive separation / per heading or speed without a limit |
 
 *good* (reward above 0), *bad* (below 0), *neutral*.
 

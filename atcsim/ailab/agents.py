@@ -7,6 +7,7 @@ model = the Hugging Face model deployed (or OPENAI_SERVED_MODEL_NAME_OVERRIDE).
 from __future__ import annotations
 
 import json
+import math
 import time
 from typing import List, Optional, Tuple
 
@@ -21,10 +22,11 @@ At every decision, in this order:
 3. ANSWER every pilot request (reply approve or unable; the probe result is given: approve when it says no conflict).
 4. SOLVE every predicted conflict between your aircraft as soon as it is listed (under 10 minutes): act at the first decision you see it, not when the aircraft are close. A conflict listed again "still unsolved" means your last decision did not solve it.
    - PRIORITY: move only ONE aircraft, the one without priority. An aircraft maintaining its level has priority over one climbing or descending; between two level aircraft, the one that entered your sector FIRST keeps its level. Do not move an aircraft that did nothing wrong. The conflict line says which one to move.
-   - ORDER OF SOLUTIONS, always: 1) SPEED (Mach "M74" or IAS "280", for traffic in trail, merging or converging: slow the one behind or speed up the one ahead), 2) HEADING (a turn of 10-45 degrees, or a delaying vector, then resume as soon as it is listed under RESUME), 3) LEVEL, last. The conflict line lists the conflict-free options in this order: take the first that works.
+   - ORDER OF SOLUTIONS, always: 1) SPEED (Mach "M74" or IAS "280", for traffic in trail, merging or converging: slow the one behind or speed up the one ahead), 2) HEADING (a turn of 10-45 degrees, or a delaying vector), 3) LEVEL, last; a level may be given with a rate ("rate": "1500-") to climb or descend two aircraft together. The conflict line lists the conflict-free options in this order: take the first that works.
+   - LIMITS: every heading and every speed is given with its limit, as the regulations require: a heading for minutes or miles ("limit": "4MIN", "then": the point to proceed to at the limit), a speed for minutes, miles or until a point past the traffic ("limit": "8MIN" or "IBALU"). At the limit the pilot goes back to its route or its normal speed by itself: choose the limit so that this happens once the traffic is passed, and do not cancel a speed or end a vector early.
+   - POSITIVE SEPARATION: give a clearance, or approve a request, only when separation is assured for the whole manoeuvre (the probe or the solver says so); never one that only might work.
    - LEVELS: never give an aircraft a level it did not ask for without asking first: {"type": "ask", "callsign": "X", "cfl": 370}; the pilot answers at the next decision (affirm, or negative with a reason), and only after "affirm" do you clear it. Exceptions: the level it requested, its flight-plan cruise level, arrivals descending, and a conflict under 2 minutes or a loss of separation (then give the level at once). A level given without asking is refused.
-   - Cancel a speed when it is no longer needed: "speed": "SN" (resume normal speed).
-5. RESUME every aircraft listed under RESUME (on a heading and now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
+5. RESUME an aircraft listed under RESUME (on a heading without a limit, now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
 6. SEQUENCE the arrivals (SEQUENCE in TO DO, within about 15 minutes of their fix): each must cross its fix at the agreed level (e.g. FL250) and the agreed distance behind the one ahead. An arrival stays at its level until its top of descent, where the pilot asks for descent (a pilot request): approve it then, to the agreed level. Do not descend arrivals earlier unless a conflict needs it. Keep the order of the sequence, and make the spacing with speed (a lower Mach or IAS for the one behind, or a higher one for the one ahead) or, if speed is not enough, a short heading and a resume. Aircraft on the same route to the same point (en-route traffic) are kept apart the same way, or at different levels.
 7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
 The exit level (XFL, "exit FL350 to WS") is the level the aircraft leaves your sector at, coordinated with the next sector; it is its current level unless you change it. Change it (clear xfl) only together with a level change that it will keep until the exit, and only to a level of its direction of flight.
@@ -42,7 +44,8 @@ LEGACY_DEFAULT_PROMPTS = {"0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353
                           "0792535b15f97a9805bdd21dea9f589a6bd1606a13ce9781995f22d8cca22496",
                           "cdbe56a568dd65d5f51c80486149ea576d29b2a62cb9e5ec4f552571f7146dd4",
                           "9950dd11812cc5ef998b7940e97d603867928b95fab03bf8dc13175d307f04df",
-                          "b4875a13f01be8c1a78ffc4f4b94a2fba95fa20d3e8aa3a04fb7b92c5fae6534"}
+                          "b4875a13f01be8c1a78ffc4f4b94a2fba95fa20d3e8aa3a04fb7b92c5fae6534",
+                          "a34586a01e13850d72651aea46ea0874a1e60bb13160dab8aca08f738cb1c54c"}
 
 
 def system_prompt(p: str) -> str:
@@ -244,13 +247,19 @@ class Baseline:
                         level_parity_ok(fl, acx.southbound) or (fl * 100 < acx.alt_ft and w.descending_to_destination(acx, fl)))
                 elif r["type"] == "direct" and r.get("value"):
                     ok = self._free(w, r["callsign"], direct=str(r["value"]))
+                elif r["type"] == "speed" and r.get("value"):
+                    v = str(r["value"]).upper()
+                    ok = self._free(w, r["callsign"], speed=v if v.startswith("M") or not v.replace(".", "").isdigit() or float(v) > 2
+                                    else f"M{int(round(float(v) * 100))}")
             except Exception:  # noqa: BLE001
                 ok = False
             acts.append({"type": "reply", "request_id": r["id"], "decision": "approve" if ok else "unable"})
             why.append(f"{r['id']} {'approved' if ok else 'unable'}")
         touched = self._resolve(w, st, mine, acts, why)
         for cs, a in mine.items():               # speeds back to normal once no longer needed
-            if a.get("speed_assigned_by_atc") and cs not in touched and not any(cs in c["aircraft"] for c in atctools.mtcd(w)):
+            if (a.get("speed_assigned_by_atc") and cs not in touched and "speed" not in (a.get("clearance_limits") or {})
+                    and cs in getattr(self, "_spd_given", set())                 # only a speed this controller gave
+                    and not any(cs in c["aircraft"] for c in atctools.mtcd(w))):
                 nm = (a.get("speed_pair") or {}).get("mach")
                 ok_ = True
                 if nm:
@@ -262,7 +271,8 @@ class Baseline:
                     acts.append({"type": "clear", "callsign": cs, "speed": "SN"})
                     touched.add(cs)
         for cs, a in mine.items():               # back on route once resuming is conflict-free (the probe)
-            if a.get("nav_mode") == "heading" and cs not in touched and w.t - getattr(self, "_acted", {}).get(cs, -1e9) >= 60:
+            if (a.get("nav_mode") == "heading" and cs not in touched and w.t - getattr(self, "_acted", {}).get(cs, -1e9) >= 60
+                    and "heading" not in (a.get("clearance_limits") or {})):      # with a limit: the pilot resumes at it
                 acx = w.aircraft[cs]
                 ahead = [p for p in acx.route[acx.next_index:] if not str(p).startswith("@") and p in w.waypoints]
                 if ahead:
@@ -272,6 +282,11 @@ class Baseline:
                         free = False
                     if free:
                         acts.append({"type": "resume", "callsign": cs})
+        given = getattr(self, "_spd_given", set())
+        for x in acts:
+            if x.get("type") == "clear" and x.get("speed"):
+                (given.discard if str(x["speed"]).upper() == "SN" else given.add)(x["callsign"])
+        self._spd_given = given
         return json.dumps({"reasoning": "; ".join(why) or "routine", "actions": acts})
 
 
@@ -307,12 +322,14 @@ class Baseline:
             for cs in pair:                         # 1) speed, 2) heading (then resume), 3) level (asked first)
                 so = solutions(w, st_by[cs])
                 tag = f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs}"
+                # every heading and speed with its limit: past the encounter (time to it, and four minutes more)
+                past = f"{int(math.ceil((max(0, c['time_to_conflict_s']) + 240) / 60))}MIN"
                 if so["speed"]:
-                    acts.append({"type": "clear", "callsign": cs, "speed": so["speed"][0]})
-                    why.append(f"{tag} speed {so['speed'][0]}")
+                    acts.append({"type": "clear", "callsign": cs, "speed": so["speed"][0], "limit": past})
+                    why.append(f"{tag} speed {so['speed'][0]} for {past}")
                 elif so["heading"]:
-                    acts.append({"type": "clear", "callsign": cs, "heading": int(so["heading"][0])})
-                    why.append(f"{tag} heading {so['heading'][0]}")
+                    acts.append({"type": "clear", "callsign": cs, "heading": int(so["heading"][0]), "limit": "4MIN"})
+                    why.append(f"{tag} heading {so['heading'][0]} for 4 min")
                 elif so["level"]:
                     fl = int(so["level"][0])
                     q = (asked.get(cs) or {}).get(fl)
@@ -333,7 +350,7 @@ class Baseline:
             if not done and urgent:
                 cs = pair[0]
                 h = (int(mine[cs]["track_deg"]) + 30) % 360 or 360
-                acts.append({"type": "clear", "callsign": cs, "heading": h})
+                acts.append({"type": "clear", "callsign": cs, "heading": h, "limit": "3MIN"})
                 why.append(f"{c['aircraft'][0]}×{c['aircraft'][1]}: {cs} heading {h:03d} (nothing better)")
                 touched.add(cs)
         return touched

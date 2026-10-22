@@ -102,6 +102,7 @@ class Aircraft:
     assumed: bool = False              # the controller has assumed it (accepted the transfer): under our control
     released: bool = False             # the controller has decontrolled it (by hand): no longer ours on the screen
     gone: bool = False                 # out of the picture (far away): no longer simulated
+    rfl: Optional[int] = None          # requested final level (a departure climbing to it asks for it on first contact)
     first_contact_t: Optional[float] = None
     assumed_t: Optional[float] = None
     entered: bool = False              # has been inside the sector square
@@ -121,6 +122,10 @@ class Aircraft:
     wind_uv: Tuple[float, float] = (0.0, 0.0)
     cleared_alt_ft: float = 0.0
     vs_cmd_fpm: Optional[float] = None
+    vs_cmd_mode: str = "min"           # assigned rate: "min" (at X ft/min or greater) | "max" (at X or less)
+    # limits of the clearances in force (a heading or a speed is given with its limit): {"heading": {...}, "speed":
+    # {...}}, each with until_t (s) or nm_left (NM flown) or until_wp (a point passed), and for a heading "then" (point)
+    clr_limits: dict = field(default_factory=dict)
     # ATC speed control. The aircraft always flies a Mach/IAS pair and converts from Mach to IAS at the altitude
     # where the two are equal (conversion / crossover altitude). Assignments replace one or both members of the pair:
     spd_mach: Optional[float] = None   # assigned Mach (above the conversion altitude)
@@ -429,14 +434,18 @@ class Aircraft:
                 dvk = math.copysign(min(abs(dv), 0.5 * dt), dv)
                 self.tas += dvk
             fpm = rocd / atm.FT * 60.0
+            mode = getattr(self, "vs_cmd_mode", "min")
             if climbing:
                 fpm = max(fpm, 0.0)
-                if self.vs_cmd_fpm:
-                    fpm = min(fpm, self.vs_cmd_fpm)
+                if self.vs_cmd_fpm and mode == "max":
+                    fpm = min(fpm, self.vs_cmd_fpm)          # at X or less (an "or greater" was checked when given)
             else:
                 fpm = min(fpm, 0.0)
                 if self.vs_cmd_fpm:
-                    fpm = -min(self.vs_cmd_fpm, SPEEDBRAKE_FACTOR * abs(fpm))
+                    if mode == "max":
+                        fpm = -min(self.vs_cmd_fpm, abs(fpm))
+                    else:                                    # at X or greater: speedbrakes if idle is not enough
+                        fpm = -min(max(self.vs_cmd_fpm, abs(fpm)), SPEEDBRAKE_FACTOR * abs(fpm))
                 elif self.speedbrake:
                     fpm = SPEEDBRAKE_FACTOR * fpm          # high on profile: speedbrakes out
             step = fpm * dt / 60.0
@@ -498,6 +507,9 @@ class Aircraft:
             "cleared_fl": int(round(self.cleared_alt_ft / 100.0)),
             "vertical_speed_fpm": round(self.vs_fpm),
             "assigned_rate_fpm": self.vs_cmd_fpm,
+            "assigned_rate_mode": getattr(self, "vs_cmd_mode", "min") if self.vs_cmd_fpm else None,
+            "clearance_limits": {k: {kk: (round(vv, 1) if isinstance(vv, float) else vv) for kk, vv in v.items()}
+                                 for k, v in (getattr(self, "clr_limits", None) or {}).items()},
             "heading": api_hdg(self.hdg),
             "heading_deg": round(self.hdg, 1),
             "track_deg": round(self.trk, 1),

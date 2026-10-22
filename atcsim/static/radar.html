@@ -124,6 +124,10 @@
   #lblMenu .fl button { text-align: left; font-family: var(--mono); padding: 2px 8px; }
   #lblMenu .fl button.cur { border-color: var(--sel); color: var(--sel); }
   #lblMenu .fg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-top: 4px; }
+  #lblMenu .lim { display: flex; align-items: center; gap: 4px; margin-top: 4px; font-size: 11px; }
+  #lblMenu .lim input { flex: 1; min-width: 0; font-size: 11px; padding: 2px 5px; }
+  #lblMenu .fl.lq { display: flex; flex-direction: row; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+  #lblMenu .fl.lq button { font-size: 10.5px; padding: 1px 5px; width: auto; flex: 0 0 auto; }
   #lblMenu .fg button { font-family: var(--mono); padding: 2px 4px; }
   #lblMenu .wxb button.on { border-color: #c9a227; color: #ffe08a; }
   #lblMenu .lv button.cf { border-color: #a33; color: #ffb3b3; } #lblMenu .lv button.ok { border-color: #2f7a5f; color: #bff5dc; }
@@ -334,6 +338,7 @@
   #lblMenu .h { font-family: var(--mono); font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 6px; align-items: flex-start; }
   #lblMenu .h > span:last-child { white-space: nowrap; }
   #lblMenu .f { display: grid; grid-template-columns: 54px 1fr auto; gap: 5px; align-items: center; margin-bottom: 5px; }
+  #lblMenu .f.sub { margin-top: -3px; } #lblMenu .f.sub > .c-dim { text-align: right; font-size: 10.5px; } #lblMenu .f.sub input { font-size: 11px; padding: 2px 5px; }
   #lblMenu input { width: 100%; font-family: var(--mono); text-transform: uppercase; padding: 3px 6px; }
   #lblMenu button { padding: 2px 7px; font-size: 11px; }
   #lblMenu .lv { display: flex; flex-wrap: wrap; gap: 3px; margin: -1px 0 6px 59px; }
@@ -363,6 +368,7 @@
   #solvePanel[hidden] { display: none; }
   body:not(.solver-ok) #solvePanel { display: none; }
   #solvePanel .hd { color: var(--dim); font-size: 10.5px; letter-spacing: .06em; }
+  #solvePanel .sv-c.exit { border-left-color: #5ad1e6; }
   #solvePanel .sv-c { border-left: 3px solid #c9a227; padding: 4px 0 4px 8px; display: flex; flex-direction: column; gap: 3px; }
   #solvePanel .sv-h a { color: var(--sel); cursor: pointer; font-weight: 700; }
   #solvePanel .sv-prio { color: #9fb4c7; font-size: 11px; }

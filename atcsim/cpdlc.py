@@ -309,14 +309,47 @@ def parse(w, text: str, callsign: Optional[str] = None) -> dict:
                         "instr": {"type": "altitude", "fl": fl}, "entry": {"cfl": fl}})
             i += 1
             continue
-        m = re.fullmatch(r"V(\d{3,4})", tk)
-        if m and els and els[-1].get("kind") == "level":
-            r = int(m.group(1))
-            up = els[-1]["code"] == "UM20"
-            els[-1]["instr"]["rate_fpm"] = r
-            els.append({"code": "UM171" if up else "UM173", "text": f"{'CLIMB' if up else 'DESCEND'} AT {r} FT/MIN MINIMUM",
+        m = re.fullmatch(r"V(\d{3,4})([+-]?)", tk)
+        lvl = next((e for e in reversed(els) if e.get("kind") == "level"), None)
+        if m and lvl is not None:
+            r, mx = int(m.group(1)), m.group(2) == "-"
+            up = lvl["code"] == "UM20"
+            lvl["instr"]["rate_fpm"] = r
+            lvl["instr"]["rate_mode"] = "max" if mx else "min"
+            lvl.setdefault("entry", {})["rate"] = f"{r}{'-' if mx else ''}"
+            els.append({"code": ("UM172" if up else "UM174") if mx else ("UM171" if up else "UM173"),
+                        "text": f"{'CLIMB' if up else 'DESCEND'} AT {r} FT/MIN {'MAXIMUM' if mx else 'MINIMUM'}",
                         "resp": "WU", "kind": "rate"})
             i += 1
+            continue
+        # the limit of the heading or speed just given: 5MIN, 20NM, UNTIL IBALU (speeds); THEN IBALU after a heading
+        host = next((e for e in reversed(els) if e.get("kind") in ("heading", "speed")), None)
+        lim_tok = re.fullmatch(r"\d+(?:\.\d+)?(?:MIN|MN|M|NM)", tk)
+        if host is not None and (lim_tok or tk in ("UNTIL", "TIL", "THEN")):
+            is_h = host["kind"] == "heading"
+            if tk in ("UNTIL", "TIL", "THEN"):
+                pt = nxt()
+                if pt not in w.waypoints:
+                    raise ValueError(f"{tk} then a point, e.g. {tk} IBALU")
+                i += 2
+                if tk == "THEN":
+                    if not is_h:
+                        raise ValueError("THEN (direct to a point) follows a heading")
+                    host["instr"]["then"] = pt
+                    host["entry"]["then"] = pt
+                    host["text"] += f" THEN PROCEED DIRECT TO {pt}"
+                    continue
+                if is_h:
+                    raise ValueError("a heading is limited in minutes or miles (5MIN, 20NM)")
+                lim = pt
+            else:
+                lim = tk if not tk.endswith("M") or tk.endswith("NM") else tk[:-1] + "MIN"
+                i += 1
+            L = w.parse_limit(lim, allow_point=not is_h)
+            host["instr"]["limit"] = L
+            host["entry"]["hlim" if is_h else "slim"] = lim.replace("UNTIL", "")
+            host["text"] += (f" FOR {int(L['min']) if float(L['min']).is_integer() else L['min']} MIN" if L.get("min") is not None
+                             else f" FOR {int(L['nm'])} NM" if L.get("nm") is not None else f" UNTIL {L['until']}")
             continue
         m = re.fullmatch(r"(H|HDG|L|R|HL|HR|TL|TR)(\d{1,3})", tk)
         if m:
@@ -324,7 +357,7 @@ def parse(w, text: str, callsign: Optional[str] = None) -> dict:
             if not 1 <= h <= 360:
                 raise ValueError("heading 1-360")
             turn = "left" if p in ("L", "HL", "TL") else "right" if p in ("R", "HR", "TR") else None
-            els.append({"code": "UM94" if turn else "UM190",
+            els.append({"code": "UM94" if turn else "UM190", "kind": "heading",
                         "text": (f"TURN {turn.upper()} HEADING {h:03d}" if turn else f"FLY HEADING {h:03d}"), "resp": "WU",
                         "instr": {"type": "heading", "heading": h, "turn": turn}, "entry": {"heading": h, "direct": ""}})
             i += 1

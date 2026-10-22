@@ -137,8 +137,9 @@ is over it.
 | **Aircraft type** | The type performance window: type data, speed schedule, assignable Mach / IAS, mass now, and by level at the present weight the speeds, climb rate, idle descent, and whether the level can be reached |
 | **Cleared level** | Levels list, coloured by the level probe (green = no conflict in 20 min, red = conflict, hover for which) |
 | **Exit level** | Levels list with *= CFL* |
-| **Speed** | Mach / IAS values, *SN* (resume normal speed) |
-| **Heading** | Left / right steps, *own navigation* |
+| **Cleared level** | (with the list) a **rate** field: `1500` = at 1500 ft/min or greater, `1500-` = or less, to climb or descend two aircraft together |
+| **Speed** | Mach / IAS values, *SN* (resume normal speed), and its **limit**: minutes, miles or a point (`10MIN`, `40NM`, `IBALU`, quick buttons) |
+| **Heading** | Left / right steps, *own navigation*, and its **limit** (`4MIN`, `20NM`) with the point to proceed to at the limit (`→ERMED`) |
 | **Next point** | Directs (points of the route, or any point), *Edit route…*, back to the filed route |
 | **WX** | Weather deviation left / right / either side, with a distance, or clear |
 
@@ -148,6 +149,29 @@ phone-coordination button. A long press on the **route** value shows the route i
 
 Clicking a label or a symbol **selects** the aircraft. The selection drives the keyboard shortcuts and the track
 info window.
+
+### Clearance limits
+
+A heading or a speed is given with its **limit**, as the regulations require: *fly heading 250 for 4 minutes, then
+direct ERMED*, *maintain M.74 until IBALU*. At the limit the pilot does what was cleared by himself and says so on
+the frequency (*EWG3KP end of heading, proceeding direct ERMED*, *EWG3KP resuming normal speed*); a new heading or
+speed replaces the limit. A heading or speed entered without a limit is still flown, with a warning (⚠ *heading
+without a limit*), and counted in the exercise statistics. In the label menus: the **for / then** fields of the
+heading, the **limit** field of the speed; on the command line, after the heading or the speed: `H250 4MIN THEN
+ERMED`, `H250 20NM`, `M74 UNTIL IBALU`, `M74 10MIN`.
+
+### Letter of agreement at the exits
+
+Aircraft leaving by the **same exit point at levels that are not vertically separated** must be at least **10 NM
+apart in trail** when they cross it, before they are transferred (the scenario or airspace may set another value).
+Each crossing closer than that is recorded (*IBE3247 crossed ERMED 1.9 NM behind EWG3KP at FL350*) and counted in the
+statistics; the Solver panel lists such pairs (**EXIT** in blue) with the clearances that give the spacing.
+
+### Departures from GMMN
+
+Departures from Casablanca (GMMN) climbing into the sector ask for their **final level on first contact**
+(*RAM6589K B788 FL260, checking in, requesting FL360*): a level request is opened at the same time as the first call.
+Their filed cruise level is that level, so it may be given without asking the pilot first.
 
 ### The full label menu
 
@@ -301,7 +325,8 @@ the callsign (`RAM201 H270`) without selecting the aircraft.
 | Type | Sends | Type | Sends |
 |---|---|---|---|
 | `CL350`, `C350` | CLIMB TO FL350 | `DES240` | DESCEND TO FL240 |
-| `350`, `FL350` | climb / descend / maintain, from the present level | `V1500` after a level | AT 1500 FT/MIN MINIMUM |
+| `350`, `FL350` | climb / descend / maintain, from the present level | `V1500` / `V1500-` after a level | AT 1500 FT/MIN MINIMUM / MAXIMUM |
+| `4MIN`, `20NM` after a heading or a speed | its limit: FOR 4 MIN / FOR 20 NM | `UNTIL IBALU` after a speed, `THEN ERMED` after a heading | MAINTAIN … UNTIL IBALU / … THEN PROCEED DIRECT TO ERMED |
 | `H270` | FLY HEADING 270 | `L270` / `R270` | TURN LEFT / RIGHT HEADING 270 |
 | `D ROLRO`, `DROLRO`, `ROLRO` | PROCEED DIRECT TO ROLRO | `VIA IBALU TERTO` | CLEARED TO TERTO VIA IBALU TERTO |
 | `M78` | MAINTAIN M.78 | `S280` / `K280` | MAINTAIN 280 KT / ON CONVERSION |

@@ -156,8 +156,11 @@ try:
     cs = next(a.callsign for a in ss.world.aircraft.values() if a.on_frequency and not a.assumed and a.active)
     rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": 360}], {"name": "AI", "seat": "atc"})
     ok(not rr[0]["ok"] and '"type": "assume"' in rr[0]["text"], "clearing an aircraft not assumed: the refusal says to assume it first")
-    rr = A.apply(ss.world, [{"type": "assume", "callsign": cs}, {"type": "clear", "callsign": cs, "heading": 200, "distance": "8NM"}], {"name": "AI", "seat": "atc"})
+    rr = A.apply(ss.world, [{"type": "assume", "callsign": cs}, {"type": "clear", "callsign": cs, "heading": 200, "limit": "5MIN", "distance": "8NM"}], {"name": "AI", "seat": "atc"})
     ok(rr[0]["ok"] and rr[1]["ok"] and "'distance' is not a field" in rr[1]["text"], "assume + clear in one answer; an unknown field reported")
+    rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "heading": 210}, {"type": "clear", "callsign": cs, "speed": "M74"}], {"name": "AI", "seat": "atc"})
+    ok(not rr[0]["ok"] and "without its limit" in rr[0]["text"] and not rr[1]["ok"] and "without its limit" in rr[1]["text"],
+       "a heading or a speed without its limit is refused (rules)")
     acx = ss.world.aircraft[cs]
     wrong = next(f for f in (360, 350, 340, 370) if not __import__("atcsim.aircraft", fromlist=["x"]).level_parity_ok(f, acx.southbound))
     rr = A.apply(ss.world, [{"type": "clear", "callsign": cs, "cfl": wrong}], {"name": "AI", "seat": "atc"})
@@ -273,6 +276,47 @@ try:
     ok(qa[0]["ok"] and "BEST" in qa[0]["result"] and qa[1]["ok"] and "conflict-free headings" in qa[1]["result"],
        f"questions: solve ({qa[0]['result'][:90]}…), headings")
     s7.stop()
+
+    # ---- limits, rates, exit spacing, departures' level requests, positive separation
+    from atcsim.session import Session as S3
+    s8 = S3("p02_wn_merges_and_climbs", mode="stepped", autostart=False); s8.stop(); s8.solo = True; w8 = s8.world
+    while w8.t < 200:
+        s8._tick()
+    a8 = w8.aircraft["EWG3KP"]; a8.assumed = True
+    w8.enter("EWG3KP", {"heading": 250, "hlim": "1MIN", "then": "ERMED"})
+    w8.enter("EWG3KP", {"speed": "M74", "slim": "2MIN"})
+    t0 = w8.t
+    while w8.t < t0 + 160:
+        s8._tick()
+    said = [e["text"] for e in w8.events if e["type"] == "pilot_readback"]
+    ok(any("for 1 minute, then direct ERMED" in x for x in said) and any("end of heading, proceeding direct ERMED" in x for x in said)
+       and any("resuming normal speed" in x for x in said) and a8.nav_mode == "lnav" and a8.spd_mach is None,
+       "limits: read back, and at the limit the pilot proceeds direct / resumes normal speed by itself")
+    w8.enter("EWG3KP", {"cfl": 330, "rate": "1000-"})
+    for _ in range(40):
+        s8._tick()
+    ok(abs(a8.vs_fpm + 1000) < 60, f"a rate 'or less' is flown: {a8.vs_fpm:.0f} ft/min")
+    s9 = S3("p02_wn_merges_and_climbs", mode="stepped", autostart=False); s9.stop(); s9.solo = True; w9 = s9.world
+    while not w9.finished and w9.t < 1900:
+        s9._tick()
+    ok(any(v["follower"] in ("EWG3KP", "IBE3247") and v["exit"] == "ERMED" for v in w9.m["exit_spacing"]),
+       f"exit spacing under the letter of agreement measured: {w9.m['exit_spacing'][:1]}")
+    s10 = S3("w01_west_scattered_cb", mode="stepped", autostart=False); s10.stop(); w10 = s10.world
+    while w10.t < 1700 and not any((r.reason or "").startswith("final") for r in w10.requests.values()):
+        s10._tick()
+    ok(any((r.reason or "").startswith("final") and r.type == "altitude" for r in w10.requests.values())
+       and any("requesting FL" in e.get("text", "") for e in w10.events if e["type"] == "checkin"),
+       "a GMMN departure asks for its final level on first contact")
+    from atcsim.solve import resolve as R
+    s11 = S3("p02_wn_merges_and_climbs", mode="stepped", autostart=False); s11.stop(); s11.solo = True; w11 = s11.world
+    while w11.t < 300:
+        s11._tick()
+    for a_ in w11.aircraft.values():
+        if a_.active and a_.on_frequency:
+            a_.assumed = True
+    bad = R.positive(w11, "EWG3KP", {"heading": int(w11.aircraft["EWG3KP"].trk) % 360 or 360, "for_s": 60.0})
+    good = R.positive(w11, "EWG3KP", {"direct": "TOVRA"})
+    ok(not bad["positive"] and good["positive"], f"positive separation: staying on track {bad}, direct TOVRA {good}")
 
     # ---- the run in the debrief
     eid = m1["exercise_id"]

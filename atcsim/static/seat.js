@@ -194,11 +194,14 @@
       <div id="lmAssume" style="margin-bottom:7px"><button class="on" id="lmAsBtn" style="width:100%;padding:4px">ASSUME ${cs}</button></div>
       <div id="lmRelease" style="margin-bottom:7px"><button id="lmRelBtn" style="width:100%;padding:4px" title="hand it off: it keeps flying as another sector's traffic">DECONTROL ${cs}</button></div>
       <div class="f"><span class="c-dim">CFL</span><input data-f="cfl" value="${sys}" inputmode="numeric"><button data-ok="cfl">OK</button></div>
+      <div class="f sub"><span class="c-dim" title="rate of climb / descent with the level: 1500 = at 1500 ft/min or greater, 1500- = or less (to climb or descend aircraft together)">rate</span><input data-f="rate" value="${h(ent.rate || '')}" placeholder="1500 · 1500-"><span></span></div>
       <div class="lv">${lv.map(l => `<button data-lv="${l}">${l}</button>`).join('')}</div>
       <div class="f"><span class="c-dim" title="exit level for the coordination with the next unit (OLDI); empty = the cleared level">XFL</span><input data-f="xfl" value="${ent.xfl != null ? ent.xfl : ''}" placeholder="= CFL" inputmode="numeric"><button data-ok="xfl">OK</button></div>
       <div id="lmCoord" class="c-dim" style="font-size:11px;margin:-2px 0 6px 59px"></div>
       <div class="f"><span class="c-dim">Speed</span><input data-f="speed" value="${h(ent.speed || '')}" placeholder="M78 · 280 · SN"><button data-ok="speed">OK</button></div>
+      <div class="f sub"><span class="c-dim" title="the limit of the speed: minutes, miles or until a point; then the pilot resumes normal speed">limit</span><input data-f="slim" value="${h(ent.slim || '')}" placeholder="10MIN · 40NM · IBALU"><span></span></div>
       <div class="f"><span class="c-dim">Heading</span><input data-f="heading" value="${ent.heading || ''}" placeholder="e.g. 250" inputmode="numeric"><button data-ok="heading">OK</button></div>
+      <div class="f sub"><span class="c-dim" title="the limit of the heading (minutes or miles), and the point to proceed to at the limit (empty: resume own navigation)">for</span><span style="display:flex;gap:4px"><input data-f="hlim" value="${h(ent.hlim || '')}" placeholder="5MIN · 20NM" style="width:50%"><input data-f="then" value="${h(ent.then || '')}" list="lmPts" placeholder="then pt" style="width:50%"></span><span></span></div>
       <div class="f"><span class="c-dim">Direct</span><input data-f="direct" value="${h(ent.direct || '')}" list="lmPts" placeholder="point"><button data-ok="direct">OK</button></div>
       <div class="lv">${[...new Set(route)].slice(0, 10).map(n => `<button data-dct="${n}">${n}</button>`).join('')}</div>
       <div class="f"><span class="c-dim">WX dev</span><input data-f="wx" value="${h(ent.wx || '')}" placeholder="L · R · L20 · Y"><button data-ok="wx">OK</button></div>
@@ -211,12 +214,24 @@
     const send = async (f, v) => {
       try { const body = { callsign: cs, ...(typeof f === 'object' ? f : { [f]: v }), ...forceFlag() };
         const rr = await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify(body) }); noteRefused(cs, 'entries', body, rr && rr._readback);
-        $('#lmMsg').className = 'c-ok'; $('#lmMsg').textContent = '✓ entered'; if (state.entries) state.entries[cs] = { ...(state.entries[cs] || {}), ...(typeof f === 'object' ? f : { [f]: v }) };
+        const wn = ((rr && rr._readback) || []).flatMap(x => x.warnings || []);
+        $('#lmMsg').className = wn.length ? 'c-warn' : 'c-ok'; $('#lmMsg').textContent = wn.length ? '✓ entered · ⚠ ' + wn.join(' · ') : '✓ entered'; if (state.entries) state.entries[cs] = { ...(state.entries[cs] || {}), ...(typeof f === 'object' ? f : { [f]: v }) };
         if (f === 'heading' && v) m.querySelector('[data-f=direct]').value = ''; }
       catch (er) { $('#lmMsg').className = 'c-los'; $('#lmMsg').textContent = er.message; }
     };
-    m.querySelectorAll('[data-ok]').forEach(b => b.onclick = () => send(b.dataset.ok, m.querySelector(`[data-f=${b.dataset.ok}]`).value.trim()));
-    m.querySelectorAll('input[data-f]').forEach(i => i.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') send(i.dataset.f, i.value.trim()); if (ev.key === 'Escape') closeMenu(); });
+    // a clearance goes with what qualifies it: the level with its rate, the heading with its limit and then-point,
+    // the speed with its limit
+    const GROUP = { cfl: ['rate'], heading: ['hlim', 'then'], speed: ['slim'] };
+    const OWNER = { rate: 'cfl', hlim: 'heading', then: 'heading', slim: 'speed' };
+    const fv = k => { const el = m.querySelector(`[data-f=${k}]`); return el ? el.value.trim() : ''; };
+    const sendGroup = k => {
+      const main = OWNER[k] || k, o = { [main]: fv(main) };
+      for (const q of GROUP[main] || []) if (fv(q) || (state.entries && (state.entries[cs] || {})[q])) o[q] = fv(q);
+      if (main === 'heading' && o.heading) o.direct = '';
+      send(Object.keys(o).length > 1 ? o : main, o[main]);
+    };
+    m.querySelectorAll('[data-ok]').forEach(b => b.onclick = () => sendGroup(b.dataset.ok));
+    m.querySelectorAll('input[data-f]').forEach(i => i.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') sendGroup(i.dataset.f); if (ev.key === 'Escape') closeMenu(); });
     m.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { m.querySelector('[data-f=cfl]').value = b.dataset.lv; send('cfl', +b.dataset.lv); });
     m.querySelectorAll('[data-dct]').forEach(b => b.onclick = () => { m.querySelector('[data-f=direct]').value = b.dataset.dct; m.querySelector('[data-f=heading]').value = ''; send({ direct: b.dataset.dct, heading: '' }); });
     $('#lmClr').onclick = () => { for (const f of ['speed', 'heading', 'direct', 'wx']) m.querySelector(`[data-f=${f}]`).value = ''; send({ speed: '', heading: '', direct: '', wx: '' }); };
@@ -259,6 +274,7 @@
     const body = { callsign: cs, ...f, ...forceFlag() };
     const rr = await api(`/sessions/${SID}/entries`, { method: 'POST', body: JSON.stringify(body) }); noteRefused(cs, 'entries', body, rr && rr._readback);
     if (state.entries && !f.route) state.entries[cs] = { ...(state.entries[cs] || {}), ...f };
+    return rr;
   };
   const p3 = v => String(Math.round(v)).padStart(3, '0');
   function openFieldMenu(cs, f, e) {
@@ -276,15 +292,23 @@
     } else if (f === 'cfl' || f === 'xfl') {
       const cur = f === 'cfl' ? sys : (co.xfl != null ? co.xfl : sys);
       body = `<input data-v value="${f === 'xfl' && !co.xfl_entered ? '' : cur}" placeholder="${f === 'xfl' ? '= CFL ' + sys : ''}" inputmode="numeric">
+        ${f === 'cfl' ? `<div class="lim"><span class="c-dim" title="rate of climb / descent: 1500 = 1500 ft/min or greater, 1500- = or less (climb or descend aircraft together)">rate</span><input data-q="rate" value="" placeholder="1500 · 1500-"></div>` : ''}
         <div class="fl">${f === 'xfl' ? `<button data-x="">= CFL (F${p3(sys)})</button>` : ''}${levels(cur).map(l => `<button data-x="${l}" class="${l === cur ? 'cur' : ''}">F${p3(l)}</button>`).join('')}</div>`;
     } else if (f === 'spd') {
       const mach = Math.round(a.mach * 100), ias = Math.round(a.ias_kt / 10) * 10;
+      const pts = realPoints(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint || a.fp_next)))).slice(0, 4);
       body = `<input data-v value="${h(ent.speed || '')}" placeholder="M78 · 280 · SN">
+        <div class="lim"><span class="c-dim" title="the limit of the speed: then the pilot resumes normal speed">limit</span><input data-q="slim" value="${h(ent.slim || '')}" placeholder="10MIN · 40NM · point"></div>
+        <div class="fl lq">${['5MIN', '10MIN', '15MIN'].concat(pts).map(x => `<button data-lq="slim" data-lv="${x}">${x}</button>`).join('')}</div>
         <div class="fg">${[-3, -2, -1, 0, 1, 2, 3].map(d => `<button data-x="M${mach + d}">M${mach + d}</button>`).join('')}<button data-x="SN">SN</button>
         ${[-30, -20, -10, 0, 10, 20, 30].map(d => `<button data-x="${ias + d}">${ias + d}</button>`).join('')}<button data-x="">clear</button></div>`;
     } else if (f === 'hdg') {
       const h0 = Math.round(a.heading / 5) * 5;
+      const pts = realPoints(a.route.slice(Math.max(0, a.route.indexOf(a.next_waypoint || a.fp_next)))).slice(0, 5);
       body = `<input data-v value="${ent.heading || ''}" placeholder="${p3(a.heading)}" inputmode="numeric">
+        <div class="lim"><span class="c-dim" title="the limit of the heading (minutes or miles), then the point to proceed to (empty: own navigation)">for</span><input data-q="hlim" value="${h(ent.hlim || '')}" placeholder="4MIN · 20NM"><span class="c-dim">then</span><input data-q="then" value="${h(ent.then || '')}" placeholder="point" list="fmPts"></div>
+        <div class="fl lq">${['2MIN', '4MIN', '6MIN'].map(x => `<button data-lq="hlim" data-lv="${x}">${x}</button>`).join('')}${pts.map(x => `<button data-lq="then" data-lv="${x}">→${x}</button>`).join('')}</div>
+        <datalist id="fmPts">${pts.map(n => `<option value="${n}">`).join('')}</datalist>
         <div class="fg">${[-40, -30, -20, -10, 10, 20, 30, 40].map(d => { const v = ((h0 + d) % 360 + 360) % 360 || 360; return `<button data-x="${v}">${d < 0 ? 'L' : 'R'}${p3(v)}</button>`; }).join('')}</div>
         <div class="fl"><button data-x="">own navigation (clear)</button></div>`;
     } else if (f === 'route') {
@@ -297,12 +321,22 @@
     m.innerHTML = `<div class="h"><span>${cs} <span class="c-dim" style="font-weight:400">${title}</span></span><button id="fmX" style="padding:0 6px">✕</button></div>${body}<div id="lmMsg" style="min-height:12px;font-size:11px;margin-top:3px"></div>`;
     m.classList.add('on', 'fm'); menuPos(e);
     const key = { cfl: 'cfl', xfl: 'xfl', spd: 'speed', hdg: 'heading', wx: 'wx' }[f];
+    // what qualifies the clearance: the rate of a level, the limit of a speed, the limit and then-point of a heading
+    const q = k => { const el = m.querySelector(`[data-q=${k}]`); return el ? el.value.trim().toUpperCase() : ''; };
+    m.querySelectorAll('[data-lq]').forEach(b => b.onclick = () => { const el = m.querySelector(`[data-q=${b.dataset.lq}]`); if (el) el.value = b.dataset.lv; });
     const go = async v => { try {
-        if (f === 'route') await sendEntry(cs, v ? { direct: v, heading: '' } : { direct: '', route: '' });
-        else if (f === 'hdg' && v) await sendEntry(cs, { heading: +v, direct: '' });
-        else await sendEntry(cs, { [key]: v === '' ? '' : (f === 'cfl' || f === 'xfl') ? +v : v });
+        let r;
+        if (f === 'route') r = await sendEntry(cs, v ? { direct: v, heading: '' } : { direct: '', route: '' });
+        else if (f === 'hdg' && v) r = await sendEntry(cs, { heading: +v, direct: '', hlim: q('hlim'), then: q('then') });
+        else if (f === 'spd' && v && v !== 'SN') r = await sendEntry(cs, { speed: v, slim: q('slim') });
+        else if (f === 'cfl' && v && q('rate')) r = await sendEntry(cs, { cfl: +v, rate: q('rate') });
+        else r = await sendEntry(cs, { [key]: v === '' ? '' : (f === 'cfl' || f === 'xfl') ? +v : v });
+        const wn = ((r && r._readback) || []).flatMap(x => x.warnings || []);
+        if (wn.length) note('⚠ ' + wn.join(' · '), true);
         closeMenu(); } catch (er) { $('#lmMsg').className = 'c-los'; $('#lmMsg').textContent = er.message; } };
     m.querySelectorAll('[data-x]').forEach(b => b.onclick = () => go(b.dataset.x));
+    m.querySelectorAll('[data-q]').forEach(el => el.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Escape') closeMenu();
+      if (ev.key === 'Enter') { const iv = m.querySelector('[data-v]'); let v = iv ? iv.value.trim().toUpperCase() : ''; if (f === 'cfl') v = v.replace(/^FL?/, ''); if (v) go(v); } });
     const inp = m.querySelector('[data-v]');
     if (inp) { inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') { let v = inp.value.trim().toUpperCase(); if (f === 'cfl' || f === 'xfl') v = v.replace(/^FL?/, ''); go(v); } if (ev.key === 'Escape') closeMenu(); };
       setTimeout(() => { inp.focus(); inp.select(); }, 0); }

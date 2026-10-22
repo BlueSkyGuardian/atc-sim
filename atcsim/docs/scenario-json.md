@@ -68,7 +68,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `pilot_delay_s` | number ≥ 0 | 4 | Seconds between a clearance and the start of its execution |
 | `start_utc` | `"HH:MM"` | `"12:00"` | UTC time at T+0 (flight plans, estimates, the clock) |
 | `magnetic_variation` | number | −1 (Agadir), 0 | Degrees, negative = west. Only for the Mode S magnetic heading |
-| `separation` | `{"horizontal_nm": n}` | airspace's | Horizontal radar minimum, 3–20 NM. Agadir 7, training 5 |
+| `separation` | `{"horizontal_nm": n, "exit_spacing_nm": m}` | airspace's | Horizontal radar minimum, 3–20 NM (Agadir 7, training 5); `exit_spacing_nm`: the letter of agreement's in-trail spacing at an exit for aircraft at levels not vertically separated (default 10) |
 | `oldi` | `{"abi_s", "act_s", "rev_limit_s"}` | 1200, 600, 180 | OLDI coordination timings (seconds before the boundary) |
 | `auto_assume` | boolean | `false` | `true` = aircraft are assumed automatically when they call |
 | `auto_routes` | boolean | `true` | Agadir: complete each route beyond the CTA from the onward-route rules (flight-plan realism) |
@@ -109,6 +109,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `ias_kt` | number | — | Fly this indicated airspeed instead of the Mach schedule (slow aircraft, holding a speed) |
 | `load` | number 0–1 | 0.5 | Mass = OEW + load × (MTOW − OEW). Lighter aircraft climb higher (long-haul at the start of a crossing: ~0.6–0.8; end of flight: ~0.3) |
 | `mass_kg` | number | — | Mass in kg instead of `load`; must be between OEW and MTOW |
+| `rfl` | integer | — | Requested final level of a departure climbing through the sector: the pilot asks for it on first contact, and it is the flight plan's cruise level. Departures from GMMN without `rfl` get one from their performance and direction (the highest few levels they can reach at their weight) |
 | `dep`, `dest` | ICAO codes | generated | Departure and destination aerodromes (flight plan, onward routing, arrival behaviour). An aircraft whose route ends at a sequencing fix is an arrival to that fix's aerodrome |
 | `arrival` | boolean | `true` | `false` = an overflight even if the route ends at a sequencing fix (no descent request, no LoA) |
 | `direction` | `"southbound"` / `"northbound"` | from the route | Overrides the direction used for the semicircular rule |

@@ -396,12 +396,13 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
         ac.destination = seqfixes[route[-1]].aerodrome
         ac.arr = {"fix": route[-1]}
     dest = str(a.get("dest") or ac.destination or "ZZZZ").upper()
+    ac.rfl = _requested_level(a, ac, asp, fl)
     spd_mode, spd_val = ac.speed_target(fl * 100.0)
     ac.flight_plan = {
         "callsign": cs, "aircraft_type": perf.icao, "wake": _wake(perf),
         "flight_rules": "I", "flight_type": "M" if ac.military else "S",
         "departure": str(a.get("dep") or "ZZZZ").upper(), "destination": dest,
-        "cruise": f"F{fl:03d}", "speed": (f"M{int(round(spd_val * 100)):03d}" if spd_mode == "mach"
+        "cruise": f"F{(ac.rfl or fl):03d}", "speed": (f"M{int(round(spd_val * 100)):03d}" if spd_mode == "mach"
                                           else f"N{int(round(tas)):04d}"),
         "route": asp.route_string(filed + [w.upper() for w in a.get("route_after", [])]),
         "equipment": ac.equipment, "rvsm": "approved (W)" if ac.rvsm_approved else "non-RVSM",
@@ -414,6 +415,31 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
                                                             str(a.get("dep") or ""), str(a.get("dest") or ac.destination or ""))
     ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
     return ac
+
+
+DEPARTURES_REQUEST_RFL = ("GMMN",)   # departures from these aerodromes ask for their final level on first contact
+
+
+def _requested_level(a: dict, ac, asp, fl: int) -> Optional[int]:
+    """The final level a departure is climbing to: the scenario's "rfl", else, for a departure from an aerodrome
+    whose traffic asks for it on first contact (GMMN), a level of its direction it can reach at its weight, above its
+    entry level - the highest few, picked by callsign so the same flight always asks the same."""
+    if a.get("rfl"):
+        return int(str(a["rfl"]).upper().lstrip("FL").lstrip("F"))
+    deps = (asp.notes or {}).get("departures_request_rfl") or DEPARTURES_REQUEST_RFL
+    if str(a.get("dep") or "").upper() not in deps:
+        return None
+    from .aircraft import level_parity_ok
+    try:
+        top = min(int(ac.max_fl()), 410)
+    except Exception:  # noqa: BLE001
+        top = 390
+    cand = [x for x in range(fl + 20, top + 1, 10) if level_parity_ok(x, ac.southbound)]
+    if not cand:
+        return None
+    pick = cand[-3:]
+    import zlib
+    return pick[zlib.crc32(ac.callsign.encode()) % len(pick)]
 
 
 def build_world(scn: dict) -> World:
@@ -550,4 +576,7 @@ def build_world(scn: dict) -> World:
     w.sep_h = float(sep.get("horizontal_nm") or (asp.notes or {}).get("separation_horizontal_nm") or 5.0)
     if w.sep_h < 3 or w.sep_h > 20:
         raise ScenarioError(f"separation.horizontal_nm {w.sep_h} is out of range (3-20 NM)")
+    # letter of agreement at the exits: aircraft leaving by the same point at levels not vertically separated are
+    # this far apart in trail when they cross it (the scenario's own, else the airspace's, else 10 NM)
+    w.exit_spacing_nm = float(sep.get("exit_spacing_nm") or (asp.notes or {}).get("exit_spacing_nm") or 10.0)
     return w

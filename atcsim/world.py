@@ -137,6 +137,7 @@ class World:
             "sequencing": {}, "seq_spacing_violations": 0, "seq_level_violations": 0,
             "rvsm_violations": [], "rvsm_violation_seconds": 0.0,
             "wrong_direction_exits": [], "wrong_direction_clearances": 0,
+            "exit_spacing": [],    # transfers closer than the agreed spacing at the exit (letter of agreement)
         }
         self._rvsm_in: Dict[str, dict] = {}
         self._wx_in: Dict[str, dict] = {}
@@ -285,7 +286,9 @@ class World:
                 r = float(instr["rate_fpm"])
                 if r < 300:
                     raise InstructionError("rate_fpm must be at least 300")
-                if climbing:
+                if str(instr.get("rate_mode") or "min").lower() == "max":
+                    pass                                       # at X or less: always possible
+                elif climbing:
                     avail = ac.climb_rate_available((ac.alt_ft + fl * 100.0) / 2)
                     if r > avail and not force:
                         raise InstructionError(f"{cs} unable {int(r)} ft/min, best rate about {int(avail // 100 * 100)} ft/min")
@@ -294,6 +297,10 @@ class World:
                     if r > maxd and not force:
                         raise InstructionError(f"{cs} unable {int(r)} ft/min, best rate about {int(maxd // 100 * 100)} ft/min")
                 out["rate_fpm"] = r
+                mode = str(instr.get("rate_mode") or "min").lower()
+                if mode not in ("min", "max"):
+                    raise InstructionError("rate_mode: min (at X ft/min or greater) or max (at X or less)")
+                out["rate_mode"] = mode
             spec = self._parse_speed(ac, instr, fl * 100.0, allow_value=False)
             if spec is not None:
                 out["speed"] = spec
@@ -308,6 +315,14 @@ class World:
                     raise InstructionError("turn must be 'left', 'right' or null")
             out["heading"] = 360 if round(h) % 360 == 0 else int(round(h))
             out["turn"] = turn
+            lim = self.parse_limit(instr.get("limit"), allow_point=False)
+            if lim:
+                out["limit"] = lim
+            if instr.get("then"):
+                th = str(instr["then"]).upper()
+                if th not in self.waypoints or th.startswith("@"):
+                    raise InstructionError(f"then direct: unknown point {th}")
+                out["then"] = th
             if pilot.heading_into_weather(self, ac, float(out["heading"])):
                 if not by_pilot and not force:
                     raise InstructionError(f"{cs} unable heading {out['heading']:03d}, weather on that heading")
@@ -349,6 +364,9 @@ class World:
             if spec is None:
                 raise InstructionError("speed needs 'mach', 'conversion_kt', 'ias_kt' or 'resume_normal'")
             out["speed"] = spec
+            lim = None if spec.get("resume_normal") else self.parse_limit(instr.get("limit"), allow_point=True)
+            if lim:
+                out["limit"] = lim
         elif itype == "reply":
             rid = str(instr.get("request_id", ""))
             req = self.requests.get(rid)
@@ -368,6 +386,108 @@ class World:
             out["request_id"] = rid
             out["decision"] = "approved" if dec.startswith("approv") else "unable"
         return out
+
+    def parse_limit(self, v, allow_point: bool = True) -> Optional[dict]:
+        """The limit of a heading or speed clearance: {"min": 5} / {"nm": 20} / {"until": "IBALU"}; accepted as such
+        or as text "5MIN", "5 MIN", "20NM", "IBALU" (a point: speeds only). None when no limit is given."""
+        if v in (None, "", {}):
+            return None
+        if isinstance(v, dict):
+            if v.get("min") is not None:
+                m = float(v["min"])
+                if not 1 <= m <= 60:
+                    raise InstructionError("limit: 1 to 60 minutes")
+                return {"min": m}
+            if v.get("nm") is not None:
+                n = float(v["nm"])
+                if not 1 <= n <= 300:
+                    raise InstructionError("limit: 1 to 300 NM")
+                return {"nm": n}
+            if v.get("until"):
+                return self.parse_limit(str(v["until"]), allow_point)
+            raise InstructionError("limit: minutes (min), miles (nm) or a point (until)")
+        t = str(v).upper().replace(" ", "")
+        m = re.fullmatch(r"(\d+(?:\.\d+)?)(MIN|MN|M|')", t)
+        if m:
+            return self.parse_limit({"min": float(m.group(1))}, allow_point)
+        m = re.fullmatch(r"(\d+(?:\.\d+)?)(NM|MILES|MI)", t)
+        if m:
+            return self.parse_limit({"nm": float(m.group(1))}, allow_point)
+        t = t.removeprefix("UNTIL").removeprefix("TIL")
+        if t in self.waypoints and not t.startswith("@"):
+            if not allow_point:
+                raise InstructionError("a heading is limited in minutes or miles (e.g. 5MIN, 20NM)")
+            return {"until": t}
+        raise InstructionError(f"limit {v!r}: minutes (5MIN), miles (20NM)" + (" or a point (IBALU)" if allow_point else ""))
+
+    @staticmethod
+    def limit_text(lim: Optional[dict]) -> str:
+        if not lim:
+            return ""
+        if lim.get("min") is not None:
+            m = lim["min"]
+            return f" for {int(m) if float(m).is_integer() else m} minute{'s' if m != 1 else ''}"
+        if lim.get("nm") is not None:
+            return f" for {int(lim['nm'])} miles"
+        return f" until {lim['until']}"
+
+    def _set_limit(self, ac: Aircraft, kind: str, n: dict) -> None:
+        lims = ac.__dict__.setdefault("clr_limits", {})
+        lim = n.get("limit")
+        if not lim:
+            lims.pop(kind, None)
+            return
+        rec = {"given_t": self.t}
+        if lim.get("min") is not None:
+            rec["until_t"] = self.t + float(lim["min"]) * 60.0
+        elif lim.get("nm") is not None:
+            rec["nm_left"] = float(lim["nm"])
+        else:
+            rec["until_wp"] = lim["until"]
+        if kind == "heading" and n.get("then"):
+            rec["then"] = n["then"]
+        lims[kind] = rec
+
+    def _limits_step(self, dt: float) -> None:
+        """At the limit of a heading the pilot proceeds direct to the point given (or resumes own navigation); at the
+        limit of a speed it resumes its normal speed - and says so."""
+        for ac in self.aircraft.values():
+            lims = getattr(ac, "clr_limits", None)
+            if not ac.active or not lims:
+                continue
+            for kind in list(lims):
+                L = lims[kind]
+                if "nm_left" in L:
+                    L["nm_left"] -= ac.gs * dt / 3600.0
+                done = (("until_t" in L and self.t >= L["until_t"]) or ("nm_left" in L and L["nm_left"] <= 0)
+                        or ("until_wp" in L and L["until_wp"] not in ac.route[ac.next_index:]))
+                if not done:
+                    continue
+                lims.pop(kind, None)
+                cs = ac.callsign
+                if kind == "heading" and ac.nav_mode == "heading":
+                    th = L.get("then")
+                    ins = {"type": "direct", "waypoint": th} if th else {"type": "resume"}
+                    r = self.issue({**ins, "callsign": cs}, source="pilot_limit", by_pilot=True)
+                    if r["status"] != "accepted" and th:
+                        r = self.issue({"type": "resume", "callsign": cs}, source="pilot_limit", by_pilot=True)
+                        th = None
+                    e = self.entries.get(cs)
+                    if e is not None:
+                        e.pop("heading", None)
+                        e.pop("hlim", None)
+                        e.pop("then", None)
+                        if th:
+                            e["direct"] = th
+                    self._event("pilot_readback", callsign=cs, ok=True, limit=True,
+                                text=f"{cs} end of heading, proceeding direct {th}" if th else f"{cs} end of heading, resuming own navigation")
+                elif kind == "speed":
+                    self.issue({"type": "speed", "resume_normal": True, "callsign": cs}, source="pilot_limit", by_pilot=True)
+                    e = self.entries.get(cs)
+                    if e is not None:
+                        e.pop("speed", None)
+                        e.pop("slim", None)
+                    self._event("pilot_readback", callsign=cs, ok=True, limit=True, text=f"{cs} resuming normal speed")
 
     def _parse_speed(self, ac: Aircraft, instr: dict, target_alt_ft: float, allow_value: bool = True):
         """Speed part of an instruction -> {'mach', 'conversion_kt', 'ias_kt', 'resume_normal'} (validated)."""
@@ -539,6 +659,14 @@ class World:
             if n["waypoint"] in self.airspace.boundary_points and fra and "X" not in fra:
                 return [f"{n['waypoint']} is an entry-only point: not a valid exit"]
             return []
+        if n.get("type") in ("heading", "speed"):
+            if n["type"] == "speed" and (n.get("speed") or {}).get("resume_normal"):
+                return []
+            if not n.get("limit"):
+                self.m["no_limit"] = self.m.get("no_limit", 0) + 1
+                return [f"{n['type']} without a limit: give it in minutes or miles"
+                        + (" (or until a point)" if n["type"] == "speed" else "")]
+            return []
         if n.get("type") != "altitude":
             return []
         ac = self.aircraft.get(n["callsign"])
@@ -623,16 +751,18 @@ class World:
         if t == "altitude":
             ac = self.aircraft.get(cs)
             verb = "climb" if ac and n["fl"] * 100 > ac.alt_ft else "descend"
-            rate = f", {int(n['rate_fpm'])} ft/min or greater" if n.get("rate_fpm") else ""
+            rate = (f", {int(n['rate_fpm'])} ft/min or {'less' if n.get('rate_mode') == 'max' else 'greater'}"
+                    if n.get("rate_fpm") else "")
             spd = f", {self.speed_phrase(n['speed'])}" if n.get("speed") else ""
             return f"{cs} {verb} FL{n['fl']}{rate}{spd}"
         if t == "heading":
             turn = f"turn {n['turn']} " if n.get("turn") else "fly "
-            return f"{cs} {turn}heading {n['heading']:03d}"
+            then = f", then direct {n['then']}" if n.get("then") else ""
+            return f"{cs} {turn}heading {n['heading']:03d}{self.limit_text(n.get('limit'))}{then}"
         if t == "direct":
             return f"{cs} proceed direct {n['waypoint']}"
         if t == "speed":
-            return f"{cs} {self.speed_phrase(n['speed'])}"
+            return f"{cs} {self.speed_phrase(n['speed'])}{self.limit_text(n.get('limit'))}"
         if t == "resume":
             return f"{cs} resume own navigation"
         if t == "reroute":
@@ -681,6 +811,30 @@ class World:
                 mode, val = speed_from_value(req.value)
                 same = (sp.get("mach") == val) if mode == "mach" else (sp.get("ias_kt") == val)
             self._resolve_request(req, "approved" if same else "amended", instr_id)
+
+    def _check_exit_spacing(self, ac: Aircraft) -> None:
+        """Letter of agreement at the exit: the aircraft just crossing its exit point against those that crossed the
+        same point before it, at a level not vertically separated from its own: the one ahead must be at least
+        exit_spacing_nm away (arrivals to a sequencing fix have their own agreement)."""
+        if ac.destination and (ac.arr or {}).get("fix") or not ac.on_frequency:
+            return
+        req = float(getattr(self, "exit_spacing_nm", 10.0) or 10.0)
+        from .solve.cpa import _sv
+        for o in self.aircraft.values():
+            if o is ac or o.exit_point != ac.exit_point or getattr(o, "exit_t", None) is None or o.gone:
+                continue
+            if self.t - o.exit_t > 1200 or (o.destination and (o.arr or {}).get("fix")):
+                continue
+            nr = bool(o.non_rvsm() if callable(o.non_rvsm) else o.non_rvsm) or bool(ac.non_rvsm() if callable(ac.non_rvsm) else ac.non_rvsm)
+            if abs(o.alt_ft - ac.alt_ft) >= _sv(o.alt_ft, ac.alt_ft, nr, False) - 1:
+                continue
+            d = dist(o.pos, ac.pos)
+            if d < req:
+                rec = {"leader": o.callsign, "follower": ac.callsign, "exit": ac.exit_point, "spacing_nm": round(d, 1),
+                       "required_nm": req, "time_s": round(self.t, 1), "fl": int(round(ac.alt_ft / 100))}
+                self.m["exit_spacing"].append(rec)
+                self._event("exit_spacing", **rec, text=f"{ac.callsign} crossed {ac.exit_point} {d:.1f} NM behind {o.callsign} "
+                                                       f"at FL{rec['fl']} (letter of agreement: {req:g} NM)")
 
     def add_dynamic_request(self, callsign: str, rtype: str, value, reason: str,
                             kind: Optional[str] = None) -> Optional[str]:
@@ -732,9 +886,14 @@ class World:
             return
         if t in ("heading", "direct", "resume", "reroute") and ac.nav_mode == "wxdev":
             ac.wx["phase"] = "clear"
+        if t in ("heading", "direct", "resume", "reroute", "deviation", "wx_plan"):
+            self._set_limit(ac, "heading", n if t == "heading" else {})
+        if t == "speed" or (t == "altitude" and n.get("speed")):
+            self._set_limit(ac, "speed", n if t == "speed" else {})
         if t == "altitude":
             ac.cleared_alt_ft = n["fl"] * 100.0
             ac.vs_cmd_fpm = n.get("rate_fpm")
+            ac.vs_cmd_mode = n.get("rate_mode") or "min"
             sq = self.seq.get(ac.arr.get("fix")) if ac.destination else None
             if sq is not None:
                 loa = sq.cross_at_fl or sq.cross_at_or_below_fl or sq.min_fl
@@ -902,6 +1061,9 @@ class World:
                 self._event("aircraft_exited", callsign=ac.callsign, at=ac.exit_point,
                             planned_exit=ac.planned_exit, fl=int(round(ac.alt_ft / 100)),
                             fuel_used_kg=round(ac.fuel_used, 1))
+                ac.exit_t = self.t
+                if self.record:
+                    self._check_exit_spacing(ac)
                 self._expire_requests(ac.callsign)
             elif res == "left_sector":
                 if self.record:
@@ -932,10 +1094,15 @@ class World:
                         vert = f" descending FL{int(ac.cleared_alt_ft // 100)}"
                     elif ac.cleared_alt_ft > ac.alt_ft + 300:
                         vert = f" climbing FL{int(ac.cleared_alt_ft // 100)}"
+                    rfl = getattr(ac, "rfl", None)
+                    ask_rfl = bool(rfl) and rfl * 100 > ac.cleared_alt_ft + 50
                     self._event("checkin", callsign=ac.callsign, entry=ac.entry_wp, fl=int(round(ac.alt_ft / 100)),
                                 assumed=ac.assumed,
                                 text=f"{ac.callsign} {ac.icao} FL{int(round(ac.alt_ft / 100))}{vert}, checking in "
-                                     f"({ac.entry_wp} in {dist(ac.pos, self.waypoints[ac.entry_wp]):.0f} NM)")
+                                     f"({ac.entry_wp} in {dist(ac.pos, self.waypoints[ac.entry_wp]):.0f} NM)"
+                                     + (f", requesting FL{rfl}" if ask_rfl else ""))
+                    if ask_rfl and self.record:          # a departure asks for its final level on first contact
+                        self.add_dynamic_request(ac.callsign, "altitude", int(rfl), "final level (departure)")
                     if not ac.assumed and self.record:
                         # first contact: waits for the controller to assume the aircraft (assume, or reply to it)
                         req = Request(id=f"R{len(self.requests) + 1:03d}", callsign=ac.callsign, type="report",
@@ -944,6 +1111,8 @@ class World:
                         self.requests[req.id] = req
                     elif not ac.assumed:
                         ac.assumed = True                  # look-ahead predictions: nobody to answer
+        # 5c. limits of the clearances: the end of a heading or of a speed (also flown in look-ahead predictions)
+        self._limits_step(dt)
         # 6. pilots: onboard weather radar, deviation / ride requests (also flown in look-ahead predictions)
         for ac in self.aircraft.values():
             if ac.active:
@@ -1389,9 +1558,11 @@ class World:
             },
             "semicircular": {
                 "wrong_direction_exits": self.m["wrong_direction_exits"],
+                "exit_spacing_violations": self.m.get("exit_spacing", []),
                 "wrong_direction_clearances": self.m["wrong_direction_clearances"],
             },
-            "instructions": {"issued": self.m["instructions_issued"], "rejected": self.m["instructions_rejected"]},
+            "instructions": {"issued": self.m["instructions_issued"], "rejected": self.m["instructions_rejected"],
+                             "headings_speeds_without_limit": self.m.get("no_limit", 0)},
             "readback": dict(self.m.get("readback", {"errors": 0, "caught": 0, "missed": 0})),
             "assumption": (lambda ts, never: {
                 "assumed": len(ts), "mean_delay_s": round(sum(ts) / len(ts), 1) if ts else None,
@@ -1460,7 +1631,8 @@ class World:
         out.sort(key=lambda c: c["time_to_los_s"])
         return out
 
-    ENTRY_FIELDS = ("cfl", "xfl", "speed", "heading", "direct", "note", "wx", "coord", "route")
+    ENTRY_FIELDS = ("cfl", "xfl", "speed", "heading", "direct", "note", "wx", "coord", "route",
+                    "hlim", "then", "slim", "rate")
 
     def enter(self, callsign: str, fields: dict, who: str = "atc") -> dict:
         """Controller's label input (connected mode): cleared level, speed, heading, direct, free note.
@@ -1473,9 +1645,15 @@ class World:
         for k, v in fields.items():
             if k not in self.ENTRY_FIELDS:
                 continue
-            if v is None or v == "":
-                e.pop(k, None)
-                continue
+            if v is None or v == "" or (k == "speed" and str(v).upper() == "SN"):
+                if k == "heading":
+                    e.pop("hlim", None)
+                    e.pop("then", None)
+                if k == "speed":
+                    e.pop("slim", None)
+                if v is None or v == "":
+                    e.pop(k, None)
+                    continue
             if k in ("cfl", "xfl"):
                 v = int(str(v).upper().lstrip("FL").lstrip("F") or 0)
                 if v % 10 or not (0 < v <= 660):
@@ -1503,6 +1681,18 @@ class World:
                 v = str(v).upper().replace(" ", "")
                 if not re.match(r"^(L|R|Y|LR)?\d{0,3}$", v) or v == "":
                     raise InstructionError("weather deviation: L, R, L20 (left up to 20 NM) or Y (either side)")
+            elif k in ("hlim", "slim"):           # the limit of a heading / a speed: 5MIN, 20NM, a point (speeds)
+                lim = self.parse_limit(v, allow_point=(k == "slim"))
+                v = (f"{int(lim['min']) if float(lim['min']).is_integer() else lim['min']}MIN" if lim.get("min") is not None
+                     else f"{int(lim['nm'])}NM" if lim.get("nm") is not None else lim["until"])
+            elif k == "then":                     # after a heading: direct to this point
+                v = str(v).upper()
+                if v not in self.waypoints or v.startswith("@"):
+                    raise InstructionError(f"unknown point {v}")
+            elif k == "rate":                     # 1500 (ft/min or greater), 1500- (or less)
+                v = str(v).upper().replace(" ", "").replace("FPM", "")
+                if not re.fullmatch(r"\d{3,4}[+-]?", v):
+                    raise InstructionError("rate: ft/min, e.g. 1500 (or greater) or 1500- (or less)")
             elif k == "speed":
                 v = str(v).upper().replace(" ", "")
                 if not re.match(r"^(M0?\.?\d{2}|\d{3}(KT)?|S\d{3}|K\d{3}|SN|MIN|MAX)$", v):
@@ -1528,11 +1718,21 @@ class World:
             return [{"status": "rejected", "text": f"{cs}: no reply (radio failure)"}]
         instrs = []
         f = fields
+        e_now = self.entries.get(cs, {})
         if f.get("cfl") not in (None, ""):
             ins = {"type": "altitude", "fl": int(str(f["cfl"]).upper().lstrip("FL").lstrip("F"))}
+            rt = f.get("rate") if f.get("rate") not in (None, "") else None
+            if rt:
+                ins["rate_fpm"] = int(str(rt).rstrip("+-"))
+                ins["rate_mode"] = "max" if str(rt).endswith("-") else "min"
             instrs.append(ins)
         if f.get("heading") not in (None, ""):
-            instrs.append({"type": "heading", "heading": int(f["heading"])})
+            ins = {"type": "heading", "heading": int(f["heading"])}
+            if f.get("hlim") or e_now.get("hlim"):
+                ins["limit"] = f.get("hlim") or e_now.get("hlim")
+            if f.get("then") or e_now.get("then"):
+                ins["then"] = f.get("then") or e_now.get("then")
+            instrs.append(ins)
         elif "heading" in f and not f.get("direct") and not f.get("route") and ac.nav_mode == "heading":
             instrs.append({"type": "resume"})
         if f.get("direct") not in (None, ""):
@@ -1543,6 +1743,8 @@ class World:
         if f.get("speed") not in (None, ""):
             v = str(f["speed"]).upper().replace(" ", "")
             m = re.match(r"^M0?\.?(\d{2})$", v)
+            sl = f.get("slim") or e_now.get("slim")
+            n0 = len(instrs)
             if v == "SN":
                 instrs.append({"type": "speed", "resume_normal": True})
             elif m:
@@ -1551,6 +1753,8 @@ class World:
                 instrs.append({"type": "speed", "conversion_kt": int(v[1:])})
             elif re.match(r"^S?\d{3}(KT)?$", v):
                 instrs.append({"type": "speed", "ias_kt": int(re.sub(r"\D", "", v)[:3])})
+            if sl and len(instrs) > n0 and not instrs[-1].get("resume_normal"):
+                instrs[-1]["limit"] = sl
         if f.get("wx") not in (None, ""):
             m = re.match(r"^(L|R|Y|LR)?(\d{0,3})$", str(f["wx"]).upper())
             side = {"L": "left", "R": "right"}.get(m.group(1) if m else "", "either")

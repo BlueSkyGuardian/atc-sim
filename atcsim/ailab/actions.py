@@ -21,15 +21,23 @@ SCHEMA = """Answer with ONE JSON object and nothing else:
 Actions (use only these; an empty list means nothing to do now):
   {"type": "assume", "callsign": "RAM123"}                 answer an aircraft calling you (radar contact): it is then yours
   {"type": "clear", "callsign": "RAM123", "cfl": 370}      cleared flight level (multiple of 10)
-  {"type": "clear", "callsign": "RAM123", "heading": 250}  fly heading (degrees)
+  {"type": "clear", "callsign": "RAM123", "cfl": 370, "rate": "1500"}   with a rate: "1500" = 1500 ft/min or greater,
+                                                           "1500-" = or less (to climb or descend aircraft together)
+  {"type": "clear", "callsign": "RAM123", "heading": 250, "limit": "5MIN", "then": "IBALU"}
+                                                           fly heading (degrees) WITH ITS LIMIT ("5MIN" or "20NM"); at the
+                                                           limit the pilot proceeds direct to "then" (or resumes own navigation)
   {"type": "clear", "callsign": "RAM123", "direct": "ROLRO"}  proceed direct to a point of its route or the map
-  {"type": "clear", "callsign": "RAM123", "speed": "M76"}  Mach (M76) or indicated speed in knots ("280"); "SN" = resume normal speed
+  {"type": "clear", "callsign": "RAM123", "speed": "M76", "limit": "IBALU"}   Mach (M76) or indicated speed in knots
+                                                           ("280") WITH ITS LIMIT ("10MIN", "40NM" or a point); at the limit
+                                                           the pilot resumes normal speed. "SN" = resume normal speed now
   {"type": "clear", "callsign": "RAM123", "xfl": 350}      exit level coordinated with the next unit
   {"type": "resume", "callsign": "RAM123"}                 resume own navigation after a heading
   {"type": "reply", "request_id": "R004", "decision": "approve"}   or "unable"
   {"type": "ask", "callsign": "RAM123", "cfl": 370}        ask the pilot if able / interested in a level (answer at the next decision)
   {"type": "decontrol", "callsign": "RAM123"}              transfer an aircraft to the next unit: when it leaves your sector
-Several fields may go in one "clear" (e.g. cfl and heading)."""
+Several fields may go in one "clear" (e.g. cfl and heading). Every heading and every speed is given with its limit
+(minutes, miles, or a point for a speed), as the rules require: plan when the aircraft goes back to its route or
+its normal speed, so that it does so only once the traffic is passed."""
 
 
 def parse_full(text: str) -> Tuple[List[dict], str, str, List[dict]]:
@@ -89,7 +97,7 @@ def parse(text: str) -> Tuple[List[dict], str, str]:
     return [], "", "no JSON object in the answer"
 
 
-ALLOWED_CLEAR = ("cfl", "xfl", "heading", "direct", "speed")
+ALLOWED_CLEAR = ("cfl", "xfl", "heading", "direct", "speed", "limit", "then", "rate")
 
 
 def _parity_levels(fl: int, southbound: bool) -> str:
@@ -99,10 +107,36 @@ def _parity_levels(fl: int, southbound: bool) -> str:
     return ", ".join(str(x) for x in near[:2])
 
 
+_POS_CACHE: dict = {}
+
+
+def _positive(w, ac, a: dict) -> Optional[dict]:
+    """The positive-separation check of a clearance about to be given (resolve.positive); None when not applicable."""
+    if not a:
+        return None
+    try:
+        from ..solve import resolve, traj as traj_mod
+        prm = resolve.clearance_params(w, ac, a)
+        if not prm:
+            return None
+        key = (id(w), round(w.t, 1))
+        if _POS_CACHE.get("key") != key:                 # everyone's trajectories, once per decision (not on the world:
+            _POS_CACHE.update(key=key, trajs=traj_mod.build_all(w, resolve.H_DEFAULT))   # it is saved in recordings)
+        return resolve.positive(w, ac.callsign, prm, _POS_CACHE["trajs"])
+    except Exception:  # noqa: BLE001 - the check never stops a clearance
+        return None
+
+
 def check_rules(w, ac, a: dict) -> List[str]:
     """The rules a clearance must respect (semicircular rule for cruising and exit levels): refusal texts."""
     from ..aircraft import level_parity_ok
     out = []
+    if a.get("heading") not in (None, "") and a.get("limit") in (None, ""):
+        out.append(f'heading {a["heading"]} for {ac.callsign} without its limit: give "limit" (e.g. "5MIN" or "20NM") '
+                   f'and, if wanted, "then" (the point to proceed to at the limit); nothing was given')
+    if a.get("speed") not in (None, "") and str(a["speed"]).upper() != "SN" and a.get("limit") in (None, ""):
+        out.append(f'speed {a["speed"]} for {ac.callsign} without its limit: give "limit" ("10MIN", "40NM" or a point '
+                   f'past the traffic); nothing was given')
     side = "southbound: odd levels" if ac.southbound else "northbound: even levels"
     for k in ("cfl", "xfl"):
         if a.get(k) in (None, ""):
@@ -247,17 +281,25 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                 if t == "resume":
                     body["heading"] = ""
                 else:
-                    for k in ("cfl", "xfl", "heading", "direct", "speed"):
+                    for k in ("cfl", "xfl", "heading", "direct", "speed", "then", "rate"):
                         if a.get(k) not in (None, ""):
                             body[k] = a[k]
+                    if a.get("limit") not in (None, ""):
+                        if "heading" in body:
+                            body["hlim"] = a["limit"]
+                        if "speed" in body and str(body["speed"]).upper() != "SN":
+                            body["slim"] = a["limit"]
+                    if "rate" in body and "cfl" not in body:
+                        raise ValueError("rate goes with a level (cfl)")
                     if "heading" in body and "direct" in body:
                         raise ValueError("heading and direct together: choose one")
-                    if len(body) == 1:
+                    if not set(body) & {"cfl", "xfl", "heading", "direct", "speed"}:
                         raise ValueError("clear: nothing to clear (cfl, heading, direct, speed or xfl)")
                     if "heading" in body:
                         body["direct"] = ""
                 if force:
                     body["force"] = True
+                pos = _positive(w, ac, a if t == "clear" else {})
                 r = inputs.apply(w, "entries", body, actor)
                 rb = r.get("_readback") or []
                 ok = not any(x.get("status") == "rejected" for x in rb)
@@ -266,6 +308,11 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                     txt += (f" (IGNORED: {', '.join(repr(e) for e in extra)} {'is not a field' if len(extra) == 1 else 'are not fields'}"
                             f" — a clear takes only {', '.join(ALLOWED_CLEAR)})")
                 res = {"action": a, "ok": ok, "text": txt}
+                if pos and ok:
+                    res["positive"] = pos["positive"]
+                    if not pos["positive"]:
+                        res["text"] += (f" — NOT POSITIVE SEPARATION: with this clearance {cs} comes within {pos['after_nm']} NM of "
+                                        f"{pos['with'] or 'other traffic'} (separation was not assured before giving it)")
                 if note:
                     res["early"] = True
                 if extra:
@@ -278,8 +325,20 @@ def apply(w, actions: List[dict], actor: dict, max_actions: int = 12, force: boo
                     raise ValueError(f"no pending request {rid}")
                 dec = str(a.get("decision", "")).lower()
                 code = "ROG" if q.type == "report" else "APP" if dec.startswith("app") else "UNA"
+                pos = None
+                if code == "APP" and q.callsign in w.aircraft:
+                    v = str(q.value or "")
+                    req_clr = ({"cfl": v} if q.type == "altitude" else {"direct": v} if q.type == "direct"
+                               else {"speed": v, "limit": "10MIN"} if q.type == "speed" else {})
+                    pos = _positive(w, w.aircraft[q.callsign], req_clr)
                 r = inputs.apply(w, "cpdlc_command", {"text": code, "callsign": q.callsign, "voice": True}, actor)
-                out.append({"action": a, "ok": True, "text": r.get("note") or code})
+                res = {"action": a, "ok": True, "text": r.get("note") or code}
+                if pos:
+                    res["positive"] = pos["positive"]
+                    if not pos["positive"]:
+                        res["text"] += (f" — NOT POSITIVE SEPARATION: approving it brings {q.callsign} within {pos['after_nm']} NM of "
+                                        f"{pos['with'] or 'other traffic'}")
+                out.append(res)
             else:
                 raise ValueError(f"unknown action type '{t}'")
         except (InstructionError, ValueError, KeyError) as e:

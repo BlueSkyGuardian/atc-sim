@@ -2,7 +2,7 @@
 // the clearances that leave everyone separated - speed first, then a delaying vector or a direct, then a level - the
 // aircraft with priority in its level left alone where possible; the best ones checked by running the simulation
 // ahead. "Apply" enters the clearance in the label as the controller would; a delaying vector leaves a "Resume"
-// reminder. Uses the radar page's globals (state, SID, EXID, EXINFO, DBID, AIW, api, msg, selected, pollSelected).
+// reminder (a vector given with its limit ends by itself: the pilot proceeds as cleared). Uses the radar page's globals (state, SID, EXID, EXINFO, DBID, AIW, api, msg, selected, pollSelected).
 (function () {
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -58,8 +58,12 @@
           <span class="sv-d" title="${s.confirmed ? 'checked by running the simulation ahead: closest distance afterwards' : 'predicted closest distance afterwards'}">${s.confirmed ? '✓ ' + s.confirmed_min_nm : (s.d_min != null ? s.d_min : '—')} NM</span>
           <button data-apply="${ci}:${si}">Apply</button></div>`).join('')
         || '<div class="sv-warn">No single clearance (or pair) keeps everyone separated: combine, or act on the other traffic.</div>';
-      return `<div class="sv-c"><div class="sv-h"><a data-sel="${esc(a)}">${esc(a)}</a> × <a data-sel="${esc(b)}">${esc(b)}</a>
-          <span class="c-dim">${c.d_min_nm} NM in ${mmss(c.t_first_s)}</span></div>${prio}${noTurn}${sols}</div>`;
+      const head = c.kind === 'exit'
+        ? `EXIT ${esc(c.exit)}: <a data-sel="${esc(b)}">${esc(b)}</a> behind <a data-sel="${esc(a)}">${esc(a)}</a>
+           <span class="c-dim">${c.d_min_nm} NM at the exit (LoA ${c.required_nm} NM) in ${mmss(c.t_first_s)}</span>`
+        : `<a data-sel="${esc(a)}">${esc(a)}</a> × <a data-sel="${esc(b)}">${esc(b)}</a>
+           <span class="c-dim">${c.d_min_nm} NM in ${mmss(c.t_first_s)}</span>`;
+      return `<div class="sv-c ${c.kind === 'exit' ? 'exit' : ''}"><div class="sv-h">${head}</div>${prio}${noTurn}${sols}</div>`;
     }).join('');
     const html = `<div class="hd">SOLVER <span class="c-dim">${data ? 'T+' + mmss(data.sim_time_s) : ''}${busy ? ' …' : ''}</span></div>${rs}${body}`;
     if (html !== lastH) { box.innerHTML = html; lastH = html; }
@@ -91,10 +95,11 @@
     if (s.needs_ask && !confirm(`${s.text}: the pilot has not asked for this level. Has the pilot said it is acceptable?`)) return;
     try {
       for (const a of s.actions) {
-        const { type, ...f } = a;
-        if (f.heading != null) f.direct = '';
+        const { type, limit, ...f } = a;
+        if (f.heading != null) { f.direct = ''; if (limit) f.hlim = limit; }
+        if (f.speed != null && limit) f.slim = limit;
         await enter(f);
-        if (f.heading != null) {
+        if (f.heading != null && !limit) {
           const prm = s.kind === 'pair' ? (s.params[a.callsign] || {}) : s.params;
           if (prm.for_s) resumes[a.callsign] = { at: state.sim_time_s + prm.for_s, heading: f.heading };
         }

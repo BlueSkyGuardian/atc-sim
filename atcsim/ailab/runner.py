@@ -150,7 +150,7 @@ def grade(struct: dict, results: list) -> list:
     out = []
     given = [r["action"] for r in results if r.get("ok") and r["action"].get("type") in ("clear", "ask")]
     for key, sv in (struct.get("solver") or {}).items():
-        pair = key.split("×")
+        pair = key.split("@")[0].split("×")
         acts = [x for x in given if str(x.get("callsign", "")).upper() in pair]
         if not acts:
             out.append({"pair": pair, "grade": "left alone"})
