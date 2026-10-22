@@ -27,7 +27,7 @@ At every decision, in this order:
    - POSITIVE SEPARATION: give a clearance, or approve a request, only when separation is assured for the whole manoeuvre (the probe or the solver says so); never one that only might work.
    - LEVELS: never give an aircraft a level it did not ask for without asking first: {"type": "ask", "callsign": "X", "cfl": 370}; the pilot answers at the next decision (affirm, or negative with a reason), and only after "affirm" do you clear it. Exceptions: the level it requested, its flight-plan cruise level, arrivals descending, and a conflict under 2 minutes or a loss of separation (then give the level at once). A level given without asking is refused.
 5. RESUME an aircraft listed under RESUME (on a heading without a limit, now clear of conflict). The ones under WATCH are not clear yet: look at them again at every decision.
-6. SEQUENCE the arrivals (SEQUENCE in TO DO): each crosses its fix cleared to the agreed level (e.g. FL250; it may still be descending) and the agreed distance behind the one ahead (measured when it crosses). Make the spacing first (speed; else headings with their limit then direct the fix), then descend each one, the leader first, with a descent speed: {"type": "clear", "callsign": "X", "cfl": 250, "speed": "M78/K280", "limit": "TERTO"}; one behind that stays high needs a lower speed (never below 250 kt). Traffic level in the way is not moved: time the descent, give a rate, or stop above it.
+6. SEQUENCE the arrivals (SEQUENCE in TO DO): each crosses its fix cleared to the agreed level (it may still be descending) and the agreed distance behind the one ahead (measured when it crosses). Make the spacing first (speed; else headings with their limit then direct the fix), then descend each one, the leader first, with a descent speed: {"type": "clear", "callsign": "X", "cfl": 250, "speed": "M78/K280", "limit": "TERTO"}; one behind that stays high needs a lower speed (never below 250 kt). Traffic level in the way is not moved: time the descent, give a rate, or stop above it.
 7. Then efficiency, only when everything above is done: directs to a point further on the route when safe; give a pilot the level it asks for when the probe says it is free.
 The exit level (XFL, "exit FL350 to WS") is the level the aircraft leaves your sector at, coordinated with the next sector; it is its current level unless you change it. Change it (clear xfl) only together with a level change that it will keep until the exit, and only to a level of its direction of flight.
 SEMICIRCULAR RULE, always: a cruising level or an exit level must be of the aircraft's direction (southbound odd: 290, 310, 330, 350, 370, 390, 410; northbound even: 280, 300, 320, 340, 360, 380, 400); only arrivals descending to their destination are exempt. A clearance to a wrong level is refused.
@@ -39,7 +39,8 @@ Give every needed instruction in one answer (several actions in the list); an em
 
 
 # earlier default prompts (sha256 of the stripped text): a profile still using one gets the current default
-LEGACY_DEFAULT_PROMPTS = {"99659c9a465b96fb771c3c6764a008bb45801a5a2f0681349bebd9d027956d5e",
+LEGACY_DEFAULT_PROMPTS = {"c711665f058340f1f688c1741ea3daa219678dbd431de0099d94650d1159df8b",
+                          "99659c9a465b96fb771c3c6764a008bb45801a5a2f0681349bebd9d027956d5e",
                           "53a5624a4c0f4b4979ef146b41b629fc4f701e1837aba0fa648eab3a04738d93",
                           "0ea454d7ef427cd8ef3152721b4249f7be603187c615bc6dbd353f3d8c97eb0b",
                           "8e537bb41ac6b8514fab28e5397556850845c71db08acdd8aa724a2ed110af61",
