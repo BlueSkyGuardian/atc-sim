@@ -175,6 +175,8 @@ ok(r.status_code == 200 and r.json()["look_ahead_s"] == 2100 and ins.get(f"/sess
    "controller sets the MTCD look-ahead (35 min), every seat sees it")
 ok(atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 90}).status_code == 400, "MTCD look-ahead over 60 min refused")
 ok(pil.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 10}).status_code == 403, "pilot cannot change the MTCD look-ahead")
+_sq = atc.post(f"/sessions/{eid}/sequence", json={"callsigns": ["X1", "X2"], "point": "ZZZZZ"}).status_code
+ok(_sq in (200, 400), f"the controller may use the sequencing tool (an unknown point: 400, not 403): {_sq}")
 ok(ins.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 20}).status_code == 200, "instructor resets it to 20 min")
 # CPDLC: the controller types, the pseudo-pilot answers
 dl = ins.get(f"/sessions/{eid}/cpdlc").json()

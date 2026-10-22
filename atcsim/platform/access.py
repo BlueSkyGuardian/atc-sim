@@ -4,7 +4,8 @@
 * /sessions/{id}/... is reserved to the members of that exercise, and each seat has its own rights:
     instructor : everything (simulation control, areas, runway, all instructions)
     pilot      : reads everything, executes instructions (the pseudo-pilot flies the aircraft), probes
-    atc        : reads everything, probes, assumes aircraft and enters clearances in the labels (/entries, /assume);
+    atc        : reads everything, probes, uses the sequencing tool, assumes aircraft and enters clearances in the
+                 labels (/entries, /assume);
                  the aircraft only do what the pseudo-pilot makes them do
 * scenario files, the designer and session creation are for instructors (and the admin).
 """
@@ -27,7 +28,7 @@ SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
 WRITE_RIGHTS = {
     "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live|bookmark)$",),   # pseudo-pilots run the simulation too
-    "atc": (r"^/(probe|mtcd|mtcd/settings|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
+    "atc": (r"^/(probe|mtcd|mtcd/settings|sequence|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
 }
 
 
