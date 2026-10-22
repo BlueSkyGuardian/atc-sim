@@ -58,7 +58,8 @@
       }
     }
     for (const sel of ['#viewbar', '#hud', '#alerts', '#pauseBanner', '#ptt', '#phoneBtn', '#phonePanel', '#callHud', '#lblMenu', '#wins', '#dispPanel',
-                       '#ctrlRow', '#solvePanel', '#seqPanel'])        // (the solo radar's control bar and panels)
+                       '#ctrlRow', '#solvePanel', '#seqPanel', '#radioLog', '#cmdBar'])   // + the solo radar's control bar, panels,
+                                                                             // radio log; the command line (what is typed)
       walk(document.querySelector(sel));
     return out;
   }
