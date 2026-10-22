@@ -77,7 +77,7 @@ class Capture:
             areas = [a.snapshot(w.t) for a in w.areas.values()]
         keep = ("outline", "shape", "sectors", "waypoints", "routes", "rad_routes", "external_points",
                 "transfer_points", "controlled_sectors", "bbox_nm", "name", "unit", "airways", "provisional_points",
-                "coordination_points", "coast")
+                "coordination_points", "coast", "fir")
         st = {"name": self.name, "scenario": self.s.scenario_name, "created": time.time(), "sep_h": w.sep_h,
               "sector": {k: sec.get(k) for k in keep}, "areas": areas}
         with open(os.path.join(self.dir, "static.json"), "w") as f:

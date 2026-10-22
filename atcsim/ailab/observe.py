@@ -668,7 +668,7 @@ def observe(w, opts: Dict = None) -> Tuple[str, dict]:
     if los:
         lines.append("\nLOSS OF SEPARATION NOW: " + "; ".join(" × ".join(p.get("aircraft", [])) for p in los))
         struct["losses"] = [p.get("aircraft") for p in los]
-    areas = [a for a in st.get("areas") or [] if a.get("active")]
+    areas = [a for a in st.get("areas") or [] if a.get("active") and a.get("relevant", True)]
     if areas:
         lines.append("\nACTIVE AREAS (keep traffic out): " + "; ".join(
             f"{a.get('id')} {a.get('kind', '')} FL{a.get('lower_fl', '')}-{a.get('upper_fl', '')}" for a in areas))

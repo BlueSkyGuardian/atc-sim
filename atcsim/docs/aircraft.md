@@ -88,7 +88,21 @@ Madeira, Sevilla, Canarias, Casablanca), which OLDI and the labels use.
 
   A scenario picks the controlled sectors with `"control"`. The others are flown by "the adjacent sector"
   (coordinated by OLDI and the telephone).
-- **Airways:** UN866, UN873 (southbound only), UN858 (northbound only), UN857, UR722, UR724, UH899 and UA411.
+- **The rest of the FIR.** The airspace is the whole Casablanca FIR: the CTA CASABLANCA's sectors are drawn too
+  (dimmer) and can be controlled instead (`"control": ["N"]` …):
+
+  | Sector | Name | Frequency (backup) |
+  |---|---|---|
+  | N | North | 125.500 (132.325) |
+  | E | East | 125.100 (132.100) |
+  | C | Central | 133.100 (132.500) |
+  | SS | South-South | 126.700 (132.500) |
+
+  When Agadir sectors are controlled, Casablanca is the adjacent unit (and the other way round). Casablanca has no
+  declared capacity in the file.
+- **Areas:** the AIP prohibited, restricted and danger areas (GMP, GMR, GMD) are in every scenario; prohibited
+  areas active, the others activated by the scenario or the instructor.
+- **Airways** (AIP ENR 3.1 / 3.2, the reference): UN866, UN873 (southbound only), UN858 (northbound only), UN857 (southbound only), UL82 RUNAX–IBALU (southbound only), UR722, UR724, UH899 (SAK–IBALU, westbound only) and UA411, and the Casablanca upper airways (UH300, UN869, UN871 and UQ401 one-way).
 - **Standard routes:** RUNAX–IBALU–ERMED–TOVRA–VEDOD–TERTO and DESUM–SULAM–UN858–AKUDA.
 - **RAD routings** (one way, dashed on the radar): RUNAX–IBALU–SAMAR, SUBAL–IBALU–SALCA, TAKAV–DOMOG,
   BEXAL–IBALU–SALCA, TAKAV–VEDOD–TERTO, VASTO–NIDEB–TIGGI, VASTO–BAROK, SAMAR–BEXAL, SAMAR–TIGGI and

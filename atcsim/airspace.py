@@ -172,7 +172,8 @@ class Airspace:
         for a, b in zip(names, names[1:]):
             for k, v in self.airways.items():
                 pts = v["points"]
-                if v.get("one_way") and a in pts and b in pts and pts.index(b) < pts.index(a) and k not in bad:
+                if (v.get("one_way") and a in pts and b in pts and pts.index(b) < pts.index(a) and k not in bad
+                        and (a, b) not in legs):         # not also a leg of a two-way route (UB11 / UN869 SLK-PELAX)
                     bad.append(k)
             if (b, a) in legs and (a, b) not in legs and not any(k in self.airways and a in self.airways[k]["points"]
                                                                 and b in self.airways[k]["points"] for k in bad):
@@ -300,6 +301,15 @@ class Airspace:
                                     for k, p in self.waypoints.items() if not k.startswith("@")
                                     for ll in [self.projection.inverse(*p)]}
         out.update(self.notes)
+        if getattr(self, "fir_sectors", None):
+            # the rest of the FIR: the other control area's sectors (drawn, not ours) and the FIR outline
+            names = getattr(self, "fir_cta_names", {}) or {}
+            out["fir"] = {"outline": [[round(x, 2), round(y, 2)] for x, y in self.fir_outline],
+                          "control_area": names.get(self.cta, self.cta),
+                          "sectors": [{**s.snapshot(), "control_area": names.get(c, c)} for s, c in self.fir_sectors]}
+            out["fir_external_points"] = sorted(getattr(self, "fir_external", []) or [])
+        if getattr(self, "published_areas", None):
+            out["published_areas_note"] = self.areas_note
         c = self.coast()
         if c:
             out["coast"] = c
@@ -394,6 +404,36 @@ def available() -> List[str]:
     return names
 
 
+def _arc_points(proj, c_ll, r_nm: float, a_ll, b_ll, direction: str) -> List[Point]:
+    """Intermediate points of an arc of a circle from a to b (both excluded)."""
+    b0 = gc_bearing(*c_ll, *a_ll)
+    b1 = gc_bearing(*c_ll, *b_ll)
+    span = (b0 - b1) % 360 if direction == "ccw" else -((b1 - b0) % 360)
+    n = max(2, int(abs(span) / 2.0))
+    return [proj.forward(*destination(*c_ll, b0 - span * k / n, float(r_nm))) for k in range(1, n)]
+
+
+def _circles_hull(pts: List[Tuple[Point, float]]) -> List[Point]:
+    """Two circles and their common tangents = convex hull of the circles."""
+    ring = []
+    for (cx, cy), r in pts:
+        ring += [(cx + r * math.sin(math.radians(a)), cy + r * math.cos(math.radians(a))) for a in range(0, 360, 10)]
+    ring = sorted(set(ring))
+
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lo, hi = [], []
+    for p in ring:
+        while len(lo) >= 2 and cross(lo[-2], lo[-1], p) <= 0:
+            lo.pop()
+        lo.append(p)
+    for p in reversed(ring):
+        while len(hi) >= 2 and cross(hi[-2], hi[-1], p) <= 0:
+            hi.pop()
+        hi.append(p)
+    return lo[:-1] + hi[:-1]
+
+
 @lru_cache(maxsize=None)
 def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     d = _load_json(name)
@@ -402,6 +442,7 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     xy = lambda s: proj.forward(*parse_dms(s))
 
     points: Dict[str, Point] = {k: xy(v["coord"]) for k, v in d["points"].items()}
+    ext = (d.get("external_points") or {}).get("points", {})
     cons: Dict[str, Point] = {}
     # boundary ring with inserted named vertices
     ring_raw: List = []
@@ -420,28 +461,29 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
             ring_raw.append(("i", item["insert"]))
         elif "arc" in item:
             a = item["arc"]
-            c_ll = parse_dms(a["center"])
-            prev_ll = proj.inverse(*ring_raw[-1][1])
-            to_ll = parse_dms(a["to"])
-            b0 = gc_bearing(*c_ll, *prev_ll)
-            b1 = gc_bearing(*c_ll, *to_ll)
-            span = (b0 - b1) % 360 if a.get("direction", "ccw") == "ccw" else -((b1 - b0) % 360)
-            n = max(2, int(abs(span) / 2.0))
-            for k in range(1, n):
-                ring_raw.append(("v", proj.forward(*destination(*c_ll, b0 - span * k / n, float(a["radius_nm"])))))
+            last = [v for kind, v in ring_raw if kind == "v"][-1]
+            for p in _arc_points(proj, parse_dms(a["center"]), a["radius_nm"], proj.inverse(*last),
+                                 parse_dms(a["to"]), a.get("direction", "ccw")):
+                ring_raw.append(("v", p))
             prev_ll = None
-    # construction points (junctions, intercepts of sector lines with the boundary)
+    # construction points (junctions, intercepts of sector lines with the boundary, points kept on a line)
     for k, c in d.get("construction_points", {}).items():
         if "coord" in c:
             cons[k] = xy(c["coord"])
-    allp = {**points, **cons}
+    allp = {**points, **{k: xy(v["coord"]) for k, v in ext.items()}, **cons}
+    ref = lambda n: allp[n] if n in allp else xy(n)
     for k, c in d.get("construction_points", {}).items():
         if "on_edge" in c:
-            e0, e1 = xy(c["on_edge"][0]), xy(c["on_edge"][1])
-            l0 = allp[c["line"][0]] if c["line"][0] in allp else xy(c["line"][0])
-            l1 = allp[c["line"][1]] if c["line"][1] in allp else xy(c["line"][1])
-            cons[k] = _line_intersection(l0, l1, e0, e1)
+            cons[k] = _line_intersection(ref(c["line"][0]), ref(c["line"][1]), xy(c["on_edge"][0]), xy(c["on_edge"][1]))
             allp[k] = cons[k]
+    for k, c in d.get("construction_points", {}).items():
+        if "snap" in c:                        # a point kept on a straight boundary segment (e.g. DOMOG)
+            p = _project_on_segment(ref(c["snap"]), ref(c["onto"][0]), ref(c["onto"][1]))
+            if k in points:
+                points[k] = p
+            else:
+                cons[k] = p
+            allp[k] = p
     # snap inserted named points onto their boundary edge
     # (the vertex list is complete first - parallels are densified - then each named point goes on its nearest edge)
     ring: List[Tuple[Point, Optional[str]]] = [(v, None) for kind, v in ring_raw if kind == "v"]
@@ -459,10 +501,10 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
             cons[v] = p
         allp[v] = p
         ring.insert(e + 1, (p, v))
-    outline = [p for p, _ in ring]
+    fir_outline = [p for p, _ in ring]
     idx = {name: i for i, (_, name) in enumerate(ring) if name}
 
-    sectors = []
+    sectors, cta_of = [], {}
     for s in d["sectors"]:
         a, b = idx[s["ring"][0]], idx[s["ring"][1]]
         path = []
@@ -472,18 +514,48 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
             if i == b:
                 break
             i = (i + 1) % len(ring)
-        line = [allp[n] for n in s["line"][1:-1]]
-        sectors.append(Sector(s["id"], s["name"], path + line, s.get("freq"), s.get("backup_freq")))
+        line, prev = [], s["line"][0]
+        for item in s["line"][1:]:
+            if isinstance(item, dict):                 # an arc of a circle from the previous point to "to"
+                arc = item["arc"]
+                p0, p1 = proj.inverse(*allp[prev]), proj.inverse(*allp[arc["to"]])
+                if prev < arc["to"]:
+                    line += _arc_points(proj, parse_dms(arc["center"]), arc["radius_nm"], p0, p1, arc["direction"])
+                else:                                  # same vertices whichever sector draws it
+                    line += _arc_points(proj, parse_dms(arc["center"]), arc["radius_nm"], p1, p0,
+                                        "cw" if arc["direction"] == "ccw" else "ccw")[::-1]
+                line.append(allp[arc["to"]])
+                prev = arc["to"]
+                continue
+            line.append(allp[item])
+            prev = item
+        poly = [q for k, q in enumerate(path + line[:-1]) if k == 0 or q != (path + line[:-1])[k - 1]]
+        if s.get("start") in allp and allp[s["start"]] in poly:     # first vertex (as published / as before)
+            k = poly.index(allp[s["start"]])
+            poly = poly[k:] + poly[:k]
+        sectors.append(Sector(s["id"], s["name"], poly, s.get("freq"), s.get("backup_freq")))
+        cta_of[s["id"]] = s.get("cta", "")
 
     ids = [s.id for s in sectors]
-    ctl = list(control) if control else ids
+    ctl = list(control) if control else list(d.get("default_control") or ids)
     for c in ctl:
         if c not in ids:
             raise ValueError(f"unknown sector {c} in airspace {name}; sectors: {ids}")
-    polys = [s.polygon for s in sectors if s.id in ctl]
-    polygon = outline if len(ctl) == len(ids) else _union_ring(polys)
+    own = cta_of[ctl[0]]
+    if any(cta_of[c] != own for c in ctl):
+        raise ValueError(f"sectors {ctl} belong to different control areas: control sectors of one of them")
+    mine = [s for s in sectors if cta_of[s.id] == own]          # sectors of our unit
+    others = [s for s in sectors if cta_of[s.id] != own]        # the rest of the FIR, drawn, not ours
+    one_cta = not others
+    outline = fir_outline if one_cta else _union_ring([s.polygon for s in mine])
+    polys = [s.polygon for s in mine if s.id in ctl]
+    polygon = outline if len(ctl) == len(mine) else _union_ring(polys)
     if _signed_area(polygon) > 0:            # clockwise like the CTA table, purely cosmetic
         polygon = polygon[::-1]
+    if _signed_area(outline) > 0:
+        outline = outline[::-1]
+    ctas = {k: v for k, v in (d.get("ctas") or {}).items() if not k.startswith("_")}
+    cta = ctas.get(own, {})
 
     airways = {k: {"points": v["points"], "lower": v.get("lower"), "one_way": bool(v.get("one_way")),
                    **({"note": v["note"]} if v.get("note") else {})} for k, v in d["airways"].items()}
@@ -498,37 +570,100 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     routes += rad
     rad2 = [list(r) for r in d.get("rad_routes", {}).get("two_way", [])]
     routes += [r[::-1] for r in rad2]          # RAD routings also flown in the other direction
-    # points of the neighbouring sectors: route points before the entry / after the exit, valid direct-to targets
+    # points of the neighbouring sectors / units: route points before the entry / after the exit, valid
+    # direct-to targets. Points outside the FIR always; points of the FIR outside our control area too.
     pinfo = dict(d["points"])
-    ext = (d.get("external_points") or {}).get("points", {})
     for k, v in ext.items():
         points[k] = xy(v["coord"])
         pinfo[k] = {**v, "role": f"external ({v.get('region', '')})", "external": True}
+    ctl_poly = outline                         # our control area (its other sectors are ours: not external)
+    near_ctl = lambda p: min(_seg_dist(p, ctl_poly[i], ctl_poly[(i + 1) % len(ctl_poly)]) for i in range(len(ctl_poly)))
+    fir_ext = []
+    if not one_cta:
+        for k, p in points.items():
+            if k in ext and not g.point_in_polygon(p, fir_outline):
+                continue
+            fra = str(pinfo.get(k, {}).get("fra", ""))
+            dd = near_ctl(p)
+            inside = g.point_in_polygon(p, ctl_poly)
+            if inside or dd <= ON_BOUNDARY_NM or (dd <= FIR_POINT_TOLERANCE_NM and ("E" in fra or "X" in fra)):
+                if pinfo.get(k, {}).get("external"):
+                    pinfo[k] = {kk: vv for kk, vv in pinfo[k].items() if kk != "external"}
+                    pinfo[k]["role"] = pinfo[k].get("region", "")
+                continue
+            if pinfo.get(k, {}).get("external"):
+                continue
+            sec = next((s for s in sectors if g.point_in_polygon(p, s.polygon)), None)
+            region = (ctas.get(cta_of[sec.id], {}).get("short") or cta_of[sec.id].title()) if sec else "FIR"
+            pinfo[k] = {**pinfo.get(k, {}), "region": f"{region} ({sec.name})" if sec else region,
+                        "external": True, "fir": True}
+            fir_ext.append(k)
     ads = []
     for a in d.get("aerodromes", []):
         x, y = xy(a["coord"])
         ads.append({**{k: v for k, v in a.items() if k != "coord"}, "x": round(x, 3), "y": round(y, 3)})
+    # published prohibited / restricted / danger areas (AIP ENR 5.1)
+    areas = []
+    for a in (d.get("published_areas") or {}).get("areas", []):
+        ar = {k: v for k, v in a.items() if k not in ("circle", "polygon", "circles")}
+        if "circle" in a:
+            c = xy(a["circle"]["center"])
+            ar["circle"] = {"center": [c[0], c[1]], "radius_nm": float(a["circle"]["radius_nm"])}
+        elif "circles" in a:
+            ar["polygon"] = [list(p) for p in _circles_hull([(xy(c["center"]), float(c["radius_nm"]))
+                                                              for c in a["circles"]])]
+        else:
+            ar["polygon"] = [list(xy(p)) for p in a["polygon"]]
+        ar["active"] = bool(a.get("active", a["kind"] == "prohibited"))
+        areas.append(ar)
     v = d["vertical"]
-    sp = Airspace(id=d["id"], name=d["name"] + ("" if len(ctl) == len(ids) else f" - sector(s) {'+'.join(ctl)}"),
+    base = cta.get("name") or d["name"]
+    sp = Airspace(id=d["id"], name=base + ("" if len(ctl) == len(mine) else f" - sector(s) {'+'.join(ctl)}"),
                   polygon=polygon, outline=outline, waypoints=points, lower_fl=int(v["lower_fl"]),
-                  upper_fl=int(v["upper_fl"]), routes=routes, airways=airways, sectors=sectors, controlled=ctl,
+                  upper_fl=int(v["upper_fl"]), routes=routes, airways=airways, sectors=mine, controlled=ctl,
                   projection=proj, point_info=pinfo, default_aerodromes=ads,
-                  default_sequencing=d.get("sequencing", []), unit=d.get("unit", ""),
+                  default_sequencing=d.get("sequencing", []) if own == cta_of[ids[0]] else [],
+                  unit=cta.get("unit") or d.get("unit", ""),
                   notes={"airspace_classes": v.get("classes"), "free_route": d.get("free_route"),
                          "rad_routes": rad, "rad_note": d.get("rad_routes", {}).get("_note"),
                          "standard_routes": std, "entry_exit": d.get("_entry_exit_note"),
                          "source": d.get("_source"), "sequencing_note": d.get("_sequencing_note"),
-                         "external_points": sorted(ext), "external_note": (d.get("external_points") or {}).get("_note"),
+                         "external_points": sorted(set(ext) | set(fir_ext)),
+                         "external_note": (d.get("external_points") or {}).get("_note"),
                          "provisional_points": sorted(k for k, v in ext.items() if v.get("provisional")),
                          "onward_routes": d.get("onward_routes"),
                          "separation_horizontal_nm": (d.get("separation_minima") or {}).get("horizontal_nm"),
                          "descent_destinations": (d.get("descent_destinations") or {}).get("aerodromes", []),
-                         "cpdlc": {k: v for k, v in (d.get("cpdlc") or {}).items() if not k.startswith("_")},
+                         "cpdlc": _cpdlc_for(d, own, ctas, others),
                          "coastline": bool(d.get("coastline")),
                          "capacity_per_hour": {k: v for k, v in (d.get("capacity_per_hour") or {}).items()
-                                               if not k.startswith("_")}})
+                                               if not k.startswith("_")} if own == cta_of[ids[0]] else {}})
     sp.construction_points = cons
+    sp.cta = own
+    sp.fir_outline = fir_outline if not one_cta else []
+    sp.fir_sectors = [(s, cta_of[s.id]) for s in others]
+    sp.fir_external = fir_ext
+    sp.fir_cta_names = {k: v.get("short") or k.title() for k, v in ctas.items()}
+    sp.published_areas = areas
+    sp.areas_note = (d.get("published_areas") or {}).get("_note")
     return sp
+
+
+def _cpdlc_for(d: dict, own: str, ctas: dict, others) -> dict:
+    """Data link identity of our unit; the other control area of the FIR is an adjacent unit."""
+    cfg = {k: v for k, v in (d.get("cpdlc") or {}).items() if not k.startswith("_")}
+    if not ctas or own == next(iter(ctas)):
+        return cfg
+    me = ctas[own]
+    cfg = {**cfg, "address": me.get("address") or cfg.get("address"), "name": me.get("callsign") or own}
+    units = {k: v for k, v in (cfg.get("units") or {}).items() if v.get("address") != me.get("address")}
+    for k, c in ctas.items():
+        if k != own:
+            units[c.get("address") or k] = {"name": f"{c.get('callsign') or k} CONTROL",
+                                            "freq": next((s.freq for s in others if s.freq), "") or "",
+                                            "address": c.get("address") or k}
+    cfg["units"] = units
+    return cfg
 
 
 def get(name: Optional[str] = None, control: Optional[Sequence[str]] = None) -> Airspace:

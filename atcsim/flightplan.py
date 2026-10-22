@@ -47,7 +47,7 @@ AERODROMES: Dict[str, Tuple[float, float]] = {
     "EVRA": (56.92, 23.97), "OMAA": (24.43, 54.65),
 }
 FIR_OF_UNIT = {"LPPC": "LPPC", "MADEIRA": "LPPC", "LECS": "LECM", "GCCC": "GCCC", "GMMM": "GMMM"}
-REGION_UNIT = (("madeira", "MADEIRA"), ("lisboa", "LPPC"), ("sevilla", "LECS"), ("madrid", "LECS"),
+REGION_UNIT = (("agadir cta", "GMAC"), ("madeira", "MADEIRA"), ("lisboa", "LPPC"), ("sevilla", "LECS"), ("madrid", "LECS"),
                ("santiago", "LPPC"), ("canarias", "GCCC"), ("casablanca", "GMMM"), ("marrakech", "GMMM"))
 
 # operator: telephony, registration pattern (? letter, # digit), Mode S block, type of flight, operator name
@@ -203,11 +203,20 @@ def _unit_of_aerodrome(code: str) -> Optional[str]:
     return None
 
 
+def _cta_unit(asp, cta: str) -> str:
+    units = ((getattr(asp, "notes", {}) or {}).get("cpdlc") or {}).get("units") or {}
+    for code, u in units.items():
+        if cta.upper() in str(u.get("name", "")).upper():
+            return code
+    return "GMMM" if cta.upper() == "CASABLANCA" else "GMAC"
+
+
 def adjacent_units(asp, names: List[str], idx_entry: int, idx_exit: int, waypoints, dep: str = "",
                    dest: str = "") -> Tuple[str, str]:
     """(previous unit, next unit) for a route: the Agadir sector not controlled on the other side of the boundary,
     else the unit of the first neighbouring-region point before the entry / after the exit."""
     from .geometry import bearing
+    from . import geometry as g
     if not asp.sectors:
         return "ADJ", "ADJ"
 
@@ -223,6 +232,10 @@ def adjacent_units(asp, names: List[str], idx_entry: int, idx_exit: int, waypoin
         sec = asp.sector_of(probe)
         if sec and sec not in asp.controlled:
             return sec
+        # the other control area of the FIR (CTA Agadir / CTA Casablanca)
+        for fs, cta in getattr(asp, "fir_sectors", None) or []:
+            if g.point_in_polygon(probe, fs.polygon):
+                return _cta_unit(asp, cta)
         rng = range(i0 + step, len(names) if step > 0 else -1, step)
         for j in rng:
             info = asp.point_info.get(names[j], {})

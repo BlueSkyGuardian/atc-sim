@@ -1602,6 +1602,19 @@ function draw() {
   // airspace: whole CTA outline, sector lines, controlled area
   const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };
   const wp = sector.waypoints;
+  const fir = sector.fir;
+  if (fir && (V.sectors || V.freqs)) {          // the other control area of the FIR (not ours): dimmer
+    ctx.font = `${10 * dpr}px ui-monospace,monospace`;
+    for (const sc of fir.sectors || []) {
+      poly(sc.polygon); ctx.setLineDash([3 * dpr, 5 * dpr]); ctx.strokeStyle = TH.sectorLines + '99'; ctx.lineWidth = 1 * dpr; if (V.sectors) ctx.stroke(); ctx.setLineDash([]);
+      if (V.sectors) { ctx.fillStyle = '#ffffff05'; ctx.fill(); }
+      if (!V.freqs) continue;
+      const cx = sc.polygon.reduce((a, p) => a + p[0], 0) / sc.polygon.length, cy = sc.polygon.reduce((a, p) => a + p[1], 0) / sc.polygon.length;
+      const [lx, ly] = toPx(cx, cy); ctx.fillStyle = TH.freqs + '88';
+      ctx.fillText(`${String(sc.control_area || '').split(' ')[0].toUpperCase()} ${sc.name.toUpperCase()} ${sc.frequency || ''}`, lx - 60 * dpr, ly);
+    }
+    if (fir.outline) { poly(fir.outline); ctx.strokeStyle = TH.outline; ctx.lineWidth = 1 * dpr; ctx.stroke(); }
+  }
   if (sector.sectors && sector.sectors.length > 1 && (V.sectors || V.freqs)) {
     ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
     for (const sc of sector.sectors) {
@@ -1680,14 +1693,20 @@ function draw() {
     const col = AREA_COL[ar.kind]; ctx.beginPath();
     if (ar.shape.type === 'circle') { const [cx, cy] = toPx(...ar.shape.center); ctx.arc(cx, cy, ar.shape.radius_nm * view.s, 0, Math.PI * 2); }
     else { ar.shape.points.forEach((p, i) => { const [px, py] = toPx(...p); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.closePath(); }
+    const faint = ar.published && (!ar.active || ar.relevant === false);   // AIP area off, or away from our levels / sectors
     ctx.setLineDash(ar.active ? [] : [6 * dpr, 5 * dpr]);
-    ctx.strokeStyle = ar.active ? col : col + '88'; ctx.lineWidth = (ar.active ? 1.6 : 1) * dpr; ctx.stroke();
-    if (ar.active) { ctx.fillStyle = col + '22'; ctx.fill(); }
+    ctx.strokeStyle = faint ? col + '55' : ar.active ? col : col + '88'; ctx.lineWidth = (ar.active && !faint ? 1.6 : 1) * dpr; ctx.stroke();
+    if (ar.active) { ctx.fillStyle = col + (faint ? '0c' : '22'); ctx.fill(); }
     ctx.setLineDash([]);
     let lx, ly;
     if (ar.shape.type === 'circle') [lx, ly] = toPx(ar.shape.center[0] - ar.shape.radius_nm * 0.6, ar.shape.center[1]);
     else { const xs = ar.shape.points.map(p => p[0]), ys = ar.shape.points.map(p => p[1]); [lx, ly] = toPx(Math.min(...xs) + 1, (Math.min(...ys) + Math.max(...ys)) / 2); }
     ctx.fillStyle = ar.active ? col : col + '99'; ctx.font = `${10.5 * dpr}px ui-monospace,monospace`;
+    if (faint) {                                  // faint, named once zoomed in
+      const span = ar.shape.type === 'circle' ? 2 * ar.shape.radius_nm : Math.max(...ar.shape.points.map(p => p[0])) - Math.min(...ar.shape.points.map(p => p[0]));
+      if (span * view.s > 40 * dpr) { ctx.fillStyle = col + '88'; ctx.fillText(`${ar.designator}${ar.active ? ' ' + String(ar.lower_fl).padStart(3, '0') + '-' + ar.upper_fl : ''}`, lx, ly); }
+      continue;
+    }
     ctx.fillText(`${ar.designator}`, lx, ly);
     ctx.fillText(`${String(ar.lower_fl).padStart(3, '0')}-${ar.upper_fl} ${ar.active ? 'ACT' : 'off'}`, lx, ly + 12 * dpr);
   }

@@ -1,0 +1,77 @@
+"""The Casablanca FIR in the Agadir airspace: CTA Agadir unchanged, the four Casablanca sectors, the ENR 5.1 areas.
+   python -m tests.test_fir"""
+import json
+import os
+
+from atcsim import airspace as A
+from atcsim.geometry import point_in_polygon
+from atcsim.scenario import build_world, load_scenario
+
+
+def ok(c, m):
+    print(("  ok  " if c else "  FAIL ") + m)
+    if not c:
+        raise SystemExit(1)
+
+
+a = A.get("agadir")
+ok(a.controlled == ["ON", "WN", "WS", "OS"] and [s.id for s in a.sectors] == ["ON", "WN", "WS", "OS"],
+   "default: the four Agadir sectors, ours")
+ok(abs(abs(A._signed_area(a.polygon)) - 73867.553) < 0.01, "CTA Agadir area unchanged")
+ok([round(v, 2) for v in a.bbox] == [-217.38, -179.79, 245.75, 181.95], "CTA Agadir bbox unchanged (view, weather)")
+ok({"DOMOG", "SALCA", "MARJA", "TERTO", "ROLRO"} <= set(a.boundary_points), "Agadir transfer points")
+ok([s.id for s, _ in a.fir_sectors] == ["N", "E", "C", "SS"], "Casablanca sectors drawn as the rest of the FIR")
+ok(a.point_info["FES"].get("external") and a.point_info["LAKAM"].get("external"),
+   "Casablanca points are neighbouring points for Agadir")
+ok(not a.point_info["IBALU"].get("external"), "Agadir points are ours")
+aw = a.airways
+ok(aw["UN857"]["one_way"] and aw["UN857"]["points"][0] == "KORNO", "UN857 southbound only (ENR 3.2)")
+ok(aw["UH899"]["one_way"] and aw["UH899"]["points"] == ["SAK", "ODAXA", "LAPNO", "IBALU"], "UH899 SAK to IBALU only (ENR 3.1)")
+ok(not aw["UA411"]["one_way"] and aw["UA411"]["points"][0] == "ORSUP", "UA411 both ways, ORSUP to IBALU (ENR 3.1)")
+ok("SAK" in aw["UR722"]["points"] and aw["UM240"]["points"][-1] == "ERA", "NDB and VOR points kept in the sequences")
+ok(a.against_one_way(["VEDOD", "TOVRA"]) == ["UN857"], "flying UN857 northbound is flagged")
+ok(not a.against_one_way(["PELAX", "SLK"]), "a leg also on a two-way route (UB11) is not")
+d = a.describe()
+ok(len(d["fir"]["sectors"]) == 4 and len(d["fir"]["outline"]) > 50, "describe: fir outline and sectors")
+dom = a.waypoints["DOMOG"]
+ok(any(point_in_polygon((dom[0] + 0.3, dom[1]), s.polygon) for s, _ in a.fir_sectors), "DOMOG on the Agadir/Casablanca line")
+
+fr = {s.id: s for s, _ in a.fir_sectors}
+ok([fr[k].freq for k in ("N", "E", "C", "SS")] == ["125.500", "125.100", "133.100", "126.700"], "ENR 2.1 frequencies")
+for k, pt in (("N", "TNR"), ("N", "RBT"), ("E", "FES"), ("E", "OJD"), ("C", "MAK"), ("SS", "ADM"), ("SS", "BULIS")):
+    p = a.waypoints[pt]
+    near = [s for s in fr.values() if point_in_polygon(p, s.polygon)]
+    ok(fr[k] in near or (pt == "BULIS" and pt in A.get("agadir", ["SS"]).boundary_points), f"{pt} in sector {k}")
+
+tot = sum(abs(A._signed_area(s.polygon)) for s in fr.values()) + sum(abs(A._signed_area(s.polygon)) for s in a.sectors)
+ok(abs(tot - abs(A._signed_area(a.fir_outline))) < 1.0, f"the eight sectors tile the FIR ({tot:.0f} NM²)")
+
+c = A.get("agadir", ["N", "E", "C", "SS"])
+ok(c.unit == "ACC CASABLANCA" and c.notes["cpdlc"]["address"] == "GMMM" and "GMAC" in c.notes["cpdlc"]["units"],
+   "Casablanca control: own unit Casablanca, Agadir adjacent")
+ok(c.point_info["IBALU"].get("external") and not c.point_info["LAKAM"].get("external"), "points swap sides")
+ok(not c.default_sequencing, "no Agadir arrival sequencing from Casablanca")
+try:
+    A.get("agadir", ["WN", "N"])
+    ok(False, "mixed control areas refused")
+except ValueError:
+    ok(True, "mixed control areas refused")
+
+w = build_world(load_scenario("s20_casablanca_north"))
+ok(w.env.airspace.controlled == ["N"], "s20 controls Casablanca North")
+x = w.aircraft["RAM970"]
+ok(x.prev_unit == "GMAC" and x.next_unit == "E", f"from Agadir, to East: {x.prev_unit} {x.next_unit}")
+ok(len([k for k in w.areas if k.startswith("GM")]) == 45, "the 45 ENR 5.1 areas are in the scenario")
+ok(w.areas["GMP02"].active and w.areas["GMP02"].relevant and not w.areas["GMD25"].active, "GMP active, GMD inactive")
+for _ in range(620):
+    w.step(1)
+ok(w.areas["GMD25"].active, "GMD 25 activates on its schedule")
+snap = w.areas["GMD25"].snapshot(w.t)
+ok(snap["designator"] == "GMD 25" and snap["published"], "designator and published flag")
+
+w2 = build_world(load_scenario("s18_exit_sequence_three"))
+ok(not w2.areas["GMP02"].relevant, "a Casablanca area does not count for an Agadir sector")
+s = load_scenario("s18_exit_sequence_three")
+s["published_areas"] = False
+ok(not build_world(s).areas, "published_areas false leaves them out")
+print("FIR ok")

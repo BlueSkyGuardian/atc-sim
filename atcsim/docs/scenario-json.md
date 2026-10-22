@@ -63,7 +63,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `description` | string | `""` | The **briefing** the controller (and an agent) reads before starting: sectors open, traffic, weather, what to expect. No spoilers |
 | `design_notes` | string | `""` | The **traps** and the intended solution, for instructors. Hidden from the controller and from agents |
 | `airspace` | `"training"` or `"agadir"` | `"training"` | Which airspace |
-| `control` | list of sector ids | all sectors | Agadir only: the sectors the controller works: `["WS"]`, `["WN","WS"]` (WW), `["ON","OS"]` (OCE), or all four. The others are adjacent units |
+| `control` | list of sector ids | the four Agadir sectors | Agadir airspace (the whole Casablanca FIR): the sectors the controller works, all in one control area. CTA Agadir: `["WS"]`, `["WN","WS"]` (WW), `["ON","OS"]` (OCE), or all four. CTA Casablanca: `["N"]`, `["E"]`, `["C"]`, `["SS"]` or any combination. The other sectors of that control area are adjacent sectors; the other control area is the adjacent unit (Casablanca ACC or Agadir ACC) |
 | `duration_s` | number ≥ 300 | 1800 | Length of the exercise, in seconds |
 | `pilot_delay_s` | number ≥ 0 | 4 | Seconds between a clearance and the start of its execution |
 | `start_utc` | `"HH:MM"` | `"12:00"` | UTC time at T+0 (flight plans, estimates, the clock) |
@@ -79,6 +79,7 @@ for the controller to prevent. Only `name` and `aircraft` are required. Each air
 | `extra_waypoints` | object | `{}` | Extra named points usable in routes: `{"MID01": [0, 0], "XAVI1": "312000N 0120000W"}` |
 | `weather` | object | calm ISA | See [Weather](#weather) |
 | `areas` | list | `[]` | Danger / restricted / prohibited areas. See [Areas](#areas) |
+| `published_areas` | `false` or object | prohibited areas active | Agadir: the AIP areas (ENR 5.1 GMP / GMR / GMD), always loaded. `{"GMD25": true}` activates one, `{"GMR09": {"active": false, "schedule": [{"time": 900, "active": true}]}}` schedules one, `{"GMP02": false}` switches one off; `false` leaves them all out. See [Areas](#areas) |
 | `aircraft` | list, **required** | — | See [Aircraft](#aircraft) |
 | `requests` | list | `[]` | Scripted pilot requests. See [Requests](#requests) |
 | `events` | list | `[]` | Scripted events (loss of RVSM). See [Events](#events) |
@@ -255,6 +256,15 @@ those.
 
 An active area is drawn on the scope, and flying into it is an infringement. Pilots do not avoid areas by
 themselves: that is the controller's job.
+
+**Published areas (Agadir).** The airspace file holds the AIP Maroc ENR 5.1 areas: 12 prohibited (GMP 01, 02,
+11, 14–22), 7 restricted (GMR 02, 04A, 05, 06, 09, 11, 12) and 26 danger areas (GMD 01–07, 11–13, 21–26, 28–38),
+with their published limits (GND / SFC / MSL = 0, UNL = 999, feet and metres converted to flight levels; the
+two-circle areas GMP 16 and 17 as the hull of their circles). Every scenario of the airspace has them: the
+prohibited ones active (H24), the others drawn inactive (dashed, faint). Switch them with `published_areas`, and
+the instructor can activate any of them during the run like a scenario area. An area only counts for the agent's
+picture when it reaches the controlled levels (FL195 and above) within 30 NM of the controlled sectors; GMD 25
+(MSL–FL460) for example overlaps West North near the 35°50'N boundary.
 
 ## Weather
 

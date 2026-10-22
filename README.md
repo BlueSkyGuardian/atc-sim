@@ -427,25 +427,50 @@ A 120 × 120 NM square, FL250–FL460, coordinates in NM from the centre (x east
 - **Waypoints:** N1–N4 and S1–S4 at x = ±15, ±45 on the north and south edges; W1/W2 and E1/E2 at y = ±20 on the west and east edges.
 - **Routes:** 44 published routes. Every waypoint joins every waypoint on the opposite side, plus N3/N4 → E1/E2.
 
-### Agadir CTA (`atcsim/data/airspaces/agadir_cta.json`)
-- **Boundary:** the CTA AGADIR table: 321500N 0143700W, 355800N 0120000W, 355800N 0072300W, 355000N 0072300W,
+### Agadir airspace: the Casablanca FIR (`atcsim/data/airspaces/agadir_cta.json`)
+The file holds the whole FIR GMMM: the CTA AGADIR (Agadir ACC, the default) and the CTA CASABLANCA (Casablanca
+ACC). A scenario controls sectors of one of them (`"control"`); the other is drawn on the scope, dimmer, and is the
+adjacent unit.
+- **FIR outline** (ENR 2.1): 35°58'N / 35°50'N to 002°06'W, a straight line to the Mediterranean coast at the
+  Moroccan-Algerian border, the border to 315000N 0024000W (approximate: the AIP only says "following the border"),
+  then 312159N 0033642W, BAGBO, 300000N 0060825W, 284000N 0084000W, 27°40'N to 013°10'W, RUSIK, DEVLA, KORAL,
+  300000N 0123000W, and the CTA AGADIR's western boundary with its 100 NM arc.
+- **CTA AGADIR boundary:** 321500N 0143700W, 355800N 0120000W, 355800N 0072300W, 355000N 0072300W,
   355000N 0062703W, 331841N 0092623W, 330334N 0092726W, 325741N 0094344W, 300000N 0123000W, 313000N 0154500W, then
   the 100 NM arc anticlockwise around 330400N 0162100W. Edges along 35°58'N and 35°50'N follow the parallel.
-  Simulated volume FL195–FL460 (class C).
+  Simulated volume FL195–FL460 (class C), both CTAs.
 - **Sectors:** Oceanic North 136.000, West North 128.800, West South 127.000, Oceanic South 124.500. The sector
   lines run through the FRA intermediate points OSDIV, NEVTU, ABTIR, NIDEB, IBLIV, XELER, ERMED and DOMOG and through
   ADILI on the northern boundary. Two junctions are read off the chart: J 324422N 0122612W and V 331137N 0113157W.
-- **Points:** 43 points with ENR 4.4 coordinates, and RUNAX. ADILI isn't in ENR 4.4, so its position is read off
-  the chart. The upper chart was georeferenced on 17 ENR 4.4 points with a residual of about 0.5 NM.
-- **Airways:**
+- **Points:** the 242 points of ENR 4.4 (43 of them in the CTA AGADIR, plus RUNAX), the en-route VOR/DMEs (OJD,
+  FES, RBT, TTN, SLK, MAK, ESS, ERA, OZT, ALM, BRF, ARI, TNR, BML, and LAY, DKH, SMR south of the FIR). Points of the
+  other control area are neighbouring points (route points before / after, direct-to targets), like the Lisboa or
+  Canarias points. ADILI isn't in ENR 4.4, so its position is read off the chart. The upper chart was georeferenced
+  on 17 ENR 4.4 points with a residual of about 0.5 NM.
+- **CTA CASABLANCA sectors** (ENR 2.1, published lines): North 125.500 (backup 132.325), East 125.100 (132.100),
+  Central 133.100 (132.500), South-South 126.700 (132.500). North and East share the 28 NM arc around VOR/DME RBT;
+  the junction of North, East and Central is published as 330012N 0065607W (East) and 325957N 0065616W (Central),
+  0.2 NM apart, and is taken as one point. Central and South-South meet the CTA AGADIR boundary at 323914N 0100100W;
+  ROLRO and that point are kept on the boundary line.
+- **Airways:** the upper ATS routes of AIP Maroc ENR 3.1 / 3.2, which are the reference: the points in the
+  published order, one-way where the table gives cruising levels in one direction only. Through the CTA AGADIR:
   - UN866 BEXAL–KUBIL–OSDIV–KONBA
   - **UN873** BAROK–BENTU–ABTIR–MITLA–SAMAR, southbound only
   - **UN858** VASTO–SULAM–DIMSA–IBLIV–SUNID–AKUDA, northbound only
-  - UN857/A857 KORNO–ABODA–IBALU–ERMED–TOVRA–VEDOD–TERTO
-  - UR722 AMSEL–ABODA–MARJA
-  - UR724 OSLAD–IBALU–NISBA
-  - UH899 IBALU–LAPNO
-  - UA411 IBALU–SALCA
+  - **UN857**/A857 KORNO–ABODA–IBALU–ERMED–TOVRA–VEDOD–TERTO, southbound only
+  - **UL82** RUNAX–IBALU, southbound only
+  - UR722 AMSEL–ABODA–MARJA–LAKAM–SAK–CSD–FOBAC–MABAP–MAK
+  - UR724 OSLAD–IBALU–NISBA–MOKRI–ESS–DENOB–AGALI–ADM
+  - **UH899** SAK–ODAXA–LAPNO–IBALU, westbound only
+  - UA411 ORSUP–OJD–…–FES–…–RBT–LAKAM–SALCA–IBALU
+
+  and in the CTA CASABLANCA: UA600, UB11, UG5, UG664, UG850, UH104, UH119, **UH300** (MOGBA–KEMEX–ESS, northbound
+  only), UH400, UH500, UJ744, UL58, UL102, UM240, UM372, UM985, UM999, UN10, UN726, **UN869** (GALTO–…–RUSIK,
+  southbound only), **UN871** (KORAL–…–ADUBI, northbound only), **UQ401** (OZT–RATVA–RUBAB–BML, northbound only),
+  UR975, UR977, UT900, UV203, UW255, UW700, UW900, UZ801. A leg shared with a two-way route (SLK–PELAX on UB11 and
+  UN869) may be flown both ways.
+- **Areas:** the ENR 5.1 prohibited (GMP), restricted (GMR) and danger (GMD) areas, in every scenario: prohibited
+  ones active, the others inactive until the scenario or the instructor activates them.
 
   One-way airways have arrows on the radar, and the scenario build rejects flights filed against them.
 - **Standard routes:** RUNAX–IBALU–ERMED–TOVRA–VEDOD–TERTO (southbound) and DESUM–SULAM–UN858–AKUDA (northbound).

@@ -188,8 +188,8 @@ SCHEMA = {
         "description": {"type": "string", "description": "briefing shown to the controller"},
         "design_notes": {"type": "string", "description": "the traps, hidden from the controller and agents"},
         "airspace": {"enum": ["training", "agadir"], "default": "training"},
-        "control": {"type": "array", "items": {"enum": ["WN", "WS", "ON", "OS"]}, "minItems": 1,
-                    "description": "agadir: sectors controlled (default all four)"},
+        "control": {"type": "array", "items": {"enum": ["WN", "WS", "ON", "OS", "N", "E", "C", "SS"]}, "minItems": 1,
+                    "description": "agadir: sectors controlled, all in one control area: CTA Agadir WN WS ON OS (default all four) or CTA Casablanca N E C SS"},
         "duration_s": {"type": "number", "minimum": 300, "default": 1800},
         "pilot_delay_s": {"type": "number", "minimum": 0, "default": 4},
         "start_utc": {"type": "string", "pattern": "^[0-9]{1,2}:?[0-9]{2}$", "default": "12:00"},
@@ -246,6 +246,14 @@ SCHEMA = {
             "active": {"type": "boolean", "default": False},
             "schedule": {"type": "array", "items": {"type": "object", "required": ["time", "active"],
                                                     "properties": {"time": _TIME, "active": {"type": "boolean"}}}}}}},
+        "published_areas": {"description": "Agadir: the AIP areas (ENR 5.1 GMP / GMR / GMD), loaded into every scenario, "
+                                           "prohibited ones active. false leaves them out; an object switches some.",
+                            "oneOf": [{"const": False}, {"type": "object", "additionalProperties": {"oneOf": [
+                                {"type": "boolean"},
+                                {"type": "object", "properties": {"active": {"type": "boolean"}, "schedule": {
+                                    "type": "array", "items": {"type": "object", "required": ["time", "active"],
+                                                               "properties": {"time": _TIME,
+                                                                              "active": {"type": "boolean"}}}}}}]}}]},
         "aircraft": {"type": "array", "items": {"$ref": "#/$defs/aircraft"}},
         "requests": {"type": "array", "items": {"type": "object", "required": ["time", "callsign", "type"], "properties": {
             "time": _TIME, "callsign": {"type": "string"},

@@ -22,6 +22,10 @@ class Area:
     active: bool = False
     schedule: List[Tuple[float, bool]] = field(default_factory=list)   # (time, active)
     _sched_idx: int = 0
+    designator: Optional[str] = None   # published designator (e.g. "GMD 25"); default "<D|R|P>-<id>"
+    published: bool = False            # an AIP area of the airspace (not one written in the scenario)
+    relevant: bool = True              # touches the controlled area's levels and surroundings
+    note: str = ""
 
     def contains_xy(self, pt: Point) -> bool:
         if self.circle:
@@ -64,13 +68,15 @@ class Area:
             "id": self.id,
             "name": self.name,
             "kind": self.kind,
-            "designator": f"{AREA_KINDS[self.kind]}-{self.id}",
+            "designator": self.designator or f"{AREA_KINDS[self.kind]}-{self.id}",
             "lower_fl": self.lower_fl,
             "upper_fl": self.upper_fl,
             "active": self.active,
             "next_change": self.next_change(),
             "published_schedule": [{"time_s": ts, "active": a} for ts, a in self.schedule],
         }
+        if self.published:
+            d.update({"published": True, "relevant": self.relevant, "note": self.note})
         if self.circle:
             d["shape"] = {"type": "circle", "center": list(self.circle[0]), "radius_nm": self.circle[1]}
         else:

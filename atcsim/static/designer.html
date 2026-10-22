@@ -252,7 +252,15 @@ async function renderNewCtl() {
   const a = $('#newAsp').value;
   if (a === 'training') { $('#newCtl').innerHTML = ''; return; }
   const d = await api(`/airspace?name=${a}`);
-  $('#newCtl').innerHTML = d.sectors.map(s => `<label class="chip"><input type="checkbox" value="${s.id}" checked style="margin:0 3px 0 0;vertical-align:-2px">${s.id}</label>`).join('');
+  const chip = (s, on) => `<label class="chip" title="${esc(s.name)} ${s.frequency || ''}"><input type="checkbox" value="${s.id}"${on ? ' checked' : ''} style="margin:0 3px 0 0;vertical-align:-2px">${s.id}</label>`;
+  // the sectors of one control area (CTA Agadir or CTA Casablanca): ticking one of the other clears the first
+  const groups = [[(d.fir && d.fir.control_area) || '', d.sectors, true]];
+  if (d.fir) groups.push([d.fir.sectors[0].control_area, d.fir.sectors, false]);
+  $('#newCtl').innerHTML = groups.map(([n, ss, on]) => `<span class="dim" style="font-size:11px;margin-right:3px">${esc(String(n).split(' ')[0])}</span>` + ss.map(s => chip(s, on)).join('')).join('<span style="display:inline-block;width:10px"></span>');
+  const grp = id => groups.findIndex(([, ss]) => ss.some(s => s.id === id));
+  $('#newCtl').querySelectorAll('input').forEach(i => i.onchange = () => {
+    if (i.checked) $('#newCtl').querySelectorAll('input').forEach(j => { if (grp(j.value) !== grp(i.value)) j.checked = false; });
+  });
 }
 $('#newAsp').onchange = renderNewCtl;
 async function setScenario(s) {
@@ -923,6 +931,10 @@ function draw() {
   if (wxImg && wxMeta && $('#showWx').checked) { const [x0, y0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [x1, y1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]); ctx.drawImage(wxImg, x0, y0, x1 - x0, y1 - y0); }
   // airspace
   const wp = sector.waypoints;
+  if (sector.fir) {                                       // the other control area of the FIR
+    for (const sc of sector.fir.sectors) { poly(sc.polygon); ctx.setLineDash([3 * dpr, 5 * dpr]); ctx.strokeStyle = '#2f7a5f88'; ctx.lineWidth = dpr; ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#ffffff05'; ctx.fill(); }
+    poly(sector.fir.outline); ctx.strokeStyle = '#2d4258'; ctx.lineWidth = dpr; ctx.stroke();
+  }
   for (const sc of sector.sectors || []) {
     const ctl = (sector.controlled_sectors || []).includes(sc.id);
     poly(sc.polygon); ctx.setLineDash([3 * dpr, 4 * dpr]); ctx.strokeStyle = '#2f7a5f'; ctx.lineWidth = dpr; ctx.stroke(); ctx.setLineDash([]);

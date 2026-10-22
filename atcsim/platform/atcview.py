@@ -182,6 +182,22 @@ class Renderer:
                     d.polygon([vw.P(*p) for p in ring], fill=vw.c("land", (19, 38, 58)))
             for ln in sec["coast"]["lines"]:
                 d.line([vw.P(*p) for p in ln], fill=vw.c("coast", (61, 98, 131)), width=max(1, round(k)))
+        fir = sec.get("fir") or {}
+        if fir and (vw.on("sectors") or vw.on("freqs")):       # the other control area of the FIR, dimmer
+            fc = tuple(int(v * 0.6) for v in vw.c("sectorLines", (47, 122, 95)))
+            ff = tuple(int(v * 0.55) for v in vw.c("freqs", (63, 156, 122)))
+            for sc in fir.get("sectors") or []:
+                if vw.on("sectors"):
+                    dashed(d, poly(sc["polygon"]), fc, 1, 3 * k, 5 * k)
+                if vw.on("freqs"):
+                    cx = sum(p[0] for p in sc["polygon"]) / len(sc["polygon"])
+                    cy = sum(p[1] for p in sc["polygon"]) / len(sc["polygon"])
+                    x, y = vw.P(cx, cy)
+                    d.text((x - 50 * k, y - 8 * k), f"{str(sc.get('control_area') or '').split(' ')[0].upper()} "
+                           f"{sc['name'].upper()} {sc.get('frequency') or ''}", fill=ff, font=font(10.5 * k))
+            if fir.get("outline"):
+                d.line(poly(fir["outline"]), fill=tuple(int(v * 0.8) for v in vw.c("outline", (45, 66, 88))),
+                       width=max(1, round(k)))
         sectors = sec.get("sectors") or []
         if len(sectors) > 1:
             ctl = set(sec.get("controlled_sectors") or [])
@@ -375,7 +391,7 @@ class Renderer:
             for a in self.areas.values():
                 active = a["id"] in fr.get("areas", [])
                 col = AREA_COL.get(a["kind"], (200, 200, 60))
-                c = col if active else tuple(int(v * 0.55) for v in col)
+                c = col if active and a.get("relevant") is not False else tuple(int(v * 0.55) for v in col)
                 sh = a["shape"]
                 if sh["type"] == "circle":
                     (cx, cy), r = vw.P(*sh["center"]), sh["radius_nm"] * vw.s * k
@@ -387,6 +403,8 @@ class Renderer:
                     xs, ys = [p[0] for p in sh["points"]], [p[1] for p in sh["points"]]
                     lx, ly = vw.P(min(xs) + 1, (min(ys) + max(ys)) / 2)
                 text(img, (lx, ly - 8 * k), a.get("designator", a["id"]), c, f10)
+                if a.get("published") and (not active or a.get("relevant") is False):
+                    continue                    # AIP areas off or away from our sectors: outline and name only
                 d.text((lx, ly + 4 * k), f"{int(a.get('lower_fl', 0)):03d}-{a.get('upper_fl', '')} {'ACT' if active else 'off'}",
                        fill=c, font=f10)
         acs = fr.get("ac", [])

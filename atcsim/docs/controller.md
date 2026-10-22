@@ -36,7 +36,7 @@ The toolbar changes **your view only**, never the simulation:
 |---|---|
 | Weather product and FL | Composite reflectivity, or a CAPPI at a flight level (to see embedded cells at your level) |
 | Tops | Echo tops |
-| Coast, Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), restricted / danger areas, airways, RAD routings (dashed, one-way arrows), sector lines with frequencies, point names, history dots |
+| Coast, Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), prohibited / restricted / danger areas (the AIP GMP / GMR / GMD areas are always there: bright when active and reaching your levels and sectors, faint otherwise), airways, RAD routings (dashed, one-way arrows), sector lines with frequencies (the other control area of the Casablanca FIR dimmer, with the FIR outline), point names, history dots |
 | RBL | Range-and-bearing mode (you rarely need it, see [RBL](#range-and-bearing-lines-rbl)) |
 | Reset view | Fit the airspace |
 | **FPL** | The flight-plan list (key <kbd>G</kbd>) |

@@ -40,15 +40,24 @@ def briefing(w) -> str:
         out.append("NEIGHBOUR SECTORS (other controllers): " + "; ".join(f"{s['id']} {s.get('name', '')}" for s in others))
     # points: those inside or near the sectors (the routes go through them)
     bb = d.get("bbox_nm") or [-1e9, -1e9, 1e9, 1e9]
+    far = set(d.get("fir_external_points") or [])       # the other control area of the FIR: not listed
     wps = {k: v for k, v in (d.get("waypoints") or {}).items()
-           if bb[0] - 80 <= v[0] <= bb[2] + 80 and bb[1] - 80 <= v[1] <= bb[3] + 80}
+           if bb[0] - 80 <= v[0] <= bb[2] + 80 and bb[1] - 80 <= v[1] <= bb[3] + 80 and k not in far}
     out.append("POINTS (name x,y): " + " ".join(f"{k}({_r(v[0])},{_r(v[1])})" for k, v in sorted(wps.items())))
     if d.get("entry_exit"):
         out.append("ENTRY / EXIT: " + str(d["entry_exit"]))
     rts = d.get("standard_routes") or []
     if rts:
         out.append("MAIN ROUTES: " + "; ".join(" ".join(r) for r in rts))
-    aw = d.get("airways") or {}
+    ext = set(d.get("external_points") or [])
+    aw = {}
+    for k, v in (d.get("airways") or {}).items():      # the part of each airway in our control area
+        run, best = [], []
+        for n in v.get("points") or []:
+            run = run + [n] if n not in ext else []
+            best = run if len(run) > len(best) else best
+        if len(best) >= 2:
+            aw[k] = {**v, "points": best}
     if aw:
         out.append("AIRWAYS: " + "; ".join(f"{k} {' '.join(v.get('points') or [])}" + (f" ({v['note']})" if v.get("note") else "")
                                              for k, v in aw.items()))

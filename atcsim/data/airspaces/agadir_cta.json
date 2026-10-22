@@ -1,5 +1,5 @@
 {
- "_source": "AIP MAROC ENR 4.4 (AIRAC AMDT 08/26) for point coordinates; ENR 6 upper/lower charts for airways, sector lines and the CTA boundary table (CTA AGADIR). ADILI is not listed in ENR 4.4: its position is read off the chart. The sector-line junctions J and V are read off the upper chart (georeferenced on 17 ENR 4.4 points, residual about 0.5 NM).",
+ "_source": "AIP MAROC ENR 4.4 (AIRAC AMDT 08/26) for point coordinates; ENR 6 upper/lower charts for airways, sector lines and the CTA boundary table (CTA AGADIR). ADILI is not listed in ENR 4.4: its position is read off the chart. The sector-line junctions J and V are read off the upper chart (georeferenced on 17 ENR 4.4 points, residual about 0.5 NM). CTA Casablanca sectors North / East / Central / South-South: ENR 2.1 (AIRAC 08/24); Casablanca upper airways: ENR 3.1 / 3.2; the FIR outline from ENR 2.1 (the Moroccan-Algerian border between the Mediterranean coast and 31 50N 002 40W is approximate); prohibited, restricted and danger areas: ENR 5.1.",
  "id": "agadir",
  "name": "Agadir CTA (Casablanca FIR GMMM)",
  "unit": "ACC AGADIR",
@@ -12,7 +12,7 @@
  "vertical": {
   "lower_fl": 195,
   "upper_fl": 460,
-  "note": "CTA AGADIR: FL460/UNL class G, FL195/FL460 class C (controlled, simulated), MSL/FL195 class G",
+  "note": "CTA AGADIR and CTA CASABLANCA: FL460/UNL class G, FL195/FL460 class C (controlled, simulated), MSL/FL195 class G",
   "classes": [
    {
     "from": "FL460",
@@ -43,13 +43,71 @@
   "355800N 0072300W",
   "355000N 0072300W",
   "355000N 0062703W",
-  "331841N 0092623W",
-  "330334N 0092726W",
   {
-   "insert": "DOMOG"
+   "insert": "BAMBA"
   },
-  "325741N 0094344W",
+  "355000N 0045439W",
+  {
+   "insert": "NE1"
+  },
+  "355000N 0020600W",
+  "350530N 0021300W",
+  "345055N 0015026W",
+  {
+   "insert": "ORSUP"
+  },
+  "344200N 0014430W",
+  "341500N 0014200W",
+  "334500N 0014000W",
+  "331200N 0013300W",
+  "324500N 0011540W",
+  "320600N 0011500W",
+  "315800N 0015100W",
+  "315000N 0024000W",
+  "312159N 0033642W",
+  {
+   "insert": "E1"
+  },
+  "301902N 0053911W",
+  {
+   "insert": "BAGBO"
+  },
+  "300000N 0060825W",
+  {
+   "insert": "S1"
+  },
+  "284000N 0084000W",
+  "274000N 0084000W",
+  "274000N 0090830W",
+  {
+   "insert": "BULIS"
+  },
+  "274000N 0103100W",
+  {
+   "insert": "ECHED"
+  },
+  "274000N 0112500W",
+  "274000N 0123543W",
+  {
+   "insert": "SOLNA"
+  },
+  "274000N 0131000W",
+  "285422N 0124859W",
+  {
+   "insert": "RUSIK"
+  },
+  "291453N 0124306W",
+  {
+   "insert": "DEVLA"
+  },
+  "294353N 0123442W",
+  {
+   "insert": "KORAL"
+  },
   "300000N 0123000W",
+  {
+   "insert": "B_SE"
+  },
   {
    "insert": "B_SW"
   },
@@ -270,6 +328,1060 @@
    "coord": "355000N 0063756W",
    "role": "FIR GMMM/LECM - UL82",
    "fra": "E"
+  },
+  "ABATO": {
+   "coord": "303214N 0083311W",
+   "role": "TMA/2 GMAD – G/UG664",
+   "fra": ""
+  },
+  "ABDOR": {
+   "coord": "315311.49N 0072955.83W",
+   "role": "H/UH400 – M/UM372 – Z/UZ801",
+   "fra": ""
+  },
+  "ABGIS": {
+   "coord": "352646.01N 0034447.95W",
+   "role": "IAF RNAV (GNSS) RWY 17 AD GMTA",
+   "fra": ""
+  },
+  "ABIRO": {
+   "coord": "354817N 0061723W",
+   "role": "TMA/1 GMTT –N/UN726",
+   "fra": ""
+  },
+  "ABKAN": {
+   "coord": "342656.50N 0021405.54W",
+   "role": "Point à l’intérieur de la TMA GMFO",
+   "fra": ""
+  },
+  "ABMIL": {
+   "coord": "335400N 0075000W",
+   "role": "Jonction avec UN871 DEP GMMX",
+   "fra": ""
+  },
+  "ADKIM": {
+   "coord": "355000N 0060142W",
+   "role": "Point de sortie FIR GMMM/LECM",
+   "fra": ""
+  },
+  "ADRER": {
+   "coord": "345026.07N 0021704.42W",
+   "role": "Point à l’intérieur de la TMA GMFO",
+   "fra": ""
+  },
+  "ADUBI": {
+   "coord": "355000N 0061837W",
+   "role": "FIR GMMM/LECM – UN871",
+   "fra": ""
+  },
+  "AGAMU": {
+   "coord": "301852.66N 0090541.11W",
+   "role": "Point TMA GMAD",
+   "fra": ""
+  },
+  "AGDAL": {
+   "coord": "340700N 0071852W",
+   "role": "TMA GMMN – G/UG5",
+   "fra": ""
+  },
+  "AGOVA": {
+   "coord": "320113.63N 0071158.14W",
+   "role": "H/UH400 – M/UM372 – L/UL102 – W/UW900",
+   "fra": ""
+  },
+  "ALKIX": {
+   "coord": "341311.47N 0044447.32W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "AMKAS": {
+   "coord": "335540.43N 0051534.33W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "AMLOK": {
+   "coord": "294900N 0100121W",
+   "role": "TMA/2 GMAD – A600",
+   "fra": ""
+  },
+  "ARGAB": {
+   "coord": "302058N 0094638W",
+   "role": "Point de cheminement à l’intérieur TMA/1 GMAD",
+   "fra": ""
+  },
+  "ARIAM": {
+   "coord": "335322N 0013737W",
+   "role": "",
+   "fra": ""
+  },
+  "ARSOL": {
+   "coord": "295551N 0093312W",
+   "role": "TMA/1 GMAD – R975",
+   "fra": ""
+  },
+  "ATVAR": {
+   "coord": "341932.92N 0051214.60W",
+   "role": "TMA/2 GMFF- M/UM240",
+   "fra": ""
+  },
+  "BABNA": {
+   "coord": "300043N 0101015W",
+   "role": "TMA/2 GMAD – G849",
+   "fra": ""
+  },
+  "BAGBO": {
+   "coord": "301902N 0053911W",
+   "role": "Point d’entrée/sortie FIR GMMM/DAAA – UJ744",
+   "fra": ""
+  },
+  "BAKIM": {
+   "coord": "350232N 0065630W",
+   "role": "Jonction avec UN871 DEP GMMN/GMME",
+   "fra": ""
+  },
+  "BAMBA": {
+   "coord": "355000N 0062703W",
+   "role": "FIR GMMM/LPPC – N/UN726",
+   "fra": ""
+  },
+  "BARAM": {
+   "coord": "321449N 0085400W",
+   "role": "G/UG5",
+   "fra": ""
+  },
+  "BARIS": {
+   "coord": "345411N 0055550W",
+   "role": "",
+   "fra": ""
+  },
+  "BARPA": {
+   "coord": "355000N 0054000W",
+   "role": "FIR GMMM/LECM –UM985",
+   "fra": ""
+  },
+  "BENOV": {
+   "coord": "320538.77N 0082716.64W",
+   "role": "TMA GMMX– R/UR975",
+   "fra": ""
+  },
+  "BERUM": {
+   "coord": "355000N 0031409W",
+   "role": "FIR GMMM/LECM – G/UG850",
+   "fra": ""
+  },
+  "BIDLA": {
+   "coord": "305344N 0084922W",
+   "role": "TMA/2 GMAD – G/UG850",
+   "fra": ""
+  },
+  "BIRVO": {
+   "coord": "331711.57N 0081130.00W",
+   "role": "Point à l’intérieur de la TMA GMMN",
+   "fra": ""
+  },
+  "BISMI": {
+   "coord": "333850N 0065337W",
+   "role": "R975 – TMA GMMN",
+   "fra": ""
+  },
+  "BODNI": {
+   "coord": "332054N 0075015W",
+   "role": "TMA GMMN",
+   "fra": ""
+  },
+  "BOKPA": {
+   "coord": "342332.53N 0043515.96W",
+   "role": "TMA/2 GMFF – G/UG850",
+   "fra": ""
+  },
+  "BULIS": {
+   "coord": "274000N 0090830W",
+   "role": "FIRs GMMM/GCCC/GOOO – UR977 – UM372",
+   "fra": ""
+  },
+  "BULOK": {
+   "coord": "301051N 0095018W",
+   "role": "G/UG850",
+   "fra": ""
+  },
+  "DEMUM": {
+   "coord": "335645.92N 0051523.16W",
+   "role": "TMA/1 GMFF – A411",
+   "fra": ""
+  },
+  "DENOB": {
+   "coord": "310306N 0093522W",
+   "role": "TMA/2 GMAD – R724",
+   "fra": ""
+  },
+  "DETAD": {
+   "coord": "340257.03N 0043551.20W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "DEVLA": {
+   "coord": "291453N 0124306W",
+   "role": "FIR GMMM/GCCC – G/UG850",
+   "fra": ""
+  },
+  "DEVNO": {
+   "coord": "330237.36N 0074341.65W",
+   "role": "Point à l’intérieur de la TMA GMMN",
+   "fra": ""
+  },
+  "DEXAD": {
+   "coord": "265542.81N 0131218.14W",
+   "role": "IAF RNAV (GNSS) RWY 02 AD GMML",
+   "fra": ""
+  },
+  "DIDAN": {
+   "coord": "293710N 0094120W",
+   "role": "TMA/2 GMAD – R975",
+   "fra": ""
+  },
+  "DIDOV": {
+   "coord": "324430.11N 0060133.31W",
+   "role": "H/UH119 – M/UM372",
+   "fra": ""
+  },
+  "DIGEX": {
+   "coord": "350749.00N 0022238.00W",
+   "role": "TMA GMFO – W/UW700",
+   "fra": ""
+  },
+  "DIRAD": {
+   "coord": "335811.92N 0063058.48W",
+   "role": "B/UB11- TMA GMMN",
+   "fra": ""
+  },
+  "DISMA": {
+   "coord": "240855N 0153628W",
+   "role": "TMA GMMH – A600F",
+   "fra": ""
+  },
+  "DIVUX": {
+   "coord": "290000N 0084759W",
+   "role": "UM372",
+   "fra": ""
+  },
+  "DOGAN": {
+   "coord": "301354N 0101434W",
+   "role": "TMA/2 GMAD - UG664",
+   "fra": ""
+  },
+  "DONAS": {
+   "coord": "334151N 0063430W",
+   "role": "Point à l’intérieur TMA GMMN–R/UR975",
+   "fra": ""
+  },
+  "DOTIV": {
+   "coord": "342145N 0032829W",
+   "role": "A/UA411",
+   "fra": ""
+  },
+  "ECHED": {
+   "coord": "274000N 0103100W",
+   "role": "FIR GMMM/GCCC/GOOO – R/UR975-Z/UZ966",
+   "fra": ""
+  },
+  "EMKOK": {
+   "coord": "340713.62N 0042104.17W",
+   "role": "TMA2 GMFF – A411",
+   "fra": ""
+  },
+  "ENNAV": {
+   "coord": "340749.34N 0063014.66W",
+   "role": "IAF STARy CONV RWY21 AD GMME",
+   "fra": ""
+  },
+  "ERLAM": {
+   "coord": "325509N 0062324W",
+   "role": "H/UH119 – UG850",
+   "fra": ""
+  },
+  "ESALA": {
+   "coord": "340224N 0071023W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "ESAMI": {
+   "coord": "355000N 0024111W",
+   "role": "M/UM372",
+   "fra": ""
+  },
+  "ETAVO": {
+   "coord": "265220.11N 0131915.39W",
+   "role": "IAF RNAV (GNSS) RWY 02 AD GMML",
+   "fra": ""
+  },
+  "EVDOL": {
+   "coord": "333352.82N 0072514.26W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "EVOXO": {
+   "coord": "341344.04N 0022535.26W",
+   "role": "TMA GMFO – G/UG664",
+   "fra": ""
+  },
+  "FACAS": {
+   "coord": "324050N 0074842W",
+   "role": "TMA GMMN – B/UB11",
+   "fra": ""
+  },
+  "FAHIM": {
+   "coord": "341504.27N 0065038.82W",
+   "role": "IAF STARy CONV RWY21 AD GMME",
+   "fra": ""
+  },
+  "FOBAC": {
+   "coord": "324309N 0080601W",
+   "role": "TMA GMMN – R/UR722",
+   "fra": ""
+  },
+  "GALTO": {
+   "coord": "355000N 0050837W",
+   "role": "FIR GMMM/LECM – B/UB11 – UN869",
+   "fra": ""
+  },
+  "GIPUD": {
+   "coord": "334503.92N 0043738.79W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "GIRAL": {
+   "coord": "264426N 0133247W",
+   "role": "TMA GMML – A600F",
+   "fra": ""
+  },
+  "GITEM": {
+   "coord": "241422N 0155319W",
+   "role": "TMA GMMH",
+   "fra": ""
+  },
+  "GODPO": {
+   "coord": "331058.24N 0070436.26W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "GOSNO": {
+   "coord": "311905N 0083432W",
+   "role": "H/UH400",
+   "fra": ""
+  },
+  "GOSPI": {
+   "coord": "300851N 0094918W",
+   "role": "TMA/1 GMAD – G849",
+   "fra": ""
+  },
+  "GOVAS": {
+   "coord": "331151N 0065854W",
+   "role": "Point à l’intérieur TMA GMMN– H/UH119",
+   "fra": ""
+  },
+  "IBEVO": {
+   "coord": "333846.74N 0042400.01W",
+   "role": "TMA/2 GMFF – W/UW255",
+   "fra": ""
+  },
+  "IDMEB": {
+   "coord": "352830.65N 0035311.46W",
+   "role": "IAF RNAV (GNSS) RWY 17 AD GMTA",
+   "fra": ""
+  },
+  "IPLOS": {
+   "coord": "335853.98N 0054417.31W",
+   "role": "TMA/2 GMFF – A411",
+   "fra": ""
+  },
+  "IVDAK": {
+   "coord": "333424.56N 0045345.40W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "IXIRI": {
+   "coord": "352951.46N 0024923.57W",
+   "role": "M/UM372 – W/UW700",
+   "fra": ""
+  },
+  "IXOBA": {
+   "coord": "344134.81N 0020614.68W",
+   "role": "TMA GMFO (IAF BRG 238,45° / D9.0 NM/DME/OJD)",
+   "fra": ""
+  },
+  "IXODA": {
+   "coord": "345732N 0053254W",
+   "role": "H/UH104 – M/UM240",
+   "fra": ""
+  },
+  "KEGAG": {
+   "coord": "302628.41N 0085518.06W",
+   "role": "TMA/1 GMAD –G/UG664",
+   "fra": ""
+  },
+  "KEKIV": {
+   "coord": "340823.06N 0050653.49W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "KEMEX": {
+   "coord": "310052N 0094312W",
+   "role": "TMA/2 GMAD – H/UH300",
+   "fra": ""
+  },
+  "KOPAB": {
+   "coord": "313957.60N 0094807.98W",
+   "role": "IAF RNAV (GNSS) RWY 16 AD GMMI",
+   "fra": ""
+  },
+  "KORAL": {
+   "coord": "294353N 0123442W",
+   "role": "FIR GMMM/GCCC – G/UG5 – UN871",
+   "fra": ""
+  },
+  "KORIS": {
+   "coord": "355000N 0061421W",
+   "role": "FIR GMMM/LECM – GUG 5",
+   "fra": ""
+  },
+  "KOTAG": {
+   "coord": "330909.01N 0071619.14W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "KUDAX": {
+   "coord": "314830.86N 0074018.96W",
+   "role": "H/UH400 – M/UM372",
+   "fra": ""
+  },
+  "KUVEL": {
+   "coord": "290000N 0091539W",
+   "role": "UR977",
+   "fra": ""
+  },
+  "LACAJ": {
+   "coord": "330809N 0065059W",
+   "role": "TMA GMMN – H/UH119",
+   "fra": ""
+  },
+  "LAMAD": {
+   "coord": "354709.14N 0052914.16W",
+   "role": "TMA/1 GMTT – M143",
+   "fra": ""
+  },
+  "LANBA": {
+   "coord": "315009.45N 0082337.76W",
+   "role": "TMA GMMX",
+   "fra": ""
+  },
+  "LARAP": {
+   "coord": "310655N 0062754W",
+   "role": "TMA GMMZ – G/UG664",
+   "fra": ""
+  },
+  "LARMO": {
+   "coord": "233450.86N 0160757.04W",
+   "role": "IAF RNAV (GNSS) RWY 03 AD GMMH",
+   "fra": ""
+  },
+  "LASAB": {
+   "coord": "231650N 0160619W",
+   "role": "TMA GMMH – A600F – B600G",
+   "fra": ""
+  },
+  "LEGTI": {
+   "coord": "332151.40N 0044936.74W",
+   "role": "TMA/2 GMFF –M/UM240",
+   "fra": ""
+  },
+  "LINTO": {
+   "coord": "355000N 0055716W",
+   "role": "FIR GMMM/LECM – N/UN10",
+   "fra": ""
+  },
+  "LINVA": {
+   "coord": "304944N 0072215W",
+   "role": "TMA GMMZ – G/UG664",
+   "fra": ""
+  },
+  "LISRA": {
+   "coord": "311400N 0082904W",
+   "role": "TMA GMMX – G/UG850",
+   "fra": ""
+  },
+  "LOBMI": {
+   "coord": "323927.03N 0073012.14W",
+   "role": "Z801",
+   "fra": ""
+  },
+  "MABAP": {
+   "coord": "320727.36N 0081149.62W",
+   "role": "TMA GMMX – B/UB11 – R/UR722 – UN869",
+   "fra": ""
+  },
+  "MABOG": {
+   "coord": "323819N 0073011W",
+   "role": "TMA GMMN – Z/UZ801",
+   "fra": ""
+  },
+  "MADOV": {
+   "coord": "352453N 0054508W",
+   "role": "TMA/1 GMTT – M/UM240",
+   "fra": ""
+  },
+  "MAGAV": {
+   "coord": "313131.05N 0084640.15W",
+   "role": "TMA GMMX – B11",
+   "fra": ""
+  },
+  "MAPIT": {
+   "coord": "334033.22N 0051042.65W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "MAXOR": {
+   "coord": "311010N 0071833W",
+   "role": "TMA GMMZ – J744",
+   "fra": ""
+  },
+  "MIMRO": {
+   "coord": "310059N 0090309W",
+   "role": "TMA/2 GMAD – H4/UH00",
+   "fra": ""
+  },
+  "MOGBA": {
+   "coord": "303346N 0094533W",
+   "role": "TMA/1 GMAD – H/UH300 – H/UH400",
+   "fra": ""
+  },
+  "MOKIB": {
+   "coord": "342529N 0065225W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "MOKIR": {
+   "coord": "312025N 0073646W",
+   "role": "TMA GMMX – J744",
+   "fra": ""
+  },
+  "MOKRI": {
+   "coord": "330939N 0091027W",
+   "role": "Point de transfert secteurs S/W – R/UR724",
+   "fra": ""
+  },
+  "MOGBI": {
+   "coord": "323710.63N 0072158.78W",
+   "role": "W/UW900",
+   "fra": ""
+  },
+  "MOGVA": {
+   "coord": "312047.15N 0070052.51W",
+   "role": "TMA GMMZ–W/UW900",
+   "fra": ""
+  },
+  "MOKDA": {
+   "coord": "333504.54N 0075348.55W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "MOROX": {
+   "coord": "290000N 0095721W",
+   "role": "UR975",
+   "fra": ""
+  },
+  "NAMIR": {
+   "coord": "310036N 0090204W",
+   "role": "TMA/2 GMAD – R/U975",
+   "fra": ""
+  },
+  "NAPOV": {
+   "coord": "312400.65N 0075722.12W",
+   "role": "STAR RNAV(GNSS) RWY10 GMMX",
+   "fra": ""
+  },
+  "NAREG": {
+   "coord": "330351N 0070354W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "NARMI": {
+   "coord": "353811N 0052951W",
+   "role": "TMA/1 GMTT – N/UN726",
+   "fra": ""
+  },
+  "NASRO": {
+   "coord": "335815N 0074306W",
+   "role": "",
+   "fra": ""
+  },
+  "NEMVA": {
+   "coord": "344019.44N 0022008.23W",
+   "role": "Point à l’intérieur de la TMA GMFO",
+   "fra": ""
+  },
+  "NEVEK": {
+   "coord": "331946.85N 0055013.33W",
+   "role": "UG850",
+   "fra": ""
+  },
+  "NIKZO": {
+   "coord": "324339N 0080941W",
+   "role": "TMA GMMN – R/UR975",
+   "fra": ""
+  },
+  "NIRAL": {
+   "coord": "331141N 0082200W",
+   "role": "UN871",
+   "fra": ""
+  },
+  "NISUR": {
+   "coord": "311044N 0100500W",
+   "role": "G/UG5",
+   "fra": ""
+  },
+  "NOLRO": {
+   "coord": "354653N 0060210W",
+   "role": "TMA/1 GMTT",
+   "fra": ""
+  },
+  "NONVI": {
+   "coord": "332441.06N 0052102.61W",
+   "role": "TMA/2 GMFF – V203",
+   "fra": ""
+  },
+  "OBOGA": {
+   "coord": "315016N 0074851W",
+   "role": "TMA GMMX – G/UG850",
+   "fra": ""
+  },
+  "ODROS": {
+   "coord": "354029N 0050045W",
+   "role": "IAF RNAV (GNSS) RWY 24 AD GMTN",
+   "fra": ""
+  },
+  "OLMAG": {
+   "coord": "330848N 0032012W",
+   "role": "G/UG664 – W/UW255",
+   "fra": ""
+  },
+  "OLOMA": {
+   "coord": "303827N 0090418W",
+   "role": "TMA/1 GMAD – G/UG850",
+   "fra": ""
+  },
+  "ORSUP": {
+   "coord": "345055N 0015026W",
+   "role": "FIR GMMM / DAAA",
+   "fra": ""
+  },
+  "OSDAM": {
+   "coord": "352045N 0064204W",
+   "role": "UM985 – UN871",
+   "fra": ""
+  },
+  "PEKOP": {
+   "coord": "355000.0N 0032627.3W",
+   "role": "Point d’entrée/sortie FIR GMMM/LECM",
+   "fra": ""
+  },
+  "PELAX": {
+   "coord": "325113.14N 0074125.79W",
+   "role": "B/UB11– UN869",
+   "fra": ""
+  },
+  "PIXEB": {
+   "coord": "321630N 0030000W",
+   "role": "H/UH119",
+   "fra": ""
+  },
+  "PIXOV": {
+   "coord": "325301.53N 0072625.86W",
+   "role": "W/UW900",
+   "fra": ""
+  },
+  "POBUB": {
+   "coord": "334914.99N 0054512.01W",
+   "role": "TMA/2 GMFF – R975",
+   "fra": ""
+  },
+  "PODES": {
+   "coord": "355000.0N 0040252.5W",
+   "role": "BDRY FIR/UIR GMMM/LECM",
+   "fra": ""
+  },
+  "POGIK": {
+   "coord": "313511.02N 0095303.58W",
+   "role": "IAF RNAV (GNSS) RWY 16 AD GMMI",
+   "fra": ""
+  },
+  "RABCA": {
+   "coord": "354415.37N 0060506.05W",
+   "role": "IAF BRG 272° TNR DVOR/DME AD GMTT",
+   "fra": ""
+  },
+  "RADAF": {
+   "coord": "324124N 0061355W",
+   "role": "IAF RNAV (GNSS) RWY 23 AD GMMD",
+   "fra": ""
+  },
+  "RALEK": {
+   "coord": "330013N 0081046W",
+   "role": "G/UG5",
+   "fra": ""
+  },
+  "RAMIM": {
+   "coord": "314011.66N 0074807.11W",
+   "role": "IAF RNAV (GNSS) RWY 28 AD GMMX",
+   "fra": ""
+  },
+  "RANUL": {
+   "coord": "335537.97N 0041845.22W",
+   "role": "TMA/2 GMFF",
+   "fra": ""
+  },
+  "RATNI": {
+   "coord": "293423N 0091850W",
+   "role": "TMA/2 GMAD",
+   "fra": ""
+  },
+  "RATVA": {
+   "coord": "312002.62N 0064441.03W",
+   "role": "TMA GMMZ –Q401",
+   "fra": ""
+  },
+  "RAVMA": {
+   "coord": "321129.14N 0064848.04W",
+   "role": "M372",
+   "fra": ""
+  },
+  "RAVOL": {
+   "coord": "333108N 0082829W",
+   "role": "H/UH500 – TMA GMMN",
+   "fra": ""
+  },
+  "REVMI": {
+   "coord": "335026.60N 0072203.46W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "RINPA": {
+   "coord": "313512.98N 0074842.73W",
+   "role": "IAF BRG 098.56°MAG/15.0 DME MAK",
+   "fra": ""
+  },
+  "RIPOV": {
+   "coord": "334202.56N 0051235.99W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "ROLGO": {
+   "coord": "265834.06N 0132301.82W",
+   "role": "IAF RNAV (GNSS) RWY 02 AD GMML",
+   "fra": ""
+  },
+  "ROMOR": {
+   "coord": "343606.20N 0023600.00W",
+   "role": "TMA GMFO – A411",
+   "fra": ""
+  },
+  "ROMSO": {
+   "coord": "352643N 0062933W",
+   "role": "UM985– G/UG5 – M143",
+   "fra": ""
+  },
+  "RUBAB": {
+   "coord": "320007.31N 0062814.24W",
+   "role": "L/UL102 – Q/UQ401",
+   "fra": ""
+  },
+  "RUSIK": {
+   "coord": "285422N 0124859W",
+   "role": "FIR GMMM/GCCC – G849 – UN869",
+   "fra": ""
+  },
+  "SADIC": {
+   "coord": "334402N 0062000W",
+   "role": "TMA GMMN – R/UR975",
+   "fra": ""
+  },
+  "SAKOF": {
+   "coord": "332225N 0065425W",
+   "role": "Point à l’intérieur TMA GMMN",
+   "fra": ""
+  },
+  "SAWBA": {
+   "coord": "265956N 0124027W",
+   "role": "TMA GMML-Z/UZ967",
+   "fra": ""
+  },
+  "SIVSO": {
+   "coord": "312755.89N 0082023.00W",
+   "role": "IAF STAR RNAV(GNSS) RWY10 AD GMMX",
+   "fra": ""
+  },
+  "SOBGO": {
+   "coord": "345326.28N 0030017.35W",
+   "role": "IAF RNAV(GNSS) RWY08;RWY26 AD GMMW",
+   "fra": ""
+  },
+  "SOBMA": {
+   "coord": "352400N 0055500W",
+   "role": "TMA/1 GMTT – N10",
+   "fra": ""
+  },
+  "SODSA": {
+   "coord": "332730.02N 0052506.66W",
+   "role": "TMA/2 GMFF – M372",
+   "fra": ""
+  },
+  "SOLNA": {
+   "coord": "274000N 0123543W",
+   "role": "FIR GMMM/GCCC – A/UA600",
+   "fra": ""
+  },
+  "SOMOM": {
+   "coord": "300421N 0101157W",
+   "role": "TMA/2 GMAD – G/UG850",
+   "fra": ""
+  },
+  "SONSO": {
+   "coord": "300044N 0120607W",
+   "role": "UN871 – G/UG5 – UG664",
+   "fra": ""
+  },
+  "SOPAB": {
+   "coord": "300913.41N 0093550.60W",
+   "role": "Point TMA GMAD",
+   "fra": ""
+  },
+  "SOVAL": {
+   "coord": "341022N 0041008W",
+   "role": "A/UA411",
+   "fra": ""
+  },
+  "TABIM": {
+   "coord": "334442.89N 0051559.71W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "TAGOG": {
+   "coord": "301619N 0095143W",
+   "role": "TMA/1 GMAD – UG664",
+   "fra": ""
+  },
+  "TAKAG": {
+   "coord": "235649.64N 0155755.24W",
+   "role": "IAF RNAV (GNSS) RWY 21 AD GMMH",
+   "fra": ""
+  },
+  "TEKNA": {
+   "coord": "300221N 0094418W",
+   "role": "TMA/1 GMAD – A600",
+   "fra": ""
+  },
+  "TIDLO": {
+   "coord": "315941.04N 0061347.92W",
+   "role": "FIR GMMM",
+   "fra": ""
+  },
+  "TIDMO": {
+   "coord": "305431.36N 0063227.05W",
+   "role": "IAF STAR RNAV RWY 30 AD GMMZ",
+   "fra": ""
+  },
+  "TIKVO": {
+   "coord": "295420.30N 0092040.57W",
+   "role": "Point TMA GMAD",
+   "fra": ""
+  },
+  "TIXAL": {
+   "coord": "321532.33N 0071556.16W",
+   "role": "UG850 – W/UW900",
+   "fra": ""
+  },
+  "TOBZA": {
+   "coord": "323851N 0054954W",
+   "role": "H/UH119 – V/UV203",
+   "fra": ""
+  },
+  "TODBA": {
+   "coord": "313643.67N 0093735.65W",
+   "role": "IAF (VORz) RWY 16 AD GMMI",
+   "fra": ""
+  },
+  "TOGMA": {
+   "coord": "311830N 0064037W",
+   "role": "TMA GMMZ – V/UV203",
+   "fra": ""
+  },
+  "TOLSI": {
+   "coord": "343602N 0070054W",
+   "role": "G/UG5- TMA GMMN",
+   "fra": ""
+  },
+  "TOPMA": {
+   "coord": "303451N 0082254W",
+   "role": "G/UG664 – M/UM372",
+   "fra": ""
+  },
+  "TUSOR": {
+   "coord": "342950N 0061954W",
+   "role": "TMA GMMN",
+   "fra": ""
+  },
+  "UBITA": {
+   "coord": "313912.98N 0094043.38W",
+   "role": "IAF RNAV (GNSS) RWY 16 AD GMMI",
+   "fra": ""
+  },
+  "ULMAM": {
+   "coord": "340000N 0015843W",
+   "role": "FIR GMMM",
+   "fra": ""
+  },
+  "UROLU": {
+   "coord": "333240.20N 0053235.81W",
+   "role": "TMA/2 GMFF",
+   "fra": ""
+  },
+  "UVMOL": {
+   "coord": "352543.61N 0040420.73W",
+   "role": "IAF RNAV (GNSS) RWY 17 AD AL GMTA",
+   "fra": ""
+  },
+  "VABNA": {
+   "coord": "325209.76N 0073016.67W",
+   "role": "Z/UZ801",
+   "fra": ""
+  },
+  "VABOL": {
+   "coord": "312244.97N 0082913.67W",
+   "role": "STAR RNAV (GNSS) RWY10 AD GMMX",
+   "fra": ""
+  },
+  "VABSI": {
+   "coord": "345411.00N 0023600.00W",
+   "role": "TMA GMFO – N/UN726",
+   "fra": ""
+  },
+  "VAGNO": {
+   "coord": "354424N 0061800W",
+   "role": "TMA/1 GMTT – G/UG5",
+   "fra": ""
+  },
+  "VANOP": {
+   "coord": "315000N 0034500W",
+   "role": "FIR GMMM",
+   "fra": ""
+  },
+  "VARAS": {
+   "coord": "340132N 0062054W",
+   "role": "TMA GMMN – A/UA411",
+   "fra": ""
+  },
+  "VAXAM": {
+   "coord": "335329.86N 0051556.50W",
+   "role": "TMA/1 GMFF",
+   "fra": ""
+  },
+  "VONCI": {
+   "coord": "324537N 0082446W",
+   "role": "TMA GMMN – G/UG5",
+   "fra": ""
+  },
+  "XAVOV": {
+   "coord": "343336N 0024509W",
+   "role": "A/UA411 – L/UL58 – UM999",
+   "fra": ""
+  },
+  "TALOK": {
+   "coord": "304949.84N 0064113.44W",
+   "role": "Point TMA GMMZ",
+   "fra": ""
+  },
+  "OJD": {
+   "coord": "344624N 0015701W",
+   "role": "VOR/DME OUJDA",
+   "fra": "",
+   "navaid": true
+  },
+  "FES": {
+   "coord": "335539N 0050049W",
+   "role": "VOR/DME FES",
+   "fra": "",
+   "navaid": true
+  },
+  "RBT": {
+   "coord": "340300N 0064447W",
+   "role": "VOR/DME RABAT",
+   "fra": "",
+   "navaid": true
+  },
+  "TTN": {
+   "coord": "353551N 0051908W",
+   "role": "VOR/DME TETOUAN",
+   "fra": "",
+   "navaid": true
+  },
+  "SLK": {
+   "coord": "330656N 0073022W",
+   "role": "VOR/DME SETTAT",
+   "fra": "",
+   "navaid": true
+  },
+  "MAK": {
+   "coord": "313646N 0080611W",
+   "role": "VOR/DME MARRAKECH",
+   "fra": "",
+   "navaid": true
+  },
+  "ESS": {
+   "coord": "312404N 0094113W",
+   "role": "VOR/DME ESSAOUIRA",
+   "fra": "",
+   "navaid": true
+  },
+  "ERA": {
+   "coord": "315527N 0042138W",
+   "role": "VOR/DME ERRACHIDIA",
+   "fra": "",
+   "navaid": true
+  },
+  "OZT": {
+   "coord": "305624N 0065416W",
+   "role": "VOR/DME OUARZAZATE",
+   "fra": "",
+   "navaid": true
+  },
+  "ALM": {
+   "coord": "351127N 0035030W",
+   "role": "VOR/DME AL HOCEIMA",
+   "fra": "",
+   "navaid": true
+  },
+  "BRF": {
+   "coord": "323051N 0020150W",
+   "role": "VOR/DME BOUARFA",
+   "fra": "",
+   "navaid": true
+  },
+  "ARI": {
+   "coord": "345912N 0030145W",
+   "role": "VOR/DME NADOR",
+   "fra": "",
+   "navaid": true
+  },
+  "TNR": {
+   "coord": "354403N 0055509W",
+   "role": "VOR/DME TANGER",
+   "fra": "",
+   "navaid": true
+  },
+  "BML": {
+   "coord": "322501N 0061753W",
+   "role": "VOR/DME BENI MELLAL",
+   "fra": "",
+   "navaid": true
   }
  },
  "construction_points": {
@@ -302,6 +1414,90 @@
     "304454N 0140105W"
    ],
    "note": "OS/WS line meets the SW boundary between SAMAR and VASTO"
+  },
+  "AG1": {
+   "coord": "331841N 0092623W",
+   "note": "CTA Agadir / CTA Casablanca (ENR 2.1)"
+  },
+  "AG2": {
+   "coord": "330334N 0092726W",
+   "note": "CTA Agadir / CTA Casablanca (ENR 2.1)"
+  },
+  "AG3": {
+   "coord": "325741N 0094344W",
+   "note": "CTA Agadir / CTA Casablanca (ENR 2.1)"
+  },
+  "B_SE": {
+   "coord": "300000N 0123000W",
+   "note": "CTA Agadir / CTA Casablanca / FIR GCCC"
+  },
+  "NE1": {
+   "coord": "355000N 0045439W",
+   "note": "sector North / East on the FIR boundary (ENR 2.1)"
+  },
+  "E1": {
+   "coord": "312159N 0033642W",
+   "note": "sector East / Central on the FIR boundary (ENR 2.1)"
+  },
+  "S1": {
+   "coord": "300000N 0060825W",
+   "note": "sector Central / South-South on the FIR boundary (ENR 2.1)"
+  },
+  "N1": {
+   "coord": "341157N 0061249W",
+   "note": "start of the RBT 28 NM arc, sector North / East"
+  },
+  "N2": {
+   "coord": "334239N 0062139W",
+   "note": "end of the RBT 28 NM arc, sector North / East"
+  },
+  "N3": {
+   "coord": "333121N 0063554W",
+   "note": "sector North / East"
+  },
+  "CJ": {
+   "coord": "330012N 0065607W",
+   "note": "sector North / East / Central (published 330012N 0065607W East, 325957N 0065616W Central)"
+  },
+  "N4": {
+   "coord": "323917N 0070933W",
+   "note": "sector North / Central"
+  },
+  "C1": {
+   "coord": "304151N 0075423W",
+   "note": "sector Central / South-South"
+  },
+  "C2": {
+   "coord": "311018N 0082505W",
+   "note": "sector Central / South-South"
+  },
+  "C3": {
+   "coord": "312957N 0084617W",
+   "note": "sector Central / South-South"
+  },
+  "P3239": {
+   "snap": "323914N 0100100W",
+   "onto": [
+    "AG3",
+    "B_SE"
+   ],
+   "note": "sector Central / South-South on the CTA Agadir boundary"
+  },
+  "RO": {
+   "snap": "ROLRO",
+   "onto": [
+    "AG3",
+    "B_SE"
+   ],
+   "note": "ROLRO on the CTA Agadir boundary (sector line SS)"
+  },
+  "DOMOG": {
+   "snap": "DOMOG",
+   "onto": [
+    "AG2",
+    "AG3"
+   ],
+   "note": "DOMOG stays on the CTA Agadir boundary"
   }
  },
  "sectors": [
@@ -323,7 +1519,8 @@
     "NEVTU",
     "OSDIV",
     "B_NW"
-   ]
+   ],
+   "cta": "AGADIR"
   },
   {
    "id": "WN",
@@ -332,16 +1529,20 @@
    "backup_freq": "125.900",
    "ring": [
     "ADILI",
-    "DOMOG"
+    "BAMBA"
    ],
    "line": [
+    "BAMBA",
+    "AG1",
+    "AG2",
     "DOMOG",
     "ERMED",
     "XELER",
     "IBLIV",
     "V",
     "ADILI"
-   ]
+   ],
+   "cta": "AGADIR"
   },
   {
    "id": "WS",
@@ -349,7 +1550,7 @@
    "freq": "127.000",
    "backup_freq": "125.900",
    "ring": [
-    "DOMOG",
+    "B_SE",
     "B_SW"
    ],
    "line": [
@@ -360,8 +1561,12 @@
     "IBLIV",
     "XELER",
     "ERMED",
-    "DOMOG"
-   ]
+    "DOMOG",
+    "AG3",
+    "B_SE"
+   ],
+   "cta": "AGADIR",
+   "start": "DOMOG"
   },
   {
    "id": "OS",
@@ -379,6 +1584,118 @@
     "ABTIR",
     "J",
     "B_SW"
+   ],
+   "cta": "AGADIR"
+  },
+  {
+   "id": "N",
+   "name": "North",
+   "cta": "CASABLANCA",
+   "freq": "125.500",
+   "backup_freq": "132.325",
+   "ring": [
+    "BAMBA",
+    "NE1"
+   ],
+   "line": [
+    "NE1",
+    "N1",
+    {
+     "arc": {
+      "center": "340300N 0064447W",
+      "radius_nm": 28,
+      "direction": "cw",
+      "to": "N2"
+     }
+    },
+    "N3",
+    "CJ",
+    "N4",
+    "MOGBI",
+    "VONCI",
+    "MOKRI",
+    "AG2",
+    "AG1",
+    "BAMBA"
+   ]
+  },
+  {
+   "id": "E",
+   "name": "East",
+   "cta": "CASABLANCA",
+   "freq": "125.100",
+   "backup_freq": "132.100",
+   "ring": [
+    "NE1",
+    "E1"
+   ],
+   "line": [
+    "E1",
+    "CJ",
+    "N3",
+    "N2",
+    {
+     "arc": {
+      "center": "340300N 0064447W",
+      "radius_nm": 28,
+      "direction": "ccw",
+      "to": "N1"
+     }
+    },
+    "NE1"
+   ]
+  },
+  {
+   "id": "C",
+   "name": "Central",
+   "cta": "CASABLANCA",
+   "freq": "133.100",
+   "backup_freq": "132.500",
+   "ring": [
+    "E1",
+    "S1"
+   ],
+   "line": [
+    "S1",
+    "C1",
+    "C2",
+    "LISRA",
+    "GOSNO",
+    "C3",
+    "MAGAV",
+    "P3239",
+    "AG3",
+    "DOMOG",
+    "AG2",
+    "MOKRI",
+    "VONCI",
+    "MOGBI",
+    "N4",
+    "CJ",
+    "E1"
+   ]
+  },
+  {
+   "id": "SS",
+   "name": "South-South",
+   "cta": "CASABLANCA",
+   "freq": "126.700",
+   "backup_freq": "132.500",
+   "ring": [
+    "S1",
+    "B_SE"
+   ],
+   "line": [
+    "B_SE",
+    "RO",
+    "P3239",
+    "MAGAV",
+    "C3",
+    "GOSNO",
+    "LISRA",
+    "C2",
+    "C1",
+    "S1"
    ]
   }
  ],
@@ -389,8 +1706,7 @@
     "KUBIL",
     "OSDIV",
     "KONBA"
-   ],
-   "upper": true
+   ]
   },
   "UN873": {
    "points": [
@@ -400,7 +1716,6 @@
     "MITLA",
     "SAMAR"
    ],
-   "upper": true,
    "one_way": true,
    "note": "southbound only (BAROK to SAMAR)"
   },
@@ -413,7 +1728,6 @@
     "SUNID",
     "AKUDA"
    ],
-   "upper": true,
    "one_way": true,
    "note": "northbound only (VASTO to AKUDA): VASTO is an entry point, AKUDA an exit point"
   },
@@ -427,41 +1741,428 @@
     "VEDOD",
     "TERTO"
    ],
-   "upper": true,
+   "one_way": true,
+   "note": "southbound only",
    "lower": "A857"
   },
   "UR722": {
    "points": [
     "AMSEL",
     "ABODA",
-    "MARJA"
+    "MARJA",
+    "LAKAM",
+    "SAK",
+    "CSD",
+    "FOBAC",
+    "MABAP",
+    "MAK"
    ],
-   "upper": true,
    "lower": "R722"
   },
   "UR724": {
    "points": [
     "OSLAD",
     "IBALU",
-    "NISBA"
+    "NISBA",
+    "MOKRI",
+    "ESS",
+    "DENOB",
+    "AGALI",
+    "ADM"
    ],
-   "upper": true,
    "lower": "R724"
   },
   "UH899": {
    "points": [
-    "IBALU",
-    "LAPNO"
+    "SAK",
+    "ODAXA",
+    "LAPNO",
+    "IBALU"
    ],
-   "upper": true,
+   "one_way": true,
+   "note": "westbound only, SAK to IBALU",
    "lower": "H899"
   },
   "UA411": {
    "points": [
-    "IBALU",
-    "SALCA"
+    "ORSUP",
+    "OJD",
+    "ROMOR",
+    "XAVOV",
+    "DOTIV",
+    "SOVAL",
+    "EMKOK",
+    "FES",
+    "DEMUM",
+    "IPLOS",
+    "VARAS",
+    "RBT",
+    "LAKAM",
+    "SALCA",
+    "IBALU"
    ],
-   "upper": true
+   "lower": "A411"
+  },
+  "UL82": {
+   "points": [
+    "RUNAX",
+    "IBALU"
+   ],
+   "one_way": true,
+   "note": "southbound only"
+  },
+  "UA600": {
+   "points": [
+    "ADM",
+    "TEKNA",
+    "AMLOK",
+    "SOLNA",
+    "LAY",
+    "ARENA",
+    "CABEL",
+    "DKH"
+   ],
+   "lower": "A600"
+  },
+  "UB11": {
+   "points": [
+    "GALTO",
+    "TTN",
+    "BARIS",
+    "TUSOR",
+    "DIRAD",
+    "BISMI",
+    "SLK",
+    "PELAX",
+    "FACAS",
+    "MABAP",
+    "MAK"
+   ],
+   "lower": "B11"
+  },
+  "UG5": {
+   "points": [
+    "KORIS",
+    "VAGNO",
+    "ROMSO",
+    "TOLSI",
+    "AGDAL",
+    "SAK",
+    "RALEK",
+    "VONCI",
+    "BARAM",
+    "ESS",
+    "NISUR",
+    "SONSO",
+    "KORAL"
+   ],
+   "lower": "G5"
+  },
+  "UG664": {
+   "points": [
+    "OJD",
+    "EVOXO",
+    "OLMAG",
+    "ERA",
+    "LARAP",
+    "OZT",
+    "LINVA",
+    "TOPMA",
+    "ABATO",
+    "KEGAG",
+    "ADM",
+    "TAGOG",
+    "DOGAN",
+    "SONSO"
+   ],
+   "lower": "G664"
+  },
+  "UG850": {
+   "points": [
+    "BERUM",
+    "ALM",
+    "BOKPA",
+    "FES",
+    "NEVEK",
+    "ERLAM",
+    "TIXAL",
+    "VALBA",
+    "OBOGA",
+    "MAK",
+    "LISRA",
+    "BIDLA",
+    "OLOMA",
+    "ADM",
+    "BULOK",
+    "SOMOM",
+    "DEVLA"
+   ],
+   "lower": "G850"
+  },
+  "UH104": {
+   "points": [
+    "ALM",
+    "IXODA",
+    "BARIS"
+   ],
+   "lower": "H104"
+  },
+  "UH119": {
+   "points": [
+    "SAK",
+    "GOVAS",
+    "LACAJ",
+    "ERLAM",
+    "DIDOV",
+    "TOBZA",
+    "ERA",
+    "PIXEB",
+    "BRF"
+   ],
+   "lower": "H119"
+  },
+  "UH300": {
+   "points": [
+    "MOGBA",
+    "KEMEX",
+    "ESS"
+   ],
+   "one_way": true,
+   "note": "northbound only",
+   "lower": "H300"
+  },
+  "UH400": {
+   "points": [
+    "AGOVA",
+    "ABDOR",
+    "KUDAX",
+    "MAK",
+    "GOSNO",
+    "MIMRO",
+    "AGALI",
+    "MOGBA"
+   ],
+   "lower": "H400"
+  },
+  "UH500": {
+   "points": [
+    "NISBA",
+    "RAVOL",
+    "SAK"
+   ],
+   "lower": "H500"
+  },
+  "UJ744": {
+   "points": [
+    "MAK",
+    "MOKIR",
+    "MAXOR",
+    "OZT",
+    "BAGBO"
+   ],
+   "lower": "J744"
+  },
+  "UR975": {
+   "points": [
+    "FES",
+    "POBUB",
+    "SADIC",
+    "DONAS",
+    "BISMI",
+    "SAK",
+    "CSD",
+    "NIKZO",
+    "BENOV",
+    "MAGAV",
+    "NAMIR",
+    "EKTAL",
+    "ADM",
+    "ARSOL",
+    "DIDAN",
+    "MOROX",
+    "ECHED"
+   ],
+   "lower": "R975"
+  },
+  "UR977": {
+   "points": [
+    "ADM",
+    "KUVEL",
+    "BULIS"
+   ]
+  },
+  "UV203": {
+   "points": [
+    "FES",
+    "TOBZA",
+    "TOGMA",
+    "OZT"
+   ],
+   "lower": "V203"
+  },
+  "UW255": {
+   "points": [
+    "FES",
+    "IBEVO",
+    "OLMAG",
+    "BRF"
+   ],
+   "lower": "W255"
+  },
+  "UW700": {
+   "points": [
+    "BERUM",
+    "IXIRI",
+    "DIGEX"
+   ],
+   "lower": "W700"
+  },
+  "UW900": {
+   "points": [
+    "SAK",
+    "SLK",
+    "PIXOV",
+    "MOGBI",
+    "TIXAL",
+    "AGOVA",
+    "MOGVA",
+    "OZT"
+   ],
+   "lower": "W900"
+  },
+  "UL58": {
+   "points": [
+    "BERUM",
+    "ARI",
+    "XAVOV",
+    "BRF"
+   ]
+  },
+  "UL102": {
+   "points": [
+    "ARIAM",
+    "ERA",
+    "RUBAB",
+    "AGOVA"
+   ]
+  },
+  "UM240": {
+   "points": [
+    "TNR",
+    "MADOV",
+    "IXODA",
+    "ATVAR",
+    "FES",
+    "LEGTI",
+    "ERA"
+   ]
+  },
+  "UM372": {
+   "points": [
+    "ESAMI",
+    "IXIRI",
+    "ARI",
+    "FES",
+    "SODSA",
+    "DIDOV",
+    "BML",
+    "RAVMA",
+    "AGOVA",
+    "ABDOR",
+    "KUDAX",
+    "MAK",
+    "TOPMA",
+    "DIVUX",
+    "BULIS"
+   ]
+  },
+  "UM985": {
+   "points": [
+    "BARPA",
+    "TNR",
+    "ROMSO",
+    "OSDAM"
+   ]
+  },
+  "UM999": {
+   "points": [
+    "ALM",
+    "XAVOV",
+    "ARIAM"
+   ]
+  },
+  "UN10": {
+   "points": [
+    "LINTO",
+    "TNR",
+    "SOBMA",
+    "BARIS"
+   ]
+  },
+  "UN726": {
+   "points": [
+    "BAMBA",
+    "ABIRO",
+    "TNR",
+    "NARMI",
+    "TTN",
+    "ALM",
+    "ARI",
+    "VABSI",
+    "OJD"
+   ]
+  },
+  "UN869": {
+   "points": [
+    "GALTO",
+    "RBT",
+    "SLK",
+    "PELAX",
+    "MABAP",
+    "ADM",
+    "RUSIK"
+   ],
+   "one_way": true,
+   "note": "southbound only"
+  },
+  "UN871": {
+   "points": [
+    "KORAL",
+    "SONSO",
+    "ESS",
+    "NIRAL",
+    "OSDAM",
+    "ADUBI"
+   ],
+   "one_way": true,
+   "note": "northbound only"
+  },
+  "UQ401": {
+   "points": [
+    "OZT",
+    "RATVA",
+    "RUBAB",
+    "BML"
+   ],
+   "one_way": true,
+   "note": "northbound only"
+  },
+  "UT900": {
+   "points": [
+    "FES",
+    "ARIAM"
+   ]
+  },
+  "UZ801": {
+   "points": [
+    "TOLSI",
+    "SLK",
+    "VABNA",
+    "LOBMI",
+    "MABOG",
+    "VALBA",
+    "ABDOR"
+   ]
   }
  },
  "free_route": "FRA: direct routings between FRA points (E entry, X exit, I intermediate) are allowed; the simulator accepts a direct to any named point.",
@@ -847,6 +2548,31 @@
     "coord": "341114N 0074418W",
     "region": "Casablanca",
     "source": "unit (34.187222, -7.738333): GMMN arrivals after MARJA"
+   },
+   "LAY": {
+    "coord": "270834N 0131305W",
+    "region": "Canarias (Laayoune)",
+    "source": "AIP Maroc ENR 3 (VOR/DME LAAYOUNE)"
+   },
+   "DKH": {
+    "coord": "234441N 0155511W",
+    "region": "Canarias (Laayoune)",
+    "source": "AIP Maroc ENR 3 (VOR/DME DAKHLA)"
+   },
+   "SMR": {
+    "coord": "264351N 0114112W",
+    "region": "Canarias (Laayoune)",
+    "source": "AIP Maroc ENR 3 (VOR/DME SMARA)"
+   },
+   "ARENA": {
+    "coord": "254341N 0142131W",
+    "region": "Canarias (Laayoune)",
+    "source": "AIP Maroc ENR 3.1 (UA600)"
+   },
+   "CABEL": {
+    "coord": "250000N 0145628W",
+    "region": "Canarias (Laayoune)",
+    "source": "AIP Maroc ENR 3.1 (UA600)"
    }
   }
  },
@@ -1504,11 +3230,31 @@
   "address": "GMAC",
   "name": "AGADIR",
   "units": {
-   "GMMM": {"name": "CASABLANCA CONTROL", "freq": "125.300", "address": "GMMM"},
-   "LPPC": {"name": "LISBOA CONTROL", "freq": "132.150", "address": "LPPC"},
-   "GCCC": {"name": "CANARIAS CONTROL", "freq": "128.600", "address": "GCCC"},
-   "LECS": {"name": "SEVILLA CONTROL", "freq": "133.900", "address": "LECS"},
-   "MADEIRA": {"name": "LISBOA CONTROL", "freq": "125.700", "address": "LPPC"}
+   "GMMM": {
+    "name": "CASABLANCA CONTROL",
+    "freq": "125.300",
+    "address": "GMMM"
+   },
+   "LPPC": {
+    "name": "LISBOA CONTROL",
+    "freq": "132.150",
+    "address": "LPPC"
+   },
+   "GCCC": {
+    "name": "CANARIAS CONTROL",
+    "freq": "128.600",
+    "address": "GCCC"
+   },
+   "LECS": {
+    "name": "SEVILLA CONTROL",
+    "freq": "133.900",
+    "address": "LECS"
+   },
+   "MADEIRA": {
+    "name": "LISBOA CONTROL",
+    "freq": "125.700",
+    "address": "LPPC"
+   }
   }
  },
  "capacity_per_hour": {
@@ -1520,5 +3266,676 @@
   "ON": 56,
   "OS": 65,
   "ON+OS+WN+WS": 47
- }
+ },
+ "ctas": {
+  "_note": "The FIR GMMM holds two control areas: CTA AGADIR (ACC Agadir, sectors ON / WN / WS / OS) and CTA CASABLANCA (ACC Casablanca, sectors N / E / C / SS, ENR 2.1). A scenario controls sectors of one of them; the other one is drawn and its sectors are the neighbouring unit.",
+  "AGADIR": {
+   "name": "Agadir CTA (Casablanca FIR GMMM)",
+   "unit": "ACC AGADIR",
+   "address": "GMAC",
+   "callsign": "AGADIR",
+   "short": "Agadir CTA"
+  },
+  "CASABLANCA": {
+   "name": "Casablanca CTA (Casablanca FIR GMMM)",
+   "unit": "ACC CASABLANCA",
+   "address": "GMMM",
+   "callsign": "CASABLANCA",
+   "short": "Casablanca CTA"
+  }
+ },
+ "default_control": [
+  "ON",
+  "WN",
+  "WS",
+  "OS"
+ ],
+ "published_areas": {
+  "_note": "AIP Maroc ENR 5.1 prohibited (GMP), restricted (GMR) and danger (GMD) areas, loaded into every scenario of this airspace. Prohibited areas are active (H24); restricted and danger areas are published inactive and a scenario activates them with \"published_areas\": {\"GMD25\": true} or {\"GMD25\": {\"active\": false, \"schedule\": [{\"time\": 600, \"active\": true}]}}. Limits as flight levels (GND / SFC / MSL = 0, UNL = 999; feet and metres converted).",
+  "areas": [
+   {
+    "id": "GMP01",
+    "name": "GMP 01",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 999,
+    "circle": {
+     "center": "320729.99N 0075240.83W",
+     "radius_nm": 8
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP02",
+    "name": "GMP 02 SIDI SLIMANE",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 999,
+    "circle": {
+     "center": "341350N 0060254W",
+     "radius_nm": 8
+    },
+    "note": "military holding / approach, H24"
+   },
+   {
+    "id": "GMP11",
+    "name": "GMP 11 AGADIR",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 205,
+    "circle": {
+     "center": "302501N 0093624W",
+     "radius_nm": 0.648
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP14",
+    "name": "GMP 14 AGADIR",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 205,
+    "circle": {
+     "center": "302225N 0093535W",
+     "radius_nm": 0.648
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP15",
+    "name": "GMP 15 LES SABLONS",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 100,
+    "circle": {
+     "center": "340151N 0064354W",
+     "radius_nm": 0.54
+    },
+    "note": "penetration prohibited"
+   },
+   {
+    "id": "GMP16",
+    "name": "GMP 16 HASSAN II",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "circles": [
+     {
+      "center": "333629N 0073758W",
+      "radius_nm": 0.27
+     },
+     {
+      "center": "333451N 0073614W",
+      "radius_nm": 1.0
+     }
+    ],
+    "note": "penetration prohibited H24 (two circles and their common tangents)"
+   },
+   {
+    "id": "GMP17",
+    "name": "GMP 17",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "circles": [
+     {
+      "center": "335621N 0065004W",
+      "radius_nm": 1.0
+     },
+     {
+      "center": "340014N 0065004W",
+      "radius_nm": 1.0
+     }
+    ],
+    "note": "penetration prohibited H24 (two circles and their common tangents)"
+   },
+   {
+    "id": "GMP18",
+    "name": "GMP 18",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 200,
+    "circle": {
+     "center": "335211N 0070244W",
+     "radius_nm": 5
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP19",
+    "name": "GMP 19",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "circle": {
+     "center": "353253N 0055743W",
+     "radius_nm": 1.08
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP20",
+    "name": "GMP 20",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 60,
+    "circle": {
+     "center": "354820N 0055056W",
+     "radius_nm": 1.08
+    },
+    "note": "penetration prohibited H24"
+   },
+   {
+    "id": "GMP21",
+    "name": "GMP 21 PORT TANGER MED",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 240,
+    "polygon": [
+     "355647N 0052900W",
+     "355246N 0053436W",
+     "355054N 0053232W",
+     "355456N 0052703W"
+    ],
+    "note": "published in AIP Espana by agreement with Morocco"
+   },
+   {
+    "id": "GMP22",
+    "name": "GMP 22 LA SAMIR",
+    "kind": "prohibited",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "circle": {
+     "center": "334110N 0072520W",
+     "radius_nm": 1.5
+    },
+    "note": "penetration prohibited H24 (IFR SFC-5000 FT)"
+   },
+   {
+    "id": "GMR02",
+    "name": "GMR 02 MEKNES",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 195,
+    "polygon": [
+     "334450N 0052354W",
+     "332116N 0052130W",
+     "324408N 0055308W",
+     "325107N 0060444W",
+     "334149N 0054554W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMR04A",
+    "name": "GMR 04A KENITRA",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 35,
+    "polygon": [
+     "344650N 0062429W",
+     "345150N 0054844W",
+     "343250N 0061454W",
+     "343405N 0063324W"
+    ],
+    "note": "training; entry permission RABAT APP or Casablanca ACC 125.500"
+   },
+   {
+    "id": "GMR05",
+    "name": "GMR 05",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "polygon": [
+     "333751N 0055854W",
+     "325951N 0061454W",
+     "331151N 0062454W",
+     "333051N 0062454W"
+    ],
+    "note": "military helicopter training MON TIL FRI; prior permission (ACC 125.100)"
+   },
+   {
+    "id": "GMR06",
+    "name": "GMR 06",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 185,
+    "polygon": [
+     "334149N 0054554W",
+     "333548N 0054810W",
+     "331949N 0064325W",
+     "333121N 0063554W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMR09",
+    "name": "GMR 09",
+    "kind": "restricted",
+    "lower_fl": 265,
+    "upper_fl": 460,
+    "polygon": [
+     "354750N 0041124W",
+     "354920N 0030054W",
+     "352650N 0025724W",
+     "351220N 0040224W"
+    ],
+    "note": "high altitude / high Mach interception training under radar control, activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMR11",
+    "name": "GMR 11",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 10,
+    "polygon": [
+     "270152N 0131255W",
+     "270052N 0130355W",
+     "264252N 0130755W",
+     "265452N 0131555W"
+    ],
+    "note": "helicopter training MON-SAT VMC; LAAYOUNE TWR"
+   },
+   {
+    "id": "GMR12",
+    "name": "GMR 12",
+    "kind": "restricted",
+    "lower_fl": 0,
+    "upper_fl": 5,
+    "polygon": [
+     "263052N 0121955W",
+     "263452N 0125355W",
+     "264252N 0130755W",
+     "270052N 0130355W",
+     "265252N 0121655W"
+    ],
+    "note": "military helicopter training MON-SAT; LAAYOUNE TWR"
+   },
+   {
+    "id": "GMD01",
+    "name": "GMD 01 EL HAJEB",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 180,
+    "circle": {
+     "center": "333936N 0051754W",
+     "radius_nm": 4
+    },
+    "note": "activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD02",
+    "name": "GMD 02 EL HAJEB",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 132,
+    "polygon": [
+     "334550N 0052154W",
+     "334550N 0050754W",
+     "333551N 0050754W",
+     "333551N 0052154W"
+    ],
+    "note": "activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD04",
+    "name": "GMD 04 SEFROU",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 165,
+    "polygon": [
+     "334520N 0045209W",
+     "334520N 0045052W",
+     "334730N 0044934W",
+     "334830N 0045014W",
+     "334910N 0045129W",
+     "334910N 0045224W",
+     "334700N 0045329W",
+     "334555N 0045329W"
+    ],
+    "note": "activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD05",
+    "name": "GMD 05 RAM RAM",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 25,
+    "circle": {
+     "center": "314321N 0080224W",
+     "radius_nm": 2.7
+    },
+    "note": "activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD06",
+    "name": "GMD 06",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 33,
+    "polygon": [
+     "342527N 0063249W",
+     "342621N 0063249W",
+     "342621N 0063057W",
+     "342527N 0063057W"
+    ],
+    "note": "surface to surface firing, activity by NOTAM"
+   },
+   {
+    "id": "GMD07",
+    "name": "GMD 07 GUERCIF",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 400,
+    "polygon": [
+     "341250N 0032024W",
+     "341256N 0032149W",
+     "341015N 0033201W",
+     "340518N 0034107W",
+     "340110N 0034556W",
+     "335409N 0034348W",
+     "335453N 0032716W",
+     "335809N 0032441W"
+    ],
+    "note": "activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD11",
+    "name": "GMD 11",
+    "kind": "danger",
+    "lower_fl": 130,
+    "upper_fl": 999,
+    "polygon": [
+     "334405N 0050024W",
+     "330251N 0034454W",
+     "322951N 0041454W",
+     "332736N 0050309W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD12",
+    "name": "GMD 12",
+    "kind": "danger",
+    "lower_fl": 130,
+    "upper_fl": 999,
+    "polygon": [
+     "335450N 0025954W",
+     "330251N 0034454W",
+     "334405N 0050024W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD13",
+    "name": "GMD 13 MEKNES",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 50,
+    "polygon": [
+     "331200N 0042030W",
+     "331200N 0055917W",
+     "325351N 0060654W",
+     "322651N 0054524W",
+     "324551N 0040254W",
+     "330221N 0035854W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD21",
+    "name": "GMD 21",
+    "kind": "danger",
+    "lower_fl": 150,
+    "upper_fl": 460,
+    "polygon": [
+     "354450N 0045054W",
+     "354550N 0041124W",
+     "351200N 0040224W",
+     "343020N 0053839W",
+     "343835N 0055324W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD22",
+    "name": "GMD 22",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 460,
+    "polygon": [
+     "351200N 0040224W",
+     "340823N 0050730W",
+     "340820N 0053234W",
+     "342140N 0053254W",
+     "341150N 0055229W",
+     "342150N 0055754W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD23",
+    "name": "GMD 23 OULED EL KHAT",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 250,
+    "polygon": [
+     "263257N 0131255W",
+     "263257N 0130355W",
+     "262955N 0130155W",
+     "262200N 0130155W",
+     "262200N 0131255W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD24",
+    "name": "GMD 24",
+    "kind": "danger",
+    "lower_fl": 150,
+    "upper_fl": 460,
+    "polygon": [
+     "272552N 0122955W",
+     "275652N 0112955W",
+     "270632N 0112955W",
+     "270152N 0122955W"
+    ],
+    "note": "air training, activity by NOTAM, impermeable when active (ACC-CNDA agreement)"
+   },
+   {
+    "id": "GMD25",
+    "name": "GMD 25",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 460,
+    "polygon": [
+     "341950N 0072254W",
+     "343750N 0080654W",
+     "354950N 0072254W",
+     "354950N 0062754W"
+    ],
+    "note": "air training, activity by NOTAM, impermeable when active"
+   },
+   {
+    "id": "GMD26",
+    "name": "GMD 26",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 235,
+    "polygon": [
+     "335450N 0025954W",
+     "335450N 0021954W",
+     "325151N 0021954W",
+     "315951N 0034254W",
+     "322951N 0041454W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD28",
+    "name": "GMD 28",
+    "kind": "danger",
+    "lower_fl": 65,
+    "upper_fl": 195,
+    "polygon": [
+     "330254N 0083902W",
+     "324926N 0082842W",
+     "321930N 0085705W",
+     "321930N 0090827W",
+     "323254N 0091224W"
+    ],
+    "note": "aviation activities 01 JUN TIL 15 SEP MON TIL FRI 0500-1300; 16 SEP TIL 30 MAY MON TIL FRI 0700-1700"
+   },
+   {
+    "id": "GMD29",
+    "name": "GMD 29",
+    "kind": "danger",
+    "lower_fl": 90,
+    "upper_fl": 460,
+    "polygon": [
+     "331949N 0064325W",
+     "333548N 0054810W",
+     "325107N 0060444W",
+     "322941N 0062240W",
+     "321329N 0065932W",
+     "323014N 0071519W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD30",
+    "name": "GMD 30",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 460,
+    "polygon": [
+     "322213N 0061133W",
+     "320947N 0051405W",
+     "315706N 0044503W",
+     "311713N 0062905W",
+     "312300N 0063604W",
+     "312640N 0063433W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD31",
+    "name": "GMD 31 MEKNES",
+    "kind": "danger",
+    "lower_fl": 140,
+    "upper_fl": 999,
+    "polygon": [
+     "332116N 0052130W",
+     "320947N 0051405W",
+     "322213N 0061133W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD32",
+    "name": "GMD 32 MEKNES",
+    "kind": "danger",
+    "lower_fl": 140,
+    "upper_fl": 460,
+    "polygon": [
+     "332116N 0052130W",
+     "332434N 0051839W",
+     "332647N 0050252W",
+     "322951N 0041455W",
+     "321451N 0042955W",
+     "320947N 0051405W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD33",
+    "name": "GMD 33 MARRAKECH",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 195,
+    "polygon": [
+     "321129N 0083323W",
+     "313548N 0085124W",
+     "313204N 0091904W",
+     "313620N 0092236W",
+     "321032N 0085010W"
+    ],
+    "note": "aviation activities 01 JUN TIL 15 SEP MON TIL FRI 0500-1300; 16 SEP TIL 30 MAY MON TIL FRI 0700-1700"
+   },
+   {
+    "id": "GMD34",
+    "name": "GMD 34 MARRAKECH",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 195,
+    "polygon": [
+     "323444N 0073615W",
+     "323014N 0071519W",
+     "320356N 0065036W",
+     "315511N 0071018W",
+     "321021N 0074123W",
+     "321857N 0074747W"
+    ],
+    "note": "aviation activities MON TIL FRI 0600-1459, 1700-2159"
+   },
+   {
+    "id": "GMD35",
+    "name": "GMD 35 MARRAKECH",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 90,
+    "polygon": [
+     "321021N 0074123W",
+     "315511N 0071018W",
+     "314824N 0072528W",
+     "315219N 0072533W",
+     "315647N 0074801W"
+    ],
+    "note": "aviation activities 01 JUN TIL 15 SEP MON TIL FRI 0500-1300; 16 SEP TIL 30 MAY MON TIL FRI 0700-1700"
+   },
+   {
+    "id": "GMD36",
+    "name": "GMD 36 MARRAKECH",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 195,
+    "polygon": [
+     "312600N 0072458W",
+     "314824N 0072528W",
+     "320356N 0065036W",
+     "312632N 0064734W"
+    ],
+    "note": "aviation activities 01 JUN TIL 15 SEP MON TIL FRI 0500-1300; 16 SEP TIL 30 MAY MON TIL FRI 0700-1700"
+   },
+   {
+    "id": "GMD37",
+    "name": "GMD 37",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 195,
+    "polygon": [
+     "320356N 0065036W",
+     "320500N 0061844W",
+     "312640N 0063433W",
+     "312632N 0064734W"
+    ],
+    "note": "aviation activities 01 JUN TIL 15 SEP MON TIL FRI 0500-1300; 16 SEP TIL 30 MAY MON TIL FRI 0700-1700"
+   },
+   {
+    "id": "GMD38",
+    "name": "GMD 38 AMASSIN",
+    "kind": "danger",
+    "lower_fl": 0,
+    "upper_fl": 999,
+    "polygon": [
+     "260000N 0132200W",
+     "260000N 0124200W",
+     "250000N 0124200W",
+     "250000N 0134200W"
+    ],
+    "note": "air training, impermeable when active (LAAYOUNE APP / CNDA); APR-SEP 0600-2000, OCT-MAR 0700-1800"
+   }
+  ]
+ },
+ "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight)."
 }

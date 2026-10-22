@@ -57,6 +57,8 @@ from .geometry import (
     SECTOR_LOWER_FL, SECTOR_UPPER_FL, bearing, dist, polyline_length, project_on_polyline,
 )
 from .model import AREA_KINDS, Area
+from . import geometry as g
+from .airspace import _seg_dist
 from . import routing
 from . import flightplan
 from .weather import Weather
@@ -445,6 +447,46 @@ def _requested_level(a: dict, ac, asp, fl: int) -> Optional[int]:
     return pick[zlib.crc32(ac.callsign.encode()) % len(pick)]
 
 
+def _published_areas(scn: dict, asp, taken: set) -> List[Area]:
+    """The airspace's AIP areas (ENR 5.1): prohibited ones active, the others published inactive. The scenario
+    switches them with "published_areas": {"GMD25": true | false | {"active": .., "schedule": [..]}}, or leaves them
+    all out with "published_areas": false."""
+    spec = scn.get("published_areas", True)
+    pub = getattr(asp, "published_areas", None) or []
+    if spec is False or not pub:
+        return []
+    spec = spec if isinstance(spec, dict) else {}
+    known = {a["id"] for a in pub}
+    for k in spec:
+        if k not in known:
+            raise ScenarioError(f"published_areas: unknown area {k}; areas: {sorted(known)}")
+    poly = asp.polygon
+    near = lambda p: (g.point_in_polygon(p, poly) or
+                      min(_seg_dist(p, poly[i], poly[(i + 1) % len(poly)]) for i in range(len(poly))) <= 30.0)
+    out = []
+    for a in pub:
+        if a["id"] in taken:
+            continue
+        s = spec.get(a["id"])
+        s = {"active": s} if isinstance(s, bool) else (s or {})
+        area = Area(id=a["id"], name=a["name"], kind=a["kind"], lower_fl=int(a["lower_fl"]), upper_fl=int(a["upper_fl"]),
+                    active=bool(s.get("active", a["active"])),
+                    schedule=sorted([(float(e["time"]), bool(e["active"])) for e in s.get("schedule", [])]),
+                    designator=a["name"].split(" ")[0] + " " + a["name"].split(" ")[1], published=True,
+                    note=a.get("note", ""))
+        if "circle" in a:
+            c, r = tuple(a["circle"]["center"]), a["circle"]["radius_nm"]
+            area.circle = (c, r)
+            edge = [(c[0] + r * math.sin(k * math.pi / 8), c[1] + r * math.cos(k * math.pi / 8)) for k in range(16)]
+        else:
+            area.polygon = [tuple(p) for p in a["polygon"]]
+            edge = area.polygon
+        area.relevant = (area.upper_fl >= asp.lower_fl and area.lower_fl <= asp.upper_fl and
+                         (any(near(p) for p in edge) or any(area.contains_xy(p) for p in poly)))
+        out.append(area)
+    return out
+
+
 def build_world(scn: dict) -> World:
     import copy as _copy
     asp = _copy.copy(_airspace_for(scn))           # per-world copy: coordination points are added to it
@@ -515,6 +557,7 @@ def build_world(scn: dict) -> World:
         else:
             raise ScenarioError(f"area {area.id}: needs 'polygon' or 'circle'")
         areas.append(area)
+    areas += _published_areas(scn, asp, {a.id for a in areas})
 
     requests = []
     for r in scn.get("requests", []):
