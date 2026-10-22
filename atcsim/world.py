@@ -1191,7 +1191,8 @@ class World:
                         int(round(a.trk)), spd, nav,
                         api_hdg(a.target_hdg) if nav != "L" and a.target_hdg is not None else None,
                         a.next_wp if nav == "L" and a.active else None, 1 if a.on_frequency else 0,
-                        "A" if a.active else "T", rv.get(a.rvsm_status, "A")])
+                        "A" if a.active else "T", rv.get(a.rvsm_status, "A"),
+                        "C" if a.assumed else "R" if a.released else ""])     # control: assumed / decontrolled
         self.recording["frames"].append({
             "t": round(self.t, 1), "ac": acs,
             "req": [[r.callsign, r.type, r.kind] for r in self.requests.values() if r.status == "pending"],

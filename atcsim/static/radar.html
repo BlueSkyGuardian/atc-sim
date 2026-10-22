@@ -1071,7 +1071,11 @@ function replayState() {
       status: r[13] === 'A' ? 'active' : 'exited', type: m.type, route: m.route || [], entry_waypoint: m.entry,
       flight_plan: { destination: m.dest }, category: m.military ? 'military' : 'civil', formation: m.formation ? { size: m.formation } : null,
       rvsm: { status: rv, needs_2000ft: rv !== 'approved' || !!m.formation }, arrival: null, speed_restriction: null,
-      trail: trails[r[0]] || [], exit_point: null };
+      trail: trails[r[0]] || [], exit_point: null,
+      // control state at that moment (recordings made before it was recorded: as it is now)
+      ...(r.length > 15 ? { assumed: r[15] === 'C', released: r[15] === 'R' } : (() => {
+        const cur = state && (state.aircraft || []).concat(state.transferred || []).find(q => q.callsign === r[0]);
+        return cur ? { assumed: !!cur.assumed, released: !!cur.released } : {}; })()) };
   };
   const all = f0.ac.map(mk);
   const areas = ((state && state.areas) || rec.areas || []).map(a => ({ ...a, active: f0.areas.includes(a.id) }));
