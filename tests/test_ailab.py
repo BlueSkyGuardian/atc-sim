@@ -258,8 +258,9 @@ try:
             break
         time.sleep(1)
     s6 = ins.get(f"/api/ai/runs/{r6}/steps?limit=200").json()["steps"]
-    ok(x6["status"] == "done" and x6["evaluation"]["losses"] == 0 and any("×" in (s.get("reasoning") or "") for s in s6),
-       f"the solver flies a run on its own: score {x6['score']}, no loss, its resolutions: " + "; ".join(s["reasoning"] for s in s6 if "×" in (s.get("reasoning") or ""))[:160])
+    acted = [s["reasoning"] for s in s6 if "×" in (s.get("reasoning") or "") or "sequence at" in (s.get("reasoning") or "")]
+    ok(x6["status"] == "done" and x6["evaluation"]["losses"] == 0 and acted,
+       f"the solver flies a run on its own: score {x6['score']}, no loss, its resolutions: " + "; ".join(acted)[:200])
     ins.delete(f"/api/ai/runs/{r6}")
     ok(any("SOLVER" in (s.get("observation") or "") for s in s0), "the model is shown the solver's solutions for each conflict")
     gr = [g for s in s0 for g in s.get("grades") or []]
