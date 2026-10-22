@@ -10,6 +10,15 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const btn = $('#seqBtn'), box = $('#seqPanel');
   if (!btn || !box) return;
+  // the point can also be typed (a waypoint under a label is hard to click): a field that the panel's refresh leaves alone
+  box.innerHTML = `<div class="sq-pt"><span class="c-dim">point</span> <input id="sqPt" list="sqPts" placeholder="e.g. TERTO" autocomplete="off" spellcheck="false">
+    <datalist id="sqPts"></datalist></div><div id="sqInner"></div>`;
+  const inner = box.querySelector('#sqInner'), ptIn = box.querySelector('#sqPt');
+  const fillPts = () => { const dl = box.querySelector('#sqPts'); if (dl.options.length || !sector) return;
+    dl.innerHTML = Object.keys(sector.waypoints || {}).filter(n => !n.startsWith('@')).sort().map(n => `<option value="${n}">`).join(''); };
+  ptIn.addEventListener('focus', fillPts);
+  ptIn.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') ptIn.dispatchEvent(new Event('change')); });
+  ptIn.addEventListener('change', () => { const v = ptIn.value.trim().toUpperCase(); if (sector && (sector.waypoints || {})[v]) { point = v; compute(true); } else if (v) msg(`unknown point ${v}`, true); });
   // the solo radar, the sandbox and the controller's (or instructor's) seat in an exercise; not the pseudo-pilot, a
   // debrief or an AI run being watched
   const allowed = () => !DBID && !AIW && SID && SEAT !== 'pilot';
@@ -44,7 +53,7 @@
       const [px, py] = toPx(p[0], p[1]), d = Math.hypot(px - qx, py - qy);
       if (d < bd) { bd = d; best = n; }
     }
-    if (best) { point = best; compute(); }
+    if (best) { point = best; ptIn.value = best; compute(); }
   };
 
   async function compute(force) {
@@ -68,7 +77,7 @@
     const chips = sel.map(cs => `<span class="sq-ac" style="background:${colorOf(cs)}">${esc(cs)}</span>`).join('') || '<span class="c-dim">none</span>';
     let body = `<div><span class="c-dim">aircraft</span> ${chips} <span class="c-dim">at</span> <b>${esc(point || '—')}</b></div>`;
     if (!allowed()) body += '<div class="c-dim">The sequencing tool is for the controller (solo radar, sandbox, the controller\'s seat in an exercise).</div>';
-    else if (sel.length < 2 || !point) body += `<div class="sq-hint">Click ${sel.length < 2 ? 'two or more aircraft' : ''}${sel.length < 2 && !point ? ', then ' : ''}${!point ? 'the point where they must be in trail' : ''} on the scope (click an aircraft again to remove it, Esc to leave).</div>`;
+    else if (sel.length < 2 || !point) body += `<div class="sq-hint">Click ${sel.length < 2 ? 'two or more aircraft' : ''}${sel.length < 2 && !point ? ', then ' : ''}${!point ? 'the point where they must be in trail (or type it above)' : ''} on the scope (click an aircraft again to remove it, Esc to leave).</div>`;
     else if (err) body += `<div class="warn">${esc(err)}</div>`;
     else if (!data) body += '<div class="c-dim">computing…</div>';
     else {
@@ -86,7 +95,12 @@
         const all = a.headings.filter(h => h.leg_nm != null), hs = all.filter(h => h.ok);
         const outN = all.length - hs.length;
         const pk = pick[cs];
-        body += `<div data-cs="${esc(cs)}"><b style="color:${colorOf(cs)}">${esc(cs)}</b> <span class="c-dim">behind ${esc(a.ahead)} · its ellipse: headings that give the spacing (time on heading)</span>
+        const now_ = a.spacing_now_nm != null ? ` · ${a.spacing_now_nm >= 0 ? a.spacing_now_nm + ' NM' : 'ahead of it'} as cleared now` : '';
+        if (a.ellipse_none) {
+          body += `<div data-cs="${esc(cs)}"><b style="color:${colorOf(cs)}">${esc(cs)}</b> <span class="c-dim">behind ${esc(a.ahead)}${now_}: already far enough behind, no vector needed</span></div>`;
+          continue;
+        }
+        body += `<div data-cs="${esc(cs)}"><b style="color:${colorOf(cs)}">${esc(cs)}</b> <span class="c-dim">behind ${esc(a.ahead)}${now_}${a.direct ? ' · direct ' + esc(d.point) : ''} · headings that give the spacing (time on heading)</span>
           <div class="sq-hdgs">${hs.length ? '' : '<span class="warn">no heading within the rules</span>'}${hs.map(h => `<span class="sq-h ${h.ok ? '' : 'no'} ${pk === h.heading ? 'pick' : ''} ${a.chosen_heading === h.heading ? 'chosen' : ''}"
             ${h.ok ? `data-pick="${esc(cs)}:${h.heading}"` : ''} title="${h.ok ? `${h.side}${h.turn}°, ${h.leg_nm} NM, ${mmss(h.time_s)}` : 'not allowed: ' + esc({ direction: 'off its direction of flight', 'too long': 'more than 15 minutes on the heading', turn: 'turn too small or too large', fan: 'not on the side / not more than the one ahead', ellipse: 'cannot give the spacing' }[h.why_not] || h.why_not)}">${String(h.heading).padStart(3, '0')}<span class="c-dim"> ${Math.round(h.time_s / 60)}'</span></span>`).join('')}${outN ? `<span class="c-dim" title="on the ellipse but off the direction of flight, over 15 minutes, too small or too large a turn">+${outN} outside the rules</span>` : ''}</div>`;
         if (pk != null) {
@@ -98,7 +112,7 @@
     }
     const html = `<div class="hd"><span>SEQUENCE ${data ? '<span class="c-dim">T+' + mmss(data.sim_time_s) + '</span>' : ''}${busy ? ' …' : ''}</span>
       <span><button data-act="re" title="compute again now">↻</button> <button data-act="clr" title="clear the aircraft and the point">Clear</button> <button data-act="off" title="leave the tool (Esc)">✕</button></span></div>${body}`;
-    if (html !== lastH) { box.innerHTML = html; lastH = html; }
+    if (html !== lastH) { inner.innerHTML = html; lastH = html; }
   }
 
   async function enter(a) {
@@ -113,7 +127,7 @@
   box.addEventListener('mousedown', async e => {
     const b = e.target.closest('[data-act]');
     if (b) { e.preventDefault(); const k = b.dataset.act;
-      if (k === 'off') setOn(false); else if (k === 'clr') { sel = []; point = null; data = null; for (const c in pick) delete pick[c]; render(); } else compute(true);
+      if (k === 'off') setOn(false); else if (k === 'clr') { sel = []; point = null; ptIn.value = ''; data = null; for (const c in pick) delete pick[c]; render(); } else compute(true);
       return; }
     const pk = e.target.closest('[data-pick]');
     if (pk) { e.preventDefault(); const [cs, h] = pk.dataset.pick.split(':'); pick[cs] = pick[cs] === +h ? undefined : +h; if (pick[cs] === undefined) delete pick[cs]; lastH = ''; render(); return; }
@@ -158,13 +172,17 @@
   }
   window.drawSeqTool = function (byCs) {
     if (!on || !allowed()) return;
-    const dpr = devicePixelRatio, focusCs = focus || Object.keys(pick).find(c => pick[c] != null) || null;
+    // in focus: the follower under the mouse - its label or symbol on the scope, or its row in the panel - else the
+    // one whose heading was picked; it is drawn stronger, the others stay visible, a little dimmed
+    const hov = (typeof hoverLbl !== 'undefined' && hoverLbl) || (typeof hoverAc !== 'undefined' && hoverAc) || null;
+    const dpr = devicePixelRatio, focusCs = focus || (hov && data && data.aircraft && data.aircraft[hov] ? hov : null)
+      || Object.keys(pick).find(c => pick[c] != null) || null;
     ctx.save();
     ctx.font = `${9.5 * dpr}px ui-monospace,monospace`; ctx.textBaseline = 'middle';
     for (const cs of sel) {                                    // the aircraft chosen: a thin ring, its rank
       const a = byCs[cs]; if (!a) continue;
       const [x, y] = toPx(a.x_nm, a.y_nm), col = colorOf(cs);
-      ctx.strokeStyle = col + 'b0'; ctx.lineWidth = 1.2 * dpr;
+      ctx.strokeStyle = col + (focusCs === cs ? 'ff' : 'b0'); ctx.lineWidth = (focusCs === cs ? 2 : 1.2) * dpr;
       ctx.beginPath(); ctx.arc(x, y, 9 * dpr, 0, Math.PI * 2); ctx.stroke();
       const k = data && data.sequence ? data.sequence.indexOf(cs) : -1;
       if (k >= 0) label(String(k + 1), x - 12 * dpr, y - 12 * dpr, col, dpr);
@@ -179,16 +197,16 @@
       const T = data.point_xy;
       for (const cs of data.sequence) {
         const a = data.aircraft[cs]; if (!a || !a.ellipse) continue;
-        const col = colorOf(cs), dim = focusCs && focusCs !== cs ? 0.35 : 1;
+        const col = colorOf(cs), hot = focusCs === cs, dim = focusCs && !hot ? 0.55 : 1;
         const pt = hd => a.ellipse[Math.round(((hd % 360) + 360) % 360 / 2) % a.ellipse.length];
         // the whole ellipse: a faint hairline
-        ctx.strokeStyle = col + hex2(0.18 * dim); ctx.lineWidth = 1 * dpr;
+        ctx.strokeStyle = col + hex2((hot ? 0.6 : 0.35) * dim); ctx.lineWidth = (hot ? 1.4 : 1) * dpr;
         ctx.beginPath(); let pen = false;
         a.ellipse.forEach(p => { if (!p) { pen = false; return; } const [x, y] = toPx(p[0], p[1]); if (pen) ctx.lineTo(x, y); else ctx.moveTo(x, y); pen = true; });
         ctx.stroke();
         // the arc of the headings that can be given, with its ticks
         for (const r of runs(a.headings || [])) {
-          ctx.strokeStyle = col + hex2(0.7 * dim); ctx.lineWidth = 1.6 * dpr;
+          ctx.strokeStyle = col + hex2((hot ? 1 : 0.75) * dim); ctx.lineWidth = (hot ? 2.2 : 1.6) * dpr;
           ctx.beginPath(); pen = false;
           for (let k = 0; k < r.length; k++) {
             const h0 = r[k], h1 = k + 1 < r.length ? r[k + 1] : r[k];
@@ -206,7 +224,7 @@
             const L = Math.hypot(qx - x, qy - y) || 1, nx = -(qy - y) / L * 3.5 * dpr, ny = (qx - x) / L * 3.5 * dpr;
             ctx.beginPath(); ctx.moveTo(x - nx, y - ny); ctx.lineTo(x + nx, y + ny); ctx.stroke();
           }
-          if (dim === 1) for (const h of [r[0], r[r.length - 1]]) {      // the two ends of the arc labelled
+          if (!focusCs || hot) for (const h of [r[0], r[r.length - 1]]) {      // the two ends of the arc labelled
             const p = pt(h); if (!p) continue;
             const [x, y] = toPx(p[0], p[1]);
             label(String(h || 360).padStart(3, '0'), x + 5 * dpr, y, col + 'cc', dpr);
@@ -220,7 +238,7 @@
           ctx.setLineDash(pick[cs] != null ? [6 * dpr, 4 * dpr] : []);
           ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(mx, my); ctx.lineTo(tx, ty); ctx.stroke(); ctx.setLineDash([]);
           ctx.fillStyle = col + hex2(dim); ctx.beginPath(); ctx.arc(mx, my, 2.5 * dpr, 0, Math.PI * 2); ctx.fill();
-          if (dim === 1) label(`${String(h.heading).padStart(3, '0')} · ${Math.round(h.leg_nm)} NM · ${Math.round(h.time_s / 60)}'`,
+          if (!focusCs || hot) label(`${String(h.heading).padStart(3, '0')} · ${Math.round(h.leg_nm)} NM · ${Math.round(h.time_s / 60)}'`,
             (ax + mx) / 2 + 8 * dpr, (ay + my) / 2, col, dpr);
         }
       }

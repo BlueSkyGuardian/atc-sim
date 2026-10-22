@@ -846,51 +846,87 @@ def descent_now(w, cs: str, fix: str, mach: Optional[float] = None, lead_hint: O
 
 # ----------------------------------------------------------------------------- the controller's tool
 def tool(w, callsigns: List[str], point: str, S: Optional[float] = None) -> Dict:
-    """For the controller on the radar: the aircraft chosen, sequenced in trail at the point chosen (first come,
-    first served), each follower with its sequencing ellipse (the turn points that put it exactly S behind the one
-    ahead, wind included) and every heading on it: its time and distance on the heading, its turn point, whether the
-    rules allow it (direction of flight, 15 minutes at most, the side and size of the fan), the one the plan takes.
+    """For the controller on the radar: the aircraft chosen, in trail at the point chosen (first come, first served),
+    each follower with its sequencing ellipse (the turn points that put it S behind the one ahead when it crosses the
+    point, wind included) and every heading on it: its time and distance on the heading, its turn point, whether the
+    rules allow it (direction of flight, 15 minutes at most), the one the plan takes. Every follower gets its ellipse,
+    whether or not it needs a clearance; an aircraft whose route does not go through the point is taken direct to it.
     The plan itself (speed first, then the fan) is checked against all the traffic."""
     point = point.upper()
     if point not in w.waypoints:
         raise ValueError(f"unknown point {point}")
-    members = [c for c in callsigns if c in w.aircraft and w.aircraft[c].active and point in traj.route_ahead(w, w.aircraft[c])]
-    off = [c for c in callsigns if c not in members]
-    P = plan(w, point, S=S, members=members, use_merge=False, descents=False)
     p = w.waypoints[point]
-    out = {"point": point, "point_xy": [round(p[0], 2), round(p[1], 2)], "ok": P.get("ok"), "why": P.get("why", ""),
-           "sequence": P.get("sequence", []), "spacing_nm": P.get("S"), "notes": P.get("notes", []),
-           "spacing": P.get("spacing", []), "closest_nm": P.get("closest_nm"), "not_via_point": off,
+    act = [c for c in dict.fromkeys(callsigns) if c in w.aircraft and w.aircraft[c].active]
+    on_route = [c for c in act if point in traj.route_ahead(w, w.aircraft[c])]
+    direct = [c for c in act if c not in on_route]
+    S = float(S if S is not None else (seqfix_of(w, point).spacing_nm if seqfix_of(w, point) else exits.required_nm(w)))
+    P = plan(w, point, S=S, members=on_route, use_merge=False, descents=False) if len(on_route) >= 2 else \
+        {"ok": True, "sequence": on_route, "steps": [], "notes": [], "spacing": [], "targets": {}, "S": S}
+    H = 3600.0
+    trs = dict(P.get("trajs") or {})
+    for c in act:
+        if c not in trs:
+            trs[c] = traj.build(w, w.aircraft[c], H, direct=point if c in direct else None)
+
+    def t_at(c):
+        x = _cross(trs[c], p)
+        if x is not None:
+            return x
+        e = eta_s(w, w.aircraft[c], point) if c in on_route else None
+        if e is None:
+            a = w.aircraft[c]
+            e = math.hypot(p[0] - a.x, p[1] - a.y) / max(a.gs, 150.0) * 3600.0
+        return e
+    order = sorted(act, key=t_at)
+    if not direct and set(P.get("sequence", [])) == set(on_route):
+        order = list(P["sequence"])                       # the plan's order (its speeds and vectors included)
+    notes = list(P.get("notes", []))
+    planned = set(P.get("sequence", []))
+    for c in act:
+        if c in direct:
+            notes.append(f"{c}: {point} is not on its route - taken direct {point}")
+        elif c not in planned and len(on_route) >= 2:
+            notes.append(f"{c}: does not pass {point} in the next {int(H_SEQ // 60)} minutes as cleared now (not in the plan)")
+    why = "" if P.get("why") == "nothing to sequence" else P.get("why", "")
+    out = {"point": point, "point_xy": [round(p[0], 2), round(p[1], 2)], "ok": P.get("ok"), "why": why,
+           "sequence": order, "spacing_nm": S, "notes": notes,
+           "spacing": P.get("spacing", []), "closest_nm": P.get("closest_nm"), "not_via_point": direct,
            "steps": [{"at_s": round(s_["at_s"], 1), "callsign": s_["callsign"], "action": s_["action"], "why": s_["why"]}
                      for s_ in P.get("steps", [])], "aircraft": {}}
-    trs = P.get("trajs") or {}
-    for cs in P.get("sequence", []):
+    targets = P.get("targets") or {}
+    t_prev = None
+    for k, cs in enumerate(order):
         a = w.aircraft[cs]
         info = {"x": round(a.x, 2), "y": round(a.y, 2), "track": round(a.trk), "heading": round(a.hdg), "gs": round(a.gs),
-                "fl": int(round(a.alt_ft / 100)), "eta_s": None}
-        if cs in trs:
-            c = _cross(trs[cs], p)
-            info["eta_s"] = None if c is None else round(c)
-            tt = np.arange(0.0, (c or 600.0) + 1.0, 20.0)
-            X, Y, _ = trs[cs].at(tt)
-            info["path"] = [[round(float(x_), 2), round(float(y_), 2)] for x_, y_ in zip(X, Y)]
-        tg = (P.get("targets") or {}).get(cs)
-        if tg:
-            info.update(ahead=tg["ahead"], solution=tg.get("solution"), chosen_heading=tg.get("heading"))
-            cands = fan_candidates(w, a, cs, tg["ahead"], point, tg["t_ahead_s"], tg["S_nm"], None, tg["g_lead_kt"],
-                                   all_headings=True)
+                "fl": int(round(a.alt_ft / 100)), "eta_s": round(t_at(cs)), "direct": cs in direct}
+        tt = np.arange(0.0, min(t_at(cs), H) + 1.0, 20.0)
+        X, Y, _ = trs[cs].at(tt)
+        info["path"] = [[round(float(x_), 2), round(float(y_), 2)] for x_, y_ in zip(X, Y)]
+        if k > 0:
+            ahead = order[k - 1]
+            tg = targets.get(cs) if (targets.get(cs) or {}).get("ahead") == ahead else None
+            t_ahead = tg["t_ahead_s"] if tg else max(t_prev, t_at(ahead))
+            g_lead = tg["g_lead_kt"] if tg else _gs_at(trs[ahead], t_at(ahead))
+            S_k = S + MARGIN_NM
+            spc = _trail(trs[ahead], trs[cs], [p])
+            info.update(ahead=ahead, solution=(tg or {}).get("solution"), chosen_heading=(tg or {}).get("heading"),
+                        spacing_now_nm=None if spc is None else round(spc["spacing_nm"], 1))
+            cands = fan_candidates(w, a, cs, ahead, point, t_ahead, S_k, None, g_lead, all_headings=True)
             info["headings"] = [{"heading": c_["heading"], "ok": c_["ok"], "why_not": c_["why_not"], "turn": c_["turn"],
                                  "side": "R" if c_["side"] > 0 else "L",
                                  "time_s": round(c_["time_s"]) if c_.get("time_s") is not None else None,
                                  "leg_nm": round(c_["leg_nm"], 1) if c_.get("leg_nm") is not None else None,
                                  "turn_point": [round(c_["turn_point"][0], 2), round(c_["turn_point"][1], 2)] if c_.get("turn_point") else None}
                                 for c_ in sorted(cands, key=lambda c_: c_["heading"])]
-            # the ellipse: the turn points of every heading (2 degree steps), over the ground (wind included)
             tas = a.tas if a.tas > 100 else max(a.gs, 150.0)
             pts = []
             for h in range(0, 360, 2):
-                g = ellipse.with_wind(a.pos, p, tg["t_ahead_s"], tg["S_nm"], tas, tuple(a.wind_uv), h, g_lead=tg["g_lead_kt"])
+                g = ellipse.with_wind(a.pos, p, t_ahead, S_k, tas, tuple(a.wind_uv), h, g_lead=g_lead)
                 pts.append(None if g is None else [round(float(g["turn_point"][0]), 2), round(float(g["turn_point"][1]), 2)])
             info["ellipse"] = pts
+            info["ellipse_none"] = not any(pts)           # already far enough behind: no vector needed
+            t_prev = t_ahead + S_k / g_lead * 3600.0
+        else:
+            t_prev = t_at(cs)
         out["aircraft"][cs] = info
     return out

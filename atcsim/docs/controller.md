@@ -489,7 +489,10 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   <kbd>Esc</kbd> or ✕ leaves the tool. While it is on, the labels work as usual (click, drag, menus); an aircraft is
   added to or removed from the sequence by a click on its symbol. Each ellipse is a faint line, with the arc of the
   headings that can be given drawn plainly (a tick every 10°, its two ends labelled); moving the mouse over a
-  follower in the panel, or picking one of its headings, brings it forward and dims the others.
+  follower in the panel, over its label or symbol on the scope, or picking one of its headings, brings it forward and
+  dims the others. Every follower gets its ellipse (one already far enough behind is said so); an aircraft whose route
+  does not go through the point is taken direct to it. The point can also be typed in the panel's *point* field (a
+  waypoint under a label is hard to click).
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
   its **debrief**.
