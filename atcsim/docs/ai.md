@@ -157,6 +157,20 @@ Aircraft on the same route (en-route traffic) appear in the conflict lines with 
   reachability close in) and the costs. A level request that cannot be given yet may get an intermediate level now
   (the request stays open: ACCOMMODATE lists it when the final level becomes possible).
 
+### In-trail sequences (the built-in solver)
+
+Aircraft that will leave by the same exit too close, or whose routes join ahead at levels not separated, are
+sequenced as a group (`solve/sequence.py`): first come first served where the routes join, each at least the
+agreed spacing (10 NM) behind the one ahead there and at the exit, from the times **assigned** to the ones ahead.
+A speed is used when it is enough (own Mach −0.03 at most, none for a climbing departure), given at the latest
+moment that still works, at once if the aircraft is gaining on the one ahead at the same level. Otherwise a vector on
+its **sequencing ellipse** (`solve/ellipse.py`: foci the aircraft and the point, major axis the path that puts it the
+spacing behind; in the wind, in the frame of the air mass), for the time that gives exactly the spacing, then direct
+the point: aircraft in the same stream fanned out to the same side, each further than the one ahead, the later turned
+first, each resuming after the one ahead; converging streams turned to whichever side diverges. No vector longer than
+15 minutes, none that would take the aircraft past its point and turn it back more than 90°. The plan is checked in
+the trajectory model (every pair separated until they leave the sector), and its clearances are issued when due.
+
 ### The solver's solutions
 
 With *solver solutions* on (agent profile), each conflict line ends with the solver's answer: *SOLVER (conflict-free

@@ -459,15 +459,74 @@ class SolverAgent(Baseline):
         prm = {k: v for k, v in (("speed", speed), ("direct", direct), ("cfl", cfl)) if v is not None}
         return resolve.check_clearance(w, w.aircraft[cs], resolve.H_DEFAULT, prm, self._trajs, float(w.sep_h))[0]
 
+    def _sequences(self, w, mine, acts, why) -> set:
+        """In-trail sequences (solve/sequence.py) for aircraft that would leave by the same exit too close: planned once
+        for the whole group, each clearance issued when it is due (a speed at the latest moment that still works, the
+        vectors from the back of the sequence); the plan's aircraft are left to it while it holds."""
+        from ..solve import exits, sequence
+        plans = self.__dict__.setdefault("_seq_plans", {})
+        touched = set()
+        for x in list(plans):                             # a plan holds 30 minutes, or until it is done
+            if w.t - plans[x]["t"] > 1800 or not any(w.aircraft[c].active for c in plans[x]["plan"]["sequence"] if c in w.aircraft):
+                plans.pop(x)
+        try:
+            viol = exits.conflicts(w)
+        except Exception:  # noqa: BLE001
+            viol = []
+        targets = {v["exit"] for v in viol}
+        # a conflict between two aircraft whose routes join ahead at levels not separated: a merge to sequence as a
+        # group (to the last point they share in the sector), rather than pair by pair
+        try:
+            from ..solve import cpa as cpa_mod, traj as traj_mod
+            T_ = traj_mod.build_all(w, 600.0)
+            for pc in cpa_mod.matrix(T_, float(w.sep_h), only=sorted(mine))["conflicts"]:
+                ra = traj_mod.route_ahead(w, w.aircraft[pc.a])
+                rb = traj_mod.route_ahead(w, w.aircraft[pc.b])
+                common = [x_ for x_ in ra if x_ in rb]
+                if common and pc.a in mine and pc.b in mine:
+                    last = common[0]
+                    for x_ in common[1:]:
+                        if ra.index(x_) == ra.index(last) + 1 and rb.index(x_) == rb.index(last) + 1:
+                            last = x_
+                        else:
+                            break
+                    xa = exits.exit_of(w, w.aircraft[pc.a])
+                    targets.add(xa if xa in common else last)     # to the exit when they leave together
+        except Exception:  # noqa: BLE001
+            pass
+        for x in sorted(targets):
+            if x in plans or any(x in pl["plan"].get("sequence_points", []) for pl in plans.values()):
+                continue
+            try:
+                P = sequence.plan(w, x, members=[c for c in sequence.members_of(w, x) if c in mine])
+            except Exception:  # noqa: BLE001
+                continue
+            if P.get("ok") and P.get("steps"):
+                plans[x] = {"plan": P, "t": w.t, "issued": set()}
+                why.append(f"sequence at {P['point']} for {x}: " + " → ".join(P["sequence"]))
+        for x, pl in plans.items():
+            for i, stp in enumerate(pl["plan"]["steps"]):
+                if i in pl["issued"] or stp["at_s"] > w.t + 1:
+                    continue
+                acts.append(stp["action"])
+                why.append(stp["why"])
+                pl["issued"].add(i)
+                self._acted = dict(getattr(self, "_acted", {}), **{stp["callsign"]: w.t})
+            touched |= set(pl["plan"]["sequence"])
+        return touched
+
     def _resolve(self, w, st, mine, acts, why) -> set:
         from ..solve import resolve
         from . import actions as act_mod
-        touched = set()
+        in_plan = self._sequences(w, mine, acts, why)
+        touched = set(in_plan)
         asked = getattr(self, "asked", None) or {}
         last = getattr(self, "_acted", {})
         res = resolve.solve(w, asked=asked, rollout=1)
         for s_ in sorted(res["sets"], key=lambda x: x["t_first"] if x["t_first"] is not None else 1e9):
             urgent = (s_["t_first"] or 0) <= act_mod.URGENT_S
+            if not urgent and set(s_["pair"]) <= in_plan:
+                continue                                    # both in a sequence plan that keeps them separated
             if not urgent and any(w.t - last.get(x, -1e9) < 120 for x in s_["pair"]):
                 continue                                    # a clearance given less than 2 min ago: let it work
             best = (s_["optimal"] or s_["solutions"] or [None])[0]

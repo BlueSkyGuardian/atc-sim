@@ -164,6 +164,7 @@ def generate(w, a, st: dict, t_pass: Optional[float] = None, target_fl: Optional
     levels = {}
     for d in (10, -10, 20, -20, 30, -30, 40, -40):
         levels[base + d] = 3.0 + abs(d) / 10 * 0.15
+    inter = [fl for fl in inter if abs(fl * 100 - a.alt_ft) > 300 and abs(fl * 100 - a.cleared_alt_ft) > 50]
     for fl in inter:                                   # stop the climb / descent there for now: cheaper than moving it
         levels[fl] = min(levels.get(fl, 9.0), 0.9 + abs(tgt - fl) / 10 * 0.05)
     for fl, cost in levels.items():

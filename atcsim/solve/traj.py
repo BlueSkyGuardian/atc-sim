@@ -277,12 +277,19 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
         else:
             p2 = p1 + _unit(trk_v) * gs_v / 3600.0 * for_s
             ahead = route_ahead(w, a)
+            nxt_pt = None
             if then:
                 direct_after = then.upper()
             if direct_after:
                 rejoin = ahead[ahead.index(direct_after):] if direct_after in ahead else [direct_after]
             else:
                 rejoin = ahead[1:] if len(ahead) > 1 and lateral_new else ahead
+            if rejoin:                                 # the turn at the end of the vector: half on the old track too
+                q = np.array(w.waypoints[rejoin[0]], dtype=float) - p2
+                if float(np.hypot(*q)) > 1e-6:
+                    brg_q = math.degrees(math.atan2(q[0], q[1])) % 360
+                    turn_e = abs((brg_q - trk_v + 180) % 360 - 180)
+                    p2 = p2 + _unit(trk_v) * gs_v / 3600.0 * (turn_e / TURN_RATE_DPS / 2)
             pts, hdg = [tuple(p0), tuple(p1), tuple(p2)] + [w.waypoints[p] for p in rejoin], None
     elif len(pts) >= 2:
         # a turn in progress or to come at once (past a point, a new direct): the track changes at a standard rate,
