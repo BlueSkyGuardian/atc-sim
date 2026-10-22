@@ -48,10 +48,32 @@ def _unit(deg: float) -> np.ndarray:
     return np.array([math.sin(r), math.cos(r)])
 
 
+def wind_gs(tas: float, wind: Tuple[float, float], u) -> float:
+    """Ground speed along the unit track u, at a true airspeed and wind (kt, toward east / north): the wind triangle."""
+    along = wind[0] * u[0] + wind[1] * u[1]
+    cross = wind[0] * u[1] - wind[1] * u[0]
+    return max(60.0, along + math.sqrt(max(tas * tas - cross * cross, 1.0)))
+
+
+def heading_for_track(tas: float, track: float, wind: Tuple[float, float]) -> float:
+    """The heading that makes good a track in a wind (the drift corrected)."""
+    u = (math.sin(math.radians(track)), math.cos(math.radians(track)))
+    cross = wind[0] * u[1] - wind[1] * u[0]
+    return (track + math.degrees(math.asin(max(-0.99, min(0.99, cross / max(tas, 1.0)))))) % 360
+
+
+def air_to_ground(tas: float, heading: float, wind: Tuple[float, float]) -> Tuple[float, float]:
+    """(track, ground speed) of a heading flown at a true airspeed in a wind."""
+    vx = tas * math.sin(math.radians(heading)) + wind[0]
+    vy = tas * math.cos(math.radians(heading)) + wind[1]
+    return math.degrees(math.atan2(vx, vy)) % 360, math.hypot(vx, vy)
+
+
 def _horizontal(pts: List[Tuple[float, float]], sched: List[Tuple[float, float]], H: float,
-                straight_brg: Optional[float]) -> Tuple[List[float], List[float], List[float]]:
+                straight_brg: Optional[float], wind: Optional[Tuple[float, float]] = None) -> Tuple[List[float], List[float], List[float]]:
     """Walk a polyline (then straight on along its last bearing, or along straight_brg when it has one point) with a
-    ground-speed schedule [(t_from, gs_kt), ...]. Breakpoints at the vertices, the speed changes and the horizon."""
+    speed schedule [(t_from, speed_kt), ...]: ground speeds, or, with a wind, true airspeeds turned into the ground
+    speed of each leg by the wind triangle. Breakpoints at the vertices, the speed changes and the horizon."""
     P = [np.array(p, dtype=float) for p in pts]
     if len(P) == 1:
         P.append(P[0] + _unit(straight_brg if straight_brg is not None else 0.0) * 1000.0)
@@ -78,7 +100,7 @@ def _horizontal(pts: List[Tuple[float, float]], sched: List[Tuple[float, float]]
             continue
         u = seg / L
         while L > 1e-9 and t < H:
-            v = gs_at(t) / 3600.0
+            v = (wind_gs(gs_at(t), wind, u) if wind is not None else gs_at(t)) / 3600.0
             t_end = t + L / v
             nxt = min([x for x in switches if t + 1e-9 < x < t_end] + [t_end, H])
             step = (nxt - t) * v
@@ -105,6 +127,15 @@ def normal_gs(a, gs0: float) -> float:
     finally:
         a.spd_mach, a.spd_cas, a.spd_ias_now = saved
     return max(100.0, gs0 + tas_n - a.tas)
+
+
+def normal_tas(a, tas0: float) -> float:
+    """The true airspeed the aircraft will have at its own speed (no speed assigned), at its present level."""
+    try:
+        mode, val = a.normal_speed()
+        return max(120.0, float(a.perf.tas_for(mode, val, a.alt_ft)))
+    except Exception:  # noqa: BLE001
+        return tas0
 
 
 def _along_to(pts: List[Tuple[float, float]], target: Tuple[float, float]) -> Optional[float]:
@@ -196,7 +227,7 @@ def route_ahead(w, a) -> List[str]:
 
 def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, for_s: Optional[float] = None,
           direct: Optional[str] = None, cfl: Optional[int] = None, rates: str = "expected", speed_for_s: Optional[float] = None,
-          rate: Optional[float] = None, intermediate: Optional[int] = None) -> Traj:
+          rate: Optional[float] = None, intermediate: Optional[int] = None, then: Optional[str] = None) -> Traj:
     """The predicted trajectory of aircraft a over H seconds, with an optional clearance. A speed is held for
     speed_for_s (its limit) then the aircraft resumes its normal speed; a heading for for_s then the route; a level at
     an assigned rate (ft/min) when rate is given. The limits of the clearances in force are flown as well."""
@@ -206,12 +237,14 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
         ent["cfl"] = int(cfl)
     lims = getattr(a, "clr_limits", None) or {}
     gs0 = a.gs if a.gs > 100 else max(a.tas, 150.0)          # the ground speed (the wind included)
-    lateral_new = heading is not None or direct is not None
+    tas0 = a.tas if a.tas > 100 else gs0
+    wind = tuple(getattr(a, "wind_uv", (0.0, 0.0)) or (0.0, 0.0))   # the wind at the aircraft (kt): each leg's ground
+    lateral_new = heading is not None or direct is not None          # speed from the wind triangle, headings drift
     # a heading in force with its limit: on the present track until the limit, then its point (or the route)
     if not lateral_new and a.nav_mode == "heading" and "heading" in lims:
         left = limit_left_s(w, a, "heading", gs0)
         if left is not None:
-            heading, for_s = float(a.trk), left
+            heading, for_s = float(a.hdg), left
             then = lims["heading"].get("then")
             direct_after = then if then in w.waypoints else None
         else:
@@ -221,26 +254,31 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
     pts, hdg = atctools._path(w, a, ent, None, direct.upper() if direct else None)
     # speed schedule: a new speed (with its limit), else a speed in force with its limit, else constant
     if speed:
-        gs1 = max(100.0, gs0 + a.tas * (atctools.speed_factor(a, speed) - 1.0))
-        sched = [(0.0, gs0), (SPEED_DELAY_S, gs1)]
+        tas1 = max(120.0, tas0 * atctools.speed_factor(a, speed))
+        sched = [(0.0, tas0), (SPEED_DELAY_S, tas1)]
         if speed_for_s is not None:
-            sched.append((SPEED_DELAY_S + speed_for_s, normal_gs(a, gs1)))
+            sched.append((SPEED_DELAY_S + speed_for_s, normal_tas(a, tas0)))
     else:
-        sched = [(0.0, gs0)]
+        sched = [(0.0, tas0)]
         left = limit_left_s(w, a, "speed", gs0, pts if hdg is None else None) if "speed" in lims else None
         if left is not None:
-            sched.append((left, normal_gs(a, gs0)))
+            sched.append((left, normal_tas(a, tas0)))
+    if hdg is not None:                                        # an open heading in force: its track, with the drift
+        hdg = air_to_ground(tas0, hdg, wind)[0]
     if heading is not None:
         trk = a.trk
-        turn = abs((float(heading) - trk + 180) % 360 - 180)
+        turn = abs((float(heading) - a.hdg + 180) % 360 - 180)        # the heading change
         t_turn = (PILOT_DELAY_S if lateral_new else 0.0) + turn / TURN_RATE_DPS / 2   # half the turn on the old track
         p0 = np.array(a.pos, dtype=float)
         p1 = p0 + _unit(trk) * gs0 / 3600.0 * t_turn
+        trk_v, gs_v = air_to_ground(tas0, float(heading), wind)   # a heading drifts: the ground track it gives
         if for_s is None:
-            pts, hdg = [tuple(p0), tuple(p1), tuple(p1 + _unit(float(heading)) * 1000.0)], None
+            pts, hdg = [tuple(p0), tuple(p1), tuple(p1 + _unit(trk_v) * 1000.0)], None
         else:
-            p2 = p1 + _unit(float(heading)) * gs0 / 3600.0 * for_s
+            p2 = p1 + _unit(trk_v) * gs_v / 3600.0 * for_s
             ahead = route_ahead(w, a)
+            if then:
+                direct_after = then.upper()
             if direct_after:
                 rejoin = ahead[ahead.index(direct_after):] if direct_after in ahead else [direct_after]
             else:
@@ -258,7 +296,7 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
             lead = gs0 / 3600.0 * turn / TURN_RATE_DPS / 2
             if turn > 5 and lead < 0.8 * L:
                 pts = [tuple(p0), tuple(p0 + _unit(a.trk) * lead)] + list(pts[1:])
-    th, xh, yh = _horizontal(pts, sched, H, hdg)
+    th, xh, yh = _horizontal(pts, sched, H, hdg, wind)
     cfl_ft = atctools._system_cfl(w, a, ent)
     lvl_delay = PILOT_DELAY_S if cfl is not None and abs(cfl * 100 - a.cleared_alt_ft) > 50 else 0.0
     if rate is not None and cfl is not None:

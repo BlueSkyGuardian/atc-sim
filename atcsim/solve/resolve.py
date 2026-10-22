@@ -134,19 +134,23 @@ def generate(w, a, st: dict, t_pass: Optional[float] = None, target_fl: Optional
     brg_r, brg_x = route_bearings(w, a)
     then = ahead[1] if len(ahead) > 1 else (ahead[0] if ahead else None)
     seen = set()
-    for base, offs in ((a.trk, (10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 90, -90)), (brg_r, (0, 10, -10, 20, -20, 30, -30, 45, -45))):
+    wind = tuple(getattr(a, "wind_uv", (0.0, 0.0)) or (0.0, 0.0))
+    tas = a.tas if a.tas > 100 else max(a.gs, 150.0)
+    hdg_r = traj.heading_for_track(tas, brg_r, wind)              # the heading that makes good the route's direction
+    for base, offs in ((a.hdg, (10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 90, -90)), (hdg_r, (0, 10, -10, 20, -20, 30, -30, 45, -45))):
         for dpsi in offs:
             h = int(round((base + dpsi) / 5.0) * 5) % 360 or 360
-            if h in seen or _angle(h, a.trk) < 5:
+            if h in seen or _angle(h, a.hdg) < 5:
                 continue
             seen.add(h)
-            turn = _angle(h, a.trk)
+            turn = _angle(h, a.hdg)
+            trk_h = traj.air_to_ground(tas, h, wind)[0]          # where the heading takes it over the ground
             for for_s in (120.0, 240.0, 360.0):
                 act = {"type": "clear", "callsign": cs, "heading": h, "limit": f"{int(for_s // 60)}MIN"}
                 if then:
                     act["then"] = then
-                out.append({"kind": "heading", "prm": {"heading": h, "for_s": for_s}, "acts": [act], "off_route": _angle(h, brg_r),
-                            "off_exit": _angle(h, brg_x), "cost": 1.2 + turn / 10 * 0.06 + for_s / 120 * 0.05 + re_hdg,
+                out.append({"kind": "heading", "prm": {"heading": h, "for_s": for_s}, "acts": [act], "off_route": _angle(trk_h, brg_r),
+                            "off_exit": _angle(trk_h, brg_x), "cost": 1.2 + turn / 10 * 0.06 + for_s / 120 * 0.05 + re_hdg,
                             "check": {"type": "heading", "heading": h}})
     # levels: about the cleared level; and the intermediate levels on the way to it (or to the level asked for)
     base = int(round((st.get("cleared_fl") or st["fl"])))

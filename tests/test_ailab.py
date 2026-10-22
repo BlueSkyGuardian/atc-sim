@@ -314,7 +314,7 @@ try:
     for a_ in w11.aircraft.values():
         if a_.active and a_.on_frequency:
             a_.assumed = True
-    bad = R.positive(w11, "EWG3KP", {"heading": int(w11.aircraft["EWG3KP"].trk) % 360 or 360, "for_s": 60.0})
+    bad = R.positive(w11, "EWG3KP", {"heading": int(round(w11.aircraft["EWG3KP"].hdg)) % 360 or 360, "for_s": 60.0})
     good = R.positive(w11, "EWG3KP", {"direct": "TOVRA"})
     ok(not bad["positive"] and good["positive"], f"positive separation: staying on track {bad}, direct TOVRA {good}")
 
