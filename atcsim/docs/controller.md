@@ -74,12 +74,17 @@ The default colours can all be changed in ⚙ Display.
 ```
 NRVSM MTC7'                 ← alerts line (special tracks, MTCD)
 RAM101                      ← callsign
-350↓330 S350 X310 B738      ← current level, arrow, cleared level, Mode S selected level, exit level, type
+350↓330 -21 S350 X310 B738  ← current level, arrow, cleared level, vertical rate, Mode S selected level, exit level, type
 451 M78 026›066 H >IBALU    ← ground speed, speed, heading, tags, next point (or the direct entered)
 →LPPC                       ← info line (next unit, coordination, notes)
 ```
 
 ![An assumed label: NRVSM alert, callsign, current level 280, exit level X280, type, then ground speed, IAS, heading changing 032›062 with the yellow H and WXL tags entered by the controller, and the next unit](/static/docs/c_label.jpg "An assumed label: NRVSM alert, callsign, current level 280, exit level X280, type, then ground speed, IAS, heading changing 032›062 with the yellow H and WXL tags entered by the controller, and the next unit")
+
+**Vertical rate.** While an aircraft climbs or descends (200 ft/min or more) its rate follows the levels, signed, in
+hundreds of ft/min: `-21` is descending at 2100 ft/min, `+15` climbing at 1500. An assigned rate comes after it
+(`R20+` at 2000 ft/min or greater, `R10-` at 1000 or less). It is on every label, also the short label of other
+sectors' traffic, in the debrief, the replay and the recordings.
 
 **Three levels.** Real systems work with three levels, and so does this one:
 
@@ -515,6 +520,11 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   - when your instructor holds the **debrief session** (**● Join the debrief** on your home page): an open call (talk
     freely, **🎙 On / 🔇 Muted**), one shared player that the instructor runs, your view follows theirs and you see their
     cursor. You may act on the picture too: your actions branch timelines everybody sees.
+  - **invite** people to it (**＋ Invite** in the debrief, for whoever leads it: the instructor, or you for your solo
+    runs): find them by name, e-mail or licence, or copy the **join link** (anyone with an account who opens it
+    joins; **New link** stops the old one). The people invited see it on their home page (Debriefs tile, *INVITED*)
+    and in their debriefs, and open it like the exercise's members (their own player; the shared one and the call
+    while the session is on). An invitation gives access to the debrief and its report only;
   **Report ↗** gives the run written up: workload, each loss of separation with the clearances before it, requests
   left unanswered, read-backs, infringements, the bookmarks.
 - **Recording:** the server renders a video of *your* screen (traffic as your seat showed it, your labels, your

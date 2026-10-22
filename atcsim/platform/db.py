@@ -54,6 +54,10 @@ CREATE TABLE IF NOT EXISTS debrief_sessions (
   started_at REAL, ended_at REAL, started_by INTEGER,
   branches TEXT                          -- JSON list: the alternatives tried
 );
+CREATE TABLE IF NOT EXISTS debrief_links (
+  exercise_id TEXT PRIMARY KEY,          -- a debrief's join link: whoever opens it (signed in) joins as a guest
+  token TEXT NOT NULL, created_at REAL NOT NULL, created_by INTEGER
+);
 CREATE TABLE IF NOT EXISTS exercise_members (
   exercise_id TEXT NOT NULL,
   user_id INTEGER NOT NULL,
@@ -188,7 +192,7 @@ def exercise(eid: str) -> Optional[dict]:
 
 
 def seat_of(eid: str, user: dict) -> Optional[str]:
-    """The user's seat in this exercise: 'instructor', 'atc', 'pilot', or None."""
+    """The user's seat in this exercise: 'instructor', 'atc', 'pilot', 'guest' (invited to its debrief), or None."""
     e = exercise(eid)
     if e is None:
         return "instructor" if user["role"] == "admin" else None

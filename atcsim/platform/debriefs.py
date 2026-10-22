@@ -715,6 +715,7 @@ def list_debriefs(request: Request):
     """The debriefs of this user's ended exercises: ready (not held yet), live (on now: join it) or done."""
     from .exercises import exercises as ex_list
     from . import comms
+    me = require_user(request)
     out = []
     for x in ex_list(request, limit=300):
         if x["live"] or not x["ended_at"]:
@@ -723,7 +724,10 @@ def list_debriefs(request: Request):
         if r["status"] == "none":
             continue
         room = comms.hub.rooms.get("db:" + x["id"])
+        inv = db.q1("SELECT added_at FROM exercise_members WHERE exercise_id=? AND user_id=? AND seat=?",
+                    (x["id"], me["id"], GUEST)) if x.get("seat") == GUEST else None
         out.append({**x, "debrief_status": r["status"], "started_at": r["started_at"],
+                    "invited_at": inv["added_at"] if inv else None,
                     "debrief_ended_at": r["ended_at"], "branches": _timelines_count(x["id"]),
                     "on_call": [c.name for c in room.conns.values()] if room else []})
     return out
@@ -841,6 +845,132 @@ def rename(eid: str, tid: int, body: Rename, request: Request):
     tl.meta["name"] = " ".join(body.name.split())[:80] or tl.meta.get("name")
     tl.save_meta()
     return tl.public()
+
+
+# ------------------------------------------------------------------ invitations (guests of the debrief)
+GUEST = "guest"                     # exercise_members seat of a person invited to the debrief only (no other rights,
+                                    # not counted in anyone's statistics)
+
+
+def _people(eid: str) -> list:
+    e = db.exercise(eid)
+    out = []
+    if e and e.get("instructor_id"):
+        o = db.user_by_id(e["instructor_id"])
+        if o:
+            out.append({**db.public_user(o), "seat": "atc" if e.get("solo") else "instructor", "owner": True})
+    for m in db.members(eid):
+        if any(x["id"] == m["user_id"] for x in out):
+            continue
+        u = db.user_by_id(m["user_id"])
+        if u:
+            out.append({**db.public_user(u), "seat": m["seat"], "owner": False})
+    return out
+
+
+def _link(eid: str, u: dict, request: Request, reset: bool = False) -> str:
+    import secrets
+    r = db.q1("SELECT token FROM debrief_links WHERE exercise_id=?", (eid,))
+    if r is None or reset:
+        tok = secrets.token_urlsafe(12)
+        db.x("INSERT OR REPLACE INTO debrief_links (exercise_id, token, created_at, created_by) VALUES (?,?,?,?)",
+             (eid, tok, time.time(), u.get("id")))
+    else:
+        tok = r["token"]
+    from .auth import _base
+    return f"{_base(request)}/debrief/{eid}?join={tok}"
+
+
+def join_by_token(eid: str, u: dict, token: str) -> bool:
+    """A join link opened by a signed-in person: they become a guest of the debrief (members keep their seat)."""
+    r = db.q1("SELECT token FROM debrief_links WHERE exercise_id=?", (eid,))
+    if not r or not token or token != r["token"] or db.exercise(eid) is None:
+        return False
+    from .access import seat_for
+    if seat_for(eid, u) is None:
+        db.add_member(eid, u["id"], GUEST)
+    return True
+
+
+def _need_leader(eid: str, u: dict) -> None:
+    _member(eid, u)
+    if not is_leader(eid, u):
+        raise HTTPException(403, "the exercise's instructor (for a solo run: its controller) invites")
+
+
+@router.get("/api/debriefs/{eid}/invite")
+def invite_info(eid: str, request: Request):
+    """Who is in the debrief (the exercise's people and the guests), and the join link."""
+    u = require_user(request)
+    _need_leader(eid, u)
+    return {"people": _people(eid), "link": _link(eid, u, request)}
+
+
+@router.get("/api/debriefs/{eid}/invitable")
+def invitable(eid: str, request: Request, q: str = ""):
+    """People who can be invited (active accounts not in it yet), matching q (name, email, licence)."""
+    u = require_user(request)
+    _need_leader(eid, u)
+    q = " ".join(q.lower().split())
+    if len(q) < 2:
+        return []
+    have = {p["id"] for p in _people(eid)}
+    out = []
+    for r in db.q("SELECT * FROM users WHERE active=1 ORDER BY last_name, first_name, email"):
+        if r["id"] in have:
+            continue
+        hay = f"{r['first_name']} {r['last_name']} {r['email']} {r['licence'] or ''}".lower()
+        if all(w in hay for w in q.split()):
+            out.append({k: v for k, v in db.public_user(r).items() if k in ("id", "name", "email", "licence", "role")})
+        if len(out) >= 20:
+            break
+    return out
+
+
+class Invite(BaseModel):
+    user_ids: List[int]
+
+
+@router.post("/api/debriefs/{eid}/invite")
+def invite(eid: str, body: Invite, request: Request):
+    """Invite people to the debrief: they see it on their home page and in their debriefs, and open it like the
+    exercise's members (their own player; the shared one and the call while the session is on)."""
+    u = require_user(request)
+    _need_leader(eid, u)
+    from .access import seat_for
+    for uid in body.user_ids[:50]:
+        o = db.user_by_id(uid)
+        if o and o.get("active") and seat_for(eid, o) is None:
+            db.add_member(eid, uid, GUEST)
+    return {"people": _people(eid)}
+
+
+@router.delete("/api/debriefs/{eid}/invite/{uid}")
+def uninvite(eid: str, uid: int, request: Request):
+    u = require_user(request)
+    _need_leader(eid, u)
+    db.x("DELETE FROM exercise_members WHERE exercise_id=? AND user_id=? AND seat=?", (eid, uid, GUEST))
+    return {"people": _people(eid)}
+
+
+@router.post("/api/debriefs/{eid}/link")
+def new_link(eid: str, request: Request):
+    """A new join link (the previous one stops working)."""
+    u = require_user(request)
+    _need_leader(eid, u)
+    return {"link": _link(eid, u, request, reset=True)}
+
+
+class Join(BaseModel):
+    token: str
+
+
+@router.post("/api/debriefs/{eid}/join")
+def join(eid: str, body: Join, request: Request):
+    u = require_user(request)
+    if not join_by_token(eid, u, body.token):
+        raise HTTPException(403, "this join link is not (or no longer) valid")
+    return info(eid, u)
 
 
 @router.websocket("/debriefs/{eid}/comms")

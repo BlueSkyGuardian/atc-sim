@@ -207,4 +207,28 @@ ok(len(tls) == 5 + n_wx and tls[1]["status"] == "ready" and tls[2]["parent"] == 
 sid = atc.post(f"/api/debriefs/{eid}/player").json()["sid"]
 atc.post(f"/api/debriefs/{eid}/seek", json={"sid": sid, "t": 600})
 ok(sig(view(atc, sid)) == cap[600], "and the exercise still reproduces 1:1")
+
+# ---- invitations: by the leader, by a join link; guests see it in their debriefs, nothing else
+guest, linked = client("guest@gmail.com"), client("linked@gmail.com")
+for c, n in ((guest, "Gus"), (linked, "Lin")):
+    c.put("/api/me", json={"first_name": n, "last_name": "X", "licence": "L-" + n})
+ok(guest.get(f"/api/debriefs/{eid}").status_code == 403 and atc.get(f"/api/debriefs/{eid}/invite").status_code == 403,
+   "not invited: no access; only the leader invites")
+found = ins.get(f"/api/debriefs/{eid}/invitable?q=gus").json()
+ok(len(found) == 1 and found[0]["name"] == "Gus X", f"the leader finds people to invite: {found}")
+ppl = ins.post(f"/api/debriefs/{eid}/invite", json={"user_ids": [found[0]["id"]]}).json()["people"]
+ok(any(p["name"] == "Gus X" and p["seat"] == "guest" for p in ppl), "invited as a guest")
+d = [x for x in guest.get("/api/debriefs").json() if x["id"] == eid]
+ok(d and d[0]["seat"] == "guest" and d[0]["invited_at"], "the guest sees it in their debriefs")
+ok(guest.post(f"/api/debriefs/{eid}/player").status_code == 200, "and opens their own player")
+link = ins.get(f"/api/debriefs/{eid}/invite").json()["link"]
+tok = link.split("join=")[1]
+ok(linked.post(f"/api/debriefs/{eid}/join", json={"token": "wrong"}).status_code == 403, "a wrong link: refused")
+ok(linked.get(f"/debrief/{eid}?join={tok}").status_code == 200 and linked.get(f"/api/debriefs/{eid}").status_code == 200,
+   "opening the join link makes one a guest")
+new = ins.post(f"/api/debriefs/{eid}/link").json()["link"]
+ok(new != link and client("late@gmail.com").post(f"/api/debriefs/{eid}/join", json={"token": tok}).status_code == 403,
+   "a new link: the old one stops working")
+ok(ins.delete(f"/api/debriefs/{eid}/invite/{found[0]['id']}").status_code == 200
+   and guest.get(f"/api/debriefs/{eid}").status_code == 403, "an invitation removed")
 print("debrief checks passed")

@@ -194,8 +194,10 @@ function renderTiles() {
       : mineLive.length ? '' : `<p>${isInstr() ? 'Every exercise you ran or joined, with search.' : 'No exercise yet. Your instructor invites you, or sends you a link.'}</p>`}
     <div class="foot">Search by name or date, sort by difficulty</div></div>`);
   const dbLive = DBS.filter(d => d.debrief_status === 'live'), dbReady = DBS.filter(d => d.debrief_status === 'ready');
+  const dbInv = DBS.filter(d => d.seat === 'guest' && d.debrief_status !== 'live' && Date.now() / 1000 - (d.invited_at || 0) < 14 * 86400);   // invitations of the last two weeks
   T.push(`<div class="tile" data-href="#debriefs" data-tile="debriefs" role="link" tabindex="0"><h3>Debriefs ${dbLive.length ? `<span class="n hot">${dbLive.length} live</span>` : `<span class="n">${DBS.length}</span>`}</h3>
     ${dbLive.length ? `<ul>${dbLive.map(d => `<li><span class="pill dblive">LIVE</span><span class="grow">${esc(d.name)}</span><a href="/debrief/${d.id}" onclick="event.stopPropagation()"><button class="small primary">Join</button></a></li>`).join('')}</ul>` : ''}
+    ${dbInv.length ? `<ul>${dbInv.slice(0, 4).map(d => `<li><span class="pill">INVITED</span><span class="grow">${esc(d.name)}</span><a href="/debrief/${d.id}" onclick="event.stopPropagation()"><button class="small">Open</button></a></li>`).join('')}</ul>` : ''}
     <p>${dbReady.length && isInstr() ? `${dbReady.length} to hold. ` : ''}Go through each exercise on the simulator: the replay, the marked moments, other solutions tried.</p></div>`);
   T.push(`<a class="tile" href="#evaluations" data-tile="evaluations"><h3>Evaluations ${pend ? `<span class="n hot">${pend} to write</span>` : ''}</h3>
     ${EV && EV.pending[0] ? `<p>Next: evaluate <b>${esc(EV.pending[0].ratee)}</b> (${EV.pending[0].role}), ${esc(EV.pending[0].exercise)}</p>` : ''}
@@ -227,10 +229,11 @@ function renderTiles() {
 
 // ------------------------------------------------------------ data
 let HIST = [];                                     // full history, refreshed every 30 s; live rows every 2 s
-async function loadHistory() { try { HIST = await api('/api/exercises?limit=1000'); } catch (e) { } }
+// (a guest of a debrief only: in the debriefs, not with the exercises)
+async function loadHistory() { try { HIST = (await api('/api/exercises?limit=1000')).filter(e => e.seat !== 'guest'); } catch (e) { } }
 async function loadExercises(full) {
   if (full === true) await loadHistory();
-  let live; try { live = await api('/api/exercises?pictures=true&live=true'); } catch (e) { return; }
+  let live; try { live = (await api('/api/exercises?pictures=true&live=true')).filter(e => e.seat !== 'guest'); } catch (e) { return; }
   const L = new Map(live.map(e => [e.id, e]));
   if (HIST.some(e => e.live && !L.has(e.id))) await loadHistory();   // one just ended: refresh its row
   EXS = live.concat(HIST.filter(e => !L.has(e.id)).map(e => e.live ? Object.assign({}, e, { live: false, status: 'ended' }) : e))
@@ -502,10 +505,11 @@ function renderDebriefs() {
     return `<div class="dbc ${d.debrief_status === 'live' ? 'live' : ''}"><div class="t"><span>${esc(d.name)}</span><span class="pill ${cls}">${stx}</span></div>
       <div class="s">${esc(d.scenario)}${d.solo ? ' · solo' : ''} · flown ${fmtDate(d.created_at)}</div>
       <div class="s">Controller: ${esc(atc)}${d.solo ? '' : ' · instructor: ' + esc(d.instructor)}</div>
+      ${d.seat === 'guest' ? `<div class="s"><span class="pill">INVITED</span> you are invited to this debrief</div>` : ''}
       <div class="s">${d.branches ? `${d.branches} alternative${d.branches > 1 ? 's' : ''} tried` : 'no alternative tried yet'}${d.debrief_ended_at ? ' · debriefed ' + fmtDate(d.debrief_ended_at) : ''}</div>
       ${d.on_call.length ? `<div class="s"><span class="warn">on the call: ${d.on_call.map(esc).join(', ')}</span></div>` : ''}
       <div class="acts"><a href="/debrief/${d.id}"><button class="small primary">${go}</button></a>
-        ${d.solo ? '' : `<a href="#evaluations/${d.id}"><button class="small">Evaluation</button></a>`}<a href="/debrief/${d.id}/report"><button class="small">Report</button></a></div></div>`;
+        ${d.solo || d.seat === 'guest' ? '' : `<a href="#evaluations/${d.id}"><button class="small">Evaluation</button></a>`}<a href="/debrief/${d.id}/report"><button class="small">Report</button></a></div></div>`;
   };
   const groups = [['Live now', DBS.filter(d => d.debrief_status === 'live')], ['Not held yet', DBS.filter(d => d.debrief_status === 'ready')],
                   ['Debriefed', DBS.filter(d => d.debrief_status === 'done')]].filter(g => g[1].length);

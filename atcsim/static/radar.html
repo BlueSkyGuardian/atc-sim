@@ -1307,6 +1307,15 @@ const angDiff = (a, b) => Math.abs(((a - b + 540) % 360) - 180);
 // current›assigned while turning to an assigned heading) · H tag when a heading is assigned · WX tag when a weather
 // deviation is approved · next point (or the direct) when no heading. On the controller's seat everything assigned
 // comes from what the controller entered; on the other seats, from what the aircraft is doing.
+// the vertical rate on the level line: signed, in hundreds of ft/min (" -21" = descending at 2100 ft/min), shown from
+// 200 ft/min; an assigned rate after it ("R15+" at 1500 ft/min or greater, "R10-" or less)
+function vrate(a) {
+  const v = a.vertical_speed_fpm || 0;
+  if (Math.abs(v) < 200) return '';
+  let t = ` ${v > 0 ? '+' : '-'}${pad(Math.round(Math.abs(v) / 100), 2)}`;
+  if (a.assigned_rate_fpm) t += ` R${Math.round(a.assigned_rate_fpm / 100)}${a.assigned_rate_mode === 'max' ? '-' : '+'}`;
+  return t;
+}
 function labelLine3(a, ent) {
   const segs = [[`${a.gs_kt} `, 0, 'spd']];
   const cur = a.speed_mode === 'mach' ? 'M' + pad(a.mach * 100, 2) : 'I' + a.ias_kt;
@@ -1746,7 +1755,7 @@ function draw() {
     const o = labelOff[a.callsign] || [10, -14], bx = px + o[0] * dpr, by = py + o[1] * dpr;
     if (labelOff[a.callsign]) { ctx.strokeStyle = col + '77'; ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(bx - 2 * dpr, by - 4 * dpr); ctx.stroke(); }
     const lines = [[[a.callsign, col === TH.handedOff ? '#8d9aa7' : col, 'cs']],
-                   [[`${pad(a.fl, 3)}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' '}`, col, 'cfl'], [` ${a.type}`, col, 'type'],
+                   [[`${pad(a.fl, 3)}${a.vertical_speed_fpm > 0 ? '↑' : a.vertical_speed_fpm < 0 ? '↓' : ' '}${vrate(a)}`, col, 'cfl'], [` ${a.type}`, col, 'type'],
                     [` →${a.next_unit || (a.exit_point ? 'via ' + a.exit_point : '')}`, col]]];
     ctx.font = `${(fs - 0.5) * dpr}px ui-monospace,monospace`;
     const lw = paintLabel(lines, 0, bx, by, (fs - 0.5) * 1.1, 0, col, a.callsign);
@@ -1821,6 +1830,8 @@ function draw() {
     // exit level when entered or different from the cleared level (green once coordinated by ACT, amber when it needs
     // a phone coordination or breaks the LoA / semicircular rule), type
     const l2 = [[`${pad(a.fl, 3)}${arrow}${cflShown !== a.fl ? cflShown : ''}`, pc('lblLevel', col), 'cfl']];
+    const vr = vrate(a);                                   // vertical rate (hundreds of ft/min) while climbing / descending
+    if (vr) l2.push([vr, pc('lblLevel', col), 'cfl']);
     const ms = a.mode_s;
     if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl, 'cfl']);
     if (co && a.assumed) {                                   // the exit level: always on the label of an assumed aircraft

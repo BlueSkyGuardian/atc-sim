@@ -207,6 +207,13 @@ exercise itself is never changed, and the run goes on (on the new timeline) if i
 
 ![A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)](/static/docs/x_try.jpg "A timeline: the decontrol at T+10:32 branches the exercise, extrapolated to the end (panel on the left)")
 
+### Inviting people
+
+**＋ Invite** (top right of the debrief) adds people to it: find them by name, e-mail or licence, or copy its **join
+link** (anyone with an account who opens it joins as a guest; **New link** replaces it). Guests see the debrief on
+their home page and in their debriefs, open it like the members, join the session and its call; they get the debrief
+and its report, nothing else of the exercise, and do not count in anyone's statistics. ✕ removes an invitation.
+
 ### Holding the debrief session
 
 **● Start the debrief session** (top right) puts everybody on **one shared player** with an **open voice call**: no

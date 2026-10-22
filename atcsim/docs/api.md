@@ -242,6 +242,11 @@ Used by the home, stats and admin pages (signed-in users):
 | GET | `/api/debriefs` | The debriefs of this user's ended exercises with `debrief_status`: `ready` (not held), `live`, `done`; `branches` (number of tries), `on_call` |
 | GET | `/api/debriefs/{eid}` | One debrief: the exercise, `debrief_status`, `leader`, `on_call`, `player_sid` (the player to open), and `timelines`: [{`id` ("orig" or n), `parent`, `t0`, `name`, `by`, `status` (computing / ready / stopped / failed), `frontier`, `end_t`, `changes` [{`t`, `text`, `by`}], `summary` {`losses`, `first_loss_s`, `infringements`, `min_sep_nm`}}] |
 | POST | `/api/debriefs/{eid}/start` · `/end` | The instructor (solo: the owner) starts / ends the debrief session |
+| GET | `/api/debriefs/{eid}/invite` | The leader: who is in the debrief (`people`: the exercise's people and the guests) and its join `link` |
+| GET | `/api/debriefs/{eid}/invitable?q=` | The leader: active accounts not in it yet matching `q` (name, e-mail, licence; 2 characters at least) |
+| POST | `/api/debriefs/{eid}/invite` | The leader invites: `{"user_ids": [...]}` (they become guests) · `DELETE .../invite/{uid}` removes a guest |
+| POST | `/api/debriefs/{eid}/link` | The leader: a new join link (the old one stops working) |
+| POST | `/api/debriefs/{eid}/join` | `{"token": ...}`: join as a guest by the link (opening `/debrief/{eid}?join=<token>` does the same) |
 | POST | `/api/debriefs/{eid}/player` | The player this user works on (the session's shared one while it is live, else their own): `sid`, `timeline`, `can_write` (actions branch timelines), `can_control` (play, pause, seek, speed). Use `/sessions/{sid}/...` on it like any session; its state's `session.debrief` gives `timeline`, `t0`, `frontier`, `end_t`, `computing` |
 | | `"force": true` | On `/entries` and `/cpdlc/command`: simulated pilots (solo radar, debrief) fly the clearance whatever the weather or their performance (no "unable"); logged with it, so replays and timelines reproduce it |
 | POST | `/api/debriefs/{eid}/seek` | `{"sid", "t": 600}` to go to T+600 s on the player's timeline; `{"sid", "timeline": "2", "t"}` to show another timeline (at the same moment when `t` is left out). Play / pause / speed: `POST /sessions/{sid}/control` |

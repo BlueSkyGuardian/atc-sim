@@ -135,9 +135,17 @@ def help_doc(slug: str, request: Request):
 
 
 @router.get("/debrief/{eid}", include_in_schema=False)
-def debrief_page(eid: str, request: Request):
-    """The debrief on the simulator screen (radar page in debrief mode)."""
-    u = require_user(request)
+def debrief_page(eid: str, request: Request, join: Optional[str] = None):
+    """The debrief on the simulator screen (radar page in debrief mode). ?join=<token>: its join link (the person
+    signed in becomes a guest of the debrief)."""
+    try:
+        u = require_user(request)
+    except HTTPException:
+        from urllib.parse import quote
+        return RedirectResponse("/login?next=" + quote(str(request.url.path) + (f"?join={join}" if join else "")), 303)
+    if join and seat_for(eid, u) is None:
+        from . import debriefs
+        debriefs.join_by_token(eid, u, join)
     if seat_for(eid, u) is None:
         raise HTTPException(403, "you are not a member of this exercise")
     return page("radar.html")

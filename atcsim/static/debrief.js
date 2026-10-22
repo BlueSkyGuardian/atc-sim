@@ -187,7 +187,8 @@
         : `<button data-act="follow" class="db-follow" title="Back to the instructor's view">↺ Follow the instructor</button>`;
     }
     const lead = INFO.leader ? (live ? `<button data-act="end" class="db-end">End debrief</button>`
-      : `<button data-act="start" class="primary">● ${st === 'done' ? 'Debrief again' : 'Start the debrief session'}</button>`) : '';
+      : `<button data-act="start" class="primary">● ${st === 'done' ? 'Debrief again' : 'Start the debrief session'}</button>`)
+      + `<button data-act="invite" title="Invite people to this debrief, or copy its join link">＋ Invite</button>` : '';
     const mode = live ? (P.can_control ? 'you run the session' : 'the instructor runs it · your actions branch timelines') : 'your own player';
     const links = `<a href="/debrief/${DBID}/report" target="_blank" title="The written report">Report ↗</a>` +
       (INFO.leader && !INFO.solo ? `<a href="/#evaluations/${DBID}">Evaluate</a>` : '') + `<a href="/#debriefs">Home</a>`;
@@ -225,6 +226,48 @@
       if (ev.key === 'Escape') { lastList = ''; render(); }
     });
   }
+  // ------------------------------------------------------------------ invitations (the leader)
+  const SEATS = { instructor: 'instructor', atc: 'controller', pilot: 'pseudo-pilot', guest: 'invited' };
+  let invTimer = null;
+  async function openInvite() {
+    const el = window.atcWin('dbInvite', '<b>Invite to the debrief</b>', 80, 80, 460);
+    el.querySelector('.wb').innerHTML = `<div class="c-dim" style="font-size:11.5px;margin-bottom:6px">Invited people see this debrief on their home page and in their debriefs, and open it like the exercise's members.</div>
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px"><input id="dbInvQ" placeholder="name, e-mail or licence" autocomplete="off" style="flex:1"></div>
+      <div id="dbInvRes"></div>
+      <div class="sub">Join link <span class="c-dim">(anyone with an account who opens it joins as a guest)</span></div>
+      <div style="display:flex;gap:6px;align-items:center"><input id="dbInvLink" readonly style="flex:1;font-size:11px">
+        <button id="dbInvCopy">Copy</button><button id="dbInvNew" title="A new link: the previous one stops working">New link</button></div>
+      <div class="sub">In this debrief</div><div id="dbInvPeople" class="c-dim">…</div>`;
+    const q = el.querySelector('#dbInvQ');
+    q.addEventListener('input', () => { clearTimeout(invTimer); invTimer = setTimeout(search, 250); });
+    q.addEventListener('keydown', e => e.stopPropagation());
+    el.querySelector('#dbInvCopy').onclick = async () => { const l = el.querySelector('#dbInvLink'); l.select();
+      try { await navigator.clipboard.writeText(l.value); banner('Join link copied', 2500); } catch (e) { document.execCommand('copy'); } };
+    el.querySelector('#dbInvNew').onclick = async () => {
+      if (!confirm('Make a new join link? The current one stops working.')) return;
+      try { const r = await api(`/api/debriefs/${DBID}/link`, { method: 'POST' }); el.querySelector('#dbInvLink').value = r.link; } catch (e) { banner(h(e.message), 4000); } };
+    el.querySelector('#dbInvRes').onclick = async e => { const b = e.target.closest('[data-add]'); if (!b) return;
+      try { const r = await api(`/api/debriefs/${DBID}/invite`, { method: 'POST', body: JSON.stringify({ user_ids: [+b.dataset.add] }) });
+        people(r.people); search(); } catch (err) { banner(h(err.message), 4000); } };
+    el.querySelector('#dbInvPeople').onclick = async e => { const b = e.target.closest('[data-rm]'); if (!b) return;
+      try { const r = await api(`/api/debriefs/${DBID}/invite/${b.dataset.rm}`, { method: 'DELETE' }); people(r.people); } catch (err) { banner(h(err.message), 4000); } };
+    try { const r = await api(`/api/debriefs/${DBID}/invite`); el.querySelector('#dbInvLink').value = r.link; people(r.people); }
+    catch (e) { el.querySelector('#dbInvPeople').textContent = e.message; }
+    q.focus();
+  }
+  function people(L) {
+    const el = document.getElementById('dbInvPeople'); if (!el) return;
+    el.innerHTML = L.map(p => `<div style="display:flex;gap:6px;align-items:center;padding:2px 0"><span style="flex:1;color:#cfe0ee">${h(p.name)} <span class="c-dim">${h(p.email)}</span></span>
+      <span class="c-dim">${SEATS[p.seat] || h(p.seat)}${p.owner ? ' · leads' : ''}</span>${p.seat === 'guest' ? `<button class="small" data-rm="${p.id}" title="Remove the invitation">✕</button>` : ''}</div>`).join('') || 'nobody yet';
+  }
+  async function search() {
+    const el = document.getElementById('dbInvRes'), q = document.getElementById('dbInvQ'); if (!el || !q) return;
+    const v = q.value.trim(); if (v.length < 2) { el.innerHTML = ''; return; }
+    try { const L = await api(`/api/debriefs/${DBID}/invitable?q=${encodeURIComponent(v)}`);
+      el.innerHTML = L.map(p => `<div style="display:flex;gap:6px;align-items:center;padding:2px 0"><span style="flex:1">${h(p.name)} <span class="c-dim">${h(p.email)}${p.licence ? ' · ' + h(p.licence) : ''}</span></span><button class="small primary" data-add="${p.id}">Invite</button></div>`).join('')
+        || '<div class="c-dim">nobody found (or already in it)</div>'; }
+    catch (e) { el.textContent = e.message; }
+  }
   async function onBarClick(e) {
     const a = e.target.closest('[data-act]'); if (!a) return;
     const act = a.dataset.act;
@@ -235,6 +278,7 @@
       try { INFO = await api(`/api/debriefs/${DBID}/start`, { method: 'POST' }); await openPlayer(); joinCall(); render();
         banner('Debrief session on: one shared player. The members see it live on their home page and join; they follow your view and hear you. You run the player; anybody may act on it (each action branches a timeline).', 8000); }
       catch (err) { banner(h(err.message), 5000); }
+    } else if (act === 'invite') { openInvite();
     } else if (act === 'end') {
       if (!confirm('End the debrief session? The call closes. Every timeline stays with the exercise.')) return;
       try { await api(`/api/debriefs/${DBID}/end`, { method: 'POST' }); refresh(); } catch (err) { banner(h(err.message), 5000); }
