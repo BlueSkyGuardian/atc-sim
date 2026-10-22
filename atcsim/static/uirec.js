@@ -1,4 +1,5 @@
-// Controller's seat: sends what happens on the screen to the exercise recording (through the voice WebSocket):
+// Controller's seat: sends what happens on the screen to the exercise recording (through the voice WebSocket; on the
+// solo radar, which has no radio, by HTTP POST /api/exercises/{id}/ui):
 //   'v' scope view (size, centre, zoom, display options, weather product, label positions, selection, RBLs)
 //   'o' on-screen panels (toolbar, HUD, alarms, label menu with what is being typed, telephone, push-to-talk)
 //   'm' mouse position (20 per second while it moves), 'c' / 'd' clicks and double-clicks (and what was clicked)
@@ -56,7 +57,8 @@
         } else if (n.nodeType === 1) walk(n);
       }
     }
-    for (const sel of ['#viewbar', '#hud', '#alerts', '#pauseBanner', '#ptt', '#phoneBtn', '#phonePanel', '#callHud', '#lblMenu', '#wins', '#dispPanel'])
+    for (const sel of ['#viewbar', '#hud', '#alerts', '#pauseBanner', '#ptt', '#phoneBtn', '#phonePanel', '#callHud', '#lblMenu', '#wins', '#dispPanel',
+                       '#ctrlRow', '#solvePanel', '#seqPanel'])        // (the solo radar's control bar and panels)
       walk(document.querySelector(sel));
     return out;
   }
@@ -89,10 +91,19 @@
       for (const cs of Object.keys(lastL)) if (!(cs in cur)) { diff[cs] = null; delete lastL[cs]; n++; }
       if (n) push('L', diff);
     }, 1000);
+    let posting = false;
     setInterval(() => {
       const voice = window.__voice;
-      if (!q.length || !voice || !voice.ws || voice.ws.readyState !== 1) return;
-      voice.send({ op: 'ui', now: now(), ev: q.splice(0, q.length) });
+      if (!q.length) return;
+      if (voice && voice.ws && voice.ws.readyState === 1) { voice.send({ op: 'ui', now: now(), ev: q.splice(0, q.length) }); return; }
+      if (voice || posting) return;                // (a seat with the radio: wait for it to reconnect)
+      // the solo radar has no radio connection: the same events by HTTP, about once a second
+      posting = true;
+      const ev = q.splice(0, q.length);
+      fetch(`/api/exercises/${EXID}/ui`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ now: now(), ev }) })
+        .then(r => { if (!r.ok && r.status >= 500) q.unshift(...ev); })
+        .catch(() => { q.unshift(...ev.slice(-3000)); })
+        .finally(() => { setTimeout(() => { posting = false; }, 700); });
     }, 300);
   }
   const wait = setInterval(() => { if (typeof SEAT !== 'undefined' && document.body.classList.contains('exercise')) { clearInterval(wait); if (SEAT === 'atc') start(); } }, 300);

@@ -507,6 +507,26 @@ def remove_member(eid: str, uid: int, request: Request):
     return db.members(eid)
 
 
+class UiBatch(BaseModel):
+    now: float = 0
+    ev: list = []
+
+
+@router.post("/api/exercises/{eid}/ui")
+def exercise_ui(eid: str, body: UiBatch, request: Request):
+    """The controller's screen activity (view, zoom, panels, mouse, clicks, labels) for the exercise's video, from a
+    seat without the voice connection that normally carries it (the solo radar)."""
+    from . import recorder
+    u = require_user(request)
+    if seat_for(eid, u) != "atc":
+        raise HTTPException(403, "the controller's seat only")
+    ev = body.ev[:2000]
+    wx = next((e[2].get("wx") for e in reversed(ev) if isinstance(e, list) and len(e) == 3 and e[1] == "v"
+               and isinstance(e[2], dict)), None)
+    recorder.ui(eid, u.get("id"), 0, time.time(), body.now, ev, wx)
+    return {"ok": True, "n": len(ev)}
+
+
 @router.post("/api/exercises/{eid}/end")
 def end_exercise(eid: str, request: Request):
     u = require_user(request)

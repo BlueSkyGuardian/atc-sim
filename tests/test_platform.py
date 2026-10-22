@@ -177,6 +177,9 @@ ok(atc.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 90}).statu
 ok(pil.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 10}).status_code == 403, "pilot cannot change the MTCD look-ahead")
 _sq = atc.post(f"/sessions/{eid}/sequence", json={"callsigns": ["X1", "X2"], "point": "ZZZZZ"}).status_code
 ok(_sq in (200, 400), f"the controller may use the sequencing tool (an unknown point: 400, not 403): {_sq}")
+_ui = atc.post(f"/api/exercises/{eid}/ui", json={"now": 1000, "ev": [[990, "m", [10, 20]]]})
+ok(_ui.status_code == 200 and pil.post(f"/api/exercises/{eid}/ui", json={"now": 1, "ev": []}).status_code == 403,
+   "the controller's screen activity can be sent by HTTP (the solo radar has no radio); not by another seat")
 ok(ins.post(f"/sessions/{eid}/mtcd/settings", json={"look_ahead_min": 20}).status_code == 200, "instructor resets it to 20 min")
 # CPDLC: the controller types, the pseudo-pilot answers
 dl = ins.get(f"/sessions/{eid}/cpdlc").json()
