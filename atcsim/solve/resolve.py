@@ -64,81 +64,168 @@ def _flyable(w, a, instr: dict) -> bool:
         return True
 
 
-def _candidates(w, a, st: dict, asked: Optional[dict], t_pass: Optional[float] = None):
-    """(kind, params, actions, cost, needs_ask) for aircraft a: only clearances its pilot would fly, each heading and
-    speed with its limit. t_pass: seconds until the encounter is passed - a speed is held that long (rounded up to the
-    minute, at least 4), so the aircraft goes back to its normal speed only once the traffic is passed."""
-    from ..aircraft import level_parity_ok
-    from ..ailab import actions as act_mod
+MAX_OFF_ROUTE_DEG = 60.0   # a vector keeps the aircraft's direction: within this of the bearing to where it rejoins
+MAX_OFF_EXIT_DEG = 90.0    # and never turns it away from its exit
+LAST_REJECTED: Dict[str, Dict[str, int]] = {}   # per aircraft: candidates rejected by each constraint (last call)
+
+
+def departing(w, a) -> bool:
+    """A departure still climbing to its final level: no speed control (it climbs at its own speed schedule)."""
+    rfl = getattr(a, "rfl", None)
+    if rfl and a.alt_ft < rfl * 100 - 300:
+        return True
+    dep = str((a.flight_plan or {}).get("departure") or "").upper()
+    return a.vs_fpm > 300 and (dep in getattr(w, "aerodromes", {}) or dep in ("GMMN", "GMMX", "GMAD", "GMMW"))
+
+
+def route_bearings(w, a) -> tuple:
+    """(bearing to the point it rejoins after a vector, bearing to its exit): the aircraft's direction of flight."""
+    ahead = traj.route_ahead(w, a)
+    if not ahead:
+        return a.trk, a.trk
+    pos = a.pos
+    pts = [w.waypoints[p] for p in ahead]
+    rej = pts[1] if len(pts) > 1 else pts[0]
+    if math.hypot(rej[0] - pos[0], rej[1] - pos[1]) < 15 and len(pts) > 2:
+        rej = pts[2]
+    ext = w.waypoints.get(getattr(a, "planned_exit", None) or "", None) or pts[-1]
+    brg = lambda p: math.degrees(math.atan2(p[0] - pos[0], p[1] - pos[1])) % 360
+    return brg(rej), brg(ext)
+
+
+def _angle(a_, b_) -> float:
+    return abs((a_ - b_ + 180) % 360 - 180)
+
+
+def generate(w, a, st: dict, t_pass: Optional[float] = None, target_fl: Optional[int] = None) -> List[dict]:
+    """Layer 1 - the plausible clearances for aircraft a, built around its route: speeds about its own speed, directs
+    to points ahead, vectors around the direction it is going (the bearing to where it rejoins its route) and around its
+    present track, levels about its cleared level, and the intermediate levels between its present level and the level
+    it is going to (or asks for: target_fl). Each heading and speed with its limit."""
     out = []
     cs = a.callsign
     lims = getattr(a, "clr_limits", None) or {}
-    # changing a clearance in force (a speed or a heading still within its limit) costs: it is what makes a solver
-    # thrash, clearing and undoing; the same clearance given again is not a candidate
     re_spd = 0.6 if ("speed" in lims or getattr(a, "speed_assigned", False)) else 0.0
     re_hdg = 0.6 if a.nav_mode == "heading" else 0.0
     hold_s = max(240.0, math.ceil(((t_pass or 300.0) + 60.0) / 60.0) * 60.0)
     lim_txt = f"{int(hold_s // 60)}MIN"
-    # speed: within ±0.03 Mach (±20 kt) of the aircraft's OWN speed - never a reduction on top of a reduction
-    from ..world import MAX_MACH_CHANGE, MAX_IAS_CHANGE_KT
     mode_n, val_n = a.normal_speed()
     cur_m = st.get("mach") if st.get("speed_mode") == "mach" else None
     if mode_n == "mach":
-        mmo = getattr(a.perf, "mmo", 0.86)
         for d in (-0.01, -0.02, -0.03, +0.01, +0.02, +0.03):
             m = round(val_n + d, 2)
-            if abs(m - val_n) > MAX_MACH_CHANGE + 1e-6 or (cur_m and abs(m - cur_m) < 0.005):
+            if cur_m and abs(m - cur_m) < 0.005:
                 continue
-            if m <= min(0.86, mmo - 0.01) and _flyable(w, a, {"type": "speed", "mach": m}):
-                sp = f"M{int(round(m * 100))}"
-                out.append(("speed", {"speed": sp, "speed_for_s": hold_s},
-                            [{"type": "clear", "callsign": cs, "speed": sp, "limit": lim_txt}], abs(d) / 0.01 * 0.08 + re_spd, False))
+            sp = f"M{int(round(m * 100))}"
+            out.append({"kind": "speed", "prm": {"speed": sp, "speed_for_s": hold_s}, "delta": d,
+                        "acts": [{"type": "clear", "callsign": cs, "speed": sp, "limit": lim_txt}],
+                        "cost": abs(d) / 0.01 * 0.08 + re_spd, "check": {"type": "speed", "mach": m}})
     else:
         v0 = int(round(val_n / 10) * 10)
         for d in (-10, -20, +10, +20):
             v = v0 + d
-            if abs(v - val_n) > MAX_IAS_CHANGE_KT + 5 or not (210 <= v <= 340):
-                continue
-            if _flyable(w, a, {"type": "speed", "ias_kt": v}):
-                out.append(("speed", {"speed": str(v), "speed_for_s": hold_s},
-                            [{"type": "clear", "callsign": cs, "speed": str(v), "limit": lim_txt}], abs(d) / 10 * 0.08 + re_spd, False))
-    # direct (shortcut to a later point of its route)
+            out.append({"kind": "speed", "prm": {"speed": str(v), "speed_for_s": hold_s}, "delta_kt": v - val_n,
+                        "acts": [{"type": "clear", "callsign": cs, "speed": str(v), "limit": lim_txt}],
+                        "cost": abs(d) / 10 * 0.08 + re_spd, "check": {"type": "speed", "ias_kt": v}})
     ahead = traj.route_ahead(w, a)
     for k, p in enumerate(ahead[1:4], start=1):
-        out.append(("direct", {"direct": p}, [{"type": "clear", "callsign": cs, "direct": p}], 1.0 + 0.05 * k, False))
-    # heading: a delaying vector of 2, 4 or 6 minutes, then direct to the route point after the next one
-    trk = a.trk
+        out.append({"kind": "direct", "prm": {"direct": p}, "acts": [{"type": "clear", "callsign": cs, "direct": p}],
+                    "cost": 1.0 + 0.05 * k, "check": {"type": "direct", "waypoint": p}})
+    brg_r, brg_x = route_bearings(w, a)
     then = ahead[1] if len(ahead) > 1 else (ahead[0] if ahead else None)
-    for dpsi in (10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 90, -90):
-        h = int(round(trk + dpsi)) % 360 or 360
-        if not _flyable(w, a, {"type": "heading", "heading": h}):
-            continue                                  # e.g. into weather it cannot fly through
-        for for_s in (120.0, 240.0, 360.0):
-            act = {"type": "clear", "callsign": cs, "heading": h, "limit": f"{int(for_s // 60)}MIN"}
-            if then:
-                act["then"] = then
-            out.append(("heading", {"heading": h, "for_s": for_s},
-                        [act], 1.2 + abs(dpsi) / 10 * 0.06 + for_s / 120 * 0.05 + re_hdg, False))
-    # level, at the aircraft's own rate, or at a rate no greater than 1000 / 2000 ft/min (to climb or descend
-    # together with another aircraft, or to pass another's level later)
+    seen = set()
+    for base, offs in ((a.trk, (10, -10, 20, -20, 30, -30, 45, -45, 60, -60, 90, -90)), (brg_r, (0, 10, -10, 20, -20, 30, -30, 45, -45))):
+        for dpsi in offs:
+            h = int(round((base + dpsi) / 5.0) * 5) % 360 or 360
+            if h in seen or _angle(h, a.trk) < 5:
+                continue
+            seen.add(h)
+            turn = _angle(h, a.trk)
+            for for_s in (120.0, 240.0, 360.0):
+                act = {"type": "clear", "callsign": cs, "heading": h, "limit": f"{int(for_s // 60)}MIN"}
+                if then:
+                    act["then"] = then
+                out.append({"kind": "heading", "prm": {"heading": h, "for_s": for_s}, "acts": [act], "off_route": _angle(h, brg_r),
+                            "off_exit": _angle(h, brg_x), "cost": 1.2 + turn / 10 * 0.06 + for_s / 120 * 0.05 + re_hdg,
+                            "check": {"type": "heading", "heading": h}})
+    # levels: about the cleared level; and the intermediate levels on the way to it (or to the level asked for)
     base = int(round((st.get("cleared_fl") or st["fl"])))
+    f0 = int(round(a.alt_ft / 100))
+    tgt = int(target_fl) if target_fl else base
+    inter = []
+    if tgt > f0 + 5:
+        inter = list(range((f0 // 10 + 1) * 10, tgt, 10))
+    elif tgt < f0 - 5:
+        inter = list(range((f0 // 10) * 10, tgt, -10))
+    levels = {}
     for d in (10, -10, 20, -20, 30, -30, 40, -40):
-        fl = base + d
-        if not (100 <= fl <= w.upper_fl):
-            continue
-        down_arr = fl * 100 < a.alt_ft - 300 and w.descending_to_destination(a, fl)
-        if not (down_arr or level_parity_ok(fl, a.southbound)):
-            continue
-        if fl * 100 > getattr(a.perf, "ceiling_ft", 1e9) or not _flyable(w, a, {"type": "altitude", "fl": fl}):
-            continue
-        ask = bool(act_mod.level_needs_asking(w, a, fl, asked or {})) if a.assumed else False
-        cost = 3.0 + abs(d) / 10 * 0.15 + (0.5 if ask else 0.0)
-        out.append(("level", {"cfl": fl}, [{"type": "clear", "callsign": cs, "cfl": fl}], cost, ask))
+        levels[base + d] = 3.0 + abs(d) / 10 * 0.15
+    for fl in inter:                                   # stop the climb / descent there for now: cheaper than moving it
+        levels[fl] = min(levels.get(fl, 9.0), 0.9 + abs(tgt - fl) / 10 * 0.05)
+    for fl, cost in levels.items():
+        out.append({"kind": "level", "prm": {"cfl": fl}, "acts": [{"type": "clear", "callsign": cs, "cfl": fl}], "cost": cost,
+                    "intermediate": fl in inter, "target": tgt, "check": {"type": "altitude", "fl": fl}})
         own = traj._perf_rate(a, fl * 100 > a.alt_ft)
         for r in (1000, 2000):
             if own and own > r + 200:
-                out.append(("level", {"cfl": fl, "rate": float(r)},
-                            [{"type": "clear", "callsign": cs, "cfl": fl, "rate": f"{r}-"}], cost + 0.1, ask))
+                out.append({"kind": "level", "prm": {"cfl": fl, "rate": float(r)}, "intermediate": fl in inter, "target": tgt,
+                            "acts": [{"type": "clear", "callsign": cs, "cfl": fl, "rate": f"{r}-"}], "cost": cost + 0.1,
+                            "check": {"type": "altitude", "fl": fl}})
+    return out
+
+
+def constraint(w, a, c: dict, asked: Optional[dict]) -> Optional[str]:
+    """Layer 2 - the rules a plausible clearance must keep (the name of the first one broken, or None); also sets
+    c["ask"] for a level the pilot did not request."""
+    from ..aircraft import level_parity_ok
+    from ..ailab import actions as act_mod
+    from ..world import MAX_MACH_CHANGE, MAX_IAS_CHANGE_KT
+    k = c["kind"]
+    if k == "speed":
+        if departing(w, a):
+            return "no speed control for a departure still climbing"
+        if abs(c.get("delta", 0.0)) > MAX_MACH_CHANGE + 1e-6 or abs(c.get("delta_kt", 0.0)) > MAX_IAS_CHANGE_KT + 5:
+            return "speed more than 0.03 Mach / 20 kt from its own"
+        if c["check"].get("mach") is not None and c["check"]["mach"] > min(0.86, getattr(a.perf, "mmo", 0.86) - 0.01):
+            return "above its maximum Mach"
+        if c["check"].get("ias_kt") is not None and not (210 <= c["check"]["ias_kt"] <= 340):
+            return "outside the usable IAS"
+    if k == "heading":
+        if c["off_route"] > MAX_OFF_ROUTE_DEG:
+            return "away from its direction of flight"
+        if c["off_exit"] > MAX_OFF_EXIT_DEG:
+            return "turns it away from its exit"
+    if k == "level":
+        fl = c["prm"]["cfl"]
+        if not (100 <= fl <= w.upper_fl):
+            return "outside the sector's levels"
+        down_arr = fl * 100 < a.alt_ft - 300 and w.descending_to_destination(a, fl)
+        if not (down_arr or level_parity_ok(fl, a.southbound)):
+            return "semicircular rule"
+        if fl * 100 > getattr(a.perf, "ceiling_ft", 1e9):
+            return "above its ceiling"
+        c["ask"] = bool(act_mod.level_needs_asking(w, a, fl, asked or {})) if a.assumed and not c.get("intermediate") else False
+        if c["ask"]:
+            c["cost"] += 0.5
+    if not _flyable(w, a, c["check"]):
+        return "the pilot would refuse it (performance, weather, RVSM)"
+    return None
+
+
+def _candidates(w, a, st: dict, asked: Optional[dict], t_pass: Optional[float] = None, target_fl: Optional[int] = None):
+    """(kind, params, actions, cost, needs_ask) of the plausible clearances that keep every rule (layers 1 and 2);
+    what was rejected, by rule, is kept in LAST_REJECTED[callsign]."""
+    out, rej = [], {}
+    for c in generate(w, a, st, t_pass, target_fl):
+        why = constraint(w, a, c, asked)
+        if why:
+            rej[why] = rej.get(why, 0) + 1
+            continue
+        prm = dict(c["prm"])
+        if c.get("intermediate"):
+            prm["intermediate"] = c["target"]
+        out.append((c["kind"], prm, c["acts"], c["cost"], bool(c.get("ask"))))
+    LAST_REJECTED[a.callsign] = rej
     return out
 
 
@@ -152,7 +239,8 @@ def _text(kind: str, cs: str, prm: dict) -> str:
         return f"{cs} heading {prm['heading']:03d} for {int(prm['for_s'] // 60)} min, then resume"
     if kind == "level":
         rate = f" at {int(prm['rate'])} ft/min or less" if prm.get("rate") else ""
-        return f"{cs} FL{prm['cfl']:03d}{rate}"
+        later = f" for now (FL{prm['intermediate']:03d} when clear)" if prm.get("intermediate") else ""
+        return f"{cs} FL{prm['cfl']:03d}{rate}{later}"
     return cs
 
 
@@ -308,7 +396,12 @@ def solve(w, pair: Optional[tuple] = None, H: float = H_DEFAULT, asked: Optional
         sols = [s for s in sols if s.confirmed is not False]
         best = next((s for s in sols if s.confirmed is not False), None)
         optimal = [s for s in sols if best and s.kind == best.kind and s.cost <= best.cost + OPT_TOL and s.confirmed is not False]
+        rejected = {}
+        for cs_ in order:
+            for k_, n_ in LAST_REJECTED.get(cs_, {}).items():
+                rejected[k_] = rejected.get(k_, 0) + n_
         sets.append({"pair": [p.a, p.b], "t_first": p.t_first, "d_min": round(p.d_min, 1), "priority": why, "move": mv, "hj": hjv,
+                     "rejected": rejected,
                      "solutions": sols, "optimal": optimal})
     if exit_spacing:
         sets += _exit_sets(w, H, asked, st, mine, only_assumed, trajs, sh, max_solutions)
@@ -511,6 +604,16 @@ def accommodate(w, cs: str, req: dict, asked: Optional[dict] = None, H: float = 
         if ok2 and (best is None or cost < best["cost"]):
             act = {**base_act, **{k: v for k, v in acts[0].items() if k not in ("type", "callsign")}}
             best = {"actions": [act], "cost": cost, "text": f"{cs}: request given with {_text(kind, cs, prm).replace(cs + ' ', '')}"}
+    # 1b) a level asked for: an intermediate level now (the climb or descent stopped short of the conflict), the
+    #     level asked for later, when separation is assured - the request stays open
+    if req.get("cfl") is not None:
+        for kind, prm, acts, cost, ask in _candidates(w, a, st[cs], asked, max(blocking.values()) + 120.0, target_fl=int(req["cfl"])):
+            if kind != "level" or not prm.get("intermediate") or (best is not None and cost >= best["cost"]):
+                continue
+            ok2, d2, _ = check_clearance(w, a, H, prm, trajs, sh)
+            if ok2:
+                best = {"actions": acts, "cost": cost, "intermediate": prm["cfl"],
+                        "text": f"{cs}: FL{prm['cfl']:03d} for now, FL{int(req['cfl']):03d} when separation is assured"}
     # 2) the aircraft in the way (ours only), the request given as asked
     if len(blocking) == 1:
         o = next(iter(blocking))

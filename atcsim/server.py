@@ -596,6 +596,7 @@ def solve(sid: str, callsign: Optional[str] = None, other: Optional[str] = None,
              "t_first_s": None if x["t_first"] is None else round(x["t_first"]), "d_min_nm": x["d_min"],
              "move": x["move"], "priority": x["priority"],
              "turn_enough": {m: hv["turn_enough"] for m, hv in (x.get("hj") or {}).items()},
+             "ruled_out": x.get("rejected") or {},
              "optimal": [o.text for o in x["optimal"]],
              "solutions": [o.public() for o in x["solutions"]]} for x in res["sets"]],
             "text": resolve.describe(res)}

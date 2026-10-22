@@ -196,7 +196,7 @@ def route_ahead(w, a) -> List[str]:
 
 def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, for_s: Optional[float] = None,
           direct: Optional[str] = None, cfl: Optional[int] = None, rates: str = "expected", speed_for_s: Optional[float] = None,
-          rate: Optional[float] = None) -> Traj:
+          rate: Optional[float] = None, intermediate: Optional[int] = None) -> Traj:
     """The predicted trajectory of aircraft a over H seconds, with an optional clearance. A speed is held for
     speed_for_s (its limit) then the aircraft resumes its normal speed; a heading for for_s then the route; a level at
     an assigned rate (ft/min) when rate is given. The limits of the clearances in force are flown as well."""

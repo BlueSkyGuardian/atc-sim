@@ -428,7 +428,7 @@ class SolverAgent(Baseline):
             sol = None
         if sol is None:
             return [{"type": "reply", "request_id": r["id"], "decision": "unable"}], [f"{r['id']} unable (nothing makes it separated)"]
-        if len(sol["actions"]) == 1 and set(sol["actions"][0]) <= {"type", "callsign", "cfl", "direct"}:
+        if len(sol["actions"]) == 1 and set(sol["actions"][0]) <= {"type", "callsign", "cfl", "direct"} and not sol.get("intermediate"):
             return [{"type": "reply", "request_id": r["id"], "decision": "approve"}], [f"{r['id']} approved"]
         self._acted = dict(getattr(self, "_acted", {}), **{a_["callsign"]: w.t for a_ in sol["actions"]})
         return list(sol["actions"]), [f"{r['id']} approved: {sol['text']}"]
@@ -438,6 +438,10 @@ class SolverAgent(Baseline):
         sol = self._request_solution(w, q.callsign, req)
         if sol is None:
             return [], []
+        if sol.get("intermediate") is not None:          # only a step closer to the level asked for, never a step back
+            cur = w.aircraft[q.callsign].cleared_alt_ft / 100.0
+            if abs(sol["intermediate"] - req["cfl"]) >= abs(cur - req["cfl"]) - 5:
+                return [], []
         t_ = int(q.resolved_time or q.time)
         self._acted = dict(getattr(self, "_acted", {}), **{a_["callsign"]: w.t for a_ in sol["actions"]})
         return list(sol["actions"]), [f"its request {q.id} (refused at T+{t_ // 60:02d}:{t_ % 60:02d}) now given: {sol['text']}"]

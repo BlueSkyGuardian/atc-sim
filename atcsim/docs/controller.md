@@ -466,8 +466,11 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   **Apply** enters the clearance in the label, as you would; a vector or speed goes with its limit. The panel also
   lists the pilots' **requests** waiting for you (green): *AS ASKED* when the requested level or direct is separated
   from everyone, *WITH* a speed or vector that makes it so (for the aircraft asking, or the one in the way), or *NOT NOW*
-  when nothing does. Speeds are proposed within ±0.03 Mach (±20 kt) of the aircraft's own speed; a larger change
-  entered by hand is flown with a warning. The list follows the traffic every 5 simulated seconds.
+  when nothing does. Speeds are proposed within ±0.03 Mach (±20 kt) of the aircraft's own speed (none for a departure
+  still climbing); a larger change entered by hand is flown with a warning. Vectors keep the aircraft's direction of
+  flight (within 60° of the way to the point it rejoins, never away from its exit). A climb or descent may be stopped
+  at an **intermediate level** (*FL280 for now, FL360 when separation is assured*): the request stays open and the
+  final level follows when it is clear. *ruled out* lists the plausible clearances the rules set aside, by rule. The list follows the traffic every 5 simulated seconds.
 
   ![The solver panel](/static/docs/s_solver.jpg "The solver panel: the conflict, its solutions in order, checked ones with ✓")
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.

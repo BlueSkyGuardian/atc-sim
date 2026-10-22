@@ -63,7 +63,9 @@
            <span class="c-dim">${c.d_min_nm} NM at the exit (LoA ${c.required_nm} NM) in ${mmss(c.t_first_s)}</span>`
         : `<a data-sel="${esc(a)}">${esc(a)}</a> × <a data-sel="${esc(b)}">${esc(b)}</a>
            <span class="c-dim">${c.d_min_nm} NM in ${mmss(c.t_first_s)}</span>`;
-      return `<div class="sv-c ${c.kind === 'exit' ? 'exit' : ''}"><div class="sv-h">${head}</div>${prio}${noTurn}${sols}</div>`;
+      const ro = Object.entries(c.ruled_out || {}).sort((x, y) => y[1] - x[1]).slice(0, 4);
+      const ruled = ro.length ? `<div class="sv-prio" title="plausible clearances set aside by the rules before any separation check">ruled out: ${ro.map(([k, n]) => `${esc(k)} (${n})`).join(' · ')}</div>` : '';
+      return `<div class="sv-c ${c.kind === 'exit' ? 'exit' : ''}"><div class="sv-h">${head}</div>${prio}${noTurn}${sols}${ruled}</div>`;
     }).join('');
     const rq = (data && data.requests || []).map((q, qi) => `<div class="sv-c req"><div class="sv-h">REQUEST ${esc(q.request_id)} <a data-sel="${esc(q.callsign)}">${esc(q.callsign)}</a> <span class="c-dim">${esc(q.text)}</span></div>
         <div class="sv-sol ${q.possible ? 'best' : ''}"><span class="sv-k k-${q.as_asked ? 'speed' : q.possible ? 'heading' : 'level'}">${q.as_asked ? 'AS ASKED' : q.possible ? 'WITH' : 'NOT NOW'}</span>

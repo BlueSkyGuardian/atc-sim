@@ -180,7 +180,7 @@ def _flyable_now(w, ac, instr: dict) -> bool:
 
 
 def refused_requests(w) -> list:
-    """Requests the controller refused that the pilot still wants: the aircraft is still ours and does not have it
+    """Requests the controller refused (or answered with an intermediate level) that the pilot still wants: the aircraft is still ours and does not have it
     (a level not cleared, a direct not flown), and has not asked anything else of that kind since. Newest per
     aircraft and kind."""
     out = {}
@@ -188,7 +188,7 @@ def refused_requests(w) -> list:
         if r.type not in ("altitude", "direct"):
             continue
         key = (r.callsign, r.type)
-        if r.status != "unable":
+        if r.status not in ("unable", "amended"):
             out.pop(key, None)                             # a newer request of that kind replaces the refused one
             continue
         if w.t - (r.resolved_time or r.time) > REFUSED_KEEP_S:
@@ -244,7 +244,17 @@ def level_needs_asking(w, ac, fl: int, asked: dict) -> str:
     if any(r.callsign == ac.callsign and r.status == "pending" and str(r.value or "").upper().lstrip("F").lstrip("L").isdigit()
            and _fl(r.value) == fl for r in w.requests.values()):
         return ""                                          # it asked for this level
-    if any(r.callsign == ac.callsign and r.type == "altitude" and r.status == "unable" and _fl(r.value) == fl
+    cur = ac.alt_ft / 100.0
+    clr = ac.cleared_alt_ft / 100.0
+    if abs(clr - cur) > 3 and min(cur, clr) - 3 <= fl <= max(cur, clr) + 3:
+        return ""                                          # its climb / descent stopped short (an intermediate level)
+    for r in w.requests.values():                          # a step on the way to a level it asked for: no need to ask
+        if (r.callsign == ac.callsign and r.type == "altitude" and r.status in ("pending", "unable", "amended")
+                and str(r.value or "").upper().lstrip("F").lstrip("L").isdigit()):
+            q = _fl(r.value)
+            if min(cur, q) - 3 <= fl <= max(cur, q) + 3:
+                return ""
+    if any(r.callsign == ac.callsign and r.type == "altitude" and r.status in ("unable", "amended") and _fl(r.value) == fl
            and w.t - (r.resolved_time or r.time) <= REFUSED_KEEP_S for r in w.requests.values()
            if str(r.value or "").upper().lstrip("F").lstrip("L").isdigit()):
         return ""                                          # it asked for this level earlier (refused then)

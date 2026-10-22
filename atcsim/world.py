@@ -806,7 +806,7 @@ class World:
         if norm["type"] == "wx_plan":
             return
         for req in self.requests.values():
-            if (req.status == "unable" and req.callsign == norm["callsign"] and req.type == norm["type"]
+            if (req.status in ("unable", "amended") and req.callsign == norm["callsign"] and req.type == norm["type"]
                     and req.type in ("altitude", "direct")
                     and (norm.get("fl") == req.value if req.type == "altitude" else norm.get("waypoint") == req.value)):
                 req.status = "approved"                  # refused at first, given later when it became possible

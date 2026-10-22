@@ -148,7 +148,14 @@ Aircraft on the same route (en-route traffic) appear in the conflict lines with 
   separate them. A refused request is remembered: **ACCOMMODATE** in TO DO lists those that have become possible, to
   give without waiting for the pilot to ask again. The built-in solver does all this by itself.
 - **Speeds** are adjusted by at most ±0.03 Mach (±20 kt) from the aircraft's own speed; a larger change is refused
-  (rules on).
+  (rules on). The solver gives no speed to a departure still climbing to its final level.
+- **The solver in three layers**: plausible clearances built around the aircraft's route (vectors about the way to
+  where it rejoins, intermediate levels on the way to its cleared or requested level, directs ahead, speeds about its
+  own), then the rules (direction of flight within 60° of the route and never away from the exit, departures, speed
+  range, semicircular rule, the pilot's own check, the ask rule — a step towards a level it asked for or is cleared to
+  needs no asking), then the separation checks (exact CPA with everyone, positive separation, exit spacing,
+  reachability close in) and the costs. A level request that cannot be given yet may get an intermediate level now
+  (the request stays open: ACCOMMODATE lists it when the final level becomes possible).
 
 ### The solver's solutions
 
