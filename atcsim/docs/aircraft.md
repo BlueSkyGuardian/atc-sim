@@ -104,7 +104,8 @@ Madeira, Sevilla, Canarias, Casablanca), which OLDI and the labels use.
 ## Arrivals and sequencing
 
 Agadir arrivals: **GCRR** (Lanzarote) via **TERTO**, **GMMN** (Casablanca) via **MARJA** and **SALCA**. The letter of
-agreement asks for **FL250** at the fix and **10 NM in trail**. These values are placeholders until the unit's
+agreement asks for arrivals **cleared to FL250** when they cross the fix (they may still be descending to it) and
+**10 NM in trail**. These values are placeholders until the unit's
 real ones are entered. The training sector has E1 (Eastfield) and S4 (Southport).
 
 - Each arrival's pilot computes its **top of descent** continuously: remaining route + approach path against an

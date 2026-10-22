@@ -180,16 +180,19 @@ checked in the trajectory model (every pair separated until they leave the secto
 when due.
 
 **Arrivals** (TERTO for GCRR, MARJA and SALCA for GMMN) are planned per sequencing fix with its letter of agreement
-(FL250 at the fix, 10 NM in trail whatever their present levels): the in-trail sequence as above, built on
-trajectories that include each one's descent (the true airspeed falls in the descent: an aircraft that goes down
-earlier slows earlier, the one behind gains), then each **descent** once its separation is certain — at its planned
-descent point (the same distance before the fix for all, so that the trail is kept), with its **descent speed**
-(its Mach, then 280 kt on conversion: `"speed": "M78/K280"`). Traffic that is not descending and whose level the
-descent crosses is **not moved**: the descent is given earlier or later, with a rate (*at 3000 ft/min or greater*,
-through its level first; *1000 ft/min or less*, behind it), or stopped above its level and continued when clear.
-Each descent is checked again against the traffic as it is when it comes due (traffic that entered meanwhile counts);
-the pilot's request for descent stays open until the plan gives it. A new arrival makes a new plan (the clearances
-given stay in force, and an aircraft already on a vector keeps it if it can).
+(cleared to FL250 when they cross the fix — they may still be descending — and 10 NM in trail whatever their levels):
+the in-trail sequence as above, built on trajectories that include each one's descent, then each **descent**, the
+leader first, once its separation is certain, at its own top of descent (cleared before the fix in any case), with a
+**descent speed** (`"speed": "M78/K280"`: a Mach, then an IAS on conversion). The leader flies what its pilot says it
+will after conversion (its own schedule); each one behind is given that IAS or less, 10 kt (and 0.01 Mach) at a time,
+until the spacing holds at the fix — at the same Mach a lower aircraft is faster, at the same IAS a higher one is
+(about 6 kt per 1000 ft), so one that stays high while the one ahead goes down needs more — never below 250 kt; if
+need be the restriction is given at once, before its descent, and if 250 kt is not enough the leader is asked to keep
+10 or 20 kt more than it said. Traffic that is not descending and whose level the descent crosses is **not moved**:
+the descent is given earlier or later, with a rate (*at 3000 ft/min or greater*, through its level first; *1000
+ft/min or less*, behind it), or stopped above its level and continued when clear. Each descent is checked again when
+it comes due, against the traffic as it is then; the pilot's request for descent stays open until the plan gives
+it. A new arrival makes a new plan (the clearances given stay in force, a vector kept if it can be).
 
 ### The solver's solutions
 

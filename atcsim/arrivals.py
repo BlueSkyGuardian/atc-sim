@@ -349,13 +349,17 @@ def on_fix_crossing(world: "World", ac: "Aircraft") -> None:
     coord = ac.arr.get("coordinated_fl")
     if not level_ok and coord is not None and fl <= (seq.cross_at_fl or seq.cross_at_or_below_fl or fl):
         level_ok = True                         # cleared below the LoA level after coordination with the next sector
+    loa = seq.cross_at_fl or seq.cross_at_or_below_fl
+    descending = False
+    if not level_ok and loa and ac.cleared_alt_ft <= loa * 100.0 + 50 and ac.alt_ft > loa * 100.0:
+        level_ok = descending = True            # cleared to the agreed level, still descending to it: as agreed
     speed_ok = seq.speed_at_fix_kt is None or abs(ac.cas() - seq.speed_at_fix_kt) <= 10
     spacing_ok = spacing is None or spacing >= seq.spacing_nm
     rec = {"callsign": ac.callsign, "time_s": round(world.t, 1), "fl": fl, "ias_kt": round(ac.cas()),
            "gs_kt": round(ac.gs),
            "behind": prev["callsign"] if prev else None, "spacing_nm": spacing,
            "spacing_ok": spacing_ok, "level_ok": level_ok, "speed_ok": speed_ok,
-           "coordinated_fl": coord}
+           "coordinated_fl": coord, "descending": descending}
     log.append(rec)
     if not spacing_ok:
         world.m["seq_spacing_violations"] += 1
@@ -365,7 +369,7 @@ def on_fix_crossing(world: "World", ac: "Aircraft") -> None:
         world.m["seq_speed_violations"] = world.m.get("seq_speed_violations", 0) + 1
     want = (f"FL{seq.cross_at_fl}" if seq.cross_at_fl else
             f"at or below FL{seq.cross_at_or_below_fl}" if seq.cross_at_or_below_fl else None)
-    lvl = f"FL{fl}" + ("" if want is None else f" ({'OK' if level_ok else 'NOT'} {want}"
+    lvl = f"FL{fl}" + (f" descending FL{int(round(ac.cleared_alt_ft / 100))}" if descending else "") + ("" if want is None else f" ({'OK' if level_ok else 'NOT'} {want}"
                        + (f", coordinated FL{coord}" if coord is not None else "") + ")")
     if seq.speed_at_fix_kt:
         lvl += f", {round(ac.cas())} kt ({'OK' if speed_ok else 'NOT'} {int(seq.speed_at_fix_kt)} kt)"

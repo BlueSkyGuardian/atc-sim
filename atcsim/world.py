@@ -17,6 +17,7 @@ from . import arrivals, pilot
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
 MAX_IAS_CHANGE_KT = 20.0     # and by at most this from its own indicated airspeed
+MIN_IAS_KT = 250            # no speed below 250 kt unless the pilot has said it can (the approach units' speeds)
 INSTRUCTION_TYPES = ("altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
                      "reroute", "wx_clear")
 MAX_EVENTS = 20000
@@ -401,6 +402,10 @@ class World:
         if spec.get("mach") is not None and mode == "mach" and abs(spec["mach"] - val) > MAX_MACH_CHANGE + 1e-6:
             return (f"M.{int(round(spec['mach'] * 100))} is {abs(spec['mach'] - val):.2f} from {ac.callsign}'s own M.{int(round(val * 100))}: "
                     f"a speed is adjusted by at most {MAX_MACH_CHANGE:.2f}")
+        low = [v for v in (spec.get("ias_kt"), spec.get("conversion_kt")) if v is not None and v < MIN_IAS_KT - 0.5]
+        if low and not (mode != "mach" and val < MIN_IAS_KT - 0.5):
+            return (f"{int(low[0])} kt for {ac.callsign}: a speed below {MIN_IAS_KT} kt is given only when the pilot has "
+                    f"said the aircraft can fly it")
         if spec.get("ias_kt") is not None and mode != "mach" and abs(spec["ias_kt"] - val) > MAX_IAS_CHANGE_KT + 0.5:
             return (f"{int(spec['ias_kt'])} kt is {abs(spec['ias_kt'] - val):.0f} kt from {ac.callsign}'s own {int(val)} kt: "
                     f"a speed is adjusted by at most {int(MAX_IAS_CHANGE_KT)} kt")

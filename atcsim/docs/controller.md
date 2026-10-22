@@ -467,7 +467,8 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   lists the pilots' **requests** waiting for you (green): *AS ASKED* when the requested level or direct is separated
   from everyone, *WITH* a speed or vector that makes it so (for the aircraft asking, or the one in the way), or *NOT NOW*
   when nothing does. Speeds are proposed within ±0.03 Mach (±20 kt) of the aircraft's own speed (none for a departure
-  still climbing); a larger change entered by hand is flown with a warning. Vectors keep the aircraft's direction of
+  still climbing); a larger change, or a speed below 250 kt (given only when the pilot has said it can), entered by
+  hand is flown with a warning. Vectors keep the aircraft's direction of
   flight (within 60° of the way to the point it rejoins, never away from its exit). A climb or descent may be stopped
   at an **intermediate level** (*FL280 for now, FL360 when separation is assured*): the request stays open and the
   final level follows when it is clear. *ruled out* lists the plausible clearances the rules set aside, by rule. The list follows the traffic every 5 simulated seconds.

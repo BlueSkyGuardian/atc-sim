@@ -319,7 +319,7 @@ try:
     good = R.positive(w11, "EWG3KP", {"direct": "TOVRA"})
     ok(not bad["positive"] and good["positive"], f"positive separation: staying on track {bad}, direct TOVRA {good}")
 
-    # ---- sequencing: arrivals to TERTO under the solver (in trail, level at the fix, the overflight left alone), and
+    # ---- sequencing: arrivals to TERTO under the solver (in trail, cleared to FL250 at the fix, the overflight left alone), and
     # the controller's sequencing tool (ellipses and headings)
     from atcsim.ailab import agents as AG, actions as AC
     from atcsim.solve import sequence as SQ
@@ -335,10 +335,11 @@ try:
     xs = w12.m["sequencing"].get("TERTO", [])
     ok(len(xs) == 3 and all(x["spacing_ok"] and x["level_ok"] for x in xs)
        and not [e for e in w12.events if e["type"] == "separation_loss_start"],
-       f"arrivals to TERTO: in trail and at FL250 at the fix, no loss: {[(x['callsign'], x['fl'], x['spacing_nm']) for x in xs]}")
-    ok(any(str(a_.get("speed", "")).endswith("/K280") and a_.get("cfl") == 250 for a_ in acts12)
+       f"arrivals to TERTO: in trail and cleared to FL250 at the fix, no loss: {[(x['callsign'], x['fl'], x['spacing_nm']) for x in xs]}")
+    ok(any("/K" in str(a_.get("speed", "")) and a_.get("cfl") == 250 for a_ in acts12)
+       and all(int(str(a_["speed"]).split("/K")[1]) >= 250 for a_ in acts12 if "/K" in str(a_.get("speed", "")))
        and not any(a_.get("callsign") == "TAP1471" for a_ in acts12 if a_.get("type") == "clear"),
-       "each descent given with its descent speed (Mach, then 280 kt on conversion); the overflight is not moved")
+       "each descent given with its descent speed (Mach, then an IAS on conversion, never below 250 kt); the overflight is not moved")
     s13 = S3("s18_exit_sequence_three", mode="stepped", autostart=False); s13.stop(); s13.solo = True; w13 = s13.world
     while w13.t < 300:
         s13._tick()

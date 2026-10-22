@@ -193,7 +193,7 @@ def constraint(w, a, c: dict, asked: Optional[dict]) -> Optional[str]:
             return "speed more than 0.03 Mach / 20 kt from its own"
         if c["check"].get("mach") is not None and c["check"]["mach"] > min(0.86, getattr(a.perf, "mmo", 0.86) - 0.01):
             return "above its maximum Mach"
-        if c["check"].get("ias_kt") is not None and not (210 <= c["check"]["ias_kt"] <= 340):
+        if c["check"].get("ias_kt") is not None and not (250 <= c["check"]["ias_kt"] <= 340):
             return "outside the usable IAS"
     if k == "heading":
         if c["off_route"] > MAX_OFF_ROUTE_DEG:
