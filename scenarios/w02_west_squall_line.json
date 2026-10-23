@@ -44,51 +44,17 @@
   ],
   "weather": {
     "seed": 102,
+    "wind": {
+      "climatology": {
+        "month": 11
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "squall_line",
@@ -141,7 +107,7 @@
         "ssr": "2534",
         "reg": "EI-MRJ",
         "code": "4CAA8B",
-        "eobt": "1400",
+        "eobt": "1358",
         "altn": "EGGW",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "RYANAIR",
@@ -292,7 +258,7 @@
         "ssr": "3474",
         "reg": "G-JLUL",
         "code": "43345A",
-        "eobt": "1336",
+        "eobt": "1339",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "JET2",
@@ -318,7 +284,7 @@
         "ssr": "5517",
         "reg": "G-TEXF",
         "code": "42D57C",
-        "eobt": "1401",
+        "eobt": "1404",
         "altn": "GCFV",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TUI AIRWAYS",
@@ -348,7 +314,7 @@
         "ssr": "2245",
         "reg": "D-AFNU",
         "code": "3FB945",
-        "eobt": "1336",
+        "eobt": "1339",
         "altn": "GCFV",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "EUROWINGS",
@@ -374,7 +340,7 @@
         "ssr": "3663",
         "reg": "CN-RFV",
         "code": "023C1E",
-        "eobt": "1452",
+        "eobt": "1453",
         "altn": "GMME",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "ROYAL AIR MAROC",
@@ -401,7 +367,7 @@
         "ssr": "2427",
         "reg": "CN-RWH",
         "code": "021E89",
-        "eobt": "1630",
+        "eobt": "1631",
         "altn": "GMME",
         "equipment": "SDE2FGHIRWY/S",
         "opr": "ROYAL AIR MAROC",
@@ -421,7 +387,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 330,
+      "fl": 310,
       "load": 0.59,
       "entry_time": -845,
       "dep": "LPPT",
@@ -433,7 +399,7 @@
         "ssr": "2122",
         "reg": "EC-FHK",
         "code": "365A42",
-        "eobt": "1552",
+        "eobt": "1553",
         "altn": "GCTS",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "VUELING",
@@ -1425,7 +1391,7 @@
         "NIPRI",
         "ROLRO"
       ],
-      "fl": 390,
+      "fl": 350,
       "load": 0.43,
       "entry_time": 1577,
       "dep": "KJFK",
@@ -1437,7 +1403,7 @@
         "ssr": "3112",
         "reg": "CN-RDW",
         "code": "021A52",
-        "eobt": "1049",
+        "eobt": "1051",
         "altn": "GMMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",
