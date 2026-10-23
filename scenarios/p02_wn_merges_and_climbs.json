@@ -37,77 +37,18 @@
   ],
   "events": [],
   "title": "Step 2 - West North alone, merges at IBALU, a departure climbing",
-  "description": "West North (WN) open on its own, traffic about two thirds of its declared capacity (58 flights/h). Westerly jet north of the sector, no storms. UN857 and the RUNAX standard route merge at IBALU; Casablanca arrivals via MARJA and SALCA, departures climbing to cruise.",
+  "description": "West North (WN) open on its own, traffic about two thirds of its declared capacity (58 flights/h). February winds (ERA5 climatology: the subtropical jet over the sector), no storms. UN857 and the RUNAX standard route merge at IBALU; Casablanca arrivals via MARJA and SALCA, departures climbing to cruise.",
   "control": [
     "WN"
   ],
   "weather": {
     "seed": 202,
-    "temperature": {
-      "surface_c": 13,
-      "tropopause_fl": 340
-    },
     "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 250,
-          "kt": 12
-        },
-        {
-          "fl": 100,
-          "dir": 260,
-          "kt": 28
-        },
-        {
-          "fl": 200,
-          "dir": 265,
-          "kt": 42
-        },
-        {
-          "fl": 300,
-          "dir": 270,
-          "kt": 55
-        },
-        {
-          "fl": 400,
-          "dir": 275,
-          "kt": 42
-        },
-        {
-          "fl": 500,
-          "dir": 280,
-          "kt": 25
-        },
-        {
-          "fl": 650,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "jet": {
-        "core_fl": 340,
-        "dir": 268,
-        "kt": 65,
-        "axis_point": [
-          0,
-          120
-        ],
-        "half_width_nm": 90,
-        "depth_below_ft": 11000,
-        "depth_above_ft": 8000,
-        "streak_length_nm": 600,
-        "streak_speed_kt": 30,
-        "meander_amp_nm": 10,
-        "meander_wavelength_nm": 500
+      "climatology": {
+        "month": 2
       },
       "noise_kt": 5,
-      "noise_scale_nm": 45
+      "noise_scale_nm": 40
     }
   },
   "aircraft": [
@@ -134,7 +75,7 @@
         "ssr": "4627",
         "reg": "D-AFGV",
         "code": "3C146E",
-        "eobt": "0954",
+        "eobt": "0958",
         "altn": "GCRR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "EUROWINGS",
@@ -166,7 +107,7 @@
         "ssr": "2403",
         "reg": "EC-JQF",
         "code": "375B48",
-        "eobt": "1143",
+        "eobt": "1146",
         "altn": "GCXO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "IBERIA",
@@ -216,16 +157,16 @@
       "load": 0.4,
       "reach": {
         "point": [
-          181.404,
-          128.451
+          181.395,
+          128.443
         ],
-        "time": 1473
+        "time": 1469
       },
       "fpl": {
         "ssr": "5207",
         "reg": "D-AHEL",
         "code": "3CAEF5",
-        "eobt": "1019",
+        "eobt": "1021",
         "altn": "GCXO",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "CONDOR",
@@ -381,7 +322,7 @@
         "ssr": "3324",
         "reg": "HB-JYC",
         "code": "4B7FD7",
-        "eobt": "0833",
+        "eobt": "0832",
         "altn": "GCTS",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "SWISS",
@@ -411,7 +352,7 @@
         "ssr": "2361",
         "reg": "LN-NLD",
         "code": "47A547",
-        "eobt": "1017",
+        "eobt": "1016",
         "altn": "GCXO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "NORWEGIAN",
@@ -501,7 +442,7 @@
         "ssr": "3752",
         "reg": "EI-HHF",
         "code": "4CAAE0",
-        "eobt": "0824",
+        "eobt": "0823",
         "altn": "LPFR",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "RYANAIR",
@@ -657,7 +598,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 390,
+      "fl": 350,
       "load": 0.38,
       "entry_time": -525,
       "dep": "LSZH",
@@ -858,7 +799,7 @@
         "ssr": "5604",
         "reg": "CN-RPG",
         "code": "0216FE",
-        "eobt": "0622",
+        "eobt": "0621",
         "altn": "GMME",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",

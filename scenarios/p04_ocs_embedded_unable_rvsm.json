@@ -21,51 +21,17 @@
   ],
   "weather": {
     "seed": 104,
+    "wind": {
+      "climatology": {
+        "month": 1
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "embedded",
@@ -102,7 +68,7 @@
         "ssr": "3164",
         "reg": "EC-ZZA",
         "code": "355954",
-        "eobt": "1515",
+        "eobt": "1516",
         "altn": "SBKP",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA",
@@ -130,7 +96,7 @@
         "ssr": "2365",
         "reg": "D-AALU",
         "code": "3CD247",
-        "eobt": "1342",
+        "eobt": "1343",
         "altn": "SBKP",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "DEUTSCHE LUFTHANSA",
@@ -162,7 +128,7 @@
         "ssr": "3711",
         "reg": "F-HZPC",
         "code": "3BBC5F",
-        "eobt": "1412",
+        "eobt": "1413",
         "altn": "GOBD",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TRANSAVIA FRANCE",
@@ -353,7 +319,7 @@
         "MITLA",
         "SAMAR"
       ],
-      "fl": 410,
+      "fl": 330,
       "load": 0.46,
       "entry_time": 1210,
       "dep": "ENGM",
@@ -1442,7 +1408,7 @@
         "SAMAR",
         "TIGGI"
       ],
-      "fl": 320,
+      "fl": 300,
       "load": 0.43,
       "entry_time": 1775,
       "dep": "SAEZ",
@@ -1454,7 +1420,7 @@
         "ssr": "5537",
         "reg": "G-JMGC",
         "code": "42873C",
-        "eobt": "0654",
+        "eobt": "0644",
         "altn": "ENGM",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "JET2",
@@ -1548,7 +1514,7 @@
         "NIPRI",
         "ROLRO"
       ],
-      "fl": 330,
+      "fl": 350,
       "load": 0.55,
       "entry_time": 1326,
       "dep": "LPPD",
@@ -1560,7 +1526,7 @@
         "ssr": "3130",
         "reg": "CN-RBS",
         "code": "0203D3",
-        "eobt": "1529",
+        "eobt": "1528",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "ROYAL AIR MAROC",

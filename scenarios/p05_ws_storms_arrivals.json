@@ -22,51 +22,17 @@
   ],
   "weather": {
     "seed": 101,
+    "wind": {
+      "climatology": {
+        "month": 10
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "scattered",
@@ -104,7 +70,7 @@
         "ssr": "4723",
         "reg": "G-JVGH",
         "code": "40B0F0",
-        "eobt": "0752",
+        "eobt": "0755",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "JET2",
@@ -131,7 +97,7 @@
         "ssr": "3706",
         "reg": "G-TDFY",
         "code": "42721F",
-        "eobt": "0802",
+        "eobt": "0805",
         "altn": "GCRR",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TUI AIRWAYS",
@@ -161,7 +127,7 @@
         "ssr": "4117",
         "reg": "G-JKYT",
         "code": "4295E3",
-        "eobt": "0752",
+        "eobt": "0756",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "JET2",
@@ -187,7 +153,7 @@
         "ssr": "4421",
         "reg": "G-TSJT",
         "code": "40E569",
-        "eobt": "0812",
+        "eobt": "0815",
         "altn": "GCFV",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TUI AIRWAYS",
@@ -329,7 +295,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 370,
+      "fl": 390,
       "load": 0.33,
       "entry_time": 1043,
       "dep": "LEBL",
@@ -380,37 +346,6 @@
       }
     },
     {
-      "callsign": "SWR8910X",
-      "type": "B738",
-      "route": [
-        "KORNO",
-        "ABODA",
-        "IBALU",
-        "ERMED",
-        "TOVRA",
-        "VEDOD",
-        "TERTO"
-      ],
-      "fl": 350,
-      "load": 0.56,
-      "entry_time": 3160,
-      "dep": "LEBL",
-      "dest": "GCXO",
-      "direction": "southbound",
-      "flow": "un857",
-      "arrival": false,
-      "fpl": {
-        "ssr": "3162",
-        "reg": "HB-JBN",
-        "code": "4B0E94",
-        "eobt": "0941",
-        "altn": "GCTS",
-        "equipment": "SDE2E3FGHIJ1RWY/LB1",
-        "opr": "SWISS",
-        "pob": 143
-      }
-    },
-    {
       "callsign": "RYR3522P",
       "type": "B738",
       "route": [
@@ -442,36 +377,6 @@
       }
     },
     {
-      "callsign": "TAP8534K",
-      "type": "B739",
-      "route": [
-        "RUNAX",
-        "IBALU",
-        "ERMED",
-        "TOVRA",
-        "VEDOD",
-        "TERTO"
-      ],
-      "fl": 350,
-      "load": 0.57,
-      "entry_time": 358,
-      "dep": "LEMD",
-      "dest": "GCFV",
-      "direction": "southbound",
-      "flow": "runax_std",
-      "arrival": false,
-      "fpl": {
-        "ssr": "2223",
-        "reg": "CS-TUM",
-        "code": "497504",
-        "eobt": "0924",
-        "altn": "GCRR",
-        "equipment": "SDE2E3FGHIJ1RWY/LB1",
-        "opr": "TAP AIR PORTUGAL",
-        "pob": 181
-      }
-    },
-    {
       "callsign": "TVF9422",
       "type": "B739",
       "route": [
@@ -482,7 +387,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 350,
+      "fl": 290,
       "load": 0.5,
       "entry_time": 1388,
       "dep": "EGCC",
@@ -494,7 +399,7 @@
         "ssr": "2650",
         "reg": "F-HADL",
         "code": "3B278D",
-        "eobt": "0802",
+        "eobt": "0806",
         "altn": "GCXO",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "TRANSAVIA FRANCE",
@@ -563,32 +468,33 @@
       }
     },
     {
-      "callsign": "EWG9083",
-      "type": "A21N",
+      "callsign": "TVF8803X",
+      "type": "A319",
       "route": [
-        "RUNAX",
-        "IBALU",
-        "ERMED",
-        "TOVRA",
-        "VEDOD",
-        "TERTO"
+        "VASTO",
+        "SULAM",
+        "DIMSA",
+        "IBLIV",
+        "SUNID",
+        "AKUDA"
       ],
-      "fl": 330,
-      "load": 0.59,
-      "entry_time": -693,
-      "dep": "LSZH",
-      "dest": "GCRR",
-      "direction": "southbound",
-      "flow": "runax_gcrr",
+      "fl": 400,
+      "load": 0.4,
+      "entry_time": -1436,
+      "dep": "GCXO",
+      "dest": "LEVC",
+      "direction": "northbound",
+      "flow": "un858",
+      "arrival": false,
       "fpl": {
-        "ssr": "2017",
-        "reg": "D-ANMF",
-        "code": "3CCBC0",
-        "eobt": "0737",
-        "altn": "GCFV",
-        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
-        "opr": "EUROWINGS",
-        "pob": 171
+        "ssr": "5070",
+        "reg": "F-HKTU",
+        "code": "3BECB3",
+        "eobt": "0943",
+        "altn": "LEAL",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TRANSAVIA FRANCE",
+        "pob": 120
       }
     },
     {
@@ -723,7 +629,7 @@
         "SUNID",
         "AKUDA"
       ],
-      "fl": 320,
+      "fl": 340,
       "load": 0.43,
       "entry_time": 2923,
       "dep": "GCLP",
@@ -821,6 +727,33 @@
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "RYANAIR",
         "pob": 178
+      }
+    },
+    {
+      "callsign": "SWR2809A",
+      "type": "A319",
+      "route": [
+        "TAKAV",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 330,
+      "load": 0.44,
+      "entry_time": 1481,
+      "dep": "LSZH",
+      "dest": "GCXO",
+      "direction": "southbound",
+      "flow": "takav_vedod",
+      "arrival": false,
+      "fpl": {
+        "ssr": "5350",
+        "reg": "HB-JWF",
+        "code": "4B51B9",
+        "eobt": "0808",
+        "altn": "GCTS",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "SWISS",
+        "pob": 95
       }
     },
     {
@@ -1095,13 +1028,39 @@
       }
     },
     {
+      "callsign": "TAP5506",
+      "type": "A320",
+      "route": [
+        "NIPRI",
+        "ROLRO"
+      ],
+      "fl": 410,
+      "load": 0.33,
+      "entry_time": 1135,
+      "dep": "KJFK",
+      "dest": "GMMX",
+      "direction": "southbound",
+      "flow": "nipri_rolro",
+      "arrival": false,
+      "fpl": {
+        "ssr": "4721",
+        "reg": "CS-TEF",
+        "code": "4958B0",
+        "eobt": "0408",
+        "altn": "GMMI",
+        "equipment": "SDE2E3FGHIJ1RWY/LB1",
+        "opr": "TAP AIR PORTUGAL",
+        "pob": 124
+      }
+    },
+    {
       "callsign": "SAT1465",
       "type": "A320",
       "route": [
         "NIPRI",
         "ROLRO"
       ],
-      "fl": 290,
+      "fl": 350,
       "load": 0.48,
       "entry_time": 2760,
       "dep": "KJFK",
@@ -1113,7 +1072,7 @@
         "ssr": "4602",
         "reg": "CS-TYN",
         "code": "49536D",
-        "eobt": "0445",
+        "eobt": "0437",
         "altn": "GMMI",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "SATA AIR ACORES",
@@ -1147,30 +1106,29 @@
       }
     },
     {
-      "callsign": "TVF7356",
-      "type": "A21N",
+      "callsign": "TVF4372",
+      "type": "B739",
       "route": [
         "VASTO",
         "BAROK"
       ],
-      "fl": 360,
-      "load": 0.39,
-      "entry_time": 1557,
-      "dep": "GVAC",
-      "dest": "EGKK",
+      "fl": 380,
+      "load": 0.32,
+      "entry_time": 297,
+      "dep": "DNMM",
+      "dest": "LPPT",
       "direction": "northbound",
       "flow": "vasto_barok",
       "arrival": false,
       "fpl": {
-        "ssr": "3363",
-        "reg": "F-HRMY",
-        "code": "3A8358",
-        "eobt": "0845",
-        "altn": "EGLL",
-        "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
+        "ssr": "5462",
+        "reg": "F-HTGV",
+        "code": "39BF7B",
+        "eobt": "0640",
+        "altn": "LPFR",
+        "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "TRANSAVIA FRANCE",
-        "pob": 190,
-        "rmk": "TCAS"
+        "pob": 159
       }
     },
     {
