@@ -340,6 +340,8 @@
     ['C or L', 'cleared level of the selected aircraft'], ['X', 'exit level (XFL)'], ['H', 'heading'], ['S', 'speed'], ['D', 'direct / route'], ['W', 'weather deviation (WX tag)'], ['N', 'note (full menu)'],
     ['E', 'edit its route (re-routing)'], ['A', 'assume the selected aircraft'], ['U', 'decontrol it'], ['F', 'its flight plan'], ['I', 'track info window'],
     ['R', 'show its route for 8 s'], ['B', 'range/bearing line from the aircraft or point under the mouse; it follows the mouse, click (or B) to place it'],
+    ['Q', 'geographic cursor: the position under the mouse in degrees, minutes, seconds; click drops a marker there (Shift+click: drop and keep the cursor), Q / Esc to leave'],
+    ['Ctrl+F', 'find: aircraft (callsign, SSR code), point, aerodrome, airway, area, coordinates'],
     ['right-drag', 'range/bearing line between two aircraft or points'], ['Delete', 'remove the last RBL (Shift+Delete: all)'],
     ['G', 'flight plan list'], ['M', 'MTCD on / off'], ['O', 'OLDI messages'], ['+ / −', 'zoom'], ['arrows', 'move the picture'], ['0', 'reset the view'],
     ['Enter', 'command line: type a clearance for the selected aircraft (CPDLC, or Shift+Enter to enter a voice clearance)'], ['J', 'CPDLC window'], ['T', 'coordination chat with the other sectors and units'],

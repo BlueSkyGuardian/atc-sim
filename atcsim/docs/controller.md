@@ -134,6 +134,8 @@ sector outlined in yellow. These stay on the scope (listed under *On the scope* 
 with ✕ or *clear all*. Arrows move through the results. Clicking a message in the **CPDLC** window also centres the
 scope on its aircraft.
 
+**Geographic cursor**: press <kbd>Q</kbd> and the cursor becomes a crosshair with the position under it in degrees, minutes and seconds (to a tenth of a second). A click drops a marker with that label there (<kbd>Shift</kbd>+click: drop it and keep the cursor); <kbd>Q</kbd> or <kbd>Esc</kbd> leaves. Dropped markers are listed in the Find window with the others. Every marker is a ring with a fine cross through it, the exact position at its centre.
+
 A pilot's **squawk ident** (pseudo-pilot or instructor) makes the aircraft's label flash bright yellow with *ID* for
 about 18 seconds.
 

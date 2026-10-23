@@ -17,6 +17,18 @@
     const F = Math.cos(l1 * rad) * Math.pow(t(l1), n) / n, rho0 = R * F / Math.pow(t(p.lat0), n);
     return (lat, lon) => { const rho = R * F / Math.pow(t(lat), n), th = n * (lon - p.lon0) * rad; return [rho * Math.sin(th), rho0 - rho * Math.cos(th)]; };
   }
+  function lccInv() {                    // plane (NM) -> lat, lon
+    const p = sector && sector.projection; if (!p) return null;
+    const R = p.earth_radius_nm || 3440.065, rad = Math.PI / 180, [l1, l2] = p.standard_parallels;
+    const t = f => Math.tan(Math.PI / 4 + f * rad / 2);
+    const n = Math.abs(l1 - l2) < 1e-9 ? Math.sin(l1 * rad) : Math.log(Math.cos(l1 * rad) / Math.cos(l2 * rad)) / Math.log(t(l2) / t(l1));
+    const F = Math.cos(l1 * rad) * Math.pow(t(l1), n) / n, rho0 = R * F / Math.pow(t(p.lat0), n);
+    return (x, y) => { const dy = rho0 - y, rho = Math.sign(n) * Math.hypot(x, dy), th = Math.atan2(x, dy);
+      return [(2 * Math.atan(Math.pow(R * F / rho, 1 / n)) - Math.PI / 2) / rad, p.lon0 + th / n / rad]; };
+  }
+  const dmsFine = (v, w, pos, neg) => { const a = Math.abs(v); let d = Math.floor(a), m = Math.floor((a - d) * 60), s = ((a - d) * 60 - m) * 60;
+    if (s >= 59.95) { s = 0; m += 1; } if (m >= 60) { m = 0; d += 1; }
+    return `${String(d).padStart(w, '0')}°${String(m).padStart(2, '0')}'${s.toFixed(1).padStart(4, '0')}"${v >= 0 ? pos : neg}`; };
   const dmsTxt = (v, w, pos, neg) => { const a = Math.abs(v), d = Math.floor(a), m = Math.floor((a - d) * 60), s = Math.round(((a - d) * 60 - m) * 60);
     return `${String(d).padStart(w, '0')}°${String(m).padStart(2, '0')}'${String(s).padStart(2, '0')}"${v >= 0 ? pos : neg}`; };
   // 334512N 0073015W · 3345N00730W · N33 45 12 W007 30 15 · 33°45'12"N 7°30'15"W · 33.75 -7.5 · 33.75N 7.5W
@@ -125,6 +137,23 @@
   window.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); open(); }
   });
+  let geoMode = false;
+  const geoAt = (px, py) => { const inv = lccInv(); if (!inv) return null; const [x, y] = fromPx(px, py); return inv(x, y); };
+  function setGeo(on) { geoMode = on; cv.style.cursor = on ? 'none' : ''; }
+  window.geoCursorActive = () => geoMode;
+  window.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.target.closest('input,textarea,select,[contenteditable]')) return;
+    if (e.key === 'q' || e.key === 'Q') { setGeo(!geoMode); e.preventDefault(); }
+    else if (e.key === 'Escape' && geoMode) setGeo(false);
+  });
+  cv.addEventListener('mousedown', e => {
+    if (!geoMode || e.button !== 0) return;
+    e.stopImmediatePropagation(); e.preventDefault();
+    const [px, py] = canvasPt(e), ll = geoAt(px, py); if (!ll) return;
+    const [x, y] = fromPx(px, py), label = `${dmsFine(ll[0], 2, 'N', 'S')} ${dmsFine(ll[1], 3, 'E', 'W')}`;
+    marks.push({ kind: 'coord', label, sub: 'dropped', x, y, key: 'coord:' + label + ':' + marks.length, t0: performance.now() });
+    render(); if (!e.shiftKey) setGeo(false);
+  }, true);
   const css = document.createElement('style');
   css.textContent = `.win .lk-r { padding: 4px 6px; border-radius: 4px; cursor: pointer; font-family: var(--mono); font-size: 12px; }
     .win .lk-r small, .win .lk-m small { color: var(--dim); font-family: system-ui; margin-left: 4px; }
@@ -134,6 +163,15 @@
   document.head.appendChild(css);
 
   // ---------------------------------------------------------------- drawing (called by the radar's draw loop)
+  // a ring with a fine cross through it (the exact position at the centre, a gap so the point itself stays visible)
+  function crosshair(x, y, r, long) {
+    const dpr = devicePixelRatio, g = 2.5 * dpr, L = long ? r * 1.8 : r * 1.35;
+    ctx.lineWidth = 1.6 * dpr; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 1 * dpr; ctx.beginPath();
+    ctx.moveTo(x - L, y); ctx.lineTo(x - g, y); ctx.moveTo(x + g, y); ctx.lineTo(x + L, y);
+    ctx.moveTo(x, y - L); ctx.lineTo(x, y - g); ctx.moveTo(x, y + g); ctx.lineTo(x, y + L); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x, y, 0.9 * dpr, 0, Math.PI * 2); ctx.fill();
+  }
   window.drawLookup = byCs => {
     const dpr = devicePixelRatio, now = performance.now();
     const pulse = t0 => now - t0 < 4000 ? 1 + 0.6 * Math.abs(Math.sin((now - t0) / 220)) : 1;
@@ -152,9 +190,7 @@
         ctx.stroke(); const [lx, ly] = toPx(m.x, m.y); ctx.fillText(m.label, lx, ly);
       } else {
         const [x, y] = toPx(m.x, m.y); ctx.lineWidth = 2 * dpr;
-        if (m.kind === 'coord') { const r = 9 * dpr * k; ctx.beginPath(); ctx.moveTo(x - r, y); ctx.lineTo(x + r, y); ctx.moveTo(x, y - r); ctx.lineTo(x, y + r); ctx.stroke();
-          ctx.beginPath(); ctx.arc(x, y, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); }
-        else { ctx.beginPath(); ctx.arc(x, y, 10 * dpr * k, 0, Math.PI * 2); ctx.stroke(); }
+        crosshair(x, y, (m.kind === 'coord' ? 9 : 10) * dpr * k, m.kind === 'coord');
         ctx.fillText(m.label, x + 12 * dpr, y - 10 * dpr);
       }
     }
@@ -162,6 +198,18 @@
       const a = byCs[hiAc.cs], [x, y] = toPx(a.x_nm, a.y_nm), f = ((hiAc.until - now) % 1000) / 1000;
       ctx.lineWidth = 2.5 * dpr; ctx.globalAlpha = 0.4 + 0.6 * f; ctx.beginPath(); ctx.arc(x, y, (12 + 26 * f) * dpr, 0, Math.PI * 2); ctx.stroke();
       ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(x, y, 12 * dpr, 0, Math.PI * 2); ctx.stroke();
+    }
+    if (geoMode && mouseCv) {                                    // the geographic cursor: crosshair and DMS label
+      const [x, y] = mouseCv, ll = geoAt(x, y);
+      ctx.strokeStyle = COL; ctx.fillStyle = COL; crosshair(x, y, 7 * dpr, true);
+      if (ll) {
+        const t = `${dmsFine(ll[0], 2, 'N', 'S')}  ${dmsFine(ll[1], 3, 'E', 'W')}`;
+        ctx.font = `bold ${11 * dpr}px ui-monospace,monospace`; const w = ctx.measureText(t).width;
+        const bx = x + 16 * dpr, by = y + 16 * dpr;
+        ctx.fillStyle = '#0b1016e6'; ctx.fillRect(bx - 4 * dpr, by - 12 * dpr, w + 8 * dpr, 17 * dpr);
+        ctx.strokeStyle = COL + '99'; ctx.lineWidth = 1 * dpr; ctx.strokeRect(bx - 4 * dpr, by - 12 * dpr, w + 8 * dpr, 17 * dpr);
+        ctx.fillStyle = COL; ctx.fillText(t, bx, by);
+      }
     }
     ctx.restore();
   };
