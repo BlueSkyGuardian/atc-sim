@@ -65,8 +65,12 @@
     for (const a of acs.slice(0, 6)) if (!out.some(r => r.cs === a.callsign)) out.push({ kind: 'ac', cs: a.callsign, label: a.callsign, sub: `aircraft · ${a.type} · FL${a.fl} · A${a.squawk || '----'}` });
     for (const ad of (arrInfo && arrInfo.aerodromes) || []) if (ad.id.startsWith(q) || String(ad.name || '').toUpperCase().includes(q))
       out.push({ kind: 'point', label: ad.id, sub: `aerodrome · ${ad.name} · RWY ${ad.runway_in_use}`, x: ad.x_nm, y: ad.y_nm });
+    const simAd = new Set(((arrInfo && arrInfo.aerodromes) || []).map(a => a.id));
+    for (const ap of sector.airports || []) if (!simAd.has(ap.id) && (ap.id.startsWith(q) || (ap.iata || '') === q || String(ap.name || '').toUpperCase().includes(q) || String(ap.city || '').toUpperCase().includes(q)))
+      if (out.filter(r => r.kind === 'point' && r.sub.startsWith('aerodrome')).length < 8)
+        out.push({ kind: 'point', label: ap.id, sub: `aerodrome · ${ap.name}${ap.iata ? ' (' + ap.iata + ')' : ''}${ap.elev_ft != null ? ' · ' + ap.elev_ft + ' ft' : ''} · RWY ${(ap.runways || []).map(r => r.id).join(' ') || '—'}`, x: ap.x, y: ap.y });
     const pts = Object.keys(wp).filter(n => !n.startsWith('@') && n.startsWith(q)).sort((a, b) => a.length - b.length || a.localeCompare(b));
-    for (const n of pts.slice(0, 8)) out.push({ kind: 'point', label: n, sub: `point${geo[n] ? ' · ' + (geo[n].role || '') + ' · ' + (geo[n].aip || '') : ''}`, x: wp[n][0], y: wp[n][1] });
+    for (const n of pts.slice(0, 8)) out.push({ kind: 'point', label: n, sub: `${geo[n] && geo[n].name ? geo[n].name : 'point'}${geo[n] ? ' · ' + (geo[n].role || '') + ' · ' + (geo[n].aip || '') : ''}`, x: wp[n][0], y: wp[n][1] });
     for (const [name, aw] of Object.entries(sector.airways || {})) if (name.toUpperCase().startsWith(q) && aw.points.every(p => wp[p]))
       out.push({ kind: 'airway', label: name, sub: `airway · ${aw.points[0]} – ${aw.points[aw.points.length - 1]}`, pts: aw.points.map(p => wp[p]) });
     const qa = q.replace(/\s+/g, '');

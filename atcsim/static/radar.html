@@ -518,7 +518,9 @@
 <button data-v="sectors" class="on" title="Sector borders">Borders</button>
 <button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button>
 <button data-v="names" class="on" title="Point names">Points</button>
-<button data-v="trails" class="on" title="History dots">Trails</button></div></span>
+<button data-v="trails" class="on" title="History dots">Trails</button>
+<button data-v="airports" class="on" title="Aerodromes of the region with their runways (names when zoomed in)">Airports</button>
+<button data-v="navaids" class="on" title="Radio navaids: VOR (hexagon), NDB (circle), DME (square)">Navaids</button></div></span>
       <span class="vg"><button class="vgb" title="SIDs, STARs, holding patterns">Procedures</button><div class="vgm"><button data-v="sid" class="on" title="SIDs of the runways in use">SID</button>
 <button data-v="star" class="on" title="STARs of the runways in use">STAR</button>
 <button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
@@ -629,7 +631,7 @@ const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] |
 const AIW = (location.pathname.match(/^\/ai\/watch\/([0-9a-f]+)\/?$/) || [])[1] || null;      // an AI run, live (aiwatch.js)
 const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
-const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false };
+const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false, airports: true, navaids: true };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
 // display settings (colours, sizes): per browser, from the Display menu
 const TH_DEF = {
@@ -1818,6 +1820,27 @@ function draw() {
     ctx.fillText(`${ar.designator}`, lx, ly);
     ctx.fillText(`${String(ar.lower_fl).padStart(3, '0')}-${ar.upper_fl} ${ar.active ? 'ACT' : 'off'}`, lx, ly + 12 * dpr);
   }
+  // reference aerodromes: runways (thresholds), the ARP of those without runway data; names when zoomed in
+  if (V.airports && sector.airports) {
+    const simIds = new Set(((arrInfo && arrInfo.aerodromes) || []).map(a => a.id));
+    ctx.font = `${(TH.nameFont - 0.5) * dpr}px ui-monospace,monospace`;
+    for (const ap of sector.airports) {
+      const [ax, ay] = toPx(ap.x, ap.y);
+      if (ax < -50 || ay < -50 || ax > W + 50 || ay > H + 50) continue;
+      ctx.strokeStyle = ctx.fillStyle = TH.aerodromes + (ap.type === 'small' ? '99' : 'dd');
+      let drew = false;
+      for (const r of ap.runways || []) {
+        const [e1, e2] = r.ends; if (!e1 || !e2 || e1.x == null || e2.x == null) continue;
+        const [x1, y1] = toPx(e1.x, e1.y), [x2, y2] = toPx(e2.x, e2.y);
+        ctx.lineWidth = (ap.type === 'large' ? 2.6 : ap.type === 'medium' ? 2 : 1.4) * dpr;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); drew = true;
+        if (userZoom >= 6) { ctx.fillText(e1.id, x1 + 3 * dpr, y1 + 10 * dpr); ctx.fillText(e2.id, x2 + 3 * dpr, y2 + 10 * dpr); }
+      }
+      if (!drew) { ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.arc(ax, ay, 3 * dpr, 0, Math.PI * 2); ctx.stroke(); }
+      const named = !simIds.has(ap.id) && (userZoom >= 2.2 || (ap.type === 'large' && userZoom >= 0.9) || (ap.type === 'medium' && userZoom >= 1.4));
+      if (named) ctx.fillText(ap.id, ax + 6 * dpr, ay - 5 * dpr);
+    }
+  }
   // waypoints: filled = transfer (entry/exit) point on the boundary, hollow = internal point
   ctx.font = `${TH.nameFont * dpr}px ui-monospace,monospace`;
   const xfer = new Set(sector.transfer_points || []);
@@ -1831,6 +1854,18 @@ function draw() {
     const [px, py] = toPx(...p);
     if (copSet.has(n)) {                 // generated coordination point on a sector line: a small tick, no name
       ctx.strokeStyle = '#3d556c'; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.moveTo(px - 3 * dpr, py); ctx.lineTo(px + 3 * dpr, py); ctx.stroke(); continue;
+    }
+    const nav = sector.navaids && sector.navaids[n];
+    if (nav) {                           // radio navaid: VOR hexagon, NDB circle with a dot, DME square
+      if (!V.navaids) continue;
+      const ext = extSet.has(n), r = 5 * dpr;
+      ctx.strokeStyle = ctx.fillStyle = ext ? TH.extPoints : TH.points; ctx.lineWidth = 1 * dpr; ctx.beginPath();
+      if (nav === 'NDB') { ctx.arc(px, py, r, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(px, py, 1.3 * dpr, 0, Math.PI * 2); ctx.fill(); }
+      else if (nav === 'DME') { ctx.strokeRect(px - r * 0.8, py - r * 0.8, r * 1.6, r * 1.6); }
+      else { for (let k = 0; k < 6; k++) { const a = Math.PI / 3 * k; k ? ctx.lineTo(px + r * Math.cos(a), py + r * Math.sin(a)) : ctx.moveTo(px + r, py); }
+        ctx.closePath(); ctx.stroke(); ctx.beginPath(); ctx.arc(px, py, 1 * dpr, 0, Math.PI * 2); ctx.fill(); }
+      if (V.names && (!ext || userZoom >= 1.6)) { ctx.fillText(n, px + 7 * dpr, py + 4 * dpr); nameRect(n, px + 7 * dpr, py + 4 * dpr); }
+      continue;
     }
     if (extSet.has(n)) {                 // neighbouring-sector point: small diamond, '?' = provisional position
       ctx.strokeStyle = ctx.fillStyle = TH.extPoints; ctx.lineWidth = 1 * dpr; ctx.beginPath();

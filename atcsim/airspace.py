@@ -297,10 +297,21 @@ class Airspace:
             out["projection"] = self.projection.spec()
             out["waypoints_geo"] = {k: {"lat": round(ll[0], 5), "lon": round(ll[1], 5), "aip": format_dms(*ll),
                                         **{kk: vv for kk, vv in self.point_info.get(k, {}).items()
-                                           if kk in ("role", "fra", "estimated", "provisional", "region")}}
+                                           if kk in ("role", "fra", "estimated", "provisional", "region", "name", "navaid_type")}}
                                     for k, p in self.waypoints.items() if not k.startswith("@")
                                     for ll in [self.projection.inverse(*p)]}
         out.update(self.notes)
+        if getattr(self, "airports", None):
+            out["airports"] = self.airports
+        # radio navaids (symbols on the scope): VOR, VOR/DME, VORTAC, DME, NDB, TACAN
+        nav = {}
+        for k, v in self.point_info.items():
+            t = v.get("navaid_type") or (v.get("role", "") if v.get("navaid") else "")
+            if not t or k not in self.waypoints:
+                continue
+            t = t.upper()
+            nav[k] = "NDB" if "NDB" in t else "VOR" if ("VOR" in t or "TACAN" in t) else "DME" if "DME" in t else "VOR"
+        out["navaids"] = nav
         if getattr(self, "fir_sectors", None):
             # the rest of the FIR: the other control area's sectors (drawn, not ours) and the FIR outline
             names = getattr(self, "fir_cta_names", {}) or {}
@@ -609,6 +620,32 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
                 hs.append({**{k: v for k, v in h.items() if k != "coord"}, "x": round(hx, 3), "y": round(hy, 3)})
             ad["holdings"] = hs
         ads.append(ad)
+    # reference aerodromes (display, lookup): ARP and runway ends on the plane
+    refs = []
+    for a in d.get("airports", []):
+        x, y = xy(a["coord"])
+        rws = []
+        for r in a.get("runways", []):
+            ends = []
+            for e in r["ends"]:
+                ee = {k: v for k, v in e.items() if k != "coord"}
+                if e.get("coord"):
+                    ex, ey = xy(e["coord"]); ee.update(x=round(ex, 3), y=round(ey, 3))
+                ends.append(ee)
+            if not all("x" in e for e in ends) and r.get("length_ft"):
+                # no threshold coordinates: the runway centred on the ARP along its heading
+                h = next((e.get("heading_true") for e in ends if e.get("heading_true") is not None), None)
+                if h is None and ends[0]["id"][:2].isdigit():
+                    h = int(ends[0]["id"][:2]) * 10.0
+                if h is not None:
+                    half = r["length_ft"] * 0.3048 / 1852.0 / 2.0
+                    u = (math.sin(math.radians(h)), math.cos(math.radians(h)))
+                    for k, e in enumerate(ends):
+                        sg = -1 if k == 0 else 1
+                        e.update(x=round(x + sg * u[0] * half, 3), y=round(y + sg * u[1] * half, 3), approx=True)
+            rws.append({**{k: v for k, v in r.items() if k != "ends"}, "ends": ends})
+        refs.append({**{k: v for k, v in a.items() if k not in ("coord", "runways")}, "x": round(x, 3), "y": round(y, 3),
+                     "runways": rws})
     # published prohibited / restricted / danger areas (AIP ENR 5.1)
     areas = []
     for a in (d.get("published_areas") or {}).get("areas", []):
@@ -656,6 +693,7 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     sp.fir_external = fir_ext
     sp.fir_cta_names = {k: v.get("short") or k.title() for k, v in ctas.items()}
     sp.published_areas = areas
+    sp.airports = refs
     sp.areas_note = (d.get("published_areas") or {}).get("_note")
     return sp
 

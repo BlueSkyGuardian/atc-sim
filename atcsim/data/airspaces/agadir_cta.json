@@ -2434,6 +2434,14 @@
       }
      ],
      "_source": "AD2 GMMN 35-2-1/2 ILSz/ILSy RWY 17R: QFU 165 mag, intercept at SAK (D8.0 ICAS), FAF D5.2 ICAS 2300 ft; from NASRO 177 to 15 NM CBA, arc 13 NM CBA, 114 SAK (city overflight avoidance); from the south via BODNI"
+    },
+    {
+     "id": "17R",
+     "heading": 164
+    },
+    {
+     "id": "35L",
+     "heading": 344
     }
    ],
    "runway_in_use": "auto",
@@ -4130,6 +4138,14 @@
     {
      "id": "21R",
      "heading": 211
+    },
+    {
+     "id": "03R",
+     "heading": 22
+    },
+    {
+     "id": "21L",
+     "heading": 202
     }
    ],
    "runway_in_use": "auto",
@@ -5929,6 +5945,1334 @@
     "coord": "250000N 0145628W",
     "region": "Canarias (Laayoune)",
     "source": "AIP Maroc ENR 3.1 (UA600)"
+   },
+   "AA": {
+    "coord": "402653.52N 0033219.72W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MADRID 355"
+   },
+   "ABT": {
+    "coord": "385638.76N 0015951.61W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ALBACETE 321"
+   },
+   "ADX": {
+    "coord": "393257.84N 0022345.10E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ANDRAITX 384"
+   },
+   "ALS": {
+    "coord": "301913.08N 0091909.98W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB AGADIR 396"
+   },
+   "ALT": {
+    "coord": "381605.88N 0003412.41W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME ALICANTE 113.80"
+   },
+   "ALU": {
+    "coord": "351052.31N 0035040.42W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB AL HOCEIMA 401"
+   },
+   "AM": {
+    "coord": "365232.88N 0021423.68W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ALMERIA 284"
+   },
+   "AML": {
+    "coord": "301924.96N 0092716.99W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB AGADIR 402"
+   },
+   "AMN": {
+    "coord": "365054.24N 0022244.98W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ALMERIA 310"
+   },
+   "AMR": {
+    "coord": "364959.51N 0021533.91W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME ALMERIA 114.10"
+   },
+   "AOG": {
+    "coord": "363852.44N 0062056.62W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN ROTA 108.60"
+   },
+   "ARM": {
+    "coord": "370424.61N 0034807.49W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ARMILLA 344"
+   },
+   "ARW": {
+    "coord": "345922.92N 0030239.01W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB EL AROUI 355"
+   },
+   "ATE": {
+    "coord": "381709.95N 0003511.76W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME ALICANTE 114.65"
+   },
+   "ATR": {
+    "coord": "375659.65N 0011349.51W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ALCANTARILLA 345"
+   },
+   "AZR": {
+    "coord": "302200.48N 0092702.41W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB INEZGANE 371"
+   },
+   "B": {
+    "coord": "392846.91N 0002722.24W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB VALENCIA 400"
+   },
+   "BAI": {
+    "coord": "380905.40N 0033745.01W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB BAILEN 418"
+   },
+   "BEJ": {
+    "coord": "380742.24N 0075536.08W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC BEJA 115.80"
+   },
+   "BJ": {
+    "coord": "402648.84N 0033345.18W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB BARAJAS 308"
+   },
+   "BJA": {
+    "coord": "380933.49N 0075518.16W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB BEJA 376"
+   },
+   "BJZ": {
+    "coord": "384859.76N 0064153.48W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB BADAJOZ 298"
+   },
+   "BLN": {
+    "coord": "380909.00N 0033730.04W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME BAILEN 116.20"
+   },
+   "BRA": {
+    "coord": "402808.76N 0033327.14W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME BARAJAS 116.45"
+   },
+   "BV": {
+    "coord": "283605.76N 0174523.76W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "DME",
+    "name": "DME LA PALMA 112.40"
+   },
+   "BX": {
+    "coord": "283606.12N 0174524.48W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB LA PALMA 389"
+   },
+   "CA": {
+    "coord": "384332.16N 0092129.99W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CASCAIS 359"
+   },
+   "CAC": {
+    "coord": "393144.04N 0062543.86W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CACERES 380"
+   },
+   "CAS": {
+    "coord": "384453.88N 0092142.99W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CASCAIS 114.30"
+   },
+   "CB": {
+    "coord": "400938.16N 0082818.98W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB COIMBRA 426"
+   },
+   "CBA": {
+    "coord": "333117.40N 0074037.88W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CASABLANCA 116.90"
+   },
+   "CCS": {
+    "coord": "393128.21N 0062605.06W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CACERES 114.20"
+   },
+   "CDB": {
+    "coord": "375045.25N 0045041.93W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CORDOBA 112.40"
+   },
+   "CDP": {
+    "coord": "394151.72N 0032603.73E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CAPDEPERA 112.90"
+   },
+   "CEU": {
+    "coord": "355333.36N 0051819.58W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB/DME",
+    "name": "NDB/DME CEUTA 300"
+   },
+   "CJN": {
+    "coord": "402219.21N 0023240.60W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CASTEJON 115.60"
+   },
+   "CLS": {
+    "coord": "394225.92N 0005910.74W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME CALLES 117.55"
+   },
+   "CNL": {
+    "coord": "341713.92N 0063714.02W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB KENITRA 380"
+   },
+   "CNU": {
+    "coord": "344758.93N 0015358.99W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB OUJDA 371"
+   },
+   "CNZ": {
+    "coord": "313602.16N 0075751.98W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MARRAKECH 267"
+   },
+   "COR": {
+    "coord": "375033.72N 0045048.52W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CORDOBA 366"
+   },
+   "COV": {
+    "coord": "401757.11N 0072532.99W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB COVILHA 360"
+   },
+   "CP": {
+    "coord": "383832.28N 0091317.47W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CAPARICA 389"
+   },
+   "CST": {
+    "coord": "393829.04N 0025456.23E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB COSTIX 351"
+   },
+   "CTE": {
+    "coord": "402302.04N 0023122.08W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CASTEJON 362"
+   },
+   "CVT": {
+    "coord": "402204.09N 0034624.28W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB CUATRO VIENTOS 285"
+   },
+   "DKA": {
+    "coord": "234216.92N 0155558.08W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB DAKHLA 221"
+   },
+   "EAL": {
+    "coord": "385707.93N 0034525.20W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ALMAGRO 332"
+   },
+   "EBT": {
+    "coord": "393722.80N 0002819.50W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB VALENCIA 386"
+   },
+   "EEC": {
+    "coord": "371855.44N 0060004.72W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB EL COPERO 327"
+   },
+   "ESP": {
+    "coord": "382527.48N 0091108.81W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC ESPICHEL 112.50"
+   },
+   "FAR": {
+    "coord": "370031.32N 0075533.35W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB FARO 332"
+   },
+   "FIL": {
+    "coord": "383121.00N 0284109.24W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB HORTA 380"
+   },
+   "FLO": {
+    "coord": "392645.95N 0311003.72W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB FLORES 270"
+   },
+   "FRS": {
+    "coord": "392712.97N 0311237.44W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME FLORES 113.30"
+   },
+   "FTM": {
+    "coord": "393957.96N 0082935.56W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME FATIMA 113.50"
+   },
+   "FUN": {
+    "coord": "324449.21N 0164220.52W",
+    "region": "Madeira",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MADEIRA 112.20"
+   },
+   "GBR": {
+    "coord": "360834.43N 0052033.79W",
+    "region": "Gibraltar",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN GIBRALTAR 113.60"
+   },
+   "GC": {
+    "coord": "390537.68N 0280150.88W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB GRACIOSA 428"
+   },
+   "GDA": {
+    "coord": "371059.52N 0035927.28W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME GRANADA 113.40"
+   },
+   "GDV": {
+    "coord": "280437.56N 0152544.40W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME GRAN CANARIA 112.90"
+   },
+   "GE": {
+    "coord": "401159.27N 0035039.37W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB GETAFE 421"
+   },
+   "GLM": {
+    "coord": "290051.84N 0100354.00W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR",
+    "name": "VOR GOULIMINE 114.30"
+   },
+   "GM": {
+    "coord": "364335.41N 0043417.22W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MALAGA 350"
+   },
+   "GP": {
+    "coord": "384659.52N 0270647.16W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB LAJES 341"
+   },
+   "GRA": {
+    "coord": "371121.84N 0034039.76W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB GRANADA 412"
+   },
+   "HIE": {
+    "coord": "274858.32N 0175311.04W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB HIERRO 376"
+   },
+   "HIJ": {
+    "coord": "383029.15N 0050558.85W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME HINOJOSA 114.70"
+   },
+   "HNS": {
+    "coord": "383037.08N 0050639.82W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB HINOJOSA 346"
+   },
+   "HR": {
+    "coord": "274857.96N 0175311.04W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "DME",
+    "name": "DME HIERRO 113.20"
+   },
+   "HT": {
+    "coord": "383111.64N 0283746.20W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB HORTA 360"
+   },
+   "IBA": {
+    "coord": "385205.89N 0012157.28E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME IBIZA 117.80"
+   },
+   "IFR": {
+    "coord": "333001.08N 0050937.01W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB IFRANE 409"
+   },
+   "IZA": {
+    "coord": "385455.80N 0012813.48E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB IBIZA 394"
+   },
+   "JER": {
+    "coord": "365004.20N 0060058.39W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB JEREZ 433"
+   },
+   "JOA": {
+    "coord": "393352.92N 0024447.87E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME PALMA DE MALLORCA 117.70"
+   },
+   "JRZ": {
+    "coord": "364854.72N 0060135.54W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME JEREZ 113.00"
+   },
+   "KSR": {
+    "coord": "315531.08N 0042143.99W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ERRACHIDIA 293"
+   },
+   "L": {
+    "coord": "401647.64N 0034432.53W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB GETAFE 335"
+   },
+   "LAJ": {
+    "coord": "384247.88N 0270655.44W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN LAJES 110.80"
+   },
+   "LAR": {
+    "coord": "385939.48N 0090225.40W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB ARRUDA 382"
+   },
+   "LCZ": {
+    "coord": "374034.68N 0005621.40W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MURCIA/SAN JAVIER 381"
+   },
+   "LGM": {
+    "coord": "280143.32N 0171253.64W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME LA GOMERA 116.00"
+   },
+   "LIS": {
+    "coord": "385321.84N 0090946.01W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME LISBOA 114.80"
+   },
+   "LM": {
+    "coord": "384702.04N 0270615.84W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR",
+    "name": "VOR LAJES 112.30"
+   },
+   "LO": {
+    "coord": "385111.16N 0090551.00W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB LISBOA LOM 401"
+   },
+   "LPC": {
+    "coord": "274942.60N 0152555.92W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME GRAN CANARIA 115.00"
+   },
+   "LTE": {
+    "coord": "285630.84N 0133659.04W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME LANZAROTE 113.70"
+   },
+   "LZ": {
+    "coord": "285719.44N 0133643.20W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB LANZAROTE 310"
+   },
+   "LZR": {
+    "coord": "290957.60N 0133038.52W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME LANZAROTE 115.20"
+   },
+   "MA": {
+    "coord": "402402.88N 0032926.30W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MADRID 390"
+   },
+   "MAD": {
+    "coord": "324453.16N 0164223.40W",
+    "region": "Madeira",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MADEIRA 318"
+   },
+   "MAR": {
+    "coord": "370319.09N 0045623.60W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MARTIN 112.60"
+   },
+   "MBA": {
+    "coord": "264412.12N 0114004.44W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME SMARA 117.70"
+   },
+   "MEL": {
+    "coord": "351649.44N 0025729.41W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MELILLA 114.25"
+   },
+   "MGA": {
+    "coord": "364851.48N 0042210.27W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MALAGA 112.00"
+   },
+   "MGL": {
+    "coord": "374429.05N 0253502.04W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PONTA DELGADA 371"
+   },
+   "MHN": {
+    "coord": "395148.60N 0041301.88E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MENORCA 112.60"
+   },
+   "MIA": {
+    "coord": "351828.08N 0025719.87W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MELILLA 292"
+   },
+   "MIO": {
+    "coord": "384234.93N 0090235.63W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MONTIJO 322"
+   },
+   "MJV": {
+    "coord": "392606.72N 0024529.84E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME PALMA DE MALLORCA 113.30"
+   },
+   "MKS": {
+    "coord": "335241.16N 0053055.01W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR",
+    "name": "VOR MEKNES 116.30"
+   },
+   "MLG": {
+    "coord": "364043.32N 0043024.01W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME MALAGA 113.55"
+   },
+   "MLL": {
+    "coord": "351826.64N 0025719.51W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "DME",
+    "name": "DME MELILLA 117.40"
+   },
+   "MN": {
+    "coord": "395011.39N 0041247.84E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MENORCA 344"
+   },
+   "MNF": {
+    "coord": "371740.57N 0053343.70W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MORON 428"
+   },
+   "MOJ": {
+    "coord": "384231.68N 0090159.59W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN MONTIJO 110.00"
+   },
+   "MRN": {
+    "coord": "371023.52N 0053710.70W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN MORON 115.30"
+   },
+   "MTL": {
+    "coord": "395428.08N 0085301.00W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MONTE REAL 336"
+   },
+   "MTR": {
+    "coord": "394957.36N 0085324.50W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN MONTE REAL 109.60"
+   },
+   "NSA": {
+    "coord": "393352.92N 0075452.99W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC NISA 115.50"
+   },
+   "NVS": {
+    "coord": "402207.31N 0041457.91W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME NAVAS 114.95"
+   },
+   "O": {
+    "coord": "374542.48N 0004944.60W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MURCIA/SAN JAVIER 370"
+   },
+   "ORZ": {
+    "coord": "305537.92N 0065257.00W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB OUARZAZATE 384"
+   },
+   "PA": {
+    "coord": "393557.84N 0024916.25E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PALMA DE MALLORCA 308"
+   },
+   "PD": {
+    "coord": "374406.00N 0254030.00W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PONTA DELGADA 351"
+   },
+   "PDT": {
+    "coord": "401510.44N 0032052.91W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME PERALES 116.95"
+   },
+   "PI": {
+    "coord": "383329.52N 0282411.52W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PICO 420"
+   },
+   "PND": {
+    "coord": "392614.64N 0002047.26W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB VALENCIA 340"
+   },
+   "POS": {
+    "coord": "395538.64N 0030652.49E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME POLLENSA 116.40"
+   },
+   "PST": {
+    "coord": "330406.96N 0162129.88W",
+    "region": "Madeira",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PORTO SANTO 338"
+   },
+   "PTC": {
+    "coord": "392538.28N 0031524.19E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB PORTO COLOM 401"
+   },
+   "RMA": {
+    "coord": "363932.04N 0042836.26W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB MALAGA 330"
+   },
+   "RS": {
+    "coord": "402321.84N 0033344.14W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB BARAJAS 326"
+   },
+   "SFI": {
+    "coord": "321751.00N 0090954.00W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB SAFI 395"
+   },
+   "SGO": {
+    "coord": "394027.11N 0001228.10W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB SAGUNTO 356"
+   },
+   "SGR": {
+    "coord": "370502.04N 0085647.00W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME SAGRES 113.90"
+   },
+   "SMA": {
+    "coord": "365948.12N 0251032.16W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB SANTA MARIA 323"
+   },
+   "SMN": {
+    "coord": "341356.99N 0060302.02W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME SIDI SLIMANE 115.50"
+   },
+   "SNT": {
+    "coord": "330525.09N 0162102.16W",
+    "region": "Madeira",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME PORTO SANTO 114.90"
+   },
+   "SPP": {
+    "coord": "372505.15N 0054743.87W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB SEVILLA 420"
+   },
+   "SRA": {
+    "coord": "384945.12N 0092024.00W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC SINTRA 112.10"
+   },
+   "SSJ": {
+    "coord": "393334.92N 0024359.70E",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN PALMA DE MALLORCA 108.40"
+   },
+   "STO": {
+    "coord": "330431.07N 0162156.52W",
+    "region": "Madeira",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN PORTO SANTO 116.30"
+   },
+   "SVL": {
+    "coord": "372540.43N 0054543.96W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME SEVILLA 113.70"
+   },
+   "TAB": {
+    "coord": "385644.88N 0015148.60W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN ALBACETE 108.00"
+   },
+   "TBC": {
+    "coord": "385329.77N 0064907.25W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN TALAVERA 108.80"
+   },
+   "TEO": {
+    "coord": "395822.08N 0042045.89W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB TOLEDO 385"
+   },
+   "TES": {
+    "coord": "280316.92N 0163346.08W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB TENERIFE SUR 317"
+   },
+   "TFN": {
+    "coord": "283212.48N 0161607.68W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME TENERIFE NORTE 117.70"
+   },
+   "TFS": {
+    "coord": "280008.64N 0164116.44W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME TENERIFE SUR 116.40"
+   },
+   "TGN": {
+    "coord": "275524.24N 0152322.20W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN GRAN CANARIA 115.60"
+   },
+   "TGR": {
+    "coord": "370757.00N 0033801.68W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN ARMILLA 113.10"
+   },
+   "TJZ": {
+    "coord": "402956.04N 0032643.76W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN TORREJON 112.50"
+   },
+   "TLD": {
+    "coord": "395810.21N 0042014.89W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME TOLEDO 113.20"
+   },
+   "TLZ": {
+    "coord": "285641.28N 0133625.20W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN LANZAROTE 114.70"
+   },
+   "TNA": {
+    "coord": "282552.32N 0111017.04W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB TAN TAN 274"
+   },
+   "TNG": {
+    "coord": "354344.04N 0055326.99W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME TANGER 115.90"
+   },
+   "TOB": {
+    "coord": "394659.52N 0032831.40W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB VILLATOBAS 403"
+   },
+   "TRL": {
+    "coord": "375703.96N 0011345.01W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN ALCANTARILLA 116.60"
+   },
+   "TRM": {
+    "coord": "384537.44N 0270533.36W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN TERMINAL 116.20"
+   },
+   "TUN": {
+    "coord": "353656.88N 0051645.01W",
+    "region": "Maroc",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB SANIAT RMEL 388"
+   },
+   "TX": {
+    "coord": "282709.00N 0161527.72W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB TENERIFE NORTE 410"
+   },
+   "VAB": {
+    "coord": "385637.69N 0020009.61W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME ALBACETE 115.80"
+   },
+   "VBZ": {
+    "coord": "385323.64N 0064856.70W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME BADAJOZ 116.80"
+   },
+   "VFA": {
+    "coord": "370048.60N 0075830.04W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME FARO 112.80"
+   },
+   "VFL": {
+    "coord": "383109.85N 0283724.96W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC HORTA 112.70"
+   },
+   "VGE": {
+    "coord": "401721.12N 0034337.56W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR",
+    "name": "VOR GETAFE 112.50"
+   },
+   "VJF": {
+    "coord": "361449.92N 0055818.73W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME VEJER 117.80"
+   },
+   "VLC": {
+    "coord": "392908.16N 0002858.96W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME VALENCIA 116.10"
+   },
+   "VMG": {
+    "coord": "375045.96N 0254529.16W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VORTAC",
+    "name": "VORTAC SAO MIGUEL 114.50"
+   },
+   "VR": {
+    "coord": "275124.48N 0152511.64W",
+    "region": "Canarias",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "NDB",
+    "name": "NDB GRAN CANARIA 365"
+   },
+   "VSJ": {
+    "coord": "374647.64N 0004846.40W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "TACAN",
+    "name": "TACAN MURCIA/SAN JAVIER 113.00"
+   },
+   "VSM": {
+    "coord": "365746.08N 0250959.04W",
+    "region": "Lisboa",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME SANTA MARIA 113.70"
+   },
+   "VTB": {
+    "coord": "394650.88N 0032750.51W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME VILLATOBAS 112.70"
+   },
+   "YES": {
+    "coord": "382138.89N 0022109.90W",
+    "region": "Sevilla/Madrid",
+    "source": "OurAirports navaids",
+    "navaid": true,
+    "navaid_type": "VOR/DME",
+    "name": "VOR/DME YESTE 115.20"
    }
   }
  },
@@ -7401,5 +8745,3498 @@
   ]
  },
  "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
- "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added.",
+ "airports": [
+  {
+   "id": "EH-0001",
+   "name": "Tifariti Airstrip",
+   "type": "small",
+   "coord": "260904.54N 0103351.28W",
+   "elev_ft": 1624,
+   "country": "EH",
+   "city": "Tifariti",
+   "runways": []
+  },
+  {
+   "id": "EH-0005",
+   "name": "Oum Dreyga Airfield",
+   "type": "small",
+   "coord": "240530.12N 0131840.68W",
+   "elev_ft": 948,
+   "country": "EH",
+   "city": "Oum Dreyga",
+   "runways": []
+  },
+  {
+   "id": "EH-0007",
+   "name": "Al Mahbes UN Airstrip",
+   "type": "small",
+   "coord": "272507.56N 0091017.46W",
+   "country": "EH",
+   "city": "Al Mahbes",
+   "runways": []
+  },
+  {
+   "id": "EH-0008",
+   "name": "Al Farssia Airstrip",
+   "type": "small",
+   "coord": "271444.45N 0092823.23W",
+   "country": "EH",
+   "city": "Al Farssia",
+   "runways": []
+  },
+  {
+   "id": "EH-0011",
+   "name": "Boukraa Airport",
+   "type": "small",
+   "coord": "262135.57N 0125056.87W",
+   "country": "EH",
+   "city": "Boukraa",
+   "runways": []
+  },
+  {
+   "id": "EH-0013",
+   "name": "Agounit Airport",
+   "type": "small",
+   "coord": "221212.35N 0130845.92W",
+   "country": "EH",
+   "city": "Agounit",
+   "runways": []
+  },
+  {
+   "id": "EH-0016",
+   "name": "Aousserd MINURSO Airstrip",
+   "type": "small",
+   "coord": "223459.16N 0142118.18W",
+   "country": "EH",
+   "city": "Aousserd",
+   "runways": []
+  },
+  {
+   "id": "EH-0020",
+   "name": "Guerguerat Airport",
+   "type": "small",
+   "coord": "212329.40N 0165724.59W",
+   "country": "EH",
+   "city": "Guerguerat",
+   "runways": []
+  },
+  {
+   "id": "EH-0024",
+   "name": "Tarfaya Airport",
+   "type": "small",
+   "coord": "275655.32N 0125459.76W",
+   "elev_ft": 20,
+   "country": "EH",
+   "city": "Tarfaya",
+   "runways": []
+  },
+  {
+   "id": "EH-0026",
+   "name": "Al Mahbes Airstrip",
+   "type": "small",
+   "coord": "272434.90N 0090422.86W",
+   "elev_ft": 1520,
+   "country": "EH",
+   "city": "Al Mahbes",
+   "runways": []
+  },
+  {
+   "id": "ES-0232",
+   "name": "Jarde Airport",
+   "type": "small",
+   "coord": "282328.27N 0135858.68W",
+   "elev_ft": 515,
+   "country": "ES",
+   "city": "Antigua",
+   "runways": []
+  },
+  {
+   "id": "ES-0355",
+   "name": "Devils of the Air RC Model Club Airport",
+   "type": "small",
+   "coord": "290157.77N 0133554.70W",
+   "country": "ES",
+   "city": "Teguise (Lanzarote)",
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02"
+      },
+      {
+       "id": "20"
+      }
+     ],
+     "length_ft": 550,
+     "surface": "Asphalt"
+    }
+   ]
+  },
+  {
+   "id": "GCFV",
+   "name": "Fuerteventura Airport",
+   "type": "large",
+   "coord": "282709.72N 0135149.68W",
+   "elev_ft": 85,
+   "country": "ES",
+   "iata": "FUE",
+   "city": "El Matorral",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "01/19",
+     "ends": [
+      {
+       "id": "01",
+       "coord": "282558.32N 0135151.83W",
+       "heading_true": 2.0,
+       "elev_ft": 37,
+       "displaced_ft": 3285
+      },
+      {
+       "id": "19",
+       "coord": "282748.80N 0135148.22W",
+       "heading_true": 182.0,
+       "elev_ft": 75,
+       "displaced_ft": 1510
+      }
+     ],
+     "length_ft": 11220,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCGM",
+   "name": "La Gomera Airport",
+   "type": "small",
+   "coord": "280146.56N 0171252.56W",
+   "elev_ft": 716,
+   "country": "ES",
+   "iata": "GMZ",
+   "city": "Alajero, La Gomera Island",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "280142.96N 0171319.56W",
+       "heading_true": 81.2,
+       "elev_ft": 716
+      },
+      {
+       "id": "27",
+       "coord": "280150.52N 0171225.56W",
+       "heading_true": 261.2,
+       "elev_ft": 712
+      }
+     ],
+     "length_ft": 4921,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCHI",
+   "name": "El Hierro Airport",
+   "type": "medium",
+   "coord": "274853.28N 0175313.56W",
+   "elev_ft": 103,
+   "country": "ES",
+   "iata": "VDE",
+   "city": "El Hierro Island",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "16/34",
+     "ends": [
+      {
+       "id": "16",
+       "coord": "274911.28N 0175324.00W",
+       "heading_true": 152.6,
+       "elev_ft": 71
+      },
+      {
+       "id": "34",
+       "coord": "274835.28N 0175302.76W",
+       "heading_true": 332.6,
+       "elev_ft": 103
+      }
+     ],
+     "length_ft": 4101,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCLA",
+   "name": "La Palma Airport",
+   "type": "medium",
+   "coord": "283735.40N 0174520.16W",
+   "elev_ft": 107,
+   "country": "ES",
+   "iata": "SPC",
+   "city": "Sta Cruz de la Palma, La Palma Island",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "36/18",
+     "ends": [
+      {
+       "id": "36",
+       "coord": "283659.76N 0174519.44W",
+       "heading_true": 359.0,
+       "elev_ft": 103
+      },
+      {
+       "id": "18",
+       "coord": "283811.04N 0174520.88W",
+       "heading_true": 179.0,
+       "elev_ft": 65
+      }
+     ],
+     "length_ft": 7218,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCLB",
+   "name": "El Berriel Aeroc Airport",
+   "type": "small",
+   "coord": "274657.00N 0153025.92W",
+   "elev_ft": 20,
+   "country": "ES",
+   "city": "Gran Canaria Island",
+   "runways": []
+  },
+  {
+   "id": "GCLP",
+   "name": "Gran Canaria Airport",
+   "type": "large",
+   "coord": "275554.84N 0152311.76W",
+   "elev_ft": 78,
+   "country": "ES",
+   "iata": "LPA",
+   "city": "Gran Canaria Island",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03L/21R",
+     "ends": [
+      {
+       "id": "03L",
+       "coord": "275508.04N 0152332.28W",
+       "heading_true": 22.0,
+       "elev_ft": 78
+      },
+      {
+       "id": "21R",
+       "coord": "275641.64N 0152250.88W",
+       "heading_true": 202.0,
+       "elev_ft": 33
+      }
+     ],
+     "length_ft": 10171,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "03R/21L",
+     "ends": [
+      {
+       "id": "03R",
+       "coord": "275505.52N 0152325.44W",
+       "heading_true": 22.0,
+       "elev_ft": 69
+      },
+      {
+       "id": "21L",
+       "coord": "275639.12N 0152243.68W",
+       "heading_true": 202.0,
+       "elev_ft": 27
+      }
+     ],
+     "length_ft": 10171,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCRR",
+   "name": "César Manrique-Lanzarote Airport",
+   "type": "large",
+   "coord": "285643.80N 0133618.72W",
+   "elev_ft": 46,
+   "country": "ES",
+   "iata": "ACE",
+   "city": "San Bartolomé",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "285608.88N 0133638.88W",
+       "heading_true": 27.0,
+       "elev_ft": 18,
+       "displaced_ft": 285
+      },
+      {
+       "id": "21",
+       "coord": "285718.36N 0133558.56W",
+       "heading_true": 207.0,
+       "elev_ft": 47
+      }
+     ],
+     "length_ft": 7874,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCTS",
+   "name": "Tenerife Sur Airport",
+   "type": "large",
+   "coord": "280240.20N 0163421.00W",
+   "elev_ft": 209,
+   "country": "ES",
+   "iata": "TFS",
+   "city": "Tenerife",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "280221.12N 0163515.36W",
+       "heading_true": 68.6,
+       "elev_ft": 188
+      },
+      {
+       "id": "25",
+       "coord": "280258.92N 0163326.28W",
+       "heading_true": 248.6,
+       "elev_ft": 209
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GCXO",
+   "name": "Tenerife Norte-Ciudad de La Laguna Airport",
+   "type": "large",
+   "coord": "282857.91N 0162030.15W",
+   "elev_ft": 2076,
+   "country": "ES",
+   "iata": "TFN",
+   "city": "Tenerife",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "282915.92N 0162124.87W",
+       "heading_true": 111.0,
+       "elev_ft": 2062
+      },
+      {
+       "id": "30",
+       "coord": "282839.71N 0161935.71W",
+       "heading_true": 291.0,
+       "elev_ft": 2007
+      }
+     ],
+     "length_ft": 10404,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GEML",
+   "name": "Melilla Airport",
+   "type": "medium",
+   "coord": "351647.28N 0025722.54W",
+   "elev_ft": 156,
+   "country": "ES",
+   "iata": "MLN",
+   "city": "Melilla",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "15/33",
+     "ends": [
+      {
+       "id": "15",
+       "coord": "351709.24N 0025740.25W",
+       "heading_true": 146.0,
+       "elev_ft": 156,
+       "displaced_ft": 755
+      },
+      {
+       "id": "33",
+       "coord": "351629.64N 0025708.06W",
+       "heading_true": 326.0,
+       "elev_ft": 133
+      }
+     ],
+     "length_ft": 4701,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMAA",
+   "name": "Inezgane Airport",
+   "type": "small",
+   "coord": "302253.04N 0093246.72W",
+   "elev_ft": 89,
+   "country": "MA",
+   "city": "Inezgane",
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "302259.16N 0093340.93W",
+       "heading_true": 97.5,
+       "elev_ft": 75
+      },
+      {
+       "id": "28",
+       "coord": "302246.56N 0093152.39W",
+       "heading_true": 277.5,
+       "elev_ft": 85
+      }
+     ],
+     "length_ft": 9547,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMAD",
+   "name": "Al Massira Airport",
+   "type": "large",
+   "coord": "301920.92N 0092443.21W",
+   "elev_ft": 250,
+   "country": "MA",
+   "iata": "AGA",
+   "city": "Agadir (Temsia)",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "301922.90N 0092541.38W",
+       "heading_true": 91.0,
+       "elev_ft": 197
+      },
+      {
+       "id": "27",
+       "coord": "301920.05N 0092341.62W",
+       "heading_true": 271.0,
+       "elev_ft": 253
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMAT",
+   "name": "Tan Tan Airport",
+   "type": "medium",
+   "coord": "282651.23N 0110942.30W",
+   "elev_ft": 653,
+   "country": "MA",
+   "iata": "TTA",
+   "city": "Tan Tan",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "282624.72N 0110957.96W",
+       "heading_true": 27.8,
+       "elev_ft": 653
+      },
+      {
+       "id": "21",
+       "coord": "282722.32N 0110923.76W",
+       "heading_true": 207.8,
+       "elev_ft": 653
+      }
+     ],
+     "length_ft": 6562,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMAZ",
+   "name": "Zagora Airport",
+   "type": "large",
+   "coord": "301556.84N 0055138.91W",
+   "elev_ft": 2414,
+   "country": "MA",
+   "iata": "OZG",
+   "city": "Zagora",
+   "scheduled": true,
+   "runways": []
+  },
+  {
+   "id": "GMFA",
+   "name": "Ouezzane Airport",
+   "type": "small",
+   "coord": "344736.10N 0053809.55W",
+   "elev_ft": 571,
+   "country": "MA",
+   "city": "Beni Malek",
+   "runways": []
+  },
+  {
+   "id": "GMFB",
+   "name": "Bouarfa Airport",
+   "type": "medium",
+   "coord": "323051.50N 0015859.00W",
+   "elev_ft": 3630,
+   "country": "MA",
+   "iata": "UAR",
+   "city": "Bouarfa",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "323051.54N 0015958.61W",
+       "elev_ft": 3642
+      },
+      {
+       "id": "27",
+       "coord": "323051.59N 0015756.03W",
+       "elev_ft": 3642
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFF",
+   "name": "Fes Saïss International Airport",
+   "type": "large",
+   "coord": "335538.28N 0045840.66W",
+   "elev_ft": 1900,
+   "country": "MA",
+   "iata": "FEZ",
+   "city": "Saïss",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "335538.64N 0045942.76W",
+       "heading_true": 90.0,
+       "elev_ft": 1854
+      },
+      {
+       "id": "27",
+       "coord": "335538.28N 0045738.38W",
+       "heading_true": 270.0,
+       "elev_ft": 1890,
+       "displaced_ft": 820
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFI",
+   "name": "Ifran Airport",
+   "type": "small",
+   "coord": "333019.08N 0050910.44W",
+   "elev_ft": 5459,
+   "country": "MA",
+   "city": "Ifran",
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "332948.12N 0050928.04W",
+       "heading_true": 25.0
+      },
+      {
+       "id": "21",
+       "coord": "333050.04N 0050852.87W",
+       "heading_true": 205.0
+      }
+     ],
+     "length_ft": 6920,
+     "width_ft": 115,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFK",
+   "name": "Moulay Ali Cherif Airport",
+   "type": "medium",
+   "coord": "315651.00N 0042353.99W",
+   "elev_ft": 3428,
+   "country": "MA",
+   "iata": "ERH",
+   "city": "Errachidia",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "13/31",
+     "ends": [
+      {
+       "id": "13",
+       "coord": "315723.76N 0042453.75W",
+       "heading_true": 125.1,
+       "elev_ft": 3428
+      },
+      {
+       "id": "31",
+       "coord": "315623.64N 0042313.13W",
+       "heading_true": 305.1,
+       "elev_ft": 3363
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFM",
+   "name": "Bassatine Airport",
+   "type": "medium",
+   "coord": "335244.76N 0053054.43W",
+   "elev_ft": 1890,
+   "country": "MA",
+   "iata": "MEK",
+   "city": "Meknes",
+   "runways": [
+    {
+     "id": "08/26",
+     "ends": [
+      {
+       "id": "08",
+       "coord": "335256.28N 0053148.94W",
+       "heading_true": 77.4,
+       "elev_ft": 1814
+      },
+      {
+       "id": "26",
+       "coord": "335309.23N 0053033.84W",
+       "heading_true": 257.4,
+       "elev_ft": 1814
+      }
+     ],
+     "length_ft": 6420,
+     "width_ft": 164,
+     "surface": "ASP"
+    },
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "335219.92N 0053131.55W",
+       "heading_true": 83.0,
+       "elev_ft": 1870,
+       "displaced_ft": 495
+      },
+      {
+       "id": "27",
+       "coord": "335230.00N 0052942.00W",
+       "heading_true": 263.0,
+       "elev_ft": 1890
+      }
+     ],
+     "length_ft": 9252,
+     "width_ft": 164,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFO",
+   "name": "Oujda Angads Airport",
+   "type": "large",
+   "coord": "344722.41N 0015533.75W",
+   "elev_ft": 1535,
+   "country": "MA",
+   "iata": "OUD",
+   "city": "Ahl Angad",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "06/24",
+     "ends": [
+      {
+       "id": "06",
+       "coord": "344647.64N 0015616.22W",
+       "heading_true": 58.0,
+       "elev_ft": 1535
+      },
+      {
+       "id": "24",
+       "coord": "344739.84N 0015436.47W",
+       "heading_true": 238.0,
+       "elev_ft": 1493
+      }
+     ],
+     "length_ft": 9843,
+     "width_ft": 148,
+     "surface": "BIT"
+    },
+    {
+     "id": "13/31",
+     "ends": [
+      {
+       "id": "13",
+       "coord": "344835.28N 0015707.81W",
+       "heading_true": 132.0,
+       "elev_ft": 1486
+      },
+      {
+       "id": "31",
+       "coord": "344731.91N 0015539.00W",
+       "heading_true": 312.0,
+       "elev_ft": 1493
+      }
+     ],
+     "length_ft": 9843,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMFZ",
+   "name": "Taza Airport",
+   "type": "small",
+   "coord": "341354.79N 0035649.24W",
+   "elev_ft": 1890,
+   "country": "MA",
+   "city": "Taza",
+   "runways": []
+  },
+  {
+   "id": "GMMA",
+   "name": "Smara Airport",
+   "type": "medium",
+   "coord": "264355.15N 0114101.16W",
+   "elev_ft": 350,
+   "country": "EH",
+   "iata": "SMW",
+   "city": "Smara",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "16/34",
+     "ends": [
+      {
+       "id": "16",
+       "coord": "264436.96N 0114130.84W",
+       "heading_true": 152.0
+      },
+      {
+       "id": "34",
+       "coord": "264311.64N 0114039.00W",
+       "heading_true": 332.0
+      }
+     ],
+     "length_ft": 9843,
+     "width_ft": 100,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMB",
+   "name": "Ben Slimane Airport",
+   "type": "small",
+   "coord": "333919.44N 0071317.22W",
+   "elev_ft": 627,
+   "country": "MA",
+   "iata": "GMD",
+   "city": "Ben Slimane",
+   "runways": [
+    {
+     "id": "14/32",
+     "ends": [
+      {
+       "id": "14",
+       "coord": "333958.32N 0071354.48W",
+       "heading_true": 141.0,
+       "elev_ft": 526
+      },
+      {
+       "id": "32",
+       "coord": "333840.56N 0071239.92W",
+       "heading_true": 321.0,
+       "elev_ft": 618
+      }
+     ],
+     "length_ft": 10085,
+     "width_ft": 150,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMD",
+   "name": "Beni Mellal Airport",
+   "type": "large",
+   "coord": "322406.82N 0061857.26W",
+   "elev_ft": 1694,
+   "country": "MA",
+   "iata": "BEM",
+   "city": "Oulad Yaich",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "05/23",
+     "ends": [
+      {
+       "id": "05",
+       "coord": "322338.24N 0061931.59W",
+       "elev_ft": 1673
+      },
+      {
+       "id": "23",
+       "coord": "322434.86N 0061823.89W",
+       "elev_ft": 1673
+      }
+     ],
+     "length_ft": 8169,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMME",
+   "name": "Rabat-Salé Airport",
+   "type": "large",
+   "coord": "340305.39N 0064505.47W",
+   "elev_ft": 276,
+   "country": "MA",
+   "iata": "RBA",
+   "city": "Rabat",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "340216.79N 0064541.00W",
+       "heading_true": 33.0,
+       "elev_ft": 265
+      },
+      {
+       "id": "21",
+       "coord": "340353.64N 0064429.94W",
+       "heading_true": 213.0,
+       "elev_ft": 238
+      }
+     ],
+     "length_ft": 11483,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMH",
+   "name": "Dakhla Airport",
+   "type": "large",
+   "coord": "234305.88N 0155555.20W",
+   "elev_ft": 36,
+   "country": "EH",
+   "iata": "VIL",
+   "city": "Dakhla",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "234220.88N 0155615.72W",
+       "heading_true": 22.7,
+       "elev_ft": 36
+      },
+      {
+       "id": "21",
+       "coord": "234350.88N 0155534.68W",
+       "heading_true": 202.7,
+       "elev_ft": 27
+      }
+     ],
+     "length_ft": 9842,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMI",
+   "name": "Essaouira-Mogador Airport",
+   "type": "medium",
+   "coord": "312351.00N 0094054.01W",
+   "elev_ft": 384,
+   "country": "MA",
+   "iata": "ESU",
+   "city": "Essaouira",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "16/34",
+     "ends": [
+      {
+       "id": "16",
+       "coord": "312436.42N 0094116.64W",
+       "heading_true": 159.0,
+       "elev_ft": 351
+      },
+      {
+       "id": "34",
+       "coord": "312317.68N 0094040.89W",
+       "heading_true": 339.0,
+       "elev_ft": 421
+      }
+     ],
+     "length_ft": 8553,
+     "width_ft": 148,
+     "surface": "BIT"
+    }
+   ]
+  },
+  {
+   "id": "GMML",
+   "name": "Laayoune Hassan I International Airport",
+   "type": "large",
+   "coord": "270832.88N 0131329.81W",
+   "elev_ft": 207,
+   "country": "EH",
+   "iata": "EUN",
+   "city": "El Aaiún",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02",
+       "coord": "270748.72N 0131407.44W",
+       "heading_true": 16.0,
+       "elev_ft": 223
+      },
+      {
+       "id": "20",
+       "coord": "270912.96N 0131339.36W",
+       "heading_true": 196.0,
+       "elev_ft": 217
+      }
+     ],
+     "length_ft": 8861,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "04/22",
+     "ends": [
+      {
+       "id": "04",
+       "coord": "270808.88N 0131333.24W",
+       "heading_true": 32.0,
+       "elev_ft": 202
+      },
+      {
+       "id": "22",
+       "coord": "270918.00N 0131245.36W",
+       "heading_true": 212.0,
+       "elev_ft": 202
+      }
+     ],
+     "length_ft": 8202,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMN",
+   "name": "Mohammed V International Airport",
+   "type": "large",
+   "coord": "332203.00N 0073523.89W",
+   "elev_ft": 656,
+   "country": "MA",
+   "iata": "CMN",
+   "city": "Casablanca",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "17L/35R",
+     "ends": [
+      {
+       "id": "17L",
+       "coord": "332302.40N 0073536.67W",
+       "heading_true": 164.0,
+       "elev_ft": 633
+      },
+      {
+       "id": "35R",
+       "coord": "332106.48N 0073456.96W",
+       "heading_true": 344.0,
+       "elev_ft": 656
+      }
+     ],
+     "length_ft": 12205,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "17R/35L",
+     "ends": [
+      {
+       "id": "17R",
+       "coord": "332259.15N 0073550.75W",
+       "heading_true": 164.0,
+       "elev_ft": 636
+      },
+      {
+       "id": "35L",
+       "coord": "332103.24N 0073511.11W",
+       "heading_true": 344.0,
+       "elev_ft": 656
+      }
+     ],
+     "length_ft": 12205,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMO",
+   "name": "Taroudant Airport",
+   "type": "small",
+   "coord": "303012.55N 0084917.58W",
+   "elev_ft": 869,
+   "country": "MA",
+   "city": "Taroudant",
+   "runways": []
+  },
+  {
+   "id": "GMMT",
+   "name": "Casablanca Tit Mellil Airport",
+   "type": "small",
+   "coord": "333551.00N 0072754.00W",
+   "elev_ft": 322,
+   "country": "MA",
+   "city": "Casablanca",
+   "runways": [
+    {
+     "id": "18/36",
+     "ends": [
+      {
+       "id": "18"
+      },
+      {
+       "id": "36"
+      }
+     ],
+     "length_ft": 3687,
+     "width_ft": 50,
+     "surface": "asphalt"
+    }
+   ]
+  },
+  {
+   "id": "GMMW",
+   "name": "Nador Al Aaroui International Airport",
+   "type": "large",
+   "coord": "345919.68N 0030141.56W",
+   "elev_ft": 574,
+   "country": "MA",
+   "iata": "NDR",
+   "city": "Al Aaroui",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "08/26",
+     "ends": [
+      {
+       "id": "08",
+       "coord": "345909.60N 0030239.41W",
+       "heading_true": 78.0,
+       "elev_ft": 594
+      },
+      {
+       "id": "26",
+       "coord": "345929.76N 0030043.67W",
+       "heading_true": 258.0,
+       "elev_ft": 570
+      }
+     ],
+     "length_ft": 9842,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMX",
+   "name": "Marrakesh Menara Airport",
+   "type": "large",
+   "coord": "313617.31N 0080208.84W",
+   "elev_ft": 1545,
+   "country": "MA",
+   "iata": "RAK",
+   "city": "Marrakesh",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "313630.24N 0080309.14W",
+       "heading_true": 96.0,
+       "elev_ft": 1506,
+       "displaced_ft": 918
+      },
+      {
+       "id": "28",
+       "coord": "313619.80N 0080111.96W",
+       "heading_true": 276.0,
+       "elev_ft": 1545
+      }
+     ],
+     "length_ft": 10170,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMMY",
+   "name": "Kenitra Air Base",
+   "type": "medium",
+   "coord": "341756.04N 0063545.17W",
+   "elev_ft": 16,
+   "country": "MA",
+   "iata": "NNA",
+   "city": "Kenitra",
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "341719.32N 0063541.14W",
+       "heading_true": 19.0,
+       "elev_ft": 13
+      },
+      {
+       "id": "21",
+       "coord": "341815.47N 0063517.92W",
+       "heading_true": 199.0,
+       "elev_ft": 13
+      }
+     ],
+     "length_ft": 6035,
+     "width_ft": 150,
+     "surface": "ASP"
+    },
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "341747.03N 0063643.06W",
+       "heading_true": 63.0,
+       "elev_ft": 16
+      },
+      {
+       "id": "25",
+       "coord": "341823.40N 0063518.20W",
+       "heading_true": 243.0,
+       "elev_ft": 12
+      }
+     ],
+     "length_ft": 7995,
+     "width_ft": 150,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "GMMZ",
+   "name": "Ouarzazate International Airport",
+   "type": "large",
+   "coord": "305620.76N 0065433.95W",
+   "elev_ft": 3782,
+   "country": "MA",
+   "iata": "OZZ",
+   "city": "Ouarzazate",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "305642.72N 0065524.38W",
+       "heading_true": 116.8,
+       "elev_ft": 3782
+      },
+      {
+       "id": "30",
+       "coord": "305558.80N 0065343.84W",
+       "heading_true": 296.8,
+       "elev_ft": 3710
+      }
+     ],
+     "length_ft": 9842,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMSL",
+   "name": "Sidi Slimane Airport",
+   "type": "small",
+   "coord": "341350.15N 0060300.50W",
+   "elev_ft": 179,
+   "country": "MA",
+   "city": "Sidi Slimane",
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "341329.99N 0060403.50W",
+       "heading_true": 72.0,
+       "elev_ft": 174
+      },
+      {
+       "id": "25",
+       "coord": "341410.68N 0060157.97W",
+       "heading_true": 252.0,
+       "elev_ft": 162
+      }
+     ],
+     "length_ft": 11302,
+     "width_ft": 140,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMTA",
+   "name": "Cherif Al Idrissi Airport",
+   "type": "medium",
+   "coord": "351037.56N 0035022.27W",
+   "elev_ft": 95,
+   "country": "MA",
+   "iata": "AHU",
+   "city": "Al Hoceima",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "17/35",
+     "ends": [
+      {
+       "id": "17",
+       "coord": "351118.60N 0035028.75W",
+       "heading_true": 173.0,
+       "elev_ft": 21
+      },
+      {
+       "id": "35",
+       "coord": "350957.96N 0035016.04W",
+       "heading_true": 353.0,
+       "elev_ft": 96
+      }
+     ],
+     "length_ft": 10511,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "GMTN",
+   "name": "Sania Ramel Airport",
+   "type": "large",
+   "coord": "353539.48N 0051912.07W",
+   "elev_ft": 10,
+   "country": "MA",
+   "iata": "TTU",
+   "city": "Tétouan",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "353521.84N 0051943.35W",
+       "elev_ft": 11
+      },
+      {
+       "id": "25",
+       "coord": "353607.85N 0051745.51W",
+       "elev_ft": 11
+      }
+     ],
+     "length_ft": 10784,
+     "width_ft": 148,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "GMTT",
+   "name": "Tangier Ibn Battuta Airport",
+   "type": "large",
+   "coord": "354354.27N 0055517.25W",
+   "elev_ft": 62,
+   "country": "MA",
+   "iata": "TNG",
+   "city": "Tangier",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "354359.88N 0055625.12W",
+       "heading_true": 96.0,
+       "elev_ft": 20
+      },
+      {
+       "id": "28",
+       "coord": "354348.00N 0055406.55W",
+       "heading_true": 276.0,
+       "elev_ft": 62,
+       "displaced_ft": 1640
+      }
+     ],
+     "length_ft": 11483,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEAB",
+   "name": "Albacete Airport / Los Llanos Air Base",
+   "type": "medium",
+   "coord": "385654.61N 0015148.67W",
+   "elev_ft": 2302,
+   "country": "ES",
+   "iata": "ABC",
+   "city": "Albacete",
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "385652.81N 0015244.62W",
+       "heading_true": 87.4,
+       "elev_ft": 2281
+      },
+      {
+       "id": "27",
+       "coord": "385656.76N 0015052.58W",
+       "heading_true": 267.4,
+       "elev_ft": 2302
+      }
+     ],
+     "length_ft": 8858,
+     "width_ft": 197,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEAM",
+   "name": "Almería Airport",
+   "type": "medium",
+   "coord": "365038.04N 0022212.36W",
+   "elev_ft": 70,
+   "country": "ES",
+   "iata": "LEI",
+   "city": "Almería",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "365022.92N 0022314.14W",
+       "heading_true": 73.0,
+       "elev_ft": 26,
+       "displaced_ft": 492
+      },
+      {
+       "id": "25",
+       "coord": "365053.16N 0022110.58W",
+       "heading_true": 253.0,
+       "elev_ft": 70
+      }
+     ],
+     "length_ft": 10499,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEAX",
+   "name": "La Axarquía-Leoni Benabu Airfield",
+   "type": "small",
+   "coord": "364806.00N 0040808.00W",
+   "elev_ft": 118,
+   "country": "ES",
+   "city": "Málaga",
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "364807.89N 0040814.12W",
+       "heading_true": 123.0,
+       "elev_ft": 115,
+       "displaced_ft": 1377
+      },
+      {
+       "id": "30",
+       "coord": "364757.05N 0040752.16W",
+       "heading_true": 303.0,
+       "elev_ft": 131,
+       "displaced_ft": 174
+      }
+     ],
+     "length_ft": 3146,
+     "width_ft": 65,
+     "surface": "asphalt"
+    }
+   ]
+  },
+  {
+   "id": "LEBA",
+   "name": "Córdoba Airport",
+   "type": "medium",
+   "coord": "375031.20N 0045055.97W",
+   "elev_ft": 297,
+   "country": "ES",
+   "iata": "ODB",
+   "city": "Córdoba",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "coord": "375003.97N 0045114.96W",
+       "heading_true": 29.0,
+       "elev_ft": 292
+      },
+      {
+       "id": "21",
+       "coord": "375107.57N 0045030.60W",
+       "heading_true": 209.0,
+       "elev_ft": 304,
+       "displaced_ft": 656
+      }
+     ],
+     "length_ft": 7352,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEBE",
+   "name": "Beas de Segura Airfield",
+   "type": "small",
+   "coord": "381619.02N 0025710.49W",
+   "elev_ft": 1780,
+   "country": "ES",
+   "city": "Jaén",
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "381631.19N 0025728.80W",
+       "heading_true": 88.0
+      },
+      {
+       "id": "27",
+       "coord": "381632.88N 0025629.22W",
+       "heading_true": 268.0
+      }
+     ],
+     "length_ft": 4757,
+     "width_ft": 98,
+     "surface": "ASP"
+    },
+    {
+     "id": "15/33",
+     "ends": [
+      {
+       "id": "15",
+       "coord": "381640.44N 0025654.20W",
+       "heading_true": 147.6
+      },
+      {
+       "id": "33",
+       "coord": "381619.93N 0025637.68W",
+       "heading_true": 327.6
+      }
+     ],
+     "length_ft": 2460,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEBZ",
+   "name": "Badajoz Airport",
+   "type": "medium",
+   "coord": "385328.68N 0064916.79W",
+   "elev_ft": 609,
+   "country": "ES",
+   "iata": "BJZ",
+   "city": "Badajoz",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "13/31",
+     "ends": [
+      {
+       "id": "13",
+       "coord": "385355.68N 0065004.63W",
+       "heading_true": 126.0,
+       "elev_ft": 579
+      },
+      {
+       "id": "31",
+       "coord": "385301.68N 0064828.40W",
+       "heading_true": 306.0,
+       "elev_ft": 609
+      }
+     ],
+     "length_ft": 9350,
+     "width_ft": 197,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LECT",
+   "name": "El Castaño Airfield",
+   "type": "small",
+   "coord": "390048.97N 0042313.71W",
+   "elev_ft": 2116,
+   "country": "ES",
+   "city": "Luciana",
+   "runways": [
+    {
+     "id": "14/32",
+     "ends": [
+      {
+       "id": "14",
+       "coord": "390104.44N 0042146.80W",
+       "heading_true": 133.0,
+       "displaced_ft": 217
+      },
+      {
+       "id": "32",
+       "coord": "390033.48N 0042252.32W",
+       "heading_true": 313.0,
+       "displaced_ft": 217
+      }
+     ],
+     "length_ft": 5036,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEDE",
+   "name": "Córdoba-Villarrubia Airfield",
+   "type": "small",
+   "coord": "375011.88N 0045347.13W",
+   "elev_ft": 307,
+   "country": "ES",
+   "city": "Córdoba",
+   "runways": [
+    {
+     "id": "16/34",
+     "ends": [
+      {
+       "id": "16"
+      },
+      {
+       "id": "34"
+      }
+     ],
+     "length_ft": 214,
+     "surface": "compacted soil"
+    }
+   ]
+  },
+  {
+   "id": "LEEM",
+   "name": "El Manantío Airfield",
+   "type": "small",
+   "coord": "384639.03N 0065928.05W",
+   "elev_ft": 876,
+   "country": "ES",
+   "city": "Badajoz",
+   "runways": []
+  },
+  {
+   "id": "LEGA",
+   "name": "Armilla Air Base",
+   "type": "medium",
+   "coord": "370759.53N 0033808.48W",
+   "elev_ft": 2297,
+   "country": "ES",
+   "city": "Armilla",
+   "runways": [
+    {
+     "id": "18/36",
+     "ends": [
+      {
+       "id": "18",
+       "coord": "370820.76N 0033807.51W",
+       "heading_true": 181.4,
+       "elev_ft": 2216
+      },
+      {
+       "id": "36",
+       "coord": "370738.64N 0033809.49W",
+       "heading_true": 1.3,
+       "elev_ft": 2297
+      }
+     ],
+     "length_ft": 4265,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEGC",
+   "name": "Altarejos-Guadalcanal Private Airfield",
+   "type": "small",
+   "coord": "381018.12N 0054422.31W",
+   "elev_ft": 1928,
+   "country": "ES",
+   "city": "Sevilla",
+   "runways": [
+    {
+     "id": "15/33",
+     "ends": [
+      {
+       "id": "15"
+      },
+      {
+       "id": "33"
+      }
+     ],
+     "length_ft": 5250,
+     "width_ft": 57,
+     "surface": "Asphalt"
+    }
+   ]
+  },
+  {
+   "id": "LEGR",
+   "name": "F.G.L. Airport Granada-Jaén Airport",
+   "type": "medium",
+   "coord": "371119.33N 0034638.50W",
+   "elev_ft": 1860,
+   "country": "ES",
+   "iata": "GRX",
+   "city": "Granada",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "371118.96N 0034737.28W",
+       "heading_true": 89.5,
+       "elev_ft": 1842
+      },
+      {
+       "id": "27",
+       "coord": "371120.04N 0034539.71W",
+       "heading_true": 269.5,
+       "elev_ft": 1860
+      }
+     ],
+     "length_ft": 9514,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEGU",
+   "name": "Aeródromo de Guadalupe",
+   "type": "small",
+   "coord": "392044.52N 0051150.46W",
+   "elev_ft": 1408,
+   "country": "ES",
+   "city": "Guadalupe",
+   "runways": []
+  },
+  {
+   "id": "LEIZ",
+   "name": "La Perdiz - Torre De Juan Abad Airfield",
+   "type": "small",
+   "coord": "383047.16N 0032151.59W",
+   "elev_ft": 2753,
+   "country": "ES",
+   "city": "Torre de Juan Abad",
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "383049.31N 0032222.98W",
+       "heading_true": 95.0
+      },
+      {
+       "id": "28",
+       "coord": "383045.00N 0032120.16W",
+       "heading_true": 275.0,
+       "displaced_ft": 492
+      }
+     ],
+     "length_ft": 5015,
+     "width_ft": 75,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEJR",
+   "name": "Jerez Airport",
+   "type": "medium",
+   "coord": "364440.55N 0060336.40W",
+   "elev_ft": 93,
+   "country": "ES",
+   "iata": "XRY",
+   "city": "Jerez de la Frontera",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02",
+       "coord": "364406.00N 0060353.32W",
+       "heading_true": 21.4,
+       "elev_ft": 68
+      },
+      {
+       "id": "20",
+       "coord": "364515.48N 0060319.48W",
+       "heading_true": 201.4,
+       "elev_ft": 93
+      }
+     ],
+     "length_ft": 7546,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEJU",
+   "name": "La Juliana Airfield",
+   "type": "small",
+   "coord": "371741.99N 0060945.00W",
+   "elev_ft": 148,
+   "country": "ES",
+   "city": "Sevilla",
+   "runways": []
+  },
+  {
+   "id": "LELA",
+   "name": "La Calderera Airfield",
+   "type": "small",
+   "coord": "384452.43N 0033052.42W",
+   "elev_ft": 2467,
+   "country": "ES",
+   "city": "Valdepeñas",
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "384445.59N 0033121.72W",
+       "heading_true": 73.8
+      },
+      {
+       "id": "25",
+       "coord": "384458.92N 0033023.15W",
+       "heading_true": 253.8
+      }
+     ],
+     "length_ft": 4830,
+     "width_ft": 77,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LELC",
+   "name": "San Javier Airport",
+   "type": "medium",
+   "coord": "374630.01N 0004844.60W",
+   "elev_ft": 11,
+   "country": "ES",
+   "city": "San Javier",
+   "runways": [
+    {
+     "id": "05L/23R",
+     "ends": [
+      {
+       "id": "05L",
+       "coord": "374649.79N 0004900.62W",
+       "heading_true": 46.1
+      },
+      {
+       "id": "23R",
+       "coord": "374709.60N 0004834.89W",
+       "heading_true": 226.1
+      }
+     ],
+     "length_ft": 5174,
+     "width_ft": 148,
+     "surface": "ASPH"
+    },
+    {
+     "id": "05R/23L",
+     "ends": [
+      {
+       "id": "05R",
+       "coord": "374603.72N 0004917.60W",
+       "heading_true": 45.8,
+       "elev_ft": 11
+      },
+      {
+       "id": "23L",
+       "coord": "374655.92N 0004810.20W",
+       "heading_true": 225.8,
+       "elev_ft": 5
+      }
+     ],
+     "length_ft": 7612,
+     "width_ft": 148,
+     "surface": "ASPH"
+    }
+   ]
+  },
+  {
+   "id": "LELH",
+   "name": "Alhama De Murcia Airfield",
+   "type": "small",
+   "coord": "374456.04N 0011807.78W",
+   "elev_ft": 669,
+   "country": "ES",
+   "city": "Cánovas",
+   "runways": []
+  },
+  {
+   "id": "LEMF",
+   "name": "Mafé - Gibraleón Airfield",
+   "type": "small",
+   "coord": "372151.48N 0065515.38W",
+   "elev_ft": 86,
+   "country": "ES",
+   "city": "Gibraleón",
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12"
+      },
+      {
+       "id": "30"
+      }
+     ],
+     "length_ft": 2297,
+     "width_ft": 59,
+     "surface": "concrete"
+    }
+   ]
+  },
+  {
+   "id": "LEMG",
+   "name": "Málaga-Costa del Sol Airport",
+   "type": "large",
+   "coord": "364041.64N 0043000.75W",
+   "elev_ft": 53,
+   "country": "ES",
+   "iata": "AGP",
+   "city": "Málaga",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "364127.61N 0043028.08W",
+       "heading_true": 119.0,
+       "elev_ft": 52
+      },
+      {
+       "id": "30",
+       "coord": "364046.56N 0042849.91W",
+       "heading_true": 299.0,
+       "elev_ft": 31
+      }
+     ],
+     "length_ft": 9022,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "13/31",
+     "ends": [
+      {
+       "id": "13",
+       "coord": "364104.21N 0043045.32W",
+       "heading_true": 133.0,
+       "elev_ft": 52
+      },
+      {
+       "id": "31",
+       "coord": "363955.45N 0042908.95W",
+       "heading_true": 313.0,
+       "elev_ft": 31
+      }
+     ],
+     "length_ft": 10500,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEMI",
+   "name": "Region of Murcia International Airport",
+   "type": "large",
+   "coord": "374810.27N 0010729.58W",
+   "elev_ft": 644,
+   "country": "ES",
+   "iata": "RMU",
+   "city": "Corvera",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "05/23",
+     "ends": [
+      {
+       "id": "05",
+       "coord": "374736.60N 0010813.56W",
+       "heading_true": 46.0,
+       "elev_ft": 641
+      },
+      {
+       "id": "23",
+       "coord": "374846.08N 0010644.24W",
+       "heading_true": 226.0,
+       "elev_ft": 640
+      }
+     ],
+     "length_ft": 9842,
+     "width_ft": 147,
+     "surface": "ASPH"
+    }
+   ]
+  },
+  {
+   "id": "LEMO",
+   "name": "Moron Air Base",
+   "type": "medium",
+   "coord": "371029.64N 0053657.38W",
+   "elev_ft": 285,
+   "country": "ES",
+   "iata": "OZP",
+   "city": "Morón",
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02",
+       "coord": "370934.56N 0053722.40W",
+       "heading_true": 19.8,
+       "elev_ft": 285
+      },
+      {
+       "id": "20",
+       "coord": "371124.37N 0053632.94W",
+       "heading_true": 199.8,
+       "elev_ft": 270
+      }
+     ],
+     "length_ft": 11801,
+     "width_ft": 200,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LEMP",
+   "name": "Los Martínez Del Puerto Airfield",
+   "type": "small",
+   "coord": "375012.54N 0010551.60W",
+   "elev_ft": 534,
+   "country": "ES",
+   "city": "Murcia",
+   "runways": [
+    {
+     "id": "15/33",
+     "ends": [
+      {
+       "id": "15"
+      },
+      {
+       "id": "33"
+      }
+     ],
+     "length_ft": 2789,
+     "width_ft": 98,
+     "surface": "Compacted Earth"
+    }
+   ]
+  },
+  {
+   "id": "LENE",
+   "name": "La Caminera Airfield",
+   "type": "small",
+   "coord": "384011.02N 0031811.50W",
+   "elev_ft": 2510,
+   "country": "ES",
+   "runways": [
+    {
+     "id": "08/26",
+     "ends": [
+      {
+       "id": "08",
+       "elev_ft": 2556
+      },
+      {
+       "id": "26",
+       "elev_ft": 2558
+      }
+     ],
+     "length_ft": 4593,
+     "width_ft": 75,
+     "surface": "paved"
+    }
+   ]
+  },
+  {
+   "id": "LENN",
+   "name": "La Centenera",
+   "type": "small",
+   "coord": "380653.60N 0040655.69W",
+   "elev_ft": 2169,
+   "country": "ES",
+   "city": "Marmolejo",
+   "runways": []
+  },
+  {
+   "id": "LEOT",
+   "name": "Ontur Airfield",
+   "type": "small",
+   "coord": "383656.45N 0013135.32W",
+   "elev_ft": 2200,
+   "country": "ES",
+   "city": "Ontur",
+   "runways": []
+  },
+  {
+   "id": "LEPI",
+   "name": "Casas de los Pinos Airfield",
+   "type": "small",
+   "coord": "391753.52N 0022243.39W",
+   "elev_ft": 2370,
+   "country": "ES",
+   "city": "Casas de los Pinos",
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "heading_true": 118.0,
+       "elev_ft": 475,
+       "displaced_ft": 377
+      },
+      {
+       "id": "30",
+       "heading_true": 298.0,
+       "elev_ft": 475,
+       "displaced_ft": 417
+      }
+     ],
+     "length_ft": 3041,
+     "width_ft": 60,
+     "surface": "ASPH"
+    }
+   ]
+  },
+  {
+   "id": "LEPR",
+   "name": "Palma del Río Airfield",
+   "type": "small",
+   "coord": "374251.78N 0051254.81W",
+   "elev_ft": 410,
+   "country": "ES",
+   "city": "Palma del Rio",
+   "runways": []
+  },
+  {
+   "id": "LEPZ",
+   "name": "Los Pozuelos de Calatrava Airfield",
+   "type": "small",
+   "coord": "385442.05N 0041123.02W",
+   "elev_ft": 1850,
+   "country": "ES",
+   "city": "Los Pozuelos de Calatrava, Ciudad Real",
+   "runways": [
+    {
+     "id": "14/32",
+     "ends": [
+      {
+       "id": "14",
+       "coord": "385456.16N 0041142.43W",
+       "heading_true": 137.2
+      },
+      {
+       "id": "32",
+       "coord": "385431.67N 0041113.67W",
+       "heading_true": 317.2
+      }
+     ],
+     "length_ft": 3346,
+     "width_ft": 59,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LERI",
+   "name": "Alcantarilla Air Base",
+   "type": "medium",
+   "coord": "375703.96N 0011349.15W",
+   "elev_ft": 250,
+   "country": "ES",
+   "city": "Alcantarilla",
+   "runways": [
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "375657.48N 0011406.68W",
+       "heading_true": 64.9,
+       "elev_ft": 250
+      },
+      {
+       "id": "25",
+       "coord": "375710.44N 0011331.58W",
+       "heading_true": 244.9,
+       "elev_ft": 221
+      }
+     ],
+     "length_ft": 3077,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LERL",
+   "name": "Ciudad Real International Airport",
+   "type": "medium",
+   "coord": "385123.32N 0035811.80W",
+   "elev_ft": 2120,
+   "country": "ES",
+   "iata": "CQM",
+   "city": "Ciudad Real",
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10"
+      },
+      {
+       "id": "28"
+      }
+     ],
+     "length_ft": 13450,
+     "width_ft": 197,
+     "surface": "asp"
+    }
+   ]
+  },
+  {
+   "id": "LERT",
+   "name": "Rota Naval Station Airport",
+   "type": "medium",
+   "coord": "363842.72N 0062058.06W",
+   "elev_ft": 86,
+   "country": "ES",
+   "iata": "ROZ",
+   "city": "Rota",
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "363849.93N 0062211.86W",
+       "heading_true": 96.9,
+       "elev_ft": 63
+      },
+      {
+       "id": "28",
+       "coord": "363835.52N 0061944.40W",
+       "heading_true": 276.9,
+       "elev_ft": 62
+      }
+     ],
+     "length_ft": 12106,
+     "width_ft": 200,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LESE",
+   "name": "San Enrique Airfield",
+   "type": "small",
+   "coord": "384350.88N 0041847.02W",
+   "elev_ft": 2263,
+   "country": "ES",
+   "city": "Almodóvar del Campo",
+   "runways": []
+  },
+  {
+   "id": "LETE",
+   "name": "Morante Airfield",
+   "type": "small",
+   "coord": "390212.84N 0064126.02W",
+   "elev_ft": 703,
+   "country": "ES",
+   "city": "Badajoz",
+   "runways": []
+  },
+  {
+   "id": "LETF",
+   "name": "Tomás Fernández Espada Airfield",
+   "type": "small",
+   "coord": "365218.45N 0053855.59W",
+   "elev_ft": 328,
+   "country": "ES",
+   "city": "Villamartin",
+   "runways": []
+  },
+  {
+   "id": "LEVE",
+   "name": "Aeródromo Virgen de La Estrella",
+   "type": "small",
+   "coord": "382514.00N 0062125.00W",
+   "elev_ft": 1837,
+   "country": "ES",
+   "city": "Zafra",
+   "runways": []
+  },
+  {
+   "id": "LEZL",
+   "name": "Seville Airport",
+   "type": "large",
+   "coord": "372504.80N 0055335.20W",
+   "elev_ft": 112,
+   "country": "ES",
+   "iata": "SVQ",
+   "city": "Seville",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "372504.44N 0055443.49W",
+       "heading_true": 90.0,
+       "elev_ft": 83
+      },
+      {
+       "id": "27",
+       "coord": "372504.80N 0055226.76W",
+       "heading_true": 270.0,
+       "elev_ft": 111
+      }
+     ],
+     "length_ft": 11030,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPAR",
+   "name": "Alverca Air Base",
+   "type": "medium",
+   "coord": "385259.88N 0090148.36W",
+   "elev_ft": 11,
+   "country": "PT",
+   "city": "Vila Franca de Xira",
+   "runways": [
+    {
+     "id": "04/22",
+     "ends": [
+      {
+       "id": "04",
+       "coord": "385218.48N 0090221.23W",
+       "heading_true": 33.0,
+       "elev_ft": 9,
+       "displaced_ft": 820
+      },
+      {
+       "id": "22",
+       "coord": "385340.20N 0090114.38W",
+       "heading_true": 213.0,
+       "elev_ft": 11,
+       "displaced_ft": 787
+      }
+     ],
+     "length_ft": 9810,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPAZ",
+   "name": "Santa Maria Airport",
+   "type": "medium",
+   "coord": "365817.04N 0251014.16W",
+   "elev_ft": 308,
+   "country": "PT",
+   "iata": "SMA",
+   "city": "Vila do Porto",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "18/36",
+     "ends": [
+      {
+       "id": "18",
+       "coord": "365906.00N 0251023.88W",
+       "heading_true": 171.0,
+       "elev_ft": 283
+      },
+      {
+       "id": "36",
+       "coord": "365728.09N 0251004.44W",
+       "heading_true": 351.0,
+       "elev_ft": 283
+      }
+     ],
+     "length_ft": 10000,
+     "width_ft": 197,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPBJ",
+   "name": "Beja Airport / Airbase",
+   "type": "medium",
+   "coord": "380444.04N 0075556.64W",
+   "elev_ft": 636,
+   "country": "PT",
+   "iata": "BYJ",
+   "city": "Beja",
+   "runways": [
+    {
+     "id": "01L/19R",
+     "ends": [
+      {
+       "id": "01L",
+       "coord": "380348.24N 0075603.95W",
+       "heading_true": 6.4,
+       "elev_ft": 628
+      },
+      {
+       "id": "19R",
+       "coord": "380539.83N 0075549.33W",
+       "heading_true": 186.4,
+       "elev_ft": 624
+      }
+     ],
+     "length_ft": 11319,
+     "width_ft": 197,
+     "surface": "CON"
+    },
+    {
+     "id": "01R/19L",
+     "ends": [
+      {
+       "id": "01R",
+       "coord": "380355.44N 0075554.12W",
+       "heading_true": 5.9,
+       "elev_ft": 633
+      },
+      {
+       "id": "19L",
+       "coord": "380530.84N 0075541.63W",
+       "heading_true": 185.9,
+       "elev_ft": 617
+      }
+     ],
+     "length_ft": 9682,
+     "width_ft": 98,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPCB",
+   "name": "Aerodromo de Castelo Branco",
+   "type": "medium",
+   "coord": "395040.30N 0072623.55W",
+   "elev_ft": 1300,
+   "country": "PT",
+   "city": "Castelo Branco",
+   "runways": [
+    {
+     "id": "16/34",
+     "ends": [
+      {
+       "id": "16"
+      },
+      {
+       "id": "34"
+      }
+     ],
+     "length_ft": 4790,
+     "width_ft": 98,
+     "surface": "Asphalt"
+    }
+   ]
+  },
+  {
+   "id": "LPCR",
+   "name": "Corvo Airport",
+   "type": "small",
+   "coord": "394017.40N 0310648.96W",
+   "elev_ft": 62,
+   "country": "PT",
+   "iata": "CVU",
+   "city": "Corvo",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "11/29",
+     "ends": [
+      {
+       "id": "11"
+      },
+      {
+       "id": "29"
+      }
+     ],
+     "length_ft": 2625,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPCS",
+   "name": "Cascais Airport",
+   "type": "medium",
+   "coord": "384329.99N 0092118.83W",
+   "elev_ft": 325,
+   "country": "PT",
+   "iata": "CAT",
+   "city": "Cascais",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "17/35",
+     "ends": [
+      {
+       "id": "17",
+       "coord": "384352.05N 0092126.64W",
+       "heading_true": 164.0,
+       "elev_ft": 326,
+       "displaced_ft": 623
+      },
+      {
+       "id": "35",
+       "coord": "384308.41N 0092110.74W",
+       "heading_true": 344.0,
+       "elev_ft": 287
+      }
+     ],
+     "length_ft": 4593,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPEV",
+   "name": "Évora Airfield",
+   "type": "medium",
+   "coord": "383200.60N 0075322.70W",
+   "elev_ft": 807,
+   "country": "PT",
+   "city": "Évora",
+   "runways": [
+    {
+     "id": "01/19",
+     "ends": [
+      {
+       "id": "01",
+       "coord": "383140.09N 0075324.72W",
+       "heading_true": 4.0,
+       "elev_ft": 807,
+       "displaced_ft": 180
+      },
+      {
+       "id": "19",
+       "coord": "383221.48N 0075320.69W",
+       "heading_true": 184.0,
+       "elev_ft": 807,
+       "displaced_ft": 98
+      }
+     ],
+     "length_ft": 4265,
+     "width_ft": 75,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPFL",
+   "name": "Flores Airport",
+   "type": "medium",
+   "coord": "392719.08N 0310753.04W",
+   "elev_ft": 112,
+   "country": "PT",
+   "iata": "FLW",
+   "city": "Santa Cruz das Flores",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "18/36",
+     "ends": [
+      {
+       "id": "18",
+       "coord": "392741.39N 0310759.16W",
+       "heading_true": 166.0,
+       "elev_ft": 98,
+       "displaced_ft": 262
+      },
+      {
+       "id": "36",
+       "coord": "392657.12N 0310746.92W",
+       "heading_true": 346.0,
+       "elev_ft": 107,
+       "displaced_ft": 197
+      }
+     ],
+     "length_ft": 4593,
+     "width_ft": 98,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPFR",
+   "name": "Faro - Gago Coutinho International Airport",
+   "type": "large",
+   "coord": "370057.27N 0075815.38W",
+   "elev_ft": 24,
+   "country": "PT",
+   "iata": "FAO",
+   "city": "Faro",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "370102.28N 0075909.92W",
+       "heading_true": 100.0,
+       "elev_ft": 24,
+       "displaced_ft": 148
+      },
+      {
+       "id": "28",
+       "coord": "370048.24N 0075730.82W",
+       "heading_true": 280.0,
+       "elev_ft": 18,
+       "displaced_ft": 148
+      }
+     ],
+     "length_ft": 8169,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPGR",
+   "name": "Graciosa Airport",
+   "type": "medium",
+   "coord": "390531.92N 0280147.28W",
+   "elev_ft": 86,
+   "country": "PT",
+   "iata": "GRW",
+   "city": "Santa Cruz da Graciosa",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "390526.88N 0280215.72W",
+       "heading_true": 76.7,
+       "displaced_ft": 182
+      },
+      {
+       "id": "27",
+       "coord": "390536.59N 0280119.20W",
+       "heading_true": 256.7,
+       "displaced_ft": 182
+      }
+     ],
+     "length_ft": 4529,
+     "width_ft": 98,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPHR",
+   "name": "Horta Airport",
+   "type": "medium",
+   "coord": "383111.64N 0284257.24W",
+   "elev_ft": 118,
+   "country": "PT",
+   "iata": "HOR",
+   "city": "Horta",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "10/28",
+     "ends": [
+      {
+       "id": "10",
+       "coord": "383111.64N 0284328.20W",
+       "heading_true": 90.0,
+       "elev_ft": 81
+      },
+      {
+       "id": "28",
+       "coord": "383111.64N 0284225.56W",
+       "heading_true": 270.0,
+       "elev_ft": 117
+      }
+     ],
+     "length_ft": 5233,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPJF",
+   "name": "Aerodromo de Leiria",
+   "type": "small",
+   "coord": "394647.67N 0084912.86W",
+   "elev_ft": 151,
+   "country": "PT",
+   "city": "Leiria",
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02",
+       "heading_true": 14.0,
+       "elev_ft": 134,
+       "displaced_ft": 180
+      },
+      {
+       "id": "20",
+       "heading_true": 194.0,
+       "elev_ft": 180,
+       "displaced_ft": 131
+      }
+     ],
+     "length_ft": 1640,
+     "width_ft": 36,
+     "surface": "asfalt"
+    }
+   ]
+  },
+  {
+   "id": "LPLA",
+   "name": "Lajes Airport",
+   "type": "medium",
+   "coord": "384542.48N 0270526.88W",
+   "elev_ft": 180,
+   "country": "PT",
+   "iata": "TER",
+   "city": "Praia da Vitória",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "15/33",
+     "ends": [
+      {
+       "id": "15",
+       "coord": "384633.60N 0270620.16W",
+       "heading_true": 140.7,
+       "elev_ft": 158
+      },
+      {
+       "id": "33",
+       "coord": "384510.44N 0270453.04W",
+       "heading_true": 320.7,
+       "elev_ft": 180
+      }
+     ],
+     "length_ft": 10870,
+     "width_ft": 197,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPMA",
+   "name": "Cristiano Ronaldo International Airport",
+   "type": "large",
+   "coord": "324152.12N 0164628.61W",
+   "elev_ft": 192,
+   "country": "PT",
+   "iata": "FNC",
+   "city": "Funchal",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "05/23",
+     "ends": [
+      {
+       "id": "05",
+       "coord": "324120.40N 0164705.28W",
+       "heading_true": 44.7,
+       "elev_ft": 147,
+       "displaced_ft": 480
+      },
+      {
+       "id": "23",
+       "coord": "324224.47N 0164550.40W",
+       "heading_true": 224.7,
+       "elev_ft": 192,
+       "displaced_ft": 490
+      }
+     ],
+     "length_ft": 9110,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPMF",
+   "name": "Aerodromo de Monfortinho",
+   "type": "small",
+   "coord": "395835.03N 0065423.85W",
+   "country": "PT",
+   "city": "Idanha-a-Nova",
+   "runways": []
+  },
+  {
+   "id": "LPMO",
+   "name": "Morargil Airfield",
+   "type": "small",
+   "coord": "385936.72N 0080831.24W",
+   "elev_ft": 380,
+   "country": "PT",
+   "city": "Mora",
+   "runways": [
+    {
+     "id": "06/24",
+     "ends": [
+      {
+       "id": "06"
+      },
+      {
+       "id": "24"
+      }
+     ],
+     "length_ft": 3600,
+     "width_ft": 90,
+     "surface": "Asphalt"
+    }
+   ]
+  },
+  {
+   "id": "LPMR",
+   "name": "Monte Real Air Base",
+   "type": "medium",
+   "coord": "394942.01N 0085315.00W",
+   "elev_ft": 187,
+   "country": "PT",
+   "runways": [
+    {
+     "id": "36/18",
+     "ends": [
+      {
+       "id": "36",
+       "coord": "394904.08N 0085316.04W",
+       "heading_true": 2.0,
+       "elev_ft": 173,
+       "displaced_ft": 886
+      },
+      {
+       "id": "18",
+       "coord": "395040.92N 0085312.23W",
+       "heading_true": 182.0,
+       "elev_ft": 172,
+       "displaced_ft": 863
+      }
+     ],
+     "length_ft": 9816,
+     "width_ft": 148,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPMT",
+   "name": "Montijo Air Base",
+   "type": "medium",
+   "coord": "384233.44N 0090201.25W",
+   "elev_ft": 46,
+   "country": "PT",
+   "city": "Montijo",
+   "runways": [
+    {
+     "id": "01/19",
+     "ends": [
+      {
+       "id": "01",
+       "coord": "384159.65N 0090218.02W",
+       "heading_true": 6.5,
+       "elev_ft": 10
+      },
+      {
+       "id": "19",
+       "coord": "384310.56N 0090207.69W",
+       "heading_true": 186.5,
+       "elev_ft": 35
+      }
+     ],
+     "length_ft": 7044,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "07/25",
+     "ends": [
+      {
+       "id": "07",
+       "coord": "384218.01N 0090213.81W",
+       "heading_true": 72.0,
+       "elev_ft": 18
+      },
+      {
+       "id": "25",
+       "coord": "384241.76N 0090037.48W",
+       "heading_true": 252.0,
+       "elev_ft": 46
+      }
+     ],
+     "length_ft": 8005,
+     "width_ft": 148,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPPD",
+   "name": "João Paulo II Airport",
+   "type": "large",
+   "coord": "374428.32N 0254152.44W",
+   "elev_ft": 259,
+   "country": "PT",
+   "iata": "PDL",
+   "city": "Ponta Delgada",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "374446.32N 0254239.24W",
+       "heading_true": 111.6,
+       "elev_ft": 259
+      },
+      {
+       "id": "30",
+       "coord": "374416.44N 0254104.56W",
+       "heading_true": 291.6,
+       "elev_ft": 187,
+       "displaced_ft": 787
+      }
+     ],
+     "length_ft": 8192,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPPI",
+   "name": "Pico Airport",
+   "type": "medium",
+   "coord": "383315.47N 0282628.68W",
+   "elev_ft": 109,
+   "country": "PT",
+   "iata": "PIX",
+   "city": "Pico Island",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "383306.48N 0282709.72W",
+       "heading_true": 83.0,
+       "elev_ft": 110,
+       "displaced_ft": 246
+      },
+      {
+       "id": "27",
+       "coord": "383314.05N 0282558.44W",
+       "heading_true": 263.0,
+       "elev_ft": 104,
+       "displaced_ft": 197
+      }
+     ],
+     "length_ft": 5725,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPPM",
+   "name": "Portimão Airport",
+   "type": "medium",
+   "coord": "370857.48N 0083502.26W",
+   "elev_ft": 5,
+   "country": "PT",
+   "iata": "PRM",
+   "city": "Portimão",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "11/29",
+     "ends": [
+      {
+       "id": "11",
+       "coord": "370901.80N 0083518.82W",
+       "heading_true": 107.0,
+       "elev_ft": 5
+      },
+      {
+       "id": "29",
+       "coord": "370853.52N 0083445.62W",
+       "heading_true": 287.0,
+       "elev_ft": 5,
+       "displaced_ft": 295
+      }
+     ],
+     "length_ft": 2822,
+     "width_ft": 89,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPPS",
+   "name": "Porto Santo Airport",
+   "type": "medium",
+   "coord": "330424.23N 0162100.00W",
+   "elev_ft": 341,
+   "country": "PT",
+   "iata": "PXO",
+   "city": "Vila Baleira",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "18/36",
+     "ends": [
+      {
+       "id": "18",
+       "coord": "330513.21N 0162101.80W",
+       "heading_true": 178.0,
+       "elev_ft": 240
+      },
+      {
+       "id": "36",
+       "coord": "330335.63N 0162057.84W",
+       "heading_true": 358.0,
+       "elev_ft": 338
+      }
+     ],
+     "length_ft": 9861,
+     "width_ft": 148,
+     "surface": "CON"
+    }
+   ]
+  },
+  {
+   "id": "LPPT",
+   "name": "Lisbon Humberto Delgado Airport",
+   "type": "large",
+   "coord": "384652.68N 0090809.31W",
+   "elev_ft": 374,
+   "country": "PT",
+   "iata": "LIS",
+   "city": "Lisbon",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "02/20",
+     "ends": [
+      {
+       "id": "02",
+       "coord": "384556.44N 0090839.49W",
+       "heading_true": 22.0,
+       "elev_ft": 331,
+       "displaced_ft": 290
+      },
+      {
+       "id": "20",
+       "coord": "384750.33N 0090738.55W",
+       "heading_true": 202.0,
+       "elev_ft": 347,
+       "displaced_ft": 1960
+      }
+     ],
+     "length_ft": 12500,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPSC",
+   "name": "Santa Cruz Airfield",
+   "type": "small",
+   "coord": "390726.11N 0092248.33W",
+   "elev_ft": 157,
+   "country": "PT",
+   "city": "Torres Vedras",
+   "runways": []
+  },
+  {
+   "id": "LPSJ",
+   "name": "São Jorge Airport",
+   "type": "medium",
+   "coord": "383955.80N 0281032.88W",
+   "elev_ft": 311,
+   "country": "PT",
+   "iata": "SJZ",
+   "city": "Velas",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "13/31",
+     "ends": [
+      {
+       "id": "13",
+       "coord": "384005.88N 0281058.44W",
+       "heading_true": 117.0,
+       "elev_ft": 335,
+       "displaced_ft": 466
+      },
+      {
+       "id": "31",
+       "coord": "383945.72N 0281007.68W",
+       "heading_true": 297.0,
+       "elev_ft": 318,
+       "displaced_ft": 466
+      }
+     ],
+     "length_ft": 4633,
+     "width_ft": 148,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPSO",
+   "name": "Aeródromo Municipal de Ponte de Sor",
+   "type": "medium",
+   "coord": "391241.56N 0080328.03W",
+   "elev_ft": 390,
+   "country": "PT",
+   "city": "Ponte de Sor",
+   "runways": [
+    {
+     "id": "03/21",
+     "ends": [
+      {
+       "id": "03",
+       "elev_ft": 389
+      },
+      {
+       "id": "21",
+       "elev_ft": 390
+      }
+     ],
+     "length_ft": 5906,
+     "width_ft": 98,
+     "surface": "asphalt"
+    }
+   ]
+  },
+  {
+   "id": "LPSR",
+   "name": "Santarém Airfield",
+   "type": "small",
+   "coord": "391234.18N 0084114.21W",
+   "elev_ft": 30,
+   "country": "PT",
+   "city": "Santarém",
+   "runways": [
+    {
+     "id": "05/23",
+     "ends": [
+      {
+       "id": "05",
+       "coord": "391225.31N 0084126.56W"
+      },
+      {
+       "id": "23",
+       "coord": "391244.75N 0084059.66W"
+      }
+     ],
+     "length_ft": 3960,
+     "width_ft": 82
+    }
+   ]
+  },
+  {
+   "id": "LPST",
+   "name": "Sintra Air Base",
+   "type": "medium",
+   "coord": "384951.96N 0092022.38W",
+   "elev_ft": 440,
+   "country": "PT",
+   "city": "Sintra",
+   "runways": [
+    {
+     "id": "14/32",
+     "ends": [
+      {
+       "id": "14",
+       "coord": "385012.48N 0092048.77W",
+       "heading_true": 135.0,
+       "elev_ft": 420
+      },
+      {
+       "id": "32",
+       "coord": "384931.07N 0091956.75W",
+       "heading_true": 315.0,
+       "elev_ft": 440
+      }
+     ],
+     "length_ft": 5906,
+     "width_ft": 131,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LPTN",
+   "name": "Tancos Airbase",
+   "type": "medium",
+   "coord": "392830.36N 0082152.49W",
+   "elev_ft": 266,
+   "country": "PT",
+   "city": "Tancos",
+   "runways": [
+    {
+     "id": "08/26",
+     "ends": [
+      {
+       "id": "08",
+       "coord": "392819.56N 0082308.56W",
+       "heading_true": 77.0,
+       "elev_ft": 249,
+       "displaced_ft": 328
+      },
+      {
+       "id": "26",
+       "coord": "392835.76N 0082134.85W",
+       "heading_true": 257.0,
+       "elev_ft": 257
+      }
+     ],
+     "length_ft": 7530,
+     "width_ft": 148,
+     "surface": "ASP"
+    },
+    {
+     "id": "12/30",
+     "ends": [
+      {
+       "id": "12",
+       "coord": "392844.76N 0082225.68W",
+       "heading_true": 117.0,
+       "elev_ft": 266,
+       "displaced_ft": 328
+      },
+      {
+       "id": "30",
+       "coord": "392827.12N 0082140.93W",
+       "heading_true": 297.0,
+       "elev_ft": 256
+      }
+     ],
+     "length_ft": 3937,
+     "width_ft": 74,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "LXGB",
+   "name": "Gibraltar Airport",
+   "type": "large",
+   "coord": "360906.04N 0052059.21W",
+   "elev_ft": 12,
+   "country": "GI",
+   "iata": "GIB",
+   "city": "Gibraltar",
+   "scheduled": true,
+   "runways": [
+    {
+     "id": "09/27",
+     "ends": [
+      {
+       "id": "09",
+       "coord": "360902.98N 0052134.64W",
+       "heading_true": 88.0,
+       "elev_ft": 10,
+       "displaced_ft": 302
+      },
+      {
+       "id": "27",
+       "coord": "360905.45N 0052024.20W",
+       "heading_true": 268.0,
+       "elev_ft": 11,
+       "displaced_ft": 368
+      }
+     ],
+     "length_ft": 6000,
+     "width_ft": 150,
+     "surface": "ASP"
+    }
+   ]
+  },
+  {
+   "id": "MA-0002",
+   "name": "Lakhmiss N'Arazane Airport",
+   "type": "small",
+   "coord": "302949.45N 0083811.33W",
+   "elev_ft": 1204,
+   "country": "MA",
+   "city": "Arazane",
+   "runways": []
+  },
+  {
+   "id": "MA-0003",
+   "name": "Mahbes Airbase",
+   "type": "medium",
+   "coord": "274337.14N 0091416.31W",
+   "elev_ft": 1623,
+   "country": "EH",
+   "runways": []
+  },
+  {
+   "id": "MA-0004",
+   "name": "Tata Airport",
+   "type": "small",
+   "coord": "293326.57N 0080027.62W",
+   "country": "MA",
+   "city": "Tata",
+   "runways": []
+  },
+  {
+   "id": "MA-0006",
+   "name": "Khouribga Air Base",
+   "type": "small",
+   "coord": "325129.56N 0065645.96W",
+   "country": "MA",
+   "city": "Khouribga",
+   "runways": []
+  },
+  {
+   "id": "MA-0007",
+   "name": "Khouribga West Airport",
+   "type": "small",
+   "coord": "325236.12N 0070504.02W",
+   "country": "MA",
+   "city": "N'Khila",
+   "runways": []
+  },
+  {
+   "id": "MA-0008",
+   "name": "Ben Guerir Air Base",
+   "type": "small",
+   "coord": "320729.60N 0075240.39W",
+   "elev_ft": 1406,
+   "country": "MA",
+   "city": "Ouled Ben Anou Grichate",
+   "runways": []
+  },
+  {
+   "id": "MA-0009",
+   "name": "Sidi Zouine Airport",
+   "type": "small",
+   "coord": "313817.99N 0082051.65W",
+   "country": "MA",
+   "city": "Sidi Zouine",
+   "runways": []
+  },
+  {
+   "id": "MA-0019",
+   "name": "MERZOUGA Field",
+   "type": "small",
+   "coord": "310746.60N 0040154.08W",
+   "elev_ft": 2330,
+   "country": "MA",
+   "city": "Merzouga",
+   "runways": []
+  },
+  {
+   "id": "MA-0020",
+   "name": "FoumZguid Airfield",
+   "type": "small",
+   "coord": "300406.74N 0065144.78W",
+   "country": "MA",
+   "city": "Foum Zguid",
+   "runways": []
+  },
+  {
+   "id": "MA-GLN",
+   "name": "Guelmim Airport",
+   "type": "small",
+   "coord": "290136.12N 0100301.08W",
+   "elev_ft": 984,
+   "country": "MA",
+   "iata": "GLN",
+   "city": "Guelmim",
+   "runways": []
+  }
+ ],
+ "_airports_source": "OurAirports (public domain, github.com/davidmegginson/ourairports-data): every aerodrome of Morocco (Western Sahara included) and the Canary Islands, Gibraltar, southern Spain (Andalucia, Extremadura, Murcia, southern Castilla-La Mancha, Ceuta, Melilla) and southern Portugal (south of 40N) with Madeira; runway thresholds and true headings as OurAirports has them"
 }
