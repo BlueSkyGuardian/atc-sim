@@ -294,6 +294,7 @@ def _vector_away(world, a, b) -> None:
     world.waypoints[name] = p
     a.route = a.route[:a.next_index] + [name] + a.route[a.next_index:]
     a.leg_from = a.pos
+    a._dct = True
     a.nav_mode, a.target_hdg, a.turn_dir = "lnav", None, None
     if _arr(a):
         a.app["names"].insert(0, name)

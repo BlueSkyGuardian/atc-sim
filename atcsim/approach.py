@@ -93,6 +93,7 @@ def _start(world: "World", ac: "Aircraft") -> None:
         route.append(n)
     ac.route = ac.route[:ac.next_index] + route
     ac.leg_from = ac.pos
+    ac._dct = True
     ac.nav_mode, ac.target_hdg, ac.turn_dir = "lnav", None, None
     ac.app = {"ad": ad.id, "runway": ad.in_use, "type": path["type"], "thr": tuple(path["threshold"]),
               "faf": tuple(path["faf"]), "names": names, "last": -1e9, "established": False, "cleared_down": False}
@@ -528,6 +529,7 @@ def _published_hold(world: "World", ac: "Aircraft", h: dict, laps: int, why: str
         app_names.append(n)
     ac.route = ac.route[:ac.next_index] + [hf] + names + app_names
     ac.leg_from = ac.pos
+    ac._dct = True
     ac.nav_mode, ac.target_hdg, ac.turn_dir = "lnav", None, None
     st.update(names=[hf] + names + app_names, hold_names=[hf] + names, type=path["type"], faf=tuple(path["faf"]),
               thr=tuple(path["threshold"]), hold={"fix": h["fix"], "min_alt_ft": h["min_alt_ft"], "max_kt": h["max_kt"],
@@ -601,6 +603,7 @@ def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> bool:
     st["names"].insert(0, name)
     ac.route = ac.route[:ac.next_index] + [name] + rest
     ac.leg_from = ac.pos
+    ac._dct = True
     st["stretch_t"] = world.t
     world._event("approach_vector", callsign=ac.callsign,
                  text=f"{ac.callsign} vectored by approach for spacing (+{extra:.0f} NM)")

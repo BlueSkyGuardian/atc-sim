@@ -969,6 +969,7 @@ class World:
         elif t == "resume":
             ac.nav_mode = "lnav"            # direct to the next waypoint of the route from present position
             ac.leg_from = ac.pos
+            ac._dct = True
             ac.turn_dir = None
         elif t == "reroute":
             pts = list(n["points"])
@@ -987,6 +988,7 @@ class World:
             ac.route = prefix + pts + tail
             ac.next_index = len(prefix)
             ac.leg_from = ac.pos
+            ac._dct = True
             ac.nav_mode = "lnav"
             ac.turn_dir = None
         elif t == "direct":
@@ -1009,6 +1011,7 @@ class World:
                     ac.route = prefix + [wp, ac.route[-1]]
                 ac.next_index = len(prefix)
             ac.leg_from = ac.pos            # FMS DIR-TO leg starts at present position
+            ac._dct = True
             ac.nav_mode = "lnav"
             ac.turn_dir = None
 
@@ -1125,6 +1128,7 @@ class World:
                     elif ac.nav_mode == "lnav":
                         ac.route = ac.route[:ac.next_index] + [w for w in onward if w not in rest[:1]]
                         ac.leg_from = ac.pos
+                        ac._dct = True
             if res == "exited":
                 ac.exit_pos = ac.pos                       # where it was transferred (approach.py waits 30 NM past it)
                 if self.record:

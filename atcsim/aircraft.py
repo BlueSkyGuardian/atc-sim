@@ -28,6 +28,21 @@ SPEEDBRAKE_FACTOR = 1.5        # max descent rate with speedbrakes relative to i
 DESCENT_NM_PER_KFT = ((25000.0, 4.3), (10000.0, 3.3), (0.0, 3.0))
 
 
+_K_ROLL = (180.0 / math.pi) ** 2
+
+
+def _capture_bank(err_deg: float, tas_ms: float, dt: float) -> float:
+    """The autopilot's bank for a heading error: up to the nominal bank, rolled out early enough to arrive on the
+    heading with the wings level - no overshoot, no slow creep onto it. Rolling out from bank b at the roll rate p
+    still turns the aircraft (180/pi)^2 (g/V) (-ln cos b) / p degrees; the bank is the one for which that (plus half
+    a step at the present rate) is the error left."""
+    rate_full = math.degrees(atm.G0 * math.tan(math.radians(BANK_NOMINAL_DEG)) / tas_ms)
+    budget = max(0.0, err_deg - rate_full * dt * 0.5)
+    x = budget * ROLL_RATE_DEG_S * tas_ms / (atm.G0 * _K_ROLL)
+    c = math.exp(-x)
+    return min(BANK_NOMINAL_DEG, math.degrees(math.acos(max(-1.0, min(1.0, c)))))
+
+
 def descent_profile_fpm(tas_kt: float, alt_ft: float) -> float:
     """The rate (ft/min) of the pilot's own descent at that true airspeed and level (before the idle limit)."""
     nm = next(v for a, v in DESCENT_NM_PER_KFT if alt_ft >= a)
@@ -276,6 +291,7 @@ class Aircraft:
         else:
             self.route = self.route[:self.next_index] + [wp] + self.route[self.next_index:]
         self.leg_from = self.pos
+        self._dct = True
         self.nav_mode = "lnav"
         self.wx_done = True
 
@@ -313,14 +329,14 @@ class Aircraft:
             err = heading_diff(self.hdg, hdg_cmd)
         if forced and abs(err) < 1.0:
             self.turn_dir = None
-        bank_cmd = max(-BANK_NOMINAL_DEG, min(BANK_NOMINAL_DEG, BANK_GAIN * err))
+        tas_ms = max(self.tas, 100.0) * atm.KT
+        bank_cmd = math.copysign(_capture_bank(abs(err), tas_ms, dt), err)
         roll = ROLL_RATE_DEG_S * dt
         self.bank += max(-roll, min(roll, bank_cmd - self.bank))
-        tas_ms = max(self.tas, 100.0) * atm.KT
         rate = math.degrees(atm.G0 * math.tan(math.radians(self.bank)) / tas_ms)
         dpsi = rate * dt
-        if err != 0 and dpsi * err > 0 and abs(dpsi) > abs(err):
-            dpsi = err
+        if abs(err) < 0.3 and abs(self.bank) < roll:      # on the heading, wings level
+            dpsi, self.bank = err, 0.0
         self.hdg = (self.hdg + dpsi) % 360.0
 
         # ---- speed & vertical: total-energy model
@@ -385,6 +401,14 @@ class Aircraft:
 
     def _lnav(self, env: Env, u: float, v: float, outside: bool = False) -> Optional[str]:
         wps = env.waypoints
+        if getattr(self, "_dct", False) and self.next_wp in wps:
+            # direct to a point: the FMS flies the turn, then the line from where the turn ends (no S back onto a
+            # line drawn from where the clearance was given)
+            brg = bearing(self.pos, wps[self.next_wp])
+            if abs(heading_diff(self.trk, brg)) > 2.0 and dist(self.pos, wps[self.next_wp]) > 1.0:
+                self.leg_from = self.pos
+            else:
+                self._dct = False
         while True:
             to_name = self.next_wp
             B = wps[to_name]

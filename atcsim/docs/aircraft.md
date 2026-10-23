@@ -9,7 +9,7 @@
 | Vertical and speed | Point-mass total-energy model, (T − D)·V = m·g·ḣ + m·V·V̇, with the energy-share factor for constant-Mach / constant-CAS climbs and descents. Climbs at max climb thrust, descents at idle. Mass decreases with fuel burn |
 | Temperature | Drag uses the real air density. Engines are flat-rated: climb thrust falls 0.8 %/°C above ISA+10, so hot days lower the maximum level (about 1000–3000 ft by ISA+20) |
 | Speed | Each aircraft flies a **Mach / IAS pair** and converts at the **conversion altitude** (M.78 / 300 kt ≈ FL293). ATC can replace either: *"descend FL250, maintain Mach .76, on conversion 280 knots"*. *"Maintain 280 knots"* applies at every level. Below FL100, 250 kt. VMO / MMO protection always |
-| Lateral | 25° bank, 5°/s roll rate. FMS-style navigation: track-to-fix legs, wind correction, fly-by turn anticipation |
+| Lateral | 25° bank, 5°/s roll rate. The autopilot starts its roll-out early enough to arrive on the new heading wings-level (no overshoot, no slow creep onto it): a 90° turn at FL350 takes about 87 s. FMS-style navigation: track-to-fix legs, wind correction, fly-by turn anticipation. A direct-to is flown from where the aircraft is during the turn, so it rolls out straight on the line to the fix with no S-turn |
 | Pilot delay | Instructions execute after `pilot_delay_s` (default 4 s) |
 
 **Civil types (36):** A19N A20N A21N A318 A319 A320 A321 A332 A333 A343 A359 A388 B37M B38M B39M B734 B737 B738 B739
