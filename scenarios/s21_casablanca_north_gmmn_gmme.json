@@ -1,7 +1,7 @@
 {
   "name": "s21_casablanca_north_gmmn_gmme",
   "title": "Casablanca North: GMMN and GMME arrivals and departures",
-  "description": "Casablanca ACC, North sector (125.500) open alone, one hour. GMMN arrivals in three streams - from Agadir West North via MARJA and SALCA to LAKAM, from the west via NISBA and from the south via MOKRI to RAVOL, from the east on UR975 and from the north on UB11 to BISMI - and GMME arrivals to FAHIM and ENNAV. Letter of agreement with approach: cleared FL200 at the fix (still descending is fine), 10 NM in trail. GMMN and GMME departures are released climbing FL190 and ask for their cruising level (UN871 via BAKIM, UR722 via LAKAM, UB11 via TUSOR, UN869 south). Transit traffic on UB11, UN869, UA411, UN871, UG5, UN726 and UM240. GMD 21 (FL150-FL460, Al Hoceima) is notified active from T+15 min. Westerly flow; isolated thunderstorms building between Rabat, Fes and the Middle Atlas.",
+  "description": "Casablanca ACC, North sector (125.500) open alone, one hour. GMMN arrivals in three streams - from Agadir West North via MARJA and SALCA to LAKAM, from the west via NISBA and from the south via MOKRI to RAVOL, from the east on UR975 and from the north on UB11 to BISMI - and GMME arrivals to FAHIM and ENNAV. Letter of agreement with approach: cleared FL200 at the fix (still descending is fine), 10 NM in trail. GMMN and GMME departures are released climbing FL190 and ask for their cruising level (UN871 via BAKIM, UR722 via LAKAM, UB11 via TUSOR, UN869 south). Transit traffic on UB11, UN869, UA411, UN871, UG5, UN726 and UM240. GMD 21 (FL150-FL460, Al Hoceima) is notified active from T+15 min. April climatological winds (ERA5); isolated thunderstorms building between Rabat, Fes and the Middle Atlas.",
   "design_notes": "LAKAM wave 1 (T+17 to T+19): RAM763 (MARJA FL330), TAP1032 and the heavy RAM203 behind it (SALCA, FL350 / FL370), EZY9113 (MARJA FL330) - four within 100 s; RAM203 is fast and must not be first by default, the order and 10 NM come from speed and early vectors. RAM1474 (GMMN to LPPT, released FL190 at T+14) asks FL300 and climbs straight up UR722 against the MARJA arrivals: give the climb only above / after them or vector it. RAVOL (T+27): IBE3920 from NISBA and RAM1407 from MOKRI converge 25 s apart. BISMI (T+32 to T+34): RAM571 and the B77W SVA285 on UR975, AFR1396 on UB11 behind the UB11 southbound pair. Crossings: IBE3871 (UN869) and RAM1110 (UA411) at FL370 over RBT at T+21 (1 NM if nothing is done). Overtake: ETH712 (B77W M0.85) catches VLG8122 (A320 M0.76) on UN871 at FL360 before ADUBI, and the BAKIM departures RAM970 (asks FL360) and RAM1352 (asks FL380) join that stream. Speed trap: EZY62LK (M0.80) behind RYR4CW (M0.76), both FL350 on UB11 southbound, 10 NM apart at BARIS, closing. RAM756 (GMMN departure on UB11 north at T+34) asks FL360 = the level of TVF3302, northbound on UB11 ahead of it: a climb into its trail. AFR1450 northbound on UG5 at FL380 asks FL400 at T+28 while TAP1652 southbound at FL390 is opposite on the same airway: unable until passed. GMD 21 activates at T+15: RAM517 (UN726 east, TNR at T+28) must be rerouted before TTN-ALM (coordinate with East). Second LAKAM wave at T+45: RAM1425 (MARJA FL310), DLH4AM and the heavy RAM211 (SALCA, FL350 / FL330).",
   "airspace": "agadir",
   "control": [
@@ -12,33 +12,10 @@
   "start_utc": "09:00",
   "weather": {
     "seed": 211,
-    "temperature": {
-      "surface_c": 21,
-      "tropopause_fl": 380
-    },
     "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 300,
-          "kt": 12
-        },
-        {
-          "fl": 200,
-          "dir": 285,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 275,
-          "kt": 60
-        },
-        {
-          "fl": 450,
-          "dir": 270,
-          "kt": 40
-        }
-      ],
+      "climatology": {
+        "month": 4
+      },
       "noise_kt": 5
     },
     "convection": [

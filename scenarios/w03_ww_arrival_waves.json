@@ -13,34 +13,11 @@
  "design_notes": "GCRR waves at VEDOD about 2100, 3200, 4300 s; GMMN waves at ABODA about 700, 1800, 2900 s. Heavies sandwiched: TOM4HB B788 M.85 between RYR72TK and EZY43RF; CFG1W A333 M.84 between EZY88QP and BAW2RF; TOM9KX B789 and IBS41D A332 in wave 3; RAM1123 B789 between RAM1347 and RAM803; RAM1471 B788 between RAM949 and RAM655. Slow and low ahead: AME4521 C130 FL270 at VEDOD 2.5 min before wave 1, AME3302 A400 FL290 2.5 min before wave 2, IBB8790 E195 (M.74, itself a GCRR arrival) FL310 before wave 3. Same-level merges (loss if left alone): RYR72TK/TOM4HB at VEDOD FL370 40 s apart, VLG81KP/EZY88QP FL370 22 s, RYR33VN/EXS7NC FL370 25 s, RAM949/RAM1471 at ABODA FL370 25 s. Descent requests come between 30 s and 5 min before the merge point, sometimes the follower first. In the way: IBE3518/EZY91WP/EWG14T (KORNO-ABODA at FL310/330 just after each GMMN wave), BAW2581/NOZ418/SAS77K (RUNAX-IBALU crossing ABODA-MARJA at FL330/310), TOM67G/RYR8C/TOM2DM/TAP1129 (GCLP/GCFV on the TERTO axes), TAP1066 head-on on MARJA-ABODA at FL320, RAM1290 GMMN departure climbing to FL360 against GMMN wave 2, RAM2210 (SALCA-IBALU) climbing to FL350 into GCRR wave 3 at IBALU, BCS51 northbound asking FL400 as the TAKAV stream at FL390 crosses it.",
  "weather": {
   "seed": 31,
-  "temperature": {
-   "surface_c": 22,
-   "tropopause_fl": 380,
-   "lapse_c_per_kft": 2.0
-  },
   "wind": {
-   "profile": [
-    {
-     "fl": 0,
-     "dir": 30,
-     "kt": 12
-    },
-    {
-     "fl": 250,
-     "dir": 290,
-     "kt": 35
-    },
-    {
-     "fl": 350,
-     "dir": 280,
-     "kt": 50
-    },
-    {
-     "fl": 450,
-     "dir": 280,
-     "kt": 40
-    }
-   ]
+   "climatology": {
+    "month": 1
+   },
+   "noise_kt": 4
   }
  },
  "aircraft": [

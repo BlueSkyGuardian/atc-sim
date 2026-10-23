@@ -1,7 +1,7 @@
 {
   "name": "s20_casablanca_north",
   "title": "Casablanca North: Rabat crossings and GMD 21",
-  "description": "Casablanca ACC, North sector (125.500) open alone. Traffic from the Strait (GALTO, KORIS, BAMBA) to the south and east, northbound UN871 to ADUBI, eastbound UA411 from Agadir over SALCA and Rabat, UR722 from Agadir via MARJA. The danger area GMD 21 (FL150-FL460, Al Hoceima, in the East sector) is notified active from T+10 min. Light westerly flow, a few isolated moderate showers north-east of Rabat.",
+  "description": "Casablanca ACC, North sector (125.500) open alone. Traffic from the Strait (GALTO, KORIS, BAMBA) to the south and east, northbound UN871 to ADUBI, eastbound UA411 from Agadir over SALCA and Rabat, UR722 from Agadir via MARJA. The danger area GMD 21 (FL150-FL460, Al Hoceima, in the East sector) is notified active from T+10 min. April climatological winds (ERA5), a few isolated moderate showers north-east of Rabat.",
   "design_notes": "RAM970 (UA411 eastbound, FL370) and IBE3871 (UN869 southbound, FL370) meet over RBT at about T+20 min (1 NM if nothing is done): one of them has to move, and the levels next to them are not free everywhere (RAM517 FL380 on UN726, TAP1652 FL390 on UG5, VLG8122 FL360 northbound on UN871). EZY62LK on UB11 at FL350 asks for FL370 at T+8 min: unable until it is clear of the Rabat corridor traffic. GMD 21 activates at T+10 min: RAM517 (UN726 eastbound FL380, TNR at about T+12) would fly TTN-ALM into it just after leaving North: reroute it (coordinate with East) before TTN. RAM1475 (UR722 via MARJA) and VLG8122 (UN871 northbound) are ordinary traffic.",
   "airspace": "agadir",
   "control": [
@@ -11,33 +11,10 @@
   "complexity": 3,
   "weather": {
     "seed": 120,
-    "temperature": {
-      "surface_c": 22,
-      "tropopause_fl": 380
-    },
     "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 300,
-          "kt": 10
-        },
-        {
-          "fl": 200,
-          "dir": 280,
-          "kt": 35
-        },
-        {
-          "fl": 350,
-          "dir": 270,
-          "kt": 50
-        },
-        {
-          "fl": 450,
-          "dir": 270,
-          "kt": 35
-        }
-      ],
+      "climatology": {
+        "month": 4
+      },
       "noise_kt": 4
     },
     "convection": {

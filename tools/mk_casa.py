@@ -5,15 +5,11 @@ import os
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scenarios")
 
-WX_W = {"seed": 211, "temperature": {"surface_c": 21, "tropopause_fl": 380},
-        "wind": {"profile": [{"fl": 0, "dir": 300, "kt": 12}, {"fl": 200, "dir": 285, "kt": 40},
-                             {"fl": 350, "dir": 275, "kt": 60}, {"fl": 450, "dir": 270, "kt": 40}], "noise_kt": 5},
+WX_W = {"seed": 211, "wind": {"climatology": {"month": 4}, "noise_kt": 5},
         # morning showers building over the Rabat - Fes corridor and the Middle Atlas foothills
         "convection": [{"regime": "isolated", "intensity": "strong", "count": 5, "region": [205, 25, 325, 120]},
                        {"regime": "isolated", "intensity": "moderate", "count": 3, "region": [150, 60, 230, 140]}]}
-WX_S = {"seed": 222, "temperature": {"surface_c": 27, "tropopause_fl": 390},
-        "wind": {"profile": [{"fl": 0, "dir": 20, "kt": 10}, {"fl": 200, "dir": 330, "kt": 30},
-                             {"fl": 350, "dir": 300, "kt": 45}, {"fl": 450, "dir": 290, "kt": 30}], "noise_kt": 4},
+WX_S = {"seed": 222, "wind": {"climatology": {"month": 6}, "noise_kt": 4},
         # afternoon convection over the High Atlas (Marrakech - Ouarzazate - Beni Mellal), tops to FL450
         "convection": [{"regime": "scattered", "intensity": "strong", "count": 9, "region": [190, -150, 340, -40]},
                        {"regime": "isolated", "intensity": "moderate", "count": 3, "region": [120, -120, 190, -60]}]}
@@ -100,7 +96,7 @@ s21 = {
                    "in trail. GMMN and GMME departures are released climbing FL190 and ask for their cruising level "
                    "(UN871 via BAKIM, UR722 via LAKAM, UB11 via TUSOR, UN869 south). Transit traffic on UB11, UN869, "
                    "UA411, UN871, UG5, UN726 and UM240. GMD 21 (FL150-FL460, Al Hoceima) is notified active from T+15 "
-                   "min. Westerly flow; isolated thunderstorms building between Rabat, Fes and the Middle Atlas.",
+                   "min. April climatological winds (ERA5); isolated thunderstorms building between Rabat, Fes and the Middle Atlas.",
     "design_notes": "LAKAM wave 1 (T+17 to T+19): RAM763 (MARJA FL330), TAP1032 and the heavy RAM203 behind it (SALCA, "
                     "FL350 / FL370), EZY9113 (MARJA FL330) - four within 100 s; RAM203 is fast and must not be first by "
                     "default, the order and 10 NM come from speed and early vectors. RAM1474 (GMMN to LPPT, released "
@@ -199,8 +195,10 @@ s22 = {
                     "RAM1407 departs south on UA600 (T+31.5, asks FL330) head-on with the arrival BIN420 (FL340, TEKNA "
                     "at T+34) under RAM1291 (UA600 south FL350). Watch ADM: RAM1291 (UA600) leaves it southbound at FL350 just as the UR975 pair (FL350) passes it - an unplanned-looking convergence. OLOMA: RAM1622 (GMMX departure on UG850 south, asks "
                     "FL350) ahead of the arrival RYR2AG (FL310) and opposite TVF4410 (UG850 north FL360). Crossings at "
-                    "FL370: SWR254 (UM372) and RAM287 (UW900) at AGOVA at T+22; SWR254 again with AFR1580 (UG664) at "
-                    "TOPMA at T+37. Overtake: UAE751 (B77W M0.85) catches RAM1527 (B738 M0.76) on UR975 at FL350 before "
+                    "FL370: SWR254 (UM372) and RAM287 (UW900) at AGOVA at T+22; AFR1580 (UG664) crosses UM372 at TOPMA "
+                    "at T+37 behind SWR254. The High Atlas storms make pilots ask for deviations: SWR254, left alone, "
+                    "deviates north-west and comes back direct MAK straight through the prohibited area GMP 01 "
+                    "(Ben Guerir, UNL) - pilots do not avoid areas by themselves. Overtake: UAE751 (B77W M0.85) catches RAM1527 (B738 M0.76) on UR975 at FL350 before "
                     "the GCCC boundary. IBE3871 (UN869 FL390) asks FL350 at T+27.5 while the AGALI and MABAP traffic is "
                     "around. GMD 30 activates at T+15: RAM1891 (UL102 westbound FL360, entering from East about T+21 "
                     "straight into the area, RUBAB at T+33) needs a reroute coordinated with East before it enters. Ouarzazate: RAM1717 to MAXOR (FL290), RAM1718 out of RATVA at T+41.5 on "

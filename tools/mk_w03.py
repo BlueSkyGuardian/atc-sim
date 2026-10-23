@@ -93,9 +93,7 @@ scn = {
                      "(GCLP/GCFV on the TERTO axes), TAP1066 head-on on MARJA-ABODA at FL320, RAM1290 GMMN departure "
                      "climbing to FL360 against GMMN wave 2, RAM2210 (SALCA-IBALU) climbing to FL350 into GCRR wave 3 at IBALU, BCS51 northbound "
                      "asking FL400 as the TAKAV stream at FL390 crosses it."),
-    "weather": {"seed": 31, "temperature": {"surface_c": 22, "tropopause_fl": 380, "lapse_c_per_kft": 2.0},
-                "wind": {"profile": [{"fl": 0, "dir": 30, "kt": 12}, {"fl": 250, "dir": 290, "kt": 35},
-                                     {"fl": 350, "dir": 280, "kt": 50}, {"fl": 450, "dir": 280, "kt": 40}]}},
+    "weather": {"seed": 31, "wind": {"climatology": {"month": 1}, "noise_kt": 4}},   # January, ERA5
     "aircraft": ac, "requests": sorted(rq, key=lambda r: r["time"]),
     "expected": {"passive": {"allow_left_sector": True, "los": True,
                              "pairs": [["RYR72TK", "TOM4HB"], ["RAM1471", "RAM949"], ["EZY88QP", "VLG81KP"], ["EXS7NC", "RYR33VN"]]}},

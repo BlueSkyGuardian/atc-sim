@@ -1,7 +1,7 @@
 {
   "name": "s19_terto_arrivals_crossing",
   "title": "Three arrivals for Lanzarote by TERTO, an overflight in the way of their descent",
-  "description": "Three GCRR arrivals converge on VEDOD for TERTO (letter of agreement: FL250 at TERTO, 10 NM in trail), two from TOVRA and one from TAKAV, within a minute of each other. A northbound overflight at FL320 (free route DESUM - VEDOD - SUNID, UN857 being southbound only) comes up from VEDOD against the stream and stays at its level: it is not to be touched. Build the in-trail sequence (speed first, a fan of vectors where it is not enough), and give each descent once its separation is certain - with its descent speed (Mach, then an IAS on conversion), timed, or with a rate, so that it crosses FL320 clear of the overflight.",
+  "description": "Three GCRR arrivals converge on VEDOD for TERTO (letter of agreement: FL250 at TERTO, 10 NM in trail), two from TOVRA and one from TAKAV, within a minute of each other. A northbound overflight at FL320 (free route DESUM - VEDOD - SUNID, UN857 being southbound only) comes up from VEDOD against the stream and stays at its level: it is not to be touched. Build the in-trail sequence (speed first, a fan of vectors where it is not enough), and give each descent once its separation is certain - with its descent speed (Mach, then an IAS on conversion), timed, or with a rate, so that it crosses FL320 clear of the overflight. January climatological winds (ERA5): westerly across TOVRA - TERTO.",
   "airspace": "agadir",
   "control": [
     "WS"
@@ -75,5 +75,14 @@
       }
     }
   ],
-  "expected": {}
+  "expected": {},
+  "weather": {
+    "seed": 19,
+    "wind": {
+      "climatology": {
+        "month": 1
+      },
+      "noise_kt": 4
+    }
+  }
 }
