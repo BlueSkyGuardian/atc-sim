@@ -69,51 +69,17 @@
   ],
   "weather": {
     "seed": 104,
+    "wind": {
+      "climatology": {
+        "month": 1
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "embedded",
@@ -179,7 +145,7 @@
         "ssr": "4457",
         "reg": "PR-GPS",
         "code": "E64F2A",
-        "eobt": "1950",
+        "eobt": "1948",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "GOL",
@@ -231,7 +197,7 @@
         "ssr": "2646",
         "reg": "PR-AGG",
         "code": "E6DC4D",
-        "eobt": "1447",
+        "eobt": "1444",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AZUL",
@@ -257,7 +223,7 @@
         "ssr": "3612",
         "reg": "EC-FSF",
         "code": "36AD9D",
-        "eobt": "1219",
+        "eobt": "1216",
         "altn": "LEVC",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA",
@@ -285,7 +251,7 @@
         "ssr": "2266",
         "reg": "PH-BEW",
         "code": "480EC5",
-        "eobt": "1757",
+        "eobt": "1758",
         "altn": "SCEL",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "KLM",
@@ -731,7 +697,7 @@
         "KUBIL",
         "BEXAL"
       ],
-      "fl": 360,
+      "fl": 340,
       "load": 0.53,
       "entry_time": 1368,
       "dep": "SBRF",
@@ -743,7 +709,7 @@
         "ssr": "4700",
         "reg": "EC-HEP",
         "code": "36206F",
-        "eobt": "1520",
+        "eobt": "1523",
         "altn": "EGNM",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AIR EUROPA",
@@ -839,7 +805,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 310,
+      "fl": 290,
       "load": 0.48,
       "entry_time": 1156,
       "dep": "EDDM",
@@ -851,7 +817,7 @@
         "ssr": "3166",
         "reg": "EC-ESB",
         "code": "356994",
-        "eobt": "1734",
+        "eobt": "1728",
         "altn": "SBGR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "VUELING",

@@ -30,71 +30,12 @@
   ],
   "weather": {
     "seed": 103,
-    "temperature": {
-      "surface_c": 13,
-      "tropopause_fl": 340
-    },
     "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 250,
-          "kt": 12
-        },
-        {
-          "fl": 100,
-          "dir": 260,
-          "kt": 28
-        },
-        {
-          "fl": 200,
-          "dir": 265,
-          "kt": 42
-        },
-        {
-          "fl": 300,
-          "dir": 270,
-          "kt": 55
-        },
-        {
-          "fl": 400,
-          "dir": 275,
-          "kt": 42
-        },
-        {
-          "fl": 500,
-          "dir": 280,
-          "kt": 25
-        },
-        {
-          "fl": 650,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "jet": {
-        "core_fl": 340,
-        "dir": 268,
-        "kt": 65,
-        "axis_point": [
-          0,
-          120
-        ],
-        "half_width_nm": 90,
-        "depth_below_ft": 11000,
-        "depth_above_ft": 8000,
-        "streak_length_nm": 600,
-        "streak_speed_kt": 30,
-        "meander_amp_nm": 10,
-        "meander_wavelength_nm": 500
+      "climatology": {
+        "month": 2
       },
       "noise_kt": 5,
-      "noise_scale_nm": 45
+      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "isolated",
@@ -128,7 +69,7 @@
         "ssr": "5576",
         "reg": "PR-AQR",
         "code": "E6923D",
-        "eobt": "1704",
+        "eobt": "1700",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AZUL",
@@ -155,7 +96,7 @@
         "ssr": "3151",
         "reg": "EC-PBC",
         "code": "34EE13",
-        "eobt": "0053",
+        "eobt": "0050",
         "altn": "LEPA",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "VUELING",
@@ -184,7 +125,7 @@
         "ssr": "3567",
         "reg": "EC-DZT",
         "code": "36681C",
-        "eobt": "0011",
+        "eobt": "0018",
         "altn": "SBKP",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA",
@@ -240,7 +181,7 @@
         "ssr": "2170",
         "reg": "F-GZHL",
         "code": "391243",
-        "eobt": "2314",
+        "eobt": "2317",
         "altn": "SBGR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AIR FRANCE",
@@ -269,7 +210,7 @@
         "ssr": "4201",
         "reg": "PT-MVZ",
         "code": "E65225",
-        "eobt": "2326",
+        "eobt": "2329",
         "altn": "SBKP",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "LATAM BRASIL",
@@ -296,7 +237,7 @@
         "ssr": "2377",
         "reg": "CS-TWK",
         "code": "492F88",
-        "eobt": "1711",
+        "eobt": "1707",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "TAP AIR PORTUGAL",
@@ -319,8 +260,8 @@
       "load": 0.4,
       "reach": {
         "point": [
-          2.42,
-          177.901
+          2.042,
+          177.371
         ],
         "time": 1300
       },
@@ -389,7 +330,7 @@
         "ssr": "4624",
         "reg": "EC-JWM",
         "code": "35F92E",
-        "eobt": "0007",
+        "eobt": "0013",
         "altn": "GCTS",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "VUELING",
@@ -421,7 +362,7 @@
         "ssr": "2433",
         "reg": "F-HKET",
         "code": "39FA89",
-        "eobt": "2307",
+        "eobt": "2313",
         "altn": "GOBD",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TRANSAVIA FRANCE",
@@ -449,7 +390,7 @@
         "ssr": "3637",
         "reg": "N811AV",
         "code": "A7071D",
-        "eobt": "1815",
+        "eobt": "1814",
         "altn": "LEVC",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AVIANCA",
@@ -495,7 +436,7 @@
         "MITLA",
         "SAMAR"
       ],
-      "fl": 370,
+      "fl": 330,
       "load": 0.42,
       "entry_time": -488,
       "dep": "EGKK",
@@ -507,7 +448,7 @@
         "ssr": "5360",
         "reg": "D-AXXC",
         "code": "3DD1F9",
-        "eobt": "2315",
+        "eobt": "2316",
         "altn": "SBFZ",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "DEUTSCHE LUFTHANSA",
@@ -705,7 +646,7 @@
         "ssr": "3254",
         "reg": "PR-AHZ",
         "code": "E406D6",
-        "eobt": "2341",
+        "eobt": "2340",
         "altn": "SVMI",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AZUL",
@@ -761,7 +702,7 @@
         "ssr": "5423",
         "reg": "N193AV",
         "code": "A070FA",
-        "eobt": "0007",
+        "eobt": "0006",
         "altn": "SBRF",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AVIANCA",
@@ -871,7 +812,7 @@
         "ssr": "4457",
         "reg": "G-EGEB",
         "code": "41C0EA",
-        "eobt": "2243",
+        "eobt": "2242",
         "altn": "SCEL",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "EASYJET",
@@ -898,7 +839,7 @@
         "ssr": "3306",
         "reg": "N953AV",
         "code": "A49256",
-        "eobt": "2310",
+        "eobt": "2309",
         "altn": "SBGR",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AVIANCA",
@@ -1058,7 +999,7 @@
         "ssr": "5112",
         "reg": "F-GSKF",
         "code": "38F073",
-        "eobt": "1730",
+        "eobt": "1729",
         "altn": "LSZH",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AIR FRANCE",
@@ -1084,7 +1025,7 @@
         "ssr": "2756",
         "reg": "EI-PSV",
         "code": "4CA60F",
-        "eobt": "1420",
+        "eobt": "1419",
         "altn": "LEPA",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "RYANAIR",
@@ -1110,7 +1051,7 @@
         "ssr": "2300",
         "reg": "N120AV",
         "code": "A5D4C6",
-        "eobt": "1718",
+        "eobt": "1717",
         "altn": "LFPO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "AVIANCA",
@@ -1163,7 +1104,7 @@
         "ssr": "4776",
         "reg": "D-AESK",
         "code": "3E7731",
-        "eobt": "1958",
+        "eobt": "1957",
         "altn": "LEPA",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "DEUTSCHE LUFTHANSA",
@@ -1242,7 +1183,7 @@
         "ssr": "4036",
         "reg": "D-AEWU",
         "code": "3DCB22",
-        "eobt": "2202",
+        "eobt": "2201",
         "altn": "LPPT",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "CONDOR",
@@ -1269,7 +1210,7 @@
         "ssr": "4245",
         "reg": "PR-AQD",
         "code": "E6A4E6",
-        "eobt": "1502",
+        "eobt": "1501",
         "altn": "LSZH",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AZUL",
@@ -1377,7 +1318,7 @@
         "ssr": "2075",
         "reg": "CS-TDQ",
         "code": "494081",
-        "eobt": "0046",
+        "eobt": "0045",
         "altn": "EGNM",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TAP AIR PORTUGAL",
