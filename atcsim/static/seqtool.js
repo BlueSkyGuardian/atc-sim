@@ -11,7 +11,7 @@
   const btn = $('#seqBtn'), box = $('#seqPanel');
   if (!btn || !box) return;
   // the point can also be typed (a waypoint under a label is hard to click): a field that the panel's refresh leaves alone
-  box.innerHTML = `<div class="sq-pt"><span class="c-dim">point</span> <input id="sqPt" list="sqPts" placeholder="e.g. TERTO" autocomplete="off" spellcheck="false">
+  box.innerHTML = `<div class="pwh"><span>Sequencing</span><button data-pclose title="close (Esc)">✕</button></div><div class="sq-pt"><span class="c-dim">point</span> <input id="sqPt" list="sqPts" placeholder="e.g. TERTO" autocomplete="off" spellcheck="false">
     <datalist id="sqPts"></datalist></div><div id="sqInner"></div>`;
   const inner = box.querySelector('#sqInner'), ptIn = box.querySelector('#sqPt');
   const fillPts = () => { const dl = box.querySelector('#sqPts'); if (dl.options.length || !sector) return;
@@ -35,6 +35,8 @@
     render();
   }
   btn.onclick = () => setOn(!on);
+  box.querySelector('[data-pclose]').onclick = () => setOn(false);
+  if (window.makeMovable) makeMovable(box, box.querySelector('.pwh'));
   window.seqToolActive = () => on && allowed();
   window.addEventListener('keydown', e => { if (on && e.key === 'Escape' && !e.target.closest('input,textarea')) setOn(false); });
 

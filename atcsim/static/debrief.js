@@ -69,7 +69,7 @@
     $('#scope').insertAdjacentHTML('beforeend', `<div id="dbBar"></div><div id="dbCursors"></div><div id="dbMsg"></div>
       <div id="dbTls"><div class="hd"><b>Timelines</b><span class="c-dim">click to show · any action branches a new one</span><button id="dbTlFold" title="Fold">–</button></div><div id="dbTlList"></div></div>
       <div id="dbCtl">
-        <button data-c="start" title="To the start of this timeline">⏮</button><button data-c="back" title="30 s back">−30 s</button>
+        <button data-c="fold" class="sb-fold" title="Collapse / expand the player">◂</button><button data-c="start" title="To the start of this timeline">⏮</button><button data-c="back" title="30 s back">−30 s</button>
         <button data-c="play" id="dbPlay" class="primary" title="Play / pause (P)">▶ Play</button><button data-c="fwd" title="30 s forward">+30 s</button>
         <span class="sb-seg">${[1, 2, 5, 10, 30].map(v => `<button data-tf="${v}">×${v}</button>`).join('')}</span>
         <button data-c="wx" id="dbWx" title="Do the simulated pilots deviate around weather by themselves? Off: they fly what they are cleared to and only ask (you clear deviations). Switching it is a change of the timeline shown (or the setting for the timelines you make, on the exercise as flown).">WX avoid</button>
@@ -117,7 +117,11 @@
     finally { seeking = false; if (nextSeek) { const n = nextSeek; nextSeek = null; seek(n[0], n[1]); } }
   }
   function onCtl(e) {
-    const b = e.target.closest('button'); if (!b || !state) return;
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.c === 'fold') {          // folded: play / pause, the 30 s steps and the speed only
+      const box = $('#dbCtl'); box.classList.toggle('folded'); b.textContent = box.classList.contains('folded') ? '▸' : '◂'; return;
+    }
+    if (!state) return;
     if (b.dataset.tf) { control({ action: 'set_speed', time_factor: +b.dataset.tf }); return; }
     const c = b.dataset.c, now = state.sim_time_s, d = dbg();
     if (c === 'play') control({ action: state.session.status === 'running' ? 'pause' : 'resume' });

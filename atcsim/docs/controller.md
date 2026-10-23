@@ -26,34 +26,31 @@ anywhere except inside a text field.
 ## The radar picture
 
 
-![The controller seat: the whole window is the radar. Toolbar at the top, information box top left, alarms at the top centre, the push-to-talk hint and the telephone at the bottom](/static/docs/c_radar.jpg "The controller seat: the whole window is the radar. Toolbar at the top, information box top left, alarms at the top centre, the push-to-talk hint and the telephone at the bottom")
+![The controller seat: the whole window is the radar. Toolbar at the top (ALARMS on the left), information box top left, the push-to-talk hint and the telephone at the bottom](/static/docs/c_radar.jpg "The controller seat: the whole window is the radar. Toolbar at the top (ALARMS on the left), information box top left, the push-to-talk hint and the telephone at the bottom")
 
 ### Toolbar
 
-The toolbar changes **your view only**, never the simulation:
+The toolbar changes **your view only**, never the simulation. The toggles are grouped in drop-down menus (click a
+group to open it, click elsewhere to close it; a group lights up when one of its items has something new, e.g. an MTCD
+conflict or an unread chat message):
 
 | Control | What it does |
 |---|---|
-| Weather product and FL | Composite reflectivity, or a CAPPI at a flight level (to see embedded cells at your level) |
-| Tops | Echo tops |
-| Coast, Areas, Routes, RAD, Sectors, Names, Points, Trails | Map layers: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), prohibited / restricted / danger areas (the AIP GMP / GMR / GMD areas are always there: bright when active and reaching your levels and sectors, faint otherwise), airways, RAD routings (dashed, one-way arrows), sector lines with frequencies (the other control area of the Casablanca FIR dimmer, with the FIR outline), point names, history dots |
-| SID, STAR, Hold | The published procedures of the **runways in use** (GMMN, GMME, GMMX, GMAD, GMMZ; the holds of GCLP and GCRR too): SIDs dotted green from the runway, STARs dashed orange (names when zoomed in), holding patterns in purple with their minimum altitude - each layer on / off; colours in Display. A runway change redraws them |
-| RBL | Range-and-bearing mode (you rarely need it, see [RBL](#range-and-bearing-lines-rbl)) |
-| Reset view | Fit the airspace |
-| **FPL** | The flight-plan list (key <kbd>G</kbd>) |
-| **MTCD** | Medium-term conflict detection on/off (key <kbd>M</kbd>) |
-| **INFO** | Track info window on/off (key <kbd>I</kbd>) |
-| **OLDI** | OLDI messages window (key <kbd>O</kbd>) |
-| **CPDLC** | CPDLC window: requests, dialogues, connections (key <kbd>J</kbd>); the count of requests waiting |
-| **CHAT** | Coordination chat with the other sectors and units (key <kbd>T</kbd>); the count of unread messages |
-| **HUD** | Show or hide the information box (saved in your browser) |
-| **Timeline** | Solo radar (and the instructor): show or hide the replay timeline under the scope |
-| **Solver** | Solo radar: the conflict solver's suggestions for each predicted conflict (see below) |
+| **ALARMS** | Red and flashing while there is a loss of separation, amber with an STCA; the count of alarms. Click it for the alarms window (see [Alarms](#alarms)) |
+| **Weather** ▾ | Weather product and FL (composite reflectivity, or a CAPPI at a flight level to see embedded cells at your level), echo tops |
+| **Map** ▾ | Coast, Areas, Routes, RAD, Borders, Freq, Points, Trails: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), prohibited / restricted / danger areas (the AIP GMP / GMR / GMD areas are always there: bright when active and reaching your levels and sectors, faint otherwise), airways, RAD routings (dashed, one-way arrows), sector lines, sector names with frequencies (the other control area of the Casablanca FIR dimmer, with the FIR outline), point names, history dots |
+| **Procedures** ▾ | SID, STAR, Hold: the published procedures of the **runways in use** (GMMN, GMME, GMMX, GMAD, GMMZ, GMTT, GMFO, GMFI; the holds of GCLP and GCRR too): SIDs dotted green from the runway, STARs dashed orange (names when zoomed in), holding patterns in purple with their minimum altitude, each layer on / off; colours in Display. A runway change redraws them. **All runways**: every runway's procedures, not only those in use |
+| **Tools** ▾ | RBL (range-and-bearing mode, rarely needed, see [RBL](#range-and-bearing-lines-rbl)) and ✕ RBL; Comply, Solver, Sequence (see below); LIVE on the solo radar |
+| **Windows** ▾ | **FPL** flight-plan list (key <kbd>G</kbd>), **MTCD** on/off (key <kbd>M</kbd>), **INFO** track info (key <kbd>I</kbd>), **OLDI** messages (key <kbd>O</kbd>), **Timeline** (solo radar and instructor: the replay timeline under the scope), **HUD** (the information box) |
+| **Comms** ▾ | **CPDLC** window: requests, dialogues, connections (key <kbd>J</kbd>), with the count of requests waiting; **CHAT** with the other sectors and units (key <kbd>T</kbd>), with the count of unread messages |
+| ⌂ | Reset the view: fit the airspace |
+| ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour, saved in your browser. A window with a title bar: drag it anywhere, ✕ to close |
 | **?** | Keyboard shortcuts |
 | UTC clock | The exercise clock (the scenario's start time, then real time × the time factor) |
-| ⚙ Display | Zoom, fonts, symbol, speed vector, history dots, weather opacity, every colour. Saved in your browser |
 
-Map: drag the background to pan, use the wheel to zoom, double-click the background to refit.
+Map: drag the background to pan; the wheel zooms **about the cursor** (the point under the mouse stays where it is);
+double-click the background to refit. The simulation bar (solo radar, instructor) folds with ◂ to Run / Pause, the
+time factor and +10 s; the debrief player folds the same way to Play / Pause, −30 s / +30 s and the speed.
 
 ### Aircraft states and colours
 
@@ -121,10 +118,14 @@ heading line.
 | `MTC7'` | Medium-term conflict in 7 minutes (MTCD on) |
 | `COORD` | A change too close to the boundary for an OLDI revision: coordinate by phone |
 
-Alarms at the top of the scope: an amber **STCA** banner per pair predicted to lose separation within 3 minutes,
-and a red flashing **LOSS OF SEPARATION** banner per pair below the minimum (7 NM in the Agadir CTA, 5 NM in the
-training sector; 1000 ft, or 2000 ft for non-RVSM pairs in RVSM airspace, above FL410 and against formations).
-Click a banner to select the aircraft.
+### Alarms
+
+The **ALARMS** button in the toolbar turns amber when a pair is predicted to lose separation within 3 minutes (**STCA**)
+and red, flashing, when a pair is below the minimum (**LOSS OF SEPARATION**: 7 NM in the Agadir CTA, 5 NM in the
+training sector; 1000 ft, or 2000 ft for non-RVSM pairs in RVSM airspace, above FL410 and against formations). It
+opens the alarms window, like the MTCD list: each loss, each STCA (time to the loss, closest distance) and each area
+infringement predicted within 3 minutes. Click a line to select the aircraft. The sound for new alarms is switched on
+or off in the window.
 
 ## Working with labels: flat buttons
 

@@ -48,7 +48,7 @@
   function setupCtl() {
     btn = document.createElement('button'); btn.id = 'chatBtn'; btn.textContent = 'CHAT';
     btn.title = 'Coordination chat with the other sectors and the adjacent units (T)';
-    const help = document.getElementById('helpBtn'); if (help) help.parentNode.insertBefore(btn, help);
+    const help = document.getElementById('helpBtn'), host = document.getElementById('commsMenu'); if (host) host.appendChild(btn); else if (help) help.parentNode.insertBefore(btn, help);
     btn.onclick = () => wantWin && atcIsOpen('chatWin') ? closeWin() : openWin();
     const typing = () => { const a = document.activeElement; return a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT') && a.type !== 'checkbox'; };
     window.addEventListener('keydown', e => {

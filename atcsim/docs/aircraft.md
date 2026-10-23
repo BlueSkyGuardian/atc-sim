@@ -6,7 +6,7 @@
 |---|---|
 | Atmosphere | ISA with the scenario's temperature. Flight levels are **pressure altitudes**. Exact CAS ↔ TAS ↔ Mach conversions |
 | Type data | From **OpenAP** (TU Delft) for 36 civil types: max climb and idle thrust, drag polar with wave drag, fuel flow, MTOW / OEW, ceiling, VMO / MMO, real-world cruise Mach. A **per-type calibration** brings L/D max and the maximum level at mid weight to typical values |
-| Vertical and speed | Point-mass total-energy model, (T − D)·V = m·g·ḣ + m·V·V̇, with the energy-share factor for constant-Mach / constant-CAS climbs and descents. Climbs at max climb thrust, descents at idle. Mass decreases with fuel burn |
+| Vertical and speed | Point-mass total-energy model, (T − D)·V = m·g·ḣ + m·V·V̇, with the energy-share factor for constant-Mach / constant-CAS climbs and descents. Climbs at max climb thrust, descents at idle. Slowing down in a descent shares the idle energy (30 % to the descent, 70 % to the speed, as BADA): about 0.5 kt/s with a shallower descent (400-600 ft/min) while it slows, against about 0.7 kt/s level. Mass decreases with fuel burn |
 | Temperature | Drag uses the real air density. Engines are flat-rated: climb thrust falls 0.8 %/°C above ISA+10, so hot days lower the maximum level (about 1000–3000 ft by ISA+20) |
 | Speed | Each aircraft flies a **Mach / IAS pair** and converts at the **conversion altitude** (M.78 / 300 kt ≈ FL293). ATC can replace either: *"descend FL250, maintain Mach .76, on conversion 280 knots"*. *"Maintain 280 knots"* applies at every level. Below FL100, 250 kt. VMO / MMO protection always |
 | Lateral | 25° bank, 5°/s roll rate. The autopilot starts its roll-out early enough to arrive on the new heading wings-level (no overshoot, no slow creep onto it): a 90° turn at FL350 takes about 87 s. FMS-style navigation: track-to-fix legs, wind correction, fly-by turn anticipation. A direct-to is flown from where the aircraft is during the turn, so it rolls out straight on the line to the fix with no S-turn |
@@ -165,7 +165,7 @@ its slot: speed first, then one vector (up to 25 NM), then the **published appro
 the aerodrome's published one for the runway in use that lies on the way (fix, inbound track, turn direction,
 1 minute legs or the published leg length, never below its minimum holding altitude, its maximum speed): GMMN KOTAG /
 DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI, INSER, NAVIM; GMAD SOPAB, AGAMU
-(27), ALS (27); GMMX ODALO, RAMIM (28), MAK; GMME ME999, ME998, FAHIM, ENNAV (21); GMMZ TIDMO (30), MZ120 (12) (`aerodromes[].holdings`). The number of laps accounts for the detour
+(27), ALS (27); GMMX ODALO, RAMIM (28), MAK; GMME ME999, ME998, FAHIM, ENNAV (21); GMMZ TIDMO (30), MZ120 (12); GMFO ADRER, ABKAN (`aerodromes[].holdings`). The holding speed is the ICAO one for the level (230 kt up to 14000 ft, 240 kt to FL200, 265 kt above) or the published maximum within the hold's levels, and approach asks for it as soon as it gives the hold, at any level. The number of laps accounts for the detour
 to the hold fix, and laps are cut short when the slot comes (`approach_holding`, `approach_leave_hold`).
 The aircraft flies the hold itself, as the FMS does: the **entry** for the track it arrives on (direct, teardrop 30° off the outbound track, or parallel; the 70° line), the fix **flown over**, turns in the holding direction at rate one or 25° of bank (whichever is less), the outbound track the pattern's width from the inbound one (corrected for the wind, including the drift during the turn back), **timed from abeam the fix** (1 min up to 14000 ft, 1.5 min above) or flown to the published leg length, the outbound time adjusted lap by lap so the inbound leg comes out at the standard time, and the inbound track intercepted and flown to the fix. It leaves at the fix (aircraft snapshot `holding`: fix, entry, phase). No new
 vector while the last one is still being flown. Approach re-sequences when an aircraft has clearly got ahead of the
@@ -191,11 +191,11 @@ below, 3 NM below FL100. Cleared before its top of descent, about 1000 ft/min un
 only when it can no longer make the level of its letter of agreement by the fix; "expedite", an assigned rate or
 speedbrakes give up to the idle rate and more.
 
-**Departures and SIDs.** Departures from GMMN, GMME, GMMX and GMAD fly the published SIDs (`aerodromes[].sids`
+**Departures and SIDs.** Departures from GMMN, GMME, GMMX, GMAD, GMTT, GMFO and GMFI fly the published SIDs (`aerodromes[].sids`
 in the airspace file, from AIP Maroc AD 2 xx 31): GMMN 35R/35L 1D/3D and 17L/17R 2D/4D (on the runway axis to
 2000 ft, then the NDB / VOR tracks through MOKDA, BODNI, EVDOL, REVMI, AGDAL, CSD, SLK, GOVAS, BISMI…), GMME RNAV
 03 1A and 21 1B, GMMX 10 3D (Rm 114 to 10 DME MAK) and 28 4D (to 2.5 DME MAK), GMAD 09 4D (right reversal at
-1500 ft / 2000 ft) and 27 3D (left at 5.2 DME ADM). A departure takes off from the departure end of the runway in
+1500 ft / 2000 ft) and 27 3D (left at 5.2 DME ADM), GMTT 10 1D (on the axis to the TAN NDB) and 28 2D (turns at 3.6 DME TNR), GMFO 06 1C / 13 3C (at 2000 ft right Rm 259 to IXOBA) and RNAV 31 4R (FO510, FO512; no SID chart for 24 in the set), GMFI RNAV 03 1N and 21 1P (to 7200 ft, then left to FI420). A departure takes off from the departure end of the runway in
 use, flies the SID that leads to its route - the turn on the published side, 230 kt in the turns (210 kt on GMME
 21) until about 4000 ft above the field, then its own climb speeds - and climbs to the level approach gives it
 (the scenario's `cfl`). It is approach's until its release point (the scenario's start point, brought onto the
@@ -209,7 +209,7 @@ from the previous ones (Agadir West: the GMMN departures at MARJA, SALCA, NISBA)
 use when its runway is within 150 NM of our entry point: the SID that makes the shortest way to its route, then its
 flight plan, climbing to the level it enters at (FL260…), with approach and the previous sector until it calls us
 10 NM before the entry - on the scope from take-off, separated by them. Further away, or already airborne at the
-start of the exercise, it appears before the entry as before. **STARs** (`aerodromes[].stars`, AD 2 xx 33-35) are
+start of the exercise, it appears before the entry as before. **STARs** (`aerodromes[].stars`, AD 2 xx 33-35; GMTT 1A / 2A to RABCA and 5A by ATC, GMFO 5C / 7C / 8R to ADRER and ABKAN, GMFI EMKOK 1L / FES 1L) are
 drawn on the scope with the SIDs and the holds.
 
 **The approach units keep their traffic separated** (`tma.py`). The traffic "with approach" - departures on their

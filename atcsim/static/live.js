@@ -88,7 +88,7 @@
     if (EXINFO && EXINFO.solo) {                      // solo radar: a toolbar button and a floating window
       const btn = document.createElement('button'); btn.id = 'liveBtn'; btn.textContent = 'LIVE';
       btn.title = 'Live actions: add an aircraft, an emergency, a pilot request, switch an area';
-      const help = document.getElementById('helpBtn'); if (help) help.parentNode.insertBefore(btn, help);
+      const help = document.getElementById('helpBtn'), host = document.getElementById('toolsMenu'); if (host) host.appendChild(btn); else if (help) help.parentNode.insertBefore(btn, help);
       btn.onclick = async () => {
         if (atcIsOpen('liveWin')) { atcCloseWin('liveWin'); box = null; return; }
         const el = atcWin('liveWin', 'Live actions', 140, 90, 430);

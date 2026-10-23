@@ -1560,6 +1560,53 @@
    "coord": "311905.56N 0083434.45W",
    "role": "GMMX STAR (R-237 MAK, position approximate)",
    "fra": ""
+  },
+  "TAN": {
+   "coord": "354316.00N 0054817.00W",
+   "role": "NDB TANGER TAN 374",
+   "fra": "",
+   "navaid": true
+  },
+  "VDO": {
+   "coord": "344856.68N 0015737.66W",
+   "role": "VOR/DME OUJDA VDO 115.65",
+   "fra": "",
+   "navaid": true
+  },
+  "FO510": {
+   "coord": "345009.05N 0015919.07W",
+   "role": "GMFO SID RNAV RWY 31",
+   "fra": ""
+  },
+  "FO512": {
+   "coord": "344509.26N 0020824.82W",
+   "role": "GMFO SID RNAV RWY 31",
+   "fra": ""
+  },
+  "FI418": {
+   "coord": "333958.06N 0050341.72W",
+   "role": "GMFI SID RNAV",
+   "fra": ""
+  },
+  "FI440": {
+   "coord": "334557.29N 0050303.02W",
+   "role": "GMFI SID RNAV",
+   "fra": ""
+  },
+  "FI420": {
+   "coord": "333526.52N 0050615.75W",
+   "role": "GMFI SID RNAV RWY 21",
+   "fra": ""
+  },
+  "FI400": {
+   "coord": "334558.98N 0045648.14W",
+   "role": "GMFI IAF (STAR RNAV)",
+   "fra": ""
+  },
+  "FI402": {
+   "coord": "334538.69N 0044540.22W",
+   "role": "GMFI IAF (STAR RNAV)",
+   "fra": ""
   }
  },
  "construction_points": {
@@ -4589,6 +4636,1011 @@
     }
    ],
    "_stars_source": "AD2 GMMZ 34_1 (RNAV STAR RWY 30 1A) and 35_1 (STAR RWY 12 4A)"
+  },
+  {
+   "id": "GMTT",
+   "name": "Tanger Ibn Batouta",
+   "coord": "354337N 0055500W",
+   "elev_ft": 69,
+   "runways": [
+    {
+     "id": "10",
+     "heading": 100
+    },
+    {
+     "id": "28",
+     "heading": 280
+    }
+   ],
+   "runway_in_use": "auto",
+   "_sids_source": "AD2 GMTT 31_1 / 31_2 (SID CONV RWY 10 1D: on the axis to the TAN NDB; RWY 28 2D: turns at 3.6 DME TNR, 220 kt)",
+   "_stars_source": "AD2 GMTT 33_1 / 33_2 (STAR CONV RWY 10 1A, RWY 28 2A to the IAF RABCA via the 13.6 DME TNR arc; RWY 28 5A by ATC straight in on R098 TAN)",
+   "sids": [
+    {
+     "name": "BARPA1D",
+     "runways": [
+      "10"
+     ],
+     "end": "BARPA",
+     "via": [
+      "TAN",
+      "BARPA"
+     ]
+    },
+    {
+     "name": "LAMAD1D",
+     "runways": [
+      "10"
+     ],
+     "end": "LAMAD",
+     "via": [
+      "TAN",
+      "LAMAD"
+     ]
+    },
+    {
+     "name": "NARMI1D",
+     "runways": [
+      "10"
+     ],
+     "end": "NARMI",
+     "via": [
+      "TAN",
+      "NARMI"
+     ]
+    },
+    {
+     "name": "MADOV1D",
+     "runways": [
+      "10"
+     ],
+     "end": "MADOV",
+     "via": [
+      "TAN",
+      "353546.19N 0055049.69W",
+      "MADOV"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "SOBMA1D",
+     "runways": [
+      "10"
+     ],
+     "end": "SOBMA",
+     "via": [
+      "TAN",
+      "353603.32N 0055509.00W",
+      "SOBMA"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "ABIRO1D",
+     "runways": [
+      "10"
+     ],
+     "end": "ABIRO",
+     "via": [
+      "TAN",
+      "354013.82N 0055016.99W",
+      "354016.22N 0055645.12W",
+      "354603.91N 0060557.03W",
+      "ABIRO"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "NOLRO1D",
+     "runways": [
+      "10"
+     ],
+     "end": "NOLRO",
+     "via": [
+      "TAN",
+      "354013.82N 0055016.99W",
+      "354016.22N 0055645.12W",
+      "354559.20N 0055927.52W",
+      "NOLRO"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "LAMAD2D",
+     "runways": [
+      "28"
+     ],
+     "end": "LAMAD",
+     "via": [
+      "TAN",
+      "354545.44N 0054146.19W",
+      "LAMAD"
+     ],
+     "turn": "L",
+     "axis_nm": 3.0,
+     "max_kt": 220
+    },
+    {
+     "name": "SOBMA2D",
+     "runways": [
+      "28"
+     ],
+     "end": "SOBMA",
+     "via": [
+      "353803.24N 0055509.00W",
+      "SOBMA"
+     ],
+     "turn": "L",
+     "axis_nm": 3.0,
+     "max_kt": 220
+    },
+    {
+     "name": "NARMI2D",
+     "runways": [
+      "28"
+     ],
+     "end": "NARMI",
+     "via": [
+      "TAN",
+      "NARMI"
+     ],
+     "turn": "L",
+     "axis_nm": 3.0,
+     "max_kt": 220
+    },
+    {
+     "name": "MADOV2D",
+     "runways": [
+      "28"
+     ],
+     "end": "MADOV",
+     "via": [
+      "353831.81N 0055216.03W",
+      "MADOV"
+     ],
+     "turn": "L",
+     "axis_nm": 3.0,
+     "max_kt": 220
+    },
+    {
+     "name": "ABIRO2D",
+     "runways": [
+      "28"
+     ],
+     "end": "ABIRO",
+     "via": [
+      "354510.29N 0060108.95W",
+      "ABIRO"
+     ],
+     "axis_nm": 3.0
+    },
+    {
+     "name": "NOLRO2D",
+     "runways": [
+      "28"
+     ],
+     "end": "NOLRO",
+     "via": [
+      "NOLRO"
+     ],
+     "turn": "R",
+     "axis_nm": 3.0
+    },
+    {
+     "name": "BARPA2D",
+     "runways": [
+      "28"
+     ],
+     "end": "BARPA",
+     "via": [
+      "TAN",
+      "BARPA"
+     ],
+     "turn": "L",
+     "axis_nm": 3.0,
+     "max_kt": 220
+    }
+   ],
+   "stars": [
+    {
+     "name": "LAMAD1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "LAMAD",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "NARMI1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "NARMI",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "MADOV1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "MADOV",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "NOLRO1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "NOLRO",
+      "354006.85N 0060043.21W",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "VAGNO1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "VAGNO",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "ABIRO1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "ABIRO",
+      "354731.96N 0061352.60W",
+      "354541.24N 0061146.43W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "LAMAD2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "LAMAD",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "NARMI2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "NARMI",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "MADOV2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MADOV",
+      "TNR",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "NOLRO2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "NOLRO",
+      "354006.85N 0060043.21W",
+      "354038.88N 0060847.82W",
+      "354208.37N 0061143.40W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "VAGNO2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "VAGNO",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "ABIRO2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "ABIRO",
+      "354731.96N 0061352.60W",
+      "354541.24N 0061146.43W",
+      "RABCA"
+     ]
+    },
+    {
+     "name": "LAMAD5A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "LAMAD",
+      "354708.15N 0053048.92W",
+      "354245.69N 0053303.01W",
+      "354217.15N 0053830.69W",
+      "TAN"
+     ]
+    },
+    {
+     "name": "NARMI5A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "NARMI",
+      "353830.14N 0053130.55W",
+      "354209.73N 0053717.42W",
+      "TAN"
+     ]
+    },
+    {
+     "name": "MADOV5A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MADOV",
+      "352824.44N 0054659.95W",
+      "353436.14N 0054049.63W",
+      "354224.55N 0053943.97W",
+      "TAN"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "GMFO",
+   "name": "Oujda Angads",
+   "coord": "344714N 0015527W",
+   "elev_ft": 1535,
+   "runways": [
+    {
+     "id": "06",
+     "heading": 62
+    },
+    {
+     "id": "24",
+     "heading": 242
+    },
+    {
+     "id": "13",
+     "heading": 130
+    },
+    {
+     "id": "31",
+     "heading": 310
+    }
+   ],
+   "runway_in_use": "auto",
+   "_holdings_source": "AD2 GMFO 33_1_1 (STAR RWY 06: IAF ADRER 17 DME OJD hold inbound 104, IAF ABKAN 24 DME OJD hold inbound 037; 1 min, 210 kt, up to 10000 ft)",
+   "_sids_source": "AD2 GMFO 31_1 (SID CONV RWY 06 1C), 31_3 (RWY 13 3C): Rm 073 / axis, at 2000 ft right Rm 259 to IXOBA (200 kt); 32_4 (SID RNAV RWY 31 4R via FO510, FO512). No SID chart for RWY 24 in the set",
+   "_stars_source": "AD2 GMFO 33_1_1 (STAR CONV RWY 06 5C, 5A by ATC), 33_3 (RWY 13 7C), 34_4_1 (STAR RNAV RWY 31 8R; ROMOR 8A to FO161 left out: no coordinates)",
+   "holdings": [
+    {
+     "fix": "ADRER",
+     "coord": "345026.07N 0021704.42W",
+     "inbound_mag": 104,
+     "var": -0.5,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 7000,
+     "max_alt_ft": 10000,
+     "max_kt": 210,
+     "runways": []
+    },
+    {
+     "fix": "ABKAN",
+     "coord": "342656.50N 0021405.54W",
+     "inbound_mag": 37,
+     "var": -0.5,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 7500,
+     "max_alt_ft": 10000,
+     "max_kt": 210,
+     "runways": []
+    }
+   ],
+   "sids": [
+    {
+     "name": "ORSUP1C",
+     "runways": [
+      "06"
+     ],
+     "end": "ORSUP",
+     "via": [
+      "IXOBA",
+      "VDO",
+      "ORSUP"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "DIGEX1C",
+     "runways": [
+      "06"
+     ],
+     "end": "DIGEX",
+     "via": [
+      "IXOBA",
+      "345042.87N 0022545.07W",
+      "345725.72N 0022258.43W",
+      "350328.67N 0021733.18W",
+      "DIGEX"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "VABSI1C",
+     "runways": [
+      "06"
+     ],
+     "end": "VABSI",
+     "via": [
+      "IXOBA",
+      "345042.87N 0022545.07W",
+      "VABSI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "ROMOR1C",
+     "runways": [
+      "06"
+     ],
+     "end": "ROMOR",
+     "via": [
+      "IXOBA",
+      "344134.11N 0021533.79W",
+      "ROMOR"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "EVOXO1C",
+     "runways": [
+      "06"
+     ],
+     "end": "EVOXO",
+     "via": [
+      "343821.80N 0020414.49W",
+      "ABKAN",
+      "EVOXO"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "ORSUP3C",
+     "runways": [
+      "13"
+     ],
+     "end": "ORSUP",
+     "via": [
+      "IXOBA",
+      "VDO",
+      "ORSUP"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "DIGEX3C",
+     "runways": [
+      "13"
+     ],
+     "end": "DIGEX",
+     "via": [
+      "IXOBA",
+      "345042.87N 0022545.07W",
+      "345725.72N 0022258.43W",
+      "350328.67N 0021733.18W",
+      "DIGEX"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "VABSI3C",
+     "runways": [
+      "13"
+     ],
+     "end": "VABSI",
+     "via": [
+      "IXOBA",
+      "345042.87N 0022545.07W",
+      "VABSI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "ROMOR3C",
+     "runways": [
+      "13"
+     ],
+     "end": "ROMOR",
+     "via": [
+      "IXOBA",
+      "344134.11N 0021533.79W",
+      "ROMOR"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "EVOXO3C",
+     "runways": [
+      "13"
+     ],
+     "end": "EVOXO",
+     "via": [
+      "343821.80N 0020414.49W",
+      "ABKAN",
+      "EVOXO"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 200
+    },
+    {
+     "name": "ORSUP4R",
+     "runways": [
+      "31"
+     ],
+     "end": "ORSUP",
+     "via": [
+      "FO510",
+      "FO512",
+      "OJD",
+      "ORSUP"
+     ]
+    },
+    {
+     "name": "DIGEX4R",
+     "runways": [
+      "31"
+     ],
+     "end": "DIGEX",
+     "via": [
+      "FO510",
+      "FO512",
+      "ADRER",
+      "DIGEX"
+     ]
+    },
+    {
+     "name": "VABSI4R",
+     "runways": [
+      "31"
+     ],
+     "end": "VABSI",
+     "via": [
+      "FO510",
+      "FO512",
+      "VABSI"
+     ]
+    },
+    {
+     "name": "ROMOR4R",
+     "runways": [
+      "31"
+     ],
+     "end": "ROMOR",
+     "via": [
+      "FO510",
+      "FO512",
+      "ROMOR"
+     ]
+    },
+    {
+     "name": "EVOXO4R",
+     "runways": [
+      "31"
+     ],
+     "end": "EVOXO",
+     "via": [
+      "FO510",
+      "FO512",
+      "EVOXO"
+     ]
+    }
+   ],
+   "stars": [
+    {
+     "name": "ORSUP5C",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "ORSUP",
+      "OJD",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "DIGEX5C",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "DIGEX",
+      "345955.48N 0021315.77W",
+      "345444.61N 0021502.87W",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "VABSI5C",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "VABSI",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "ROMOR5C",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "ROMOR",
+      "343831.50N 0022708.18W",
+      "343432.76N 0022222.14W",
+      "343028.53N 0021848.89W",
+      "ABKAN"
+     ]
+    },
+    {
+     "name": "ROMOR5A",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "ROMOR",
+      "343831.50N 0022708.18W",
+      "343516.80N 0022251.47W",
+      "IXOBA"
+     ]
+    },
+    {
+     "name": "EVOXO5C",
+     "runways": [
+      "06"
+     ],
+     "via": [
+      "EVOXO",
+      "ABKAN"
+     ]
+    },
+    {
+     "name": "ORSUP7C",
+     "runways": [
+      "13"
+     ],
+     "via": [
+      "ORSUP",
+      "OJD",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "DIGEX7C",
+     "runways": [
+      "13"
+     ],
+     "via": [
+      "DIGEX",
+      "350038.13N 0021407.22W",
+      "345647.91N 0021436.32W",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "VABSI7C",
+     "runways": [
+      "13"
+     ],
+     "via": [
+      "VABSI",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "ROMOR7C",
+     "runways": [
+      "13"
+     ],
+     "via": [
+      "ROMOR",
+      "344057.68N 0021752.74W",
+      "344633.36N 0021652.80W",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "EVOXO7C",
+     "runways": [
+      "13"
+     ],
+     "via": [
+      "EVOXO",
+      "343332.27N 0020833.91W",
+      "343938.56N 0021327.19W",
+      "344527.56N 0021637.69W",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "ORSUP8R",
+     "runways": [
+      "31"
+     ],
+     "via": [
+      "ORSUP",
+      "OJD",
+      "IXOBA",
+      "ABKAN"
+     ]
+    },
+    {
+     "name": "DIGEX8R",
+     "runways": [
+      "31"
+     ],
+     "via": [
+      "DIGEX",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "VABSI8R",
+     "runways": [
+      "31"
+     ],
+     "via": [
+      "VABSI",
+      "ADRER"
+     ]
+    },
+    {
+     "name": "ROMOR8R",
+     "runways": [
+      "31"
+     ],
+     "via": [
+      "ROMOR",
+      "ABKAN"
+     ]
+    },
+    {
+     "name": "EVOXO8R",
+     "runways": [
+      "31"
+     ],
+     "via": [
+      "EVOXO",
+      "ABKAN"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "GMFI",
+   "name": "Ifrane",
+   "coord": "333020N 0050909W",
+   "elev_ft": 5466,
+   "runways": [
+    {
+     "id": "03",
+     "heading": 25
+    },
+    {
+     "id": "21",
+     "heading": 205
+    }
+   ],
+   "runway_in_use": "auto",
+   "_sids_source": "AD2 GMFI 32_1 (SID RNAV1 RWY 03 1N via FI418, FI440), 32_2 (RWY 21 1P: 205 to 7200 ft, left direct FI420, 210 kt)",
+   "_stars_source": "AD2 GMFI 34_1 (STAR RNAV1 RWY 03-21: EMKOK 1L, FES 1L to the IAFs FI402 / FI400)",
+   "sids": [
+    {
+     "name": "BOKPA1N",
+     "runways": [
+      "03"
+     ],
+     "end": "BOKPA",
+     "via": [
+      "FI418",
+      "FI440",
+      "ALKIX",
+      "BOKPA"
+     ]
+    },
+    {
+     "name": "DEMUM1N",
+     "runways": [
+      "03"
+     ],
+     "end": "DEMUM",
+     "via": [
+      "FI418",
+      "FI440",
+      "DEMUM"
+     ]
+    },
+    {
+     "name": "FES1N",
+     "runways": [
+      "03"
+     ],
+     "end": "FES",
+     "via": [
+      "FI418",
+      "FI440",
+      "FES"
+     ]
+    },
+    {
+     "name": "VAXAM1N",
+     "runways": [
+      "03"
+     ],
+     "end": "VAXAM",
+     "via": [
+      "FI418",
+      "FI440",
+      "VAXAM"
+     ]
+    },
+    {
+     "name": "BOKPA1P",
+     "runways": [
+      "21"
+     ],
+     "end": "BOKPA",
+     "via": [
+      "FI420",
+      "FI418",
+      "FI440",
+      "ALKIX",
+      "BOKPA"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 7200,
+     "max_kt": 210
+    },
+    {
+     "name": "DEMUM1P",
+     "runways": [
+      "21"
+     ],
+     "end": "DEMUM",
+     "via": [
+      "FI420",
+      "FI418",
+      "FI440",
+      "DEMUM"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 7200,
+     "max_kt": 210
+    },
+    {
+     "name": "FES1P",
+     "runways": [
+      "21"
+     ],
+     "end": "FES",
+     "via": [
+      "FI420",
+      "FI418",
+      "FI440",
+      "FES"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 7200,
+     "max_kt": 210
+    },
+    {
+     "name": "VAXAM1P",
+     "runways": [
+      "21"
+     ],
+     "end": "VAXAM",
+     "via": [
+      "FI420",
+      "FI418",
+      "FI440",
+      "VAXAM"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 7200,
+     "max_kt": 210
+    }
+   ],
+   "stars": [
+    {
+     "name": "EMKOK1L",
+     "runways": [
+      "03",
+      "21"
+     ],
+     "via": [
+      "EMKOK",
+      "DETAD",
+      "FI402"
+     ]
+    },
+    {
+     "name": "FES1L",
+     "runways": [
+      "03",
+      "21"
+     ],
+     "via": [
+      "FES",
+      "FI400"
+     ]
+    }
+   ]
   }
  ],
  "sequencing": [

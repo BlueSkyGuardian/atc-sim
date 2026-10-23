@@ -77,6 +77,34 @@
   #dispPanel .sw { display: flex; gap: 4px; align-items: center; }
   #dispPanel .sw button { padding: 0 5px; font-size: 10px; }
   #alerts { top: 40px; }
+  /* the alarms: a button in the toolbar and a window (the old banner is not shown) */
+  #alerts { display: none !important; }
+  #alBtn.los { background: #ff5a5a; color: #fff; font-weight: 700; border-color: #ff5a5a; animation: blink 1s steps(2, start) infinite; }
+  #alBtn.stca { background: #f2b84b; color: #111; border-color: #f2b84b; font-weight: 600; }
+  body.seat-pilot #alBtn { display: none; }
+  .win .al-r { padding: 4px 6px; border: 1px solid var(--line); border-left: 3px solid #f2b84b; border-radius: 4px; margin-bottom: 4px; font-family: var(--mono); font-size: 12px; cursor: pointer; }
+  .win .al-r.los { border-left-color: #ff5a5a; color: #ffd6d6; } .win .al-r.area { border-left-color: #e08a3c; }
+  .win .al-r:hover { background: #163049; } .win .al-r small { display: block; color: var(--dim); font-family: system-ui; }
+  /* toolbar: toggles grouped in drop-down menus */
+  #viewbar .vg { position: relative; display: inline-flex; }
+  #viewbar .vgb::after { content: " ▾"; font-size: 9px; color: var(--dim); }
+  #viewbar .vgm { display: none; position: absolute; left: 0; top: calc(100% + 3px); z-index: 9; flex-direction: column; align-items: stretch; gap: 3px; padding: 6px;
+    background: #10233af7; border: 1px solid #3b5e82; border-radius: 6px; box-shadow: 0 10px 30px #000b; min-width: 160px; }
+  #viewbar .vg.open .vgm { display: flex; }
+  #viewbar .vgm button { text-align: left; }
+  #viewbar .vgm .vrow { display: flex; gap: 4px; align-items: center; }
+  #viewbar .vg:has(> .vgm:empty) { display: none; }
+  #viewbar .vg.open > .vgb { border-color: var(--sel); color: var(--sel); }
+  #viewbar .vg.hit > .vgb { border-color: #8a5fd0; color: #d9c2ff; }
+  /* movable panels with a title bar and a close button */
+  .pwh { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: -10px -12px 8px; padding: 6px 9px 6px 12px; border-bottom: 1px solid var(--line);
+    cursor: move; user-select: none; font: 600 12px system-ui; color: var(--text); letter-spacing: 0; text-transform: none; }
+  .pwh button { padding: 0 6px; }
+  #seqPanel .pwh { margin: -8px -8px 0; padding: 5px 8px; }
+  /* collapsible simulation / player bars */
+  .simbar .sb-fold, #dbCtl .sb-fold { padding: 2px 6px; color: var(--dim); }
+  .simbar.folded .sb-st, .simbar.folded .sb-t, .simbar.folded #sbMark, .simbar.folded .sb-rst, .simbar.folded .sb-end { display: none !important; }
+  #dbCtl.folded [data-c=start], #dbCtl.folded #dbWx, #dbCtl.folded #dbT, #dbCtl.folded #dbTlName { display: none; }
   #utcClock { font: 600 12px var(--mono); color: var(--text); background: #0b1724cc; border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; }
   #utcClock:empty { display: none; }
   #mtBtn.hit { border-color: #8a5fd0; color: #d9c2ff; }
@@ -474,19 +502,30 @@
   <div id="scope">
     <canvas id="cv"></canvas>
     <div id="viewbar">
-      <select id="wxMode" title="Weather display">
+      <button id="alBtn" title="Alarms: losses of separation, short-term conflict alerts, area infringements">ALARMS</button>
+      <span class="vg"><button class="vgb" title="Weather display">Weather</button><div class="vgm"><select id="wxMode" title="Weather display">
         <option value="composite">WX composite</option><option value="cappi" selected>WX at FL</option>
         <option value="sel">WX selected a/c FL</option><option value="echo_tops">Echo tops</option>
         <option value="edr">Turbulence at FL</option><option value="off">WX off</option>
       </select>
       <input id="wxFl" type="number" value="350" min="0" max="800" step="10" style="width:62px" title="Flight level">
-      <label><input type="checkbox" id="wxCells" checked> tops</label>
-      <span class="sep"></span>
-      <button data-v="coast" class="on" title="Land and coastlines (Morocco, Iberia, the Canaries, Madeira, the Azores)">Coast</button><button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button><button data-v="sid" class="on" title="SIDs of the runways in use">SID</button><button data-v="star" class="on" title="STARs of the runways in use">STAR</button><button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
-      <span class="sep"></span>
-      <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
-      <span class="sep"></span>
-      <button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="seqBtn" title="Sequencing tool: click two or more aircraft, then the point where they must be in trail; shows each follower's sequencing ellipse and the headings that give the spacing (Esc to leave)">Sequence</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
+      <label><input type="checkbox" id="wxCells" checked> tops</label></div></span>
+      <span class="vg"><button class="vgb" title="Map layers">Map</button><div class="vgm"><button data-v="coast" class="on" title="Land and coastlines (Morocco, Iberia, the Canaries, Madeira, the Azores)">Coast</button>
+<button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button>
+<button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button>
+<button data-v="rad" class="on" title="RAD direct routings">RAD</button>
+<button data-v="sectors" class="on" title="Sector borders">Borders</button>
+<button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button>
+<button data-v="names" class="on" title="Point names">Points</button>
+<button data-v="trails" class="on" title="History dots">Trails</button></div></span>
+      <span class="vg"><button class="vgb" title="SIDs, STARs, holding patterns">Procedures</button><div class="vgm"><button data-v="sid" class="on" title="SIDs of the runways in use">SID</button>
+<button data-v="star" class="on" title="STARs of the runways in use">STAR</button>
+<button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
+<button data-v="procAll" title="Off: the procedures of the runways in use only. On: every runway's">All runways</button></div></span>
+      <span class="vg"><button class="vgb" title="Measuring and decision tools">Tools</button><div class="vgm" id="toolsMenu"><button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="seqBtn" title="Sequencing tool: click two or more aircraft, then the point where they must be in trail; shows each follower's sequencing ellipse and the headings that give the spacing (Esc to leave)">Sequence</button></div></span>
+      <span class="vg"><button class="vgb" title="Flight plans, MTCD, track info, OLDI, timeline, information box">Windows</button><div class="vgm"><button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button></div></span>
+      <span class="vg"><button class="vgb" title="CPDLC, coordination chat">Comms</button><div class="vgm" id="commsMenu"></div></span>
+      <button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
       <span id="utcClock" title="UTC"></span>
       <span class="c-dim" id="rblHint" style="font-size:11px"></span>
     </div>
@@ -495,7 +534,7 @@
     <div id="hud"></div>
     <div id="pauseBanner"></div>
     <div id="ctrlRow" class="simbar" role="toolbar" aria-label="Simulation control">
-      <span class="sb-st" id="sbSt">—</span>
+      <button class="sb-fold" id="sbFold" title="Collapse / expand the bar">◂</button><span class="sb-st" id="sbSt">—</span>
       <button data-act="resume" class="sb-run" title="Run (P)">▶ Run</button><button data-act="pause" class="sb-pause" title="Pause (P)">❚❚ Pause</button>
       <span class="sb-seg" title="Time factor"><button data-tf="1">×1</button><button data-tf="2">×2</button><button data-tf="5">×5</button><button data-tf="10">×10</button><button data-tf="30">×30</button></span>
       <button data-act="step" title="Pause and advance 10 seconds">+10 s</button>
@@ -589,7 +628,7 @@ const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] |
 const AIW = (location.pathname.match(/^\/ai\/watch\/([0-9a-f]+)\/?$/) || [])[1] || null;      // an AI run, live (aiwatch.js)
 const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
-const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true };
+const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
 // display settings (colours, sizes): per browser, from the Display menu
 const TH_DEF = {
@@ -650,7 +689,9 @@ async function api(path, opts = {}) {
       const auto = k.startsWith('lbl');
       return `<span>${L[k]}</span><span class="sw"><input type="color" data-c="${k}" value="${TH[k] || '#5fd3a3'}">${auto ? `<button data-auto="${k}" title="use the aircraft state colour" class="${TH[k] ? '' : 'on'}">auto</button>` : ''}</span>`; }).join('') + `</div>`;
     h += `<div style="margin-top:10px;display:flex;gap:6px"><button id="dpReset">Reset all to defaults</button><button id="dpClose">Close</button></div>`;
-    box.innerHTML = h;
+    box.innerHTML = `<div class="pwh"><span>Display settings</span><button data-pclose title="close">✕</button></div>` + h;
+    box.querySelector('[data-pclose]').onclick = () => box.classList.remove('on');
+    makeMovable(box, box.querySelector('.pwh'));
     box.querySelectorAll('h4[data-g]').forEach(t => t.onclick = () => { const g = box.querySelector(`[data-gg="${t.dataset.g}"]`); g.classList.toggle('closed'); t.querySelector('span').textContent = g.classList.contains('closed') ? '▸' : '▾'; });
     box.querySelectorAll('[data-k]').forEach(i => i.oninput = () => { TH[i.dataset.k] = +i.value; box.querySelector(`[data-val="${i.dataset.k}"]`).textContent = i.value; saveTheme(); });
     box.querySelectorAll('[data-c]').forEach(i => i.oninput = () => { TH[i.dataset.c] = i.value; const b = box.querySelector(`[data-auto="${i.dataset.c}"]`); if (b) b.classList.remove('on'); saveTheme(); });
@@ -970,26 +1011,58 @@ function beep(freq, ms) {
     o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + ms / 1000); } catch (e) {}
 }
 function renderAlerts() {
-  const box = $('#alerts'); if (!box) return;
-  if (!state || replayMode) { box.innerHTML = ''; return; }
-  const items = [], keys = new Set();
-  for (const p of state.current_losses || []) {
-    const k = 'L' + p.aircraft.join('-'); keys.add(k);
-    items.push(`<div class="al los" data-cs="${p.aircraft[0]}">LOSS OF SEPARATION ${p.aircraft.join(' × ')} · ${p.horizontal_nm} NM / ${p.vertical_ft} ft (min ${p.required_horizontal_nm} NM / ${p.required_vertical_ft} ft)</div>`);
-  }
+  const btn = $('#alBtn'); if (!btn) return;
+  const live = state && !replayMode;
+  const los = live ? state.current_losses || [] : [];
   // STCA: the server's fast straight-line check, every second (state.stca); older servers: from the look-ahead
-  for (const c of (state.stca || (sep && sep.predicted_conflicts) || [])) {
-    if (c.time_to_los_s == null || c.time_to_los_s <= 0 || c.time_to_los_s > STCA_S) continue;
-    const k = 'S' + c.aircraft.join('-'); keys.add(k);
-    items.push(`<div class="al stca" data-cs="${c.aircraft[0]}">STCA ${c.aircraft.join(' × ')} · LoS in ${fmtT(c.time_to_los_s)} · CPA ${c.cpa_horizontal_nm} NM / ${c.vertical_at_cpa_ft} ft</div>`);
-  }
+  const stca = live ? (state.stca || (sep && sep.predicted_conflicts) || []).filter(c => c.time_to_los_s != null && c.time_to_los_s > 0 && c.time_to_los_s <= STCA_S) : [];
+  const areas = live ? (sep && sep.predicted_area_infringements || []).filter(p => p.time_to_entry_s != null && p.time_to_entry_s <= STCA_S) : [];
+  const keys = new Set([...los.map(p => 'L' + p.aircraft.join('-')), ...stca.map(c => 'S' + c.aircraft.join('-'))]);
   for (const k of keys) if (!alertKeys.has(k)) { beep(k[0] === 'L' ? 880 : 660, k[0] === 'L' ? 400 : 200); break; }
   alertKeys = keys;
-  box.innerHTML = items.slice(0, 5).join('') + (items.length > 5 ? `<div class="al more">+${items.length - 5} more</div>` : '') +
-    `<div class="al more" id="muteBtn" title="sound for new alerts">${muted ? '🔇 alarms muted (click)' : '🔊 alarms on'}</div>`;
-  box.querySelectorAll('[data-cs]').forEach(el => el.onclick = () => { selected = el.dataset.cs; pollSelected(); });
-  $('#muteBtn').onclick = () => { muted = !muted; if (!muted) beep(660, 120); renderAlerts(); };
+  const n = los.length + stca.length + areas.length;
+  btn.textContent = n ? `ALARMS ${n}` : 'ALARMS';
+  btn.classList.toggle('los', los.length > 0); btn.classList.toggle('stca', !los.length && stca.length > 0);
+  if (!window.atcIsOpen || !atcIsOpen('alWin')) return;
+  const rows = los.map(p => `<div class="al-r los" data-cs="${p.aircraft[0]}"><b>LOSS OF SEPARATION</b> ${p.aircraft.join(' × ')}<small>${p.horizontal_nm} NM / ${p.vertical_ft} ft (minimum ${p.required_horizontal_nm} NM / ${p.required_vertical_ft} ft)</small></div>`)
+    .concat(stca.map(c => `<div class="al-r" data-cs="${c.aircraft[0]}"><b>STCA</b> ${c.aircraft.join(' × ')} · LoS in ${fmtT(c.time_to_los_s)}<small>closest ${c.cpa_horizontal_nm} NM / ${c.vertical_at_cpa_ft} ft</small></div>`))
+    .concat(areas.map(p => `<div class="al-r area" data-cs="${p.callsign}"><b>AREA</b> ${p.callsign} → ${p.kind} ${p.area_id} in ${fmtT(p.time_to_entry_s)}</div>`));
+  const el = atcWin('alWin', `Alarms <span class="c-dim" style="font-weight:400">losses, STCA (${STCA_S / 60} min), areas</span>`, 70, 50, 380);
+  const html = `<div class="row" style="margin-bottom:6px"><button id="alMute">${muted ? '🔇 sound off' : '🔊 sound on'}</button><span class="c-dim" style="font-size:11px">click a line to select the aircraft</span></div>` +
+    (rows.join('') || '<div class="empty">no alarm</div>');
+  const wb = el.querySelector('.wb');
+  if (wb.dataset.h !== html) { wb.dataset.h = html; wb.innerHTML = html;
+    wb.querySelectorAll('[data-cs]').forEach(r => r.onclick = () => { selected = r.dataset.cs; pollSelected(); });
+    wb.querySelector('#alMute').onclick = () => { muted = !muted; if (!muted) beep(660, 120); delete wb.dataset.h; renderAlerts(); }; }
 }
+$('#alBtn').onclick = () => { if (atcIsOpen('alWin')) atcCloseWin('alWin'); else { atcWin('alWin', 'Alarms', 70, 50, 380); renderAlerts(); } };
+// a panel that is not a window (display settings, sequencing): moved by its title bar
+function makeMovable(el, handle) {
+  if (handle.dataset.mv) return; handle.dataset.mv = '1';
+  handle.addEventListener('mousedown', e => {
+    if (e.target.closest('button,input,select')) return;
+    const sx = e.clientX, sy = e.clientY, ox = el.offsetLeft, oy = el.offsetTop;
+    el.style.bottom = 'auto'; el.style.right = 'auto'; el.style.left = ox + 'px'; el.style.top = oy + 'px'; el.dataset.moved = '1';
+    const mv = ev => { el.style.left = Math.max(0, ox + ev.clientX - sx) + 'px'; el.style.top = Math.max(0, oy + ev.clientY - sy) + 'px'; };
+    const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up); e.preventDefault(); e.stopPropagation();
+  });
+}
+window.makeMovable = makeMovable;
+// the toolbar's drop-down groups: one open at a time, closed by a click elsewhere; a group lights up when one of its
+// items does (MTCD hit, OLDI message)
+document.querySelectorAll('#viewbar .vg').forEach(g => g.querySelector('.vgb').onclick = e => {
+  const was = g.classList.contains('open');
+  document.querySelectorAll('#viewbar .vg.open').forEach(o => o.classList.remove('open'));
+  if (!was) g.classList.add('open');
+  e.stopPropagation();
+});
+document.addEventListener('mousedown', e => { if (!e.target.closest('#viewbar .vg')) document.querySelectorAll('#viewbar .vg.open').forEach(o => o.classList.remove('open')); });
+setInterval(() => document.querySelectorAll('#viewbar .vg').forEach(g => g.classList.toggle('hit', !!g.querySelector('.vgm .hit'))), 700);
+// the simulation bar folds to run / pause, the time factor and the step
+$('#sbFold').onclick = () => { const b = $('#ctrlRow'); b.classList.toggle('folded'); $('#sbFold').textContent = b.classList.contains('folded') ? '▸' : '◂';
+  try { localStorage.setItem('atc_sbfold', b.classList.contains('folded') ? '1' : ''); } catch (e) {} };
+try { if (localStorage.getItem('atc_sbfold')) { $('#ctrlRow').classList.add('folded'); $('#sbFold').textContent = '▸'; } } catch (e) {}
 setInterval(renderAlerts, 1000);
 function renderConfl() {
   if (!sep) return;
@@ -1186,9 +1259,17 @@ function fitView() {
 }
 // keep the HUD, alarms and panels below the toolbar when it wraps onto a second line (narrow windows)
 setInterval(() => { const vb = document.getElementById('viewbar'); if (!vb) return; const t = vb.offsetTop + vb.offsetHeight + 6 + 'px';
-  for (const id of ['hud', 'alerts', 'dispPanel']) { const el = document.getElementById(id); if (el && el.style.top !== t) el.style.top = t; } }, 500);
+  for (const id of ['hud', 'alerts', 'dispPanel']) { const el = document.getElementById(id); if (el && !el.dataset.moved && el.style.top !== t) el.style.top = t; } }, 500);
 function setZoom(z) { userZoom = Math.max(0.3, Math.min(20, z)); const sl = document.getElementById('dpZoom'); if (sl) sl.value = Math.log(userZoom); }
-cv.addEventListener('wheel', e => { e.preventDefault(); setZoom(userZoom * (e.deltaY < 0 ? 1.1 : 0.9)); }, { passive: false });
+// the wheel zooms about the point under the cursor (that point stays where it is on the screen)
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const [px, py] = canvasPt(e), [wx, wy] = fromPx(px, py), z0 = userZoom;
+  setZoom(userZoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+  if (!view.s || userZoom === z0) return;
+  const s1 = view.s * userZoom / z0, w = cv.width, h = cv.height;
+  view.cx = wx - (px - w / 2) / s1; view.cy = wy + (py - h / 2) / s1; view.s = s1;
+}, { passive: false });
 // labels: offsets in CSS px per callsign; rectangles of the last frame for hit testing
 const labelOff = {}, labelRects = [];
 let drag = null;
@@ -1680,8 +1761,8 @@ function draw() {
     const tag = (txt, p, col) => { const [px, py] = toPx(p[0], p[1]); ctx.font = `${9 * dpr}px ui-monospace,monospace`; ctx.fillStyle = col; ctx.fillText(txt, px + 4 * dpr, py - 4 * dpr); };
     for (const ad of arrInfo.aerodromes) {
       const pr = ad.procedures; if (!pr) continue;
-      const rw = ad.runway_in_use, onRw = r => !r || !r.length || r.includes(rw);
-      if (V.sid) for (const sd of pr.sids) if (sd.runway === rw) { line(sd.points, TH.sid + 'b0', [2, 3]); if (userZoom >= 1.6) tag(sd.name, sd.points[sd.points.length - 1], TH.sid + 'cc'); }
+      const rw = ad.runway_in_use, onRw = r => V.procAll || !r || !r.length || r.includes(rw);
+      if (V.sid) for (const sd of pr.sids) if (V.procAll || sd.runway === rw) { line(sd.points, TH.sid + 'b0', [2, 3]); if (userZoom >= 1.6) tag(sd.name, sd.points[sd.points.length - 1], TH.sid + 'cc'); }
       if (V.star) for (const st of pr.stars) if (onRw(st.runways)) { line(st.points, TH.star + 'b0', [6, 3]); if (userZoom >= 1.6) tag(st.name, st.points[0], TH.star + 'cc'); }
       if (V.hold) for (const h of pr.holds) if (onRw(h.runways)) { line(h.points, TH.hold, []); tag(`${h.fix} ${h.min_alt_ft >= 10000 ? 'FL' + Math.round(h.min_alt_ft / 100) : Math.round(h.min_alt_ft) + 'ft'}+`, h.points[1], TH.hold + 'cc'); }
     }

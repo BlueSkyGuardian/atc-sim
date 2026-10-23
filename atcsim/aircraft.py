@@ -21,6 +21,7 @@ MAX_INTERCEPT_DEG = 45.0
 BANK_GAIN = 2.0                # commanded bank (deg) per degree of heading error, capped at nominal bank
 SPEED_SHARE = 0.3              # share of excess power used for speed change while climbing/descending
 SPEEDBRAKE_FACTOR = 1.5        # max descent rate with speedbrakes relative to idle descent
+DECEL_DESCENT_SHARE = 0.3      # slowing down in a descent: share of the (idle) energy given to the descent
 # a descent with no rate given (the pilot's own, managed descent): never steeper than idle, and not steeper than
 # these NM flown per 1000 ft (still air) - about 100 levels in 43 NM from the cruise down to FL250, then about the
 # idle path; "expedite" / an assigned rate / speedbrakes use the full idle rate (and more)
@@ -679,7 +680,15 @@ class Aircraft:
             if not speed_change:
                 rocd = pex / atm.G0 * esf
                 self.tas = tgt
-            elif (climbing and dv > 0) or (not climbing and dv < 0):
+            elif not climbing and dv < 0:
+                # slowing down in the descent: at idle the energy is shared (BADA's reduced energy share), a shallower
+                # descent while the speed comes off (about 0.5 kt/s, against 0.7 level)
+                drag_x = SPEEDBRAKE_FACTOR if (self.speedbrake or self.vs_cmd_fpm) else 1.0
+                pex_d = (T - D * drag_x) * V / self.mass
+                rocd = DECEL_DESCENT_SHARE * pex_d / atm.G0
+                dvk = (1 - DECEL_DESCENT_SHARE) * pex_d / V * dt / atm.KT
+                self.tas += dvk if abs(dvk) < abs(dv) else dv
+            elif climbing and dv > 0:
                 rocd = (1 - SPEED_SHARE) * pex / atm.G0
                 dvk = SPEED_SHARE * pex / V * dt / atm.KT
                 self.tas += dvk if abs(dvk) < abs(dv) else dv

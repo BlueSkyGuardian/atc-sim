@@ -255,7 +255,9 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
     elif to_go <= final_nm + 4.0:
         want = 180.0
     elif _holding(ac):
-        want = min(210.0, (st.get("hold") or {}).get("max_kt") or 210.0)
+        hd = st.get("hold") or {}
+        want = min(210.0 if ac.alt_ft <= 14000.0 else 230.0,
+                   holding_speed_kt(ac.alt_ft, hd.get("max_kt"), hd.get("max_alt_ft")))
     elif to_go <= 25.0 or st.get("hold_names"):
         want = 210.0
     # its landing slot: never earlier than the one ahead (as it really flies) plus the approach spacing
@@ -319,8 +321,17 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         floor_kt = FINAL_KT if st["established"] or to_go <= final_nm + 4.0 else 180.0
         cur = ac.cas()
         want = max(floor_kt, min(want or cur, cur - (20.0 if early > 30 else 10.0)))
-    if want is not None and ac.alt_ft < 26000:
+    if want is not None and (ac.alt_ft < 26000 or _holding(ac)):
         ac.spd_cas, ac.spd_ias_now, ac.spd_mach = float(want), True, None
+
+
+def holding_speed_kt(alt_ft: float, published_kt=None, published_max_alt_ft=None) -> float:
+    """The most it may hold at (IAS, ICAO PANS-OPS): 230 kt up to 14000 ft, 240 kt to FL200, 265 kt to FL340, about
+    M0.83 above (taken as 265 kt); the published maximum within the hold's published levels."""
+    icao = 230.0 if alt_ft <= 14000.0 else 240.0 if alt_ft <= 20000.0 else 265.0
+    if published_kt and (published_max_alt_ft is None or alt_ft <= published_max_alt_ft + 500.0):
+        return min(icao, float(published_kt))
+    return icao
 
 
 def _hold(world: "World", ac: "Aircraft", laps: int) -> None:
@@ -538,6 +549,7 @@ def _published_hold(world: "World", ac: "Aircraft", h: dict, laps: int, why: str
     ac.hold_state = None
     st.update(names=[hf] + names + app_names, hold_names=[hf] + names, type=path["type"], faf=tuple(path["faf"]),
               thr=tuple(path["threshold"]), hold={"fix": h["fix"], "min_alt_ft": h["min_alt_ft"], "max_kt": h["max_kt"],
+                                                  "max_alt_ft": h.get("max_alt_ft"),
                                                   "why": why, "laps": laps, "lap_nm": lap_nm})
     side = "right" if h["turn"] == "R" else "left"
     world._event("approach_holding", callsign=ac.callsign, fix=h["fix"], laps=laps,

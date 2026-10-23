@@ -165,7 +165,7 @@
   // ------------------------------------------------------------------ CPDLC window
   const btn = document.createElement('button');
   btn.id = 'dlBtn'; btn.title = 'CPDLC: requests, dialogues and connections (J)'; btn.textContent = 'CPDLC';
-  const help = document.getElementById('helpBtn'); if (help) help.parentNode.insertBefore(btn, help);
+  const help = document.getElementById('helpBtn'), host = document.getElementById('commsMenu'); if (host) host.appendChild(btn); else if (help) help.parentNode.insertBefore(btn, help);
   btn.onclick = toggleWin;
   let logCs = null, logLast = -1, logMsgs = [];
   let wantWin = false;
