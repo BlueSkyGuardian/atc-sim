@@ -51,51 +51,17 @@
   ],
   "weather": {
     "seed": 101,
+    "wind": {
+      "climatology": {
+        "month": 10
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "scattered",
@@ -133,7 +99,7 @@
         "ssr": "4531",
         "reg": "D-ATTQ",
         "code": "3DAA6C",
-        "eobt": "0700",
+        "eobt": "0702",
         "altn": "GCRR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "EUROWINGS",
@@ -164,7 +130,7 @@
         "ssr": "3162",
         "reg": "EC-FVZ",
         "code": "35A054",
-        "eobt": "0847",
+        "eobt": "0849",
         "altn": "GCXO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "IBERIA",
@@ -212,7 +178,7 @@
         "SUNID",
         "AKUDA"
       ],
-      "fl": 320,
+      "fl": 340,
       "dep": "GOBD",
       "dest": "EBBR",
       "load": 0.4,
@@ -227,7 +193,7 @@
         "ssr": "4520",
         "reg": "OO-SCL",
         "code": "44BE6B",
-        "eobt": "0700",
+        "eobt": "0654",
         "altn": "EHAM",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "BRUSSELS AIRLINES",
@@ -256,7 +222,7 @@
         "ssr": "2276",
         "reg": "EI-PQA",
         "code": "4CA706",
-        "eobt": "0910",
+        "eobt": "0907",
         "altn": "EGGW",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "RYANAIR",
@@ -285,7 +251,7 @@
         "ssr": "3466",
         "reg": "G-EVTL",
         "code": "40311A",
-        "eobt": "0912",
+        "eobt": "0908",
         "altn": "EGLL",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "EASYJET",
@@ -343,7 +309,7 @@
         "ssr": "4344",
         "reg": "CS-TZL",
         "code": "4969A8",
-        "eobt": "0853",
+        "eobt": "0857",
         "altn": "GCTS",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TAP AIR PORTUGAL",
@@ -373,7 +339,7 @@
         "ssr": "4350",
         "reg": "G-JMXL",
         "code": "415A68",
-        "eobt": "0647",
+        "eobt": "0654",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "JET2",
@@ -400,7 +366,7 @@
         "ssr": "4545",
         "reg": "G-TAEQ",
         "code": "42AB2C",
-        "eobt": "0701",
+        "eobt": "0706",
         "altn": "GCRR",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "TUI AIRWAYS",
@@ -450,16 +416,16 @@
       "load": 0.4,
       "reach": {
         "point": [
-          181.405,
-          128.452
+          181.402,
+          128.45
         ],
-        "time": 1661
+        "time": 1664
       },
       "fpl": {
         "ssr": "2051",
         "reg": "D-AXPW",
         "code": "3D7C41",
-        "eobt": "0725",
+        "eobt": "0726",
         "altn": "GCXO",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "CONDOR",
@@ -898,7 +864,7 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 290,
+      "fl": 390,
       "load": 0.43,
       "entry_time": 409,
       "dep": "EGLL",
@@ -910,7 +876,7 @@
         "ssr": "5001",
         "reg": "EC-XLF",
         "code": "367AB1",
-        "eobt": "0724",
+        "eobt": "0721",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA EXPRESS",
@@ -1034,7 +1000,7 @@
         "IBALU",
         "SAMAR"
       ],
-      "fl": 330,
+      "fl": 390,
       "load": 0.31,
       "entry_time": 100,
       "dep": "EDDM",

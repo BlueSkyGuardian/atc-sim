@@ -875,22 +875,32 @@ def _jet(seed, axis=(0, 120)):
     return j
 
 
-WX_W_MOD = wx(CONVECTIVE_SW, seed=101, convection={"regime": "scattered", "intensity": "strong", "count": 8,
-                                                   "region": [-40, -120, 60, -40]})
-WX_W_SEV = wx(CONVECTIVE_SW, seed=102, convection={"regime": "squall_line", "intensity": "severe",
-                                                   "line": {"center": [-20, -95], "length_nm": 170, "orient_deg": 120,
-                                                            "gaps": 0, "gap_list": [[-35, 22], [40, 20]],
-                                                            "spacing_nm": 8}})
-WX_O_LIGHT = wx(_jet(103), convection={"regime": "isolated", "intensity": "moderate", "count": 5,
-                                        "region": [-170, -60, -80, 60]})
-WX_O_EMB = wx(CONVECTIVE_SW, seed=104, convection={"regime": "embedded", "intensity": "strong", "count": 8,
-                                                   "region": [-185, -110, -100, -20]})
-WX_C_MOD = wx(CONVECTIVE_SW, seed=105, convection={"regime": "scattered", "intensity": "strong", "count": 12,
-                                                   "region": [-150, -130, 40, 20]})
-WX_C_SEV = wx(CONVECTIVE_SW, seed=106, convection={"regime": "squall_line", "intensity": "severe",
-                                                   "line": {"center": [-60, -70], "length_nm": 230, "orient_deg": 125,
-                                                            "gaps": 0, "gap_list": [[-60, 22], [10, 20], [75, 22]],
-                                                            "spacing_nm": 8}})
+def clim(month: int, seed: int, temperature=None, **extra) -> dict:
+    """Agadir weather on the ERA5 climatology of a month (atcsim/climate.py): the day is drawn from the seed."""
+    d = {"seed": seed, "wind": {"climatology": {"month": month}, "noise_kt": 5, "noise_scale_nm": 40}}
+    if temperature:
+        d["temperature"] = dict(temperature)
+    d.update(extra)
+    return d
+
+
+UNSTABLE = CONVECTIVE_SW["temperature"]          # moist, unstable: steep lapse rate for the storms
+WX_W_MOD = clim(10, 101, UNSTABLE, convection={"regime": "scattered", "intensity": "strong", "count": 8,
+                                               "region": [-40, -120, 60, -40]})
+WX_W_SEV = clim(11, 102, UNSTABLE, convection={"regime": "squall_line", "intensity": "severe",
+                                               "line": {"center": [-20, -95], "length_nm": 170, "orient_deg": 120,
+                                                        "gaps": 0, "gap_list": [[-35, 22], [40, 20]],
+                                                        "spacing_nm": 8}})
+WX_O_LIGHT = clim(2, 103, convection={"regime": "isolated", "intensity": "moderate", "count": 5,
+                                      "region": [-170, -60, -80, 60]})
+WX_O_EMB = clim(1, 104, UNSTABLE, convection={"regime": "embedded", "intensity": "strong", "count": 8,
+                                              "region": [-185, -110, -100, -20]})
+WX_C_MOD = clim(10, 105, UNSTABLE, convection={"regime": "scattered", "intensity": "strong", "count": 12,
+                                               "region": [-150, -130, 40, 20]})
+WX_C_SEV = clim(12, 106, UNSTABLE, convection={"regime": "squall_line", "intensity": "severe",
+                                               "line": {"center": [-60, -70], "length_nm": 230, "orient_deg": 125,
+                                                        "gaps": 0, "gap_list": [[-60, 22], [10, 20], [75, 22]],
+                                                        "spacing_nm": 8}})
 
 
 @scenario
@@ -1200,10 +1210,10 @@ def p01():
         "p01_ws_two_merges",
         title="Step 1 - West South alone, light traffic, two merges",
         description="West South (WS) open on its own, traffic about half its declared capacity (43 flights/h). "
-                    "Settled northerly weather, no storms. Southbound Europe-Canaries flows on UN857, the RUNAX "
+                    "Settled July weather (ERA5 climatology: light westerlies aloft), no storms. Southbound Europe-Canaries flows on UN857, the RUNAX "
                     "standard route and TAKAV-VEDOD-TERTO; northbound Canaries-Europe traffic on UN858; NIPRI-ROLRO "
                     "traffic from the Azores.",
-        control=["WS"], duration_s=2700, complexity=2, weather=wx(NORTHERLY, seed=201),
+        control=["WS"], duration_s=2700, complexity=2, weather=clim(7, 201),
         aircraft=[
             ac("RAM1311", "B738", ["NIPRI", "ROLRO"], 350, None, at=AT_ROLRO_TKV, t=1100, dep="LPAZ",
                dest="GMAD"),
@@ -1228,9 +1238,9 @@ def p02():
         "p02_wn_merges_and_climbs",
         title="Step 2 - West North alone, merges at IBALU, a departure climbing",
         description="West North (WN) open on its own, traffic about two thirds of its declared capacity "
-                    "(58 flights/h). Westerly jet north of the sector, no storms. UN857 and the RUNAX standard route "
+                    "(58 flights/h). February winds (ERA5 climatology: the subtropical jet over the sector), no storms. UN857 and the RUNAX standard route "
                     "merge at IBALU; Casablanca arrivals via MARJA and SALCA, departures climbing to cruise.",
-        control=["WN"], duration_s=2700, complexity=2, weather=_jet(202),
+        control=["WN"], duration_s=2700, complexity=2, weather=clim(2, 202),
         aircraft=[
             ac("EWG3KP", "A320", STD, 350, None, at="IBALU", t=800, dep="EDDK", dest="GCFV", overflight=True),
             ac("IBE3247", "A21N", UN857, 350, None, at="IBALU", t=818, dep="LEMD", dest="GCLP", overflight=True),
@@ -1348,10 +1358,10 @@ def p06():
     scn = ag(
         "p06_wn_capacity_sequencing",
         title="Step 6 - West North alone at capacity, Casablanca sequences, unable RVSM",
-        description="West North (WN) open on its own, traffic at its declared capacity (58 flights/h). Westerly "
-                    "jet. Casablanca arrivals via MARJA and SALCA (LoA FL250, 10 NM in trail), departures climbing, "
+        description="West North (WN) open on its own, traffic at its declared capacity (58 flights/h). March "
+                    "winds (ERA5 climatology, strong westerlies). Casablanca arrivals via MARJA and SALCA (LoA FL250, 10 NM in trail), departures climbing, "
                     "UN857 / RUNAX merging at IBALU, UN858 northbound.",
-        control=["WN"], complexity=4, weather=_jet(206),
+        control=["WN"], complexity=4, weather=clim(3, 206),
         aircraft=[
             ac("RYR7HB", "B738", UN858, 380, None, at=AT_BEXAL_UN858, t=1300, dep="GVAC", dest="EGSS"),
             ac("RAM1219", "B738", ["BEXAL", "IBALU", "SALCA"], 370, None, at=AT_BEXAL_UN858, t=1300, dep="KJFK",

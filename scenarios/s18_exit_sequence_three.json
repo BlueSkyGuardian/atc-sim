@@ -1,18 +1,82 @@
 {
   "name": "s18_exit_sequence_three",
   "title": "Three at FL350 for ERMED: build the in-trail sequence",
-  "description": "Three aircraft at FL350 converge on IBALU from RUNAX and KORNO and leave by ERMED within two minutes of each other; the last is a faster wide-body. The letter of agreement asks for 10 NM in trail at ERMED. Sequence them by speed where it is enough, by a fan of vectors (same side, growing angles, the last turned first, resumed from the front) where it is not.",
+  "description": "Three aircraft at FL350 converge on IBALU from RUNAX and KORNO and leave by ERMED within two minutes of each other; the last is a faster wide-body. The letter of agreement asks for 10 NM in trail at ERMED. Sequence them by speed where it is enough, by a fan of vectors (same side, growing angles, the last turned first, resumed from the front) where it is not. March climatological winds (ERA5).",
   "airspace": "agadir",
-  "control": ["WN"],
+  "control": [
+    "WN"
+  ],
   "duration_s": 2400,
   "complexity": 4,
   "aircraft": [
-    {"callsign": "RAM1201", "type": "B738", "route": ["RUNAX", "IBALU", "ERMED", "TOVRA", "VEDOD", "TERTO"], "fl": 350, "dep": "LFPO", "dest": "GCLP",
-     "reach": {"waypoint": "IBALU", "time": 1100}},
-    {"callsign": "IBE3302", "type": "A320", "route": ["KORNO", "ABODA", "IBALU", "ERMED", "TOVRA", "VEDOD", "TERTO"], "fl": 350, "dep": "LEMD", "dest": "GCTS",
-     "reach": {"waypoint": "IBALU", "time": 1130}},
-    {"callsign": "BAW2477", "type": "B77W", "route": ["RUNAX", "IBALU", "ERMED", "TOVRA", "VEDOD", "TERTO"], "fl": 350, "mach": 0.85, "dep": "EGLL", "dest": "GCLP",
-     "reach": {"waypoint": "IBALU", "time": 1180}}
+    {
+      "callsign": "RAM1201",
+      "type": "B738",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "dep": "LFPO",
+      "dest": "GCLP",
+      "reach": {
+        "waypoint": "IBALU",
+        "time": 1100
+      }
+    },
+    {
+      "callsign": "IBE3302",
+      "type": "A320",
+      "route": [
+        "KORNO",
+        "ABODA",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "dep": "LEMD",
+      "dest": "GCTS",
+      "reach": {
+        "waypoint": "IBALU",
+        "time": 1130
+      }
+    },
+    {
+      "callsign": "BAW2477",
+      "type": "B77W",
+      "route": [
+        "RUNAX",
+        "IBALU",
+        "ERMED",
+        "TOVRA",
+        "VEDOD",
+        "TERTO"
+      ],
+      "fl": 350,
+      "mach": 0.85,
+      "dep": "EGLL",
+      "dest": "GCLP",
+      "reach": {
+        "waypoint": "IBALU",
+        "time": 1180
+      }
+    }
   ],
-  "expected": {}
+  "expected": {},
+  "weather": {
+    "seed": 18,
+    "wind": {
+      "climatology": {
+        "month": 3
+      },
+      "noise_kt": 4
+    }
+  }
 }
