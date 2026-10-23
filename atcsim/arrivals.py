@@ -75,6 +75,7 @@ class Aerodrome:
     racetrack_nm: float = 4.0
     holdings: List[dict] = field(default_factory=list)   # published approach holds: x, y, fix, inbound_true, turn, ...
     sids: List[dict] = field(default_factory=list)         # published SIDs: name, runways, end, via [(name, (x, y))]
+    stars: List[dict] = field(default_factory=list)        # published STARs: name, runways, via [(name, (x, y))]
     rwy: Dict[str, dict] = field(default_factory=dict)     # per runway (published procedure): final_nm, faf_alt_ft,
     _sidx: int = 0                                         # if_nm, joins [{via: [(x, y)], north_of_field}]
 
@@ -151,6 +152,50 @@ def _sid(sd: dict, waypoints, asp=None) -> dict:
             "max_kt": float(sd.get("max_kt") or 230)}
 
 
+def procedures(ad: "Aerodrome") -> dict:
+    """The published procedures of an aerodrome as drawn on the scope: SIDs (from the runway), STARs, holds (one
+    lap), each with its runways and points."""
+    from .approach import _lap
+    out = {"sids": [], "stars": [], "holds": []}
+    for sd in ad.sids:
+        for rw in sd["runways"]:
+            if rw in ad.runways:
+                pts = sid_path(ad, sd, rw)
+                out["sids"].append({"name": sd["name"], "runway": rw, "end": sd["end"],
+                                    "points": [[round(p[0], 2), round(p[1], 2)] for _, p in pts]})
+    for st in ad.stars:
+        out["stars"].append({"name": st["name"], "runways": st["runways"], "start": st["via"][0][0] if st["via"] else None,
+                             "points": [[round(p[0], 2), round(p[1], 2)] for _, p in st["via"]]})
+    for h in ad.holdings:
+        out["holds"].append({"fix": h["fix"], "runways": h["runways"], "turn": h["turn"],
+                             "inbound_true": round(h["inbound_true"], 1), "min_alt_ft": h["min_alt_ft"],
+                             "points": [[round(p[0], 2), round(p[1], 2)] for p in racetrack(h)]})
+    return out
+
+
+def racetrack(h: dict, tas: float = 220.0) -> List[Point]:
+    """The outline of a holding pattern for the scope: the inbound leg to the fix, a half-circle turn to the holding
+    side, the outbound leg, the turn back (1 minute legs at 220 kt, or the published leg length)."""
+    th = math.radians(h["inbound_true"])
+    u = (math.sin(th), math.cos(th))
+    n = (u[1], -u[0]) if h["turn"] == "R" else (-u[1], u[0])
+    L = float(h["leg_nm"]) if h.get("leg_nm") else float(h.get("leg_min") or 1.0) * tas / 60.0
+    w = 2.0 * tas * 120.0 / 3600.0 / (2.0 * math.pi) * 1.3
+    F = (h["x"], h["y"])
+    pts = [(F[0] - u[0] * L, F[1] - u[1] * L), F]
+    for k in range(1, 13):                                # the turn at the fix
+        a = math.pi * k / 12
+        pts.append((F[0] + n[0] * w / 2 * (1 - math.cos(a)) + u[0] * w / 2 * math.sin(a),
+                    F[1] + n[1] * w / 2 * (1 - math.cos(a)) + u[1] * w / 2 * math.sin(a)))
+    E = (F[0] + n[0] * w - u[0] * L, F[1] + n[1] * w - u[1] * L)
+    pts.append(E)
+    for k in range(1, 13):                                # the turn back to the inbound leg
+        a = math.pi * k / 12
+        pts.append((E[0] - n[0] * w / 2 * (1 - math.cos(a)) - u[0] * w / 2 * math.sin(a),
+                    E[1] - n[1] * w / 2 * (1 - math.cos(a)) - u[1] * w / 2 * math.sin(a)))
+    return pts
+
+
 def sid_path(ad: "Aerodrome", sid: dict, runway: str) -> List[Tuple[Optional[str], Point]]:
     """The SID flown from the departure end of the runway: the runway axis up to its turn (an altitude, at a climb
     of about 600 ft per NM, or a distance), a point to the side of the published turn, then its points."""
@@ -220,6 +265,8 @@ def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Di
                        rwy={str(r["id"]): _runway_params(r, asp) for r in a["runways"]},
                        sids=[_sid(sd, waypoints, asp) for sd in (a.get("sids") or next(
                            (d.get("sids", []) for d in d_ads if d.get("id") == a["id"]), []))],
+                       stars=[_sid(sd, waypoints, asp) for sd in (a.get("stars") or next(
+                           (d.get("stars", []) for d in d_ads if d.get("id") == a["id"]), []))],
                        holdings=[_holding(h, asp) for h in (a.get("holdings") or next(
                            (d.get("holdings", []) for d in d_ads if d.get("id") == a["id"]), []))])
         want = str(a.get("runway_in_use", "auto"))

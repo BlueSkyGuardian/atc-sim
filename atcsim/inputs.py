@@ -154,7 +154,11 @@ def _runway(w, body, actor):
         w._event("runway_change", aerodrome=ad.id, runway=body["runway"], manual=True,
                  text=f"{ad.id} runway in use now {body['runway']}")
         for a in w.aircraft.values():
-            a.arr.pop("_last", None)
+            if a.arr:
+                a.arr.pop("_last", None)
+        if w.record:
+            from . import approach
+            approach.runway_changed(w, ad)            # approach re-plans its arrivals for the new runway
     return ad.snapshot()
 
 

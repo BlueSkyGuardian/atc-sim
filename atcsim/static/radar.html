@@ -482,7 +482,7 @@
       <input id="wxFl" type="number" value="350" min="0" max="800" step="10" style="width:62px" title="Flight level">
       <label><input type="checkbox" id="wxCells" checked> tops</label>
       <span class="sep"></span>
-      <button data-v="coast" class="on" title="Land and coastlines (Morocco, Iberia, the Canaries, Madeira, the Azores)">Coast</button><button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button>
+      <button data-v="coast" class="on" title="Land and coastlines (Morocco, Iberia, the Canaries, Madeira, the Azores)">Coast</button><button data-v="areas" class="on" title="Danger / restricted / prohibited areas">Areas</button><button data-v="routes" class="on" title="Airways and flight-plan routes">Routes</button><button data-v="rad" class="on" title="RAD direct routings">RAD</button><button data-v="sectors" class="on" title="Sector borders">Borders</button><button data-v="freqs" class="on" title="Sector names and frequencies">Freq</button><button data-v="names" class="on" title="Point names">Points</button><button data-v="trails" class="on" title="History dots">Trails</button><button data-v="sid" class="on" title="SIDs of the runways in use">SID</button><button data-v="star" class="on" title="STARs of the runways in use">STAR</button><button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
       <span class="sep"></span>
       <button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button>
       <span class="sep"></span>
@@ -589,7 +589,7 @@ const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] |
 const AIW = (location.pathname.match(/^\/ai\/watch\/([0-9a-f]+)\/?$/) || [])[1] || null;      // an AI run, live (aiwatch.js)
 const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
-const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true };
+const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
 // display settings (colours, sizes): per browser, from the Display menu
 const TH_DEF = {
@@ -601,7 +601,7 @@ const TH_DEF = {
   lblCallsign: '', lblLevel: '', lblSpeed: '', lblInfo: '', changed: '#ffd166', sfl: '#f2b84b', tags: '#7fb8ff',
   xflOk: '#5ad1e6', xflAbi: '#9fc3e6', xflPend: '#ffffff',
   hTag: '#ffd84a', wxTag: '#ffd84a', alertInfo: '#8fd3ff', alertWarn: '#f2b84b', alertBad: '#ff5a5a', extLabel: '#b9c8d8',
-  rbl: '#d79bff', routeShow: '#ff4fd8',
+  rbl: '#d79bff', routeShow: '#ff4fd8', sid: '#6fc28a', star: '#e3a35a', hold: '#b79cff',
   lblFont: 11, nameFont: 10.5, symbol: 7, vectorMin: 2, trail: 12, wxAlpha: 1,
 };
 const TH = { ...TH_DEF };
@@ -627,7 +627,7 @@ async function api(path, opts = {}) {
   const L = {
     bg: 'Background', land: 'Land', coast: 'Coastline', outline: 'CTA outline', sector: 'Controlled area border', sectorLines: 'Sector lines', freqs: 'Sector names / frequencies',
     airways: 'Airways', airwayNames: 'Airway names', rad: 'RAD routings', fpRoute: 'Flight-plan routes', points: 'Points', extPoints: 'Points outside',
-    aerodromes: 'Aerodromes', approach: 'Approach paths', cellTops: 'Cloud tops',
+    aerodromes: 'Aerodromes', approach: 'Approach paths', sid: 'SIDs', star: 'STARs', hold: 'Holding patterns', cellTops: 'Cloud tops',
     assumed: 'Assumed', calling: 'Calling (to assume)', inbound: 'Inbound (previous sector)', other: 'Not concerned', handedOff: 'Handed off / decontrolled', selected: 'Selected', stca: 'Conflict (STCA)', los: 'Loss of separation',
     xfer: 'Transfer due / to decontrol', mtcd: 'MTCD (medium-term conflict)',
     routeShow: 'Route (long press)', rbl: 'Range / bearing lines',
@@ -638,7 +638,7 @@ async function api(path, opts = {}) {
   };
   const SIZES = [['lblFont', 'Label font', 8, 18, 0.5], ['nameFont', 'Point names', 7, 16, 0.5], ['symbol', 'Aircraft symbol', 4, 14, 1],
                  ['vectorMin', 'Speed vector (min)', 0, 6, 1], ['trail', 'History dots', 0, 12, 1], ['wxAlpha', 'Weather opacity', 0.1, 1, 0.05]];
-  const GROUPS = [['Scope', ['bg', 'land', 'coast', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'cellTops']],
+  const GROUPS = [['Scope', ['bg', 'land', 'coast', 'outline', 'sector', 'sectorLines', 'freqs', 'airways', 'airwayNames', 'rad', 'fpRoute', 'points', 'extPoints', 'aerodromes', 'approach', 'sid', 'star', 'hold', 'cellTops']],
                   ['Aircraft', ['assumed', 'calling', 'inbound', 'xfer', 'handedOff', 'selected', 'stca', 'los', 'mtcd', 'routeShow', 'rbl']],
                   ['Label parts', ['lblCallsign', 'lblLevel', 'lblSpeed', 'lblInfo', 'changed', 'sfl', 'xflOk', 'xflAbi', 'xflPend', 'tags', 'hTag', 'wxTag', 'alertInfo', 'alertWarn', 'alertBad', 'extLabel']]];
   const box = document.getElementById('dispPanel');
@@ -1673,6 +1673,17 @@ function draw() {
       ctx.strokeStyle = TH.approach; ctx.lineWidth = 1 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.beginPath();
       ap.points.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke(); ctx.setLineDash([]);
       const [fx, fy] = toPx(...ap.faf); ctx.fillStyle = TH.approach; ctx.fillRect(fx - 2 * dpr, fy - 2 * dpr, 4 * dpr, 4 * dpr);
+    }
+    // published procedures of the runway in use: SIDs, STARs, holding patterns (each on / off in the view bar)
+    const line = (pts, col, dash) => { ctx.strokeStyle = col; ctx.lineWidth = 1 * dpr; ctx.setLineDash(dash.map(x => x * dpr)); ctx.beginPath();
+      pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); ctx.stroke(); ctx.setLineDash([]); };
+    const tag = (txt, p, col) => { const [px, py] = toPx(p[0], p[1]); ctx.font = `${9 * dpr}px ui-monospace,monospace`; ctx.fillStyle = col; ctx.fillText(txt, px + 4 * dpr, py - 4 * dpr); };
+    for (const ad of arrInfo.aerodromes) {
+      const pr = ad.procedures; if (!pr) continue;
+      const rw = ad.runway_in_use, onRw = r => !r || !r.length || r.includes(rw);
+      if (V.sid) for (const sd of pr.sids) if (sd.runway === rw) { line(sd.points, TH.sid + 'b0', [2, 3]); if (userZoom >= 1.6) tag(sd.name, sd.points[sd.points.length - 1], TH.sid + 'cc'); }
+      if (V.star) for (const st of pr.stars) if (onRw(st.runways)) { line(st.points, TH.star + 'b0', [6, 3]); if (userZoom >= 1.6) tag(st.name, st.points[0], TH.star + 'cc'); }
+      if (V.hold) for (const h of pr.holds) if (onRw(h.runways)) { line(h.points, TH.hold, []); tag(`${h.fix} ${h.min_alt_ft >= 10000 ? 'FL' + Math.round(h.min_alt_ft / 100) : Math.round(h.min_alt_ft) + 'ft'}+`, h.points[1], TH.hold + 'cc'); }
     }
     for (const ad of arrInfo.aerodromes) {
       const hdg = (ad.runways.find(r => r.id === ad.runway_in_use) || {}).landing_heading || 0, hr = hdg * Math.PI / 180;

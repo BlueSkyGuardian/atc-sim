@@ -1454,6 +1454,112 @@
    "coord": "340749.34N 0063014.66W",
    "role": "GMME SID RWY 03 (= ENNAV)",
    "fra": ""
+  },
+  "BNS": {
+   "coord": "333830.50N 0071228.80W",
+   "role": "STAR point",
+   "fra": "",
+   "navaid": true
+  },
+  "ME400": {
+   "coord": "341459.95N 0062212.31W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "ME401": {
+   "coord": "340253.54N 0070025.63W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "ME500": {
+   "coord": "341415.12N 0063654.36W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "ME998": {
+   "coord": "340901.32N 0062637.08W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "ME999": {
+   "coord": "341927.79N 0064712.39W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MX289": {
+   "coord": "314808.33N 0080016.18W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MX283": {
+   "coord": "313013.70N 0074921.05W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MX287": {
+   "coord": "313435.12N 0074143.61W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MX285": {
+   "coord": "313934.14N 0074106.94W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MX291": {
+   "coord": "312512.64N 0073826.76W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ213": {
+   "coord": "310839.86N 0065603.23W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ215": {
+   "coord": "310802.31N 0064701.92W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ217": {
+   "coord": "311328.36N 0065255.34W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ219": {
+   "coord": "311308.14N 0064602.14W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ306": {
+   "coord": "304348.39N 0063846.71W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ120": {
+   "coord": "305548.34N 0071123.53W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ126": {
+   "coord": "310632.82N 0070506.59W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ220": {
+   "coord": "305832.07N 0071705.02W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "MZ222": {
+   "coord": "311218.29N 0070705.03W",
+   "role": "STAR point",
+   "fra": ""
+  },
+  "BAKBO": {
+   "coord": "311905.56N 0083434.45W",
+   "role": "GMMX STAR (R-237 MAK, position approximate)",
+   "fra": ""
   }
  },
  "construction_points": {
@@ -2720,7 +2826,253 @@
      "max_kt": 230
     }
    ],
-   "_sids_source": "AD2 GMMN 31-1-1 / 31-2-1 (SID RWY 35R/35L 1D/3D, 17L/17R 2D/4D, AIRAC 07/21, 09/21): climb on the axis to 2000 ft, then the NDB / VOR tracks; turns 230 kt max"
+   "_sids_source": "AD2 GMMN 31-1-1 / 31-2-1 (SID RWY 35R/35L 1D/3D, 17L/17R 2D/4D, AIRAC 07/21, 09/21): climb on the axis to 2000 ft, then the NDB / VOR tracks; turns 230 kt max",
+   "stars": [
+    {
+     "name": "LAKAM1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "LAKAM",
+      "NASRO"
+     ]
+    },
+    {
+     "name": "RAVOL1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "RAVOL",
+      "331316.21N 0074516.07W",
+      "330732.84N 0074439.97W",
+      "DEVNO"
+     ]
+    },
+    {
+     "name": "NIKZO1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "NIKZO",
+      "CSD",
+      "DEVNO"
+     ]
+    },
+    {
+     "name": "FOBAC1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "FOBAC",
+      "CSD",
+      "DEVNO"
+     ]
+    },
+    {
+     "name": "MABOG1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "MABOG",
+      "325256.57N 0073022.00W",
+      "325553.56N 0073556.96W",
+      "325835.76N 0074038.97W",
+      "DEVNO"
+     ]
+    },
+    {
+     "name": "MOGBI1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "MOGBI",
+      "325318.02N 0072637.13W",
+      "325502.63N 0073213.88W",
+      "325620.53N 0073704.49W",
+      "325858.78N 0074104.42W",
+      "DEVNO"
+     ]
+    },
+    {
+     "name": "LACAJ1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "LACAJ",
+      "GOVAS",
+      "KOTAG"
+     ]
+    },
+    {
+     "name": "SADIC1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "SADIC",
+      "BISMI",
+      "GODPO",
+      "KOTAG"
+     ]
+    },
+    {
+     "name": "TUSOR1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "TUSOR",
+      "DIRAD",
+      "BISMI",
+      "GODPO",
+      "KOTAG"
+     ]
+    },
+    {
+     "name": "BNS1A",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "via": [
+      "BNS",
+      "KOTAG"
+     ]
+    },
+    {
+     "name": "LAKAM2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "LAKAM",
+      "NASRO"
+     ]
+    },
+    {
+     "name": "RAVOL2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "RAVOL",
+      "BIRVO"
+     ]
+    },
+    {
+     "name": "VONCI2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "VONCI",
+      "330435.42N 0080718.21W",
+      "BIRVO"
+     ]
+    },
+    {
+     "name": "NIKZO2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "NIKZO",
+      "CSD",
+      "BIRVO"
+     ]
+    },
+    {
+     "name": "FOBAC2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "FOBAC",
+      "CSD",
+      "BIRVO"
+     ]
+    },
+    {
+     "name": "MABOG2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "MABOG",
+      "SLK"
+     ]
+    },
+    {
+     "name": "MOGBI2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "MOGBI",
+      "SLK"
+     ]
+    },
+    {
+     "name": "LACAJ2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "LACAJ",
+      "GOVAS",
+      "SLK"
+     ]
+    },
+    {
+     "name": "SADIC2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "SADIC",
+      "CAE"
+     ]
+    },
+    {
+     "name": "TUSOR2A",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "via": [
+      "TUSOR",
+      "DIRAD",
+      "BISMI",
+      "CAE"
+     ]
+    }
+   ],
+   "_stars_source": "AD2 GMMN 33-1-1 / 33-2-1 (STAR RWY 35 1A/3A, RWY 17 2A/4A, AIRAC 07/21)"
   },
   {
    "id": "GCRR",
@@ -2979,7 +3331,243 @@
      "max_kt": 230
     }
    ],
-   "_sids_source": "AD2 GMMX 31_1 / 31_2 (SID RWY 10 3D: Rm114 to 10 DME MAK; RWY 28 4D: Rm279 to 2.5 DME MAK; 230 kt in turns)"
+   "_sids_source": "AD2 GMMX 31_1 / 31_2 (SID RWY 10 3D: Rm114 to 10 DME MAK; RWY 28 4D: Rm279 to 2.5 DME MAK; 230 kt in turns)",
+   "stars": [
+    {
+     "name": "OBOGA1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "OBOGA",
+      "MAK"
+     ]
+    },
+    {
+     "name": "MABAP1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "MABAP",
+      "315633.48N 0080927.68W",
+      "315434.04N 0081652.33W",
+      "315037.91N 0082306.46W",
+      "314511.03N 0082729.14W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "MAGAV1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "MAGAV",
+      "313314.10N 0083512.96W",
+      "313616.49N 0083530.77W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "LISRA1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "LISRA",
+      "311753.26N 0082521.91W",
+      "312358.98N 0083121.57W",
+      "313122.62N 0083448.91W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "BAKBO1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "BAKBO",
+      "312202.73N 0082951.29W",
+      "313014.91N 0083429.23W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "MOKIR1A",
+     "runways": [
+      "10"
+     ],
+     "via": [
+      "MOKIR",
+      "MAK"
+     ]
+    },
+    {
+     "name": "OBOGA2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "OBOGA",
+      "MAK"
+     ]
+    },
+    {
+     "name": "MABAP2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MABAP",
+      "315633.48N 0080927.68W",
+      "315434.04N 0081652.33W",
+      "315037.91N 0082306.46W",
+      "314511.03N 0082729.14W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "MAGAV2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MAGAV",
+      "313314.10N 0083512.96W",
+      "313616.49N 0083530.77W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "LISRA2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "LISRA",
+      "311753.26N 0082521.91W",
+      "312358.98N 0083121.57W",
+      "313122.62N 0083448.91W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "BAKBO2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "BAKBO",
+      "312202.73N 0082951.29W",
+      "313014.91N 0083429.23W",
+      "313919.37N 0083522.35W",
+      "ODALO"
+     ]
+    },
+    {
+     "name": "MOKIR2A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MOKIR",
+      "MAK"
+     ]
+    },
+    {
+     "name": "KUDAX4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "KUDAX",
+      "RAMIM"
+     ]
+    },
+    {
+     "name": "OBOGA4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "OBOGA",
+      "RAMIM"
+     ]
+    },
+    {
+     "name": "MABAP4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MABAP",
+      "MX289",
+      "RAMIM"
+     ]
+    },
+    {
+     "name": "BENOV4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "BENOV",
+      "MX289",
+      "RAMIM"
+     ]
+    },
+    {
+     "name": "MAGAV4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MAGAV",
+      "MX283"
+     ]
+    },
+    {
+     "name": "GOSNO4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "GOSNO",
+      "MX283"
+     ]
+    },
+    {
+     "name": "LISRA4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "LISRA",
+      "NAPOV",
+      "MX283"
+     ]
+    },
+    {
+     "name": "MOKIR4A",
+     "runways": [
+      "28"
+     ],
+     "via": [
+      "MOKIR",
+      "MX287",
+      "MX285",
+      "RAMIM"
+     ]
+    }
+   ],
+   "_stars_source": "AD2 GMMX 33_1 / 33_2 (STAR RWY 10 1A, RWY 28 2A) and 34_2 (RNAV STAR RWY 28 4A); BAKBO position approximate"
   },
   {
    "id": "GMAD",
@@ -3302,7 +3890,185 @@
      "max_kt": 230
     }
    ],
-   "_sids_source": "AD2 GMAD 31_1_1 / 31_1_2 (SID RWY 09 4D: turn at 1500 ft (2000 ft OLOMA, KEGAG) right Rm272 / 274; RWY 27 3D: turn left at 5.2 DME ADM)"
+   "_sids_source": "AD2 GMAD 31_1_1 / 31_1_2 (SID RWY 09 4D: turn at 1500 ft (2000 ft OLOMA, KEGAG) right Rm272 / 274; RWY 27 3D: turn left at 5.2 DME ADM)",
+   "stars": [
+    {
+     "name": "AGALI1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "AGALI",
+      "ADM"
+     ]
+    },
+    {
+     "name": "EKTAL1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "EKTAL",
+      "ADM"
+     ]
+    },
+    {
+     "name": "OLOMA1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "OLOMA",
+      "ADM"
+     ]
+    },
+    {
+     "name": "KEGAG1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "KEGAG",
+      "ADM"
+     ]
+    },
+    {
+     "name": "BULOK1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "BULOK",
+      "ADM"
+     ]
+    },
+    {
+     "name": "GOSPI1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "GOSPI",
+      "ADM"
+     ]
+    },
+    {
+     "name": "TEKNA1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "TEKNA",
+      "ADM"
+     ]
+    },
+    {
+     "name": "ARSOL1A",
+     "runways": [
+      "09"
+     ],
+     "via": [
+      "ARSOL",
+      "ADM"
+     ]
+    },
+    {
+     "name": "AGALI2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "AGALI",
+      "303547.85N 0092746.98W",
+      "303351.51N 0092713.19W",
+      "303356.92N 0091914.42W",
+      "303057.40N 0091203.49W",
+      "302530.92N 0090711.38W",
+      "AGAMU"
+     ]
+    },
+    {
+     "name": "EKTAL2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "EKTAL",
+      "303449.84N 0091458.93W",
+      "303300.35N 0091555.72W",
+      "302935.49N 0091021.30W",
+      "302435.32N 0090644.74W",
+      "AGAMU"
+     ]
+    },
+    {
+     "name": "OLOMA2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "OLOMA",
+      "303219.13N 0091019.78W",
+      "303047.40N 0091149.45W",
+      "302523.76N 0090707.67W",
+      "AGAMU"
+     ]
+    },
+    {
+     "name": "KEGAG2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "KEGAG",
+      "302415.57N 0090410.29W",
+      "302340.81N 0090623.36W",
+      "302115.17N 0090547.15W",
+      "AGAMU"
+     ]
+    },
+    {
+     "name": "BULOK2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "BULOK",
+      "ADM"
+     ]
+    },
+    {
+     "name": "GOSPI2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "GOSPI",
+      "ADM"
+     ]
+    },
+    {
+     "name": "TEKNA2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "TEKNA",
+      "ADM"
+     ]
+    },
+    {
+     "name": "ARSOL2A",
+     "runways": [
+      "27"
+     ],
+     "via": [
+      "ARSOL",
+      "ADM"
+     ]
+    }
+   ],
+   "_stars_source": "AD2 GMAD 33_1_1 / 33_1_2 (STAR RWY 09 1A, RWY 27 2A)"
   },
   {
    "id": "GCLP",
@@ -3591,7 +4357,53 @@
      "max_kt": 210
     }
    ],
-   "_sids_source": "AD2 GMME 31-3 / 31-4 (RNAV SID RWY 03 1A, RWY 21 1B, AIRAC 03/25)"
+   "_sids_source": "AD2 GMME 31-3 / 31-4 (RNAV SID RWY 03 1A, RWY 21 1B, AIRAC 03/25)",
+   "stars": [
+    {
+     "name": "TUSOR1F",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "TUSOR",
+      "ME400",
+      "ME998"
+     ]
+    },
+    {
+     "name": "VARAS1F",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "VARAS",
+      "ME998"
+     ]
+    },
+    {
+     "name": "ESALA1F",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "ESALA",
+      "ME401",
+      "ME402",
+      "ME999"
+     ]
+    },
+    {
+     "name": "TUSOR1H",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "TUSOR",
+      "ME500"
+     ]
+    }
+   ],
+   "_stars_source": "AD2 GMME 35-1 (RNAV STAR RWY 21, AIRAC 03/25)"
   },
   {
    "id": "GMMZ",
@@ -3637,7 +4449,146 @@
      ]
     }
    ],
-   "_holdings_source": "AIP Maroc AD2 GMMZ 34_1 (RNAV STAR RWY 30: TIDMO) and 35_1 (STAR RWY 12: MZ120) data tables"
+   "_holdings_source": "AIP Maroc AD2 GMMZ 34_1 (RNAV STAR RWY 30: TIDMO) and 35_1 (STAR RWY 12: MZ120) data tables",
+   "stars": [
+    {
+     "name": "MAXOR1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "MAXOR",
+      "MZ213",
+      "MZ215",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "MOGVA1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "MOGVA",
+      "MZ217",
+      "MZ215",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "RATVA1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "RATVA",
+      "MZ219",
+      "MZ215",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "TOGMA1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "TOGMA",
+      "MZ215",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "LARAP1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "LARAP",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "LINVA1A",
+     "runways": [
+      "30"
+     ],
+     "via": [
+      "LINVA",
+      "MZ306",
+      "TIDMO"
+     ]
+    },
+    {
+     "name": "MAXOR4A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "MAXOR",
+      "MZ220",
+      "MZ120"
+     ]
+    },
+    {
+     "name": "MOGVA4A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "MOGVA",
+      "MZ222",
+      "MZ220",
+      "MZ120"
+     ]
+    },
+    {
+     "name": "RATVA4A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "RATVA",
+      "MZ219",
+      "MZ215",
+      "MZ126"
+     ]
+    },
+    {
+     "name": "TOGMA4A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "TOGMA",
+      "MZ215",
+      "MZ126"
+     ]
+    },
+    {
+     "name": "LARAP3A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "LARAP",
+      "MZ215",
+      "MZ126"
+     ]
+    },
+    {
+     "name": "LINVA4A",
+     "runways": [
+      "12"
+     ],
+     "via": [
+      "LINVA",
+      "MZ220",
+      "MZ120"
+     ]
+    }
+   ],
+   "_stars_source": "AD2 GMMZ 34_1 (RNAV STAR RWY 30 1A) and 35_1 (STAR RWY 12 4A)"
   }
  ],
  "sequencing": [

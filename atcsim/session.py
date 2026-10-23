@@ -453,9 +453,17 @@ class Session:
         }
 
 
+def arrivals_mod_procedures(ad) -> dict:
+    from .arrivals import procedures
+    try:
+        return procedures(ad)
+    except Exception:  # noqa: BLE001
+        return {"sids": [], "stars": [], "holds": []}
+
+
 def arrivals_description(w: World) -> dict:
     return {
-        "aerodromes": [a.snapshot() for a in w.aerodromes.values()],
+        "aerodromes": [{**a.snapshot(), "procedures": arrivals_mod_procedures(a)} for a in w.aerodromes.values()],
         "sequencing_fixes": [{**q.snapshot(), "approach_with_runway_in_use": w.approach(f, q.aerodrome)}
                              for f, q in w.seq.items()],
         "note": "every flight whose exit is a sequencing fix is an arrival to that aerodrome; it requests descent "

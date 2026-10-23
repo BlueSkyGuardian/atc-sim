@@ -86,6 +86,15 @@ def _minima(world, a, b) -> Tuple[float, float]:
     return h, v
 
 
+def _unit(world, a) -> str:
+    """Who is working it: the aerodrome's approach near the field, the previous sector further out."""
+    ad = world.aerodromes.get(_ad_of(a) or "")
+    if ad is not None and dist(ad.pos, a.pos) <= TMA_RADIUS_NM:
+        return f"{ad.id} approach"
+    pu = getattr(a, "prev_unit", "") or ""
+    return f"{pu} control" if pu and pu != (_ad_of(a) or "") else "Casablanca control"
+
+
 def _ad_of(a) -> Optional[str]:
     if getattr(a, "app", None):
         return a.app.get("ad")
@@ -120,7 +129,7 @@ def _restrict(world, a, kind: str, alt: float, other, own: float) -> None:
         old["alt"] = alt                                  # a small adjustment: no new instruction
         return
     a.tma_cap = {"kind": kind, "alt": alt, "vs": other.callsign, "t": world.t, "own_ft": own}
-    unit = f"{_ad_of(a) or ''} approach".strip()
+    unit = _unit(world, a)
     verb = "stop climb at" if kind == "ceiling" else "stop descent at"
     lvl = f"FL{int(alt // 100):03d}" if alt >= 6000 else f"{int(alt)} ft"
     world._event("approach_restriction", callsign=a.callsign, traffic=other.callsign, kind=kind, alt_ft=alt,
@@ -290,7 +299,7 @@ def _vector_away(world, a, b) -> None:
         a.app["names"].insert(0, name)
         a.app["stretch_t"] = world.t
     hdg = int(round(math.degrees(math.atan2(p[0] - a.x, p[1] - a.y)) % 360 / 5.0) * 5) % 360 or 360
-    unit = f"{_ad_of(a) or ''} approach".strip()
+    unit = _unit(world, a)
     world._event("approach_vector", callsign=a.callsign, traffic=b.callsign,
                  text=f"{unit}: {a.callsign} turn {'right' if side > 0 else 'left'} heading {hdg:03d}, "
                       f"traffic {b.callsign}")

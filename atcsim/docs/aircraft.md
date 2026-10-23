@@ -203,6 +203,14 @@ its own climb performance needs to get there at the scenario's start time. Its l
 gives (FL90 a few miles from the field, FL160 forty miles out), not a fixed FL150. The SID is in its flight plan
 (`sid`, and at the head of item 15).
 
+**Departures entering from the previous sector.** A departure from an aerodrome with SIDs that enters our sectors
+from the previous ones (Agadir West: the GMMN departures at MARJA, SALCA, NISBA) also takes off from the runway in
+use when its runway is within 150 NM of our entry point: the SID that makes the shortest way to its route, then its
+flight plan, climbing to the level it enters at (FL260…), with approach and the previous sector until it calls us
+10 NM before the entry - on the scope from take-off, separated by them. Further away, or already airborne at the
+start of the exercise, it appears before the entry as before. **STARs** (`aerodromes[].stars`, AD 2 xx 33-35) are
+drawn on the scope with the SIDs and the holds.
+
 **The approach units keep their traffic separated** (`tma.py`). The traffic "with approach" - departures on their
 SID before their release, arrivals the next units have taken over - is checked every few seconds against every other
 aircraft around (approach's own, ours, the en-route traffic) over the next two and a half minutes, with the radar

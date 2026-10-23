@@ -408,6 +408,8 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     ac.start_along_nm = start_along
     ac.planned_exit = route[-1]
     ac.planned_length_nm = polyline_length(pts) - max(0.0, start_along - head_len)
+    if sid_info is None and not start_name:
+        _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, route, perf, mass, fl)
     dest_fp = str(a.get("dest") or "").upper()
     if (route[-1] in seqfixes and a.get("arrival", True)
             and (not dest_fp or dest_fp == seqfixes[route[-1]].aerodrome)):   # arrival behind the fix
@@ -446,6 +448,59 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
         ac.flight_plan["route"] = f"{ac.sid['name']} " + str(ac.flight_plan.get("route", ""))
     return ac
 
+
+
+SID_UPSTREAM_MAX_NM = 150.0   # a departure entering our sectors this far from its runway or less is shown from take-off
+
+
+def _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, route, perf, mass, fl) -> None:
+    """A departure from an aerodrome with SIDs that enters our sectors from the previous ones (no start point): it
+    takes off from the runway in use and flies the SID that makes the shortest way to its route, then its flight plan
+    to our entry point, climbing to the level it enters at - with approach and the previous sector until it calls us
+    (10 NM before the entry, as any other). Not when it is far (SID_UPSTREAM_MAX_NM) or already airborne at the
+    start of the exercise."""
+    from .arrivals import sid_path
+    dep = str(a.get("dep") or "").upper()
+    ad = aerodromes.get(dep)
+    if (ad is None or not getattr(ad, "sids", None) or a.get("sid") is False
+            or not scn.get("sid_departures", True) or ac.entry_time <= 0.0 or getattr(ac, "start_along_nm", 0) > 0):
+        return
+    cands = [sd for sd in ad.sids if ad.in_use in sd["runways"]]
+    if a.get("sid"):
+        cands = [sd for sd in cands if sd["name"] == str(a["sid"]).upper()] or cands
+    if not cands:
+        return
+    upstream = [w for w in names[:idx_entry] if w in waypoints and not w.startswith("@")]
+    entry = route[0]
+    tail = upstream + [entry]
+    best = None
+    for sd in cands:
+        path = sid_path(ad, sd, ad.in_use)
+        xy = [p for _, p in path] + [waypoints[w] for w in tail]
+        L = polyline_length(xy)
+        if best is None or L < best[0]:
+            best = (L, sd, path)
+    L, sd, path = best
+    if L > SID_UPSTREAM_MAX_NM:
+        return
+    t_s = _climb_time_s(perf, mass, L, ad.elev_ft, fl * 100.0, sd["max_kt"])
+    spawn = ac.boundary_time - t_s
+    if spawn < 0:
+        return
+    pre = []
+    for k, (nm, p) in enumerate(path):
+        w = nm or f"@{ac.callsign}~S{k}"
+        if nm is None:
+            waypoints[w] = p
+        if w not in pre and w not in tail:
+            pre.append(w)
+    ac.route = pre + tail + list(route[1:])
+    ac.entry_time = spawn
+    ac.start_along_nm = 0.0
+    ac.spawn_alt_ft = ad.elev_ft + 50.0
+    ac.initial_cfl = fl                          # the previous units climb it to the level it enters at
+    ac.sid = {"name": sd["name"], "aerodrome": ad.id, "runway": ad.in_use, "max_kt": sd["max_kt"], "released": False,
+              "elev_ft": ad.elev_ft}
 
 
 def _climb_time_s(perf, mass: float, along_nm: float, elev_ft: float, cfl_ft: float, sid_kt: float) -> float:
