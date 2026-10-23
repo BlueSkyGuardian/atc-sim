@@ -73,6 +73,7 @@ class Aerodrome:
     faf_agl_ft: float = 3000.0
     outbound_nm: float = 12.0
     racetrack_nm: float = 4.0
+    holdings: List[dict] = field(default_factory=list)   # published approach holds: x, y, fix, inbound_true, turn, ...
     _sidx: int = 0
 
     @property
@@ -97,6 +98,8 @@ class Aerodrome:
         return {"id": self.id, "name": self.name, "x_nm": self.x, "y_nm": self.y, "elev_ft": self.elev_ft,
                 "runways": [{"id": k, "landing_heading": v} for k, v in self.runways.items()],
                 "runway_in_use": self.in_use,
+                "holdings": [{k: h[k] for k in ("fix", "inbound_true", "turn", "min_alt_ft", "max_alt_ft", "max_kt",
+                                                "runways")} | {"x_nm": h["x"], "y_nm": h["y"]} for h in self.holdings],
                 "runway_changes": [{"time_s": t, "runway": r} for t, r in self.schedule[self._sidx:]]}
 
 
@@ -127,6 +130,22 @@ class SeqFix:
                 "letter_of_agreement": self.describe()}
 
 
+def _holding(h: dict, asp=None) -> dict:
+    """A published holding pattern: its fix position and inbound track (true) resolved."""
+    if "x" in h:
+        x, y = float(h["x"]), float(h["y"])
+    else:
+        x, y = asp.resolve_point(h.get("coord") or h["fix"])
+    if h.get("inbound_true") is not None:
+        inb = float(h["inbound_true"])
+    else:
+        inb = float(h["inbound_mag"]) + float(h.get("var", 0.0))
+    return {"fix": h["fix"], "x": x, "y": y, "inbound_true": inb % 360, "turn": str(h.get("turn", "R")).upper()[:1],
+            "leg_min": h.get("leg_min"), "leg_nm": h.get("leg_nm"), "min_alt_ft": float(h.get("min_alt_ft", 0)),
+            "max_alt_ft": float(h["max_fl"]) * 100.0 if h.get("max_fl") else None,
+            "max_kt": float(h.get("max_kt", 230)), "runways": [str(r) for r in h.get("runways", [])]}
+
+
 def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Dict[str, Aerodrome], Dict[str, SeqFix]]:
     ads: Dict[str, Aerodrome] = {}
     d_ads = asp.default_aerodromes if asp is not None else DEFAULT_AERODROMES
@@ -140,7 +159,9 @@ def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Di
                        elev_ft=float(a.get("elev_ft", 0)),
                        runways={str(r["id"]): float(r["heading"]) % 360 for r in a["runways"]},
                        schedule=sorted((float(e["time"]), str(e["runway"])) for e in a.get("runway_schedule", [])),
-                       final_nm=float(a.get("final_nm", 10)), outbound_nm=float(a.get("outbound_nm", 12)))
+                       final_nm=float(a.get("final_nm", 10)), outbound_nm=float(a.get("outbound_nm", 12)),
+                       holdings=[_holding(h, asp) for h in (a.get("holdings") or next(
+                           (d.get("holdings", []) for d in d_ads if d.get("id") == a["id"]), []))])
         want = str(a.get("runway_in_use", "auto"))
         if want == "auto":
             # into the surface wind

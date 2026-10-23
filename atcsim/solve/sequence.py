@@ -50,6 +50,11 @@ ARR_DESCENT_BEFORE_S = 300.0   # an arrival is planned down about 5 minutes befo
 ARR_PLAN_S = 1500.0        # arrivals are sequenced from 25 minutes before their fix (not earlier: the picture changes)
 MIN_IAS = 250              # never below 250 kt unless the pilot has said it can
 MAX_TURN_BACK_DEG = 90.0   # at the end of a vector, the turn towards the point is at most this
+SPEED_CAP: Dict[str, float] = {}   # Mach given to a follower so that it is no faster than the one ahead (this plan)
+MAX_MACH_CHANGE = 0.03     # a delay is absorbed by speed with at most 0.03 off the aircraft's own Mach
+MAX_MACH_MATCH = 0.08      # to fly no faster than the one ahead, a follower is slowed by up to 0.08 when its type
+                           # and weight allow it (a B788 at M.85 to M.77; not below its buffet margin)
+MAX_OFF_AXIS_NM = 25.0     # a sequencing vector never takes the aircraft more than 25 NM off the axis of its route
 MAX_VECTOR_S = 900.0       # a sequencing vector lasts at most 15 minutes: beyond, another solution (direct, level)
 
 
@@ -127,11 +132,27 @@ def plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]]
     if sq is not None and (descents is None or descents):
         DESCEND.update(fix=T_name, fl=int(sq.cross_at_fl or sq.cross_at_or_below_fl or sq.min_fl))
     try:
-        P = _plan(w, T_name, S, members, shared_after_nm, asked, use_merge, descents)
-        if not P.get("ok") and use_merge and P.get("point") not in (None, T_name):
-            P2 = _plan(w, T_name, S, members, shared_after_nm, asked, False, descents)
-        else:
-            P2 = None
+        # the faster first (when a follower could not slow to the speed of the one ahead), else first come first served
+        P = None
+        for order in ("speed", "fcfs"):
+            Pk = _plan(w, T_name, S, members, shared_after_nm, asked, use_merge, descents, order=order)
+            if not Pk.get("ok") and use_merge and Pk.get("point") not in (None, T_name):
+                Pm = _plan(w, T_name, S, members, shared_after_nm, asked, False, descents, order=order)
+                if Pm.get("ok"):
+                    Pm["notes"] = [f"too close to {Pk['point']} to sequence there: vectors direct {T_name}"] + Pm.get("notes", [])
+                    Pk = Pm
+            if P is None:
+                P = Pk
+            if Pk.get("ok"):
+                if order == "fcfs" and Pk.get("swapped_would"):
+                    Pk["notes"] = Pk.get("notes", []) + [
+                        "the faster aircraft could not be put first: behind, it will close on the one ahead after "
+                        + T_name + " - keep an eye on the spacing once the vectors are over"]
+                P = Pk
+                break
+            if not Pk.get("swapped"):
+                break                                  # no speed reordering to undo: the same plan both ways
+        P2 = None
     finally:
         DESCEND.update(fix=None, fl=None)
     if P2 is not None:
@@ -142,7 +163,7 @@ def plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]]
 
 
 def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]] = None, shared_after_nm: float = 0.0,
-          asked=None, use_merge: bool = True, descents: Optional[bool] = None) -> Dict:
+          asked=None, use_merge: bool = True, descents: Optional[bool] = None, order: str = "speed") -> Dict:
     """The sequencing plan at point T_name for the aircraft going there (members), or {"ok": False, "why": ...}.
     At a sequencing fix (arrivals) the spacing is that of its letter of agreement, whatever the levels, and the
     descents to the LoA level are planned as well (descents=None: when T_name is a sequencing fix)."""
@@ -182,6 +203,25 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
         # some of them no longer pass the merge point (a vector direct to the fix): sequenced at the fix itself
         return {"ok": False, "why": f"not all via {T_name}", "sequence": seq, "steps": [], "point": T_name, "S": S,
                 "targets": {}, "spacing": [], "notes": [], "fix": fix_name}
+    # a faster aircraft that cannot slow down to the speed of the one ahead (own Mach - 0.03 still faster) goes first
+    # when they come close together: behind, it would eat the spacing once the vectors are over
+    SPEED_CAP.clear()
+    own_m = {cs: _own_mach(w.aircraft[cs]) for cs in seq}
+    fcfs = list(seq)
+    for _ in range(len(seq) if order == "speed" else 0):
+        moved = False
+        for k in range(1, len(seq)):
+            f_, l_ = seq[k], seq[k - 1]
+            mf, ml = own_m.get(f_), own_m.get(l_)
+            if mf is None or ml is None:
+                continue
+            g_l = max(w.aircraft[l_].gs, 150.0)
+            close = cross[f_] - cross[l_] < (S + MARGIN_NM) / g_l * 3600.0 + 120.0
+            if close and _mach_floor(w.aircraft[f_], mf) > ml + 0.005:
+                seq[k - 1], seq[k] = f_, l_
+                moved = True
+        if not moved:
+            break
     t_out = [c for c in (_cross(base[cs], last_pt) for cs in seq) if c is not None]
     CLEAR_UNTIL["t"] = (max(t_out) + 900.0) if t_out else None
     CLEAR_UNTIL["pt"] = last_pt
@@ -201,6 +241,25 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
             t_assigned[cs] = cross[cs]
             notes.append(f"{cs}: vertically separated from {ahead} at {T_name}")
             continue
+        # no faster than the one ahead: when its own Mach is higher, it is slowed (within 0.03) for the whole way,
+        # so the spacing the plan builds is not eaten afterwards
+        cap_steps = []
+        mf, ml = own_m.get(cs), SPEED_CAP.get(ahead, own_m.get(ahead))
+        if mf is not None and ml is not None and mf > ml + 0.005 and not departing(w, a):
+            m_cap = round(max(_mach_floor(a, mf), math.floor(ml * 100 + 1e-6) / 100.0), 2)
+            SPEED_CAP[cs] = m_cap
+            Tr_c = traj.build(w, a, H_SEQ, **_capkw(cs))
+            planned[cs], level[cs] = _adj(w, a, Tr_c, mach=m_cap), Tr_c
+            cross[cs] = _cross(planned[cs], p) or cross[cs]
+            cap_steps = [{"at_s": w.t, "callsign": cs, "action": {"type": "clear", "callsign": cs,
+                                                                  "speed": f"M{int(round(m_cap * 100))}", "limit": fix_name},
+                          "why": (f"{cs} M{int(round(m_cap * 100))} until {fix_name}: no faster than {ahead} "
+                                  f"(M{int(round(ml * 100))}), the spacing holds once the vectors are over")
+                                 if m_cap <= ml + 0.005 else
+                                 (f"{cs} M{int(round(m_cap * 100))} until {fix_name}: the slowest it can fly, still faster "
+                                  f"than {ahead} (M{int(round(ml * 100))}) - the spacing shrinks after {fix_name}")}]
+            if m_cap > ml + 0.005:
+                notes.append(f"{cs} cannot slow to the speed of {ahead}: watch the spacing after {fix_name}")
         g = max(a.gs, 150.0)
         g_lead = _gs_at(planned[ahead], t_assigned[ahead])     # the one ahead's ground speed after T
         S_k = S + MARGIN_NM
@@ -210,6 +269,7 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
         spc0 = _trail(planned[ahead], planned[cs], check_pts)
         if (spc0 is not None and spc0["spacing_nm"] >= S + 0.2) or (spc0 is None and delay <= 0):
             t_assigned[cs] = cross[cs]
+            steps += cap_steps
             notes.append(f"{cs}: already {S:g} NM or more behind {ahead}"
                          + (f" ({spc0['spacing_nm']:.1f} NM)" if spc0 else ""))
             continue
@@ -220,6 +280,7 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
             mode, val = a.normal_speed()
             if mode == "mach":
                 m_slow = round(val - 0.03, 2)
+                cap = SPEED_CAP.get(cs)
                 g_slow = max(120.0, g + a.perf.tas_for("mach", m_slow, a.alt_ft) - a.tas)
                 gain = 1.0 / g_slow - 1.0 / g                     # hours per NM held
                 X = delay / 3600.0 / gain if gain > 0 else math.inf
@@ -229,6 +290,8 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
                     if closing:                                    # gaining on the one ahead now: at once, the least
                         for dm in (0.01, 0.02, 0.03):              # reduction that is enough over the whole way
                             m_try = round(val - dm, 2)
+                            if cap is not None and m_try > cap + 1e-6:
+                                continue
                             g_try = max(120.0, g + a.perf.tas_for("mach", m_try, a.alt_ft) - a.tas)
                             if D * (1.0 / g_try - 1.0 / g) * 3600.0 >= delay:
                                 m_slow, X, start_s = m_try, D, 0.0
@@ -252,9 +315,32 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
         if sol is None:
             sol = _fan_member(w, a, cs, ahead, T_name, _ahead_only(planned, seq, k), t_assigned[ahead], S_k, fan_prev, sh,
                               planned[ahead], check_pts, g_lead)
+        # 5) both: slowed (own Mach -0.03) and vectored, as a controller would when a vector alone is too long
+        if sol is None and mf is not None and not departing(w, a):
+            m_both = round(mf - MAX_MACH_CHANGE, 2)
+            if m_both < SPEED_CAP.get(cs, 9.0) - 1e-6:
+                had = SPEED_CAP.get(cs)
+                SPEED_CAP[cs] = m_both
+                sol = _fan_member(w, a, cs, ahead, T_name, _ahead_only(planned, seq, k), t_assigned[ahead], S_k, fan_prev,
+                                  sh, planned[ahead], check_pts, g_lead)
+                if sol is None:
+                    if had is None:
+                        SPEED_CAP.pop(cs, None)
+                    else:
+                        SPEED_CAP[cs] = had
+                else:
+                    sp = f"M{int(round(m_both * 100))}"
+                    cap_steps = [{"at_s": w.t, "callsign": cs, "action": {"type": "clear", "callsign": cs, "speed": sp,
+                                                                           "limit": fix_name},
+                                  "why": f"{cs} {sp} until {fix_name}, with the vector: a vector alone would be too long"}]
         if sol is None:
             return {"ok": False, "why": f"no speed or vector puts {cs} {S:g} NM behind {ahead} at {T_name}", "sequence": seq,
+                    "swapped": seq != fcfs,
                     "steps": steps, "notes": notes, "point": T_name, "S": S, "targets": targets, "spacing": [], "fix": fix_name}
+        if sol["kind"] == "speed":
+            SPEED_CAP[cs] = min(sol["mach"], SPEED_CAP.get(cs, 9.0))
+        elif cap_steps:
+            sol["steps"] = cap_steps + sol["steps"]
         planned[cs] = sol["traj"]
         level[cs] = sol.get("level", sol["traj"])
         targets[cs]["solution"] = sol["kind"]
@@ -339,8 +425,13 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
     return {"ok": worst >= sh, "sequence": seq, "steps": now + sorted(later, key=lambda s_: s_["at_s"]), "spacing": final,
             "closest_nm": None if math.isinf(worst) else round(worst, 1), "notes": notes, "point": T_name, "S": S,
             "shared_after_nm": round(shared_after_nm, 1), "targets": targets, "fix": fix_name, "arrival": arrival,
-            "trajs": {cs: planned[cs] for cs in seq},
+            "trajs": {cs: planned[cs] for cs in seq}, "swapped": seq != fcfs, "swapped_would": _would_swap(seq, own_m),
             "why": "" if worst >= sh else f"the plan leaves two aircraft {worst:.1f} NM apart"}
+
+
+def _would_swap(seq, own_m) -> bool:
+    return any(own_m.get(f) is not None and own_m.get(l) is not None and own_m[f] - MAX_MACH_CHANGE > own_m[l] + 0.005
+               for l, f in zip(seq, seq[1:]))
 
 
 def _trail(T_lead, T_foll, pts) -> Optional[Dict]:
@@ -451,17 +542,20 @@ def _fan_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, fan_prev, sh, T_
         ref = _refine_against(w, a, planned, cs, T_name, h, S_k, c["time_s"], t_ahead, T_lead, check_pts)
         if ref is None or ref["time_s"] > MAX_VECTOR_S:
             continue
-        Tr_l = traj.build(w, a, H_SEQ, heading=h, for_s=ref["time_s"], then=T_name)
-        Tr = _adj(w, a, Tr_l)
+        Tr_l = traj.build(w, a, H_SEQ, heading=h, for_s=ref["time_s"], then=T_name, **_capkw(cs))
+        Tr = _adj(w, a, Tr_l, mach=SPEED_CAP.get(cs))
         Mx, My, _ = Tr_l.at(ref["time_s"])
         from .resolve import _angle
         if _angle(c["track"], math.degrees(math.atan2(p[0] - float(Mx), p[1] - float(My))) % 360) > MAX_TURN_BACK_DEG:
             continue                                  # vectored past its point and turned back: not how it is done
         resume_t = w.t + ref["time_s"]
-        if fan_prev and c["same_stream"] and resume_t < fan_prev[2] + 30:
-            continue                                  # resumes only after the one ahead (from the front)
+        if fan_prev and c["same_stream"] and resume_t < fan_prev[2] + 30 and SPEED_CAP.get(cs) is None:
+            continue                                  # resumes only after the one ahead (from the front); slowed to
+                                                      # the speed of the one ahead it may turn in first (checked clear)
         if not _inside(w, Tr, _cross(Tr, p)):
             continue                                  # the vector would take it out of the sector
+        if off_axis_nm(w, a, (float(Mx), float(My))) > MAX_OFF_AXIS_NM:
+            continue                                  # never more than 25 NM off the axis of its route
         if not _clear(Tr, {k_: v for k_, v in planned.items() if k_ != cs}, cs, sh):
             continue
         mins = max(1, int(round(ref["time_s"] / 60.0)))
@@ -472,6 +566,60 @@ def _fan_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, fan_prev, sh, T_
                            "why": (f"{cs} heading {h:03d} ({'right' if side > 0 else 'left'} {turn}°) for {ref['ground_nm']:.0f} NM "
                                    f"(about {mins} min), then direct {T_name}: {ref['spacing_nm']:.1f} NM behind {ahead}")}]}
     return None
+
+
+def _capkw(cs: str) -> Dict:
+    m = SPEED_CAP.get(cs)
+    return {"speed": f"M{int(round(m * 100))}", "speed_for_s": H_SEQ} if m else {}
+
+
+def _mach_floor(a, own: Optional[float] = None) -> float:
+    """The lowest Mach the aircraft is given to keep behind a slower one: its own less MAX_MACH_MATCH, not below the
+    type's assignable range nor within 0.02 of its buffet speed at its present level and weight."""
+    own = own if own is not None else (_own_mach(a) or 0.78)
+    lo = own - MAX_MACH_MATCH
+    p = getattr(a, "perf", None)
+    if p is not None:
+        try:
+            lo = max(lo, float(p.mach_assign_min))
+            alt = a.alt_ft
+            m1 = p.tas_for("mach", 1.0, alt)
+            if m1 > 0:
+                lo = max(lo, p.min_tas_buffet(alt, a.mass) / m1 + 0.02)
+        except Exception:  # noqa: BLE001
+            pass
+    return round(min(own, math.ceil(lo * 100 - 1e-6) / 100.0), 2)
+
+
+def _own_mach(a) -> Optional[float]:
+    try:
+        mode, val = a.normal_speed()
+    except Exception:  # noqa: BLE001
+        return None
+    return float(val) if mode == "mach" else None
+
+
+def _axis(w, a) -> List:
+    """The axis of the aircraft's route: the leg it was on and the route ahead (as filed, whatever its vector)."""
+    names = [x for x in a.route[max(0, a.next_index - 1):] if x in w.waypoints and not str(x).startswith("@")]
+    names += [x for x in getattr(a, "route_after", []) if x in w.waypoints and not str(x).startswith("@")][:2]
+    pts = [w.waypoints[x] for x in names]
+    return pts if len(pts) >= 2 else [a.pos] + pts
+
+
+def off_axis_nm(w, a, pt) -> float:
+    """Distance of a point from the axis of the aircraft's route."""
+    from ..geometry import dist
+    ax = _axis(w, a)
+    if len(ax) < 2:
+        return 0.0
+    best = 1e18
+    for p0, p1 in zip(ax, ax[1:]):
+        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+        L2 = dx * dx + dy * dy
+        f = 0.0 if L2 < 1e-9 else max(0.0, min(1.0, ((pt[0] - p0[0]) * dx + (pt[1] - p0[1]) * dy) / L2))
+        best = min(best, dist(pt, (p0[0] + f * dx, p0[1] + f * dy)))
+    return best
 
 
 def _inside(w, Tr, t_end: Optional[float], margin_s: float = 45.0) -> bool:
@@ -529,6 +677,8 @@ def fan_candidates(w, a, cs, ahead, T_name, t_ahead, S_k, fan_prev=None, g_lead=
             why = why or "ellipse"
         elif geo["time_s"] > MAX_VECTOR_S:
             why = why or "too long"
+        elif off_axis_nm(w, a, tuple(map(float, geo["turn_point"]))) > MAX_OFF_AXIS_NM:
+            why = why or "off axis"                       # more than 25 NM from the axis of its route
         if why and not all_headings:
             continue
         c = {"heading": h, "side": side, "turn": turn, "track": trk_h, "same_stream": same_stream, "ok": why is None,
@@ -550,7 +700,8 @@ def _refine_against(w, a, planned, cs, T_name, h, S_k, t0_s, t_ahead, T_lead=Non
     tas = a.tas if a.tas > 100 else max(a.gs, 150.0)
 
     def err(t):
-        Tr = _adj(w, a, traj.build(w, a, H_SEQ, heading=h, for_s=max(30.0, t), then=T_name))
+        Tr = _adj(w, a, traj.build(w, a, H_SEQ, heading=h, for_s=max(30.0, t), then=T_name, **_capkw(cs)),
+                  mach=SPEED_CAP.get(cs))
         c = _cross(Tr, p)
         if c is None:
             return None
@@ -658,6 +809,8 @@ def _speed_options(a, m0: Optional[float], trail, lead_conv: Optional[float], co
     own = own_conversion(a)
     mode, val = a.normal_speed()
     m_floor = round(val - 0.03, 2) if mode == "mach" else None
+    if m_floor is not None and m0 is not None:
+        m_floor = min(m_floor, m0)                     # already slowed further (no faster than the one ahead)
     if conv_force is not None:
         return [(m0, float(conv_force), None)]
     if trail is None:

@@ -2182,7 +2182,81 @@
      "heading": 170
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "KOTAG",
+     "coord": "330909.01N 0071619.14W",
+     "inbound_mag": 261,
+     "var": -1.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 4000,
+     "max_fl": 130,
+     "max_kt": 220,
+     "runways": [
+      "35R",
+      "35L"
+     ]
+    },
+    {
+     "fix": "DEVNO",
+     "coord": "330237.36N 0074341.65W",
+     "inbound_mag": 70,
+     "var": -1.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 4000,
+     "max_fl": 130,
+     "max_kt": 220,
+     "runways": [
+      "35R",
+      "35L"
+     ]
+    },
+    {
+     "fix": "NASRO",
+     "coord": "335815N 0074306W",
+     "inbound_mag": 177,
+     "var": -1.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 130,
+     "max_kt": 220
+    },
+    {
+     "fix": "SLK",
+     "coord": "330656N 0073022W",
+     "inbound_mag": 345,
+     "var": -1.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 130,
+     "max_kt": 220,
+     "runways": [
+      "17L",
+      "17R"
+     ]
+    },
+    {
+     "fix": "BIRVO",
+     "coord": "331711.57N 0081130.00W",
+     "inbound_mag": 288,
+     "var": -1.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 4000,
+     "max_fl": 130,
+     "max_kt": 220,
+     "runways": [
+      "17L",
+      "17R"
+     ]
+    }
+   ],
+   "_holdings_source": "holding table (Maghreb vACC GMMN procedures; Jeppesen 10-2 series: KOTAG 261, DEVNO 070, SLK 345 - MHA, MAX FL130, 220 kt)"
   },
   {
    "id": "GCRR",
@@ -2199,7 +2273,47 @@
      "heading": 209
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "GAKMI",
+     "coord": "293931.5N 0131542.0W",
+     "inbound_true": 202.7,
+     "turn": "L",
+     "leg_nm": 4.9,
+     "min_alt_ft": 9000,
+     "max_kt": 250,
+     "runways": [
+      "21"
+     ]
+    },
+    {
+     "fix": "INSER",
+     "coord": "291703.4N 0130112.8W",
+     "inbound_true": 323.0,
+     "turn": "R",
+     "leg_nm": 4.8,
+     "min_alt_ft": 11000,
+     "max_fl": 130,
+     "max_kt": 240,
+     "runways": [
+      "21"
+     ]
+    },
+    {
+     "fix": "NAVIM",
+     "coord": "290839.6N 0131946.4W",
+     "inbound_true": 230.7,
+     "turn": "L",
+     "leg_nm": 4.0,
+     "min_alt_ft": 5000,
+     "max_kt": 220,
+     "runways": [
+      "21"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Espana AD 2 GCRR STAR RWY 21 (AIRAC A 08/26) holding table"
   },
   {
    "id": "GMMX",
@@ -2250,7 +2364,63 @@
      "heading": 211
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "ENETA",
+     "coord": "275529.6N 0145938.4W",
+     "inbound_true": 256.4,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 5000,
+     "max_kt": 220,
+     "runways": [
+      "03L",
+      "03R"
+     ]
+    },
+    {
+     "fix": "LALTO",
+     "coord": "274153.2N 0150014.3W",
+     "inbound_true": 226.4,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 5000,
+     "max_kt": 220,
+     "runways": [
+      "03L",
+      "03R"
+     ]
+    },
+    {
+     "fix": "TOMOS",
+     "coord": "273251.0N 0153311.7W",
+     "inbound_true": 114.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 5000,
+     "max_fl": 70,
+     "max_kt": 220,
+     "runways": [
+      "03L",
+      "03R"
+     ]
+    },
+    {
+     "fix": "LPC",
+     "coord": "274942.7N 0152556.1W",
+     "inbound_true": 20.9,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 7500,
+     "max_kt": 210,
+     "runways": [
+      "03L",
+      "03R"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Espana AD 2 GCLP STAR / IAC RWY 03 holding table"
   },
   {
    "id": "GCFV",
@@ -4078,5 +4248,6 @@
    }
   ]
  },
- "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight)."
+ "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMAD, GMMX, GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
 }

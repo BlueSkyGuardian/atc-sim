@@ -494,7 +494,10 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   when it is enough, otherwise the fan of vectors, checked against all the traffic) with **Apply**, and for each
   follower the headings within the rules with their time on the heading: click one to see it on the scope and apply
   it (that one is the geometry only, not checked against the other traffic). Headings off the direction of flight,
-  over 15 minutes, or too small or too large a turn are left out. The picture follows the traffic every 10 seconds;
+  over 15 minutes, more than 25 NM off the axis of the aircraft's route, or too small or too large a turn are left
+  out. A follower faster than the one ahead is given the Mach of the one ahead (down to own Mach −0.08 when its type
+  and weight allow) until the point, so the spacing holds once the vectors are over; one that cannot slow that much
+  is put first when the two are close. The tool uses the same solver as the AI lab's solver agent. The picture follows the traffic every 10 seconds;
   <kbd>Esc</kbd> or ✕ leaves the tool. While it is on, the labels work as usual (click, drag, menus); an aircraft is
   added to or removed from the sequence by a click on its symbol. Each ellipse is a faint line, with the arc of the
   headings that can be given drawn plainly (a tick every 10°, its two ends labelled); moving the mouse over a

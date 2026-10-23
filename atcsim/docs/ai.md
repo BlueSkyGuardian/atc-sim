@@ -175,9 +175,17 @@ fixed step: every heading (in 5° units) on the ellipse is a solution with its o
 held long or a larger one held briefly, depending on the delay still to absorb and the distance left — and the one
 taken is the cheapest (each degree of turn, and 4° per minute on the heading; for an aircraft already on a vector,
 the change from its present heading) that passes every check. No vector longer than 15 minutes, none that would take
-the aircraft past its point and turn it back more than 90°, none that would take it out of the sector. The plan is
-checked in the trajectory model (every pair separated until they leave the sector), and its clearances are issued
-when due.
+the aircraft past its point and turn it back more than 90°, none that would take it out of the sector, and none that
+would take it more than **25 NM off the axis of its route** (the leg it was on and the route ahead). When a vector
+alone would be too long, the aircraft is also slowed (own Mach −0.03) and vectored.
+**No faster than the one ahead.** A follower whose Mach is higher than the one ahead's would eat the spacing once the
+vectors are over: it is given that Mach (or the slowest its type and weight allow: down to own Mach −0.08, within its
+assignable range and clear of its buffet speed - a B788 at M.85 down to M.77) until the point, and its descent
+speed follows from it. When it cannot slow that much and the two come close, the faster one is put first in the
+sequence; when that order cannot be built either, first come first served is kept with a note to watch the spacing
+after the point. The same solver plans the sequences in the AI lab (`SolverAgent`) and in the radar's
+**Sequence** tool. The plan is checked in the trajectory model (every pair separated until they leave the sector),
+and its clearances are issued when due.
 
 **Arrivals** (TERTO for GCRR, MARJA and SALCA for GMMN) are planned per sequencing fix with its letter of agreement
 (cleared to FL250 when they cross the fix — they may still be descending — and 10 NM in trail whatever their levels):

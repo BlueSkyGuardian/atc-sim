@@ -601,7 +601,14 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     ads = []
     for a in d.get("aerodromes", []):
         x, y = xy(a["coord"])
-        ads.append({**{k: v for k, v in a.items() if k != "coord"}, "x": round(x, 3), "y": round(y, 3)})
+        ad = {**{k: v for k, v in a.items() if k != "coord"}, "x": round(x, 3), "y": round(y, 3)}
+        if a.get("holdings"):
+            hs = []
+            for h in a["holdings"]:
+                hx, hy = xy(h["coord"])
+                hs.append({**{k: v for k, v in h.items() if k != "coord"}, "x": round(hx, 3), "y": round(hy, 3)})
+            ad["holdings"] = hs
+        ads.append(ad)
     # published prohibited / restricted / danger areas (AIP ENR 5.1)
     areas = []
     for a in (d.get("published_areas") or {}).get("areas", []):

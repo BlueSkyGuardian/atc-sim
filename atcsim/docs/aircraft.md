@@ -155,8 +155,15 @@ plan at the level it was given. Then the next units fly it: the rest of its flig
 approach path (straight-in, or the reversal procedure from the far side), cleared down to the FAF altitude at its own
 top of descent, the ILS from the FAF on the 3° glide path, 250 kt below FL100, 210 kt inside 25 NM, 180 kt before the
 FAF, 145 kt on final. Each aerodrome keeps the order the arrivals were handed over in: every arrival gets a landing
-slot 6 NM (7 NM behind a heavy) after the one before it, and the delay is absorbed by holding at the start of the
-approach when it is long, a dogleg vector otherwise, then speed. Handed over high and close, it is vectored for more track miles to lose height; still too high on final
+slot 6 NM (7 NM behind a heavy) after the one before it, and the delay is absorbed in a **published approach
+holding pattern** when it is long, a dogleg vector otherwise, then speed. Handed over high and close, it loses the
+height in the published hold (laps until it can make the approach), or is vectored for more track miles when the
+hold is behind it. The hold is the aerodrome's published one for the runway in use that lies on the way (fix,
+inbound track, turn direction, 1 minute legs or the published leg length, not below its minimum holding altitude,
+its maximum speed): GMMN KOTAG / DEVNO (35), SLK / BIRVO (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI,
+INSER, NAVIM (`aerodromes[].holdings` in the airspace file). Laps are cut short when the landing slot comes
+(`approach_holding`, `approach_leave_hold` events). Aerodromes without published holding data yet (GMAD, GMMX, GMME,
+GMMZ, GMMI, GCFV) use a racetrack at the approach entry. Still too high on final
 (or past the runway) it goes around and joins the end of the sequence (`go_around` event). At the threshold the
 aircraft lands and leaves the picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it
 over (Agadir West North to Casablanca for GMMN, TERTO for GCRR, the Casablanca TMAs). A rerouted arrival (for example

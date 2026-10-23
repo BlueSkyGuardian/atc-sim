@@ -15,6 +15,11 @@ flight plan at its level, still the controller's to act on with coordination):
   sequence  : the arrivals to one aerodrome keep the order they come in (distance to touchdown); a follower closer than
               the approach spacing (6 NM, 7 NM behind a heavy) to the one ahead is slowed (never below its final
               approach speed until the FAF) - the next units keep the sequence the controller built
+  holding   : a long delay (its landing slot behind the ones ahead), or too much height for the miles left, is taken
+              in the aerodrome's published approach holding pattern (fix, inbound track, turn direction, 1 minute legs
+              or the published leg length, no lower than its minimum holding altitude, its maximum speed): the hold
+              that suits the runway in use and lies on the way; laps are cut short when its slot comes. Without
+              published holds, a racetrack at the approach entry; small delays: a dogleg before the final approach fix
   landing   : at the threshold the aircraft lands and leaves the picture ("landed" event)
 
 The aircraft stays an "outside" aircraft: the controller sees it on the scope, and may still instruct it (with a
@@ -119,9 +124,16 @@ def _schedule(world: "World", ac: "Aircraft") -> None:
     world.__dict__.setdefault("_landing_sta", {})[st["ad"]] = (sta, ac)
     delay_nm = (sta - eta0) * 220.0 / 3600.0
     if delay_nm > 30.0:
-        laps = int((delay_nm - 8.0) // HOLD_LAP_NM)
-        _hold(world, ac, laps)
-        delay_nm -= laps * HOLD_LAP_NM
+        h = _pick_hold(world, ac)
+        if h is not None:
+            lap_nm = _published_hold(world, ac, h, 0, "")
+            laps = max(1, int((delay_nm - 6.0) // lap_nm))
+            _published_hold(world, ac, h, laps, "delay")
+            delay_nm -= laps * lap_nm
+        else:
+            laps = int((delay_nm - 8.0) // HOLD_LAP_NM)
+            _hold(world, ac, laps)
+            delay_nm -= laps * HOLD_LAP_NM
     if delay_nm > 2.0:
         _stretch(world, ac, delay_nm)
 
@@ -205,8 +217,9 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         ac.vs_cmd_mode = "min"
     else:
         floor = faf_alt
-        if st.get("hold_names") and any(n in ac.route[ac.next_index:] for n in st["hold_names"][1:]):
-            floor = max(faf_alt, ad.elev_ft + HOLD_AGL_FT)           # holding: no lower than the holding level
+        if _holding(ac):
+            hmin = (st.get("hold") or {}).get("min_alt_ft") or (ad.elev_ft + HOLD_AGL_FT)
+            floor = max(faf_alt, hmin)                               # holding: no lower than the holding level
         if ac.cleared_alt_ft > floor + 50:
             need = descent_distance(ac, ac.alt_ft, floor, lambda a: 0.0)
             if to_go - final_nm <= need + 3.0 or st["cleared_down"] or floor > faf_alt:
@@ -221,6 +234,8 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         want = FINAL_KT
     elif to_go <= final_nm + 4.0:
         want = 180.0
+    elif _holding(ac):
+        want = min(210.0, (st.get("hold") or {}).get("max_kt") or 210.0)
     elif to_go <= 25.0 or st.get("hold_names"):
         want = 210.0
     # its landing slot: never earlier than the one ahead (as it really flies) plus the approach spacing
@@ -232,17 +247,28 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         # whatever the time estimates said - else one more dogleg before the final approach fix
         need_nm = (HEAVY_SPACING_NM if str(ahead[2].flight_plan.get("wake", "")) in ("H", "J") else APP_SPACING_NM) + 2.5
         gap_nm = to_go - ahead[0]
-        if gap_nm < need_nm and world.t - st.get("stretch_t", -1e9) > 40:
+        if gap_nm < need_nm and world.t - st.get("stretch_t", -1e9) > 40 and not _holding(ac):
             _stretch(world, ac, need_nm - gap_nm + 2.0)
-    if not st["established"] and world.t - st.get("stretch_t", -1e9) > 45:
-        # too high for the miles left (handed over high and close): approach vectors it for more track miles
+    if not st["established"] and world.t - st.get("stretch_t", -1e9) > 45 and not _holding(ac):
+        # too high for the miles left (handed over high and close): laps in the published hold when it is still
+        # ahead, else approach vectors it for more track miles
         need_dn = descent_distance(ac, ac.alt_ft, faf_alt, lambda a: 0.0)
         if need_dn > to_go - final_nm - 1.0:
-            _stretch(world, ac, need_dn - (to_go - final_nm) + 4.0)
+            excess = need_dn - (to_go - final_nm) + 4.0
+            h = _pick_hold(world, ac) if excess > 8.0 and not st.get("hold") else None
+            if h is not None:
+                lap_nm = _published_hold(world, ac, h, 0, "")
+                _published_hold(world, ac, h, max(1, math.ceil(excess / lap_nm)), "height")
+                st["stretch_t"] = world.t
+            else:
+                _stretch(world, ac, excess)
             ac.cleared_alt_ft = min(ac.cleared_alt_ft, faf_alt)
             st["cleared_down"] = True
+    if _holding(ac) and st.get("hold") and st["hold"].get("why") == "delay" and eta - sta > 60:
+        _leave_hold(world, ac)                          # its slot has come: out of the hold at the end of this lap
     early = sta - eta                                   # seconds too early for its slot
-    if early > 40 and not st["established"] and to_go > final_nm + 3 and world.t - st.get("stretch_t", -1e9) > 60:
+    if (early > 40 and not st["established"] and to_go > final_nm + 3 and world.t - st.get("stretch_t", -1e9) > 60
+            and not _holding(ac)):
         _stretch(world, ac, 0.8 * early * max(ac.gs, 180.0) / 3600.0)
     elif early > 10:
         floor_kt = FINAL_KT if st["established"] or to_go <= final_nm + 4.0 else 180.0
@@ -278,6 +304,111 @@ def _hold(world: "World", ac: "Aircraft", laps: int) -> None:
     st["names"] = names + st["names"]
     world._event("approach_holding", callsign=ac.callsign,
                  text=f"{ac.callsign} to hold at the approach entry, {laps} lap{'s' if laps > 1 else ''}")
+
+
+def _holding(ac: "Aircraft") -> bool:
+    """In (or on its way into) its holding pattern: lap points still ahead."""
+    st = ac.app or {}
+    names = st.get("hold_names") or []
+    return bool(names) and any(n in ac.route[ac.next_index:] for n in names[1:])
+
+
+def _pick_hold(world: "World", ac: "Aircraft"):
+    """The published hold to use: for the runway in use (else any of the aerodrome's), on the way (no further from
+    the aerodrome than the aircraft), the least detour to the final approach fix."""
+    ad = world.aerodromes[ac.app["ad"]]
+    hs = list(getattr(ad, "holdings", []) or [])
+    if not hs:
+        return None
+    hs = [h for h in hs if not h["runways"] or ad.in_use in h["runways"]] or hs
+    d_now = dist(ac.pos, ad.pos)
+    hs = [h for h in hs if dist((h["x"], h["y"]), ad.pos) <= d_now + 5.0]
+    if not hs:
+        return None
+    faf = ac.app["faf"]
+    return min(hs, key=lambda h: dist(ac.pos, (h["x"], h["y"])) + dist((h["x"], h["y"]), faf))
+
+
+def _lap(h: dict, tas: float, alt_ft: float):
+    """One lap of a holding pattern from its fix: the turn to the holding side, the outbound leg (1 minute, 1.5 above
+    14000 ft, or the published distance), the turn back, the inbound leg to the fix. Returns (points, length)."""
+    th = math.radians(h["inbound_true"])
+    u = (math.sin(th), math.cos(th))                              # inbound direction
+    n = (u[1], -u[0]) if h["turn"] == "R" else (-u[1], u[0])      # the holding side
+    leg = float(h["leg_nm"]) if h.get("leg_nm") else \
+        float(h.get("leg_min") or (1.0 if alt_ft <= 14000 else 1.5)) * max(tas, 180.0) / 60.0
+    w = max(3.0, 2.0 * max(tas, 180.0) * 120.0 / 3600.0 / (2.0 * math.pi))   # rate one turn diameter
+    F = (h["x"], h["y"])
+
+    def P(a, b):
+        return (F[0] + n[0] * a + u[0] * b, F[1] + n[1] * a + u[1] * b)
+    pts = [P(w / 2, w / 2), P(w, 0.0), P(w, -leg), P(w / 2, -leg - w / 2), P(0.0, -leg), F]
+    return pts, 2.0 * leg + math.pi * w
+
+
+def _published_hold(world: "World", ac: "Aircraft", h: dict, laps: int, why: str) -> float:
+    """Cleared to the published hold h (direct to its fix), `laps` laps, then the approach from the fix. Returns the
+    length of one lap (NM); laps=0 only measures it."""
+    st = ac.app
+    ad = world.aerodromes[st["ad"]]
+    tas = min(ac.tas if ac.tas > 100 else 230.0, 260.0)
+    pts, lap_nm = _lap(h, tas, min(ac.alt_ft, 14000.0))
+    if laps <= 0:
+        return lap_nm
+    for n in st["names"]:
+        world.waypoints.pop(n, None)
+    F = (h["x"], h["y"])
+    hf = f"@{ac.callsign}~HF"
+    world.waypoints[hf] = F
+    names = []
+    for k in range(laps):
+        for j, p in enumerate(pts):
+            n = f"@{ac.callsign}~H{k}.{j}"
+            world.waypoints[n] = (float(p[0]), float(p[1]))
+            names.append(n)
+    path = approach_path(F, ad, ad.in_use)
+    app_names = []
+    for k, p in enumerate(path["points"][1:], 1):
+        n = f"@{ac.callsign}~A{k}"
+        world.waypoints[n] = (float(p[0]), float(p[1]))
+        app_names.append(n)
+    ac.route = ac.route[:ac.next_index] + [hf] + names + app_names
+    ac.leg_from = ac.pos
+    ac.nav_mode, ac.target_hdg, ac.turn_dir = "lnav", None, None
+    st.update(names=[hf] + names + app_names, hold_names=[hf] + names, type=path["type"], faf=tuple(path["faf"]),
+              thr=tuple(path["threshold"]), hold={"fix": h["fix"], "min_alt_ft": h["min_alt_ft"], "max_kt": h["max_kt"],
+                                                  "why": why, "laps": laps})
+    side = "right" if h["turn"] == "R" else "left"
+    world._event("approach_holding", callsign=ac.callsign, fix=h["fix"], laps=laps,
+                 text=(f"{ac.callsign} to hold at {h['fix']}, inbound {int(round(h['inbound_true'])):03d} (true), {side} "
+                       f"turns, not below {int(h['min_alt_ft'])} ft, {laps} lap{'s' if laps > 1 else ''} "
+                       f"({'delay' if why == 'delay' else 'to lose height'})"))
+    return lap_nm
+
+
+def _leave_hold(world: "World", ac: "Aircraft") -> None:
+    """Out of the hold at the end of the present lap (its expected approach time has come)."""
+    st = ac.app
+    hn = st.get("hold_names") or []
+    ahead = ac.route[ac.next_index:]
+    laps_ahead = [n for n in ahead if n in hn[1:]]
+    if not laps_ahead:
+        return
+    if hn and hn[0] in ahead:
+        keep = []                                     # not there yet: straight on from the fix
+    else:
+        end_of_lap = next((n for n in laps_ahead if n.endswith(".5")), None)
+        keep = laps_ahead[:laps_ahead.index(end_of_lap) + 1] if end_of_lap else laps_ahead[:1]
+    drop = [n for n in laps_ahead if n not in keep]
+    if not drop:
+        return
+    ac.route = ac.route[:ac.next_index] + [n for n in ahead if n not in drop]
+    for n in drop:
+        world.waypoints.pop(n, None)
+    st["names"] = [n for n in st["names"] if n not in drop]
+    st["hold_names"] = [n for n in hn if n not in drop]
+    world._event("approach_leave_hold", callsign=ac.callsign,
+                 text=f"{ac.callsign} leaving the hold at {(st.get('hold') or {}).get('fix', '')} for the approach")
 
 
 def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> None:
