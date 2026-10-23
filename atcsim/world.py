@@ -1113,6 +1113,7 @@ class World:
                         ac.route = ac.route[:ac.next_index] + [w for w in onward if w not in rest[:1]]
                         ac.leg_from = ac.pos
             if res == "exited":
+                ac.exit_pos = ac.pos                       # where it was transferred (approach.py waits 30 NM past it)
                 if self.record:
                     arrivals.on_fix_crossing(self, ac)
                     fl_x = int(round(ac.alt_ft / 100))
@@ -1142,7 +1143,7 @@ class World:
         # to land stay until they land
         b = self.airspace.bbox
         for ac in self.aircraft.values():
-            if ac.outside and not getattr(ac, "app", None):
+            if ac.outside and not getattr(ac, "app", None) and not approach.lands_here(self, ac):
                 out_nm = max(b[0] - ac.x, ac.x - b[2], b[1] - ac.y, ac.y - b[3], 0.0)
                 if out_nm > (40.0 if ac.released else 150.0):
                     ac.gone = True

@@ -1,7 +1,9 @@
 """After the handover: the next units (the sector after ours, then approach) bring arrivals down to land.
 
 Every aircraft that has left our sectors (transferred or handed down into a TMA) and whose destination is one of the
-airspace's aerodromes is flown to its runway by simulated controllers:
+airspace's aerodromes is flown to its runway by simulated controllers - once it is 30 NM past its transfer point and
+the controller has decontrolled it and every other transferred arrival to that aerodrome (until then it flies its
+flight plan at its level, still the controller's to act on with coordination):
 
   lateral   : the rest of its flight plan towards the aerodrome (onward points that still bring it closer), then the
               approach path from there (straight-in, or the reversal procedure when it comes from the far side):
@@ -36,6 +38,7 @@ APP_SPACING_NM = 6.0
 HEAVY_SPACING_NM = 7.0
 FINAL_KT = 145.0
 LANDED_NM = 0.4
+TAKEOVER_NM = 30.0                # the next units take arrivals over this far past the transfer point
 HOLD_LAP_NM = 21.0                 # a 1-minute racetrack at about 220 kt
 HOLD_AGL_FT = 6000.0
 
@@ -43,6 +46,11 @@ HOLD_AGL_FT = 6000.0
 def _dest(world: "World", ac: "Aircraft"):
     code = (ac.destination or ac.flight_plan.get("destination") or "").upper()
     return world.aerodromes.get(code)
+
+
+def lands_here(world: "World", ac: "Aircraft") -> bool:
+    """An arrival to one of our aerodromes: it stays on the picture until it lands."""
+    return _dest(world, ac) is not None and not getattr(ac, "landed", False)
 
 
 def candidates(world: "World") -> List["Aircraft"]:
@@ -118,15 +126,34 @@ def _schedule(world: "World", ac: "Aircraft") -> None:
         _stretch(world, ac, delay_nm)
 
 
+def _past_tcp(ac: "Aircraft") -> float:
+    p = getattr(ac, "exit_pos", None)
+    return dist(ac.pos, p) if p is not None else 0.0
+
+
 def update(world: "World") -> None:
     arr = candidates(world)
     if not arr:
         return
+    # the next units take an arrival over once it is TAKEOVER_NM past its transfer point and the controller has
+    # decontrolled it and every other transferred arrival of its sequence (same aerodrome); until then it flies its
+    # flight plan at the level it was given, and the controller may still act on it
+    waiting = [a for a in arr if getattr(a, "app", None) is None]
+    if waiting:
+        held = {}
+        for a in arr:
+            if getattr(a, "app", None) is None and not a.released:
+                held[_dest(world, a).id] = True
+        # (handed down into a TMA at a fix inside our sector: approach takes it there, no 30 NM to fly)
+        ready = [a for a in waiting if a.released and not held.get(_dest(world, a).id)
+                 and (_past_tcp(a) >= TAKEOVER_NM or a.exit_point not in world.airspace.boundary_points)]
+        for a in sorted(ready, key=lambda a: dist(a.pos, _dest(world, a).pos)):   # closest first: the order
+            _start(world, a)
+            _schedule(world, a)
     by_ad: Dict[str, list] = {}
     for ac in arr:
         if getattr(ac, "app", None) is None:
-            _start(world, ac)
-            _schedule(world, ac)
+            continue
         if world.t - ac.app["last"] < PERIOD_S:
             continue
         ac.app["last"] = world.t
@@ -148,7 +175,8 @@ def update(world: "World") -> None:
 def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) -> None:
     st = ac.app
     thr_d = dist(ac.pos, st["thr"])
-    if to_go <= LANDED_NM or (thr_d <= LANDED_NM + 0.6 and ac.next_index >= len(ac.route) - 1):
+    low = ac.alt_ft <= ad.elev_ft + 1000.0
+    if low and (to_go <= LANDED_NM or (thr_d <= LANDED_NM + 0.6 and ac.next_index >= len(ac.route) - 1)):
         ac.landed = True
         ac.gone = True
         ac.vs_fpm = 0.0
@@ -159,8 +187,14 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         return
     final_nm = ad.final_nm
     faf_alt = ad.faf_alt_ft
+    gp_here = ad.elev_ft + max(0.0, to_go - LANDED_NM) * GLIDE_FT_PER_NM
+    unstable = to_go <= final_nm * 0.6 and ac.alt_ft > gp_here + 1500.0
+    if not low and (to_go <= LANDED_NM or ac.nav_mode != "lnav" or unstable
+                    or (thr_d <= 1.0 and ac.next_index >= len(ac.route) - 1)):
+        _go_around(world, ac, ad)             # too high on final, or past the runway: another approach
+        return
     # vertical: down to the FAF altitude at its top of descent (the holding level first), then the glide path
-    if to_go <= final_nm + 0.5:
+    if to_go <= final_nm + 0.5 and ac.alt_ft <= gp_here + 1500.0:
         st["established"] = True
     if st["established"]:
         # on the ILS: gear and flaps out (drag), descending with the glide path
@@ -193,6 +227,20 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
     sta = st["sta"]
     if ahead is not None:
         sta = max(sta, ahead[1] + _sep_s(ahead[2]))
+    if ahead is not None and not st["established"] and to_go < final_nm + 12:
+        # turning in: the one ahead must be at least the approach spacing (plus a margin) ahead along the track,
+        # whatever the time estimates said - else one more dogleg before the final approach fix
+        need_nm = (HEAVY_SPACING_NM if str(ahead[2].flight_plan.get("wake", "")) in ("H", "J") else APP_SPACING_NM) + 2.5
+        gap_nm = to_go - ahead[0]
+        if gap_nm < need_nm and world.t - st.get("stretch_t", -1e9) > 40:
+            _stretch(world, ac, need_nm - gap_nm + 2.0)
+    if not st["established"] and world.t - st.get("stretch_t", -1e9) > 45:
+        # too high for the miles left (handed over high and close): approach vectors it for more track miles
+        need_dn = descent_distance(ac, ac.alt_ft, faf_alt, lambda a: 0.0)
+        if need_dn > to_go - final_nm - 1.0:
+            _stretch(world, ac, need_dn - (to_go - final_nm) + 4.0)
+            ac.cleared_alt_ft = min(ac.cleared_alt_ft, faf_alt)
+            st["cleared_down"] = True
     early = sta - eta                                   # seconds too early for its slot
     if early > 40 and not st["established"] and to_go > final_nm + 3 and world.t - st.get("stretch_t", -1e9) > 60:
         _stretch(world, ac, 0.8 * early * max(ac.gs, 180.0) / 3600.0)
@@ -257,3 +305,22 @@ def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> None:
     st["stretch_t"] = world.t
     world._event("approach_vector", callsign=ac.callsign,
                  text=f"{ac.callsign} vectored by approach for spacing (+{extra:.0f} NM)")
+
+
+def _go_around(world: "World", ac: "Aircraft", ad) -> None:
+    """Too high over the runway: missed approach, back to the end of the sequence for another approach."""
+    st = ac.app
+    for n in st["names"]:
+        world.waypoints.pop(n, None)
+    seq = world._landing_seq.get(ad.id, [])
+    if ac.callsign in seq:
+        seq.remove(ac.callsign)
+    ac.route = ac.route[:ac.next_index]
+    ac.next_index = len(ac.route)
+    ac.cleared_alt_ft = max(ac.alt_ft, ad.faf_alt_ft + 1000.0)
+    ac.speedbrake, ac.vs_cmd_fpm = False, None
+    ac.app = None
+    world._event("go_around", callsign=ac.callsign, aerodrome=ad.id,
+                 text=f"{ac.callsign} going around {ad.id} (too high on the approach)")
+    _start(world, ac)
+    _schedule(world, ac)

@@ -97,14 +97,21 @@ ok(s2.env.airspace.controlled == ["C", "SS"] and {"MABAP", "AGALI", "TEKNA", "MA
 # after the handover: the next units bring arrivals down and land them; a reroute into the TMA keeps its end
 w = build_world(load_scenario("s21_casablanca_north_gmmn_gmme"))
 sent = False
-for _ in range(2700):
+w._check_finished = lambda: None
+for _ in range(3300):
     w.step(1)
+    if w.t == 1300:
+        held = [x.callsign for x in w.aircraft.values() if x.outside and getattr(x, "app", None)]
+        ok(not held or all(w.aircraft[c].released for c in held), "not taken over before they are decontrolled")
     for x in w.aircraft.values():
         if x.active and x.on_frequency and not x.assumed:
             w.issue({"callsign": x.callsign, "type": "assume"})
     for r in list(w.requests.values()):
         if r.status == "pending" and r.kind == "descent":
             w.issue({"callsign": r.callsign, "type": "altitude", "fl": r.value})
+    for x in w.aircraft.values():               # the controller decontrols what it has transferred
+        if x.outside and x.assumed and getattr(x, "exit_t", 0) and w.t - x.exit_t > 60:
+            w.issue({"callsign": x.callsign, "type": "release"})
     t = w.aircraft["TAP1032"]
     if t.assumed and t.entered and not sent:
         w.issue({"callsign": "TAP1032", "type": "reroute", "points": ["BIRVO", "DEVNO"]})

@@ -147,14 +147,18 @@ with its Mach / IAS schedule. Cleared FL250 40 NM before TERTO from FL370, it cr
 FL315), as real traffic does: to make a level at a fix, clear it earlier or give a rate ("at 2000 ft/min or
 greater"), which takes precedence.
 
-**After the handover.** Once an arrival has left our sectors (transferred to the next sector, or handed down into a
-TMA at its fix), simulated next units fly it to its runway: the rest of its flight plan towards the aerodrome, then the
+**After the handover.** Once an arrival has left our sectors, simulated next units fly it to its runway - but only
+when the controller has **decontrolled** it and every other transferred arrival to the same aerodrome (the sequence
+stays the controller's until then), and, for a transfer to the next sector, once it is **30 NM past its transfer
+point** (handed down into a TMA at a fix inside the sector, approach takes it there). Until then it flies its flight
+plan at the level it was given. Then the next units fly it: the rest of its flight plan towards the aerodrome, then the
 approach path (straight-in, or the reversal procedure from the far side), cleared down to the FAF altitude at its own
 top of descent, the ILS from the FAF on the 3° glide path, 250 kt below FL100, 210 kt inside 25 NM, 180 kt before the
 FAF, 145 kt on final. Each aerodrome keeps the order the arrivals were handed over in: every arrival gets a landing
 slot 6 NM (7 NM behind a heavy) after the one before it, and the delay is absorbed by holding at the start of the
-approach when it is long, a dogleg vector otherwise, then speed. At the threshold the aircraft lands and leaves the
-picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it
+approach when it is long, a dogleg vector otherwise, then speed. Handed over high and close, it is vectored for more track miles to lose height; still too high on final
+(or past the runway) it goes around and joins the end of the sequence (`go_around` event). At the threshold the
+aircraft lands and leaves the picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it
 over (Agadir West North to Casablanca for GMMN, TERTO for GCRR, the Casablanca TMAs). A rerouted arrival (for example
 via DEVNO instead of LAKAM) keeps its new route: it is handed over at its end and judged there against the letter of
 agreement of its fix.

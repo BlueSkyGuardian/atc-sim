@@ -40,51 +40,17 @@
   "description": "The whole CTA band-boxed (WW-OCE), at the declared capacity (47 flights/h). Scattered strong thunderstorms over West South and Oceanic South. Arrivals: GCRR via TERTO, GMMN via MARJA and SALCA (LoA FL250, 10 NM in trail).",
   "weather": {
     "seed": 105,
+    "wind": {
+      "climatology": {
+        "month": 10
+      },
+      "noise_kt": 5,
+      "noise_scale_nm": 40
+    },
     "temperature": {
       "surface_c": 24,
       "tropopause_fl": 390,
       "lapse_c_per_kft": 2.1
-    },
-    "wind": {
-      "profile": [
-        {
-          "fl": 0,
-          "dir": 200,
-          "kt": 10
-        },
-        {
-          "fl": 100,
-          "dir": 220,
-          "kt": 22
-        },
-        {
-          "fl": 250,
-          "dir": 240,
-          "kt": 40
-        },
-        {
-          "fl": 350,
-          "dir": 250,
-          "kt": 55
-        },
-        {
-          "fl": 450,
-          "dir": 255,
-          "kt": 40
-        },
-        {
-          "fl": 600,
-          "dir": 90,
-          "kt": 8
-        },
-        {
-          "fl": 800,
-          "dir": 90,
-          "kt": 20
-        }
-      ],
-      "noise_kt": 5,
-      "noise_scale_nm": 40
     },
     "convection": {
       "regime": "scattered",
@@ -122,7 +88,7 @@
         "ssr": "2132",
         "reg": "HB-JTK",
         "code": "4B15C2",
-        "eobt": "0955",
+        "eobt": "0956",
         "altn": "GCXO",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "SWISS",
@@ -145,10 +111,10 @@
       "dest": "EBBR",
       "reach": {
         "point": [
-          -22.861,
-          -28.863
+          -22.868,
+          -28.872
         ],
-        "time": 1499
+        "time": 1502
       },
       "fpl": {
         "ssr": "3776",
@@ -180,7 +146,7 @@
         "ssr": "3341",
         "reg": "PR-ANJ",
         "code": "E699D7",
-        "eobt": "0419",
+        "eobt": "0417",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "AZUL",
@@ -207,7 +173,7 @@
         "ssr": "3560",
         "reg": "EC-QUS",
         "code": "3646DC",
-        "eobt": "1209",
+        "eobt": "1207",
         "altn": "LEVC",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "IBERIA EXPRESS",
@@ -236,7 +202,7 @@
         "ssr": "4101",
         "reg": "CN-RJQ",
         "code": "022AA3",
-        "eobt": "0518",
+        "eobt": "0517",
         "altn": "GMME",
         "equipment": "SDE1E2E3FGHIJ1J3J4J5M1P2RWXYZ/LB1D1",
         "opr": "ROYAL AIR MAROC",
@@ -254,15 +220,15 @@
         "SUNID",
         "AKUDA"
       ],
-      "fl": 280,
+      "fl": 320,
       "dep": "GCFV",
       "dest": "LFPO",
       "reach": {
         "point": [
-          75.239,
-          110.255
+          75.241,
+          110.258
         ],
-        "time": 1112
+        "time": 1101
       },
       "fpl": {
         "ssr": "5157",
@@ -298,7 +264,7 @@
         "ssr": "5506",
         "reg": "G-JZYP",
         "code": "41AD3C",
-        "eobt": "0934",
+        "eobt": "0936",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/S",
         "opr": "JET2",
@@ -324,7 +290,7 @@
         "ssr": "5001",
         "reg": "EI-HNK",
         "code": "4CA9F1",
-        "eobt": "1004",
+        "eobt": "1006",
         "altn": "GCFV",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "RYANAIR",
@@ -350,7 +316,7 @@
         "ssr": "2542",
         "reg": "CS-TQE",
         "code": "49574B",
-        "eobt": "0412",
+        "eobt": "0409",
         "altn": "LPFR",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "TAP AIR PORTUGAL",
@@ -373,8 +339,8 @@
       "load": 0.4,
       "reach": {
         "point": [
-          2.169,
-          177.548
+          2.021,
+          177.34
         ],
         "time": 1904
       },
@@ -426,21 +392,21 @@
         "VEDOD",
         "TERTO"
       ],
-      "fl": 290,
+      "fl": 310,
       "dep": "EDDK",
       "dest": "GCLP",
       "reach": {
         "point": [
-          134.124,
-          88.381
+          134.116,
+          88.371
         ],
-        "time": 1154
+        "time": 1149
       },
       "fpl": {
         "ssr": "5207",
         "reg": "D-AMCW",
         "code": "3D80B5",
-        "eobt": "1007",
+        "eobt": "1008",
         "altn": "GCXO",
         "equipment": "SDE2E3FGHIJ1RWY/LB1",
         "opr": "EUROWINGS",
@@ -670,7 +636,7 @@
         "SUNID",
         "AKUDA"
       ],
-      "fl": 340,
+      "fl": 360,
       "load": 0.32,
       "entry_time": 1518,
       "dep": "GCLP",
