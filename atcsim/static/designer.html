@@ -162,13 +162,17 @@
           <label>new storms</label><select id="w-int" title="intensity given to the next pattern or cell you draw"><option>moderate</option><option selected>strong</option><option>severe</option></select>
           <label>surface °C</label><input id="w-sfc" type="number">
           <label>tropopause</label><input id="w-trop" type="number" step="10" placeholder="FL">
-          <label>wind FL350</label><span><input id="w-wdir" type="number" step="10" style="width:64px" placeholder="dir"> ° <input id="w-wkt" type="number" step="5" style="width:64px" placeholder="kt"> kt</span>
+          <label class="geo-only">wind</label><select id="w-src" class="geo-only" title="ERA5 climatology: real monthly mean winds over the region, varying with position and level, plus the day's departure from the mean"><option value="clim">ERA5 climatology</option><option value="profile">profile (FL350 value)</option></select>
+          <label class="clim-only">month</label><select id="w-month" class="clim-only"></select>
+          <label class="clim-only">jet that day</label><select id="w-mode" class="clim-only" title="the leading mode of the month's year-to-year variability, in standard deviations"><option value="">from the seed</option><option value="-2">much weaker (−2σ)</option><option value="-1">weaker (−1σ)</option><option value="0">mean month (0)</option><option value="1">stronger (+1σ)</option><option value="2">much stronger (+2σ)</option></select>
+          <label class="clim-only">variability</label><input id="w-var" class="clim-only" type="number" step="0.25" min="0" max="2" title="0 = exactly the monthly mean; 1 = a typical day around it (default); 2 = an unusual day">
+          <label class="prof-only">wind FL350</label><span class="prof-only"><input id="w-wdir" type="number" step="10" style="width:64px" placeholder="dir"> ° <input id="w-wkt" type="number" step="5" style="width:64px" placeholder="kt"> kt</span>
         </div>
         <div style="margin-top:8px" class="c-dim">Weather in this scenario <span style="font-size:11px">(all combined)</span></div>
         <div id="wxList"></div>
         <div class="row" style="margin-top:4px"><button data-wxadd="squall">+ squall line</button><button data-wxadd="region">+ convection area</button>
           <button data-wxadd="cell">+ cell</button><button data-wxadd="strat">+ rain area</button></div>
-        <small class="note">Any number of squall lines, convection areas (isolated, scattered or embedded cells), single cells and stratiform rain areas, all at once, on top of the wind and jet. Draw them with the tools on the map. The wind sets a standard profile scaled to the FL350 value (leave empty to keep the scenario's own profile).</small>
+        <small class="note">Any number of squall lines, convection areas (isolated, scattered or embedded cells), single cells and stratiform rain areas, all at once, on top of the wind and jet. Draw them with the tools on the map. On a real airspace the wind is the ERA5 climatology of the month (real mean winds varying with position and level), with the day's departure from the mean drawn from the seed; or a standard profile scaled to the FL350 value.</small>
         <details style="margin-top:6px"><summary class="c-dim" style="font-size:12px;cursor:pointer">advanced weather JSON</summary>
           <textarea id="w-json" rows="10"></textarea><div class="row" style="margin-top:4px"><button id="w-apply">Apply JSON</button></div></details>
       </section>
@@ -285,7 +289,8 @@ $('#newBtn').onclick = () => {
     areas: [], aircraft: [], requests: [], events: [], expected: {} };
   if (asp !== 'training') { s.airspace = asp; s.control = ctl; }
   else s.duration_s = 1800;
-  setWind(s.weather, 260, 60);
+  if (asp !== 'training') { s.weather.wind = { climatology: { month: new Date().getUTCMonth() + 1 }, noise_kt: 5 }; delete s.weather.temperature; }
+  else setWind(s.weather, 260, 60);
   setScenario(s);
 };
 function setWind(w, dir, kt) {
@@ -307,6 +312,12 @@ function renderScenarioForm() {
   set('#w-seed', w.seed ?? 0);
   renderWxList();
   set('#w-sfc', (w.temperature || {}).surface_c ?? ''); set('#w-trop', (w.temperature || {}).tropopause_fl ?? '');
+  const geo = !!scn.airspace && scn.airspace !== 'training', cl = (w.wind || {}).climatology;
+  document.querySelectorAll('.geo-only').forEach(e => e.style.display = geo ? '' : 'none');
+  document.querySelectorAll('.clim-only').forEach(e => e.style.display = geo && cl ? '' : 'none');
+  document.querySelectorAll('.prof-only').forEach(e => e.style.display = cl ? 'none' : '');
+  set('#w-src', cl ? 'clim' : 'profile');
+  if (cl) { set('#w-month', cl.month || 1); set('#w-mode', cl.mode == null ? '' : Math.round(cl.mode)); set('#w-var', cl.variability ?? 1); }
   const p350 = ((w.wind || {}).profile || []).find(p => p.fl === 350) || ((w.wind || {}).profile || []).slice(-3)[0];
   set('#w-wdir', p350 ? p350.dir : ''); set('#w-wkt', p350 ? p350.kt : '');
   if ($('#w-json') !== act) $('#w-json').value = JSON.stringify(w, null, 1);
@@ -347,6 +358,17 @@ bindField('#w-sfc', v => (scn.weather.temperature = scn.weather.temperature || {
 bindField('#w-trop', v => (scn.weather.temperature = scn.weather.temperature || {}).tropopause_fl = +v);
 const windChange = () => { const d = $('#w-wdir').value, k = $('#w-wkt').value; if (d === '' || k === '') return; setWind(scn.weather, +d, +k); };
 bindField('#w-wdir', windChange); bindField('#w-wkt', windChange);
+$('#w-month').innerHTML = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  .map((m, i) => `<option value="${i + 1}">${m}</option>`).join('');
+const climSpec = () => { const w = scn.weather; w.wind = w.wind || {}; return w.wind.climatology; };
+bindField('#w-src', v => {
+  const w = scn.weather;
+  if (v === 'clim') { w.wind = { climatology: { month: new Date().getUTCMonth() + 1 }, noise_kt: (w.wind || {}).noise_kt ?? 5 }; }
+  else setWind(w, 260, 60);
+});
+bindField('#w-month', v => { const c = climSpec(); if (c) c.month = +v; });
+bindField('#w-mode', v => { const c = climSpec(); if (!c) return; if (v === '') delete c.mode; else c.mode = +v; });
+bindField('#w-var', v => { const c = climSpec(); if (!c) return; if (v === '' || +v === 1) delete c.variability; else c.variability = Math.max(0, Math.min(2, +v)); });
 $('#w-apply').onclick = () => { try { const w = JSON.parse($('#w-json').value); snapshot(); scn.weather = w; changed(); } catch (e) { status('weather JSON: ' + e.message, 'c-los'); } };
 $('#f-exp').addEventListener('change', e => { try { snapshot(); scn.expected = e.target.value.trim() ? JSON.parse(e.target.value) : {}; status('expected results updated'); } catch (er) { status('expected JSON: ' + er.message, 'c-los'); } });
 $('#expFill').onclick = () => {

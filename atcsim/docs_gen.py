@@ -218,7 +218,9 @@ SCHEMA = {
                                 "properties": {"month": {"type": "integer", "minimum": 1, "maximum": 12},
                                                "mode": {"type": "number", "description": "leading variability mode, "
                                                         "in standard deviations (+1 strong jet, -1 weak)"},
-                                               "scale": {"type": "number"}, "file": {"type": "string"}}},
+                                               "scale": {"type": "number"}, "file": {"type": "string"},
+                                               "variability": {"type": "number", "minimum": 0, "maximum": 3,
+                                                               "description": "the day around the mean (default 1, 0 = the mean)"}}},
                 "profile": {"type": "array", "items": {"type": "object", "required": ["fl", "dir", "kt"],
                                                        "properties": {"fl": {"type": "number"},
                                                                       "dir": {"type": "number", "description": "FROM, degrees"},

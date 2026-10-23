@@ -6,6 +6,10 @@ A scenario asks for it with
   mode  : the leading mode of the year-to-year variability of that month, in standard deviations: +1 a strong-jet
           month, -1 a weak one (0 = the mean month)
   scale : multiplies the whole field (e.g. 1.2 for a day stronger than the mean)
+  variability : the day is not the month's mean (default 1; 0 = exactly the mean): unless "mode" is given, the day's
+          strength of the leading mode is drawn from the weather seed (normal, within +-2), and a smooth large-scale
+          perturbation (about 300 NM, drifting with the flow) is added, sized by the local year-to-year spread of the
+          month's mean wind times 1.6 (day-to-day variability is larger than year-to-year of monthly means)
 The field varies with position (lat / lon, on the airspace's projection) and level, so the wind along a route
 changes as it does in reality (e.g. the westerly component across TOVRA - TERTO). The synthetic jet streak, the
 gradient and the small-scale noise of the weather model are added on top when the scenario gives them.
@@ -21,6 +25,7 @@ import numpy as np
 DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "climate")
 DEFAULT = "era5_gmmm"
 GRID_NM = 10.0
+DAILY_FACTOR = 1.6             # day-to-day spread vs year-to-year spread of the monthly means
 MARGIN_NM = 200.0
 
 
@@ -60,6 +65,7 @@ class ClimField:
         u = (d["u"][m - 1] + mode * d["eof_u"][m - 1]) * scale          # [lev, lat, lon]
         v = (d["v"][m - 1] + mode * d["eof_v"][m - 1]) * scale
         t = d["t"][m - 1]
+        usd, vsd = d["u_sd"][m - 1] * scale, d["v_sd"][m - 1] * scale
         self.month, self.mode, self.scale = m, mode, scale
         self.fl = d["fl"].astype(float)
         x0, y0, x1, y1 = bbox
@@ -73,6 +79,8 @@ class ClimField:
         self.U = _bilinear(lat, lon, u, qlat, qlon).reshape(sh)
         self.V = _bilinear(lat, lon, v, qlat, qlon).reshape(sh)
         self.T = _bilinear(lat, lon, t, qlat, qlon).reshape(sh)
+        self.Usd = _bilinear(lat, lon, usd, qlat, qlon).reshape(sh)
+        self.Vsd = _bilinear(lat, lon, vsd, qlat, qlon).reshape(sh)
         self.years = [int(y) for y in d.get("years", [])]
 
     # ------------------------------------------------------------------ sampling
@@ -104,6 +112,12 @@ class ClimField:
                      np.where(fl > hi + 50, np.clip(1 - (fl - hi - 50) / 300.0, 0.3, 1.0), 1.0))
         return u * f, v * f
 
+    def sd(self, x, y, fl):
+        """Year-to-year standard deviation of the month's mean wind (kt) - the size of the perturbations."""
+        a, _ = self._sample(self.Usd, x, y, fl)
+        b, _ = self._sample(self.Vsd, x, y, fl)
+        return a, b
+
     def temperature(self, x, y, fl):
         t, _ = self._sample(self.T, x, y, fl)
         return t
@@ -116,5 +130,6 @@ class ClimField:
 
     def describe(self) -> dict:
         return {"source": "ERA5 monthly means" + (f" {self.years[0]}-{self.years[-1]}" if self.years else ""),
-                "month": self.month, "mode": self.mode, "scale": self.scale,
+                "month": self.month, "mode": round(self.mode, 2), "scale": self.scale,
+                "variability": getattr(self, "variability", None),
                 "levels_fl": [int(round(f)) for f in self.fl]}

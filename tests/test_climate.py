@@ -29,7 +29,7 @@ climate.DATA = tmp
 climate.load.cache_clear()
 
 s = load_scenario("s19_terto_arrivals_crossing")
-s["weather"] = {"seed": 2, "wind": {"climatology": {"month": 1, "file": "test_clim"}, "noise_kt": 0}}
+s["weather"] = {"seed": 2, "wind": {"climatology": {"month": 1, "file": "test_clim", "variability": 0}, "noise_kt": 0}}
 w = build_world(s)
 wx = w.env.weather
 u_tovra = wx.at(*w.waypoints["TOVRA"], 350)[0]       # 31.75N
@@ -41,6 +41,16 @@ u_strong = build_world(s).env.weather.at(*w.waypoints["TOVRA"], 350)[0]
 ok(abs(u_strong - u_tovra - 10) < 1.0, f"mode +1 adds the leading variability mode ({u_strong:.0f} kt)")
 ok(wx.summary(0)["climatology"]["month"] == 1 and abs(wx.isa_deviation_c - (-50 - (15 - 1.98 * 34))) < 1.5,
    f"temperature of the month for performance (ISA{wx.isa_deviation_c:+.1f})")
+s["weather"]["wind"]["climatology"] = {"month": 1, "file": "test_clim"}            # a day, not the mean
+days = []
+for seed in range(6):
+    s["weather"]["seed"] = seed
+    wd = build_world(s).env.weather
+    days.append(wd.at(*w.waypoints["TOVRA"], 350)[0])
+spread = max(days) - min(days)
+ok(spread > 8 and all(20 < d < 110 for d in days), f"each seed is another day around the mean: {[round(d) for d in days]} kt")
+ok(build_world(s).env.weather.at(*w.waypoints["TOVRA"], 350) == build_world(s).env.weather.at(*w.waypoints["TOVRA"], 350),
+   "the same seed gives the same day")
 for _ in range(120):
     w.step(1)
 ok(True, "the world runs on it")

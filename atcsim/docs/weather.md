@@ -61,8 +61,12 @@ profile: `"wind": {"climatology": {"month": 1, "mode": 0, "scale": 1}, "noise_kt
 levels (about FL180 to FL450) over 25–38°N, 20°W–0°, and the leading mode of their year-to-year variability; it is
 built from a Copernicus download by `tools/era5_climatology.py`. The field varies with position and level, so the
 wind along a route changes as it does in reality (the westerly component across TOVRA–TERTO, the jet over southern
-Morocco in winter, the weak summer flow). `mode` adds the leading variability mode in standard deviations (+1 a
-strong-jet month, −1 a weak one), `scale` multiplies the whole field. Below the lowest level the wind weakens towards
+Morocco in winter, the weak summer flow). A scenario is one day, not the month's mean: unless `mode` is given, the day's strength of
+the leading mode of variability is drawn from the weather seed (normal, within ±2 standard deviations; +1 is a
+strong-jet day, −1 a weak one), and a smooth large-scale departure from the mean (about 300 NM across, drifting with
+the flow) is added, sized by the local year-to-year spread of the month's mean wind × 1.6. `variability` scales both
+(default 1; 0 gives exactly the monthly mean, 2 an unusual day); `mode` fixes the jet strength; `scale` multiplies the
+whole field. In January the seeds give, for example, westerlies of 3 to 68 kt at VEDOD FL350 around the 31 kt mean. Below the lowest level the wind weakens towards
 the surface; the month's temperatures set the ISA deviation used for aircraft performance unless `temperature` is
 given. A jet streak (`jet`), a `gradient_kt_per_100nm` and the small-scale `noise_kt` are added on top when given.
 

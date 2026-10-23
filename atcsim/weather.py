@@ -203,8 +203,18 @@ class Weather:
             # ERA5 monthly climatology on the airspace's grid (climate.py); needs a real (projected) airspace
             if geo is None or getattr(geo, "projection", None) is None:
                 raise ValueError("wind climatology needs a geographic airspace (e.g. agadir)")
-            from .climate import ClimField
-            self.clim = ClimField(w["climatology"], geo.projection.inverse, geo.bbox)
+            from .climate import DAILY_FACTOR, ClimField
+            cs = dict(w["climatology"])
+            var = float(cs.get("variability", 1.0))
+            crng = np.random.default_rng(self.seed * 7 + 13)       # its own stream: the other random parts stay as they are
+            if "mode" not in cs:                                    # the day's jet strength, from the seed
+                cs["mode"] = float(np.clip(crng.normal() * var, -2.0, 2.0))
+            self.clim = ClimField(cs, geo.projection.inverse, geo.bbox)
+            self.clim.variability = var
+            self.clim_var = var * DAILY_FACTOR
+            if self.clim_var:
+                self.n_cu = NoiseField(crng, 300.0, n=self._noise_n, domain=self.domain_nm)
+                self.n_cv = NoiseField(crng, 300.0, n=self._noise_n, domain=self.domain_nm)
             self.clim_center = ((geo.bbox[0] + geo.bbox[2]) / 2.0, (geo.bbox[1] + geo.bbox[3]) / 2.0)
             if not tspec and dev is None:                 # temperatures of the month too
                 d350 = self.clim.mean_isa_dev(350.0)
@@ -302,6 +312,11 @@ class Weather:
             u, v = self.clim.uv(x, y, fl)
             u = u + np.zeros(np.broadcast(x, y, fl).shape)
             v = v + np.zeros_like(u)
+            if self.clim_var:                    # the day's large-scale departure from the mean, drifting with the flow
+                su, sv = self.clim.sd(x, y, fl)
+                ax, ay = x - self.adv[0] * t, y - self.adv[1] * t
+                u = u + self.clim_var * su * self.n_cu(ax, ay)
+                v = v + self.clim_var * sv * self.n_cv(ax, ay)
         else:
             u, v = self._bg(fl)
             u = u + np.zeros(np.broadcast(x, y, fl).shape)

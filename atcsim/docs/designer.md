@@ -76,7 +76,7 @@ undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the curs
 | start (UTC) | Clock at T+0: flight plans and estimates |
 | description | The briefing (shown to the controller and to agents) |
 | design notes | The traps (hidden from agents) |
-| Weather | Seed, intensity of the next storm drawn, surface temperature, tropopause, wind at FL350, the list of storm patterns, cells and rain areas, and the full weather JSON (*Apply JSON*) |
+| Weather | Seed, intensity of the next storm drawn, surface temperature, tropopause, the wind - on the Agadir airspace the **ERA5 climatology** (month, the jet that day: from the seed or −2σ … +2σ, variability 0–2; see [weather](weather.md#climatological-wind-era5)) or a profile from the wind at FL350 -, the list of storm patterns, cells and rain areas, and the full weather JSON (*Apply JSON*) |
 | Expected results | The `expected` block (see [Expected and solution](scenario-json.md#expected-and-solution)); *from previews* fills it from the last preview runs |
 
 ### Selected tab
