@@ -142,7 +142,8 @@ def _holding(h: dict, asp=None) -> dict:
         inb = float(h["inbound_mag"]) + float(h.get("var", 0.0))
     return {"fix": h["fix"], "x": x, "y": y, "inbound_true": inb % 360, "turn": str(h.get("turn", "R")).upper()[:1],
             "leg_min": h.get("leg_min"), "leg_nm": h.get("leg_nm"), "min_alt_ft": float(h.get("min_alt_ft", 0)),
-            "max_alt_ft": float(h["max_fl"]) * 100.0 if h.get("max_fl") else None,
+            "max_alt_ft": float(h["max_fl"]) * 100.0 if h.get("max_fl") else
+            (float(h["max_alt_ft"]) if h.get("max_alt_ft") else None),
             "max_kt": float(h.get("max_kt", 230)), "runways": [str(r) for r in h.get("runways", [])]}
 
 

@@ -2192,7 +2192,7 @@
      "turn": "L",
      "leg_min": 1,
      "min_alt_ft": 4000,
-     "max_fl": 130,
+     "max_alt_ft": 13000,
      "max_kt": 220,
      "runways": [
       "35R",
@@ -2207,7 +2207,7 @@
      "turn": "L",
      "leg_min": 1,
      "min_alt_ft": 4000,
-     "max_fl": 130,
+     "max_alt_ft": 13000,
      "max_kt": 220,
      "runways": [
       "35R",
@@ -2216,24 +2216,24 @@
     },
     {
      "fix": "NASRO",
-     "coord": "335815N 0074306W",
+     "coord": "335815.00N 0074306.00W",
      "inbound_mag": 177,
      "var": -1.0,
      "turn": "R",
      "leg_min": 1,
      "min_alt_ft": 6000,
-     "max_fl": 130,
+     "max_alt_ft": 13000,
      "max_kt": 220
     },
     {
-     "fix": "SLK",
-     "coord": "330656N 0073022W",
-     "inbound_mag": 345,
+     "fix": "BIRVO",
+     "coord": "331711.57N 0081130.00W",
+     "inbound_mag": 108,
      "var": -1.0,
-     "turn": "L",
+     "turn": "R",
      "leg_min": 1,
-     "min_alt_ft": 6000,
-     "max_fl": 130,
+     "min_alt_ft": 4000,
+     "max_alt_ft": 13000,
      "max_kt": 220,
      "runways": [
       "17L",
@@ -2241,14 +2241,29 @@
      ]
     },
     {
-     "fix": "BIRVO",
-     "coord": "331711.57N 0081130.00W",
-     "inbound_mag": 288,
+     "fix": "SLK",
+     "coord": "330656.47N 0073021.96W",
+     "inbound_mag": 345,
      "var": -1.0,
-     "turn": "R",
+     "turn": "L",
      "leg_min": 1,
-     "min_alt_ft": 4000,
-     "max_fl": 130,
+     "min_alt_ft": 6000,
+     "max_alt_ft": 13000,
+     "max_kt": 220,
+     "runways": [
+      "17L",
+      "17R"
+     ]
+    },
+    {
+     "fix": "CAE",
+     "coord": "333657.00N 0070648.70W",
+     "inbound_mag": 261,
+     "var": -1.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 7000,
+     "max_alt_ft": 13000,
      "max_kt": 220,
      "runways": [
       "17L",
@@ -2256,7 +2271,7 @@
      ]
     }
    ],
-   "_holdings_source": "holding table (Maghreb vACC GMMN procedures; Jeppesen 10-2 series: KOTAG 261, DEVNO 070, SLK 345 - MHA, MAX FL130, 220 kt)"
+   "_holdings_source": "AIP Maroc AD2 GMMN 33-1-1 / 33-2-1 (STAR RWY 35 / 17, AIRAC 07/21) and 33-1-2 / 33-2-2 (initial approaches RWY 35 / 17): protection IAS 220 kt, ZP 13000 ft"
   },
   {
    "id": "GCRR",
@@ -2330,7 +2345,54 @@
      "heading": 280
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "ODALO",
+     "coord": "313847.45N 0082929.27W",
+     "inbound_mag": 99,
+     "var": -3.0,
+     "turn": "R",
+     "leg_nm": 5.0,
+     "min_alt_ft": 6000,
+     "max_alt_ft": 11000,
+     "max_kt": 220,
+     "runways": [
+      "10",
+      "28"
+     ]
+    },
+    {
+     "fix": "RAMIM",
+     "coord": "314011.66N 0074807.11W",
+     "inbound_mag": 278,
+     "var": -2.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 5500,
+     "max_alt_ft": 12000,
+     "max_kt": 210,
+     "runways": [
+      "28"
+     ]
+    },
+    {
+     "fix": "MAK",
+     "coord": "313645.96N 0080610.93W",
+     "inbound_mag": 99,
+     "var": -3.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 3200,
+     "max_alt_ft": 11000,
+     "max_kt": 220,
+     "runways": [
+      "10",
+      "28"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Maroc AD2 GMMX 33_1 / 33_2 (STAR RWY 10 / 28: ODALO, VOR DME 279 MAK 20/25 NM), 34_2 (RNAV STAR RWY 28: RAMIM), 39_1 (VOR/DME RWY 10: MAK)"
   },
   {
    "id": "GMAD",
@@ -4297,5 +4359,5 @@
   ]
  },
  "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
- "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMX, GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
 }

@@ -160,9 +160,14 @@ holding pattern** when it is long, a dogleg vector otherwise, then speed. Handed
 height in the published hold (laps until it can make the approach), or is vectored for more track miles when the
 hold is behind it. The hold is the aerodrome's published one for the runway in use that lies on the way (fix,
 inbound track, turn direction, 1 minute legs or the published leg length, not below its minimum holding altitude,
-its maximum speed): GMMN KOTAG / DEVNO (35), SLK / BIRVO (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI,
-INSER, NAVIM; GMAD SOPAB, AGAMU (27), ALS (27) (`aerodromes[].holdings` in the airspace file). Laps are cut short when the landing slot comes
-(`approach_holding`, `approach_leave_hold` events). Aerodromes without published holding data yet (GMMX, GMME,
+its maximum speed): GMMN KOTAG / DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI,
+INSER, NAVIM; GMAD SOPAB, AGAMU (27), ALS (27); GMMX ODALO, RAMIM (28), MAK (`aerodromes[].holdings` in the airspace file).
+The number of laps accounts for the detour to the hold fix; laps are cut short when the landing slot comes
+(`approach_holding`, `approach_leave_hold` events). A delay of a few miles is a single dogleg or speed, more is
+taken in the hold - not one dogleg after another. Approach re-sequences when an aircraft has clearly got ahead of
+the one before it (`approach_resequenced`), checks the distance in a straight line as well as along the track
+before letting one turn in behind an aircraft on final, and sends around one that gets within 3 NM of the
+aircraft ahead on final. Aerodromes without published holding data yet (GMME,
 GMMZ, GMMI, GCFV) use a racetrack at the approach entry. Still too high on final
 (or past the runway) it goes around and joins the end of the sequence (`go_around` event). At the threshold the
 aircraft lands and leaves the picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it

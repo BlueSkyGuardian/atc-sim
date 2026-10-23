@@ -124,13 +124,14 @@ ok(all(w.aircraft[c].gone for c in landed), "and leave the picture")
 gm = [e["time_s"] for e in w.events if e.get("type") == "landed" and e.get("aerodrome") == "GMMN"]
 ok(all(b - a >= 140 for a, b in zip(gm, gm[1:])), f"landing intervals kept by approach: {[(e["callsign"], e["time_s"]) for e in w.events if e.get("type") == "landed"]}")
 hold_ev = [e for e in w.events if e.get("type") == "approach_holding"]
-ok(all(e.get("fix") in ("KOTAG", "DEVNO", "NASRO", "SLK", "BIRVO") for e in hold_ev if e.get("fix") is not None),
-   f"holding at GMMN's published holds: {[e['text'] for e in hold_ev]}")
+published = {h["fix"] for a in w.aerodromes.values() for h in a.holdings}
+ok(hold_ev and all(e.get("fix") in published for e in hold_ev),
+   f"holding at published holds: {[e['text'] for e in hold_ev]}")
 
 # published holds: loaded with the aerodromes, one lap is a racetrack on the holding side of the inbound track
 from atcsim import approach as _app
 ads = {a.id: a for a in w.aerodromes.values()}
-ok({h["fix"] for h in ads["GMMN"].holdings} == {"KOTAG", "DEVNO", "NASRO", "SLK", "BIRVO"}
+ok({h["fix"] for h in ads["GMMN"].holdings} == {"KOTAG", "DEVNO", "NASRO", "SLK", "BIRVO", "CAE"}
    and {h["fix"] for h in ads["GCLP"].holdings} >= {"ENETA", "LALTO", "TOMOS", "LPC"}, "published holds loaded")
 h = next(h for h in ads["GCLP"].holdings if h["fix"] == "ENETA")
 pts, lap = _app._lap(h, 220.0, 8000.0)
