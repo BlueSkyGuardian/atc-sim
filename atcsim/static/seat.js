@@ -480,7 +480,7 @@
       if (da) { e.preventDefault(); const tx = $(`#dlBox [data-dltx="${da.dataset.dlid}"]`);
         dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why, tx ? tx.value : ''); return; }
       if (e.target.closest('input')) return;
-      const c = e.target.closest('[data-cs]'); if (c) select(c.dataset.cs);
+      const c = e.target.closest('[data-cs]'); if (c) { select(c.dataset.cs); if (window.centerOn) centerOn(c.dataset.cs); }
     });
     $('#dlBox').addEventListener('keydown', e => e.stopPropagation());
     $('#todo').addEventListener('mousedown', e => {
@@ -562,6 +562,9 @@
       <div class="dk-row"><label>Weather</label><div class="dk-ctl">
         <select data-i="side"><option value="either">either side</option><option value="left">left</option><option value="right">right</option></select>
         <button data-go="dev">Deviate around weather</button><button data-go="wxclear" title="the pilot reports clear of the weather: from now on, weather it flies through counts as a penetration">Clear of weather</button></div></div>
+      <div class="dk-row"><label>Squawk</label><div class="dk-ctl">
+        <span class="c-dim" style="font-family:var(--mono)">A${h(a.squawk || '----')}</span>
+        <button data-go="ident" title="Squawk ident: the label flashes on the controller's radar for about 18 seconds">Ident</button></div></div>
       <div class="dk-row" data-dlrow><label>CPDLC</label><div class="dk-ctl">
         <span class="dk-dl" data-dlst></span>
         <select data-i="dlk"><option value="level">Request level</option><option value="direct">Request direct</option><option value="speed">Request speed</option><option value="deviation">Weather deviation</option><option value="text">Free text</option></select>
@@ -590,6 +593,10 @@
       else if (k === 'wxclear') await fly(cs, { type: 'wx_clear' }, out);
       else if (k === 'via') { const v = val('via').toUpperCase().split(/[\s,]+/).filter(x => x && x !== 'DCT'); if (v.length) await fly(cs, { type: 'reroute', points: v }, out); }
       else if (k === 'redit') editRoute(cs);
+      else if (k === 'ident') {
+        try { await api(`/sessions/${SID}/live`, { method: 'POST', body: JSON.stringify({ action: 'ident', callsign: cs }) });
+          out.className = 'dk-out ok'; out.textContent = `✓ ${cs} squawking ident`; }
+        catch (e) { out.className = 'dk-out bad'; out.textContent = e.message; } }
       else if (k === 'dl') { const v = val('dlv'); if (!v) { out.className = 'dk-out bad'; out.textContent = 'type what you request'; return; }
         await dlSend(cs, { kind: val('dlk'), value: v, reason: val('dlr') || null }); box.querySelector('[data-i=dlv]').value = ''; }
     };

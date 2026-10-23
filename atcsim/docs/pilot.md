@@ -72,6 +72,7 @@ speed, heading and navigation, what the aircraft is executing, and its limits no
 | **Direct** | The next points of the route as buttons, or any point typed |
 | **Route** | *Fly via* the points typed (a re-routing), or *Edit on map…* (the same editor as the controller's) |
 | **Weather** | Deviation left / right / a heading, with a distance; **Clear of weather** |
+| **Squawk** | The aircraft's code; **Ident**: "squawk ident", the label flashes bright on the controller's radar for about 18 seconds (the instructor has it too) |
 
 The result, or the aircraft's *unable …*, appears under the row. <kbd>Enter</kbd> validates a field.
 

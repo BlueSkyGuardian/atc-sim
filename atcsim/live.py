@@ -147,6 +147,17 @@ def emergency(w, cs: str, kind: str, aerodrome: Optional[str] = None, why: Optio
     return out
 
 
+IDENT_S = 18.0          # the special position identification pulse lasts about 18 seconds
+
+
+def ident(w, cs: str, by: str = "") -> dict:
+    """"Squawk ident": the pilot presses IDENT, the label flashes on the radar for about 18 seconds (SPI)."""
+    a = _aircraft(w, cs)
+    a.ident_until = w.t + IDENT_S
+    w._event("live", action="ident", callsign=a.callsign, by=by, text=f"{a.callsign} squawk ident")
+    return {"callsign": a.callsign, "ident_until_s": round(a.ident_until, 1)}
+
+
 def clear_emergency(w, cs: str, by: str = "") -> dict:
     a = _aircraft(w, cs)
     if not getattr(a, "emergency", None):

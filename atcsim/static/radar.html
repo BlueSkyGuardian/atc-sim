@@ -1049,6 +1049,19 @@ function makeMovable(el, handle) {
   });
 }
 window.makeMovable = makeMovable;
+// pan the scope smoothly so that an aircraft (callsign) or a point ([x, y] NM) is in the centre
+let panAnim = null;
+function centerOn(target) {
+  let p = target;
+  if (typeof target === 'string') { const src = (typeof shown !== 'undefined' && shown) || state; const a = src && src.aircraft.concat(src.transferred || []).find(x => x.callsign === target);
+    if (!a) return false; p = [a.x_nm, a.y_nm]; }
+  const from = [view.cx, view.cy], t0 = performance.now(), dur = 350;
+  if (panAnim) cancelAnimationFrame(panAnim);
+  const step = () => { const k = Math.min(1, (performance.now() - t0) / dur), e = k * k * (3 - 2 * k);
+    view.cx = from[0] + (p[0] - from[0]) * e; view.cy = from[1] + (p[1] - from[1]) * e; panAnim = k < 1 ? requestAnimationFrame(step) : null; };
+  step(); return true;
+}
+window.centerOn = centerOn;
 // the toolbar's drop-down groups: one open at a time, closed by a click elsewhere; a group lights up when one of its
 // items does (MTCD hit, OLDI message)
 document.querySelectorAll('#viewbar .vg').forEach(g => g.querySelector('.vgb').onclick = e => {
@@ -1972,6 +1985,15 @@ function draw() {
       ctx.lineTo(bx + (o[0] < 0 ? 60 * dpr : -2 * dpr), by + (o[1] < 0 ? 26 * dpr : -10 * dpr)); ctx.stroke();
     }
     const lw = paintLabel(lines, k1, bx, by, lh, 0, col, a.callsign);
+    if (a.ident_until_s != null && shown.sim_time_s < a.ident_until_s) {   // squawk ident (SPI): the label flashes bright
+      const on = Math.floor(performance.now() / 280) % 2 === 0, x0 = bx - 4 * dpr, y0 = by - (k1 + 1) * lh * dpr - 2 * dpr;
+      const w0 = Math.max(lw, 70 * dpr) + 8 * dpr, h0 = lines.length * lh * dpr + 6 * dpr;
+      ctx.lineWidth = 2.5 * dpr; ctx.strokeStyle = on ? '#fff36a' : '#fff36a55'; ctx.fillStyle = on ? '#fff36a4d' : '#fff36a14';
+      ctx.fillRect(x0, y0, w0, h0); ctx.strokeRect(x0, y0, w0, h0);
+      ctx.beginPath(); ctx.arc(px, py, (on ? 11 : 8) * dpr, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#fff36a'; ctx.font = `bold ${(fs - 1) * dpr}px ui-monospace,monospace`; ctx.fillText('ID', x0 + w0 + 3 * dpr, y0 + lh * dpr);
+      ctx.font = `${fs * dpr}px ui-monospace,monospace`;
+    }
     drawn[a.callsign] = { c: col, k: k1, x: 0, l: lines.map(ln => ln.map(sg => [sg[0], sg[1]])), ...(mtBy[a.callsign] && !st ? { m: 1 } : {}), ...(cst === 'xfer' || cst === 'leftAssumed' ? { t: 1 } : {}) };
     labelRects.push({ cs: a.callsign, x0: bx - 2 * dpr, y0: by - (k1 + 1) * lh * dpr, x1: bx + Math.max(lw, 90 * dpr), y1: by + (lines.length - k1 - 1) * lh * dpr + 4 * dpr });
   }
@@ -1981,6 +2003,7 @@ function draw() {
   if (window.drawMtcd) drawMtcd(byCs);
   if (window.drawRouteEdit) drawRouteEdit(byCs);
   if (window.drawSeqTool) drawSeqTool(byCs);
+  if (window.drawLookup) drawLookup(byCs);
   drawRbls(byCs);
   if (rblDrag && rblDrag.from) {                      // the line being dragged: bearing, range, ΔFL and CPA live
     snapMark(rblDrag.from, byCs);
@@ -2011,5 +2034,6 @@ requestAnimationFrame(draw);
 <script src="/static/aiwatch.js"></script>
 <script src="/static/solver.js"></script>
 <script src="/static/seqtool.js"></script>
+<script src="/static/lookup.js"></script>
 </body>
 </html>

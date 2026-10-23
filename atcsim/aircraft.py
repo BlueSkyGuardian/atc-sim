@@ -826,6 +826,7 @@ class Aircraft:
             "flight_plan": self.flight_plan,
             "squawk": (self.emergency or {}).get("code") or (self.flight_plan or {}).get("ssr"),
             "emergency": self.emergency,
+            "ident_until_s": getattr(self, "ident_until", None),
             "mode_s": mode_s(self, self.mag_var),
             "fp_next": self.next_wp,
             "prev_unit": self.prev_unit, "next_unit": self.next_unit,

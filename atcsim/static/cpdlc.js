@@ -210,7 +210,7 @@
       try { await api(`/sessions/${SID}/cpdlc/command`, { method: 'POST', body: JSON.stringify({ text: b.dataset.a, callsign: b.dataset.cs }) }); if (typeof pollState === 'function') pollState(); }
       catch (err) { result = { html: `<div class="cb-err">${esc(err.message)}</div>`, until: performance.now() + 5000 }; inp.focus(); showPv(lastPv); }
       return; }
-    const r = e.target.closest('#dlWin [data-cs]'); if (r) { selected = r.dataset.cs; if (typeof pollSelected === 'function') pollSelected(); }
+    const r = e.target.closest('#dlWin [data-cs]'); if (r) { selected = r.dataset.cs; if (typeof pollSelected === 'function') pollSelected(); if (window.centerOn) centerOn(r.dataset.cs); }
   }, true);
   setInterval(renderWin, 1000);
   }

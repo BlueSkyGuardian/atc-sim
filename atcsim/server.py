@@ -355,7 +355,7 @@ def control(sid: str, body: Control, request: Request):
 
 
 class LiveAction(BaseModel):
-    action: Literal["aircraft", "emergency", "clear_emergency", "request", "area", "readback_rate", "readback_result"]
+    action: Literal["aircraft", "emergency", "clear_emergency", "ident", "request", "area", "readback_rate", "readback_result"]
     rate: Optional[float] = None
     trap: Optional[int] = None
     caught: Optional[bool] = None
@@ -388,7 +388,7 @@ def live_options(sid: str):
 def live_action(sid: str, body: LiveAction, request: Request):
     """A live action (instructor, pseudo-pilots, the solo radar's controller): "aircraft" (callsign, type, fl, route,
     appear: "now" or seconds to its entry), "emergency" (callsign, kind: descent | medical | radio | general,
-    aerodrome, why), "clear_emergency" (callsign), "request" (callsign, kind: level | direct | speed | deviation |
+    aerodrome, why), "clear_emergency" (callsign), "ident" (callsign: squawk ident, the label flashes ~18 s), "request" (callsign, kind: level | direct | speed | deviation |
     report, value, reason), "area" (area, active)."""
     return _act(sid, request, "live", body.model_dump())
 

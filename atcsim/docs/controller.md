@@ -36,6 +36,7 @@ conflict or an unread chat message):
 
 | Control | What it does |
 |---|---|
+| **FIND** | Lookup (<kbd>Ctrl</kbd>+<kbd>F</kbd>), see [Find](#find) |
 | **ALARMS** | Red and flashing while there is a loss of separation, amber with an STCA; the count of alarms. Click it for the alarms window (see [Alarms](#alarms)) |
 | **Weather** ▾ | Weather product and FL (composite reflectivity, or a CAPPI at a flight level to see embedded cells at your level), echo tops |
 | **Map** ▾ | Coast, Areas, Routes, RAD, Borders, Freq, Points, Trails: land and coastlines (Morocco, Spain and the Canary Islands, Portugal, Madeira, the Azores), prohibited / restricted / danger areas (the AIP GMP / GMR / GMD areas are always there: bright when active and reaching your levels and sectors, faint otherwise), airways, RAD routings (dashed, one-way arrows), sector lines, sector names with frequencies (the other control area of the Casablanca FIR dimmer, with the FIR outline), point names, history dots |
@@ -117,6 +118,24 @@ heading line.
 | `LVL` | Level bust: leaving the cleared level, or levelled more than 300 ft from it (red, flashing) |
 | `MTC7'` | Medium-term conflict in 7 minutes (MTCD on) |
 | `COORD` | A change too close to the boundary for an OLDI revision: coordinate by phone |
+
+### Find
+
+**FIND** in the toolbar (or <kbd>Ctrl</kbd>+<kbd>F</kbd>) looks up, as you type:
+
+- an **aircraft** by callsign (any part of it) or by **SSR code** (`4474` or `A4474`): Enter selects it, centres the
+  scope on it and rings it for a few seconds;
+- a **point**, an **aerodrome**, an **airway**, a published **area** (`GMP 18`), a **sector**;
+- a **coordinate**, in any usual form (`3345N00730W`, `334500N 0073000W`, `N33 45 00 W007 30 00`, `33°45'N 7°30'W`,
+  `33.75 -7.5`), or a **point / bearing / distance** (`TERTO/090/20`, true bearing);
+
+Enter (or a click) centres the scope on it and draws it: a ring on a point, a cross on a coordinate, the airway, area or
+sector outlined in yellow. These stay on the scope (listed under *On the scope* in the window) until you remove them
+with ✕ or *clear all*. Arrows move through the results. Clicking a message in the **CPDLC** window also centres the
+scope on its aircraft.
+
+A pilot's **squawk ident** (pseudo-pilot or instructor) makes the aircraft's label flash bright yellow with *ID* for
+about 18 seconds.
 
 ### Alarms
 

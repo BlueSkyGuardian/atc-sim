@@ -172,6 +172,8 @@ def _live(w, body, actor):
         return live.emergency(w, body.get("callsign") or "", body.get("kind") or "general", body.get("aerodrome"), body.get("why"), by=who)
     if act == "clear_emergency":
         return live.clear_emergency(w, body.get("callsign") or "", by=who)
+    if act == "ident":
+        return live.ident(w, body.get("callsign") or "", by=who)
     if act == "request":
         return live.request(w, body.get("callsign") or "", body.get("kind") or "", body.get("value"), body.get("reason") or "", by=who)
     if act == "readback_rate":
