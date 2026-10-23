@@ -1009,7 +1009,9 @@ function evText(e) {
     case 'instruction_rejected': return `✗ rejected: ${e.reason}`;
     case 'separation_loss_start': return `LOSS OF SEPARATION ${e.aircraft.join(' × ')} ${e.horizontal_nm} NM / ${e.vertical_ft} ft (min ${e.required_horizontal_nm} NM / ${e.required_vertical_ft} ft)`;
     case 'separation_loss_end': return `LoS ended ${e.aircraft.join(' × ')} (${e.duration_s} s, min ${e.min_horizontal_nm} NM)`;
-    case 'area_infringement_start': return `${e.callsign} entered ACTIVE ${e.kind} area ${e.area_id}`;
+    case 'area_infringement_start': return e.inside === false
+      ? `${e.callsign} within ${e.distance_nm} NM of ACTIVE ${e.kind} area ${e.area_id} (${e.required_nm} NM required)`
+      : `${e.callsign} entered ACTIVE ${e.kind} area ${e.area_id}`;
     case 'area_activated': return `Area ${e.area_id} (${e.kind}) ACTIVATED`;
     case 'area_deactivated': return `Area ${e.area_id} (${e.kind}) deactivated`;
     case 'aircraft_entered': return `${e.callsign} (${e.aircraft_type}) entered at ${e.at} FL${e.fl} → ${e.exit}`;

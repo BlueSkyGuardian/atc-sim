@@ -201,7 +201,7 @@ and, when needed, *✓ coordinated by phone*.
   exercise's statistics): follow it up with a coordination.
 - **Re-assume** a decontrolled aircraft: its grey label's callsign is a button with *Assume*.
 
-Losses of separation, area infringements and weather penetrations count only for aircraft on your frequency.
+Losses of separation, area infringements and weather penetrations count only for aircraft on your frequency. An area infringement is being at an active area's levels closer to it than its lateral spacing: 3 NM from a prohibited area (GMP), 5 NM from a danger (GMD) or restricted (GMR) area.
 
 ## OLDI coordination
 

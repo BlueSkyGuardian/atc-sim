@@ -147,33 +147,48 @@ with its Mach / IAS schedule. Cleared FL250 40 NM before TERTO from FL370, it cr
 FL315), as real traffic does: to make a level at a fix, clear it earlier or give a rate ("at 2000 ft/min or
 greater"), which takes precedence.
 
-**After the handover.** Once an arrival has left our sectors, simulated next units fly it to its runway - but only
-when the controller has **decontrolled** it and every other transferred arrival to the same aerodrome (the sequence
-stays the controller's until then), and, for a transfer to the next sector, once it is **30 NM past its transfer
-point** (handed down into a TMA at a fix inside the sector, approach takes it there). Until then it flies its flight
-plan at the level it was given. Then the next units fly it: the rest of its flight plan towards the aerodrome, then the
-approach path (straight-in, or the reversal procedure from the far side), cleared down to the FAF altitude at its own
-top of descent, the ILS from the FAF on the 3° glide path, 250 kt below FL100, 210 kt inside 25 NM, 180 kt before the
-FAF, 145 kt on final. Each aerodrome keeps the order the arrivals were handed over in: every arrival gets a landing
-slot 6 NM (7 NM behind a heavy) after the one before it, and the delay is absorbed in a **published approach
-holding pattern** when it is long, a dogleg vector otherwise, then speed. Handed over high and close, it loses the
-height in the published hold (laps until it can make the approach), or is vectored for more track miles when the
-hold is behind it. The hold is the aerodrome's published one for the runway in use that lies on the way (fix,
-inbound track, turn direction, 1 minute legs or the published leg length, not below its minimum holding altitude,
-its maximum speed): GMMN KOTAG / DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI,
-INSER, NAVIM; GMAD SOPAB, AGAMU (27), ALS (27); GMMX ODALO, RAMIM (28), MAK (`aerodromes[].holdings` in the airspace file).
-The number of laps accounts for the detour to the hold fix; laps are cut short when the landing slot comes
-(`approach_holding`, `approach_leave_hold` events). A delay of a few miles is a single dogleg or speed, more is
-taken in the hold - not one dogleg after another. Approach re-sequences when an aircraft has clearly got ahead of
-the one before it (`approach_resequenced`), checks the distance in a straight line as well as along the track
-before letting one turn in behind an aircraft on final, and sends around one that gets within 3 NM of the
-aircraft ahead on final. Aerodromes without published holding data yet (GMME,
-GMMZ, GMMI, GCFV) use a racetrack at the approach entry. Still too high on final
-(or past the runway) it goes around and joins the end of the sequence (`go_around` event). At the threshold the
-aircraft lands and leaves the picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it
-over (Agadir West North to Casablanca for GMMN, TERTO for GCRR, the Casablanca TMAs). A rerouted arrival (for example
-via DEVNO instead of LAKAM) keeps its new route: it is handed over at its end and judged there against the letter of
-agreement of its fix.
+**After the handover.** As soon as an arrival is transferred (it leaves our sectors, or is handed down into a
+TMA), the simulated next units take it over and fly it to its runway: a late transfer leaves it high and close, and
+it is theirs to lose the height. They fly the rest of its flight plan towards the aerodrome, then the published
+approach where the airspace file gives one (`aerodromes[].runways[]`: `final_nm`, `faf_alt_ft`, `if_nm`, `joins`) -
+GMMN RWY 17: from the north the 13 NM CBA arc over the sea (avoiding the city), from the south BODNI, then the 114°
+course to SAK (the intermediate fix, 8 NM), the FAF at 5.2 NM / 2300 ft; GMMN RWY 35: FAP at 9.3 NM / 3600 ft -
+otherwise a straight-in (or the reversal procedure from the far side). Cleared down to the FAF altitude at its own
+top of descent, the ILS from the FAF on the 3° glide path, 250 kt below FL100, 210 kt inside 25 NM, 180 kt before
+the FAF, 145 kt on final.
+
+**Too high, or early.** Each aerodrome keeps the order the arrivals were handed over in: every arrival gets a
+landing slot 6 NM (7 NM behind a heavy) after the one before it. Too high for the miles left, it is first told to
+**expedite** (idle with speedbrakes, `approach_expedite`), then given **one vector** for the track miles still
+missing (a dogleg of up to 25 NM, with a margin), and only when even that is not enough laps in the hold. Early for
+its slot: speed first, then one vector (up to 25 NM), then the **published approach holding pattern**. The hold is
+the aerodrome's published one for the runway in use that lies on the way (fix, inbound track, turn direction,
+1 minute legs or the published leg length, never below its minimum holding altitude, its maximum speed): GMMN KOTAG /
+DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI, INSER, NAVIM; GMAD SOPAB, AGAMU
+(27), ALS (27); GMMX ODALO, RAMIM (28), MAK (`aerodromes[].holdings`). The number of laps accounts for the detour
+to the hold fix, and laps are cut short when the slot comes (`approach_holding`, `approach_leave_hold`). No new
+vector while the last one is still being flown. Approach re-sequences when an aircraft has clearly got ahead of the
+one before it (`approach_resequenced`), checks the distance in a straight line as well as along the track before
+letting one turn in behind an aircraft on final, takes one that is too close with nothing left to vector out of the
+sequence (`approach_breakoff`), and sends around one that gets within 3 NM of the aircraft ahead on final.
+Aerodromes without published holding data yet (GMME, GMMZ, GMMI, GCFV) use a racetrack at the approach entry.
+
+**Areas.** Every path approach builds (the way to the procedure, the joining route, the vectors) keeps the lateral
+spacing from the active areas at the levels flown there: **3 NM from a prohibited area (GMP), 5 NM from a danger
+(GMD) or restricted (GMR) one** - a point is added around the area, a vector goes to the side that stays clear. The
+final approach itself, and the leg the aircraft is on when it is transferred, are not moved.
+
+Still too high on final (or past the runway) it goes around and joins the end of the sequence (`go_around`). At the
+threshold the aircraft lands and leaves the picture (`landed`). This applies to every arrival to an aerodrome of the
+airspace, whichever sector handed it over (Agadir West North to Casablanca for GMMN, TERTO for GCRR, the Casablanca
+TMAs). A rerouted arrival (for example via DEVNO instead of LAKAM) keeps its new route: it is handed over at its end
+and judged there against the letter of agreement of its fix.
+
+**Descent rates.** Cleared down with no rate given, a pilot flies its own (managed) descent: never steeper than
+idle, and about 4.3 NM per 1000 ft above FL250 (100 levels in about 43 NM from the cruise), 3.3 NM per 1000 ft
+below, 3 NM below FL100. Cleared before its top of descent, about 1000 ft/min until it meets that path. Speedbrakes
+only when it can no longer make the level of its letter of agreement by the fix; "expedite", an assigned rate or
+speedbrakes give up to the idle rate and more.
 
 ## Traffic before and after the sector
 
@@ -182,3 +197,5 @@ agreement of its fix.
 - After the exit, an aircraft stays assumed until you decontrol it, and keeps flying its flight plan. Once
   decontrolled it turns grey and leaves the picture when well clear.
 - Losses, infringements and weather penetrations count when at least one aircraft involved is on your frequency.
+- An **area infringement** is being at an active area's levels and closer to it than its lateral spacing: 3 NM
+  from a prohibited area (GMP), 5 NM from a danger (GMD) or restricted (GMR) one (inside, or within that distance).

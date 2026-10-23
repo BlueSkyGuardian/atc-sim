@@ -22,6 +22,16 @@ MAX_INTERCEPT_DEG = 45.0
 BANK_GAIN = 2.0                # commanded bank (deg) per degree of heading error, capped at nominal bank
 SPEED_SHARE = 0.3              # share of excess power used for speed change while climbing/descending
 SPEEDBRAKE_FACTOR = 1.5        # max descent rate with speedbrakes relative to idle descent
+# a descent with no rate given (the pilot's own, managed descent): never steeper than idle, and not steeper than
+# these NM flown per 1000 ft (still air) - about 100 levels in 43 NM from the cruise down to FL250, then about the
+# idle path; "expedite" / an assigned rate / speedbrakes use the full idle rate (and more)
+DESCENT_NM_PER_KFT = ((25000.0, 4.3), (10000.0, 3.3), (0.0, 3.0))
+
+
+def descent_profile_fpm(tas_kt: float, alt_ft: float) -> float:
+    """The rate (ft/min) of the pilot's own descent at that true airspeed and level (before the idle limit)."""
+    nm = next(v for a, v in DESCENT_NM_PER_KFT if alt_ft >= a)
+    return max(tas_kt, 120.0) / 60.0 / nm * 1000.0
 EXIT_CAPTURE_NM = 3.0
 
 
@@ -461,6 +471,8 @@ class Aircraft:
                         fpm = -min(max(self.vs_cmd_fpm, abs(fpm)), SPEEDBRAKE_FACTOR * abs(fpm))
                 elif self.speedbrake:
                     fpm = SPEEDBRAKE_FACTOR * fpm          # high on profile: speedbrakes out
+                else:                                      # its own descent: the managed profile, not a dive at idle
+                    fpm = max(fpm, -descent_profile_fpm(self.tas, self.alt_ft))
             step = fpm * dt / 60.0
             if abs(step) >= abs(dz):
                 self.alt_ft = self.cleared_alt_ft
@@ -487,6 +499,12 @@ class Aircraft:
         a = self.alt_ft if alt_ft is None else alt_ft
         mode, val = self.speed_target(a)
         return -self.perf.roc_fpm(a, mode, val, self.mass, "idle")
+
+    def descent_rate_normal(self, alt_ft: Optional[float] = None) -> float:
+        """The rate of its own descent (no rate given, no speedbrakes): the managed profile, at most idle."""
+        a = self.alt_ft if alt_ft is None else alt_ft
+        mode, val = self.speed_target(a)
+        return min(self.descent_rate_idle(a), descent_profile_fpm(self.perf.tas_for(mode, val, a), a))
 
     def normal_speed(self, alt_ft: Optional[float] = None) -> Tuple[str, float]:
         """(mode, value) the aircraft flies at a level with no speed assigned: its own Mach / IAS schedule."""
@@ -597,6 +615,7 @@ class Aircraft:
             "max_fl_at_present_weight": self.max_fl(),
             "climb_rate_available_fpm": round(self.climb_rate_available()),
             "idle_descent_rate_fpm": round(self.descent_rate_idle()),
+            "normal_descent_rate_fpm": round(self.descent_rate_normal()),
             "assignable_mach": [self.perf.mach_assign_min, self.perf.mach_assign_max],
             "assignable_ias_kt": [self.perf.cas_assign_min, self.perf.cas_assign_max],
             "turn_radius_nm": round(self.turn_radius_nm(), 2),

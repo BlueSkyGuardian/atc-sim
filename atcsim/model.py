@@ -8,6 +8,9 @@ from .geometry import Point, dist, point_in_polygon
 
 # --- Airspace areas -----------------------------------------------------------
 AREA_KINDS = {"danger": "D", "restricted": "R", "prohibited": "P"}
+# lateral spacing to keep from an active area (at its levels): 3 NM from a prohibited area (GMP), 5 NM from a
+# danger (GMD) or restricted (GMR) one
+AREA_CLEARANCE_NM = {"prohibited": 3.0, "restricted": 5.0, "danger": 5.0}
 
 
 @dataclass
@@ -35,6 +38,32 @@ class Area:
 
     def contains(self, pt: Point, alt_ft: float) -> bool:
         return self.lower_fl * 100 <= alt_ft <= self.upper_fl * 100 and self.contains_xy(pt)
+
+    @property
+    def clearance_nm(self) -> float:
+        return AREA_CLEARANCE_NM.get(self.kind, 0.0)
+
+    def distance_xy(self, pt: Point) -> float:
+        """Lateral distance (NM) from the area: 0 inside."""
+        if self.contains_xy(pt):
+            return 0.0
+        if self.circle:
+            c, r = self.circle
+            return dist(c, pt) - r
+        poly = self.polygon or []
+        best = 1e18
+        for a, b in zip(poly, poly[1:] + poly[:1]):
+            dx, dy = b[0] - a[0], b[1] - a[1]
+            L2 = dx * dx + dy * dy
+            f = 0.0 if L2 < 1e-12 else max(0.0, min(1.0, ((pt[0] - a[0]) * dx + (pt[1] - a[1]) * dy) / L2))
+            best = min(best, dist(pt, (a[0] + f * dx, a[1] + f * dy)))
+        return best
+
+    def infringed(self, pt: Point, alt_ft: float, margin_nm: float = 0.0) -> bool:
+        """Within the area's levels and closer to it than its lateral spacing (3 NM prohibited, 5 NM danger /
+        restricted), plus margin_nm."""
+        return (self.lower_fl * 100 <= alt_ft <= self.upper_fl * 100
+                and self.distance_xy(pt) < self.clearance_nm + margin_nm)
 
     def advance(self, t: float) -> List[bool]:
         """Apply schedule events with time <= t. Returns list of new states applied."""
@@ -72,6 +101,7 @@ class Area:
             "lower_fl": self.lower_fl,
             "upper_fl": self.upper_fl,
             "active": self.active,
+            "clearance_nm": self.clearance_nm,
             "next_change": self.next_change(),
             "published_schedule": [{"time_s": ts, "active": a} for ts, a in self.schedule],
         }

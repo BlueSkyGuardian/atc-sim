@@ -173,7 +173,8 @@ def _perf_rate(a, climbing: bool) -> Optional[float]:
             r = float(a.climb_rate_available())
         else:
             from ..aircraft import SPEEDBRAKE_FACTOR
-            r = float(a.descent_rate_idle()) * (SPEEDBRAKE_FACTOR if getattr(a, "speedbrake", False) else 1.0)
+            r = (float(a.descent_rate_idle()) * SPEEDBRAKE_FACTOR if getattr(a, "speedbrake", False)
+                 else float(a.descent_rate_normal()))
         return r if r > 300 else None
     except Exception:  # noqa: BLE001
         return None

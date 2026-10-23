@@ -2175,11 +2175,40 @@
    "runways": [
     {
      "id": "35R",
-     "heading": 350
+     "heading": 344,
+     "final_nm": 9.3,
+     "faf_alt_ft": 3600,
+     "if_nm": 14.0,
+     "_source": "AD2 GMMN 39-2-1/2 ILS RWY 35R: QFU 345 mag (var 1W), FAP D9.3 INR 3600 ft"
     },
     {
      "id": "17L",
-     "heading": 170
+     "heading": 164,
+     "final_nm": 5.2,
+     "faf_alt_ft": 2300,
+     "if_nm": 8.0,
+     "joins": [
+      {
+       "name": "13 NM CBA arc (avoiding the city)",
+       "north_of_field": true,
+       "via": [
+        "334614.6N 0074153.3W",
+        "334325.0N 0074613.7W",
+        "334105.2N 0075052.4W",
+        "333832.6N 0075334.1W",
+        "333621.1N 0075459.4W"
+       ]
+      },
+      {
+       "name": "BODNI, then the 114 SAK course",
+       "north_of_field": false,
+       "via": [
+        "332054N 0075015W",
+        "333154.6N 0075123.7W"
+       ]
+      }
+     ],
+     "_source": "AD2 GMMN 35-2-1/2 ILSz/ILSy RWY 17R: QFU 165 mag, intercept at SAK (D8.0 ICAS), FAF D5.2 ICAS 2300 ft; from NASRO 177 to 15 NM CBA, arc 13 NM CBA, 114 SAK (city overflight avoidance); from the south via BODNI"
     }
    ],
    "runway_in_use": "auto",

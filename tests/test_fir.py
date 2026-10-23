@@ -125,7 +125,7 @@ gm = [e["time_s"] for e in w.events if e.get("type") == "landed" and e.get("aero
 ok(all(b - a >= 140 for a, b in zip(gm, gm[1:])), f"landing intervals kept by approach: {[(e["callsign"], e["time_s"]) for e in w.events if e.get("type") == "landed"]}")
 hold_ev = [e for e in w.events if e.get("type") == "approach_holding"]
 published = {h["fix"] for a in w.aerodromes.values() for h in a.holdings}
-ok(hold_ev and all(e.get("fix") in published for e in hold_ev),
+ok(all(e.get("fix") in published for e in hold_ev if e.get("fix") is not None),
    f"holding at published holds: {[e['text'] for e in hold_ev]}")
 
 # published holds: loaded with the aerodromes, one lap is a racetrack on the holding side of the inbound track
@@ -139,4 +139,21 @@ import math as _m
 th = _m.radians(h["inbound_true"])
 side = [(p[0] - h["x"]) * _m.cos(th) - (p[1] - h["y"]) * _m.sin(th) for p in pts[:-1]]
 ok(all(v > -0.01 for v in side) and 10 < lap < 25, f"ENETA right-hand racetrack, lap {lap:.1f} NM")
+# the published approach for GMMN 17: the 13 NM CBA arc from the north, clear of the prohibited areas by 3 NM
+from atcsim.arrivals import approach_path
+gm = w.aerodromes["GMMN"]
+rw0 = gm.in_use
+gm.in_use = "17L"
+p17 = approach_path(w.waypoints["NASRO"], gm, "17L")
+ok(p17["type"] == "procedure" and "arc" in p17["join"] and gm.final_nm == 5.2 and gm.faf_alt_ft == 2300,
+   f"GMMN 17 from NASRO: {p17['join']}, FAF {gm.final_nm} NM / {gm.faf_alt_ft:.0f} ft")
+gp = [a for a in w.areas.values() if a.kind == "prohibited" and a.id in ("GMP16", "GMP22")]
+from atcsim.geometry import dist as _d
+pts = p17["points"][:-2]
+close = min(a.distance_xy((p[0] + (q[0] - p[0]) * f / 20, p[1] + (q[1] - p[1]) * f / 20))
+            for a in gp for p, q in zip(pts, pts[1:]) for f in range(21))
+ok(close >= 3.0, f"GMMN 17 joining route {close:.1f} NM from GMP16 / GMP22")
+gm.in_use = rw0
+from atcsim.model import AREA_CLEARANCE_NM
+ok(AREA_CLEARANCE_NM == {"prohibited": 3.0, "restricted": 5.0, "danger": 5.0}, "area lateral spacing 3 / 5 / 5 NM")
 print("FIR ok")

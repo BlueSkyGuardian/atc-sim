@@ -69,20 +69,26 @@ class Aerodrome:
     runways: Dict[str, float]                 # id -> landing heading (deg true)
     in_use: str = ""
     schedule: List[Tuple[float, str]] = field(default_factory=list)
-    final_nm: float = 10.0
+    final_default_nm: float = 10.0
     faf_agl_ft: float = 3000.0
     outbound_nm: float = 12.0
     racetrack_nm: float = 4.0
     holdings: List[dict] = field(default_factory=list)   # published approach holds: x, y, fix, inbound_true, turn, ...
-    _sidx: int = 0
+    rwy: Dict[str, dict] = field(default_factory=dict)     # per runway (published procedure): final_nm, faf_alt_ft,
+    _sidx: int = 0                                         # if_nm, joins [{via: [(x, y)], north_of_field}]
 
     @property
     def pos(self) -> Point:
         return (self.x, self.y)
 
     @property
+    def final_nm(self) -> float:
+        return float(self.rwy.get(self.in_use, {}).get("final_nm") or self.final_default_nm)
+
+    @property
     def faf_alt_ft(self) -> float:
-        return self.elev_ft + self.faf_agl_ft
+        v = self.rwy.get(self.in_use, {}).get("faf_alt_ft")
+        return float(v) if v else self.elev_ft + self.faf_agl_ft
 
     def advance(self, t: float) -> Optional[str]:
         changed = None
@@ -130,6 +136,19 @@ class SeqFix:
                 "letter_of_agreement": self.describe()}
 
 
+def _runway_params(r: dict, asp=None) -> dict:
+    """A runway's published approach data: final (FAF distance), FAF altitude, intermediate fix distance, and the
+    joining routes to it (points resolved)."""
+    out = {k: float(r[k]) for k in ("final_nm", "faf_alt_ft", "if_nm") if r.get(k) is not None}
+    joins = []
+    for j in r.get("joins", []):
+        via = [tuple(asp.resolve_point(v)) if asp is not None else tuple(v) for v in j.get("via", [])]
+        joins.append({"name": j.get("name", ""), "via": via, "north_of_field": j.get("north_of_field")})
+    if joins:
+        out["joins"] = joins
+    return out
+
+
 def _holding(h: dict, asp=None) -> dict:
     """A published holding pattern: its fix position and inbound track (true) resolved."""
     if "x" in h:
@@ -160,7 +179,8 @@ def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Di
                        elev_ft=float(a.get("elev_ft", 0)),
                        runways={str(r["id"]): float(r["heading"]) % 360 for r in a["runways"]},
                        schedule=sorted((float(e["time"]), str(e["runway"])) for e in a.get("runway_schedule", [])),
-                       final_nm=float(a.get("final_nm", 10)), outbound_nm=float(a.get("outbound_nm", 12)),
+                       final_default_nm=float(a.get("final_nm", 10)), outbound_nm=float(a.get("outbound_nm", 12)),
+                       rwy={str(r["id"]): _runway_params(r, asp) for r in a["runways"]},
                        holdings=[_holding(h, asp) for h in (a.get("holdings") or next(
                            (d.get("holdings", []) for d in d_ads if d.get("id") == a["id"]), []))])
         want = str(a.get("runway_in_use", "auto"))
@@ -196,12 +216,31 @@ def approach_path(fix: Point, ad: Aerodrome, runway: str) -> dict:
     u = (math.sin(h), math.cos(h))                       # landing direction
     n = (u[1], -u[0])                                    # right of the landing direction
     thr = (ad.x - u[0] * 0.8, ad.y - u[1] * 0.8)         # threshold ~0.8 NM before the reference point
-    faf = (thr[0] - u[0] * ad.final_nm, thr[1] - u[1] * ad.final_nm)
+    rp = ad.rwy.get(runway, {})
+    final_nm = float(rp.get("final_nm") or ad.final_default_nm)
+    faf = (thr[0] - u[0] * final_nm, thr[1] - u[1] * final_nm)
     along = (fix[0] - thr[0]) * u[0] + (fix[1] - thr[1]) * u[1]
-    if along < -ad.final_nm * 0.5:
+    joins = [j for j in rp.get("joins", []) if j.get("via")]
+    if joins:
+        # the published joining route for where it comes from (e.g. GMMN 17: the 13 NM CBA arc over the sea from the
+        # north, BODNI from the south), then the intermediate fix and the final approach fix
+        north = fix[1] > ad.y
+        cand = [j for j in joins if j.get("north_of_field") is None or bool(j["north_of_field"]) == north] or joins
+        j = min(cand, key=lambda j: dist(fix, j["via"][0]))
+        i0 = min(range(len(j["via"])), key=lambda k: dist(fix, j["via"][k]) + 0.5 * k)   # join it where it is closest
+        if_nm = float(rp.get("if_nm") or final_nm + 4)
+        ifx = (thr[0] - u[0] * if_nm, thr[1] - u[1] * if_nm)
+        pts = [fix] + [tuple(p) for p in j["via"][i0:]] + [ifx, faf, thr]
+        faf_idx = len(pts) - 2
+        to_faf = polyline_length(pts[:faf_idx + 1])
+        return {"type": "procedure", "runway": runway, "points": [[round(p[0], 2), round(p[1], 2)] for p in pts],
+                "to_faf_nm": round(to_faf, 1), "total_nm": round(polyline_length(pts), 1), "join": j["name"],
+                "faf": [round(faf[0], 2), round(faf[1], 2)], "threshold": [round(thr[0], 2), round(thr[1], 2)]}
+    if along < -final_nm * 0.5:
         kind = "straight-in"
-        if along < -(ad.final_nm + 4):
-            ifx = (thr[0] - u[0] * (ad.final_nm + 4), thr[1] - u[1] * (ad.final_nm + 4))
+        if_nm = float(rp.get("if_nm") or final_nm + 4)
+        if along < -if_nm:
+            ifx = (thr[0] - u[0] * if_nm, thr[1] - u[1] * if_nm)
             pts = [fix, ifx, faf, thr]
         else:
             pts = [fix, faf, thr]
@@ -240,8 +279,9 @@ def descent_distance(ac: "Aircraft", from_alt: float, to_alt: float, wind_along,
         a2 = max(to_alt, alt - 1000.0)
         amid = (alt + a2) / 2
         mode, val = ac.speed_target(amid)          # Mach / IAS pair in force, converting at its own altitude
-        rod = max(-p.roc_fpm(amid, mode, val, m, "idle"), 600.0)
         tas = p.tas_for(mode, val, amid)
+        from .aircraft import descent_profile_fpm
+        rod = max(min(-p.roc_fpm(amid, mode, val, m, "idle"), descent_profile_fpm(tas, amid)), 600.0)
         gs = max(tas + wind_along(amid), 120.0)
         d += gs * (alt - a2) / rod / 60.0
         alt = a2
@@ -317,6 +357,8 @@ def compute(world: "World", ac: "Aircraft") -> dict:
 # ----------------------------------------------------------------------------- pilot logic
 def update(world: "World", ac: "Aircraft") -> None:
     st = ac.arr
+    if getattr(ac, "app", None):
+        return                                  # with the next units (approach.py): they fly it down
     if world.t - st.get("_last", -1e9) < ARR_PERIOD_S * (1 if world.record else 3):
         return
     st["_last"] = world.t
@@ -342,12 +384,14 @@ def update(world: "World", ac: "Aircraft") -> None:
         st["_vs_own"] = False
     ad = world.aerodromes[seq.aerodrome]
     # speedbrakes when well above the profile
-    if descending and tod < -4:
+    if descending and info.get("loa_latest_descent_in_nm", 0.0) < -3:
+        # it can no longer make the LoA level by the fix on its own profile (not: past its top of descent to the
+        # runway - the next unit takes it down from the LoA level)
         if not ac.speedbrake and world.record:
             world._event("pilot_report", callsign=ac.callsign,
-                         text=f"{ac.callsign} we're high, {abs(tod):.0f} NM past our descent point, speedbrakes out")
+                         text=f"{ac.callsign} we're high for {st['fix']}, speedbrakes out")
         ac.speedbrake = True
-    elif ac.speedbrake and (tod > -1 or not descending):
+    elif ac.speedbrake and (info.get("loa_latest_descent_in_nm", 0.0) > -1 or not descending):
         ac.speedbrake = False
     # descent request
     req = world.requests.get(st.get("_req")) if st.get("_req") else None

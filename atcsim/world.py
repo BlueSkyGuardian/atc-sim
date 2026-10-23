@@ -1331,7 +1331,7 @@ class World:
             if not ac.on_frequency:
                 continue
             for ar in self.areas.values():
-                if ar.active and ar.contains(ac.pos, ac.alt_ft):
+                if ar.active and ar.infringed(ac.pos, ac.alt_ft):      # inside, or within its lateral spacing
                     key = (ac.callsign, ar.id)
                     current_inf.add(key)
                     self.m["area_seconds"][ar.kind] += dt
@@ -1339,7 +1339,8 @@ class World:
                         self._inf[key] = {"start": self.t}
                         self.m["area_infringements"] += 1
                         self._event("area_infringement_start", callsign=ac.callsign, area_id=ar.id, kind=ar.kind,
-                                    fl=int(round(ac.alt_ft / 100)))
+                                    fl=int(round(ac.alt_ft / 100)), inside=ar.contains_xy(ac.pos),
+                                    distance_nm=round(ar.distance_xy(ac.pos), 1), required_nm=ar.clearance_nm)
         for key in list(self._inf):
             if key not in current_inf:
                 info = self._inf.pop(key)
@@ -1520,7 +1521,7 @@ class World:
                     if ar.id in seen:
                         continue
                     if ar.active_at(pred["t0"] + t) or ar.active:
-                        if ar.active_at(pred["t0"] + t) and ar.contains((p[0], p[1]), p[2]):
+                        if ar.active_at(pred["t0"] + t) and ar.infringed((p[0], p[1]), p[2]):
                             seen.add(ar.id)
                             area_hits.append({"callsign": cs, "area_id": ar.id, "kind": ar.kind,
                                               "time_to_entry_s": t})

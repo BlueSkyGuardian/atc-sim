@@ -43,9 +43,10 @@ APP_SPACING_NM = 6.0
 HEAVY_SPACING_NM = 7.0
 FINAL_KT = 145.0
 LANDED_NM = 0.4
-TAKEOVER_NM = 30.0                # the next units take arrivals over this far past the transfer point
 HOLD_LAP_NM = 21.0                 # a 1-minute racetrack at about 220 kt
 HOLD_AGL_FT = 6000.0
+EXPEDITE_RATIO = 0.65             # miles to lose a given height expediting (idle, speedbrakes) / on its own profile
+STRETCH_MAX_NM = 25.0             # the most a single dogleg vector adds; more delay than that: the hold
 
 
 def _dest(world: "World", ac: "Aircraft"):
@@ -76,12 +77,21 @@ def _start(world: "World", ac: "Aircraft") -> None:
         prev = p
     start = world.waypoints[pts[-1]] if pts else ac.pos
     path = approach_path(start, ad, ad.in_use)
-    names = []
-    for k, p in enumerate(path["points"][1:], 1):
+    # the whole way from where it is (its own points, then the procedure) kept clear of the active areas
+    full = [ac.pos] + [world.waypoints[w] for w in pts] + [tuple(p) for p in path["points"][1:]]
+    full = _clear_of_areas(world, ac, ad, full)
+    by_pos = {(round(world.waypoints[w][0], 2), round(world.waypoints[w][1], 2)): w for w in pts}
+    names, route = [], []
+    for k, p in enumerate(full[1:], 1):
+        w = by_pos.get((round(p[0], 2), round(p[1], 2)))
+        if w is not None:
+            route.append(w)                            # one of its flight plan points
+            continue
         n = f"@{ac.callsign}~A{k}"
         world.waypoints[n] = (float(p[0]), float(p[1]))
         names.append(n)
-    ac.route = ac.route[:ac.next_index] + pts + names
+        route.append(n)
+    ac.route = ac.route[:ac.next_index] + route
     ac.leg_from = ac.pos
     ac.nav_mode, ac.target_hdg, ac.turn_dir = "lnav", None, None
     ac.app = {"ad": ad.id, "runway": ad.in_use, "type": path["type"], "thr": tuple(path["threshold"]),
@@ -123,7 +133,7 @@ def _schedule(world: "World", ac: "Aircraft") -> None:
     st["sta"] = sta
     world.__dict__.setdefault("_landing_sta", {})[st["ad"]] = (sta, ac)
     delay_nm = (sta - eta0) * 220.0 / 3600.0
-    h = _pick_hold(world, ac) if delay_nm > 12.0 else None
+    h = _pick_hold(world, ac) if delay_nm > STRETCH_MAX_NM else None
     lap_nm = _published_hold(world, ac, h, 0, "") if h is not None else 0.0
     laps = int((delay_nm - _hold_detour(world, ac, h)) / lap_nm + 0.3) if h is not None else 0
     if laps >= 1:
@@ -138,27 +148,15 @@ def _schedule(world: "World", ac: "Aircraft") -> None:
         _stretch(world, ac, delay_nm)
 
 
-def _past_tcp(ac: "Aircraft") -> float:
-    p = getattr(ac, "exit_pos", None)
-    return dist(ac.pos, p) if p is not None else 0.0
-
-
 def update(world: "World") -> None:
     arr = candidates(world)
     if not arr:
         return
-    # the next units take an arrival over once it is TAKEOVER_NM past its transfer point and the controller has
-    # decontrolled it and every other transferred arrival of its sequence (same aerodrome); until then it flies its
-    # flight plan at the level it was given, and the controller may still act on it
+    # the next units (approach, or the next sector for it) take an arrival over as soon as it is transferred: a late
+    # transfer leaves it high and close, and it is up to them to lose the height (expedite, vectors, the hold)
     waiting = [a for a in arr if getattr(a, "app", None) is None]
     if waiting:
-        held = {}
-        for a in arr:
-            if getattr(a, "app", None) is None and not a.released:
-                held[_dest(world, a).id] = True
-        # (handed down into a TMA at a fix inside our sector: approach takes it there, no 30 NM to fly)
-        ready = [a for a in waiting if a.released and not held.get(_dest(world, a).id)
-                 and (_past_tcp(a) >= TAKEOVER_NM or a.exit_point not in world.airspace.boundary_points)]
+        ready = waiting
         for a in sorted(ready, key=lambda a: dist(a.pos, _dest(world, a).pos)):   # closest first: the order
             _start(world, a)
             _schedule(world, a)
@@ -239,6 +237,8 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
         if _holding(ac):
             hmin = (st.get("hold") or {}).get("min_alt_ft") or (ad.elev_ft + HOLD_AGL_FT)
             floor = max(faf_alt, hmin)                               # holding: no lower than the holding level
+            if ac.cleared_alt_ft < floor - 50 and ac.alt_ft > floor - 50:
+                ac.cleared_alt_ft = floor
         if ac.cleared_alt_ft > floor + 50:
             need = descent_distance(ac, ac.alt_ft, floor, lambda a: 0.0)
             if to_go - final_nm <= need + 3.0 or st["cleared_down"] or floor > faf_alt:
@@ -261,33 +261,52 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
     sta = st["sta"]
     if ahead is not None:
         sta = max(sta, ahead[1] + _sep_s(ahead[2]))
-    if ahead is not None and not st["established"] and to_go < final_nm + 12:
+    if ahead is not None and not st["established"] and to_go < final_nm + 20:
         # turning in: the one ahead must be at least the approach spacing (plus a margin) ahead along the track,
         # whatever the time estimates said - else one more dogleg before the final approach fix
         need_nm = (HEAVY_SPACING_NM if str(ahead[2].flight_plan.get("wake", "")) in ("H", "J") else APP_SPACING_NM) + 2.5
         gap_nm = to_go - ahead[0]
         if _holding(ahead[2]):
             gap_nm = need_nm                          # the one ahead is holding: its slot (time) decides, not miles
-        elif ahead[2].app and ahead[2].app.get("established"):
-            # joining from another side: the distance in a straight line counts too
+        elif ahead[2].app and ahead[2].app.get("established") and gap_nm < need_nm + 8.0:
+            # joining from another side: the distance in a straight line counts too (not when it is far behind
+            # along the track, e.g. going round again past the one on final)
             gap_nm = min(gap_nm, dist(ac.pos, ahead[2].pos) + 1.5)
         if gap_nm < need_nm and world.t - st.get("stretch_t", -1e9) > 40 and not _holding(ac):
-            _delay(world, ac, need_nm - gap_nm + 2.0, spacing=True)
-    if not st["established"] and world.t - st.get("stretch_t", -1e9) > 45 and not _holding(ac):
-        # too high for the miles left (handed over high and close): laps in the published hold when it is still
-        # ahead, else approach vectors it for more track miles
-        need_dn = descent_distance(ac, ac.alt_ft, faf_alt, lambda a: 0.0)
-        if need_dn > to_go - final_nm - 1.0:
-            excess = need_dn - (to_go - final_nm) + 4.0
-            h = _pick_hold(world, ac) if excess > 8.0 and not st.get("hold") else None
-            if h is not None:
-                lap_nm = _published_hold(world, ac, h, 0, "")
-                _published_hold(world, ac, h, max(1, math.ceil(excess / lap_nm)), "height")
-                st["stretch_t"] = world.t
-            else:
-                _stretch(world, ac, excess)
+            done = _delay(world, ac, need_nm - gap_nm + 2.0, spacing=True)
+            if not done and gap_nm < APP_SPACING_NM - 0.5 and to_go - final_nm < 8.0:
+                # too close to the one ahead and nothing left to vector before the FAF: out of the sequence
+                world._event("approach_breakoff", callsign=ac.callsign, aerodrome=ad.id,
+                             text=f"{ac.callsign} taken out of the sequence (too close behind {ahead[2].callsign}), "
+                                  f"vectored for another approach")
+                _go_around(world, ac, ad, quiet=True)
+                return
+    if not st["established"] and not _holding(ac):
+        # too high for the miles left (a late transfer, high and close): 1) expedite - idle with speedbrakes,
+        # 2) vectors for more track miles (a dogleg, up to 25 NM), 3) laps in the published hold when even that is
+        # not enough
+        need_dn = descent_distance(ac, ac.alt_ft, faf_alt, lambda a: 0.0)      # on its own descent profile
+        avail = to_go - final_nm - 1.0
+        if need_dn > avail:
             ac.cleared_alt_ft = min(ac.cleared_alt_ft, faf_alt)
             st["cleared_down"] = True
+            if not ac.speedbrake and not st.get("expedited"):
+                st["expedited"] = True
+                world._event("approach_expedite", callsign=ac.callsign,
+                             text=f"{ac.callsign} expedite descent to {int(faf_alt)} ft (high for the approach)")
+            ac.speedbrake = True
+            excess = need_dn * EXPEDITE_RATIO - avail + 2.0
+            if excess > 3.0 and world.t - st.get("stretch_t", -1e9) > 45 and not _dogleg_ahead(ac):
+                h = _pick_hold(world, ac) if excess > STRETCH_MAX_NM and not st.get("hold") else None
+                if h is not None:
+                    lap_nm = _published_hold(world, ac, h, 0, "")
+                    _published_hold(world, ac, h, max(1, math.ceil((excess - _hold_detour(world, ac, h)) / lap_nm)),
+                                    "height")
+                    st["stretch_t"] = world.t
+                else:
+                    _stretch(world, ac, min(excess + 4.0, STRETCH_MAX_NM))   # one vector, with a margin
+        elif ac.speedbrake and need_dn * EXPEDITE_RATIO < avail - 6.0 and need_dn < avail + 2.0:
+            ac.speedbrake = False                       # back on its profile
     if (_holding(ac) and st.get("hold") and st["hold"].get("why") == "delay"
             and eta - sta > 0.5 * st["hold"].get("lap_nm", 16.0) / max(ac.gs, 180.0) * 3600.0):
         _leave_hold(world, ac)                          # its slot has come: out of the hold at the end of this lap
@@ -331,11 +350,83 @@ def _hold(world: "World", ac: "Aircraft", laps: int) -> None:
                  text=f"{ac.callsign} to hold at the approach entry, {laps} lap{'s' if laps > 1 else ''}")
 
 
-def _delay(world: "World", ac: "Aircraft", extra_nm: float, spacing: bool = False) -> None:
+def _area_hit(world: "World", ad, a, b, alt0: float, rem_b: float, skip=()):
+    """The first active area (prohibited, restricted, danger) the leg a->b comes closer to than its lateral spacing
+    (3 / 5 NM) at the levels it is flown (the
+    altitude estimated from the miles left to the threshold: the FAF altitude, the glide path, no higher than now),
+    as (area, middle of the part inside), or None."""
+    L = dist(a, b)
+    n = max(2, int(L / 0.5))
+    areas = [x for x in getattr(world, "areas", {}).values() if getattr(x, "active", False) and x.id not in skip]
+    for ar in areas:
+        inside = []
+        for k in range(n + 1):
+            f = k / n
+            p = (a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f)
+            rem = rem_b + L * (1.0 - f)
+            alt = min(alt0, max(ad.elev_ft + rem * GLIDE_FT_PER_NM, ad.faf_alt_ft if rem > ad.final_nm else 0.0))
+            if ar.infringed(p, min(max(alt, ar.lower_fl * 100), ar.upper_fl * 100) if
+                            ar.lower_fl * 100 - 500 <= alt <= ar.upper_fl * 100 + 500 else -1e9, margin_nm=1.5):
+                inside.append(p)
+        if inside:
+            m = inside[len(inside) // 2]
+            return ar, m
+    return None
+
+
+def _clear_of_areas(world: "World", ac: "Aircraft", ad, pts) -> list:
+    """The approach path with a point added around each active area a leg would come closer to than its lateral
+    spacing (3 NM prohibited, 5 NM danger / restricted) at the levels flown there (the final approach itself is not
+    moved)."""
+    pts = [tuple(p) for p in pts]
+    # an area it is already next to (its own route, as transferred): not held against the leg it is flying
+    near = {x.id for x in getattr(world, "areas", {}).values()
+            if getattr(x, "active", False) and x.infringed(pts[0], ac.alt_ft, margin_nm=1.5)}
+    unfixable = set()
+    for _ in range(8):
+        hit_at = None
+        rem = 0.0
+        rems = [0.0] * len(pts)
+        for i in range(len(pts) - 2, -1, -1):
+            rem += dist(pts[i], pts[i + 1])
+            rems[i] = rem
+        for i in range(0, max(0, len(pts) - 3)):          # not the legs from the FAF on
+            if (pts[i], pts[i + 1]) in unfixable:
+                continue
+            h = _area_hit(world, ad, pts[i], pts[i + 1], ac.alt_ft, rems[i + 1], near if i == 0 else ())
+            if h is not None:
+                hit_at = (i, h)
+                break
+        if hit_at is None:
+            break
+        i, (ar, m) = hit_at
+        a, b = pts[i], pts[i + 1]
+        L = max(dist(a, b), 1e-6)
+        nx, ny = (b[1] - a[1]) / L, -(b[0] - a[0]) / L
+        best = None
+        for off in range(1, 26):
+            for sd in (1.0, -1.0):
+                c = (m[0] + nx * off * sd, m[1] + ny * off * sd)
+                if (_area_hit(world, ad, a, c, ac.alt_ft, rems[i + 1] + dist(c, b), near if i == 0 else ()) is None
+                        and _area_hit(world, ad, c, b, ac.alt_ft, rems[i + 1]) is None):
+                    best = c
+                    break
+            if best is not None:
+                break
+        if best is None:
+            unfixable.add((a, b))                          # nothing within 25 NM: leave that leg, look at the others
+            continue
+        best = (best[0] + nx * (1.0 if dist(best, (m[0] + nx, m[1] + ny)) < dist(best, (m[0] - nx, m[1] - ny)) else -1.0),
+                best[1] + ny * (1.0 if dist(best, (m[0] + nx, m[1] + ny)) < dist(best, (m[0] - nx, m[1] - ny)) else -1.0))
+        pts.insert(i + 1, best)                            # a mile more of margin
+    return [[round(p[0], 2), round(p[1], 2)] for p in pts]
+
+
+def _delay(world: "World", ac: "Aircraft", extra_nm: float, spacing: bool = False) -> bool:
     """More track miles for spacing: a dogleg when it is a few miles, laps in the published hold (still on the way)
     when it is more - not one dogleg after another."""
     st = ac.app
-    if extra_nm > 8.0 and st.get("holds_n", 0) < 3:
+    if extra_nm > STRETCH_MAX_NM and st.get("holds_n", 0) < 3:
         h = _pick_hold(world, ac)
         if h is not None:
             lap_nm = _published_hold(world, ac, h, 0, "")
@@ -344,11 +435,13 @@ def _delay(world: "World", ac: "Aircraft", extra_nm: float, spacing: bool = Fals
                 _published_hold(world, ac, h, laps, "delay")
                 st["holds_n"] = st.get("holds_n", 0) + 1
                 st["stretch_t"] = world.t
-                return
+                return True
+    if _dogleg_ahead(ac) and not spacing:
+        return True                                   # the vector it was given is still being flown
     if not spacing and (extra_nm < 3.0 or st.get("stretches", 0) >= 4):
         st["stretch_t"] = world.t                     # a few miles: the speed does it, no dogleg after dogleg
-        return
-    _stretch(world, ac, extra_nm)
+        return True
+    return _stretch(world, ac, extra_nm)
 
 
 def _hold_detour(world: "World", ac: "Aircraft", h: dict) -> float:
@@ -357,6 +450,11 @@ def _hold_detour(world: "World", ac: "Aircraft", h: dict) -> float:
     F = (h["x"], h["y"])
     path = approach_path(F, ad, ad.in_use)
     return dist(ac.pos, F) + polyline_length([F] + [tuple(p) for p in path["points"][1:]]) - _to_go(world, ac)
+
+
+def _dogleg_ahead(ac: "Aircraft") -> bool:
+    """A vector for track miles it has been given and not yet flown."""
+    return any("~D" in n for n in ac.route[ac.next_index:])
 
 
 def _holding(ac: "Aircraft") -> bool:
@@ -422,6 +520,7 @@ def _published_hold(world: "World", ac: "Aircraft", h: dict, laps: int, why: str
             world.waypoints[n] = (float(p[0]), float(p[1]))
             names.append(n)
     path = approach_path(F, ad, ad.in_use)
+    path["points"] = _clear_of_areas(world, ac, ad, path["points"])
     app_names = []
     for k, p in enumerate(path["points"][1:], 1):
         n = f"@{ac.callsign}~A{k}"
@@ -466,22 +565,36 @@ def _leave_hold(world: "World", ac: "Aircraft") -> None:
                  text=f"{ac.callsign} leaving the hold at {(st.get('hold') or {}).get('fix', '')} for the approach")
 
 
-def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> None:
-    """A dogleg on the next leg (before the final approach fix) adding extra_nm to the path."""
+def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> bool:
+    """A dogleg on the next leg (before the final approach fix) adding extra_nm to the path; False when there is no
+    room for one (on final, or too close to the next point)."""
     st = ac.app
     rest = ac.route[ac.next_index:]
     nxt = next((w for w in rest if w in world.waypoints), None)
     if nxt is None or nxt == st["names"][-1]:
-        return                                   # already on final
+        return False                             # already on final
     a, b = ac.pos, world.waypoints[nxt]
     L = dist(a, b)
     extra = min(extra_nm, 25.0)
     if L < 4.0:
-        return
-    h = math.sqrt(max(((L + extra) / 2) ** 2 - (L / 2) ** 2, 0.0))
+        return False
     ux, uy = (b[0] - a[0]) / L, (b[1] - a[1]) / L
-    side = 1.0 if (st.get("stretches", 0) % 2 == 0) else -1.0
-    mid = (a[0] + ux * L / 2 + side * uy * h, a[1] + uy * L / 2 - side * ux * h)
+    ad = world.aerodromes[st["ad"]]
+    rem_b = _to_go(world, ac) - L
+    first = 1.0 if (st.get("stretches", 0) % 2 == 0) else -1.0
+    mid = None
+    for ex in (extra, extra * 0.7, extra * 0.5):          # the side and size that keep clear of the active areas
+        h = math.sqrt(max(((L + ex) / 2) ** 2 - (L / 2) ** 2, 0.0))
+        for side in (first, -first):
+            m = (a[0] + ux * L / 2 + side * uy * h, a[1] + uy * L / 2 - side * ux * h)
+            if _area_hit(world, ad, a, m, ac.alt_ft, rem_b + dist(m, b)) is None and \
+                    _area_hit(world, ad, m, b, ac.alt_ft, rem_b) is None:
+                mid, extra = m, ex
+                break
+        if mid is not None:
+            break
+    if mid is None:
+        return False
     st["stretches"] = st.get("stretches", 0) + 1
     name = f"@{ac.callsign}~D{st['stretches']}"
     world.waypoints[name] = mid
@@ -491,6 +604,7 @@ def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> None:
     st["stretch_t"] = world.t
     world._event("approach_vector", callsign=ac.callsign,
                  text=f"{ac.callsign} vectored by approach for spacing (+{extra:.0f} NM)")
+    return True
 
 
 def _go_around(world: "World", ac: "Aircraft", ad, quiet: bool = False) -> None:

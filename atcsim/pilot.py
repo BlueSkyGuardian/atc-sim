@@ -133,7 +133,7 @@ def hazard_ahead(world: "World", ac: "Aircraft", path: Optional[np.ndarray] = No
         # altitude the aircraft will have when it gets to each point (climbing/descending to its cleared level)
         dz = ac.cleared_alt_ft - ac.alt_ft
         if abs(dz) > 300:
-            rate = abs(ac.vs_fpm) or (ac.climb_rate_available() if dz > 0 else ac.descent_rate_idle())
+            rate = abs(ac.vs_fpm) or (ac.climb_rate_available() if dz > 0 else ac.descent_rate_normal())
             t_min = along / max(ac.gs, 100.0) * 60.0
             alt = ac.alt_ft + np.sign(dz) * np.minimum(abs(dz), max(rate, 300.0) * t_min)
         else:
