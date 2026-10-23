@@ -1382,6 +1382,12 @@
    "role": "VOR/DME BENI MELLAL",
    "fra": "",
    "navaid": true
+  },
+  "BRC": {
+   "coord": "331642.96N 0073326.39W",
+   "role": "VOR/DME BERRECHID 114.00",
+   "fra": "",
+   "navaid": true
   }
  },
  "construction_points": {
