@@ -5773,8 +5773,10 @@
   "points": {
    "ELVAR": {
     "coord": "391310N 0071324W",
-    "region": "Lisboa",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "name": "L14, N975 BDRY FIR/UIR MADRID / FIR LISBOA"
    },
    "BARDI": {
     "coord": "403501N 0061809W",
@@ -5793,13 +5795,19 @@
    },
    "MINTA": {
     "coord": "370744N 0072300W",
-    "region": "Lisboa/Sevilla",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "fra": "I",
+    "name": "(I) N747Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660,ODD FL FM LECS TO LPPC FL245-FL660 BDRY FIR/UIR MADRID / FIR LISBO"
    },
    "PESAS": {
     "coord": "370212N 0072300W",
-    "region": "Lisboa/Sevilla",
-    "source": "AIP España ENR 4.4"
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "fra": "I",
+    "name": "(I) N858Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660 BDRY UIR MADRID / FIR LISBOA"
    },
    "PINEK": {
     "coord": "415104N 0083552W",
@@ -5814,27 +5822,43 @@
    "GINAS": {
     "coord": "293022N 0130800W",
     "region": "Canarias",
-    "source": "AIP España ENR 4.4"
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
    },
    "PEPOM": {
     "coord": "295356N 0125854W",
     "region": "Canarias",
-    "source": "AIP España ENR 4.4"
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
    },
    "CANIS": {
     "coord": "275959N 0143853W",
     "region": "Canarias",
-    "source": "AIP España ENR 4.4"
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
    },
    "ISORU": {
     "coord": "283737N 0151410W",
     "region": "Canarias",
-    "source": "AIP España ENR 4.4"
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
    },
    "GURKA": {
     "coord": "302602N 0155101W",
-    "region": "Canarias/Madeira",
-    "source": "AIP España ENR 4.4"
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "fra": "I",
+    "name": "(I) N729, N866 TMA CANARIAS",
+    "tma": "Canarias"
    },
    "FTV": {
     "coord": "282551N 0135152W",
@@ -5938,13 +5962,19 @@
    },
    "ARENA": {
     "coord": "254341N 0142131W",
-    "region": "Canarias (Laayoune)",
-    "source": "AIP Maroc ENR 3.1 (UA600)"
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "fra": "I",
+    "name": "(I) L660, N728"
    },
    "CABEL": {
     "coord": "250000N 0145628W",
-    "region": "Canarias (Laayoune)",
-    "source": "AIP Maroc ENR 3.1 (UA600)"
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": false,
+    "fra": "I",
+    "name": "(I) L660, N729"
    },
    "AA": {
     "coord": "402653.52N 0033219.72W",
@@ -7273,6 +7303,4225 @@
     "navaid": true,
     "navaid_type": "VOR/DME",
     "name": "VOR/DME YESTE 115.20"
+   },
+   "ABOSI": {
+    "coord": "394645N 0011705W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) M871 (A): LEVC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "ADINO": {
+    "coord": "400104N 0062225W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L14Compulsory for BDRY crossing : ODD FL FM LECM TO LPPC FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+   },
+   "ADOKI": {
+    "coord": "274356N 0152546W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ADOVO": {
+    "coord": "283405N 0134742W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ADRAS": {
+    "coord": "364956N 0024339W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "AGIDO": {
+    "coord": "371145N 0023737W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M192 TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "AKOKI": {
+    "coord": "401328N 0031307W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M871, N975"
+   },
+   "ALAOS": {
+    "coord": "371244N 0063305W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ALCAL": {
+    "coord": "371500N 0054500W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ALCOL": {
+    "coord": "375121N 0043108W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N747, N871 (D): LEMO (AD): LERT TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ALEDU": {
+    "coord": "285407N 0132041W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ALIZA": {
+    "coord": "363336N 0050112W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ALJAQ": {
+    "coord": "373726N 0045928W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEBA",
+    "tma": "Sevilla Iaf"
+   },
+   "ALORA": {
+    "coord": "364904N 0051243W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ALUGO": {
+    "coord": "292808N 0130038W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ALZUP": {
+    "coord": "370923N 0014623W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Y810 BDRY FIR/UIR MADRID / BARCELONA"
+   },
+   "AMAPI": {
+    "coord": "290059N 0130505W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "AMIBU": {
+    "coord": "384337N 0040257W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N871 Solo para uso táctico // For tactical use only"
+   },
+   "AMOTA": {
+    "coord": "373620N 0051506W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N747, T312 (AD): LEBA TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "AMPIR": {
+    "coord": "355615N 0055723W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T100"
+   },
+   "ANANA": {
+    "coord": "390000N 0022446W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M143"
+   },
+   "ANARU": {
+    "coord": "274314N 0150515W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "ANDEV": {
+    "coord": "372338N 0063559W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ANZAN": {
+    "coord": "390000N 0031317W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L27, N867, N869"
+   },
+   "APADU": {
+    "coord": "371749N 0051743W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE"
+   },
+   "APASO": {
+    "coord": "250000N 0193017W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N866, N871"
+   },
+   "ARACO": {
+    "coord": "282557N 0172708W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLA",
+    "tma": "Canarias Iaf"
+   },
+   "ARCON": {
+    "coord": "400000N 0021852W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA MADRID",
+    "tma": "Madrid"
+   },
+   "ARGOR": {
+    "coord": "393219N 0001755E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N733 (D): LEAL TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "ARGOX": {
+    "coord": "282849N 0135904W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ARJON": {
+    "coord": "380241N 0035229W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ARPEX": {
+    "coord": "373447N 0030127W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M192, (D): LEGR M445, T249 TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ARROS": {
+    "coord": "373543N 0060740W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ARSAS": {
+    "coord": "365119N 0054726W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEJR",
+    "tma": "Sevilla Iaf"
+   },
+   "ARTEM": {
+    "coord": "282433N 0160203W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ARVEM": {
+    "coord": "292129N 0133509W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ASBIN": {
+    "coord": "401518N 0031035W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID IAF LETO",
+    "tma": "Madrid Iaf"
+   },
+   "ASBUM": {
+    "coord": "374139N 0050221W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ASDIR": {
+    "coord": "401855N 0002108E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M445, T412, (D): LEVC Y90 NO_ADQ."
+   },
+   "ASKEL": {
+    "coord": "372445N 0014229W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "ASNEP": {
+    "coord": "370201N 0023354W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "ASPAS": {
+    "coord": "390000N 0030245W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "ASTAM": {
+    "coord": "285852N 0131853W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ASTRO": {
+    "coord": "390128N 0011547W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L150, M985, (AD): LEAL, LEVC Z224 BDRY FIR BARCELONA/MADRID CTA ALBACETE/TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "BABOV": {
+    "coord": "395235N 0065225W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N873 Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+   },
+   "BAFEM": {
+    "coord": "274952N 0150909W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BAGAX": {
+    "coord": "390304N 0020916W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE CTA ALBACETE IAF LEAB"
+   },
+   "BALEK": {
+    "coord": "371911N 0040358W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "BAMKU": {
+    "coord": "282246N 0134345W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAWP/IAF GCFV",
+    "tma": "Canarias Iawp"
+   },
+   "BANSO": {
+    "coord": "371403N 0013917W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Y810 CTA MURCIA/San Javier"
+   },
+   "BAPAL": {
+    "coord": "284117N 0132545W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCRR",
+    "tma": "Canarias Iaf"
+   },
+   "BASUX": {
+    "coord": "283717N 0164531W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCXO",
+    "tma": "Canarias Iaf"
+   },
+   "BAZAS": {
+    "coord": "374404N 0031107W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M192, (AD): LEGR M985, T312"
+   },
+   "BEGOX": {
+    "coord": "390409N 0004619W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445, N860 TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "BELCE": {
+    "coord": "274002N 0152301W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BELLA": {
+    "coord": "362328N 0045114W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BENED": {
+    "coord": "401238N 0020930W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N733"
+   },
+   "BEPIL": {
+    "coord": "374752N 0050727W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BESOR": {
+    "coord": "382759N 0001345W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LEAL",
+    "tma": "Valencia Iaf"
+   },
+   "BETAN": {
+    "coord": "282437N 0141507W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BETIX": {
+    "coord": "373939N 0060120W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BEXID": {
+    "coord": "393428N 0032905W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N865 (A): LEGT"
+   },
+   "BEZAR": {
+    "coord": "375744N 0050856W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BIMBO": {
+    "coord": "312517N 0160158W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N729, N981 (D): GCTS, GCXO, GCLP, GCLACompulsory for BDRY crossing:EVEN FL FM GCCC TO LPPC FL305- FL660 BDRY FIR/UIR CANARIAS / FIR LIS",
+    "tma": "Canarias"
+   },
+   "BINVA": {
+    "coord": "390000N 0035430W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "BIPET": {
+    "coord": "250000N 0162132W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857, Y422, Z27"
+   },
+   "BOLKA": {
+    "coord": "371551N 0050128W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BONIL": {
+    "coord": "385607N 0023015W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE CTA ALBACETE IAF LEAB"
+   },
+   "BOXCO": {
+    "coord": "282053N 0171722W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BRICK": {
+    "coord": "293529N 0162222W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N728, N866 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BRIKE": {
+    "coord": "363017N 0052459W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N851"
+   },
+   "BRUNO": {
+    "coord": "383630N 0002900E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N851"
+   },
+   "BUDIT": {
+    "coord": "375821N 0023016W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M445, T245 (D): LEZL TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BUKOX": {
+    "coord": "364810N 0045132W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "BUNIX": {
+    "coord": "282408N 0160600W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "BUREX": {
+    "coord": "394840N 0035622W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "BUSAP": {
+    "coord": "291233N 0131622W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "CABOJ": {
+    "coord": "260820N 0143838W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N728, Y611 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "CAMPI": {
+    "coord": "375658N 0045952W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CANAL": {
+    "coord": "380847N 0054627W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CANDE": {
+    "coord": "281925N 0155305W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCXO",
+    "tma": "Canarias Iaf"
+   },
+   "CARBO": {
+    "coord": "361508N 0012942W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) M744 (E): EVEN FL (X): ODD FL BDRY FIR/UIR BARCELONA / FIR ARGEL"
+   },
+   "CARIM": {
+    "coord": "260000N 0111142W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "T975 BDRY FIR/UIR CANARIAS / FIR DAKAR TERRESTRE"
+   },
+   "CASIM": {
+    "coord": "401351N 0000835E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L34, N608 (D): LEVC"
+   },
+   "CATON": {
+    "coord": "394819N 0011242W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N733 (D): LEAL TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "CAZAR": {
+    "coord": "383011N 0051416W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CAZON": {
+    "coord": "372549N 0061107W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CENTA": {
+    "coord": "395402N 0012555W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N733 (D): LEVC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "CHENA": {
+    "coord": "372128N 0052853W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CLANA": {
+    "coord": "363032N 0064337W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N857 (D): LEZL, LEMO TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "COCTO": {
+    "coord": "274742N 0151247W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "COLON": {
+    "coord": "281943N 0151431W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "COMPI": {
+    "coord": "392103N 0000028W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M134, N608, (D): LEAL Y90"
+   },
+   "CORDU": {
+    "coord": "375109N 0045529W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "CORIA": {
+    "coord": "370139N 0061050W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "COSTI": {
+    "coord": "272136N 0134208W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) Q279 (AD): GCFV, GCLP, GCRR TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "CRISA": {
+    "coord": "385619N 0043323W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N10, N864"
+   },
+   "CULNE": {
+    "coord": "280023N 0170618W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS ARR/DEP GCGM",
+    "tma": "Canarias Arr"
+   },
+   "DADIV": {
+    "coord": "402335N 0032027W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "DAQSE": {
+    "coord": "402035N 0040848W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "DELAP": {
+    "coord": "281750N 0153351W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "NO_ADQ. TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "DEMEX": {
+    "coord": "281202N 0135024W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "DEPIS": {
+    "coord": "281116N 0174921W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "IAF GCLA"
+   },
+   "DEREV": {
+    "coord": "264323N 0151240W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N729, N857 (AD): GCLP"
+   },
+   "DETIV": {
+    "coord": "293006N 0132637W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "DIBIB": {
+    "coord": "291621N 0132010W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "DIKUT": {
+    "coord": "400025N 0001410E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M985, Y90 (AD): LEVC NO_ADQ."
+   },
+   "DIMER": {
+    "coord": "371822N 0011007W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L112 CTA MURCIA/San Javier"
+   },
+   "DINCO": {
+    "coord": "371523N 0011716W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L112 CTA MURCIA/San Javier"
+   },
+   "DIONY": {
+    "coord": "383550N 0052837W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N858 Solo para uso táctico // For tactical use only"
+   },
+   "DIPOL": {
+    "coord": "402459N 0044035W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M191, (D): LEGT M871, N870"
+   },
+   "DITRE": {
+    "coord": "375536N 0003326W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTA MURCIA/San Javier IAF LELC, IAF LEMI"
+   },
+   "DIVAK": {
+    "coord": "365209N 0044619W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "DIXIR": {
+    "coord": "380512N 0004546W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTA MURCIA/San Javier IAF LEMI"
+   },
+   "DONIA": {
+    "coord": "362855N 0060100W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "DOPEN": {
+    "coord": "394519N 0042301W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N864 (D): LETO, LEGT"
+   },
+   "DOSEK": {
+    "coord": "371443N 0015906W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N860 (AD): LEAM TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "DRANO": {
+    "coord": "273920N 0153024W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "DUDEQ": {
+    "coord": "363700N 0041544W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "DURCO": {
+    "coord": "284515N 0130916W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "ECIJA": {
+    "coord": "373129N 0050356W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ECKOS": {
+    "coord": "280224N 0152023W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ECORE": {
+    "coord": "365000N 0051108W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "EDUMO": {
+    "coord": "225500N 0233600W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "X",
+    "name": "(X) N741 (X): ODD AND EVEN FL BDRY UIR CANARIAS / FIR/UIR SAL OCEANIC"
+   },
+   "EDUPI": {
+    "coord": "295602N 0132333W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "EFUSO": {
+    "coord": "394515N 0010540W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N733"
+   },
+   "EKRIS": {
+    "coord": "390000N 0054653W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "ELNAN": {
+    "coord": "290749N 0134033W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ELSAK": {
+    "coord": "363208N 0043322W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ELVEX": {
+    "coord": "364524N 0024322W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "ELVIR": {
+    "coord": "402223N 0031355W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "ELVIS": {
+    "coord": "382945N 0045421W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ENECO": {
+    "coord": "363551N 0040341W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ENETA": {
+    "coord": "275530N 0145938W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLP",
+    "tma": "Canarias Iaf"
+   },
+   "EPATA": {
+    "coord": "361713N 0035200W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "AD",
+    "name": "(AD) Z901 (AD): LEGR TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "EPIXI": {
+    "coord": "373536N 0060747W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ERONI": {
+    "coord": "243818N 0222848W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N741"
+   },
+   "ESILA": {
+    "coord": "370305N 0024627W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N865 TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "ESIQE": {
+    "coord": "274330N 0170855W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ESOPA": {
+    "coord": "282157N 0160450W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ETANA": {
+    "coord": "393417N 0033455W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N871"
+   },
+   "ETIBA": {
+    "coord": "212018N 0184044W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857"
+   },
+   "ETURA": {
+    "coord": "381229N 0021119W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445, T252 TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "EXTIR": {
+    "coord": "373744N 0050147W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "FAFEQ": {
+    "coord": "401010N 0032739W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID IAF LEMD",
+    "tma": "Madrid Iaf"
+   },
+   "FALPU": {
+    "coord": "274644N 0152715W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "FAYTA": {
+    "coord": "280631N 0140817W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "FEMMA": {
+    "coord": "274808N 0163139W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "FENXE": {
+    "coord": "394320N 0013256W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T257"
+   },
+   "FERNA": {
+    "coord": "374240N 0043800W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "FERRO": {
+    "coord": "362800N 0032800W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE CTA ALBACETE"
+   },
+   "FOCCU": {
+    "coord": "285052N 0133943W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "FOFUS": {
+    "coord": "365558N 0044144W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "FUFFU": {
+    "coord": "281328N 0160124W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GAFAX": {
+    "coord": "364930N 0044432W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "GAGOS": {
+    "coord": "395237N 0043202W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE"
+   },
+   "GAKMI": {
+    "coord": "293932N 0131542W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GAMVA": {
+    "coord": "292812N 0130041W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GANTA": {
+    "coord": "281630N 0171014W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GARGO": {
+    "coord": "284338N 0133427W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GATAS": {
+    "coord": "364136N 0015319W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M192 BDRY FIR BARCELONA/MADRID"
+   },
+   "GELPI": {
+    "coord": "263543N 0145116W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "GENIL": {
+    "coord": "373445N 0051800W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "GERVU": {
+    "coord": "384911N 0002900E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M603 (D): LEIB TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "GILMA": {
+    "coord": "363241N 0063341W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE, Punto de transferencia de tráfico entre: SEVILLA ACC a ROTA TWR // Transfer traffic point b"
+   },
+   "GOBEG": {
+    "coord": "290000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "GOLFO": {
+    "coord": "362204N 0020317W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M744, T100"
+   },
+   "GOLFY": {
+    "coord": "284713N 0134149W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GOMER": {
+    "coord": "280000N 0172000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N866, N981, Y422"
+   },
+   "GOMSU": {
+    "coord": "284737N 0135758W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GONZA": {
+    "coord": "361217N 0025237W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L195, N860, T100"
+   },
+   "GOPIM": {
+    "coord": "275333N 0150349W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "GOSOS": {
+    "coord": "360513N 0044332W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T100"
+   },
+   "GOTOR": {
+    "coord": "400639N 0034328W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857, N975"
+   },
+   "GOXIP": {
+    "coord": "390000N 0042752W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "GOXOL": {
+    "coord": "402448N 0043855W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "GUMAZ": {
+    "coord": "363810N 0044011W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "GUNET": {
+    "coord": "193542N 0194406W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) N857 (E): ODD FL (X): EVEN FL BDRY FIR/UIR CANARIAS / DAKAR TERRESTRE"
+   },
+   "GUPEL": {
+    "coord": "212000N 0150000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) Y601 (E): ODD FL (X): EVEN FL BDRY UIR CANARIAS / FIR/UIR DAKAR TERRESTRE"
+   },
+   "HAMRA": {
+    "coord": "365216N 0000125W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) N608, P34 (E): EVEN FL (X): ODD FL BDRY FIR/UIR BARCELONA / FIR ARGEL, Salida // Exit RVSM"
+   },
+   "IBACO": {
+    "coord": "364238N 0035540W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "IBIZO": {
+    "coord": "365546N 0045016W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "IBOLO": {
+    "coord": "282126N 0133943W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ICAFU": {
+    "coord": "281007N 0165817W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "IDEVU": {
+    "coord": "393437N 0032401W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N867"
+   },
+   "INKAL": {
+    "coord": "363644N 0035200W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L195 (AD): LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "INPAN": {
+    "coord": "393358N 0034446W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N10 (A): LEGT"
+   },
+   "INSAD": {
+    "coord": "280000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "INSER": {
+    "coord": "291703N 0130113W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "INTAX": {
+    "coord": "393524N 0025602W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L27"
+   },
+   "IPERA": {
+    "coord": "202154N 0204200W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) N873 (E): ODD FL (X): EVEN FL BDRY FIR/UIR CANARIAS / SAL OCEANIC"
+   },
+   "IQQEP": {
+    "coord": "400247N 0001658W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTR CASTELLÓN IAF LECH"
+   },
+   "ISLET": {
+    "coord": "280834N 0151742W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ISOKA": {
+    "coord": "220453N 0193524W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N873"
+   },
+   "IXIKU": {
+    "coord": "270000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "IZBUZ": {
+    "coord": "381310N 0011140W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "KAMPO": {
+    "coord": "394400N 0040319W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857 TMA MADRID",
+    "tma": "Madrid"
+   },
+   "KASAS": {
+    "coord": "295911N 0154607W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N602, N729 (D): GCTS TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "KEMAO": {
+    "coord": "363954N 0063318W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE, Punto de transferencia de tráfico entre: SEVILLA ACC a ROTA TWR // Transfer traffic point b"
+   },
+   "KEMEV": {
+    "coord": "283944N 0135827W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCFV",
+    "tma": "Canarias Iaf"
+   },
+   "KEMUL": {
+    "coord": "250130N 0135233W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N728, Y601"
+   },
+   "KENCA": {
+    "coord": "371903N 0032638W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "KETID": {
+    "coord": "300000N 0200000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "KEXME": {
+    "coord": "401808N 0032328W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID IF LEMD",
+    "tma": "Madrid If"
+   },
+   "KILVA": {
+    "coord": "390000N 0025454W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "KISCU": {
+    "coord": "364410N 0042008W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "KONDA": {
+    "coord": "274442N 0154825W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "KOPOM": {
+    "coord": "390000N 0045352W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "KOPUD": {
+    "coord": "280823N 0143028W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "KOSEL": {
+    "coord": "374517N 0024737W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445, T312 TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "KOSIB": {
+    "coord": "283512N 0141248W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "KOVAM": {
+    "coord": "392330N 0004728W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "KUBAS": {
+    "coord": "363052N 0055326W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEJR",
+    "tma": "Sevilla Iaf"
+   },
+   "KUCOS": {
+    "coord": "292615N 0132819W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "KUKAL": {
+    "coord": "375207N 0042851W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N747, T245 (AD): LEBA"
+   },
+   "KUNEN": {
+    "coord": "364954N 0025027W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L112 (AD): LEAM TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "KUTUR": {
+    "coord": "274631N 0162944W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCTS",
+    "tma": "Canarias Iaf"
+   },
+   "KUXOV": {
+    "coord": "260000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "LACOR": {
+    "coord": "273804N 0150900W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LADIL": {
+    "coord": "284051N 0164846W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LALTO": {
+    "coord": "274153N 0150014W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLP",
+    "tma": "Canarias Iaf"
+   },
+   "LAMAR": {
+    "coord": "372642N 0060431W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LANCE": {
+    "coord": "375559N 0040801W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LANTE": {
+    "coord": "372352N 0051149W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LAPTU": {
+    "coord": "250000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "LARYS": {
+    "coord": "285219N 0145003W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LASIB": {
+    "coord": "380215N 0071322W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M744Compulsory for BDRY crossing:ODD FL FM LPPC TO LECS FL245- FL660,EVEN FL FM LECS TO LPPC FL245-FL660 BDRY UIR MADRID / FIR LISBOA / "
+   },
+   "LASPO": {
+    "coord": "391657N 0003240W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445, M871, T257, Z224"
+   },
+   "LECOP": {
+    "coord": "280702N 0150454W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LENHI": {
+    "coord": "370356N 0044803W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEMG",
+    "tma": "Sevilla Iaf"
+   },
+   "LIFBI": {
+    "coord": "274542N 0151609W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LIFED": {
+    "coord": "275815N 0150516W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LIGUM": {
+    "coord": "355000N 0020000W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) L195 (E): EVEN FL (X): ODD FL BDRY UIR BARCELONA / FIR ARGEL"
+   },
+   "LIMAL": {
+    "coord": "250000N 0173732W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N873, T770 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LIMTU": {
+    "coord": "375915N 0001257W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) P34 (D): LEAL"
+   },
+   "LINDE": {
+    "coord": "283944N 0132128W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LIRBU": {
+    "coord": "281349N 0135216W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LOBSO": {
+    "coord": "284510N 0134015W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LOBUF": {
+    "coord": "284609N 0132238W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LOGRO": {
+    "coord": "390000N 0035358W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N871"
+   },
+   "LOLBO": {
+    "coord": "363316N 0041951W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LOLOS": {
+    "coord": "215100N 0164000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L660"
+   },
+   "LOMAS": {
+    "coord": "274314N 0154128W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N728, N873, TMA CANARIAS Y39",
+    "tma": "Canarias Y"
+   },
+   "LONGA": {
+    "coord": "402618N 0045238W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "LORPO": {
+    "coord": "281257N 0143906W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LUCAR": {
+    "coord": "364540N 0062321W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LUCSI": {
+    "coord": "285711N 0160736W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LUFIR": {
+    "coord": "275947N 0160026W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LUKIL": {
+    "coord": "380001N 0000616W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L150 (D): LELC"
+   },
+   "LULUG": {
+    "coord": "274413N 0164202W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "LUNOB": {
+    "coord": "291048N 0134512W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCRR",
+    "tma": "Canarias Iaf"
+   },
+   "LUNUM": {
+    "coord": "362520N 0044700W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "LUPES": {
+    "coord": "401400N 0043640W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "D",
+    "name": "(D) L185 (D): LEGT"
+   },
+   "LUVIV": {
+    "coord": "362450N 0032252W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L58, L195"
+   },
+   "MABEL": {
+    "coord": "361225N 0044020W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "MABUX": {
+    "coord": "393257N 0010859W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) M871, T257 (A): LEAL, LEVC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "MADAS": {
+    "coord": "281316N 0152244W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLP",
+    "tma": "Canarias Iaf"
+   },
+   "MAGAL": {
+    "coord": "380424N 0001351W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L150, P34 (D): LEMI TMA VALENCIA IAF LEAL",
+    "tma": "Valencia Iaf"
+   },
+   "MAMIS": {
+    "coord": "375717N 0025342W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) M985, T245 (A): LEZL TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "MANAS": {
+    "coord": "371901N 0055548W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "MANDY": {
+    "coord": "395442N 0010226W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M176 (A): LEAL (AD): LEVC BDRY FIR BARCELONA/MADRID TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "MANZU": {
+    "coord": "300823N 0133216W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "MAPED": {
+    "coord": "285508N 0140459W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCRR",
+    "tma": "Canarias Iaf"
+   },
+   "MAPOV": {
+    "coord": "285022N 0133038W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "MATUD": {
+    "coord": "272845N 0155202W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "MAURI": {
+    "coord": "212000N 0165200W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) L660 (E): ODD FL (X): EVEN FL BDRY UIR CANARIAS / DAKAR TERRESTRE"
+   },
+   "MAXET": {
+    "coord": "363258N 0021534W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "MELON": {
+    "coord": "394600N 0051907W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M30, N975, Z180"
+   },
+   "MELSE": {
+    "coord": "362351N 0043057W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "MERAN": {
+    "coord": "275123N 0161108W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Y39, Z526 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "MIMDI": {
+    "coord": "363600N 0011300W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T100"
+   },
+   "MINGU": {
+    "coord": "394934N 0012851W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M871"
+   },
+   "MITOS": {
+    "coord": "382658N 0000049W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N608, N851 (D): LELC"
+   },
+   "MIYEC": {
+    "coord": "234200N 0125900W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) N728 (E): EVEN FL (X): ODD FL BDRY UIR CANARIAS / DAKAR TERRESTRE"
+   },
+   "MOCEQ": {
+    "coord": "381834N 0044112W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N864 (A): LEBA TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "MOLIN": {
+    "coord": "390000N 0044109W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857"
+   },
+   "MOLUV": {
+    "coord": "364110N 0023632W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "MONTE": {
+    "coord": "370330N 0052920W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE, Punto de transferencia de tráfico entre: SEVILLA ACC a MORÓN TWR // Transfer traffic point ",
+    "tma": "Sevilla"
+   },
+   "MONTO": {
+    "coord": "391318N 0042949W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N857, N864"
+   },
+   "MOPIR": {
+    "coord": "392445N 0005016W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L45, M871, T257"
+   },
+   "MORAL": {
+    "coord": "390000N 0033232W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N865 (A): LEMD, LETO TMA MADRID",
+    "tma": "Madrid"
+   },
+   "MOROD": {
+    "coord": "282717N 0171239W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "MOTID": {
+    "coord": "290515N 0135213W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "MOTIL": {
+    "coord": "393220N 0014443W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L150 CTA ALBACETE"
+   },
+   "MOVAS": {
+    "coord": "274334N 0164805W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "ARR/DEP GCGM"
+   },
+   "MULAT": {
+    "coord": "392400N 0001048W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LEVC",
+    "tma": "Valencia Iaf"
+   },
+   "NALES": {
+    "coord": "365022N 0051730W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "NANDO": {
+    "coord": "395920N 0021028W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L150, M871, (AD): LETO, LEMD T257 TMA MADRID",
+    "tma": "Madrid"
+   },
+   "NAPES": {
+    "coord": "371146N 0070149W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N747, Y135, Y136"
+   },
+   "NARGO": {
+    "coord": "384418N 0005955W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L150, N860 (AD): LEVC (D): LEMI, LELC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "NASOL": {
+    "coord": "285026N 0172538W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLA",
+    "tma": "Canarias Iaf"
+   },
+   "NASOS": {
+    "coord": "392357N 0030140W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L27, N869 TMA MADRID",
+    "tma": "Madrid"
+   },
+   "NATPA": {
+    "coord": "395508N 0043511W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N975 (D): LEGT"
+   },
+   "NAVIM": {
+    "coord": "290840N 0131946W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCRR",
+    "tma": "Canarias Iaf"
+   },
+   "NAVUT": {
+    "coord": "364216N 0054137W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "NECTA": {
+    "coord": "365555N 0044758W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "NELSO": {
+    "coord": "314058N 0172725W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N741Compulsory for BDRY crossing:EVEN AND ODD FL FM LPPC TO GCCC FL305-FL660 BDRY UIR CANARIAS / FIR LISBOA"
+   },
+   "NENOS": {
+    "coord": "385142N 0011959W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "NERKU": {
+    "coord": "372629N 0012740W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTA MURCIA/San Javier IAF LEMI"
+   },
+   "NERVO": {
+    "coord": "292019N 0153907W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "NESDA": {
+    "coord": "364917N 0034430W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L112 (AD): LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "NEXUX": {
+    "coord": "300000N 0210000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "NIBEN": {
+    "coord": "400322N 0001542W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LECH",
+    "tma": "Valencia Iaf"
+   },
+   "NIDES": {
+    "coord": "274016N 0151517W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "NIDON": {
+    "coord": "370501N 0020536W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "NIKAL": {
+    "coord": "373839N 0054453W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEZL",
+    "tma": "Sevilla Iaf"
+   },
+   "NIKOV": {
+    "coord": "402910N 0022449W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "NIMAS": {
+    "coord": "385505N 0062325W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTR TALAVERA IAF LEBZ"
+   },
+   "NINGU": {
+    "coord": "275913N 0150311W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "NINOT": {
+    "coord": "391232N 0002900E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M134 (D): LEIB TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "NIRAK": {
+    "coord": "371445N 0072543W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "Y136 BDRY FIR MADRID / LISBOA"
+   },
+   "NIRPO": {
+    "coord": "291412N 0131343W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "NITOX": {
+    "coord": "364629N 0044230W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "NOBLI": {
+    "coord": "283856N 0134328W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "NOCUT": {
+    "coord": "195548N 0180000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): ODD FL (X): EVEN FL BDRY UIR CANARIAS / FIR/UIR DAKAR TERRESTRE, NOUACHOT UTA"
+   },
+   "NUNKA": {
+    "coord": "370047N 0014831W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "NUSGO": {
+    "coord": "402420N 0020930W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N869"
+   },
+   "NUSMA": {
+    "coord": "364958N 0023645W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "OBAKA": {
+    "coord": "363827N 0032618W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L58, M744"
+   },
+   "OBIBO": {
+    "coord": "394017N 0024744W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N869"
+   },
+   "OBIGE": {
+    "coord": "365553N 0045412W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OBLAC": {
+    "coord": "365021N 0043438W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OCUKI": {
+    "coord": "362932N 0042359W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ODEGI": {
+    "coord": "265341N 0161724W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N873, Z27, (AD): GCLP, GCTS Z353 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ODSEN": {
+    "coord": "390351N 0002900E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Z224 TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "OGERO": {
+    "coord": "394806N 0062402W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Z409Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECM FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+   },
+   "OGROH": {
+    "coord": "362900N 0045438W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N864 TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OLALE": {
+    "coord": "373755N 0043505W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OLIVO": {
+    "coord": "371503N 0055833W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OLOPO": {
+    "coord": "274314N 0171115W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "OLPOS": {
+    "coord": "384337N 0012032W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445"
+   },
+   "ONUBA": {
+    "coord": "371448N 0064536W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N747 (AD): LEJR, LEMO, LERT, LPFR TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OPERA": {
+    "coord": "393722N 0004644W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LEVC",
+    "tma": "Valencia Iaf"
+   },
+   "ORIPE": {
+    "coord": "365931N 0052604W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ORTIS": {
+    "coord": "312425N 0163325W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N728 (A): GCLP, GCLA, GCTS, GCXOCompulsory for BDRY crossing:ODD FL FM LPPC TO GCCC FL305- FL660 BDRY FIR/UIR CANARIAS / FIR LISBOA TMA",
+    "tma": "Canarias"
+   },
+   "ORTOP": {
+    "coord": "360136N 0072300W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N726, T100Compulsory for BDRY crossing:ODD FL FM LPPC TO LECS FL245- FL660, EVEN FL FM LECS TO LPPC FL245-FL660 BDRY FIR/UIR MADRID / FI"
+   },
+   "ORVEK": {
+    "coord": "255830N 0184850W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N866"
+   },
+   "ORVUS": {
+    "coord": "391954N 0002553E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M871 (D): LEVC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "OSENE": {
+    "coord": "364236N 0040307W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OSGET": {
+    "coord": "365956N 0044801W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OSLEP": {
+    "coord": "370956N 0071131W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N747, N858 (AD): LEZL TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OSLEV": {
+    "coord": "300000N 0220000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "OSNAL": {
+    "coord": "370350N 0050118W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OSPES": {
+    "coord": "402221N 0002049E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LECH",
+    "tma": "Valencia Iaf"
+   },
+   "OSVAN": {
+    "coord": "380700N 0003348W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L112 CTA MURCIA/San Javier"
+   },
+   "OXACA": {
+    "coord": "375700N 0060000W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M30, N858, (D): LEJR Z180 TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "OZAZU": {
+    "coord": "365602N 0044946W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PALIO": {
+    "coord": "401544N 0030254W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N871, N975"
+   },
+   "PALOH": {
+    "coord": "371602N 0043454W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PALOS": {
+    "coord": "373429N 0003212W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L112 CTA MURCIA/San Javier"
+   },
+   "PAQIS": {
+    "coord": "374559N 0052317W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PARDO": {
+    "coord": "370514N 0061821W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PARKA": {
+    "coord": "390000N 0050900W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M30, N858, Z165"
+   },
+   "PARUI": {
+    "coord": "363710N 0061230W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE, Punto de transferencia de tráfico entre: SEVILLA ACC a ROTA TWR // Transfer traffic point b"
+   },
+   "PEDRO": {
+    "coord": "385052N 0020929W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE CTA ALBACETE IAF LEAB"
+   },
+   "PELIN": {
+    "coord": "280702N 0160123W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "PENAS": {
+    "coord": "363636N 0053752W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PEPAS": {
+    "coord": "370935N 0033415W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L58, M445 (D): LEJR TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PEPAT": {
+    "coord": "282542N 0141112W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "PEPES": {
+    "coord": "303704N 0141557W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "PERER": {
+    "coord": "285815N 0132554W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "PIBIL": {
+    "coord": "300000N 0230000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (E): EVEN AND ODD FL (X): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "PIMOS": {
+    "coord": "360901N 0045336W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M445, (AD): LEMG, LERT M985, N864, TMA SEVILLA N869",
+    "tma": "Sevilla N"
+   },
+   "PIMUR": {
+    "coord": "371729N 0063106W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M30, N747"
+   },
+   "PIPHU": {
+    "coord": "380606N 0042315W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "D",
+    "name": "(D) N871 (D): LEBA TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PIREN": {
+    "coord": "365000N 0072300W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660,ODD FL FM LECS TO LPPC FL245-FL660 BDRY UIR MADRID / FIR LISBOA"
+   },
+   "PITAB": {
+    "coord": "302110N 0162657W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N728, N981"
+   },
+   "PIXED": {
+    "coord": "240000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC / FIR SAL OCEANIC"
+   },
+   "PIZCU": {
+    "coord": "364234N 0041035W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "PLANA": {
+    "coord": "395326N 0001935W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N860 (D): LECH"
+   },
+   "POBOS": {
+    "coord": "384309N 0014608W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M985"
+   },
+   "POKAB": {
+    "coord": "292145N 0131119W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "POLCI": {
+    "coord": "370340N 0014422W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L112"
+   },
+   "PORTA": {
+    "coord": "391948N 0071809W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "L185, N873 BDRY FIR/UIR MADRID / FIR LISBOA"
+   },
+   "PRADO": {
+    "coord": "400851N 0020037W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N733 (A): LEMD, LETO TMA MADRID",
+    "tma": "Madrid"
+   },
+   "PUBLA": {
+    "coord": "371500N 0052120W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE, Punto de transferencia de tráfico entre: SEVILLA ACC a MORÓN TWR // Transfer traffic point ",
+    "tma": "Sevilla"
+   },
+   "PUCLO": {
+    "coord": "254238N 0183546W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N871"
+   },
+   "QITTI": {
+    "coord": "275358N 0161603W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCTS",
+    "tma": "Canarias Iaf"
+   },
+   "RAFOL": {
+    "coord": "375658N 0000101W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L150, N608 (AD): LEAL"
+   },
+   "RAKOD": {
+    "coord": "394651N 0063743W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "L14, N870, Punto del espacio áereo delegado a Lisboa ACC // Z409 Point of airspace delegated to Lisboa ACC"
+   },
+   "RASEP": {
+    "coord": "284139N 0142648W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "RATAT": {
+    "coord": "284056N 0134654W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "RAZID": {
+    "coord": "362756N 0041227W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEMG",
+    "tma": "Sevilla Iaf"
+   },
+   "RECKA": {
+    "coord": "282543N 0174506W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "REMGI": {
+    "coord": "270525N 0151611W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N728, N729 (AD): GCLP, GCTS"
+   },
+   "RESTU": {
+    "coord": "375427N 0013327W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N851, N860 (AD): LEAL (D): LEMI, LELC BDRY FIR BARCELONA/MADRID TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "RETBA": {
+    "coord": "392637N 0005432W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M176, M871, T257"
+   },
+   "RINDI": {
+    "coord": "370620N 0000349W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) P34, T100"
+   },
+   "RIPIX": {
+    "coord": "290013N 0133331W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "RIPOD": {
+    "coord": "300000N 0240000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) (X): EVEN AND ODD FL (E): EVEN AND ODD FL BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "RIPUX": {
+    "coord": "391448N 0002623W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) P34, T257"
+   },
+   "RISPO": {
+    "coord": "371759N 0021724W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M143 TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "RIXAL": {
+    "coord": "364704N 0020104W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "RIXUR": {
+    "coord": "370632N 0033811W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M445, N851 (D): LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ROBIP": {
+    "coord": "364158N 0023414W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA IAF LEAM",
+    "tma": "Almería Iaf"
+   },
+   "ROCAZ": {
+    "coord": "290543N 0130339W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "ROCIO": {
+    "coord": "371753N 0062717W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "RODAP": {
+    "coord": "393757N 0070355W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N870, N873 Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+   },
+   "ROFIX": {
+    "coord": "401248N 0034730W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "ROLAS": {
+    "coord": "372456N 0025116W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M192, N851 (AD): LEAM CTA ALBACETE"
+   },
+   "ROLDO": {
+    "coord": "395233N 0053241W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L185, Z409 (D): LEBZ"
+   },
+   "RONDA": {
+    "coord": "364140N 0050848W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ROPEM": {
+    "coord": "293216N 0130440W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ROSAL": {
+    "coord": "380117N 0070605W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M744 (AD): LEZL BDRY FIR/UIR MADRID / FIR LISBOA"
+   },
+   "ROSTA": {
+    "coord": "281522N 0200000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N741, Y611"
+   },
+   "ROTEX": {
+    "coord": "372507N 0053608W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEZL",
+    "tma": "Sevilla Iaf"
+   },
+   "ROTUM": {
+    "coord": "250000N 0154712W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M660, Z353 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ROXES": {
+    "coord": "283051N 0134336W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "RUDBI": {
+    "coord": "401529N 0030810W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID IAF LEMD",
+    "tma": "Madrid Iaf"
+   },
+   "RUKER": {
+    "coord": "395658N 0043640W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) Z409 (A): LEMD, LEGT"
+   },
+   "RULOB": {
+    "coord": "284505N 0140100W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "RUSEM": {
+    "coord": "390000N 0045049W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Z230"
+   },
+   "RUVEN": {
+    "coord": "373914N 0053052W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEZL",
+    "tma": "Sevilla Iaf"
+   },
+   "SANJU": {
+    "coord": "370315N 0054500W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SANSI": {
+    "coord": "372950N 0010412W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTA MURCIA/San Javier IAF LELC, IAF LEMI"
+   },
+   "SANTA": {
+    "coord": "374007N 0061754W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M744 (AD): LEBZ (D): LEJR, LEMO TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SANTI": {
+    "coord": "381727N 0031927W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SARAY": {
+    "coord": "294531N 0140927W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "D",
+    "name": "(D) (D): GCLP, GCLA, GCXO TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "SARES": {
+    "coord": "362637N 0051553W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SARWO": {
+    "coord": "273108N 0161437W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "SAURA": {
+    "coord": "401522N 0001100W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) M182, N860 (A): LEVC TMA VALENCIA IAF LECH",
+    "tma": "Valencia Iaf"
+   },
+   "SERRA": {
+    "coord": "391558N 0005125W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M176, M985 (D): LEMI, LELC TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "SILUC": {
+    "coord": "243028N 0161830W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "SIRGU": {
+    "coord": "401538N 0023600W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "SIRPU": {
+    "coord": "280954N 0140624W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCFV",
+    "tma": "Canarias Iaf"
+   },
+   "SOMOB": {
+    "coord": "290047N 0134227W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "SONUS": {
+    "coord": "290237N 0132441W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "SOPET": {
+    "coord": "395002N 0000017W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M445, (A): LECH M985, N608 (D): LEAL TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "SORAD": {
+    "coord": "300000N 0250000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "BDRY UIR CANARIAS / FIR SANTA MARIA OCEANIC"
+   },
+   "SORUX": {
+    "coord": "363645N 0022851W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "SOSAV": {
+    "coord": "391625N 0012944W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L45, L150 CTA ALBACETE"
+   },
+   "SOTAD": {
+    "coord": "275831N 0135118W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCFV",
+    "tma": "Canarias Iaf"
+   },
+   "SOTUK": {
+    "coord": "391137N 0044447W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) Z165, Z230 (A): LEMD, LETO TMA MADRID",
+    "tma": "Madrid"
+   },
+   "SOVEM": {
+    "coord": "363036N 0041609W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SOVIS": {
+    "coord": "355736N 0054638W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T100, Z19"
+   },
+   "SPIEL": {
+    "coord": "380959N 0050342W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "SUFEM": {
+    "coord": "280256N 0150643W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "SUMMO": {
+    "coord": "382137N 0001654W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) N851, P34 (D): LEMI TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "TACCA": {
+    "coord": "274442N 0151611W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TADEK": {
+    "coord": "285535N 0135823W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TAGOR": {
+    "coord": "362911N 0060702W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "TAMOS": {
+    "coord": "402108N 0034800W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA MADRID",
+    "tma": "Madrid"
+   },
+   "TARIK": {
+    "coord": "362418N 0010816W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) M192 (E): EVEN FL (X): ODD FL BDRY FIR/UIR BARCELONA / FIR ARGEL"
+   },
+   "TATOS": {
+    "coord": "400000N 0001701W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N860 TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "TAVSI": {
+    "coord": "355538N 0062853W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L82, T100"
+   },
+   "TEGLO": {
+    "coord": "371457N 0055857W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "TENAR": {
+    "coord": "280254N 0155609W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TENDA": {
+    "coord": "283200N 0133826W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCFV",
+    "tma": "Canarias Iaf"
+   },
+   "TENDU": {
+    "coord": "372503N 0060703W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEZL",
+    "tma": "Sevilla Iaf"
+   },
+   "TENPA": {
+    "coord": "212142N 0215824W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "EX",
+    "name": "(EX) N866 (E): ODD FL; (X): EVEN FL BDRY UIR CANARIAS / FIR/UIR SAL OCEANIC"
+   },
+   "TESEL": {
+    "coord": "282918N 0165000W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "THAIS": {
+    "coord": "283420N 0153104W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TICKE": {
+    "coord": "293952N 0130421W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "TIFON": {
+    "coord": "385755N 0023522W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE CTA ALBACETE IAF LEAB"
+   },
+   "TINEK": {
+    "coord": "373907N 0033744W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N865"
+   },
+   "TIPUX": {
+    "coord": "280658N 0151818W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TISCA": {
+    "coord": "274228N 0152135W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TOBEK": {
+    "coord": "401147N 0032528W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID IAF LETO",
+    "tma": "Madrid Iaf"
+   },
+   "TOBOS": {
+    "coord": "363504N 0050017W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "TOCUN": {
+    "coord": "280854N 0151013W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TODKO": {
+    "coord": "281900N 0152043W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "NO_ADQ. TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TOFEF": {
+    "coord": "393144N 0072159W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "N870 BDRY UIR MADRID / FIR LISBOA, Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+   },
+   "TOLVO": {
+    "coord": "374004N 0053654W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "TOMOS": {
+    "coord": "273251N 0153312W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCLP",
+    "tma": "Canarias Iaf"
+   },
+   "TORRE": {
+    "coord": "365806N 0062746W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "TOSGA": {
+    "coord": "373732N 0021826W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M143, N851 (AD): LEAM"
+   },
+   "TOSPU": {
+    "coord": "282727N 0134040W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TOSTO": {
+    "coord": "382151N 0015610W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M445, N747"
+   },
+   "TUPIK": {
+    "coord": "275327N 0144444W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "TUPIX": {
+    "coord": "370434N 0072300W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "Y135 BDRY FIR MADRID / LISBOA"
+   },
+   "TUTIS": {
+    "coord": "355520N 0064159W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) T100"
+   },
+   "TUVIL": {
+    "coord": "284032N 0135123W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IF GCFV",
+    "tma": "Canarias If"
+   },
+   "TUXAM": {
+    "coord": "290751N 0132910W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "UDATI": {
+    "coord": "261152N 0164711W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N873, Y422 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "UJELE": {
+    "coord": "275640N 0154941W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ULSES": {
+    "coord": "395209N 0022944W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) M143 (D): LETO, LEGT"
+   },
+   "UMOTO": {
+    "coord": "283802N 0132512W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "UMUKA": {
+    "coord": "364239N 0034834W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) M744 (AD): LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "UNTOS": {
+    "coord": "371502N 0031640W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) N851, N865 (AD): LEAM, LEGR (A): LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "UREDI": {
+    "coord": "395135N 0062336W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N870Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECM FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+   },
+   "URIAS": {
+    "coord": "391409N 0003000W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "URIPO": {
+    "coord": "385527N 0002900E",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L45, T257"
+   },
+   "URQUI": {
+    "coord": "265341N 0170224W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N871, T770, (A): GCTS, GCLP Y422, Y611 TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "URRIF": {
+    "coord": "401432N 0034447W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "USADO": {
+    "coord": "390000N 0033916W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "USERA": {
+    "coord": "375504N 0033730W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "USIBA": {
+    "coord": "390000N 0053638W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) Z180"
+   },
+   "USOKO": {
+    "coord": "394737N 0042552W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) Z230 (A): LEGT"
+   },
+   "USOME": {
+    "coord": "370401N 0043449W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "USOSA": {
+    "coord": "373139N 0063121W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VADAT": {
+    "coord": "362810N 0023725W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "AD",
+    "name": "(AD) N860 (AD): LEAM TMA ALMERÍA",
+    "tma": "Almería"
+   },
+   "VANUR": {
+    "coord": "284229N 0173638W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "VASOR": {
+    "coord": "383327N 0064643W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTR TALAVERA IAF LEBZ"
+   },
+   "VEGAF": {
+    "coord": "371226N 0040914W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VENZA": {
+    "coord": "285023N 0173708W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "VEREG": {
+    "coord": "374236N 0033730W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VIBAS": {
+    "coord": "372332N 0033751W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IAD",
+    "name": "(IAD) L58, M985, (AD): LEMG, LEZL N865, T249 (A): LEMO TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VICAR": {
+    "coord": "371505N 0054656W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VIGIA": {
+    "coord": "365618N 0063422W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "VILLA": {
+    "coord": "401359N 0022438W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "ID",
+    "name": "(ID) L150 (D): LEGT TMA MADRID",
+    "tma": "Madrid"
+   },
+   "VILNA": {
+    "coord": "383223N 0004900W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA IAF LEAL",
+    "tma": "Valencia Iaf"
+   },
+   "VIZON": {
+    "coord": "274057N 0164721W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "VULPE": {
+    "coord": "374540N 0044754W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "IA",
+    "name": "(IA) N747, N864 (A): LEGR, LEMG TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "XALUD": {
+    "coord": "390000N 0045743W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "XANOS": {
+    "coord": "275610N 0165156W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS IAF GCTS",
+    "tma": "Canarias Iaf"
+   },
+   "XAVIR": {
+    "coord": "360015N 0051435W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M985"
+   },
+   "XEBAR": {
+    "coord": "383116N 0020534W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) M985, T252"
+   },
+   "XETAN": {
+    "coord": "370104N 0055546W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEJR",
+    "tma": "Sevilla Iaf"
+   },
+   "XIBUS": {
+    "coord": "275731N 0151745W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "XIGLU": {
+    "coord": "233600N 0242500W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "X",
+    "name": "(X) (X): EVEN FL BDRY UIR CANARIAS / FIR SAL OCEANIC"
+   },
+   "XOLSI": {
+    "coord": "381304N 0003942W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "CTA MURCIA/San Javier"
+   },
+   "XULIM": {
+    "coord": "355601N 0061028W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) L27, T100"
+   },
+   "XULSA": {
+    "coord": "390000N 0041610W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I)"
+   },
+   "YELBE": {
+    "coord": "275012N 0172331W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "YEQAY": {
+    "coord": "281549N 0170736W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "YOLAS": {
+    "coord": "292113N 0134538W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true
+   },
+   "YORGI": {
+    "coord": "230400N 0205011W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) N866"
+   },
+   "YOSMA": {
+    "coord": "283717N 0163500W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "YULME": {
+    "coord": "402756N 0015009W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA MADRID",
+    "tma": "Madrid"
+   },
+   "YUNYE": {
+    "coord": "400239N 0033744W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA MADRID",
+    "tma": "Madrid"
+   },
+   "YUSME": {
+    "coord": "274314N 0161138W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "fra": "I",
+    "name": "(I) TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ZORIN": {
+    "coord": "381731N 0005852W",
+    "region": "Madrid/Valencia",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA VALENCIA",
+    "tma": "Valencia"
+   },
+   "ZOZUQ": {
+    "coord": "380534N 0043749W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA SEVILLA IAF LEBA",
+    "tma": "Sevilla Iaf"
+   },
+   "ZUCRU": {
+    "coord": "273707N 0155838W",
+    "region": "Canarias",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "TMA CANARIAS",
+    "tma": "Canarias"
+   },
+   "ZUFRE": {
+    "coord": "374828N 0061631W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
+   },
+   "ZUJAR": {
+    "coord": "385843N 0051842W",
+    "region": "Sevilla/Madrid",
+    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "minor": true,
+    "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
+    "tma": "Sevilla"
    }
   }
  },
@@ -12238,5 +16487,6 @@
    "runways": []
   }
  ],
- "_airports_source": "OurAirports (public domain, github.com/davidmegginson/ourairports-data): every aerodrome of Morocco (Western Sahara included) and the Canary Islands, Gibraltar, southern Spain (Andalucia, Extremadura, Murcia, southern Castilla-La Mancha, Ceuta, Melilla) and southern Portugal (south of 40N) with Madeira; runway thresholds and true headings as OurAirports has them"
+ "_airports_source": "OurAirports (public domain, github.com/davidmegginson/ourairports-data): every aerodrome of Morocco (Western Sahara included) and the Canary Islands, Gibraltar, southern Spain (Andalucia, Extremadura, Murcia, southern Castilla-La Mancha, Ceuta, Melilla) and southern Portugal (south of 40N) with Madeira; runway thresholds and true headings as OurAirports has them",
+ "_enr44_source": "ENAIRE AIP ENR 4.4 01-OCT-26: 1083 points, those south of 40.5N and west of 0.5E as external points"
 }

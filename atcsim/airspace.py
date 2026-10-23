@@ -297,7 +297,7 @@ class Airspace:
             out["projection"] = self.projection.spec()
             out["waypoints_geo"] = {k: {"lat": round(ll[0], 5), "lon": round(ll[1], 5), "aip": format_dms(*ll),
                                         **{kk: vv for kk, vv in self.point_info.get(k, {}).items()
-                                           if kk in ("role", "fra", "estimated", "provisional", "region", "name", "navaid_type")}}
+                                           if kk in ("role", "fra", "estimated", "provisional", "region", "name", "navaid_type", "tma")}}
                                     for k, p in self.waypoints.items() if not k.startswith("@")
                                     for ll in [self.projection.inverse(*p)]}
         out.update(self.notes)
@@ -312,6 +312,7 @@ class Airspace:
             t = t.upper()
             nav[k] = "NDB" if "NDB" in t else "VOR" if ("VOR" in t or "TACAN" in t) else "DME" if "DME" in t else "VOR"
         out["navaids"] = nav
+        out["minor_points"] = sorted(k for k, v in self.point_info.items() if v.get("minor") and k in self.waypoints)
         if getattr(self, "fir_sectors", None):
             # the rest of the FIR: the other control area's sectors (drawn, not ours) and the FIR outline
             names = getattr(self, "fir_cta_names", {}) or {}

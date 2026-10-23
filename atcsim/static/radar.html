@@ -1845,6 +1845,7 @@ function draw() {
   ctx.font = `${TH.nameFont * dpr}px ui-monospace,monospace`;
   const xfer = new Set(sector.transfer_points || []);
   const sq = sector.shape.type === 'square' ? sector.shape.half_size_nm : null;
+  const minorSet = new Set(sector.minor_points || []);
   const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []), copSet = COPS();
   const dynSet = new Set(Object.keys((state && state.dyn_points) || {}));
   nameRects.length = 0;
@@ -1869,8 +1870,10 @@ function draw() {
     }
     if (extSet.has(n)) {                 // neighbouring-sector point: small diamond, '?' = provisional position
       ctx.strokeStyle = ctx.fillStyle = TH.extPoints; ctx.lineWidth = 1 * dpr; ctx.beginPath();
-      ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
-      if (V.names) { ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); nameRect(n, px + 6 * dpr, py + 4 * dpr); } continue;
+      const dm = (minorSet.has(n) ? 3 : 4) * dpr;
+      if (px < -20 || py < -20 || px > W + 20 || py > H + 20) continue;
+      ctx.moveTo(px, py - dm); ctx.lineTo(px + dm, py); ctx.lineTo(px, py + dm); ctx.lineTo(px - dm, py); ctx.closePath(); ctx.stroke();
+      if (V.names && (!minorSet.has(n) || userZoom >= 1.6)) { ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); nameRect(n, px + 6 * dpr, py + 4 * dpr); } continue;
     }
     ctx.fillStyle = ctx.strokeStyle = TH.points; ctx.lineWidth = 1 * dpr; ctx.beginPath();
     ctx.moveTo(px, py - 5 * dpr); ctx.lineTo(px + 4.5 * dpr, py + 3.5 * dpr); ctx.lineTo(px - 4.5 * dpr, py + 3.5 * dpr); ctx.closePath();
