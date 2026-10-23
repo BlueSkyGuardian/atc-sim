@@ -174,4 +174,22 @@ ok(low is not None and low < 1500, f"takes off from the runway ({low:.0f} ft whe
 ok(ck and "released by approach" in ck[0]["text"] and abs(ck[0]["time_s"] - 840) < 60,
    f"released at its start point near the start time: {[(e['time_s'], e['text']) for e in ck]}")
 ok(before_call, "not ours (not entered) while on its SID with approach")
+# a runway change before it takes off: it flies the SID of the new runway (same end), released at the same point
+sc = load_scenario("s21_casablanca_north_gmmn_gmme")
+w0 = build_world(sc)
+g0 = w0.aerodromes["GMMN"]
+other = [r for r in g0.runways if r != g0.in_use][0]
+ads = [dict(x) for x in w0.airspace.default_aerodromes]
+for x in ads:
+    if x["id"] == "GMMN":
+        x["runway_in_use"], x["runway_schedule"] = g0.in_use, [{"time": 200, "runway": other}]
+sc["aerodromes"] = ads
+w = build_world(sc)
+w._check_finished = lambda: None
+for _ in range(700):
+    w.step(1)
+d = w.aircraft["RAM1474"]
+ok(d.sid["runway"] == other and d.sid["name"].startswith("LAKAM") and d.sid["name"] != "LAKAM2D" if other.startswith("35")
+   else d.sid["runway"] == other, f"runway change to {other}: RAM1474 flies {d.sid['name']}")
+ok(any(e.get("type") == "sid_changed" and e.get("callsign") == "RAM1474" for e in w.events), "sid_changed event")
 print("FIR ok")

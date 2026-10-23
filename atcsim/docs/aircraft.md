@@ -203,6 +203,25 @@ its own climb performance needs to get there at the scenario's start time. Its l
 gives (FL90 a few miles from the field, FL160 forty miles out), not a fixed FL150. The SID is in its flight plan
 (`sid`, and at the head of item 15).
 
+**The approach units keep their traffic separated** (`tma.py`). The traffic "with approach" - departures on their
+SID before their release, arrivals the next units have taken over - is checked every few seconds against every other
+aircraft around (approach's own, ours, the en-route traffic) over the next two and a half minutes, with the radar
+minimum of the airspace (3 NM between approach's own traffic within 25 NM of the aerodrome) and the vertical minimum
+of the pair. A conflict is resolved as a TMA controller would: a departure **stops its climb** under the traffic, an
+arrival **stops its descent** above it or is given the level under it (two arrivals closing at the same level: the
+lower one continues down, the upper one stops - the stack in a hold), and when no level keeps the minimum (or a
+level would leave it in conflict with another aircraft) it is **turned away** from the traffic, back onto its route
+afterwards (`approach_restriction`, `approach_restriction_lifted`, `approach_vector` events). Our traffic is never
+moved by approach: approach's aircraft give way. A departure still restricted at its release calls us at that level
+("climbing FL110"), separated. Departures off the same aerodrome take off at least **2 minutes apart**, and not with
+an arrival within 4 NM of touchdown (`departure_delayed`).
+
+**Runway change.** A departure takes the SID of the runway in use **when it takes off** (the SID to the same end,
+released at the same point - `sid_changed`); the arrivals approach is working that are not yet established are
+**re-planned** for the new runway (its procedure, joining route, holds; climbed back to the new FAF altitude if they
+were below it - `approach_runway_change`), keeping their place in the sequence; the ones established land on the old
+runway. Arrivals still with us already plan to the runway in use (top of descent, approach path).
+
 ## Traffic before and after the sector
 
 - Aircraft **appear** 30 NM before their entry point, still with the previous unit (they refuse instructions).

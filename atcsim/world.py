@@ -12,7 +12,7 @@ from .geometry import SEP_H_NM, SEP_V_FT, Point, api_hdg, dist, polyline_length
 from .model import Area, Request
 import numpy as np
 
-from . import approach, arrivals, pilot
+from . import approach, arrivals, pilot, tma
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
@@ -1028,9 +1028,22 @@ class World:
             if rwy:
                 self._event("runway_change", aerodrome=ad.id, runway=rwy,
                             text=f"{ad.id} runway in use now {rwy}")
+                if self.record:
+                    approach.runway_changed(self, ad)
         # 2. spawns
         for ac in self.aircraft.values():
             if ac.status == "scheduled" and ac.entry_time <= t_next:
+                if getattr(ac, "sid", None) and getattr(ac, "spawn_alt_ft", None) is not None:
+                    okto, why = tma.may_take_off(self, ac)
+                    if not okto:
+                        ac.entry_time = t_next + 10.0       # holding at the runway (interval, arrival on final)
+                        if not getattr(ac, "_held_reported", False) and self.record:
+                            ac._held_reported = True
+                            self._event("departure_delayed", callsign=ac.callsign, reason=why,
+                                        text=f"{ac.callsign} take-off delayed ({why})")
+                        continue
+                    tma.resid(self, ac)
+                    tma.took_off(self, ac)
                 ac.spawn(self.env, t_next)
                 self._event("aircraft_entered", callsign=ac.callsign, at=ac.route[0], aircraft_type=ac.icao,
                             fl=ac.fl, exit=ac.exit_wp)
@@ -1139,6 +1152,7 @@ class World:
         # 5a. arrivals handed over: the next units bring them down to land (approach.py)
         if self.record:                        # (look-ahead clones do not fly what has left our sectors)
             approach.update(self)
+            tma.update(self)                   # the approach units keep their traffic separated
         # aircraft far away in the next sectors leave the picture (sooner once decontrolled); arrivals on their way
         # to land stay until they land
         b = self.airspace.bbox

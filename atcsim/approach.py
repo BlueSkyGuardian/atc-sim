@@ -607,6 +607,33 @@ def _stretch(world: "World", ac: "Aircraft", extra_nm: float) -> bool:
     return True
 
 
+def runway_changed(world: "World", ad) -> None:
+    """A change of runway: the arrivals approach is working and that are not yet established on the old runway's
+    final are re-planned for the new one (its procedure, joining route, holds); the established ones land on the
+    old runway."""
+    for ac in list(world.aircraft.values()):
+        st = getattr(ac, "app", None)
+        if not st or st.get("ad") != ad.id or st.get("established") or getattr(ac, "landed", False) or ac.gone:
+            continue
+        for n in st["names"]:
+            world.waypoints.pop(n, None)
+        ac.route = ac.route[:ac.next_index]
+        ac.next_index = len(ac.route)
+        ac.app = None
+        seq = world._landing_seq.get(ad.id, [])
+        pos = seq.index(ac.callsign) if ac.callsign in seq else None
+        _start(world, ac)
+        if pos is not None:                            # it keeps its place in the sequence
+            while ac.callsign in seq:
+                seq.remove(ac.callsign)
+            seq.insert(pos, ac.callsign)
+        if ac.alt_ft < ad.faf_alt_ft - 100:
+            ac.cleared_alt_ft = ad.faf_alt_ft          # below the new runway's procedure: up to its FAF altitude
+        _schedule(world, ac)
+        world._event("approach_runway_change", callsign=ac.callsign, aerodrome=ad.id, runway=ad.in_use,
+                     text=f"{ac.callsign} re-planned for runway {ad.in_use}")
+
+
 def _go_around(world: "World", ac: "Aircraft", ad, quiet: bool = False) -> None:
     """Too high over the runway: missed approach, back to the end of the sequence for another approach."""
     st = ac.app
