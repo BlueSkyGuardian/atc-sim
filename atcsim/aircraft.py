@@ -17,7 +17,6 @@ from .weather import Weather, describe_uv
 
 TRAIL_EVERY_S = 10.0
 TRAIL_LEN = 12
-XTE_GAIN_DEG_PER_NM = 12.0     # LNAV intercept angle per NM of cross-track error
 MAX_INTERCEPT_DEG = 45.0
 BANK_GAIN = 2.0                # commanded bank (deg) per degree of heading error, capped at nominal bank
 SPEED_SHARE = 0.3              # share of excess power used for speed change while climbing/descending
@@ -31,16 +30,54 @@ DESCENT_NM_PER_KFT = ((25000.0, 4.3), (10000.0, 3.3), (0.0, 3.0))
 _K_ROLL = (180.0 / math.pi) ** 2
 
 
-def _capture_bank(err_deg: float, tas_ms: float, dt: float) -> float:
+def _capture_bank(err_deg: float, tas_ms: float, dt: float, max_bank: float = BANK_NOMINAL_DEG) -> float:
     """The autopilot's bank for a heading error: up to the nominal bank, rolled out early enough to arrive on the
     heading with the wings level - no overshoot, no slow creep onto it. Rolling out from bank b at the roll rate p
     still turns the aircraft (180/pi)^2 (g/V) (-ln cos b) / p degrees; the bank is the one for which that (plus half
     a step at the present rate) is the error left."""
-    rate_full = math.degrees(atm.G0 * math.tan(math.radians(BANK_NOMINAL_DEG)) / tas_ms)
+    rate_full = math.degrees(atm.G0 * math.tan(math.radians(max_bank)) / tas_ms)
     budget = max(0.0, err_deg - rate_full * dt * 0.5)
     x = budget * ROLL_RATE_DEG_S * tas_ms / (atm.G0 * _K_ROLL)
     c = math.exp(-x)
-    return min(BANK_NOMINAL_DEG, math.degrees(math.acos(max(-1.0, min(1.0, c)))))
+    return min(max_bank, math.degrees(math.acos(max(-1.0, min(1.0, c)))))
+
+
+def intercept_deg(xte_nm: float, radius_nm: float) -> float:
+    """Intercept angle (deg, + = turn right) back onto a track for a cross-track error (+ = right of it): no more than
+    the angle from which a turn at that radius just rolls out on the line (acos(1 - |xte|/R), with a margin), and
+    proportional near it (gain inversely to the radius) - a fast aircraft cuts in at a shallower angle and does not
+    overshoot the line; capped at 45 degrees."""
+    r = max(radius_nm, 0.5)
+    e = abs(xte_nm)
+    geo = math.degrees(math.acos(max(-1.0, 1.0 - e / (1.5 * r))))
+    lin = 60.0 / r * e
+    return -math.copysign(min(MAX_INTERCEPT_DEG, geo, lin), xte_nm)
+
+
+def rate_one_bank(tas_ms: float) -> float:
+    """The bank (deg) of a rate one turn (3 deg/s) at that true airspeed."""
+    return math.degrees(math.atan(math.radians(3.0) * tas_ms / atm.G0))
+
+
+def hold_entry(trk: float, inbound: float, turn: str) -> str:
+    """ICAO holding entry for an aircraft arriving over the fix on track trk: 'direct', 'teardrop' (offset) or
+    'parallel' - the sectors of 180, 70 and 110 degrees split by the line at 70 degrees to the inbound track."""
+    r = heading_diff(inbound, trk)                   # + = arriving turned right of the inbound track
+    if turn == "L":
+        r = -r
+    if -70.0 <= r <= 110.0:
+        return "direct"
+    return "teardrop" if r > 110.0 else "parallel"
+
+
+def hold_leg_s(alt_ft: float) -> float:
+    """ICAO outbound timing: 1 minute at or below 14000 ft, 1.5 minutes above."""
+    return 60.0 if alt_ft <= 14000.0 else 90.0
+
+
+def _is_lap(name: str) -> bool:
+    """A point of a lap of a published hold set up by approach ("@CS~H<lap>.<j>")."""
+    return "~H" in name and not name.endswith("~HF")
 
 
 def descent_profile_fpm(tas_kt: float, alt_ft: float) -> float:
@@ -313,11 +350,21 @@ class Aircraft:
         u, v = self.wind_uv            # evaluated for all aircraft at once by the world (vectorised)
 
         # ---- lateral guidance
-        if self.nav_mode == "lnav":
+        max_bank = BANK_NOMINAL_DEG
+        if self.nav_mode != "lnav":
+            self.hold_state = None                    # vectored out of the hold
+        hold_cmd = self._hold_guidance(dt, env, u, v) if getattr(self, "hold_state", None) else None
+        if hold_cmd is not None:
+            hdg_cmd, forced = hold_cmd
+            # holding: rate one or 25 degrees of bank, whichever is less
+            max_bank = min(BANK_NOMINAL_DEG, rate_one_bank(max(self.tas, 100.0) * atm.KT))
+        elif self.nav_mode == "lnav":
             res = self._lnav(env, u, v, outside=outside)
             if res:
                 return res
             hdg_cmd, forced = self._lnav_heading_cmd, None
+            if getattr(self, "hold_state", None):     # just reached its holding fix
+                hdg_cmd, forced = self._hold_guidance(dt, env, u, v) or (hdg_cmd, None)
         else:                           # heading or wxdev
             hdg_cmd = self.target_hdg if self.target_hdg is not None else self.hdg
             forced = self.turn_dir
@@ -330,7 +377,7 @@ class Aircraft:
         if forced and abs(err) < 1.0:
             self.turn_dir = None
         tas_ms = max(self.tas, 100.0) * atm.KT
-        bank_cmd = math.copysign(_capture_bank(abs(err), tas_ms, dt), err)
+        bank_cmd = math.copysign(_capture_bank(abs(err), tas_ms, dt, max_bank), err)
         roll = ROLL_RATE_DEG_S * dt
         self.bank += max(-roll, min(roll, bank_cmd - self.bank))
         rate = math.degrees(atm.G0 * math.tan(math.radians(self.bank)) / tas_ms)
@@ -434,6 +481,11 @@ class Aircraft:
                     self.end_time = None
                     return "exited"
                 break
+            hs = getattr(self, "hold_spec", None)
+            if hs and to_name == hs["fix_name"] and _is_lap(self.route[self.next_index + 1]):
+                if to_go <= 0.05:                  # over the holding fix (fly-over): into the hold
+                    self._enter_hold(hs)
+                break
             nxt = wps[self.route[self.next_index + 1]]
             dchi = abs(heading_diff(course, bearing(B, nxt)))
             anticipation = self.turn_radius_nm() * math.tan(math.radians(min(dchi, 120.0)) / 2.0)
@@ -442,10 +494,155 @@ class Aircraft:
                 self.next_index += 1
                 continue
             break
-        intercept = max(-MAX_INTERCEPT_DEG, min(MAX_INTERCEPT_DEG, -XTE_GAIN_DEG_PER_NM * self.xte_nm))
+        intercept = intercept_deg(self.xte_nm, self.turn_radius_nm())
         desired_track = (course + intercept) % 360.0
         self._lnav_heading_cmd = (desired_track - self._wca(desired_track, u, v)) % 360.0
         return None
+
+    # ---------------------------------------------------------------- holding
+    def _enter_hold(self, hs: dict) -> None:
+        """Over the holding fix: the entry for the track it arrives on, then the racetrack. The lap points stay in the
+        route (for the times and the picture); the next one is the first of the lap being flown."""
+        self.next_index += 1
+        entry = hold_entry(self.trk, hs["inbound"], hs["turn"])
+        t_out = float(hs["leg_min"]) * 60.0 if hs.get("leg_min") else hold_leg_s(self.alt_ft)
+        self.hold_state = {"phase": {"direct": "turn_out", "teardrop": "teardrop", "parallel": "parallel"}[entry],
+                           "entry": entry, "t": 0.0, "t_out": t_out, "t_out0": t_out, "timer": None,
+                           "t_in0": None, "a_prev": 0.0}
+
+    def _hold_frame(self, hs: dict) -> Tuple[float, float]:
+        """Position in the hold: along the inbound track from the fix (+ = past it) and to the holding side."""
+        th = math.radians(hs["inbound"])
+        ux, uy = math.sin(th), math.cos(th)
+        nx, ny = (uy, -ux) if hs["turn"] == "R" else (-uy, ux)
+        dx, dy = self.x - hs["x"], self.y - hs["y"]
+        return dx * ux + dy * uy, dx * nx + dy * ny
+
+    def _exit_hold(self, hs: dict) -> None:
+        self.hold_state = None
+        self.leg_from = (hs["x"], hs["y"])
+        self._dct = False
+
+    def _hold_guidance(self, dt: float, env: Env, u: float, v: float):
+        """Heading command and forced turn direction in the hold (None: not holding any more, lnav flies on).
+        Entry (direct, teardrop 30 degrees off the outbound track, parallel), the fix flown over, turns in the holding
+        direction (rate one or 25 degrees of bank), the outbound track flown the pattern's width from the inbound one
+        (wind corrected), timed from abeam the fix or flown to its published length, its time adjusted so the inbound
+        leg (from wings level) comes out at the standard time, the inbound track intercepted and flown to the fix."""
+        hs, st = getattr(self, "hold_spec", None), self.hold_state
+        if not hs or self.next_index >= len(self.route) or not _is_lap(self.route[self.next_index]):
+            if hs:
+                self._exit_hold(hs)                   # re-cleared by approach (another route): lnav takes it
+            else:
+                self.hold_state = None
+            return None
+        st["t"] += dt
+        inb, out = hs["inbound"], (hs["inbound"] + 180.0) % 360.0
+        turn = "right" if hs["turn"] == "R" else "left"
+        other = "left" if turn == "right" else "right"
+        a, s_ = self._hold_frame(hs)
+        tas_ms = max(self.tas, 100.0) * atm.KT
+        b = min(BANK_NOMINAL_DEG, rate_one_bank(tas_ms))
+        v_ms = max(self.gs, 100.0) * atm.KT
+        radius = v_ms * v_ms / (atm.G0 * math.tan(math.radians(b))) / atm.NM
+        r_air = tas_ms * tas_ms / (atm.G0 * math.tan(math.radians(b))) / atm.NM
+        side = 1.0 if hs["turn"] == "R" else -1.0
+        # the pattern's width: the turn's diameter, less what the wind drifts it towards the holding side during
+        # the turn back (half a circle), so that turn ends on the inbound track
+        th = math.radians(hs["inbound"])
+        w_side = (u * math.cos(th) - v * math.sin(th)) * side            # kt, + = blowing to the holding side
+        t_turn = math.pi * r_air * atm.NM / tas_ms
+        width = max(0.5 * r_air, 2.0 * r_air - w_side * t_turn / 3600.0)
+        crossed = st["a_prev"] < 0.0 <= a and abs(s_) < 3.0
+        st["a_prev"] = a
+
+        def heading_for(track):
+            return (track - self._wca(track, u, v)) % 360.0
+
+        def turning(cmd, direction):
+            return cmd, (direction if abs(heading_diff(self.hdg, cmd)) > 20.0 else None)
+
+        def inbound_cmd():
+            # the inbound track to the fix: intercept angle from the offset to the side, the wind corrected
+            # s_ > 0 is towards the holding side (right of the inbound track in a right hold): steer back to the line
+            icpt = intercept_deg(s_ * side, radius)
+            return heading_for((inb + icpt) % 360.0)
+
+        ph = st["phase"]
+        if ph in ("inbound", "to_fix") and crossed:
+            # over the fix: a lap done (the entry counts as the first one when it ends on the inbound leg)
+            if ph == "inbound" and st.get("t_in0") is not None and not hs.get("leg_nm"):
+                t_in = st["t"] - st["t_in0"]               # the inbound leg's time: the next outbound adjusted
+                if t_in > 5.0:
+                    st["t_out"] = max(0.3 * st["t_out0"], min(2.5 * st["t_out0"], st["t_out"] + (st["t_out0"] - t_in)))
+            j = next((i for i in range(self.next_index, len(self.route))
+                      if _is_lap(self.route[i]) and self.route[i].endswith(".5")), None)
+            self.next_index = (j + 1) if j is not None else self.next_index + 1
+            if self.next_index >= len(self.route) or not _is_lap(self.route[self.next_index]):
+                self._exit_hold(hs)                   # last lap: on to the approach from the fix
+                return None
+            st.update(phase="turn_out", timer=None, t_in0=None)
+            ph = "turn_out"
+        if ph == "teardrop":
+            # offset entry: 30 degrees off the outbound track to the holding side, for the outbound time
+            off = -30.0 if hs["turn"] == "R" else 30.0
+            if st["timer"] is None:
+                st["timer"] = st["t"]
+            if st["t"] - st["timer"] >= st["t_out"]:
+                st.update(phase="turn_in")
+                return turning(inbound_cmd(), turn)
+            return heading_for((out + off) % 360.0), None
+        if ph == "parallel":
+            # parallel entry: the outbound track on the non-holding side, then back to the fix turning to the holding side
+            if st["timer"] is None:
+                st["timer"] = st["t"]
+            if st["t"] - st["timer"] >= st["t_out"]:
+                st.update(phase="to_fix", forced=other)
+                ph = "to_fix"
+            else:
+                return heading_for(out), None
+        if ph == "to_fix":
+            cmd = heading_for(bearing(self.pos, (hs["x"], hs["y"])))
+            if st.get("forced") and abs(heading_diff(self.hdg, cmd)) <= 20.0:
+                st["forced"] = None
+            return cmd, st.get("forced")
+        def outbound_cmd():
+            # the outbound track, the pattern's width from the inbound one (as the FMS flies it): the turn back then
+            # ends on the inbound track whatever the entry and the wind
+            icpt = intercept_deg((s_ - width) * -side, radius)
+            return heading_for((out + icpt) % 360.0)
+
+        if ph == "turn_out":
+            cmd = outbound_cmd()
+            if abs(heading_diff(self.hdg, cmd)) < 20.0:
+                st.update(phase="outbound", timer=None)
+                ph = "outbound"
+            else:
+                return cmd, turn
+        if ph == "outbound":
+            if st["timer"] is None and a <= 0.0:
+                st["timer"] = st["t"]                 # abeam the fix (wings level by now): timing starts
+            if hs.get("leg_nm"):
+                done = a <= -float(hs["leg_nm"])
+            else:
+                done = st["timer"] is not None and st["t"] - st["timer"] >= st["t_out"]
+            if done:
+                st.update(phase="turn_in")
+                ph = "turn_in"
+            else:
+                return outbound_cmd(), None
+        if ph == "turn_in":
+            cmd = inbound_cmd()
+            if abs(heading_diff(self.hdg, cmd)) <= 20.0:
+                st.update(phase="inbound", t_in0=None)
+                ph = "inbound"
+            else:
+                return cmd, turn
+        # inbound: the inbound track to the fix; timing from wings level on it
+        cmd = inbound_cmd()
+        if st.get("t_in0") is None and abs(self.bank) < 2.0:
+            st["t_in0"] = st["t"]
+        return cmd, None
 
     def _energy(self, dt: float) -> None:
         p = self.perf
@@ -634,6 +831,8 @@ class Aircraft:
             "level_parity_ok": level_parity_ok(int(round(self.cleared_alt_ft / 100.0)), self.southbound),
             "next_waypoint": self.next_wp if self.nav_mode == "lnav" else None,
             "cross_track_nm": round(self.xte_nm, 2) if self.nav_mode == "lnav" else None,
+            "holding": ({"fix": (getattr(self, "hold_spec", None) or {}).get("fix"), "entry": self.hold_state["entry"],
+                         "phase": self.hold_state["phase"]} if getattr(self, "hold_state", None) else None),
             "planned_exit": self.planned_exit,
             "current_exit": self.exit_wp,
             "mass_kg": round(self.mass),

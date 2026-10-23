@@ -139,6 +139,15 @@ import math as _m
 th = _m.radians(h["inbound_true"])
 side = [(p[0] - h["x"]) * _m.cos(th) - (p[1] - h["y"]) * _m.sin(th) for p in pts[:-1]]
 ok(all(v > -0.01 for v in side) and 10 < lap < 25, f"ENETA right-hand racetrack, lap {lap:.1f} NM")
+
+# holding entries (ICAO sectors, the 70 degree line) and the radius-aware intercept
+from atcsim.aircraft import hold_entry, intercept_deg
+ok([hold_entry(t, 360.0, "R") for t in (0, 100, 120, 170, 200, 280, 300)] ==
+   ["direct", "direct", "teardrop", "teardrop", "parallel", "parallel", "direct"], "right-hand hold entries")
+ok([hold_entry(t, 360.0, "L") for t in (0, 260, 240, 190, 160, 80, 60)] ==
+   ["direct", "direct", "teardrop", "teardrop", "parallel", "parallel", "direct"], "left-hand hold entries")
+ok(abs(intercept_deg(1.0, 6.0)) < abs(intercept_deg(1.0, 2.0)) <= 45.0 and intercept_deg(1.0, 2.0) < 0 < intercept_deg(-1.0, 2.0),
+   "intercept: shallower for a wider turn, back towards the track")
 # the published approach for GMMN 17: the 13 NM CBA arc from the north, clear of the prohibited areas by 3 NM
 from atcsim.arrivals import approach_path
 gm = w.aerodromes["GMMN"]

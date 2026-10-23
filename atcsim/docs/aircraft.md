@@ -166,7 +166,8 @@ the aerodrome's published one for the runway in use that lies on the way (fix, i
 1 minute legs or the published leg length, never below its minimum holding altitude, its maximum speed): GMMN KOTAG /
 DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI, INSER, NAVIM; GMAD SOPAB, AGAMU
 (27), ALS (27); GMMX ODALO, RAMIM (28), MAK; GMME ME999, ME998, FAHIM, ENNAV (21); GMMZ TIDMO (30), MZ120 (12) (`aerodromes[].holdings`). The number of laps accounts for the detour
-to the hold fix, and laps are cut short when the slot comes (`approach_holding`, `approach_leave_hold`). No new
+to the hold fix, and laps are cut short when the slot comes (`approach_holding`, `approach_leave_hold`).
+The aircraft flies the hold itself, as the FMS does: the **entry** for the track it arrives on (direct, teardrop 30° off the outbound track, or parallel; the 70° line), the fix **flown over**, turns in the holding direction at rate one or 25° of bank (whichever is less), the outbound track the pattern's width from the inbound one (corrected for the wind, including the drift during the turn back), **timed from abeam the fix** (1 min up to 14000 ft, 1.5 min above) or flown to the published leg length, the outbound time adjusted lap by lap so the inbound leg comes out at the standard time, and the inbound track intercepted and flown to the fix. It leaves at the fix (aircraft snapshot `holding`: fix, entry, phase). No new
 vector while the last one is still being flown. Approach re-sequences when an aircraft has clearly got ahead of the
 one before it (`approach_resequenced`), checks the distance in a straight line as well as along the track before
 letting one turn in behind an aircraft on final, takes one that is too close with nothing left to vector out of the

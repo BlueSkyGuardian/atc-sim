@@ -531,6 +531,11 @@ def _published_hold(world: "World", ac: "Aircraft", h: dict, laps: int, why: str
     ac.leg_from = ac.pos
     ac._dct = True
     ac.nav_mode, ac.target_hdg, ac.turn_dir = "lnav", None, None
+    # the aircraft flies the pattern itself (entry, timing, wind) once over the fix; the lap points are for the picture
+    # and the times
+    ac.hold_spec = {"fix_name": hf, "x": F[0], "y": F[1], "inbound": h["inbound_true"], "turn": h["turn"],
+                    "leg_min": h.get("leg_min"), "leg_nm": h.get("leg_nm"), "fix": h["fix"]}
+    ac.hold_state = None
     st.update(names=[hf] + names + app_names, hold_names=[hf] + names, type=path["type"], faf=tuple(path["faf"]),
               thr=tuple(path["threshold"]), hold={"fix": h["fix"], "min_alt_ft": h["min_alt_ft"], "max_kt": h["max_kt"],
                                                   "why": why, "laps": laps, "lap_nm": lap_nm})
