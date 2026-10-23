@@ -2347,7 +2347,55 @@
      "heading": 270
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "SOPAB",
+     "coord": "300913.41N 0093550.60W",
+     "inbound_mag": 50,
+     "var": -3.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 4500,
+     "max_fl": 120,
+     "max_kt": 220,
+     "limit_dme_nm": 20,
+     "runways": [
+      "09",
+      "27"
+     ]
+    },
+    {
+     "fix": "AGAMU",
+     "coord": "301852.66N 0090541.11W",
+     "inbound_mag": 274,
+     "var": -3.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 4500,
+     "max_fl": 120,
+     "max_kt": 220,
+     "limit_dme_nm": 20,
+     "runways": [
+      "27"
+     ]
+    },
+    {
+     "fix": "ALS",
+     "coord": "301913.3N 0091910.3W",
+     "inbound_mag": 60,
+     "var": -2.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 4000,
+     "max_fl": 120,
+     "max_kt": 220,
+     "runways": [
+      "27"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Maroc AD2 GMAD 33_1_1 / 33_1_2 (STAR RWY 09 / 27, AIRAC 01/16: IAF SOPAB, AGAMU) and AD2 GMAD 35_2 (ILSx/LOC RWY 27: hold over ALS NDB)"
   },
   {
    "id": "GCLP",
@@ -4249,5 +4297,5 @@
   ]
  },
  "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
- "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMAD, GMMX, GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMX, GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
 }

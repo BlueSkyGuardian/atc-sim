@@ -161,8 +161,8 @@ height in the published hold (laps until it can make the approach), or is vector
 hold is behind it. The hold is the aerodrome's published one for the runway in use that lies on the way (fix,
 inbound track, turn direction, 1 minute legs or the published leg length, not below its minimum holding altitude,
 its maximum speed): GMMN KOTAG / DEVNO (35), SLK / BIRVO (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI,
-INSER, NAVIM (`aerodromes[].holdings` in the airspace file). Laps are cut short when the landing slot comes
-(`approach_holding`, `approach_leave_hold` events). Aerodromes without published holding data yet (GMAD, GMMX, GMME,
+INSER, NAVIM; GMAD SOPAB, AGAMU (27), ALS (27) (`aerodromes[].holdings` in the airspace file). Laps are cut short when the landing slot comes
+(`approach_holding`, `approach_leave_hold` events). Aerodromes without published holding data yet (GMMX, GMME,
 GMMZ, GMMI, GCFV) use a racetrack at the approach entry. Still too high on final
 (or past the runway) it goes around and joins the end of the sequence (`go_around` event). At the threshold the
 aircraft lands and leaves the picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it

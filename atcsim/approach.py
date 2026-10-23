@@ -325,6 +325,8 @@ def _pick_hold(world: "World", ac: "Aircraft"):
     hs = [h for h in hs if dist((h["x"], h["y"]), ad.pos) <= d_now + 5.0]
     if not hs:
         return None
+    # the arrival holds (STAR IAFs) before the procedural ones close in on the final (e.g. GMAD ALS NDB)
+    hs = [h for h in hs if dist((h["x"], h["y"]), ad.pos) > ad.final_nm + 2.0] or hs
     faf = ac.app["faf"]
     return min(hs, key=lambda h: dist(ac.pos, (h["x"], h["y"])) + dist((h["x"], h["y"]), faf))
 
