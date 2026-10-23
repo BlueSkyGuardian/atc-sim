@@ -1388,6 +1388,72 @@
    "role": "VOR/DME BERRECHID 114.00",
    "fra": "",
    "navaid": true
+  },
+  "CSD": {
+   "coord": "325601.00N 0080354.00W",
+   "role": "NDB CASABLANCA CSD 345",
+   "fra": "",
+   "navaid": true
+  },
+  "CAE": {
+   "coord": "333657.00N 0070648.70W",
+   "role": "NDB CAE 275",
+   "fra": "",
+   "navaid": true
+  },
+  "SBI": {
+   "coord": "341035.06N 0063951.40W",
+   "role": "NDB SALE SBI 332",
+   "fra": "",
+   "navaid": true
+  },
+  "NUA": {
+   "coord": "332547.94N 0073633.42W",
+   "role": "NDB NUA 255",
+   "fra": "",
+   "navaid": true
+  },
+  "SAK": {
+   "coord": "333116.71N 0074037.59W",
+   "role": "NDB SAK 413 / DME CBA",
+   "fra": "",
+   "navaid": true
+  },
+  "ADM": {
+   "coord": "301918.90N 0092300.50W",
+   "role": "VOR/DME AGADIR ADM 117.20",
+   "fra": "",
+   "navaid": true
+  },
+  "ME600": {
+   "coord": "340632.96N 0064233.41W",
+   "role": "GMME SID RWY 03",
+   "fra": ""
+  },
+  "ME402": {
+   "coord": "341507.72N 0065040.50W",
+   "role": "GMME SID / STAR",
+   "fra": ""
+  },
+  "ME602": {
+   "coord": "341232.48N 0063809.79W",
+   "role": "GMME SID RWY 03",
+   "fra": ""
+  },
+  "ME603": {
+   "coord": "335324.78N 0063635.62W",
+   "role": "GMME SID",
+   "fra": ""
+  },
+  "ME601": {
+   "coord": "335158.64N 0064500.38W",
+   "role": "GMME SID RWY 21",
+   "fra": ""
+  },
+  "ME904": {
+   "coord": "340749.34N 0063014.66W",
+   "role": "GMME SID RWY 03 (= ENNAV)",
+   "fra": ""
   }
  },
  "construction_points": {
@@ -2306,7 +2372,355 @@
      ]
     }
    ],
-   "_holdings_source": "AIP Maroc AD2 GMMN 33-1-1 / 33-2-1 (STAR RWY 35 / 17, AIRAC 07/21) and 33-1-2 / 33-2-2 (initial approaches RWY 35 / 17): protection IAS 220 kt, ZP 13000 ft"
+   "_holdings_source": "AIP Maroc AD2 GMMN 33-1-1 / 33-2-1 (STAR RWY 35 / 17, AIRAC 07/21) and 33-1-2 / 33-2-2 (initial approaches RWY 35 / 17): protection IAS 220 kt, ZP 13000 ft",
+   "sids": [
+    {
+     "name": "LAKAM1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "LAKAM",
+     "via": [
+      "MOKDA",
+      "LAKAM"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "ODAXA1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "ODAXA",
+     "via": [
+      "MOKDA",
+      "ODAXA"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "RAVOL1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "RAVOL",
+     "via": [
+      "RAVOL"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "VONCI1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "VONCI",
+     "via": [
+      "BODNI",
+      "VONCI"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "NIKZO1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "NIKZO",
+     "via": [
+      "BODNI",
+      "330816.63N 0080338.40W",
+      "CSD",
+      "NIKZO"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "FOBAC1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "FOBAC",
+     "via": [
+      "BODNI",
+      "330816.63N 0080338.40W",
+      "CSD",
+      "FOBAC"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "LACAJ1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "LACAJ",
+     "via": [
+      "LACAJ"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "SADIC1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "SADIC",
+     "via": [
+      "EVDOL",
+      "CAE",
+      "SADIC"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "ESALA1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "ESALA",
+     "via": [
+      "EVDOL",
+      "REVMI",
+      "ESALA"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "TOLSI1D",
+     "runways": [
+      "35R",
+      "35L"
+     ],
+     "end": "TOLSI",
+     "via": [
+      "EVDOL",
+      "AGDAL",
+      "TOLSI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "LAKAM2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "LAKAM",
+     "via": [
+      "MOKDA",
+      "LAKAM"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "ODAXA2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "ODAXA",
+     "via": [
+      "MOKDA",
+      "ODAXA"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "RAVOL2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "RAVOL",
+     "via": [
+      "RAVOL"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "VONCI2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "VONCI",
+     "via": [
+      "RALEK",
+      "VONCI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "NIKZO2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "NIKZO",
+     "via": [
+      "CSD",
+      "NIKZO"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "FOBAC2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "FOBAC",
+     "via": [
+      "CSD",
+      "FOBAC"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "FACAS2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "FACAS",
+     "via": [
+      "SLK",
+      "FACAS"
+     ],
+     "max_kt": 230
+    },
+    {
+     "name": "MABOG2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "MABOG",
+     "via": [
+      "SLK",
+      "MABOG"
+     ],
+     "max_kt": 230
+    },
+    {
+     "name": "MOGBI2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "MOGBI",
+     "via": [
+      "SLK",
+      "MOGBI"
+     ],
+     "max_kt": 230
+    },
+    {
+     "name": "LACAJ2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "LACAJ",
+     "via": [
+      "GOVAS",
+      "LACAJ"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "SADIC2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "SADIC",
+     "via": [
+      "BISMI",
+      "SADIC"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "ESALA2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "ESALA",
+     "via": [
+      "EVDOL",
+      "REVMI",
+      "ESALA"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "TOLSI2D",
+     "runways": [
+      "17L",
+      "17R"
+     ],
+     "end": "TOLSI",
+     "via": [
+      "EVDOL",
+      "AGDAL",
+      "TOLSI"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    }
+   ],
+   "_sids_source": "AD2 GMMN 31-1-1 / 31-2-1 (SID RWY 35R/35L 1D/3D, 17L/17R 2D/4D, AIRAC 07/21, 09/21): climb on the axis to 2000 ft, then the NDB / VOR tracks; turns 230 kt max"
   },
   {
    "id": "GCRR",
@@ -2373,11 +2787,11 @@
    "runways": [
     {
      "id": "10",
-     "heading": 100
+     "heading": 96
     },
     {
      "id": "28",
-     "heading": 280
+     "heading": 276
     }
    ],
    "runway_in_use": "auto",
@@ -2427,7 +2841,145 @@
      ]
     }
    ],
-   "_holdings_source": "AIP Maroc AD2 GMMX 33_1 / 33_2 (STAR RWY 10 / 28: ODALO, VOR DME 279 MAK 20/25 NM), 34_2 (RNAV STAR RWY 28: RAMIM), 39_1 (VOR/DME RWY 10: MAK)"
+   "_holdings_source": "AIP Maroc AD2 GMMX 33_1 / 33_2 (STAR RWY 10 / 28: ODALO, VOR DME 279 MAK 20/25 NM), 34_2 (RNAV STAR RWY 28: RAMIM), 39_1 (VOR/DME RWY 10: MAK)",
+   "sids": [
+    {
+     "name": "OBOGA3D",
+     "runways": [
+      "10"
+     ],
+     "end": "OBOGA",
+     "via": [
+      "313310.66N 0075514.11W",
+      "OBOGA"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "MABAP3D",
+     "runways": [
+      "10"
+     ],
+     "end": "MABAP",
+     "via": [
+      "313310.66N 0075514.11W",
+      "315134.29N 0080856.65W",
+      "MABAP"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "MAGAV3D",
+     "runways": [
+      "10"
+     ],
+     "end": "MAGAV",
+     "via": [
+      "313310.66N 0075514.11W",
+      "MAGAV"
+     ],
+     "turn": "R",
+     "max_kt": 230
+    },
+    {
+     "name": "LISRA3D",
+     "runways": [
+      "10"
+     ],
+     "end": "LISRA",
+     "via": [
+      "313310.66N 0075514.11W",
+      "LISRA"
+     ],
+     "turn": "R",
+     "max_kt": 230
+    },
+    {
+     "name": "MOKIR3D",
+     "runways": [
+      "10"
+     ],
+     "end": "MOKIR",
+     "via": [
+      "313310.66N 0075514.11W",
+      "313931.27N 0073922.90W",
+      "313105.62N 0073737.66W",
+      "312307.24N 0074138.37W",
+      "MOKIR"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "OBOGA4D",
+     "runways": [
+      "28"
+     ],
+     "end": "OBOGA",
+     "via": [
+      "313701.64N 0080906.06W",
+      "OBOGA"
+     ],
+     "turn": "R",
+     "max_kt": 230
+    },
+    {
+     "name": "MABAP4D",
+     "runways": [
+      "28"
+     ],
+     "end": "MABAP",
+     "via": [
+      "313701.64N 0080906.06W",
+      "314818.87N 0080820.13W",
+      "MABAP"
+     ],
+     "turn": "R",
+     "max_kt": 230
+    },
+    {
+     "name": "MAGAV4D",
+     "runways": [
+      "28"
+     ],
+     "end": "MAGAV",
+     "via": [
+      "313701.64N 0080906.06W",
+      "MAGAV"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "LISRA4D",
+     "runways": [
+      "28"
+     ],
+     "end": "LISRA",
+     "via": [
+      "313701.64N 0080906.06W",
+      "LISRA"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "MOKIR4D",
+     "runways": [
+      "28"
+     ],
+     "end": "MOKIR",
+     "via": [
+      "313701.64N 0080906.06W",
+      "MOKIR"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    }
+   ],
+   "_sids_source": "AD2 GMMX 31_1 / 31_2 (SID RWY 10 3D: Rm114 to 10 DME MAK; RWY 28 4D: Rm279 to 2.5 DME MAK; 230 kt in turns)"
   },
   {
    "id": "GMAD",
@@ -2492,7 +3044,265 @@
      ]
     }
    ],
-   "_holdings_source": "AIP Maroc AD2 GMAD 33_1_1 / 33_1_2 (STAR RWY 09 / 27, AIRAC 01/16: IAF SOPAB, AGAMU) and AD2 GMAD 35_2 (ILSx/LOC RWY 27: hold over ALS NDB)"
+   "_holdings_source": "AIP Maroc AD2 GMAD 33_1_1 / 33_1_2 (STAR RWY 09 / 27, AIRAC 01/16: IAF SOPAB, AGAMU) and AD2 GMAD 35_2 (ILSx/LOC RWY 27: hold over ALS NDB)",
+   "sids": [
+    {
+     "name": "MOGBA4D",
+     "runways": [
+      "09"
+     ],
+     "end": "MOGBA",
+     "via": [
+      "301718.98N 0092300.50W",
+      "301450.00N 0094045.00W",
+      "ARGAB",
+      "MOGBA"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "AGALI4D",
+     "runways": [
+      "09"
+     ],
+     "end": "AGALI",
+     "via": [
+      "301718.98N 0092300.50W",
+      "301450.00N 0094045.00W",
+      "ARGAB",
+      "MOGBA",
+      "AGALI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "OLOMA4D",
+     "runways": [
+      "09"
+     ],
+     "end": "OLOMA",
+     "via": [
+      "301718.98N 0092300.50W",
+      "OLOMA"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "KEGAG4D",
+     "runways": [
+      "09"
+     ],
+     "end": "KEGAG",
+     "via": [
+      "301718.98N 0092300.50W",
+      "KEGAG"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 2000,
+     "max_kt": 230
+    },
+    {
+     "name": "BULOK4D",
+     "runways": [
+      "09"
+     ],
+     "end": "BULOK",
+     "via": [
+      "301718.98N 0092300.50W",
+      "BULOK"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "GOSPI4D",
+     "runways": [
+      "09"
+     ],
+     "end": "GOSPI",
+     "via": [
+      "301718.98N 0092300.50W",
+      "GOSPI"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "TEKNA4D",
+     "runways": [
+      "09"
+     ],
+     "end": "TEKNA",
+     "via": [
+      "301718.98N 0092300.50W",
+      "TEKNA"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "ARSOL4D",
+     "runways": [
+      "09"
+     ],
+     "end": "ARSOL",
+     "via": [
+      "301718.98N 0092300.50W",
+      "ARSOL"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "TIKVO4D",
+     "runways": [
+      "09"
+     ],
+     "end": "TIKVO",
+     "via": [
+      "301718.98N 0092300.50W",
+      "TIKVO"
+     ],
+     "turn": "R",
+     "axis_alt_ft": 1500,
+     "max_kt": 230
+    },
+    {
+     "name": "MOGBA3D",
+     "runways": [
+      "27"
+     ],
+     "end": "MOGBA",
+     "via": [
+      "301924.20N 0092901.65W",
+      "301450.00N 0094045.00W",
+      "ARGAB",
+      "MOGBA"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "AGALI3D",
+     "runways": [
+      "27"
+     ],
+     "end": "AGALI",
+     "via": [
+      "301924.20N 0092901.65W",
+      "301450.00N 0094045.00W",
+      "ARGAB",
+      "MOGBA",
+      "AGALI"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "OLOMA3D",
+     "runways": [
+      "27"
+     ],
+     "end": "OLOMA",
+     "via": [
+      "301924.20N 0092901.65W",
+      "ADM",
+      "OLOMA"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "KEGAG3D",
+     "runways": [
+      "27"
+     ],
+     "end": "KEGAG",
+     "via": [
+      "301924.20N 0092901.65W",
+      "ADM",
+      "KEGAG"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "BULOK3D",
+     "runways": [
+      "27"
+     ],
+     "end": "BULOK",
+     "via": [
+      "301924.20N 0092901.65W",
+      "BULOK"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "GOSPI3D",
+     "runways": [
+      "27"
+     ],
+     "end": "GOSPI",
+     "via": [
+      "301924.20N 0092901.65W",
+      "GOSPI"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "TEKNA3D",
+     "runways": [
+      "27"
+     ],
+     "end": "TEKNA",
+     "via": [
+      "301924.20N 0092901.65W",
+      "TEKNA"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "ARSOL3D",
+     "runways": [
+      "27"
+     ],
+     "end": "ARSOL",
+     "via": [
+      "301924.20N 0092901.65W",
+      "ARSOL"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    },
+    {
+     "name": "TIKVO3D",
+     "runways": [
+      "27"
+     ],
+     "end": "TIKVO",
+     "via": [
+      "301924.20N 0092901.65W",
+      "TIKVO"
+     ],
+     "turn": "L",
+     "max_kt": 230
+    }
+   ],
+   "_sids_source": "AD2 GMAD 31_1_1 / 31_1_2 (SID RWY 09 4D: turn at 1500 ft (2000 ft OLOMA, KEGAG) right Rm272 / 274; RWY 27 3D: turn left at 5.2 DME ADM)"
   },
   {
    "id": "GCLP",
@@ -2691,7 +3501,97 @@
      ]
     }
    ],
-   "_holdings_source": "AIP Maroc AD2 GMME 35-1 (RNAV STAR RWY 21: ME998, ME999 1 min L -FL130 +FL060), 33-2 (STAR 1G RWY 21: FAHIM 158, ENNAV 249, FL060-FL090, 220 kt), 39-5 (ILSx RWY 21)"
+   "_holdings_source": "AIP Maroc AD2 GMME 35-1 (RNAV STAR RWY 21: ME998, ME999 1 min L -FL130 +FL060), 33-2 (STAR 1G RWY 21: FAHIM 158, ENNAV 249, FL060-FL090, 220 kt), 39-5 (ILSx RWY 21)",
+   "sids": [
+    {
+     "name": "TOLSI1A",
+     "runways": [
+      "03"
+     ],
+     "end": "TOLSI",
+     "via": [
+      "ME600",
+      "ME402",
+      "TOLSI"
+     ],
+     "max_kt": 250
+    },
+    {
+     "name": "VARAS1A",
+     "runways": [
+      "03"
+     ],
+     "end": "VARAS",
+     "via": [
+      "ME602",
+      "ME904",
+      "VARAS"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "BISMI1A",
+     "runways": [
+      "03"
+     ],
+     "end": "BISMI",
+     "via": [
+      "ME602",
+      "ME904",
+      "DIRAD",
+      "ME603",
+      "BISMI"
+     ],
+     "max_kt": 220
+    },
+    {
+     "name": "TOLSI1B",
+     "runways": [
+      "21"
+     ],
+     "end": "TOLSI",
+     "via": [
+      "ME601",
+      "ME603",
+      "SBI",
+      "ME402",
+      "TOLSI"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 1000,
+     "max_kt": 210
+    },
+    {
+     "name": "VARAS1B",
+     "runways": [
+      "21"
+     ],
+     "end": "VARAS",
+     "via": [
+      "ME601",
+      "ME603",
+      "VARAS"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 1000,
+     "max_kt": 210
+    },
+    {
+     "name": "BISMI1B",
+     "runways": [
+      "21"
+     ],
+     "end": "BISMI",
+     "via": [
+      "ME601",
+      "BISMI"
+     ],
+     "turn": "L",
+     "axis_alt_ft": 1000,
+     "max_kt": 210
+    }
+   ],
+   "_sids_source": "AD2 GMME 31-3 / 31-4 (RNAV SID RWY 03 1A, RWY 21 1B, AIRAC 03/25)"
   },
   {
    "id": "GMMZ",
@@ -2708,7 +3608,36 @@
      "heading": 297
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "TIDMO",
+     "coord": "305431.36N 0063227.05W",
+     "inbound_true": 207.0,
+     "turn": "R",
+     "leg_min": 1,
+     "min_alt_ft": 9200,
+     "max_alt_ft": 14000,
+     "max_kt": 210,
+     "runways": [
+      "30"
+     ]
+    },
+    {
+     "fix": "MZ120",
+     "coord": "305548.34N 0071123.53W",
+     "inbound_true": 26.7,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 9000,
+     "max_fl": 140,
+     "max_kt": 220,
+     "runways": [
+      "12"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Maroc AD2 GMMZ 34_1 (RNAV STAR RWY 30: TIDMO) and 35_1 (STAR RWY 12: MZ120) data tables"
   }
  ],
  "sequencing": [
@@ -4469,5 +5398,5 @@
   ]
  },
  "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
- "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
 }

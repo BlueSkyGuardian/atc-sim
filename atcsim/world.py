@@ -1152,6 +1152,18 @@ class World:
         for ac in self.aircraft.values():
             if ac.active and not ac.on_frequency:
                 passed = ac.next_index >= 2 or ac.entered
+                sid = getattr(ac, "sid", None)
+                if sid and not sid.get("released") and ac.spd_cas == sid["max_kt"] \
+                        and ac.alt_ft > sid.get("elev_ft", 0.0) + 4000.0:
+                    ac.spd_cas, ac.spd_ias_now = None, False      # through the SID's turns: its own climb speed
+                if sid and not sid.get("released"):
+                    # a departure on its SID: released by approach at its release point
+                    k = ac.route.index(ac.entry_wp) if ac.entry_wp in ac.route else 0
+                    passed = ac.next_index > k
+                    if passed or dist(ac.pos, self.waypoints[ac.entry_wp]) <= ac.checkin_nm:
+                        sid["released"] = True
+                        if ac.spd_cas == sid["max_kt"]:
+                            ac.spd_cas, ac.spd_ias_now = None, False   # the SID's turn speed no longer applies
                 if passed or dist(ac.pos, self.waypoints[ac.entry_wp]) <= ac.checkin_nm:
                     ac.on_frequency = True
                     ac.first_contact_t = self.t
@@ -1168,7 +1180,8 @@ class World:
                     self._event("checkin", callsign=ac.callsign, entry=ac.entry_wp, fl=int(round(ac.alt_ft / 100)),
                                 assumed=ac.assumed,
                                 text=f"{ac.callsign} {ac.icao} FL{int(round(ac.alt_ft / 100))}{vert}, checking in "
-                                     f"({ac.entry_wp} in {dist(ac.pos, self.waypoints[ac.entry_wp]):.0f} NM)"
+                                     + (f"(released by approach, {sid['name']} from {sid['aerodrome']})" if sid else
+                                        f"({ac.entry_wp} in {dist(ac.pos, self.waypoints[ac.entry_wp]):.0f} NM)")
                                      + (f", requesting FL{rfl}" if ask_rfl else ""))
                     if ask_rfl and self.record:          # a departure asks for its final level on first contact
                         self.add_dynamic_request(ac.callsign, "altitude", int(rfl), "final level (departure)")

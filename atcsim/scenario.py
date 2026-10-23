@@ -47,7 +47,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import math
 
@@ -268,6 +268,11 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
         names = ([] if start else before) + names + after
     filed = list(names)
     start_name = None
+    sid_info = None
+    if start:
+        sid_info = _sid_departure(a, scn, asp, waypoints, aerodromes, names, start, cs)
+        if sid_info is not None:
+            names, start = sid_info["names"], dict(start, point=list(sid_info["release"]))
     if start:
         if "time" not in start:
             raise ScenarioError(f"{cs}: start needs a 'time'")
@@ -386,10 +391,20 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
         spawn = 0.0
     head_len = polyline_length(head)
     ac.route = ([pre_name] + upstream if route[0] != pre_name else []) + route
+    if sid_info is not None:
+        sid_info["time_s"] = _climb_time_s(perf, mass, sid_info["along_nm"], sid_info["elev_ft"],
+                                           float(a.get("cfl") or fl) * 100.0, sid_info["max_kt"])
+    if sid_info is not None and spawn - sid_info["time_s"] >= 0 and start_along == 0.0:
+        # it takes off and flies its SID with approach, released to us where the scenario starts it
+        ac.route = sid_info["pre"] + ac.route
+        spawn -= sid_info["time_s"]
+        ac.spawn_alt_ft = sid_info["elev_ft"] + 50.0
+        ac.sid = {"name": sid_info["name"], "aerodrome": sid_info["ad"], "runway": sid_info["runway"],
+                  "max_kt": sid_info["max_kt"], "released": False, "elev_ft": sid_info["elev_ft"]}
     ac.entry_time = spawn
     ac.boundary_time = entry
     ac.entry_wp = route[0]
-    ac.checkin_nm = float(a.get("checkin_nm", checkin_nm))
+    ac.checkin_nm = float(a.get("checkin_nm", 2.0 if getattr(ac, "sid", None) else checkin_nm))
     ac.start_along_nm = start_along
     ac.planned_exit = route[-1]
     ac.planned_length_nm = polyline_length(pts) - max(0.0, start_along - head_len)
@@ -426,7 +441,78 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     if start_name and asp.inside(waypoints[start_name]) and dep_ad in {x["id"] for x in asp.default_aerodromes}:
         ac.prev_unit = dep_ad                      # released by the departure aerodrome's approach
     ac.flight_plan = flightplan.complete(ac, a, asp, start_min, tas, route, filed)
+    if getattr(ac, "sid", None):
+        ac.flight_plan["sid"] = ac.sid["name"]
+        ac.flight_plan["route"] = f"{ac.sid['name']} " + str(ac.flight_plan.get("route", ""))
     return ac
+
+
+
+def _climb_time_s(perf, mass: float, along_nm: float, elev_ft: float, cfl_ft: float, sid_kt: float) -> float:
+    """Time from the runway to along_nm on its SID: its own climb (rate and speeds of the type: the SID's turn speed
+    up to 4000 ft above the field, 250 kt below FL100, then its own schedule), still air."""
+    alt, d, t, dt = elev_ft + 50.0, 0.0, 0.0, 5.0
+    while d < along_nm and t < 3600.0:
+        if alt < elev_ft + 4000.0:
+            mode, val = "cas", min(sid_kt, 250.0)
+        elif alt < 10000.0:
+            mode, val = "cas", 250.0
+        else:
+            mode, val = perf.schedule(alt)
+        tas = perf.tas_for(mode, val, alt)
+        if t < 30.0:
+            tas = min(tas, perf.tas_for("cas", 165.0 + t * 1.5, alt))
+        if alt < cfl_ft:
+            alt = min(cfl_ft, alt + max(500.0, perf.roc_fpm(alt, mode, val, mass)) * dt / 60.0)
+        d += tas * dt / 3600.0
+        t += dt
+    return t
+
+
+def _sid_departure(a: dict, scn: dict, asp, waypoints, aerodromes, names, start, cs) -> Optional[dict]:
+    """A departure from an aerodrome with published SIDs (scenario "sid_departures", on by default): the SID of the
+    runway in use that leads to its route (its end on the route, else the nearest end), the release point (the
+    scenario's start point brought onto the SID), the SID points before it (flown with approach) and the route from
+    there."""
+    from .arrivals import sid_path
+    from .geometry import point_along_polyline
+    dep = str(a.get("dep") or "").upper()
+    ad = aerodromes.get(dep)
+    if ad is None or not getattr(ad, "sids", None) or not a.get("sid", scn.get("sid_departures", True)):
+        return None
+    cands = [sd for sd in ad.sids if ad.in_use in sd["runways"]]
+    if a.get("sid"):
+        cands = [sd for sd in cands if sd["name"] == str(a["sid"]).upper()] or cands
+    if not cands:
+        return None
+    s0 = asp.resolve_point(start["point"])
+    on_route = [sd for sd in cands if sd["end"] in names]
+    if on_route:
+        sd = min(on_route, key=lambda x: names.index(x["end"]))
+    else:
+        sd = min(cands, key=lambda x: dist(x["via"][-1][1], s0))
+    path = sid_path(ad, sd, ad.in_use)
+    xy = [p for _, p in path]
+    along, off, _ = project_on_polyline(xy, s0)
+    if off > 15.0 or along < 3.0:
+        return None                                   # its start is not on that SID: as written
+    (rx, ry), nxt = point_along_polyline(xy, along)
+    pre = []
+    for k, (nm, p) in enumerate(path[:nxt]):
+        w = nm or f"@{cs}~S{k}"
+        if nm is None:
+            waypoints[w] = p
+        pre.append(w)
+    post = []
+    for k, (nm, p) in enumerate(path[nxt:], nxt):
+        w = nm or f"@{cs}~S{k}"
+        if nm is None:
+            waypoints[w] = p
+        post.append(w)
+    rest = names[names.index(sd["end"]) + 1:] if sd["end"] in names else names
+    new_names = post + [w for w in rest if w not in post]
+    return {"names": new_names, "release": (rx, ry), "pre": pre, "along_nm": along,
+            "elev_ft": ad.elev_ft, "name": sd["name"], "ad": ad.id, "runway": ad.in_use, "max_kt": sd["max_kt"]}
 
 
 DEPARTURES_REQUEST_RFL = ("GMMN",)   # departures from these aerodromes ask for their final level on first contact

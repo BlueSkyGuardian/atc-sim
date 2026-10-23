@@ -200,6 +200,10 @@ SCHEMA = {
                                                   "rev_limit_s": {"type": "number"}}},
         "auto_assume": {"type": "boolean", "default": False},
         "auto_routes": {"type": "boolean", "default": True},
+        "sid_departures": {"type": "boolean", "default": True,
+                           "description": "departures from an aerodrome with published SIDs (GMMN, GMME, GMMX, GMAD) take "
+                                          "off from the runway in use and fly the SID with approach, released at their "
+                                          "start point; false: they appear at their start point"},
         "pre_entry_nm": {"type": "number", "default": 30},
         "checkin_nm": {"type": "number", "default": 10},
         "post_exit_display_s": {"type": "number", "default": 240},
@@ -320,7 +324,7 @@ SCHEMA = {
                                      "description": "arrival: the pilot asks for descent at its top of descent; false = only "
                                                     "when a scripted 'descent' request says so"},
             "direction": {"enum": ["southbound", "northbound"]},
-            "dep": {"type": "string"}, "dest": {"type": "string"}, "rfl": {"type": "integer", "minimum": 100, "maximum": 600}, "cfl": {"type": "integer", "minimum": 50, "maximum": 600, "description": "cleared level at the start (a departure released climbing by approach)"},
+            "dep": {"type": "string"}, "dest": {"type": "string"}, "rfl": {"type": "integer", "minimum": 100, "maximum": 600}, "cfl": {"type": "integer", "minimum": 50, "maximum": 600, "description": "cleared level at the start (a departure released climbing by approach)"}, "sid": {"type": ["string", "boolean"], "description": "a departure's SID by name (e.g. LAKAM2D), or false to start it at its start point"},
             "rvsm": {"type": "boolean"}, "military": {"type": "boolean"},
             "formation": {"anyOf": [{"type": "integer", "minimum": 2},
                                     {"type": "object", "properties": {"size": {"type": "integer", "minimum": 2},

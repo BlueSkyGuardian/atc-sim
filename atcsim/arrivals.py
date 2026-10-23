@@ -74,6 +74,7 @@ class Aerodrome:
     outbound_nm: float = 12.0
     racetrack_nm: float = 4.0
     holdings: List[dict] = field(default_factory=list)   # published approach holds: x, y, fix, inbound_true, turn, ...
+    sids: List[dict] = field(default_factory=list)         # published SIDs: name, runways, end, via [(name, (x, y))]
     rwy: Dict[str, dict] = field(default_factory=dict)     # per runway (published procedure): final_nm, faf_alt_ft,
     _sidx: int = 0                                         # if_nm, joins [{via: [(x, y)], north_of_field}]
 
@@ -136,6 +137,42 @@ class SeqFix:
                 "letter_of_agreement": self.describe()}
 
 
+def _sid(sd: dict, waypoints, asp=None) -> dict:
+    """A published SID: its points resolved (a name of the airspace, else a coordinate)."""
+    via = []
+    for v in sd.get("via", []):
+        if isinstance(v, str) and v.upper() in waypoints:
+            via.append((v.upper(), tuple(waypoints[v.upper()])))
+        else:
+            via.append((None, tuple(asp.resolve_point(v)) if asp is not None else tuple(v)))
+    end = sd.get("end") or (via[-1][0] if via else None)
+    return {"name": sd["name"], "runways": [str(r) for r in sd.get("runways", [])], "end": end, "via": via,
+            "turn": sd.get("turn"), "axis_alt_ft": sd.get("axis_alt_ft"), "axis_nm": sd.get("axis_nm"),
+            "max_kt": float(sd.get("max_kt") or 230)}
+
+
+def sid_path(ad: "Aerodrome", sid: dict, runway: str) -> List[Tuple[Optional[str], Point]]:
+    """The SID flown from the departure end of the runway: the runway axis up to its turn (an altitude, at a climb
+    of about 600 ft per NM, or a distance), a point to the side of the published turn, then its points."""
+    h = math.radians(ad.runways[runway])
+    u = (math.sin(h), math.cos(h))
+    der = (ad.x + u[0] * 0.8, ad.y + u[1] * 0.8)
+    pts: List[Tuple[Optional[str], Point]] = [(None, der)]
+    if sid.get("axis_alt_ft"):
+        d = max(1.0, (float(sid["axis_alt_ft"]) - ad.elev_ft) / 600.0)
+    elif sid.get("axis_nm"):
+        d = float(sid["axis_nm"])
+    else:
+        d = 1.5
+    ax = (der[0] + u[0] * d, der[1] + u[1] * d)
+    pts.append((None, ax))
+    if sid.get("turn") in ("L", "R"):
+        n = (u[1], -u[0]) if sid["turn"] == "R" else (-u[1], u[0])
+        pts.append((None, (ax[0] + u[0] * 1.2 + n[0] * 1.6, ax[1] + u[1] * 1.2 + n[1] * 1.6)))
+    pts += list(sid["via"])
+    return pts
+
+
 def _runway_params(r: dict, asp=None) -> dict:
     """A runway's published approach data: final (FAF distance), FAF altitude, intermediate fix distance, and the
     joining routes to it (points resolved)."""
@@ -181,6 +218,8 @@ def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Di
                        schedule=sorted((float(e["time"]), str(e["runway"])) for e in a.get("runway_schedule", [])),
                        final_default_nm=float(a.get("final_nm", 10)), outbound_nm=float(a.get("outbound_nm", 12)),
                        rwy={str(r["id"]): _runway_params(r, asp) for r in a["runways"]},
+                       sids=[_sid(sd, waypoints, asp) for sd in (a.get("sids") or next(
+                           (d.get("sids", []) for d in d_ads if d.get("id") == a["id"]), []))],
                        holdings=[_holding(h, asp) for h in (a.get("holdings") or next(
                            (d.get("holdings", []) for d in d_ads if d.get("id") == a["id"]), []))])
         want = str(a.get("runway_in_use", "auto"))

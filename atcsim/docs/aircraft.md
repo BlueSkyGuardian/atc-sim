@@ -165,13 +165,13 @@ its slot: speed first, then one vector (up to 25 NM), then the **published appro
 the aerodrome's published one for the runway in use that lies on the way (fix, inbound track, turn direction,
 1 minute legs or the published leg length, never below its minimum holding altitude, its maximum speed): GMMN KOTAG /
 DEVNO (35), SLK / BIRVO / CAE (17), NASRO; GCLP ENETA, LALTO, TOMOS, LPC; GCRR GAKMI, INSER, NAVIM; GMAD SOPAB, AGAMU
-(27), ALS (27); GMMX ODALO, RAMIM (28), MAK; GMME ME999, ME998, FAHIM, ENNAV (21) (`aerodromes[].holdings`). The number of laps accounts for the detour
+(27), ALS (27); GMMX ODALO, RAMIM (28), MAK; GMME ME999, ME998, FAHIM, ENNAV (21); GMMZ TIDMO (30), MZ120 (12) (`aerodromes[].holdings`). The number of laps accounts for the detour
 to the hold fix, and laps are cut short when the slot comes (`approach_holding`, `approach_leave_hold`). No new
 vector while the last one is still being flown. Approach re-sequences when an aircraft has clearly got ahead of the
 one before it (`approach_resequenced`), checks the distance in a straight line as well as along the track before
 letting one turn in behind an aircraft on final, takes one that is too close with nothing left to vector out of the
 sequence (`approach_breakoff`), and sends around one that gets within 3 NM of the aircraft ahead on final.
-Aerodromes without published holding data yet (GMMZ, GMMI, GCFV) use a racetrack at the approach entry.
+Aerodromes without published holding data yet (GMMI, GCFV) use a racetrack at the approach entry.
 
 **Areas.** Every path approach builds (the way to the procedure, the joining route, the vectors) keeps the lateral
 spacing from the active areas at the levels flown there: **3 NM from a prohibited area (GMP), 5 NM from a danger
@@ -189,6 +189,19 @@ idle, and about 4.3 NM per 1000 ft above FL250 (100 levels in about 43 NM from t
 below, 3 NM below FL100. Cleared before its top of descent, about 1000 ft/min until it meets that path. Speedbrakes
 only when it can no longer make the level of its letter of agreement by the fix; "expedite", an assigned rate or
 speedbrakes give up to the idle rate and more.
+
+**Departures and SIDs.** Departures from GMMN, GMME, GMMX and GMAD fly the published SIDs (`aerodromes[].sids`
+in the airspace file, from AIP Maroc AD 2 xx 31): GMMN 35R/35L 1D/3D and 17L/17R 2D/4D (on the runway axis to
+2000 ft, then the NDB / VOR tracks through MOKDA, BODNI, EVDOL, REVMI, AGDAL, CSD, SLK, GOVAS, BISMI…), GMME RNAV
+03 1A and 21 1B, GMMX 10 3D (Rm 114 to 10 DME MAK) and 28 4D (to 2.5 DME MAK), GMAD 09 4D (right reversal at
+1500 ft / 2000 ft) and 27 3D (left at 5.2 DME ADM). A departure takes off from the departure end of the runway in
+use, flies the SID that leads to its route - the turn on the published side, 230 kt in the turns (210 kt on GMME
+21) until about 4000 ft above the field, then its own climb speeds - and climbs to the level approach gives it
+(the scenario's `cfl`). It is approach's until its release point (the scenario's start point, brought onto the
+SID), where it calls you (`checkin`: "released by approach, LAKAM2D from GMMN"); it takes off as much earlier as
+its own climb performance needs to get there at the scenario's start time. Its level there is what that climb
+gives (FL90 a few miles from the field, FL160 forty miles out), not a fixed FL150. The SID is in its flight plan
+(`sid`, and at the head of item 15).
 
 ## Traffic before and after the sector
 

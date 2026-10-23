@@ -238,7 +238,14 @@ class Aircraft:
         self.alt_ft = self.cleared_alt_ft = self.fl * 100.0
         if getattr(self, "initial_cfl", None):          # a departure released climbing (an arrival descending)
             self.cleared_alt_ft = float(self.initial_cfl) * 100.0
+        sid = getattr(self, "sid", None)
+        if sid and getattr(self, "spawn_alt_ft", None) is not None:
+            # just airborne off the runway, flying its SID (approach climbs it to the level it is released at)
+            self.alt_ft = float(self.spawn_alt_ft)
+            self.spd_cas, self.spd_ias_now = float(sid["max_kt"]), True
         self.tas = self.perf.tas_for(*self.speed_target(), self.alt_ft)
+        if sid and getattr(self, "spawn_alt_ft", None) is not None:
+            self.tas = self.perf.tas_for("cas", 165.0, self.alt_ft)
         course = bearing(self.leg_from, pts[self.next_index])
         u, v = env.weather.at(self.x, self.y, self.alt_ft / 100, t)
         self.hdg = (course - self._wca(course, u, v)) % 360
@@ -347,6 +354,9 @@ class Aircraft:
                     self.status, self.exit_point = "exited", fx
                     self.end_time = None
                     return "exited"
+        sid = getattr(self, "sid", None)
+        if sid and not sid.get("released"):
+            return None                               # on its SID with approach, below and before our airspace
         if env.airspace.inside(self.pos):
             self.entered = True
         elif self.entered:

@@ -86,7 +86,7 @@ for _ in range(1200):
         if x.active and x.on_frequency and not x.assumed:
             w.issue({"callsign": x.callsign, "type": "assume"})
     if w.t == 900:
-        ok(d0.cleared_alt_ft == 19000 and d0.alt_ft > 15500, f"climbing to FL190 after its release ({d0.alt_ft:.0f} ft)")
+        ok(d0.cleared_alt_ft == 19000 and d0.alt_ft > 10000 and d0.vs_fpm > 500, f"climbing to FL190 after its release ({d0.alt_ft:.0f} ft)")
 ok(a.status == "exited" and a.exit_point == "LAKAM", "the arrival handed over at LAKAM")
 cr = w.metrics()["sequencing"]["crossings"]
 ok("LAKAM" in cr and any(c["callsign"] == "RAM763" for c in cr["LAKAM"]), "and scored at the fix")
@@ -156,4 +156,22 @@ ok(close >= 3.0, f"GMMN 17 joining route {close:.1f} NM from GMP16 / GMP22")
 gm.in_use = rw0
 from atcsim.model import AREA_CLEARANCE_NM
 ok(AREA_CLEARANCE_NM == {"prohibited": 3.0, "restricted": 5.0, "danger": 5.0}, "area lateral spacing 3 / 5 / 5 NM")
+# SIDs: a GMMN departure takes off from the runway in use, flies its SID with approach, calls at its release
+w = build_world(load_scenario("s21_casablanca_north_gmmn_gmme"))
+w._check_finished = lambda: None
+d = w.aircraft["RAM1474"]
+ok(getattr(d, "sid", None) and d.sid["name"].startswith("LAKAM") and d.flight_plan.get("sid") == d.sid["name"],
+   f"RAM1474 on SID {getattr(d, 'sid', {}).get('name')}")
+low, before_call = None, True
+for _ in range(1000):
+    w.step(1)
+    if d.active and low is None:
+        low = d.alt_ft
+    if d.active and not d.on_frequency and d.alt_ft > 4000:
+        before_call = before_call and not d.entered
+ck = [e for e in w.events if e.get("type") == "checkin" and e.get("callsign") == "RAM1474"]
+ok(low is not None and low < 1500, f"takes off from the runway ({low:.0f} ft when it appears)")
+ok(ck and "released by approach" in ck[0]["text"] and abs(ck[0]["time_s"] - 840) < 60,
+   f"released at its start point near the start time: {[(e['time_s'], e['text']) for e in ck]}")
+ok(before_call, "not ours (not entered) while on its SID with approach")
 print("FIR ok")
