@@ -2603,14 +2603,89 @@
    "runways": [
     {
      "id": "03",
-     "heading": 35
+     "heading": 31
     },
     {
      "id": "21",
-     "heading": 215
+     "heading": 211,
+     "final_nm": 6.9,
+     "faf_alt_ft": 2500,
+     "if_nm": 12.1,
+     "joins": [
+      {
+       "name": "ME999 (IAF), 122 to ME500",
+       "via": [
+        "341927.79N 0064712.39W"
+       ]
+      },
+      {
+       "name": "ME998 (IAF), 302 to ME500",
+       "via": [
+        "340901.32N 0062637.08W"
+       ]
+      }
+     ],
+     "_source": "AD2 GMME 39-5 ILSx RWY 21 (AIRAC 02/26): QFU 211.4 T, IF ME500 12.1 NM 3000 ft, FAP ME502 6.9 NM 2500 ft; IAF ME999 / ME998"
     }
    ],
-   "runway_in_use": "auto"
+   "runway_in_use": "auto",
+   "holdings": [
+    {
+     "fix": "ME999",
+     "coord": "341927.79N 0064712.39W",
+     "inbound_true": 121.3,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 130,
+     "max_kt": 230,
+     "runways": [
+      "21"
+     ]
+    },
+    {
+     "fix": "ME998",
+     "coord": "340901.32N 0062637.08W",
+     "inbound_true": 301.5,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 130,
+     "max_kt": 220,
+     "runways": [
+      "21"
+     ]
+    },
+    {
+     "fix": "FAHIM",
+     "coord": "341504.27N 0065038.82W",
+     "inbound_mag": 158,
+     "var": 0.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 90,
+     "max_kt": 220,
+     "runways": [
+      "21"
+     ]
+    },
+    {
+     "fix": "ENNAV",
+     "coord": "340749.34N 0063014.66W",
+     "inbound_mag": 249,
+     "var": 0.0,
+     "turn": "L",
+     "leg_min": 1,
+     "min_alt_ft": 6000,
+     "max_fl": 90,
+     "max_kt": 220,
+     "runways": [
+      "21"
+     ]
+    }
+   ],
+   "_holdings_source": "AIP Maroc AD2 GMME 35-1 (RNAV STAR RWY 21: ME998, ME999 1 min L -FL130 +FL060), 33-2 (STAR 1G RWY 21: FAHIM 158, ENNAV 249, FL060-FL090, 220 kt), 39-5 (ILSx RWY 21)"
   },
   {
    "id": "GMMZ",
@@ -4388,5 +4463,5 @@
   ]
  },
  "_airways_note": "Upper ATS routes from AIP Maroc ENR 3.1 / ENR 3.2 (the source of truth): points in the published order, one-way where the table gives cruising levels in one direction only (listed in the direction of flight).",
- "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMME, GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
+ "_holdings_note": "Published approach holding patterns (aerodromes[].holdings), used by the simulated approach units for delay and for losing height. inbound_true: the inbound track (true); inbound_mag + var (variation, east positive) when published in magnetic. GMMZ, GMMI, GCFV: no published holding data here yet (AIP Maroc STAR charts not reachable) - a racetrack at the approach entry is used until added."
 }
