@@ -141,6 +141,24 @@ Scenario keys (training airspace example):
 "sequencing": [{"fix": "E1", "aerodrome": "EFLD", "spacing_nm": 10, "cross_at_fl": 250, "min_fl": 250}]
 ```
 
+**Descents started early.** An arrival cleared down before its own top of descent (computed for its destination)
+descends like a managed FMS descent started early: about 1000 ft/min until it meets its idle descent path, then idle
+with its Mach / IAS schedule. Cleared FL250 40 NM before TERTO from FL370, it crosses TERTO still descending (around
+FL315), as real traffic does: to make a level at a fix, clear it earlier or give a rate ("at 2000 ft/min or
+greater"), which takes precedence.
+
+**After the handover.** Once an arrival has left our sectors (transferred to the next sector, or handed down into a
+TMA at its fix), simulated next units fly it to its runway: the rest of its flight plan towards the aerodrome, then the
+approach path (straight-in, or the reversal procedure from the far side), cleared down to the FAF altitude at its own
+top of descent, the ILS from the FAF on the 3° glide path, 250 kt below FL100, 210 kt inside 25 NM, 180 kt before the
+FAF, 145 kt on final. Each aerodrome keeps the order the arrivals were handed over in: every arrival gets a landing
+slot 6 NM (7 NM behind a heavy) after the one before it, and the delay is absorbed by holding at the start of the
+approach when it is long, a dogleg vector otherwise, then speed. At the threshold the aircraft lands and leaves the
+picture (`landed` event). This applies to every arrival to an aerodrome of the airspace, whichever sector handed it
+over (Agadir West North to Casablanca for GMMN, TERTO for GCRR, the Casablanca TMAs). A rerouted arrival (for example
+via DEVNO instead of LAKAM) keeps its new route: it is handed over at its end and judged there against the letter of
+agreement of its fix.
+
 ## Traffic before and after the sector
 
 - Aircraft **appear** 30 NM before their entry point, still with the previous unit (they refuse instructions).

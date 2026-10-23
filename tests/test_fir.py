@@ -93,4 +93,27 @@ ok("LAKAM" in cr and any(c["callsign"] == "RAM763" for c in cr["LAKAM"]), "and s
 s2 = build_world(load_scenario("s22_casablanca_south_gmmx_gmad"))
 ok(s2.env.airspace.controlled == ["C", "SS"] and {"MABAP", "AGALI", "TEKNA", "MAXOR"} <= set(s2.seq),
    "South (C+SS): GMMX / GMAD / GMMZ sequencing fixes")
+
+# after the handover: the next units bring arrivals down and land them; a reroute into the TMA keeps its end
+w = build_world(load_scenario("s21_casablanca_north_gmmn_gmme"))
+sent = False
+for _ in range(2700):
+    w.step(1)
+    for x in w.aircraft.values():
+        if x.active and x.on_frequency and not x.assumed:
+            w.issue({"callsign": x.callsign, "type": "assume"})
+    for r in list(w.requests.values()):
+        if r.status == "pending" and r.kind == "descent":
+            w.issue({"callsign": r.callsign, "type": "altitude", "fl": r.value})
+    t = w.aircraft["TAP1032"]
+    if t.assumed and t.entered and not sent:
+        w.issue({"callsign": "TAP1032", "type": "reroute", "points": ["BIRVO", "DEVNO"]})
+        sent = True
+ok(w.aircraft["TAP1032"].exit_point == "DEVNO" and any(e.get("type") == "fix_crossing" and e.get("via") == "DEVNO"
+   for e in w.events), "rerouted via DEVNO: handed over there (LAKAM not added back), judged against the LAKAM LoA")
+landed = [e["callsign"] for e in w.events if e.get("type") == "landed"]
+ok({"RAM763", "RAM203", "RAM977"} <= set(landed), f"arrivals land after the handover ({len(landed)} landed)")
+ok(all(w.aircraft[c].gone for c in landed), "and leave the picture")
+gm = [e["time_s"] for e in w.events if e.get("type") == "landed" and e.get("aerodrome") == "GMMN"]
+ok(all(b - a >= 140 for a, b in zip(gm, gm[1:])), f"landing intervals kept by approach: {[(e["callsign"], e["time_s"]) for e in w.events if e.get("type") == "landed"]}")
 print("FIR ok")

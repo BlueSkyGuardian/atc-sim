@@ -12,7 +12,7 @@ from .geometry import SEP_H_NM, SEP_V_FT, Point, api_hdg, dist, polyline_length
 from .model import Area, Request
 import numpy as np
 
-from . import arrivals, pilot
+from . import approach, arrivals, pilot
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
@@ -979,6 +979,9 @@ class World:
             elif last in ac.route_after:           # ends in the next sector: the onward route follows
                 ac.route_after = ac.route_after[ac.route_after.index(last) + 1:]
                 tail = []
+            elif ac.arr and last not in self.airspace.boundary_points and (
+                    self.airspace.inside(self.waypoints[last]) or ac.destination in self.aerodromes):
+                tail = []                          # an arrival sent another way into the TMA: handed over at its end
             else:                                  # then the planned exit point
                 tail = [] if ac.route[-1] in pts else [ac.route[-1]]
             ac.route = prefix + pts + tail
@@ -1132,10 +1135,14 @@ class World:
                 self._event("aircraft_left_sector", callsign=ac.callsign, x_nm=round(ac.x, 1), y_nm=round(ac.y, 1),
                             note="left the sector away from any exit waypoint")
                 self._expire_requests(ac.callsign)
-        # 5a. aircraft far away in the next sectors leave the picture (sooner once decontrolled)
+        # 5a. arrivals handed over: the next units bring them down to land (approach.py)
+        if self.record:                        # (look-ahead clones do not fly what has left our sectors)
+            approach.update(self)
+        # aircraft far away in the next sectors leave the picture (sooner once decontrolled); arrivals on their way
+        # to land stay until they land
         b = self.airspace.bbox
         for ac in self.aircraft.values():
-            if ac.outside:
+            if ac.outside and not getattr(ac, "app", None):
                 out_nm = max(b[0] - ac.x, ac.x - b[2], b[1] - ac.y, ac.y - b[3], 0.0)
                 if out_nm > (40.0 if ac.released else 150.0):
                     ac.gone = True
@@ -1388,7 +1395,8 @@ class World:
         if self.t >= self.duration_s:
             self.finished = True
         elif (all(a.status in ("exited", "left_sector") for a in self.aircraft.values())
-              and self._req_idx >= len(self.scheduled_requests)):
+              and self._req_idx >= len(self.scheduled_requests)
+              and not any(getattr(a, "app", None) and not a.gone for a in self.aircraft.values())):
             self.finished = True
         if self.finished:
             # close open LoS / infringements

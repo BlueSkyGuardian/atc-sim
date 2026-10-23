@@ -39,6 +39,8 @@ ARR_PERIOD_S = 10.0
 REQUEST_AHEAD_NM = 3.0          # pilots ask a little before their computed TOD
 REPEAT_S = 60.0
 RETRY_AFTER_UNABLE_S = 90.0
+EARLY_DESCENT_FPM = 1000.0      # managed descent started before the top of descent: about 1000 ft/min until the
+                                # aircraft meets its idle descent path (then idle, Mach / IAS schedule)
 FINAL_DECEL_NM = 4.0            # 250 kt -> approach speed before the FAF
 BUFFER_NM = 2.0
 
@@ -255,11 +257,19 @@ def _route_to_fix(ac: "Aircraft", wps, fix: str) -> float:
     return d
 
 
+def handover_point(ac: "Aircraft") -> str:
+    """Where the arrival leaves us: its sequencing fix, or the end of the route it was sent along instead."""
+    names = [w for w in ac.route if not w.startswith("@")]
+    fix = ac.arr["fix"]
+    return fix if (fix in names or not names) else names[-1]
+
+
 def compute(world: "World", ac: "Aircraft") -> dict:
     seq = world.seq[ac.arr["fix"]]
     ad = world.aerodromes[seq.aerodrome]
-    path = world.approach(seq.fix, ad.id)
-    to_fix = _route_to_fix(ac, world.waypoints, seq.fix)
+    via = handover_point(ac)
+    path = world.approach(via, ad.id)
+    to_fix = _route_to_fix(ac, world.waypoints, via)
     remaining = to_fix + path["to_faf_nm"]
     brg = math.radians(bearing(ac.pos, ad.pos))
     mx, my = (ac.x + ad.x) / 2, (ac.y + ad.y) / 2
@@ -288,13 +298,26 @@ def update(world: "World", ac: "Aircraft") -> None:
     if world.t - st.get("_last", -1e9) < ARR_PERIOD_S * (1 if world.record else 3):
         return
     st["_last"] = world.t
-    if st["fix"] not in [w for w in ac.route if not w.startswith("@")]:
-        return                                  # rerouted away from its arrival fix
+    via = handover_point(ac)
+    if via != st["fix"] and (via in world.airspace.boundary_points or not world.airspace.inside(world.waypoints[via])):
+        return                                  # rerouted away from its arrival fix, out of the sector sideways
     info = compute(world, ac)
     st.update(info)
     tod = info["tod_in_nm"]
     seq = world.seq[st["fix"]]
     descending = ac.cleared_alt_ft < ac.alt_ft - 300
+    # cleared down before its own top of descent: the FMS descends gently (about 1000 ft/min) until it meets the
+    # idle path, then idle - not straight down at idle (a rate given by ATC takes precedence)
+    own = st.get("_vs_own", False)
+    if descending and (ac.vs_cmd_fpm is None or own):
+        if tod > 1.0:
+            ac.vs_cmd_fpm, ac.vs_cmd_mode = EARLY_DESCENT_FPM, "max"
+            st["_vs_own"] = True
+        elif own:
+            ac.vs_cmd_fpm = None
+            st["_vs_own"] = False
+    elif own and not descending:
+        st["_vs_own"] = False
     ad = world.aerodromes[seq.aerodrome]
     # speedbrakes when well above the profile
     if descending and tod < -4:
@@ -335,6 +358,9 @@ def update(world: "World", ac: "Aircraft") -> None:
 # ----------------------------------------------------------------------------- sequencing
 def on_fix_crossing(world: "World", ac: "Aircraft") -> None:
     seq = world.seq.get(ac.exit_point)
+    if (seq is None and ac.arr and ac.arr.get("fix") in world.seq and ac.exit_point in world.waypoints
+            and ac.exit_point not in world.airspace.boundary_points):
+        seq = world.seq[ac.arr["fix"]]          # sent another way (e.g. via DEVNO): judged where it was handed over
     if seq is None or not ac.destination:
         return
     fl = int(round(ac.alt_ft / 100.0))
@@ -376,7 +402,9 @@ def on_fix_crossing(world: "World", ac: "Aircraft") -> None:
         lvl += f", {round(ac.cas())} kt ({'OK' if speed_ok else 'NOT'} {int(seq.speed_at_fix_kt)} kt)"
     spc = "" if spacing is None else f", {spacing} NM behind {prev['callsign']} ({'OK' if spacing_ok else 'LESS THAN'} {seq.spacing_nm:.0f} NM)"
     world._event("fix_crossing", callsign=ac.callsign, fix=seq.fix, fl=fl, spacing_nm=spacing,
-                 spacing_ok=spacing_ok, level_ok=level_ok, text=f"{ac.callsign} crossed {seq.fix} {lvl}{spc}")
+                 spacing_ok=spacing_ok, level_ok=level_ok, via=None if ac.exit_point == seq.fix else ac.exit_point,
+                 text=(f"{ac.callsign} crossed {seq.fix} {lvl}{spc}" if ac.exit_point == seq.fix else
+                       f"{ac.callsign} handed over at {ac.exit_point} (instead of {seq.fix}) {lvl}{spc}"))
 
 
 def sequence_status(world: "World") -> List[dict]:
