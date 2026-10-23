@@ -508,7 +508,7 @@ def build_world(scn: dict) -> World:
     upper_fl = int(sector.get("upper_fl", asp.upper_fl if asp.id != "training" else SECTOR_UPPER_FL))
     wspec = scn.get("weather") or {}
     span = max(asp.bbox[2] - asp.bbox[0], asp.bbox[3] - asp.bbox[1])
-    weather = Weather(wspec, float(scn.get("duration_s", 1800)), domain_nm=384.0 if span <= 300 else 768.0)
+    weather = Weather(wspec, float(scn.get("duration_s", 1800)), domain_nm=384.0 if span <= 300 else 768.0, geo=asp)
     if span > 300:
         b = asp.bbox
         weather.view_bbox = (b[0] - 30.0, b[1] - 30.0, b[2] + 30.0, b[3] + 30.0)

@@ -53,6 +53,19 @@ The wind is the sum of three parts:
 Aircraft fly in this wind: ground speeds, drift, the time to a point, the top of descent and the entry times of
 scenario aircraft are all computed in it. In the designer, the planned trajectories already include it.
 
+### Climatological wind (ERA5)
+
+On the Agadir airspace (the whole Casablanca FIR), the background wind can be the real climatology instead of a
+profile: `"wind": {"climatology": {"month": 1, "mode": 0, "scale": 1}, "noise_kt": 5}`. The data file
+`atcsim/data/climate/era5_gmmm.npz` holds, for each month, the ERA5 monthly-mean wind and temperature on pressure
+levels (about FL180 to FL450) over 25–38°N, 20°W–0°, and the leading mode of their year-to-year variability; it is
+built from a Copernicus download by `tools/era5_climatology.py`. The field varies with position and level, so the
+wind along a route changes as it does in reality (the westerly component across TOVRA–TERTO, the jet over southern
+Morocco in winter, the weak summer flow). `mode` adds the leading variability mode in standard deviations (+1 a
+strong-jet month, −1 a weak one), `scale` multiplies the whole field. Below the lowest level the wind weakens towards
+the surface; the month's temperatures set the ISA deviation used for aircraft performance unless `temperature` is
+given. A jet streak (`jet`), a `gradient_kt_per_100nm` and the small-scale `noise_kt` are added on top when given.
+
 ## Convection (thunderstorms)
 
 ### Cells and their life cycle

@@ -18,6 +18,7 @@ Scenario spec (all optional; "seed" makes the random parts reproducible):
              "streak_speed_kt": 35, "meander_amp_nm": 12, "meander_wavelength_nm": 450},
      "noise_kt": 5, "noise_scale_nm": 40
   },
+  # or a real climatology (ERA5 monthly means, see climate.py): "wind": {"climatology": {"month": 1, "mode": 0}}
   "convection": {"regime": "none|isolated|scattered|squall_line|embedded", "intensity": "moderate|strong|severe",
                  # or a list of such patterns, generated together
                  "count": 8, "region": [-90, -90, 90, 90],
@@ -175,7 +176,8 @@ class Weather:
     def _nf(self, rng, scale_nm: float) -> "NoiseField":
         return NoiseField(rng, scale_nm, n=self._noise_n, domain=self.domain_nm)
 
-    def __init__(self, spec: Optional[dict] = None, duration_s: float = 1800.0, domain_nm: float = DOMAIN_NM):
+    def __init__(self, spec: Optional[dict] = None, duration_s: float = 1800.0, domain_nm: float = DOMAIN_NM,
+                 geo=None):
         # periodic noise domain: 384 NM for the training square, 768 NM for real CTAs (no visible repetition)
         self.domain_nm = float(domain_nm)
         self._noise_n = int(NOISE_N * self.domain_nm / DOMAIN_NM)
@@ -196,6 +198,19 @@ class Weather:
 
         # ---- wind
         w = spec.get("wind") or {}
+        self.clim = None
+        if w.get("climatology"):
+            # ERA5 monthly climatology on the airspace's grid (climate.py); needs a real (projected) airspace
+            if geo is None or getattr(geo, "projection", None) is None:
+                raise ValueError("wind climatology needs a geographic airspace (e.g. agadir)")
+            from .climate import ClimField
+            self.clim = ClimField(w["climatology"], geo.projection.inverse, geo.bbox)
+            self.clim_center = ((geo.bbox[0] + geo.bbox[2]) / 2.0, (geo.bbox[1] + geo.bbox[3]) / 2.0)
+            if not tspec and dev is None:                 # temperatures of the month too
+                d350 = self.clim.mean_isa_dev(350.0)
+                self.isa_deviation_c = round(d350, 1)
+                self.surface_c = 15.0 + d350
+                self.freezing_level_ft = max(0.0, self.surface_c / self.lapse_c_per_kft * 1000.0)
         prof = w.get("profile") or w.get("layers")
         if not prof:
             prof = [] if not (w or spec.get("convection") or spec.get("cells")) else [
@@ -273,6 +288,9 @@ class Weather:
 
     # ========================================================================= wind
     def _bg(self, fl):
+        if self.clim is not None:                         # the climatology at the middle of the airspace
+            u, v = self.clim.uv(self.clim_center[0], self.clim_center[1], fl)
+            return (u, v) if np.ndim(fl) else (float(u), float(v))
         return np.interp(fl, self.p_fl, self.p_u), np.interp(fl, self.p_fl, self.p_v)
 
     def wind_at(self, x, y, fl, t: float = 0.0):
@@ -280,9 +298,14 @@ class Weather:
         x = np.asarray(x, float)
         y = np.asarray(y, float)
         fl = np.asarray(fl, float)
-        u, v = self._bg(fl)
-        u = u + np.zeros(np.broadcast(x, y, fl).shape)
-        v = v + np.zeros_like(u)
+        if self.clim is not None:
+            u, v = self.clim.uv(x, y, fl)
+            u = u + np.zeros(np.broadcast(x, y, fl).shape)
+            v = v + np.zeros_like(u)
+        else:
+            u, v = self._bg(fl)
+            u = u + np.zeros(np.broadcast(x, y, fl).shape)
+            v = v + np.zeros_like(u)
         if self.grad_e or self.grad_n:
             spd = np.hypot(u, v)
             sc = np.where(spd > 1e-6, np.maximum(0.0, spd + self.grad_e * x + self.grad_n * y) / np.maximum(spd, 1e-6), 1.0)
@@ -779,6 +802,8 @@ class Weather:
             "convection": self.regimes_text(),
             "cells": self.cells_summary(t),
         }
+        if self.clim is not None:
+            d["climatology"] = self.clim.describe()
         if getattr(self, "lines", None):
             d["squall_line"] = self.lines[0]
             d["squall_lines"] = self.lines

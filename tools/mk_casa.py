@@ -7,10 +7,16 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scenarios
 
 WX_W = {"seed": 211, "temperature": {"surface_c": 21, "tropopause_fl": 380},
         "wind": {"profile": [{"fl": 0, "dir": 300, "kt": 12}, {"fl": 200, "dir": 285, "kt": 40},
-                             {"fl": 350, "dir": 275, "kt": 60}, {"fl": 450, "dir": 270, "kt": 40}], "noise_kt": 5}}
+                             {"fl": 350, "dir": 275, "kt": 60}, {"fl": 450, "dir": 270, "kt": 40}], "noise_kt": 5},
+        # morning showers building over the Rabat - Fes corridor and the Middle Atlas foothills
+        "convection": [{"regime": "isolated", "intensity": "strong", "count": 5, "region": [205, 25, 325, 120]},
+                       {"regime": "isolated", "intensity": "moderate", "count": 3, "region": [150, 60, 230, 140]}]}
 WX_S = {"seed": 222, "temperature": {"surface_c": 27, "tropopause_fl": 390},
         "wind": {"profile": [{"fl": 0, "dir": 20, "kt": 10}, {"fl": 200, "dir": 330, "kt": 30},
-                             {"fl": 350, "dir": 300, "kt": 45}, {"fl": 450, "dir": 290, "kt": 30}], "noise_kt": 4}}
+                             {"fl": 350, "dir": 300, "kt": 45}, {"fl": 450, "dir": 290, "kt": 30}], "noise_kt": 4},
+        # afternoon convection over the High Atlas (Marrakech - Ouarzazate - Beni Mellal), tops to FL450
+        "convection": [{"regime": "scattered", "intensity": "strong", "count": 9, "region": [190, -150, 340, -40]},
+                       {"regime": "isolated", "intensity": "moderate", "count": 3, "region": [120, -120, 190, -60]}]}
 
 
 def ac(cs, t, route, fl, dep, dest, at=None, time=None, **kw):
@@ -94,7 +100,7 @@ s21 = {
                    "in trail. GMMN and GMME departures are released climbing FL190 and ask for their cruising level "
                    "(UN871 via BAKIM, UR722 via LAKAM, UB11 via TUSOR, UN869 south). Transit traffic on UB11, UN869, "
                    "UA411, UN871, UG5, UN726 and UM240. GMD 21 (FL150-FL460, Al Hoceima) is notified active from T+15 "
-                   "min. Westerly flow, no storms.",
+                   "min. Westerly flow; isolated thunderstorms building between Rabat, Fes and the Middle Atlas.",
     "design_notes": "LAKAM wave 1 (T+17 to T+19): RAM763 (MARJA FL330), TAP1032 and the heavy RAM203 behind it (SALCA, "
                     "FL350 / FL370), EZY9113 (MARJA FL330) - four within 100 s; RAM203 is fast and must not be first by "
                     "default, the order and 10 NM come from speed and early vectors. RAM1474 (GMMN to LPPT, released "
@@ -182,7 +188,9 @@ s22 = {
                    "agreement with the approaches: cleared FL200 at the fix (still descending is fine), 10 NM in trail. "
                    "Departures are released climbing FL190 and ask for their cruising level. Transit traffic on UM372, "
                    "UW900, UG664, UR975, UG850, UN869, UL102, UA600 and UJ744. GMD 30 (GND-FL460, Midelt) is notified "
-                   "active from T+15 min. Northerly low-level wind, westerlies aloft, no storms.",
+                   "active from T+15 min. Northerly low-level wind, westerlies aloft; afternoon thunderstorms over the High "
+                   "Atlas between Marrakech, Beni Mellal and Ouarzazate (scattered, strong, tops to FL450), a few "
+                   "isolated cells west of Marrakech.",
     "design_notes": "MABAP (T+16.5 to T+18.5): RAM1203 (FOBAC FL330), EZY7311 (FACAS FL350), the heavy TOM6KJ (PELAX "
                     "FL370), RYR77QA (FOBAC FL310) - three entries, four aircraft in 110 s. RAM1300 (GMMX departure "
                     "released FL190 at MABAP at T+15) asks FL360 and climbs north on UB11 through the arrivals' "

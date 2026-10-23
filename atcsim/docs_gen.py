@@ -213,6 +213,12 @@ SCHEMA = {
                                                              "tropopause_fl": {"type": "number"},
                                                              "lapse_c_per_kft": {"type": "number"}}},
             "wind": {"type": "object", "properties": {
+                "climatology": {"type": "object", "required": ["month"], "description": "ERA5 monthly climatology "
+                                "(agadir): the month's mean wind and temperature field, varying with position and level",
+                                "properties": {"month": {"type": "integer", "minimum": 1, "maximum": 12},
+                                               "mode": {"type": "number", "description": "leading variability mode, "
+                                                        "in standard deviations (+1 strong jet, -1 weak)"},
+                                               "scale": {"type": "number"}, "file": {"type": "string"}}},
                 "profile": {"type": "array", "items": {"type": "object", "required": ["fl", "dir", "kt"],
                                                        "properties": {"fl": {"type": "number"},
                                                                       "dir": {"type": "number", "description": "FROM, degrees"},

@@ -233,7 +233,7 @@ def _weather_for(scn: dict) -> Weather:
         _WX.move_to_end(key)
         return _WX[key]
     span = max(asp.bbox[2] - asp.bbox[0], asp.bbox[3] - asp.bbox[1])
-    wx = Weather(spec, dur, domain_nm=384.0 if span <= 300 else 768.0)
+    wx = Weather(spec, dur, domain_nm=384.0 if span <= 300 else 768.0, geo=asp)
     b = asp.bbox
     wx.view_bbox = (b[0] - 30.0, b[1] - 30.0, b[2] + 30.0, b[3] + 30.0) if span > 300 else (-100.0, -100.0, 100.0, 100.0)
     _WX[key] = wx
