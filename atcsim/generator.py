@@ -166,7 +166,7 @@ class _Ctx:
     def _flows(self):
         import json as _json
         import os as _os
-        path = _os.path.join(_os.path.dirname(__file__), "data", "airspaces", "agadir_flows.json")
+        path = _os.path.join(_os.path.dirname(__file__), "data", "flows", "agadir.json")
         if not _os.path.exists(path):
             return []
         d = _json.loads(open(path, encoding="utf-8").read())

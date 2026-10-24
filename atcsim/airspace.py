@@ -412,7 +412,9 @@ def available() -> List[str]:
     names = ["training"]
     for fn in sorted(os.listdir(DATA_DIR)):
         if fn.endswith(".json"):
-            names.append(json.load(open(os.path.join(DATA_DIR, fn)))["id"])
+            d = json.load(open(os.path.join(DATA_DIR, fn)))
+            if isinstance(d, dict) and "id" in d and "boundary" in d:    # an airspace (not another data file)
+                names.append(d["id"])
     return names
 
 
