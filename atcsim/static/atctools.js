@@ -165,7 +165,8 @@
   async function renderOldi(force) {
     const b = document.getElementById('olBtn');
     const man = state && state.coord ? Object.values(state.coord).filter(c => c.manual).length : 0;   // REV refused: phone
-    if (b) { b.textContent = man ? `OLDI ⚠${man}` : 'OLDI'; b.classList.toggle('hit', man > 0); b.title = man ? `${man} coordination(s) to do by phone (O)` : 'OLDI: coordination messages with the adjacent units (O)'; }
+    const lrq = state && state.lvlreq ? Object.values(state.lvlreq).filter(r => r.dir === 'in' && r.state === 'pending').length : 0;
+    if (b) { b.textContent = man ? `OLDI ⚠${man}` : lrq ? `OLDI ?${lrq}` : 'OLDI'; b.classList.toggle('hit', man + lrq > 0); b.title = man ? `${man} coordination(s) to do by phone (O)` : 'OLDI: coordination messages with the adjacent units (O)'; }
     if (!isOpen('olWin') || !SID) return;
     let d; try { d = await api(`/sessions/${SID}/oldi`); } catch (e) { return; }
     if (!isOpen('olWin')) return;                       // closed while the request was out
@@ -173,13 +174,19 @@
     const body = el.querySelector('.wb');
     const ms = d.messages.slice().reverse().filter(m => olFilter === 'all' || m.dir === olFilter);
     const manual = Object.entries(d.coord).filter(([, c]) => c.manual);
+    const lreq = Object.entries(d.level_requests || {}).filter(([, r]) => r.dir === 'in' && r.state === 'pending');
+    const lvBtns = r => { const o = []; for (let l = r.rfl; l >= Math.max(r.rfl - 40, 200); l -= 10) o.push(l); return o; };
     const html = `<div class="ol-filter">${[['all', 'All'], ['out', 'Sent (to next units)'], ['in', 'Received (from previous units)']].map(([k, t]) => `<button data-of="${k}" class="${olFilter === k ? 'on' : ''}">${t}</button>`).join('')}</div>` +
+      (lreq.length ? `<div class="sub" style="color:#5ad1e6">Level requests to answer</div>` + lreq.map(([cs, r]) => `<div style="font-size:12px;margin-bottom:5px"><b>${esc(cs)}</b> <span class="c-dim">${esc(r.unit)} → ${esc(r.exit || '')} · requests</span> F${String(r.rfl).padStart(3, '0')} <span class="c-dim">· within ${Math.round((r.answer_within_s || 0) / 60)}'</span><br>${lvBtns(r).map(l => `<button data-lra="${esc(cs)}" data-l="${l}" style="padding:0 6px;font-size:11px;margin:2px 2px 0 0">F${String(l).padStart(3, '0')}${l === r.rfl ? ' ✓' : ''}</button>`).join('')}<button data-lra="${esc(cs)}" data-l="" style="padding:0 6px;font-size:11px">No climb</button></div>`).join('') : '') +
       (manual.length ? `<div class="sub" style="color:var(--warn)">Coordination by phone needed</div>` + manual.map(([cs, c]) => `<div class="c-warn" style="font-size:12px;margin-bottom:3px"><b>${esc(cs)}</b> ${esc(c.manual)}</div>`).join('') : '') +
       `<table><tr><th>UTC</th><th></th><th>Msg</th><th>Callsign</th><th>Unit</th><th>Point</th><th>ETO</th><th>Level</th><th></th></tr>` +
       ms.slice(0, 200).map(m => `<tr data-cs="${esc(m.callsign)}"><td>${esc(m.utc.slice(0, 2) + ':' + m.utc.slice(2))}</td><td class="${m.dir}">${m.dir === 'out' ? '→' : '←'}</td><td><b>${esc(m.type)}</b></td><td>${esc(m.callsign)}</td><td>${esc(m.unit)}</td><td>${esc(m.point)}</td><td>${esc(m.eto)}</td><td>F${String(m.level).padStart(3, '0')}</td><td class="c-dim">${esc(m.status)}${m.note ? ' · ' + esc(m.note) : ''}</td></tr>`).join('') + '</table>' +
       (ms.length ? '' : '<div class="empty">no message yet</div>');
     if (force || body.dataset.h !== html) { body.innerHTML = html; body.dataset.h = html;
       body.querySelectorAll('[data-of]').forEach(x => x.onclick = () => { olFilter = x.dataset.of; renderOldi(true); });
+      body.querySelectorAll('[data-lra]').forEach(x => x.onclick = async () => {
+        try { await api(`/sessions/${SID}/oldi/answer`, { method: 'POST', body: JSON.stringify({ callsign: x.dataset.lra, level: x.dataset.l ? +x.dataset.l : null }) }); renderOldi(true); }
+        catch (er) { x.textContent = '✗ ' + er.message.slice(0, 40); } });
       body.querySelectorAll('tr[data-cs]').forEach(tr => tr.onclick = () => { if (allAc().some(a => a.callsign === tr.dataset.cs)) selected = tr.dataset.cs; openFpl(tr.dataset.cs); }); }
   }
   setInterval(() => renderOldi(false), 2000);

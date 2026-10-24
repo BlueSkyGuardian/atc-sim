@@ -12,7 +12,7 @@ from .geometry import SEP_H_NM, SEP_V_FT, Point, api_hdg, dist, polyline_length
 from .model import Area, Request
 import numpy as np
 
-from . import approach, arrivals, pilot, tma
+from . import approach, arrivals, levelcoord, pilot, tma
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
@@ -1221,6 +1221,7 @@ class World:
         if self.record:
             from . import oldi
             oldi.update(self)
+            levelcoord.update(self)
             from . import cpdlc, live as _live
             cpdlc.update(self)
             _live.update(self)
@@ -1667,6 +1668,7 @@ class World:
             "instructions": {"issued": self.m["instructions_issued"], "rejected": self.m["instructions_rejected"],
                              "headings_speeds_without_limit": self.m.get("no_limit", 0)},
             "readback": dict(self.m.get("readback", {"errors": 0, "caught": 0, "missed": 0})),
+            "coordination": levelcoord.metrics(self),
             "assumption": (lambda ts, never: {
                 "assumed": len(ts), "mean_delay_s": round(sum(ts) / len(ts), 1) if ts else None,
                 "max_delay_s": max(ts) if ts else None, "late_over_30s": sum(1 for x in ts if x > 30),
@@ -1761,6 +1763,8 @@ class World:
                 v = int(str(v).upper().lstrip("FL").lstrip("F") or 0)
                 if v % 10 or not (0 < v <= 660):
                     raise InstructionError(("exit" if k == "xfl" else "cleared") + " level: a flight level, multiple of 10 (e.g. 350)")
+                if k == "xfl":
+                    e["_xfl_t"] = self.t              # entered by the controller (level coordination: re-entered = agreed)
             elif k == "heading":
                 v = int(v)
                 if not (1 <= v <= 360):
@@ -1912,6 +1916,7 @@ class World:
             "special": atctools.special_tracks(self),
             "system_cfl": atctools.system_cfls(self),
             "coord": oldi.coord_view(self),
+            "lvlreq": levelcoord.view(self),
             "dyn_points": self.dyn_points,
             "oldi_last": self.oldi[-1]["id"] if self.oldi else 0,
             "cpdlc": cpdlc.state_view(self),

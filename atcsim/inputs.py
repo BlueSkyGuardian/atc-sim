@@ -52,6 +52,8 @@ def describe(kind: str, body: dict) -> str:
         return (f"{cs} " if kind == "cpdlc_command" and cs else "") + (body.get("text") or "")
     if kind == "live":
         return f"{body.get('action')} {cs}".strip()
+    if kind == "oldi_answer":
+        return f"level coordination {cs} " + (f"F{int(body['level']):03d}" if body.get("level") else "no climb")
     if kind == "auto_wx":
         return "pilots avoid weather: " + ("on" if body.get("value", True) else "off")
     if kind == "area":
@@ -82,6 +84,15 @@ def _entries(w, body, actor):
     fields = {k: v for k, v in body.items() if k != "callsign"}
     e = w.enter(body["callsign"], fields, who=actor.get("name") or "atc")
     return {**e, "_readback": getattr(w, "last_readback", [])}
+
+
+def _oldi_answer(w, body, actor):
+    from . import levelcoord
+    if bool(w.multi) and actor.get("seat") == "pilot":
+        raise Refused("the controller answers the coordination, not the pilot")
+    lvl = body.get("level")
+    return levelcoord.answer(w, body.get("callsign") or "", int(lvl) if lvl not in (None, "") else None,
+                             by=actor.get("name") or "atc")
 
 
 def _assume(w, body, actor):
@@ -194,7 +205,7 @@ def _auto_wx(w, body, actor):
 
 
 ACTIONS: Dict[str, Callable] = {
-    "instructions": _instructions, "command": _command, "entries": _entries, "assume": _assume, "release": _release,
+    "instructions": _instructions, "command": _command, "entries": _entries, "oldi_answer": _oldi_answer, "assume": _assume, "release": _release,
     "mtcd_settings": _mtcd_settings, "cpdlc_command": _cpdlc_command, "cpdlc_respond": _cpdlc_respond,
     "cpdlc_downlink": _cpdlc_downlink, "chat": _chat, "area": _area, "runway": _runway, "live": _live,
     "bookmark": _bookmark, "auto_wx": _auto_wx,

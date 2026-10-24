@@ -1975,6 +1975,10 @@ function draw() {
     const l0 = [];                                          // alerts: special tracks, monitoring, MTCD
     for (const [code, sev] of special[a.callsign] || []) l0.push([code + ' ', sev === 'alert' ? (blink ? TH.alertBad : TH.alertBad + '77') : sev === 'warn' ? TH.alertWarn : TH.alertInfo]);
     if (co && co.manual && a.assumed) l0.push(['COORD ', blink ? TH.alertWarn : TH.alertWarn + '88']);
+    const lr = seeAlerts && shown.lvlreq ? shown.lvlreq[a.callsign] : null;   // level coordination (climbs to SUBAL / BEXAL)
+    if (lr && lr.dir === 'in' && lr.state === 'pending') l0.push([`LVL F${pad(lr.rfl, 3)}? `, blink ? '#5ad1e6' : '#5ad1e677', 'lvlreq']);
+    if (lr && lr.dir === 'out' && lr.state === 'pending') l0.push([`RAP F${pad(lr.asked, 3)} `, '#9fc3e6', 'xfl']);
+    if (lr && lr.dir === 'out' && lr.state === 'answered' && lr.kind !== 'ACP' && !lr.acked) l0.push([`${lr.kind} F${pad(lr.level, 3)} `, blink ? TH.alertBad : TH.alertBad + '88', 'xfl']);
     if (mtBy[a.callsign]) l0.push([`MTC${Math.max(0, Math.floor(mtBy[a.callsign].time_to_conflict_s / 60))}' `, TH.mtcd]);
     if (l0.length) lines.push(l0);
     const k1 = lines.length;
@@ -2000,7 +2004,8 @@ function draw() {
     const ms = a.mode_s;
     if (ent && ms && ms.ehs && ms.selected_fl !== cflShown) l2.push([` S${ms.selected_fl}`, TH.sfl, 'cfl']);
     if (co && a.assumed) {                                   // the exit level: always on the label of an assumed aircraft
-      const xc = co.manual ? (blink ? TH.alertWarn : TH.alertWarn + '77') : co.warn ? TH.alertWarn
+      const lrx = lr && lr.dir === 'out' && lr.state === 'answered' ? (lr.kind === 'ACP' || lr.acked ? TH.xflOk : TH.alertBad) : null;
+      const xc = lrx ? lrx : co.manual ? (blink ? TH.alertWarn : TH.alertWarn + '77') : co.warn ? TH.alertWarn
         : co.state && co.state !== 'transferred' && co.coordinated === co.xfl ? (co.state === 'act' ? TH.xflOk : TH.xflAbi) : TH.xflPend;
       l2.push([` X${co.xfl}`, xc, 'xfl']);
     }

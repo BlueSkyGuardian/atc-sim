@@ -791,13 +791,26 @@ def chat_send(sid: str, body: ChatIn, request: Request):
 def oldi_messages(sid: str, since: int = 0, callsign: Optional[str] = None):
     """OLDI messages exchanged with the adjacent units (ABI, ACT, REV; dir out = sent by us, in = received),
     and the coordination state of each aircraft (cleared level, exit level, coordinated level, manual coordination)."""
-    from . import oldi, atctools
+    from . import oldi, atctools, levelcoord
     s = _session(sid)
     with s.lock:
         w = s.world
         abi, act, rev = oldi.settings(w)
         return {"utc": atctools.utc(w), "abi_s": abi, "act_s": act, "rev_limit_s": rev,
-                "messages": oldi.messages(w, since, callsign), "coord": oldi.coord_view(w)}
+                "messages": oldi.messages(w, since, callsign), "coord": oldi.coord_view(w),
+                "level_requests": levelcoord.view(w)}
+
+
+class LevelAnswer(BaseModel):
+    callsign: str
+    level: Optional[int] = None
+
+
+@app.post("/sessions/{sid}/oldi/answer")
+def oldi_answer(sid: str, body: LevelAnswer, request: Request):
+    """Answer the West sector's level request for a climb to SUBAL / BEXAL (trainee on Oceanic): the level given
+    (the requested one = ACP, another = CDN) or null (RJC: no climb). West climbs the aircraft to it."""
+    return _act(sid, request, "oldi_answer", body.model_dump())
 
 
 @app.get("/sessions/{sid}/flightplans")

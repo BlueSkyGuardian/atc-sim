@@ -282,7 +282,7 @@
     const m = $('#lblMenu'), ent = (state.entries || {})[cs] || {}, co = (state.coord || {})[cs] || {};
     const sys = ent.cfl != null ? ent.cfl : (co.cfl != null ? co.cfl : a.cleared_fl);
     menuCs = cs;
-    const title = { cs: a.type + ' · ' + ((a.flight_plan || {}).departure || '') + '→' + ((a.flight_plan || {}).destination || ''), cfl: 'Cleared level', xfl: 'Exit level (coordination)', spd: 'Speed', hdg: 'Heading', route: 'Route', wx: 'Weather deviation', note: 'Note' }[f] || f;
+    const title = { cs: a.type + ' · ' + ((a.flight_plan || {}).departure || '') + '→' + ((a.flight_plan || {}).destination || ''), cfl: 'Cleared level', xfl: 'Exit level (coordination)', lvlreq: 'Level request', spd: 'Speed', hdg: 'Heading', route: 'Route', wx: 'Weather deviation', note: 'Note' }[f] || f;
     let body = '';
     const levels = base => { const out = []; for (let l = Math.round(base / 10) * 10 + 60; l >= Math.round(base / 10) * 10 - 60; l -= 10) if (l >= 50 && l <= 600) out.push(l); return out; };
     if (f === 'cs') {                                    // the callsign: control and data of the aircraft
@@ -317,6 +317,13 @@
         <div class="fl"><button data-edit>Edit route… (E)</button><button data-show>Show route (long press)</button>${ent.direct || ent.route ? '<button data-x="">back to the filed route</button>' : ''}</div>`;
     } else if (f === 'wx') {
       body = `<div class="fg"><button data-x="L">L</button><button data-x="R">R</button><button data-x="Y">either</button><button data-x="">end</button></div><input data-v value="${h(ent.wx || '')}" placeholder="L20 · R15" style="margin-top:4px">`;
+    } else if (f === 'lvlreq') {                         // West's level request (climb to SUBAL / BEXAL): answer it
+      const lr = (state.lvlreq || {})[cs];
+      if (!lr || lr.dir !== 'in' || lr.state !== 'pending') return;
+      const lv = []; for (let l = lr.rfl + 20; l >= Math.max(lr.rfl - 60, 200); l -= 10) lv.push(l);
+      body = `<div class="c-dim" style="font-size:11px;margin-bottom:4px">${h(lr.unit)}: to ${h(lr.exit || '')}, requesting <b style="color:var(--text)">F${p3(lr.rfl)}</b> · answer within ${Math.max(0, Math.round((lr.answer_within_s || 0) / 60))}'</div>
+        <input data-v value="${lr.rfl}" inputmode="numeric">
+        <div class="fl">${lv.map(l => `<button data-x="${l}" class="${l === lr.rfl ? 'cur' : ''}">F${p3(l)}${l === lr.rfl ? ' ✓' : ''}</button>`).join('')}<button data-x="NIL">No climb</button></div>`;
     } else { openMenu(cs, e, f); return; }
     m.innerHTML = `<div class="h"><span>${cs} <span class="c-dim" style="font-weight:400">${title}</span></span><button id="fmX" style="padding:0 6px">✕</button></div>${body}<div id="lmMsg" style="min-height:12px;font-size:11px;margin-top:3px"></div>`;
     m.classList.add('on', 'fm'); menuPos(e);
@@ -326,6 +333,7 @@
     m.querySelectorAll('[data-lq]').forEach(b => b.onclick = () => { const el = m.querySelector(`[data-q=${b.dataset.lq}]`); if (el) el.value = b.dataset.lv; });
     const go = async v => { try {
         let r;
+        if (f === 'lvlreq') { r = await api(`/sessions/${SID}/oldi/answer`, { method: 'POST', body: JSON.stringify({ callsign: cs, level: v === 'NIL' || v === '' ? null : +String(v).replace(/^FL?/, '') }) }); closeMenu(); return; }
         if (f === 'route') r = await sendEntry(cs, v ? { direct: v, heading: '' } : { direct: '', route: '' });
         else if (f === 'hdg' && v) r = await sendEntry(cs, { heading: +v, direct: '', hlim: q('hlim'), then: q('then') });
         else if (f === 'spd' && v && v !== 'SN') r = await sendEntry(cs, { speed: v, slim: q('slim') });
@@ -338,7 +346,7 @@
     m.querySelectorAll('[data-q]').forEach(el => el.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Escape') closeMenu();
       if (ev.key === 'Enter') { const iv = m.querySelector('[data-v]'); let v = iv ? iv.value.trim().toUpperCase() : ''; if (f === 'cfl') v = v.replace(/^FL?/, ''); if (v) go(v); } });
     const inp = m.querySelector('[data-v]');
-    if (inp) { inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') { let v = inp.value.trim().toUpperCase(); if (f === 'cfl' || f === 'xfl') v = v.replace(/^FL?/, ''); go(v); } if (ev.key === 'Escape') closeMenu(); };
+    if (inp) { inp.onkeydown = ev => { ev.stopPropagation(); if (ev.key === 'Enter') { let v = inp.value.trim().toUpperCase(); if (f === 'cfl' || f === 'xfl' || f === 'lvlreq') v = v.replace(/^FL?/, ''); go(v); } if (ev.key === 'Escape') closeMenu(); };
       setTimeout(() => { inp.focus(); inp.select(); }, 0); }
     m.querySelectorAll('[data-c]').forEach(b => b.onclick = async () => {
       const c = b.dataset.c; closeMenu();

@@ -245,6 +245,34 @@ and the label menu tells you what to coordinate with whom. Phone the unit, then 
 The previous units send their ABI / ACT for traffic coming to you. The inbound label shows the entry point, level
 and unit. The **OLDI window** (<kbd>O</kbd>) lists every message sent and received.
 
+### Level coordination West ↔ Oceanic
+
+Every flight going between the West sectors (WN, WS) and the Oceanic sectors (ON, OS), either way - the climbs to
+SUBAL / BEXAL (North America), IBALU - SAMAR, and the traffic coming back - is coordinated bilaterally: the sector
+it leaves gives the next one the aircraft, its level and its requested final level, and asks what level it can take.
+
+| Message | Meaning |
+|---|---|
+| **RAP** | The level request: the aircraft, the level asked (its requested final level when it is climbing to it) |
+| **ACP** | Accepted at the level asked |
+| **CDN** | Another level offered instead |
+| **RJC** | No climb: it stays at its present level |
+
+**The aircraft comes to you** (the other sector is simulated): the RAP arrives about 15 minutes before the
+boundary. `LVL F380?` blinks on the label and the OLDI button shows `?` with the number waiting. Click the tag
+(or use the buttons in the OLDI window) and give a level: the one asked (✓, an ACP), another (a CDN) or *No climb*
+(an RJC). The other sector gives the aircraft that level before the boundary. With no answer 5 minutes before the
+boundary, it keeps the aircraft where it is, and it counts as not answered.
+
+**The aircraft goes from you**: entering its exit level (XFL) sends the RAP (`RAP F380` on the label). The other
+sector answers within a minute, from its traffic along the aircraft's way. If it takes another level, that level
+replaces your XFL, **in red**, with `CDN F360` on the label. Enter it again as XFL to agree to it: it turns
+**green** (green too when the level asked is accepted). Clear the aircraft to the agreed level before the
+boundary. Handing an aircraft over at another level than the one agreed, or climbing or descending it without any
+agreement, is counted (*Coordination* in the results). By phone: the same messages, said on the line.
+
+Flights already within 15 minutes of the boundary at the start of the exercise were coordinated before it.
+
 ## Tools
 
 ### Track info window
