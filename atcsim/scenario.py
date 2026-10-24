@@ -453,6 +453,51 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
 SID_UPSTREAM_MAX_NM = 150.0   # a departure entering our sectors this far from its runway or less is shown from take-off
 
 
+def _turn(b1: float, b2: float) -> float:
+    return abs((b2 - b1 + 540.0) % 360.0 - 180.0)
+
+
+def _best_sid_join(cands, ad, tail, waypoints, sid_path):
+    """The SID that leads the departure on its way: it joins the route where the SID ends (that point is on the
+    route) or at the first route point ahead of its end, and the route is flown on from there - never back to the
+    route points before the join (a SID ending at LACAJ does not then fly SAK GOVAS LACAJ). Among the SIDs, the
+    shortest way to the entry point without turning back. Returns (length, sid, path, tail from the join) or None."""
+    best = None
+    for sd in cands:
+        path = sid_path(ad, sd, ad.in_use)
+        xy = [p for _, p in path]
+        e_name, e = path[-1][0], xy[-1]
+        last_brg = bearing(xy[-2], xy[-1]) if len(xy) > 1 else None
+        options = []
+        if e_name in tail:
+            k = tail.index(e_name)
+            options.append((tail[k + 1:], 0.0))
+        else:
+            for j in range(len(tail)):
+                p = waypoints[tail[j]]
+                d = dist(e, p)
+                if d < 0.5:
+                    options.append((tail[j + 1:], 0.0))
+                    continue
+                b = bearing(e, p)
+                pen = 0.0
+                if last_brg is not None and _turn(last_brg, b) > 110.0:
+                    pen += 200.0                       # back over its shoulder
+                if j + 1 < len(tail) and _turn(b, bearing(p, waypoints[tail[j + 1]])) > 100.0:
+                    pen += 200.0                       # joining the route against its direction
+                options.append((tail[j:], pen))
+        for rest, pen in options:
+            seq = xy + [waypoints[w] for w in rest]
+            if len(seq) >= 3:                          # the first leg after the SID must not reverse it
+                if _turn(bearing(seq[len(xy) - 2], seq[len(xy) - 1]), bearing(seq[len(xy) - 1], seq[len(xy)])) > 110.0 \
+                        if len(seq) > len(xy) else False:
+                    pen += 200.0
+            Lt = polyline_length(seq) + pen
+            if best is None or Lt < best[0]:
+                best = (Lt, sd, path, rest if rest else [tail[-1]] if e_name != tail[-1] else [])
+    return best
+
+
 def _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, route, perf, mass, fl) -> None:
     """A departure from an aerodrome with SIDs that enters our sectors from the previous ones (no start point): it
     takes off from the runway in use and flies the SID that makes the shortest way to its route, then its flight plan
@@ -473,14 +518,11 @@ def _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, r
     upstream = [w for w in names[:idx_entry] if w in waypoints and not w.startswith("@")]
     entry = route[0]
     tail = upstream + [entry]
-    best = None
-    for sd in cands:
-        path = sid_path(ad, sd, ad.in_use)
-        xy = [p for _, p in path] + [waypoints[w] for w in tail]
-        L = polyline_length(xy)
-        if best is None or L < best[0]:
-            best = (L, sd, path)
-    L, sd, path = best
+    best = _best_sid_join(cands, ad, tail, waypoints, sid_path)
+    if best is None:
+        return
+    _, sd, path, tail = best
+    L = polyline_length([p for _, p in path] + [waypoints[w] for w in tail])
     if L > SID_UPSTREAM_MAX_NM:
         return
     t_s = _climb_time_s(perf, mass, L, ad.elev_ft, fl * 100.0, sd["max_kt"])

@@ -245,6 +245,8 @@ class _Ctx:
     def _aerodromes(self):
         # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations
         self.sid_ads = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if d.get("sids") and "y" in d}
+        self.sid_ends = {d["id"]: {sd.get("end") or (sd["via"][-1] if sd.get("via") else None) for sd in d["sids"]}
+                         for d in self.asp.default_aerodromes if d.get("sids")}
         self.ap_xy = {a["id"]: (a["x"], a["y"]) for a in (getattr(self.asp, "airports", None) or [])
                       if a.get("type") in ("large", "medium") and a.get("x") is not None
                       and len(a["id"]) == 4 and a["id"].isalpha()}
@@ -279,6 +281,18 @@ class _Ctx:
         names = list(r["route"])
         if dep not in self.sid_ads:
             return names
+        # where one of its SIDs ends on the route: the departure joins there, in its direction of travel (a SID that
+        # ends at NIKZO for the south, LACAJ for the east...), never back along the route; the furthest such point
+        # within the first part of the route (before the exit)
+        ends = self.sid_ends.get(dep, set())
+        acc, on = 0.0, []
+        for i in range(len(names) - 1):
+            if i:
+                acc += dist(r["pts"][i - 1], r["pts"][i])
+            if names[i] in ends and acc < r["s_out"] - 10.0 and dist(self.sid_ads[dep], r["pts"][i]) < 90.0:
+                on.append(i)
+        if on:
+            return names[on[-1]:]
         ad, acc, best = self.sid_ads[dep], 0.0, (dist(self.sid_ads[dep], r["pts"][0]), 0)
         for i in range(1, len(names)):
             acc += dist(r["pts"][i - 1], r["pts"][i])
@@ -366,9 +380,14 @@ class _Ctx:
         """An aircraft on route r at level fl, at the point at_s NM along the route (default: where it enters the
         controlled area, plus a little) at time t."""
         s = r["s_in"] + 10.0 if at_s is None else at_s
-        p = _along(r["pts"], s)
+        p = None
         dep = dep or self.dep_for(r)
         names = self.join_route(r, dep)
+        if names and names[0] != r["route"][0]:            # joined further on: the timing point after the join
+            k = r["route"].index(names[0])
+            s0 = sum(dist(a_, b_) for a_, b_ in zip(r["pts"][:k], r["pts"][1:k + 1]))
+            s = max(s, s0 + 5.0)
+        p = _along(r["pts"], s)
         if kw.get("arrival") and dest:                 # an arrival ends at its aerodrome's sequencing fix
             fx = next((q["fix"] for q in self.asp.default_sequencing if q["aerodrome"] == dest and q["fix"] in names[1:]), None)
             if fx:
