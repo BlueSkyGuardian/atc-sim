@@ -270,6 +270,9 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
     if low and (to_go <= LANDED_NM or (thr_d <= LANDED_NM + 0.6 and ac.next_index >= len(ac.route) - 1)):
         ac.landed = True
         ac.gone = True
+        if ac.status == "active":                     # decontrolled inside our sectors and landed: off the picture
+            ac.status = "exited"                      # (not flown on, not counted in the sector any more)
+            ac.assumed = ac.on_frequency = False
         ac.vs_fpm = 0.0
         world._event("landed", callsign=ac.callsign, aerodrome=ad.id, runway=st["runway"],
                      text=f"{ac.callsign} landed {ad.id} runway {st['runway']}")

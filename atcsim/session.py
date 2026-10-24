@@ -107,7 +107,17 @@ class Session:
             if self.status == "running" and self.mode == "realtime":
                 with self.lock:
                     if self.status == "running":
-                        self._tick()
+                        try:
+                            self._tick()
+                        except Exception:              # noqa: BLE001 - one bad step must not stop the exercise's clock
+                            self._tick_errors = getattr(self, "_tick_errors", 0) + 1
+                            import logging
+                            import traceback
+                            logging.getLogger("atcsim").error("session %s: step failed at T+%s\n%s",
+                                                              getattr(self, "id", "?"), getattr(self.world, "t", "?"),
+                                                              traceback.format_exc())
+                            if self._tick_errors > 50:
+                                self.status = "paused"     # failing every second: stop rather than spin
                 next_tick += 1.0 / self.time_factor
                 delay = next_tick - time.monotonic()
                 if delay < -1.0:            # fell behind (e.g. very high time factor) -> resync

@@ -215,7 +215,7 @@ class _Ctx:
         self.flow_errors = []
         flows = self._flows()
         out, seen = [], set()
-        src = [(n, fid, fr, to) for n, fid, fr, to in flows] if flows else []
+        src = self._split_flows(flows) if flows else []
         for names, fid, fr, to in src:
             pts = [self.wp[n] for n in names]
             Lin = _poly_len_inside(pts, self.polys)
@@ -247,6 +247,36 @@ class _Ctx:
             out.append({"route": r, "pts": pts, "inside_nm": Lin, "south": south, "s_in": s_in, "s_out": s_out})
         self.routes = out
         self._aerodromes()
+
+    def _split_flows(self, flows):
+        """A flow serving several aerodromes of the FIR: for one its route passes closer to than its end (Rabat on the
+        way to LAKAM, Fes on the way to Oujda), that aerodrome gets the flow cut at the point nearest it (and, for
+        departures, started there): it is not flown on past its destination."""
+        xy = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if "y" in d}
+        for a_ in (getattr(self.asp, "airports", None) or []):
+            if a_.get("x") is not None and str(a_.get("id", "")).startswith("GM"):
+                xy.setdefault(a_["id"], (a_["x"], a_["y"]))
+        out = []
+        for names, fid, fr, to in flows:
+            pts = [self.wp[n] for n in names]
+            keep_to, keep_fr = [], []
+            for ad in to:
+                if ad in xy and len(names) > 2:
+                    k = min(range(len(names)), key=lambda i: dist(pts[i], xy[ad]))
+                    if k < len(names) - 1 and dist(pts[k], xy[ad]) < dist(pts[-1], xy[ad]) - 15.0:
+                        out.append((names[:k + 1], f"{fid}>{ad}", fr, [ad]))
+                        continue
+                keep_to.append(ad)
+            for ad in fr:
+                if ad in xy and len(names) > 2:
+                    k = min(range(len(names)), key=lambda i: dist(pts[i], xy[ad]))
+                    if k > 0 and dist(pts[k], xy[ad]) < dist(pts[0], xy[ad]) - 15.0:
+                        out.append((names[k:], f"{ad}>{fid}", [ad], keep_to or to))
+                        continue
+                keep_fr.append(ad)
+            if keep_to and keep_fr:
+                out.append((names, fid, keep_fr, keep_to))
+        return [(n, f, fr, to) for n, f, fr, to in out if len(n) >= 2]
 
     def _aerodromes(self):
         # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations

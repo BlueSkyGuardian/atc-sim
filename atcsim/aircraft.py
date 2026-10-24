@@ -459,6 +459,13 @@ class Aircraft:
                 self._dct = False
         while True:
             to_name = self.next_wp
+            if to_name not in wps:                  # a point that no longer exists (an approach's, removed): skip it
+                if self.next_index < len(self.route) - 1:
+                    self.next_index += 1
+                    continue
+                self.nav_mode, self.target_hdg, self.turn_dir = "heading", self.hdg, None
+                self._lnav_heading_cmd = self.hdg
+                return None
             B = wps[to_name]
             A = self.leg_from
             if dist(A, B) < 0.1:

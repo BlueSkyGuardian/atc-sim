@@ -147,8 +147,7 @@
    "GMFF",
    "GMFO",
    "GMMW",
-   "GMTA",
-   "GMTN"
+   "GMTA"
   ],
   "SAH": [
    "GMML",
@@ -986,7 +985,8 @@
   {
    "id": "tng_cmn",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "MAN"
@@ -996,7 +996,8 @@
   {
    "id": "tng_rak",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "GMMX"
@@ -1006,7 +1007,8 @@
   {
    "id": "tng_aga",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "GMAD"
@@ -1016,7 +1018,8 @@
   {
    "id": "tng_canaries",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "CAN",
@@ -1027,7 +1030,8 @@
   {
    "id": "tng_waf",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "WAFC"
@@ -1037,7 +1041,8 @@
   {
    "id": "tng_east",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "GMFO",
@@ -1048,7 +1053,8 @@
   {
    "id": "tng_fes",
    "from": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "to": [
     "GMFF",
@@ -1062,7 +1068,8 @@
     "MAN"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "LAKAM UA411 VARAS SOBMA"
   },
@@ -1072,7 +1079,8 @@
     "GMMX"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "MAK UB11 BARIS UN10 SOBMA"
   },
@@ -1082,7 +1090,8 @@
     "GMAD"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "ADM UG850 MAK UB11 BARIS UN10 SOBMA"
   },
@@ -1094,7 +1103,8 @@
     "WAFC"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "DEVLA UG850 MAK UB11 BARIS UN10 SOBMA"
   },
@@ -1105,7 +1115,8 @@
     "GMFO"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "ORSUP UA411 OJD UN726 NARMI"
   },
@@ -1116,7 +1127,8 @@
     "GMFK"
    ],
    "to": [
-    "GMTT"
+    "GMTT",
+    "GMTN"
    ],
    "route": "ERA UM240 MADOV"
   }
