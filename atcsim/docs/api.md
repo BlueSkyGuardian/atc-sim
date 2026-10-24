@@ -197,7 +197,7 @@ All weather endpoints accept `at_s=` to look at another moment.
 | Method | Path | Body → result |
 |---|---|---|
 | POST | `/designer/compile` | `{"scenario"}` → errors, warnings, planned trajectories and conflicts, `traffic_load`, estimated `ratings` |
-| POST | `/designer/generate` | `{"params": {"control": ["WS"], "aircraft_per_hour": 30, ...}}` → a random scenario with planted sequences, overtakes, crossings, level requests and West/Oceanic coordinations (see [designer](designer.md#generate-traffic)); 400 on bad parameters |
+| POST | `/designer/generate` | `{"params": {"control": ["WS"], "aircraft_per_hour": 30, ...}}` → a random scenario with planted sequences, overtakes, crossings, level requests and transatlantic flights (see [designer](designer.md#generate-traffic)); 400 on bad parameters |
 | POST | `/designer/preview` | `{"scenario", "policy": "passive"\|"naive_approve"}` → a fast-time run: tracks, losses, requests, penetrations, infringements, RVSM, sequencing |
 | POST | `/designer/weather` | `{"scenario", "at_s", "fl", "product"}` → weather image |
 | POST | `/designer/save` | `{"scenario", "name", "overwrite"}` → writes `scenarios/<name>.json` |

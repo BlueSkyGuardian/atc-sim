@@ -253,7 +253,7 @@ class GenerateBody(BaseModel):
 def designer_generate(body: GenerateBody):
     """A random scenario for the sectors given, from parameters (see atcsim/generator.py): flights per hour, density,
     sequences per hour and their size, overtakes, crossings, level requests through traffic, West / Oceanic
-    coordinations, slow and long-haul shares, levels, seed. Returns the scenario (not saved)."""
+    transatlantic flights, slow and long-haul shares, levels, seed. Returns the scenario (not saved)."""
     from . import generator
     try:
         return generator.generate(body.params)

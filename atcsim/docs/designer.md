@@ -94,15 +94,15 @@ In the Scenario tab, **Generate traffic** builds a random scenario for the secto
 | duration | Minutes |
 | sequences / h, of *a*–*b* aircraft | Arrival streams of *a* to *b* aircraft converging on a sequencing fix of the sectors that have one (North, West, South, Central, East). None in Oceanic |
 | overtakes / h | Same route and level, the faster one behind |
-| crossings / h | Two flights at the same level whose routes cross inside the sectors, meeting at the crossing |
+| crossings / h | Two flights at the same level whose routes cross inside the sectors, meeting at the crossing. The routes are drawn evenly (a route with a single crossing, like IBALU - SAMAR, as often as the long ones) |
 | level changes / h | A pilot request to climb or descend through a crossing flight's level |
-| West ↔ Oceanic | Flights to coordinate per hour (SUBAL, BEXAL, SAMAR): only when one side of the West / Oceanic boundary is controlled (see [level coordination](controller.md)) |
+| transatlantic / h | Flights to and from North America by IBALU and SUBAL / BEXAL, in the sectors those routes cross. Westbound, mostly Moroccan departures still climbing to the level they request; eastbound, at cruise. Across the West / Oceanic boundary they are coordinated by OLDI like every flight whose route touches both sides (see [level coordination](controller.md)) |
 | slow traffic | Share of slow aircraft (C550, C130, A400) at FL170–250 on the arrival routes, in the way of the sequences |
 | long-haul | Share of heavy, long-range types |
 | levels | The cruise band of the background traffic |
 | seed | Same seed and parameters, same scenario; empty draws one (the last is shown) |
 
-The situations are planted first, at the time and place they meet; the background traffic is then cleared of any
+Each planted aircraft is given a point and a time (be *here* at *T+x*), and the designer works back to when it appears. The situations are planted first, at the time and place they meet; the background traffic is then cleared of any
 conflict not planned, and flights that cannot fly their route are dropped. The result lists what was planted, and the
 design notes describe each situation (who, where, when) for the debrief.
 

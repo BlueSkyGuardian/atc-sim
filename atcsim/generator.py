@@ -13,8 +13,11 @@ Parameters (all optional, see DEFAULTS):
   slow_share               share of slow traffic (C550, C130, A400) at FL170-250, on the arrival routes when there are
                            some (in the way of the descending sequences)
   heavy_share              share of long-haul types
-  coordinations_per_hour   West <-> Oceanic flights to coordinate (climbs to SUBAL / BEXAL, IBALU - SAMAR), when the
-                           control is on either side
+  transatlantic_per_hour    flights to / from North America by IBALU and SUBAL / BEXAL (westbound: mostly Moroccan
+                           departures still climbing to their requested level; eastbound: at cruise). Crossing the
+                           West / Oceanic boundary, they are coordinated by OLDI like any flight whose route touches both
+                           sides (IBALU - SAMAR included: that one is ordinary traffic, in the random flow and the
+                           crossings)
   levels                   [lowest, highest] cruise level of the background traffic
 
 The planted situations are built geometrically (an aircraft at a point at a time: "reach"), the background traffic is
@@ -35,7 +38,7 @@ from .geometry import bearing, dist, point_in_polygon, segment_intersection
 
 DEFAULTS = dict(control=["WS"], duration_min=60, seed=None, start_utc="10:00", aircraft_per_hour=30, density=2,
                 sequences_per_hour=2, seq_size=[3, 4], overtakes_per_hour=1, crossings_per_hour=2,
-                level_crossings_per_hour=2, slow_share=0.12, heavy_share=0.3, coordinations_per_hour=2,
+                level_crossings_per_hour=2, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
                 levels=[290, 400], weather="calm")
 
 SHORT = ["B738", "A320", "A321", "B38M", "A20N", "A21N", "A319", "B739", "E190", "E195", "CRJ9", "B752"]
@@ -295,13 +298,24 @@ def _crossing_pairs(c: _Ctx):
     return pairs
 
 
+def _pick_pair(c: _Ctx, pairs):
+    """A crossing pair, each route about as likely as any other (a route with many crossings, like the long Atlantic
+    ones, would otherwise crowd out a route with one, like IBALU - SAMAR)."""
+    key = lambda r: tuple(r["route"])
+    n = {}
+    for p in pairs:
+        for r in p[:2]:
+            n[key(r)] = n.get(key(r), 0) + 1
+    return c.rng.choices(pairs, [1.0 / n[key(p[0])] + 1.0 / n[key(p[1])] for p in pairs])[0]
+
+
 def _crossings(c: _Ctx, pairs):
     n = int(round(c.P["crossings_per_hour"] * c.T / 3600.0))
     if not pairs or n <= 0:
         return 0
     done = 0
     for t in c.times(n, lo=300.0, hi=c.T - 300.0):
-        r1, r2, xp, s1, s2, x = c.rng.choice(pairs)
+        r1, r2, xp, s1, s2, x = _pick_pair(c, pairs)
         x = x or f"{r1['route'][0]}-{r1['route'][-1]} x {r2['route'][0]}-{r2['route'][-1]}"
         t1, t2 = c.pick_type(), c.pick_type()
         both = [l for l in range(330, 400, 10) if (l < 290 or level_parity_ok(l, r1["south"])) and
@@ -321,7 +335,7 @@ def _level_crossings(c: _Ctx, pairs):
     done = 0
     for t in c.times(n, lo=600.0, hi=c.T - 300.0):
         for _try in range(12):                             # a level step with a level of the crossing traffic inside it
-            r1, r2, xp, s1, s2, x = c.rng.choice(pairs)
+            r1, r2, xp, s1, s2, x = _pick_pair(c, pairs)
             t1, t2 = c.pick_type(), c.pick_type()
             mine = [l for l in range(300, min(400, _max_fl(t1)) + 1, 10) if level_parity_ok(l, r1["south"])]
             if len(mine) < 3:
@@ -353,34 +367,39 @@ def levelcoord_req_s() -> float:
     return float(REQ_S)
 
 
-def _coordinations(c: _Ctx):
-    """West <-> Oceanic flights to coordinate: departures climbing to SUBAL / BEXAL, IBALU - SAMAR, and back."""
+def _transatlantic(c: _Ctx):
+    """Flights to / from North America by IBALU and SUBAL / BEXAL. Westbound, mostly Moroccan departures climbing to
+    their requested level (the West sector asks the Oceanic one for it); eastbound, at cruise."""
     from .levelcoord import WEST, OCEANIC
     ctl = set(c.P["control"])
-    if not (ctl & set(WEST)) and not (ctl & set(OCEANIC)) or (ctl & set(WEST) and ctl & set(OCEANIC)):
-        return 0
-    cands = [r for r in c.routes if any(n in ("SUBAL", "BEXAL", "SAMAR") for n in r["route"]) and "IBALU" in r["route"]]
-    n = int(round(c.P["coordinations_per_hour"] * c.T / 3600.0))
+    cands = [r for r in c.routes if "IBALU" in r["route"] and (r["route"][0] in ("SUBAL", "BEXAL")
+                                                               or r["route"][-1] in ("SUBAL", "BEXAL"))]
+    n = int(round(c.P["transatlantic_per_hour"] * c.T / 3600.0))
     if not cands or n <= 0:
         return 0
-    for t in c.times(n, lo=240.0, hi=c.T - 900.0):
+    for t in c.times(n, lo=240.0, hi=c.T - 600.0):
         r = c.rng.choice(cands)
-        typ = c.rng.choice(["B788", "B789", "A332", "B738", "B77W"])
-        west_bound = r["route"][-1] in ("SUBAL", "BEXAL", "SAMAR")
-        if (west_bound and ctl & set(OCEANIC)) or (not west_bound and ctl & set(WEST)):
-            # the boundary is where it enters the sectors: the request comes 15 min before, so give it time to come
+        typ = c.rng.choice(["B788", "B789", "A332", "A333", "B77W", "B763", "A359"])
+        west_bound = r["route"][-1] in ("SUBAL", "BEXAL")
+        if (west_bound and ctl & set(OCEANIC) and not ctl & set(WEST)) or (not west_bound and ctl & set(WEST) and not ctl & set(OCEANIC)):
+            # it enters the sectors across the boundary: the request comes 15 min before, so give it time to come
             # (flights within 15 min of the boundary at the start count as already coordinated)
             t = max(t, levelcoord_req_s() + 180.0)
         rfl = c.level(r["south"], 340, 400, typ) or 360
-        fl = max(240, rfl - c.rng.choice([60, 80, 100])) if west_bound else rfl
-        if fl >= 290 and not level_parity_ok(fl, r["south"]):
-            fl -= 10
-        at = r["s_in"] + 5.0
-        dest = c.rng.choice(NAT) if r["route"][-1] in ("SUBAL", "BEXAL") else (
-            c.rng.choice(REGIONS["GVSC"]) if r["route"][-1] == "SAMAR" else None)
-        a = c.add(r, typ, fl, t, at_s=at, keep=True, dest=dest, dep="GMMN" if west_bound else None,
-                  ops=["RAM"] if west_bound else None, rfl=rfl)
-        c.notes.append(f"West/Oceanic coordination: {a['callsign']} {r['route'][0]}-{r['route'][-1]} F{fl}"
+        moroccan = west_bound and c.rng.random() < 0.7
+        fl = rfl
+        if moroccan:
+            fl = max(240, rfl - c.rng.choice([40, 60, 80, 100]))
+            if fl >= 290 and not level_parity_ok(fl, r["south"]):
+                fl -= 10
+        kw = {"rfl": rfl} if fl != rfl else {}
+        if west_bound:
+            a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dest=c.rng.choice(NAT),
+                      dep=c.rng.choice(["GMMN", "GMMX", "GMMN", "GMME"]) if moroccan else None,
+                      ops=["RAM"] if moroccan else None, **kw)
+        else:
+            a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dep=c.rng.choice(NAT))
+        c.notes.append(f"Transatlantic: {a['callsign']} {a['dep']}-{a['dest']} {r['route'][0]}-{r['route'][-1]} F{fl}"
                        + (f" climbing, requests F{rfl}" if rfl > fl else "") + f" around T+{int(t // 60)}'.")
     return n
 
@@ -453,7 +472,10 @@ def _prune(scn: dict) -> None:
 
 
 def generate(params: Optional[dict] = None) -> dict:
-    P = {**DEFAULTS, **{k: v for k, v in (params or {}).items() if v is not None}}
+    params = dict(params or {})
+    if "coordinations_per_hour" in params:                 # the earlier name
+        params.setdefault("transatlantic_per_hour", params.pop("coordinations_per_hour"))
+    P = {**DEFAULTS, **{k: v for k, v in params.items() if v is not None}}
     if P["seed"] is None:
         P["seed"] = random.randrange(1, 10 ** 6)
     P["control"] = [str(s).upper() for s in (P["control"] if isinstance(P["control"], list) else [P["control"]])]
@@ -465,7 +487,7 @@ def generate(params: Optional[dict] = None) -> dict:
     pairs = _crossing_pairs(c)
     planted["crossings"] = _crossings(c, pairs)
     planted["level_crossings"] = _level_crossings(c, pairs)
-    planted["coordinations"] = _coordinations(c)
+    planted["transatlantic"] = _transatlantic(c)
     _background(c)
     scn = {"name": f"gen_{'_'.join(s.lower() for s in P['control'])}_{P['seed']}", "airspace": "agadir",
            "control": P["control"], "duration_s": int(c.T), "pilot_delay_s": 4, "start_utc": P["start_utc"],
