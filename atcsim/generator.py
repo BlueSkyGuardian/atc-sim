@@ -158,7 +158,8 @@ class _Ctx:
         self.notes: List[str] = []
         self.keep: set = set()
         self.forced_dep: set = set()
-        self.flow_cs: set = set()             # flights of a planned flow: they keep their origin          # departures asked per aerodrome: re-timed, never refiled
+        self.flow_cs: set = set()
+        self.level_cap: Dict[str, int] = {}     # departures: the highest level they reach level before our boundary             # flights of a planned flow: they keep their origin          # departures asked per aerodrome: re-timed, never refiled
         self.T = P["duration_min"] * 60.0
         self._routes()
 
@@ -796,7 +797,7 @@ def _background(c: _Ctx):
         c.add(r, typ, fl, t, **({"dest": seq["aerodrome"], "arrival": True} if seq else {"arrival": False}))
 
 
-def _deconflict(scn: dict, keep: set, rounds: int = 7) -> int:
+def _deconflict(scn: dict, keep: set, rounds: int = 7, caps: Optional[Dict[str, int]] = None) -> int:
     """Background flights in an unplanned conflict (planned trajectories) moved to another level of the right
     direction; planted ones are left alone. Returns the conflicts left that are not planted."""
     from .designer import compile as dcompile
@@ -824,7 +825,7 @@ def _deconflict(scn: dict, keep: set, rounds: int = 7) -> int:
             south = r["aircraft"].get(cs, {}).get("southbound", True)
             mx = _max_fl(a["type"])
             cands = [a["fl"] + d for d in (20, -20, 40, -40, 60, -60)
-                     if level_parity_ok(a["fl"] + d, south) and 170 <= a["fl"] + d <= min(mx, 410)]
+                     if level_parity_ok(a["fl"] + d, south) and 170 <= a["fl"] + d <= min(mx, 410, (caps or {}).get(cs, 999))]
             if cands:
                 a["fl"] = cands[(rnd + len(cs)) % len(cands)]
     return left
@@ -1063,6 +1064,27 @@ def _check_whole_routes(scn: dict) -> int:
     return reverted
 
 
+def _climb_alt_at(perf, mass: float, along_nm: float, elev_ft: float, sid_kt: float) -> float:
+    """Altitude a departure reaches along_nm from the runway, climbing all the way (its own rates and speeds: the
+    SID's speed up to 4000 ft above the field, 250 kt below FL100, then its schedule), still air."""
+    alt, d, t, dt = elev_ft + 50.0, 0.0, 0.0, 5.0
+    while d < along_nm and t < 3600.0 and alt < perf.ceiling_ft:
+        if alt < elev_ft + 4000.0:
+            mode, val = "cas", min(sid_kt, 250.0)
+        elif alt < 10000.0:
+            mode, val = "cas", 250.0
+        else:
+            mode, val = perf.schedule(alt)
+        tas = perf.tas_for(mode, val, alt)
+        alt += max(300.0, perf.roc_fpm(alt, mode, val, mass)) * dt / 60.0
+        d += tas * dt / 3600.0
+        t += dt
+    return alt
+
+
+LEVEL_BY_NM = 12.0          # a departure handed over from a nearby aerodrome is level this far before our boundary
+
+
 def _check_built(scn: dict, c: _Ctx) -> dict:
     """On the built exercise: a flight filed from an aerodrome with SIDs that cannot be shown from take-off (too early
     in the exercise, or no SID joins its route) is refiled from a distant aerodrome; a level against the
@@ -1070,7 +1092,8 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
     from .scenario import build_world
     w = build_world(copy.deepcopy(scn))
     by_route = {tuple(r["route"]): r for r in c.routes}
-    out = {"from_takeoff": 0, "refiled": 0, "levels_fixed": 0}
+    out = {"from_takeoff": 0, "refiled": 0, "levels_fixed": 0, "levelled": 0}
+    wps = w.env.waypoints
     for a in scn["aircraft"]:
         ac = w.aircraft.get(a["callsign"].upper())
         if ac is None:
@@ -1078,6 +1101,22 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
         if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "runways", None):
             if getattr(ac, "sid", None):
                 out["from_takeoff"] += 1
+                # it must reach us level: the transfer level is one it reaches LEVEL_BY_NM before the entry; the
+                # level it wants goes into its requested level (it asks us for the climb)
+                if ac.entry_wp in ac.route:
+                    k = ac.route.index(ac.entry_wp)
+                    pts = [wps[n] for n in ac.route[:k + 1] if n in wps]
+                    L = sum(dist(p, q) for p, q in zip(pts, pts[1:]))
+                    reach = _climb_alt_at(ac.perf, ac.mass, max(0.0, L - LEVEL_BY_NM), ac.sid.get("elev_ft", 0.0),
+                                          ac.sid.get("max_kt", 250.0))
+                    cap = next((l for l in range(int(reach // 1000) * 10, 90, -10)
+                                if level_parity_ok(l, ac.southbound)), None)
+                    if cap is not None:
+                        c.level_cap[a["callsign"]] = cap
+                        if a["fl"] > cap:
+                            a["rfl"] = max(a.get("rfl") or 0, a["fl"])
+                            a["fl"] = cap
+                            out["levelled"] += 1
             elif a["callsign"] in c.forced_dep or (a["callsign"] in c.flow_cs and a["callsign"] not in c.keep):
                 if a["reach"]["time"] + 300 <= scn["duration_s"] - 240:
                     a["reach"]["time"] += 300               # later: time to take off and climb in view
@@ -1140,9 +1179,10 @@ def generate(params: Optional[dict] = None) -> dict:
             break
         checks = _check_built(scn, c)
     entry_left = _entry_spacing(scn, c.keep)
-    left = _deconflict(scn, c.keep)
+    left = _deconflict(scn, c.keep, caps=c.level_cap)
     scn["generator"]["planted"] = planted
     scn["generator"]["departures_from_takeoff"] = checks["from_takeoff"]
+    scn["generator"]["departures_levelled"] = checks.get("levelled", 0)
     scn["generator"]["planted_too_close_at_entry"] = entry_left
     scn["generator"]["whole_routes"] = extended - reverted
     scn["generator"]["unplanned_conflicts_left"] = left
