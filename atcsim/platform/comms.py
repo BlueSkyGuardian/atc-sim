@@ -48,6 +48,10 @@ class Conn:
         self.muted = False
         self.leader = False
         self.q: asyncio.Queue = asyncio.Queue()
+        try:                                       # the loop that serves this connection (its queue belongs to it)
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = None
         self.joined = time.time()
 
     def public(self) -> dict:
@@ -55,6 +59,22 @@ class Conn:
                 "ptt": self.ptt, "muted": self.muted, "leader": self.leader}
 
     def put(self, item) -> None:
+        """Queue a frame or message for this participant, from any thread or event loop: an asyncio queue may only be
+        touched from its own loop (from elsewhere the waiting sender is never woken - audio and calls would sit in
+        the queue), so other threads (HTTP handlers in the thread pool, other connections' loops) hand it over."""
+        try:
+            here = asyncio.get_running_loop()
+        except RuntimeError:
+            here = None
+        if self.loop is None or here is self.loop:
+            self._put(item)
+            return
+        try:
+            self.loop.call_soon_threadsafe(self._put, item)
+        except RuntimeError:
+            pass                                    # its loop is gone: the connection is closing
+
+    def _put(self, item) -> None:
         if isinstance(item, (bytes, bytearray)) and self.q.qsize() > MAX_QUEUE:
             return                                  # client too slow: drop audio, keep control messages
         self.q.put_nowait(item)
