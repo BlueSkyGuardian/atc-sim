@@ -99,6 +99,7 @@
         <button data-v="coast" title="Land and coastlines">Coast</button><button data-v="routes" title="Airways and RAD routings">Routes</button>
         <button data-v="names" title="Point names (the minor points of the neighbours when zoomed in)">Points</button>
         <button data-v="airports" title="Aerodromes with their runways">Airports</button><button data-v="navaids" title="VOR, NDB, DME">Navaids</button>
+        <button data-v="tma" title="Terminal control areas (TMA, CTA) of the aerodromes">TMA</button><button data-v="ctr" title="Control zones (CTR, ATZ)">CTR</button>
         <button data-v="sid" title="SIDs of the runways in use">SID</button><button data-v="star" title="STARs of the runways in use">STAR</button>
         <button data-v="hold" title="Published holding patterns">Hold</button><button data-v="procAll" title="Procedures of every runway, not only those in use">All runways</button>
         <button data-v="labels" title="Aircraft labels (callsign, level, type)">Labels</button></div></span>
@@ -677,7 +678,7 @@ function posOf(cs, t) {
 const rbls = []; let rblFirst = null; const rblRects = [];
 // what the shared radar tools (lookup.js: Find, the geographic cursor) expect of the page
 let state = null, shown = null, arrInfo = null, selected = null, mouseCv = null;
-const V = Object.assign({ coast: true, routes: true, names: true, airports: true, navaids: true, sid: true, star: true, hold: true, procAll: false, labels: true },
+const V = Object.assign({ coast: true, routes: true, names: true, airports: true, navaids: true, sid: true, star: true, hold: true, procAll: false, labels: true, tma: true, ctr: false },
   (() => { try { return JSON.parse(localStorage.getItem('dsg_view') || '{}'); } catch (e) { return {}; } })());
 function pollSelected() { if (selected) selectAc(selected, true); }
 function centerOn(t) {
@@ -1153,6 +1154,21 @@ function draw() {
     const [lx, ly] = toPx(...c0); ctx.fillStyle = on ? col : col + '99'; ctx.font = mono(10.5);
     ctx.fillText(`${a.id} ${String(a.lower_fl).padStart(3, '0')}-${a.upper_fl} ${on ? 'ACT' : 'off'}`, lx - 30 * dpr, ly);
   });
+  // terminal airspaces (TMA / CTA, CTR / ATZ)
+  if ((V.tma || V.ctr) && sector.terminal_areas) {
+    ctx.font = mono(9);
+    for (const ta of sector.terminal_areas) {
+      const big = ta.type === 'TMA' || ta.type === 'CTA';
+      if ((big && !V.tma) || (!big && !V.ctr)) continue;
+      const col = big ? '#4f8a6a' : '#8a7a4f';
+      ctx.strokeStyle = col; ctx.lineWidth = dpr; ctx.setLineDash(big ? [7 * dpr, 4 * dpr] : [2 * dpr, 3 * dpr]);
+      poly(ta.polygon); ctx.stroke(); ctx.setLineDash([]);
+      if (userZoom >= (big ? 1.4 : 4)) {
+        const top = ta.polygon.reduce((m, q) => q[1] > m[1] ? q : m, ta.polygon[0]), [tx, ty] = toPx(top[0], top[1]);
+        ctx.fillStyle = col; ctx.fillText(ta.name, tx + 4 * dpr, ty + 11 * dpr);
+      }
+    }
+  }
   // aerodromes and their runways; names when zoomed in
   if (V.airports && sector.airports) {
     ctx.font = mono(9.5);

@@ -520,7 +520,9 @@
 <button data-v="names" class="on" title="Point names">Points</button>
 <button data-v="trails" class="on" title="History dots">Trails</button>
 <button data-v="airports" class="on" title="Aerodromes of the region with their runways (names when zoomed in)">Airports</button>
-<button data-v="navaids" class="on" title="Radio navaids: VOR (hexagon), NDB (circle), DME (square)">Navaids</button></div></span>
+<button data-v="navaids" class="on" title="Radio navaids: VOR (hexagon), NDB (circle), DME (square)">Navaids</button>
+<button data-v="tma" class="on" title="Terminal control areas of the aerodromes (TMA, CTA): their approach's airspace, with its vertical limits when zoomed in">TMA</button>
+<button data-v="ctr" title="Control zones and aerodrome traffic zones of the aerodromes (CTR, ATZ)">CTR</button></div></span>
       <span class="vg"><button class="vgb" title="SIDs, STARs, holding patterns">Procedures</button><div class="vgm"><button data-v="sid" class="on" title="SIDs of the runways in use">SID</button>
 <button data-v="star" class="on" title="STARs of the runways in use">STAR</button>
 <button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
@@ -631,7 +633,7 @@ const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] |
 const AIW = (location.pathname.match(/^\/ai\/watch\/([0-9a-f]+)\/?$/) || [])[1] || null;      // an AI run, live (aiwatch.js)
 const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
-const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false, airports: true, navaids: true };
+const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false, airports: true, navaids: true, tma: true, ctr: false };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
 // display settings (colours, sizes): per browser, from the Display menu
 const TH_DEF = {
@@ -643,7 +645,7 @@ const TH_DEF = {
   lblCallsign: '', lblLevel: '', lblSpeed: '', lblInfo: '', changed: '#ffd166', sfl: '#f2b84b', tags: '#7fb8ff',
   xflOk: '#5ad1e6', xflAbi: '#9fc3e6', xflPend: '#ffffff',
   hTag: '#ffd84a', wxTag: '#ffd84a', alertInfo: '#8fd3ff', alertWarn: '#f2b84b', alertBad: '#ff5a5a', extLabel: '#b9c8d8',
-  rbl: '#d79bff', routeShow: '#ff4fd8', sid: '#6fc28a', star: '#e3a35a', hold: '#b79cff',
+  rbl: '#d79bff', routeShow: '#ff4fd8', sid: '#6fc28a', star: '#e3a35a', hold: '#b79cff', tma: '#4f8a6a', ctr: '#8a7a4f',
   lblFont: 11, nameFont: 10.5, symbol: 7, vectorMin: 2, trail: 12, wxAlpha: 1,
 };
 const TH = { ...TH_DEF };
@@ -669,7 +671,7 @@ async function api(path, opts = {}) {
   const L = {
     bg: 'Background', land: 'Land', coast: 'Coastline', outline: 'CTA outline', sector: 'Controlled area border', sectorLines: 'Sector lines', freqs: 'Sector names / frequencies',
     airways: 'Airways', airwayNames: 'Airway names', rad: 'RAD routings', fpRoute: 'Flight-plan routes', points: 'Points', extPoints: 'Points outside',
-    aerodromes: 'Aerodromes', approach: 'Approach paths', sid: 'SIDs', star: 'STARs', hold: 'Holding patterns', cellTops: 'Cloud tops',
+    aerodromes: 'Aerodromes', approach: 'Approach paths', sid: 'SIDs', star: 'STARs', hold: 'Holding patterns', tma: 'TMA / CTA', ctr: 'CTR / ATZ', cellTops: 'Cloud tops',
     assumed: 'Assumed', calling: 'Calling (to assume)', inbound: 'Inbound (previous sector)', other: 'Not concerned', handedOff: 'Handed off / decontrolled', selected: 'Selected', stca: 'Conflict (STCA)', los: 'Loss of separation',
     xfer: 'Transfer due / to decontrol', mtcd: 'MTCD (medium-term conflict)',
     routeShow: 'Route (long press)', rbl: 'Range / bearing lines',
@@ -1819,6 +1821,24 @@ function draw() {
     }
     ctx.fillText(`${ar.designator}`, lx, ly);
     ctx.fillText(`${String(ar.lower_fl).padStart(3, '0')}-${ar.upper_fl} ${ar.active ? 'ACT' : 'off'}`, lx, ly + 12 * dpr);
+  }
+  // terminal airspaces of the aerodromes: TMA / CTA (their approach), CTR / ATZ; name and limits when zoomed in
+  if ((V.tma || V.ctr) && sector.terminal_areas) {
+    const lim = t => String(t || '').split('/')[0].replace(/\s*\(.*\)/, '').trim();
+    ctx.font = `${(TH.nameFont - 1) * dpr}px ui-monospace,monospace`;
+    for (const ta of sector.terminal_areas) {
+      const big = ta.type === 'TMA' || ta.type === 'CTA';
+      if ((big && !V.tma) || (!big && !V.ctr)) continue;
+      const col = big ? TH.tma : TH.ctr;
+      ctx.strokeStyle = col; ctx.lineWidth = (big ? 1.2 : 1) * dpr; ctx.setLineDash(big ? [7 * dpr, 4 * dpr] : [2 * dpr, 3 * dpr]);
+      ctx.beginPath(); let top = null;
+      ta.polygon.forEach((q, i) => { const [x, y] = toPx(q[0], q[1]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); if (!top || y < top[1]) top = [x, y]; });
+      ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+      if (top && view.s * (big ? 1 : 3) > 1.8) {
+        ctx.fillStyle = col; ctx.fillText(ta.name, top[0] + 4 * dpr, top[1] + 11 * dpr);
+        ctx.fillText(`${lim(ta.lower)} - ${lim(ta.upper)}`, top[0] + 4 * dpr, top[1] + 22 * dpr);
+      }
+    }
   }
   // reference aerodromes: runways (thresholds), the ARP of those without runway data; names when zoomed in
   if (V.airports && sector.airports) {

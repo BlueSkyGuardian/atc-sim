@@ -152,6 +152,17 @@ class Airspace:
             out.append(f"{names[-1]} is an entry-only point")
         return out
 
+    def terminal_areas_of(self, icao: str) -> list:
+        """The terminal airspaces (TMA, CTA, CTR, ATZ) an aerodrome's approach / tower is responsible for."""
+        return [a for a in (getattr(self, "terminal_areas", None) or []) if a.get("aerodrome") == icao]
+
+    def in_terminal_area(self, icao: str, p: Point) -> Optional[bool]:
+        """Whether p lies (laterally) in one of the aerodrome's terminal airspaces; None when it has none."""
+        areas = self.terminal_areas_of(icao)
+        if not areas:
+            return None
+        return any(g.point_in_polygon(p, a["polygon"]) for a in areas)
+
     def published_legs(self) -> set:
         """Directed legs (a, b) of every published routing: airways (both ways unless one-way), standard routes and
         RAD direct routings (only in their published direction)."""
@@ -322,6 +333,8 @@ class Airspace:
             out["fir_external_points"] = sorted(getattr(self, "fir_external", []) or [])
         if getattr(self, "published_areas", None):
             out["published_areas_note"] = self.areas_note
+        if getattr(self, "terminal_areas", None):
+            out["terminal_areas"] = self.terminal_areas
         c = self.coast()
         if c:
             out["coast"] = c
@@ -700,6 +713,10 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
     sp.fir_cta_names = {k: v.get("short") or k.title() for k, v in ctas.items()}
     sp.published_areas = areas
     sp.airports = refs
+    # terminal airspaces of the aerodromes (TMA / CTA / CTR / ATZ): drawn, and where approach takes arrivals over
+    sp.terminal_areas = [{**{k: v for k, v in a.items() if k != "polygon"},
+                          "polygon": [[round(c, 3) for c in xy(q)] for q in a["polygon"]]}
+                         for a in (d.get("terminal_areas") or {}).get("areas", [])]
     sp.areas_note = (d.get("published_areas") or {}).get("_note")
     return sp
 

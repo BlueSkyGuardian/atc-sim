@@ -1,10 +1,11 @@
 """After the handover: the next units (the sector after ours, then approach) bring arrivals down to land.
 
 Every aircraft that has left our sectors (transferred or handed down into a TMA) and whose destination is one of the
-airspace's aerodromes is flown to its runway by simulated controllers - as soon as it is transferred, or, for an
-aerodrome inside the sectors we control (Casablanca under North, Agadir under South...), only once the controller
-has decontrolled it: those arrivals are sequenced by our own vectors, and until the decontrol the aircraft flies its
-flight plan (towards its STAR), ours to vector, slow down or hold:
+airspace's aerodromes is flown to its runway by simulated controllers - once it is inside its aerodrome's terminal
+airspace (TMA / CTA / CTR, AIP Maroc ENR 2.1 / AD 2.17) and the controller has decontrolled it; until then it flies its
+flight plan (towards its STAR), the controller's to vector, slow down or hold (Casablanca North hands GMMN arrivals
+over at FL160 to the different fixes, a pseudo-sequence). For an aerodrome without terminal airspace: as soon as it is
+transferred (an aerodrome under our sectors: once decontrolled):
 
   lateral   : the rest of its flight plan towards the aerodrome (onward points that still bring it closer), then the
               approach path from there (straight-in, or the reversal procedure when it comes from the far side):
@@ -61,8 +62,54 @@ def lands_here(world: "World", ac: "Aircraft") -> bool:
 
 
 def candidates(world: "World") -> List["Aircraft"]:
-    return [a for a in world.aircraft.values()
-            if a.outside and not a.gone and not getattr(a, "landed", False) and _dest(world, a) is not None]
+    """Arrivals to one of our aerodromes that have left our sectors - or that we decontrolled inside them, in their
+    aerodrome's terminal airspace (Casablanca's TMA lies under the North sector)."""
+    out = []
+    for a in world.aircraft.values():
+        if a.gone or getattr(a, "landed", False) or _dest(world, a) is None:
+            continue
+        if a.outside or (a.active and not a.assumed and getattr(a, "released", False)
+                         and world.airspace.in_terminal_area(_dest(world, a).id, a.pos)):
+            out.append(a)
+    return out
+
+
+def _inbound(world: "World", ac) -> None:
+    """An arrival that has left us before approach takes it: it flies on into its aerodrome's terminal airspace - the
+    STAR from the fix it left by (for the runway in use), else towards the aerodrome - not on into the blue."""
+    if getattr(ac, "_inbound_ad", None) or ac.nav_mode != "lnav":
+        return
+    ad = _dest(world, ac)
+    rest = [w for w in ac.route[ac.next_index:] if w in world.waypoints]
+    last = rest[-1] if rest else (ac.route[ac.next_index - 1] if ac.next_index else None)
+    if rest and dist(world.waypoints[rest[-1]], ad.pos) < dist(ac.pos, ad.pos) - 5.0:
+        return                                          # its flight plan still brings it closer
+    star = next((st for st in (ad.stars or []) if st["via"] and st["via"][0][0] == last
+                 and (not st["runways"] or ad.in_use in st["runways"])), None)
+    pts = []
+    if star:
+        for k, (nm, p) in enumerate(star["via"][1:], 1):
+            w = nm or f"@{ac.callsign}~T{k}"
+            world.waypoints.setdefault(w, (float(p[0]), float(p[1])))
+            pts.append(w)
+    if not pts:
+        w = f"@{ac.callsign}~AD"
+        world.waypoints[w] = (float(ad.x), float(ad.y))
+        pts = [w]
+    ac.route = ac.route[:ac.next_index] + rest + [w for w in pts if w not in rest]
+    ac._inbound_ad = ad.id
+
+
+def _ready(world: "World", a) -> bool:
+    """Whether approach takes the arrival over now. An aerodrome with terminal airspace (TMA / CTA / CTR): once the
+    aircraft is inside it and the controller has decontrolled it (approach's airspace, approach's traffic) - until
+    then it flies its flight plan, the controller's to vector to the TMA. Without one: as soon as it has left us,
+    except for an aerodrome under our sectors (then only once decontrolled)."""
+    ad = _dest(world, a)
+    inside = world.airspace.in_terminal_area(ad.id, a.pos)
+    if inside is not None:
+        return inside and not a.assumed
+    return not (a.assumed and _inside_ours(world, ad))
 
 
 def _start(world: "World", ac: "Aircraft") -> None:
@@ -171,7 +218,10 @@ def update(world: "World") -> None:
         # an aerodrome inside the sectors we work (Casablanca under North, Agadir under South, Fes under East): we
         # sequence its arrivals ourselves, by vectors - the next units take one over only once we decontrol it;
         # until then it flies its flight plan (towards its STAR) and is ours to vector, slow down or hold
-        ready = [a for a in waiting if not (a.assumed and _inside_ours(world, _dest(world, a)))]
+        ready = [a for a in waiting if _ready(world, a)]
+        for a in waiting:
+            if a not in ready and a.outside:
+                _inbound(world, a)
         for a in sorted(ready, key=lambda a: dist(a.pos, _dest(world, a).pos)):   # closest first: the order
             _start(world, a)
             _schedule(world, a)
