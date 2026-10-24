@@ -1607,6 +1607,78 @@
    "coord": "334538.69N 0044540.22W",
    "role": "GMFI IAF (STAR RNAV)",
    "fra": ""
+  },
+  "RBT038D26": {
+   "coord": "342326.69N 0062523.86W",
+   "role": "STAR point GMME 1G (RBT R038 26 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT045D24": {
+   "coord": "341955.58N 0062414.72W",
+   "role": "STAR point GMME 1G (RBT R045 24 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT054D24": {
+   "coord": "341703.35N 0062117.93W",
+   "role": "STAR point GMME 1G (RBT R054 24 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT063D24": {
+   "coord": "341350.34N 0061856.12W",
+   "role": "STAR point GMME 1G (RBT R063 24 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT094D15": {
+   "coord": "340155.68N 0062644.31W",
+   "role": "STAR point GMME 1G (RBT R094 15 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT086D13": {
+   "coord": "340353.12N 0062908.30W",
+   "role": "STAR point GMME 1G (RBT R086 13 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT078D13": {
+   "coord": "340540.85N 0062926.24W",
+   "role": "STAR point GMME 1G (RBT R078 13 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT269D15": {
+   "coord": "340242.72N 0070252.22W",
+   "role": "STAR point GMME 1G (RBT R269 15 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT285D13": {
+   "coord": "340620.55N 0065956.25W",
+   "role": "STAR point GMME 1G (RBT R285 13 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT300D13": {
+   "coord": "340928.73N 0065822.71W",
+   "role": "STAR point GMME 1G (RBT R300 13 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT315D13": {
+   "coord": "341210.41N 0065553.37W",
+   "role": "STAR point GMME 1G (RBT R315 13 DME)",
+   "fra": "",
+   "minor": true
+  },
+  "RBT330D13": {
+   "coord": "341414.53N 0065238.37W",
+   "role": "STAR point GMME 1G (RBT R330 13 DME)",
+   "fra": "",
+   "minor": true
   }
  },
  "construction_points": {
@@ -4487,9 +4559,51 @@
       "TUSOR",
       "ME500"
      ]
+    },
+    {
+     "name": "TUSOR1G",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "TUSOR",
+      "RBT038D26",
+      "RBT045D24",
+      "RBT054D24",
+      "RBT063D24",
+      "ENNAV"
+     ]
+    },
+    {
+     "name": "VARAS1G",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "VARAS",
+      "RBT094D15",
+      "RBT086D13",
+      "RBT078D13",
+      "ENNAV"
+     ]
+    },
+    {
+     "name": "ESALA1G",
+     "runways": [
+      "21"
+     ],
+     "via": [
+      "ESALA",
+      "RBT269D15",
+      "RBT285D13",
+      "RBT300D13",
+      "RBT315D13",
+      "RBT330D13",
+      "FAHIM"
+     ]
     }
    ],
-   "_stars_source": "AD2 GMME 35-1 (RNAV STAR RWY 21, AIRAC 03/25)"
+   "_stars_source": "AD2 GMME 35-1 (RNAV STAR RWY 21: TUSOR 1F/1H, VARAS 1F, ESALA 1F) and 33-2 (conventional STAR RWY 21: TUSOR 1G, VARAS 1G, ESALA 1G on RBT radials and DME arcs, to ENNAV / FAHIM; AIRAC 03/25). No STAR is published for RWY 03."
   },
   {
    "id": "GMMZ",
@@ -5680,6 +5794,212 @@
      ]
     }
    ]
+  },
+  {
+   "id": "GMAT",
+   "name": "Tan Tan Airport",
+   "coord": "282651.23N 0110942.30W",
+   "elev_ft": 653,
+   "runways": [
+    {
+     "id": "03",
+     "heading": 28
+    },
+    {
+     "id": "21",
+     "heading": 208
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMFB",
+   "name": "Bouarfa Airport",
+   "coord": "323051.50N 0015859.00W",
+   "elev_ft": 3630,
+   "runways": [
+    {
+     "id": "09",
+     "heading": 90
+    },
+    {
+     "id": "27",
+     "heading": 270
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMFF",
+   "name": "Fes Saïss International Airport",
+   "coord": "335538.28N 0045840.66W",
+   "elev_ft": 1900,
+   "runways": [
+    {
+     "id": "09",
+     "heading": 90
+    },
+    {
+     "id": "27",
+     "heading": 270
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMFK",
+   "name": "Moulay Ali Cherif Airport",
+   "coord": "315651.00N 0042353.99W",
+   "elev_ft": 3428,
+   "runways": [
+    {
+     "id": "13",
+     "heading": 125
+    },
+    {
+     "id": "31",
+     "heading": 305
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMMA",
+   "name": "Smara Airport",
+   "coord": "264355.15N 0114101.16W",
+   "elev_ft": 350,
+   "runways": [
+    {
+     "id": "16",
+     "heading": 152
+    },
+    {
+     "id": "34",
+     "heading": 332
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMMD",
+   "name": "Beni Mellal Airport",
+   "coord": "322406.82N 0061857.26W",
+   "elev_ft": 1694,
+   "runways": [
+    {
+     "id": "05",
+     "heading": 45
+    },
+    {
+     "id": "23",
+     "heading": 225
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMMH",
+   "name": "Dakhla Airport",
+   "coord": "234305.88N 0155555.20W",
+   "elev_ft": 36,
+   "runways": [
+    {
+     "id": "03",
+     "heading": 23
+    },
+    {
+     "id": "21",
+     "heading": 203
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMML",
+   "name": "Laayoune Hassan I International Airport",
+   "coord": "270832.88N 0131329.81W",
+   "elev_ft": 207,
+   "runways": [
+    {
+     "id": "02",
+     "heading": 16
+    },
+    {
+     "id": "20",
+     "heading": 196
+    },
+    {
+     "id": "04",
+     "heading": 32
+    },
+    {
+     "id": "22",
+     "heading": 212
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMMW",
+   "name": "Nador Al Aaroui International Airport",
+   "coord": "345919.68N 0030141.56W",
+   "elev_ft": 574,
+   "runways": [
+    {
+     "id": "08",
+     "heading": 78
+    },
+    {
+     "id": "26",
+     "heading": 258
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMTA",
+   "name": "Cherif Al Idrissi Airport",
+   "coord": "351037.56N 0035022.27W",
+   "elev_ft": 95,
+   "runways": [
+    {
+     "id": "17",
+     "heading": 173
+    },
+    {
+     "id": "35",
+     "heading": 353
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
+  },
+  {
+   "id": "GMTN",
+   "name": "Sania Ramel Airport",
+   "coord": "353539.48N 0051912.07W",
+   "elev_ft": 10,
+   "runways": [
+    {
+     "id": "07",
+     "heading": 64
+    },
+    {
+     "id": "25",
+     "heading": 244
+    }
+   ],
+   "runway_in_use": "auto",
+   "_source": "OurAirports (runways); no published SID/STAR in the data: omnidirectional departures"
   }
  ],
  "sequencing": [

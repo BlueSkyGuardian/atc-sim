@@ -467,7 +467,7 @@ def _best_sid_join(cands, ad, tail, waypoints, sid_path):
         path = sid_path(ad, sd, ad.in_use)
         xy = [p for _, p in path]
         e_name, e = path[-1][0], xy[-1]
-        last_brg = bearing(xy[-2], xy[-1]) if len(xy) > 1 else None
+        last_brg = bearing(xy[-2], xy[-1]) if len(xy) > 1 and not sd.get("omni") else None
         options = []
         if e_name in tail:
             k = tail.index(e_name)
@@ -488,7 +488,7 @@ def _best_sid_join(cands, ad, tail, waypoints, sid_path):
                 options.append((tail[j:], pen))
         for rest, pen in options:
             seq = xy + [waypoints[w] for w in rest]
-            if len(seq) >= 3:                          # the first leg after the SID must not reverse it
+            if len(seq) >= 3 and not sd.get("omni"):   # the first leg after the SID must not reverse it
                 if _turn(bearing(seq[len(xy) - 2], seq[len(xy) - 1]), bearing(seq[len(xy) - 1], seq[len(xy)])) > 110.0 \
                         if len(seq) > len(xy) else False:
                     pen += 200.0
@@ -507,10 +507,15 @@ def _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, r
     from .arrivals import sid_path
     dep = str(a.get("dep") or "").upper()
     ad = aerodromes.get(dep)
-    if (ad is None or not getattr(ad, "sids", None) or a.get("sid") is False
+    if (ad is None or not getattr(ad, "runways", None) or a.get("sid") is False
             or not scn.get("sid_departures", True) or ac.entry_time <= 0.0 or getattr(ac, "start_along_nm", 0) > 0):
         return
-    cands = [sd for sd in ad.sids if ad.in_use in sd["runways"]]
+    cands = [sd for sd in (getattr(ad, "sids", None) or []) if ad.in_use in sd["runways"]]
+    if not cands:
+        # no SID published for the runway in use: an omnidirectional departure - runway heading to about 1500 ft
+        # above the field, then direct to where it joins its route
+        cands = [{"name": f"{ad.id} {ad.in_use} DCT", "runways": [ad.in_use], "via": [], "end": None,
+                  "axis_alt_ft": ad.elev_ft + 1500.0, "max_kt": 250.0, "omni": True}]
     if a.get("sid"):
         cands = [sd for sd in cands if sd["name"] == str(a["sid"]).upper()] or cands
     if not cands:

@@ -240,3 +240,8 @@ runway. Arrivals still with us already plan to the runway in use (top of descent
 - Losses, infringements and weather penetrations count when at least one aircraft involved is on your frequency.
 - An **area infringement** is being at an active area's levels and closer to it than its lateral spacing: 3 NM
   from a prohibited area (GMP), 5 NM from a danger (GMD) or restricted (GMR) one (inside, or within that distance).
+
+
+### Aerodromes without published procedures
+
+Every scheduled Moroccan airport is an aerodrome of the simulation (runways from OurAirports): Laâyoune, Dakhla, Tan-Tan, Smara, Fes, Errachidia, Beni Mellal, Nador, Al Hoceima, Tetouan and Bouarfa besides those with SIDs and STARs. Without a published SID for the runway in use a departure is omnidirectional: it climbs on the runway heading to about 1500 ft above the field, then turns direct to where it joins its route. Rabat's STARs are those of AD2 GMME 35-1 (RNAV, TUSOR 1F / 1H, VARAS 1F, ESALA 1F) and 33-2 (conventional, TUSOR 1G, VARAS 1G, ESALA 1G on RBT radials and DME arcs to ENNAV / FAHIM), all for runway 21: none is published for runway 03.

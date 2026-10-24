@@ -100,7 +100,7 @@ In the Scenario tab, **Generate traffic** builds a random scenario for the secto
 | slow traffic | Share of slow aircraft (C550, C130, A400) at FL170–250 on the arrival routes, in the way of the sequences |
 | long-haul | Share of heavy, long-range types |
 | separation | The horizontal minimum of the exercise (empty: the airspace's). Every flight enters the sectors at least this far from the traffic at its level; a planted pair is re-timed so that it meets inside, not at the boundary |
-| aerodromes | For the aerodromes the ticked sectors handle (North, Central, South, East...): departures and arrivals per hour. Departures take off on a SID and climb into the sectors; arrivals are filed to the aerodrome (by its sequencing fix when it has one). Empty: only what the random traffic brings |
+| aerodromes | For the aerodromes the ticked sectors handle (North, Central, South, East...; every scheduled Moroccan airport, Laâyoune, Dakhla, Tan-Tan and Smara included): departures and arrivals per hour. Departures take off on a SID and climb into the sectors (an airport without a published SID departs omnidirectionally: runway heading to about 1500 ft, then direct to where it joins its route); arrivals are filed to the aerodrome (by its sequencing fix when it has one). Empty: only what the random traffic brings |
 | levels | The cruise band of the background traffic |
 | seed | Same seed and parameters, same scenario; empty draws one (the last is shown) |
 

@@ -244,7 +244,8 @@ class _Ctx:
 
     def _aerodromes(self):
         # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations
-        self.sid_ads = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if d.get("sids") and "y" in d}
+        # every aerodrome of the simulation can take off: on a SID when it has them, else omnidirectionally
+        self.sid_ads = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if d.get("runways") and "y" in d}
         self.sid_ends = {d["id"]: {sd.get("end") or (sd["via"][-1] if sd.get("via") else None) for sd in d["sids"]}
                          for d in self.asp.default_aerodromes if d.get("sids")}
         self.ap_xy = {a["id"]: (a["x"], a["y"]) for a in (getattr(self.asp, "airports", None) or [])
@@ -303,10 +304,12 @@ class _Ctx:
                 continue
             if names[i] in ends:
                 sid_on.append(i)
-            elif d >= 12.0:
+            elif d >= 12.0 or (d < 3.0 and not ends):   # (its own VOR, for an aerodrome without SIDs)
                 ahead.append(i)
         if sid_on:                                   # a SID ends on the route: the furthest such point
             return names[sid_on[-1]:]
+        if not ends and ahead:                       # no SIDs: straight out to the first point heading away
+            return names[ahead[0]:]
         # otherwise the first point heading away that a SID reaches in line: from the SID's end to the point and on
         # along the route, neither leg turning back (the SID end lies on the way, not beyond the point)
         sid_xy = [self.wp[e] for e in ends if e in self.wp]
@@ -413,6 +416,18 @@ class _Ctx:
             s0 = sum(dist(a_, b_) for a_, b_ in zip(r["pts"][:k], r["pts"][1:k + 1]))
             s = max(s, s0 + 5.0)
         p = _along(r["pts"], s)
+        if dest and dest in self.ap_xy and not kw.get("arrival"):
+            # to an aerodrome without a sequencing fix: the route ends where it passes closest to it, beyond the exit
+            pts = [self.wp[n] for n in names]
+            acc, best = 0.0, None
+            for i in range(1, len(names)):
+                acc += dist(pts[i - 1], pts[i])
+                d_ = dist(pts[i], self.ap_xy[dest])
+                if acc > r["s_out"] - (r["s_in"] if names[0] == r["route"][0] else 0) + 1.0 and d_ < 45.0 \
+                        and (best is None or d_ < best[0]):
+                    best = (d_, i)
+            if best is not None and best[1] < len(names) - 1:
+                names = names[:best[1] + 1]
         if kw.get("arrival") and dest:                 # an arrival ends at its aerodrome's sequencing fix
             fx = next((q["fix"] for q in self.asp.default_sequencing if q["aerodrome"] == dest and q["fix"] in names[1:]), None)
             if fx:
@@ -1048,7 +1063,7 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
         ac = w.aircraft.get(a["callsign"].upper())
         if ac is None:
             continue
-        if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "sids", None):
+        if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "runways", None):
             if getattr(ac, "sid", None):
                 out["from_takeoff"] += 1
             elif a["callsign"] in c.forced_dep or (a["callsign"] in c.flow_cs and a["callsign"] not in c.keep):
