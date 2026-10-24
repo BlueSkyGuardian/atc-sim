@@ -19,6 +19,11 @@ Parameters (all optional, see DEFAULTS):
                            sides (IBALU - SAMAR included: that one is ordinary traffic, in the random flow and the
                            crossings)
   levels                   [lowest, highest] cruise level of the background traffic
+  separation_nm            horizontal minimum of the exercise (None: the airspace's); flights enter the sectors spaced
+                           at least this much from the traffic at their level
+  airports                 {"GMMN": {"dep": 6, "arr": 8}, ...}: departures and arrivals per hour of the aerodromes of the
+                           sectors (airports_for(control) lists them); departures take off on a SID and climb into the
+                           sectors, arrivals are filed to the aerodrome (by its sequencing fix when it has one)
 
 The planted situations are built geometrically (an aircraft at a point at a time: "reach"), the background traffic is
 moved off the levels where it would conflict unplanned (planned-trajectory check), and the scenario is checked by
@@ -39,7 +44,7 @@ from .geometry import bearing, dist, point_in_polygon, segment_intersection
 DEFAULTS = dict(control=["WS"], duration_min=60, seed=None, start_utc="10:00", aircraft_per_hour=30, density=2,
                 sequences_per_hour=2, seq_size=[3, 4], overtakes_per_hour=1, crossings_per_hour=2,
                 level_crossings_per_hour=2, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
-                levels=[290, 400], weather="calm")
+                levels=[290, 400], weather="calm", airports=None, separation_nm=None)
 
 SHORT = ["B738", "A320", "A321", "B38M", "A20N", "A21N", "A319", "B739", "E190", "E195", "CRJ9", "B752"]
 LONG = ["A332", "A333", "B77W", "B789", "B788", "A359", "B772", "A343", "B744", "A388", "B763"]
@@ -60,6 +65,8 @@ REGIONS = {  # neighbouring unit -> airports beyond it
     "GMMM": ["GMMN", "GMME", "GMMX", "GMAD", "GMFF", "GMTT"],
     "DAAA": ["DAAG", "DAOO", "DTTA"],
 }
+# rough direction of each neighbouring unit's airports, seen from the Agadir / Casablanca FIR (degrees true)
+REGION_BRG = {"LPPC": 355, "LECM": 25, "LECS": 40, "GCCC": 235, "GOOO": 190, "GVSC": 215, "LPPO": 295, "DAAA": 80}
 NAT = ["KJFK", "KMIA", "KIAD", "KBOS", "KORD", "CYUL", "CYYZ"]
 
 
@@ -110,6 +117,34 @@ def _first_inside(pts, polys) -> Optional[float]:
     return None
 
 
+def _last_inside(pts, polys) -> Optional[float]:
+    """Distance along the polyline where it last leaves the controlled area."""
+    rev = list(reversed(pts))
+    s = _first_inside(rev, polys)
+    return None if s is None else _poly_len(pts) - s
+
+
+def _poly_len(pts) -> float:
+    return sum(dist(p, q) for p, q in zip(pts, pts[1:]))
+
+
+def _seg_dist(p, a, b) -> float:
+    L2 = (b[0] - a[0]) ** 2 + (b[1] - a[1]) ** 2 or 1e-9
+    t = max(0.0, min(1.0, ((p[0] - a[0]) * (b[0] - a[0]) + (p[1] - a[1]) * (b[1] - a[1])) / L2))
+    return dist(p, (a[0] + t * (b[0] - a[0]), a[1] + t * (b[1] - a[1])))
+
+
+def _cut(pts, s0, s1):
+    """The part of the polyline between s0 and s1 NM along it."""
+    res, a = [_along(pts, s0)], 0.0
+    for i in range(1, len(pts)):
+        a += dist(pts[i - 1], pts[i])
+        if s0 < a < s1:
+            res.append(pts[i])
+    res.append(_along(pts, s1))
+    return res
+
+
 class _Ctx:
     def __init__(self, P):
         self.P = P
@@ -122,6 +157,7 @@ class _Ctx:
         self.requests: List[dict] = []
         self.notes: List[str] = []
         self.keep: set = set()
+        self.forced_dep: set = set()          # departures asked per aerodrome: re-timed, never refiled
         self.T = P["duration_min"] * 60.0
         self._routes()
 
@@ -137,10 +173,89 @@ class _Ctx:
             Lin = _poly_len_inside(pts, self.polys)
             if Lin < 25.0:
                 continue
-            south = 90.0 <= bearing(pts[0], pts[-1]) < 270.0
-            out.append({"route": r, "pts": pts, "inside_nm": Lin, "south": south,
-                        "s_in": _first_inside(pts, self.polys) or 0.0})
+            s_in = _first_inside(pts, self.polys) or 0.0
+            s_out = _last_inside(pts, self.polys) or _poly_len(pts)
+            # the direction (semicircular rule) of the part we control, as the scenario reckons it
+            south = 90.0 <= bearing(_along(pts, s_in), _along(pts, s_out)) < 270.0
+            out.append({"route": r, "pts": pts, "inside_nm": Lin, "south": south, "s_in": s_in, "s_out": s_out})
         self.routes = out
+        # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations
+        self.sid_ads = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if d.get("sids") and "y" in d}
+        self.ap_xy = {a["id"]: (a["x"], a["y"]) for a in (getattr(self.asp, "airports", None) or [])
+                      if a.get("type") in ("large", "medium") and a.get("x") is not None
+                      and len(a["id"]) == 4 and a["id"].isalpha()}
+        self.ap_xy.update(self.sid_ads)
+
+    def _near(self, cands: Dict[str, tuple], part, ref, max_off=30.0, max_ref=150.0) -> List[str]:
+        """Aerodromes within max_off NM of the polyline part and max_ref NM of ref."""
+        out = []
+        for k, xy in cands.items():
+            if dist(xy, ref) > max_ref:
+                continue
+            if min((_seg_dist(xy, a, b) for a, b in zip(part, part[1:])), default=dist(xy, part[0])) <= max_off:
+                out.append(k)
+        return out
+
+    def dep_for(self, r, domestic=0.6) -> str:
+        """A departure aerodrome consistent with the route: one with SIDs near the route before it enters (it is then
+        shown from take-off), else a distant one beyond the unit the route comes from (none close to the entry)."""
+        if r["route"][0] in ("SUBAL", "BEXAL") and "IBALU" in r["route"] and self.rng.random() < 0.85:
+            return self.rng.choice(NAT)        # the North Atlantic flow
+        entry = _along(r["pts"], r["s_in"])
+        near = self._near(self.sid_ads, _cut(r["pts"], 0.0, r["s_in"]) if r["s_in"] > 1 else [r["pts"][0], entry], entry)
+        if near and self.rng.random() < domestic:
+            return self.rng.choice(near)
+        return self._far(r, "dep")
+
+    def join_route(self, r, dep) -> List[str]:
+        """The route from where a departure from a nearby aerodrome joins it (the route point before the entry
+        closest to the aerodrome): its SID then leads there and it is shown from take-off."""
+        names = list(r["route"])
+        if dep not in self.sid_ads:
+            return names
+        ad, acc, best = self.sid_ads[dep], 0.0, (dist(self.sid_ads[dep], r["pts"][0]), 0)
+        for i in range(1, len(names)):
+            acc += dist(r["pts"][i - 1], r["pts"][i])
+            if acc > r["s_in"] + 1.0 or i >= len(names) - 1:
+                break
+            best = min(best, (dist(ad, r["pts"][i]), i))
+        return names[best[1]:]
+
+    def dest_for(self, r) -> str:
+        if r["route"][-1] in ("SUBAL", "BEXAL") and "IBALU" in r["route"] and self.rng.random() < 0.85:
+            return self.rng.choice(NAT)
+        exitp = _along(r["pts"], r["s_out"])
+        L = _poly_len(r["pts"])
+        near = self._near(self.ap_xy, _cut(r["pts"], r["s_out"], L) if L - r["s_out"] > 1 else [exitp, r["pts"][-1]], exitp)
+        if near and self.rng.random() < 0.4:
+            return self.rng.choice(near)
+        return self._far(r, "dest")
+
+    def _far(self, r, end) -> str:
+        """A distant aerodrome in the direction the flight comes from (dep) or goes to (dest): beyond the unit the
+        route's end point belongs to when known, else the neighbours lying that way; never an aerodrome with SIDs
+        (those are close enough to be shown from take-off) nor one close to where it crosses our boundary."""
+        pts, L = r["pts"], _poly_len(r["pts"])
+        if end == "dep":
+            ref = _along(pts, r["s_in"])
+            far_pt = pts[0] if r["s_in"] > 20 else _along(pts, max(0.0, r["s_in"] - 1))
+            toward = bearing(ref, far_pt) if r["s_in"] > 20 else (bearing(_along(pts, r["s_in"] + 20), ref))
+            name = r["route"][0]
+        else:
+            ref = _along(pts, r["s_out"])
+            toward = bearing(ref, pts[-1]) if L - r["s_out"] > 20 else bearing(_along(pts, max(0.0, r["s_out"] - 20)), ref)
+            name = r["route"][-1]
+        ok = lambda k: k not in self.sid_ads and (k not in self.ap_xy or (
+            dist(self.ap_xy[k], ref) > 200.0 and abs((bearing(ref, self.ap_xy[k]) - toward + 540) % 360 - 180) < 70))
+        lst = [k for k in self.region_of(name, end) if ok(k)]
+        if not lst:
+            near_dir = [fir for fir, b in REGION_BRG.items() if abs((b - toward + 540) % 360 - 180) < 60]
+            lst = [k for fir in near_dir for k in REGIONS[fir] if ok(k)]
+            lst += [k for k in self.ap_xy if ok(k) and k not in lst]
+        if not lst:
+            fir = min(REGION_BRG, key=lambda f: abs((REGION_BRG[f] - toward + 540) % 360 - 180))
+            lst = REGIONS[fir]
+        return self.rng.choice(lst)
 
     def on_sectors(self, p, tol=4.0) -> bool:
         """In or on the edge of the controlled sectors."""
@@ -158,8 +273,10 @@ class _Ctx:
         info = self.asp.point_info.get(name, {})
         role = str(info.get("role", "")) + " " + str(info.get("region", ""))
         for fir, airports in REGIONS.items():
-            if fir in role:
+            if fir in role and fir != "GMMM":
                 return airports
+        if end in ("dep", "dest"):
+            return []                          # by direction (see _far)
         lat = self.asp.projection.inverse(*self.wp[name])[0] if self.asp.projection else 33
         return REGIONS["LPPC"] if lat > 35 else REGIONS["GCCC"] if lat < 29.5 else REGIONS["GMMM"]
 
@@ -173,7 +290,7 @@ class _Ctx:
 
     def level(self, south, lo, hi, typ, avoid=()):
         mx = min(hi, _max_fl(typ))
-        lv = [l for l in range(lo, mx + 1, 10) if l < 290 or level_parity_ok(l, south)]
+        lv = [l for l in range(lo, mx + 1, 10) if level_parity_ok(l, south)]
         lv = [l for l in lv if l not in avoid] or lv
         return self.rng.choice(lv) if lv else None
 
@@ -182,10 +299,11 @@ class _Ctx:
         controlled area, plus a little) at time t."""
         s = r["s_in"] + 10.0 if at_s is None else at_s
         p = _along(r["pts"], s)
+        dep = dep or self.dep_for(r)
         a = {"callsign": self.callsign(ops or (OPS_LONG if typ in LONG else OPS_SHORT)), "type": typ,
-             "route": list(r["route"]), "fl": int(fl),
-             "dep": dep or self.rng.choice(self.region_of(r["route"][0], "dep")),
-             "dest": dest or self.rng.choice(self.region_of(r["route"][-1], "dest")),
+             "route": self.join_route(r, dep), "fl": int(fl),
+             "dep": dep,
+             "dest": dest or self.dest_for(r),
              "reach": {"point": [round(p[0], 3), round(p[1], 3)], "time": int(round(t))}}
         if mach:
             a["mach"] = round(mach, 2)
@@ -310,6 +428,8 @@ def _pick_pair(c: _Ctx, pairs):
 
 
 def _crossings(c: _Ctx, pairs):
+    # at the same level: two flights of the same direction (semicircular rule)
+    pairs = [p for p in pairs if p[0]["south"] == p[1]["south"]]
     n = int(round(c.P["crossings_per_hour"] * c.T / 3600.0))
     if not pairs or n <= 0:
         return 0
@@ -318,8 +438,8 @@ def _crossings(c: _Ctx, pairs):
         r1, r2, xp, s1, s2, x = _pick_pair(c, pairs)
         x = x or f"{r1['route'][0]}-{r1['route'][-1]} x {r2['route'][0]}-{r2['route'][-1]}"
         t1, t2 = c.pick_type(), c.pick_type()
-        both = [l for l in range(330, 400, 10) if (l < 290 or level_parity_ok(l, r1["south"])) and
-                (l < 290 or level_parity_ok(l, r2["south"])) and l <= min(_max_fl(t1), _max_fl(t2))]
+        both = [l for l in range(330, 400, 10) if level_parity_ok(l, r1["south"]) and level_parity_ok(l, r2["south"])
+                and l <= min(_max_fl(t1), _max_fl(t2))]
         fl = c.rng.choice(both) if both else (c.level(r1["south"], 330, 390, t1) or 350)
         a = c.add(r1, t1, fl, t, at_s=s1, keep=True)
         b = c.add(r2, t2, fl, t + c.rng.uniform(-35, 35), at_s=s2, keep=True)
@@ -390,7 +510,7 @@ def _transatlantic(c: _Ctx):
         fl = rfl
         if moroccan:
             fl = max(240, rfl - c.rng.choice([40, 60, 80, 100]))
-            if fl >= 290 and not level_parity_ok(fl, r["south"]):
+            if not level_parity_ok(fl, r["south"]):
                 fl -= 10
         kw = {"rfl": rfl} if fl != rfl else {}
         if west_bound:
@@ -402,6 +522,83 @@ def _transatlantic(c: _Ctx):
         c.notes.append(f"Transatlantic: {a['callsign']} {a['dep']}-{a['dest']} {r['route'][0]}-{r['route'][-1]} F{fl}"
                        + (f" climbing, requests F{rfl}" if rfl > fl else "") + f" around T+{int(t // 60)}'.")
     return n
+
+
+def _dep_routes(c: _Ctx, icao: str):
+    """Routes a departure from icao can join before entering the sectors (its SID leads to the route)."""
+    if icao not in c.sid_ads:
+        return []
+    out = []
+    for r in c.routes:
+        entry = _along(r["pts"], r["s_in"])
+        part = _cut(r["pts"], 0.0, r["s_in"]) if r["s_in"] > 1 else [r["pts"][0], entry]
+        if icao in c._near({icao: c.sid_ads[icao]}, part, entry, max_off=30.0, max_ref=130.0):
+            out.append(r)
+    return out
+
+
+def _arr_routes(c: _Ctx, icao: str):
+    """Routes to icao: ending at its sequencing fix, else passing close to it after leaving the sectors."""
+    fixes = {q["fix"] for q in c.asp.default_sequencing if q["aerodrome"] == icao}
+    seq = [r for r in c.routes if r["route"][-1] in fixes]
+    if seq:
+        return seq, True
+    xy = c.ap_xy.get(icao)
+    if xy is None:
+        return [], False
+    out = []
+    for r in c.routes:
+        exitp, L = _along(r["pts"], r["s_out"]), _poly_len(r["pts"])
+        part = _cut(r["pts"], r["s_out"], L) if L - r["s_out"] > 1 else [exitp, r["pts"][-1]]
+        if c._near({icao: xy}, part, exitp, max_off=30.0, max_ref=130.0):
+            out.append(r)
+    return out, False
+
+
+def airports_for(control) -> List[dict]:
+    """The aerodromes whose departures or arrivals the sectors handle, for the generator's per-aerodrome rates."""
+    c = _Ctx({**DEFAULTS, "control": [str(s).upper() for s in control], "seed": 1})
+    out = []
+    for d in c.asp.default_aerodromes:
+        icao = d["id"]
+        dep = bool(_dep_routes(c, icao))
+        arr = bool(_arr_routes(c, icao)[0])
+        if dep or arr:
+            out.append({"id": icao, "name": d.get("name", icao), "dep": dep, "arr": arr})
+    return out
+
+
+def _airport_flows(c: _Ctx) -> Dict[str, int]:
+    done = {"departures": 0, "arrivals": 0}
+    lo_fl, hi_fl = c.P["levels"]
+    for icao, rates in (c.P.get("airports") or {}).items():
+        icao = str(icao).upper()
+        nd = int(round(float((rates or {}).get("dep") or 0) * c.T / 3600.0))
+        na = int(round(float((rates or {}).get("arr") or 0) * c.T / 3600.0))
+        routes = _dep_routes(c, icao)
+        if routes and nd > 0:
+            for t in c.times(nd, lo=0.0, hi=c.T - 300.0):
+                r = c.rng.choice(routes)
+                typ = c.pick_type()
+                ad = c.sid_ads[icao]
+                fl = c.level(r["south"], 200, min(340, hi_fl), typ) or 260
+                # long enough after the start to be shown from take-off: the SID and the climb to its level
+                climb_s = max(240.0 + dist(ad, _along(r["pts"], r["s_in"])) / 300.0 * 3600.0, 180.0 + fl * 100.0 / 1800.0 * 60.0)
+                t = max(t, climb_s + 120.0)
+                rfl = c.level(r["south"], max(fl + 20, lo_fl), hi_fl, typ)
+                kw = {"rfl": rfl} if rfl and rfl > fl else {}
+                a = c.add(r, typ, fl, t, dep=icao, **kw)
+                c.forced_dep.add(a["callsign"])
+                done["departures"] += 1
+        arr, seq = _arr_routes(c, icao)
+        if arr and na > 0:
+            for t in c.times(na, lo=-300.0, hi=c.T - 240.0):
+                r = c.rng.choice(arr)
+                typ = c.pick_type()
+                fl = c.level(r["south"], max(250, lo_fl - 40), hi_fl, typ) or 330
+                c.add(r, typ, fl, t, dest=icao, arrival=seq)
+                done["arrivals"] += 1
+    return done
 
 
 def _background(c: _Ctx):
@@ -427,7 +624,7 @@ def _background(c: _Ctx):
         c.add(r, typ, fl, t, **({"dest": seq["aerodrome"], "arrival": True} if seq else {"arrival": False}))
 
 
-def _deconflict(scn: dict, keep: set, rounds: int = 4) -> int:
+def _deconflict(scn: dict, keep: set, rounds: int = 7) -> int:
     """Background flights in an unplanned conflict (planned trajectories) moved to another level of the right
     direction; planted ones are left alone. Returns the conflicts left that are not planted."""
     from .designer import compile as dcompile
@@ -447,13 +644,82 @@ def _deconflict(scn: dict, keep: set, rounds: int = 4) -> int:
             if cs in keep or cs not in by:
                 continue
             a = by[cs]
+            if rnd >= 3:                                   # the levels did not do it: a few minutes later or earlier
+                dt = (1 if (rnd + len(cs)) % 2 else -1) * (90 + 60 * (rnd - 3))
+                if 0 <= a["reach"]["time"] + dt <= scn["duration_s"] - 120:
+                    a["reach"]["time"] += dt
+                continue
             south = r["aircraft"].get(cs, {}).get("southbound", True)
             mx = _max_fl(a["type"])
             cands = [a["fl"] + d for d in (20, -20, 40, -40, 60, -60)
-                     if (a["fl"] + d < 290 or level_parity_ok(a["fl"] + d, south)) and 170 <= a["fl"] + d <= min(mx, 410)]
+                     if level_parity_ok(a["fl"] + d, south) and 170 <= a["fl"] + d <= min(mx, 410)]
             if cands:
                 a["fl"] = cands[(rnd + len(cs)) % len(cands)]
     return left
+
+
+def _pos(plan, t):
+    """Position on a planned track [[t, x, y], ...] at time t (None outside it)."""
+    if not plan or t < plan[0][0] or t > plan[-1][0]:
+        return None
+    for (t0, x0, y0), (t1, x1, y1) in zip(plan, plan[1:]):
+        if t0 <= t <= t1:
+            k = (t - t0) / max(t1 - t0, 1e-9)
+            return (x0 + (x1 - x0) * k, y0 + (y1 - y0) * k)
+    return None
+
+
+def _entry_spacing(scn: dict, keep: set, rounds: int = 10) -> int:
+    """Every flight enters the sectors separated (the minimum of the exercise) from the traffic at its level: a planted
+    pair already too close when the second one crosses the boundary is re-timed by the smallest shift that separates
+    them at the entry and still lets them meet inside (the planted conflict is kept); a background flight is moved off
+    the level (_deconflict). Returns the planted pairs left too close at the entry."""
+    from .designer import compile as dcompile
+    by = {a["callsign"]: a for a in scn["aircraft"]}
+    bad = []
+    for rnd in range(rounds):
+        r = dcompile(scn)
+        if not r.get("ok"):
+            raise ValueError(r.get("error"))
+        plans, info, sep = r["plans"], r["aircraft"], r["separation_horizontal_nm"]
+        bad = []
+        for cf in r["planned_conflicts"]:
+            a_cs, b_cs = cf["aircraft"]
+            if not (a_cs in keep and b_cs in keep):
+                continue
+            ea, eb = info[a_cs]["entry_s"], info[b_cs]["entry_s"]
+            later, other = (a_cs, b_cs) if ea >= eb else (b_cs, a_cs)
+            te = max(ea, eb)
+            if cf["start_s"] > te + 5.0:
+                continue                                  # they enter separated, the conflict comes later: fine
+            bad.append((later, other, te, cf["minimum_nm"]))
+        if not bad:
+            return 0
+        moved = set()
+        for later, other, te, h in bad:
+            if later in moved or other in moved or later not in by:
+                continue
+            pl, po = plans[later], plans[other]
+            best = None
+            for d in sorted(range(-300, 301, 15), key=abs):
+                if d == 0:
+                    continue
+                pe, oe = _pos(pl, te), _pos(po, te + d)    # shifting 'later' by d = the other one seen at te + d
+                if pe is None or oe is None or dist(pe, oe) < h + 0.5:
+                    continue
+                # still meeting inside: closest approach after the entry under the minimum
+                dmin = min((dist(p, q) for t in range(int(te), int(pl[-1][0]), 10)
+                            for p, q in [(_pos(pl, t), _pos(po, t + d))] if p and q), default=99.0)
+                if dmin < h:
+                    best = d
+                    break
+            if best is None:                               # cannot keep both: separate them at the entry anyway
+                best = next((d for d in sorted(range(-300, 301, 15), key=abs) if d and _pos(pl, te) and _pos(po, te + d)
+                             and dist(_pos(pl, te), _pos(po, te + d)) >= h + 0.5), None)
+            if best is not None:
+                by[later]["reach"]["time"] = int(by[later]["reach"]["time"] + best)
+                moved.add(later)
+    return len(bad)
 
 
 def _prune(scn: dict) -> None:
@@ -469,6 +735,40 @@ def _prune(scn: dict) -> None:
             scn["requests"] = [q for q in scn["requests"] if q["callsign"] != cs]
             if len(scn["aircraft"]) == before:
                 raise
+
+
+def _check_built(scn: dict, c: _Ctx) -> dict:
+    """On the built exercise: a flight filed from an aerodrome with SIDs that cannot be shown from take-off (too early
+    in the exercise, or no SID joins its route) is refiled from a distant aerodrome; a level against the
+    semicircular rule for the direction the scenario gives it is moved to the nearest right one (background only)."""
+    from .scenario import build_world
+    w = build_world(copy.deepcopy(scn))
+    by_route = {tuple(r["route"]): r for r in c.routes}
+    out = {"from_takeoff": 0, "refiled": 0, "levels_fixed": 0}
+    for a in scn["aircraft"]:
+        ac = w.aircraft.get(a["callsign"].upper())
+        if ac is None:
+            continue
+        if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "sids", None):
+            if getattr(ac, "sid", None):
+                out["from_takeoff"] += 1
+            elif a["callsign"] in c.forced_dep:
+                if a["reach"]["time"] + 300 <= scn["duration_s"] - 240:
+                    a["reach"]["time"] += 300               # later: time to take off and climb in view
+                    out["retimed"] = out.get("retimed", 0) + 1
+            elif not a.get("start"):
+                r = by_route.get(tuple(a["route"]))
+                if r is not None:
+                    a["dep"] = c._far(r, "dep")
+                    out["refiled"] += 1
+        if a["callsign"] not in c.keep and not level_parity_ok(a["fl"], ac.southbound):
+            mx = _max_fl(a["type"])
+            for d in (10, -10, 30, -30):
+                if level_parity_ok(a["fl"] + d, ac.southbound) and 150 <= a["fl"] + d <= min(mx, 410):
+                    a["fl"] += d
+                    out["levels_fixed"] += 1
+                    break
+    return out
 
 
 def generate(params: Optional[dict] = None) -> dict:
@@ -488,6 +788,7 @@ def generate(params: Optional[dict] = None) -> dict:
     planted["crossings"] = _crossings(c, pairs)
     planted["level_crossings"] = _level_crossings(c, pairs)
     planted["transatlantic"] = _transatlantic(c)
+    planted.update(_airport_flows(c))
     _background(c)
     scn = {"name": f"gen_{'_'.join(s.lower() for s in P['control'])}_{P['seed']}", "airspace": "agadir",
            "control": P["control"], "duration_s": int(c.T), "pilot_delay_s": 4, "start_utc": P["start_utc"],
@@ -498,10 +799,20 @@ def generate(params: Optional[dict] = None) -> dict:
                            f"{P['level_crossings_per_hour']} level requests through traffic/h, slow traffic "
                            f"{int(P['slow_share'] * 100)} %, long-haul {int(P['heavy_share'] * 100)} %."),
            "weather": {"seed": P["seed"] % 1000, "wind": {"climatology": {"month": c.rng.randint(1, 12)}, "noise_kt": 5}},
+           **({"separation": {"horizontal_nm": float(P["separation_nm"])}} if P.get("separation_nm") else {}),
+           "pre_entry_nm": 55.0,     # on the scope well before they call (the departures nearby from take-off)
            "areas": [], "events": [], "aircraft": c.aircraft, "requests": c.requests,
            "design_notes": " ".join(c.notes), "generator": {k: P[k] for k in DEFAULTS}}
     _prune(scn)
+    checks = _check_built(scn, c)
+    for _ in range(3):
+        if not checks.get("retimed"):
+            break
+        checks = _check_built(scn, c)
+    entry_left = _entry_spacing(scn, c.keep)
     left = _deconflict(scn, c.keep)
     scn["generator"]["planted"] = planted
+    scn["generator"]["departures_from_takeoff"] = checks["from_takeoff"]
+    scn["generator"]["planted_too_close_at_entry"] = entry_left
     scn["generator"]["unplanned_conflicts_left"] = left
     return scn

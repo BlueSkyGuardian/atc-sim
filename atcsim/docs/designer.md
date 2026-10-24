@@ -46,7 +46,7 @@ in the preview run.
 | ≈ Rain area | <kbd>W</kbd> | Drag a rectangle: stratiform (widespread moderate) rain |
 | ⬠ Area (polygon) | <kbd>P</kbd> | Click the corners, double-click or <kbd>Enter</kbd> to close |
 | ◯ Area (circle) | <kbd>O</kbd> | Drag from the centre |
-| ↔ RBL | <kbd>B</kbd> | Click two ends: aircraft, waypoints or any spot. Bearing, range (and ΔFL) at the cursor time; between two aircraft also the **CPA along their trajectories** (follows the timeline). Right-click a label to remove it |
+| ↔ RBL | <kbd>B</kbd> | As on the controller seat: <kbd>B</kbd> starts a line at the cursor (snapped to the aircraft or the fix under it) that follows the mouse; a click or <kbd>B</kbd> again places it, <kbd>Esc</kbd> cancels. Or right-drag from one end to the other, or the RBL button then two clicks. The line is shown live with bearing, range (and ΔFL); between two aircraft also the **CPA along their trajectories** (follows the timeline). Right-click a label to remove it |
 | View | | Map layers, remembered in the browser: coast, routes, point names (the neighbours' minor points are named when zoomed in), airports with their runways, navaids, SIDs, STARs, holds (of the runways in use, or *All runways*), aircraft labels |
 | FIND | <kbd>Ctrl</kbd>+<kbd>F</kbd> | As on the radar: an aircraft (callsign, SSR code), a point, an aerodrome (ICAO, IATA, name), an airway, an area, a sector, a coordinate or `POINT/BRG/DIST`. Aircraft are selected and centred; the rest is marked until removed |
 | Geographic cursor | <kbd>Q</kbd> | The cursor shows its coordinates (degrees, minutes, seconds); a click drops a marked coordinate (<kbd>Shift</kbd>-click keeps the cursor on) |
@@ -99,8 +99,12 @@ In the Scenario tab, **Generate traffic** builds a random scenario for the secto
 | transatlantic / h | Flights to and from North America by IBALU and SUBAL / BEXAL, in the sectors those routes cross. Westbound, mostly Moroccan departures still climbing to the level they request; eastbound, at cruise. Across the West / Oceanic boundary they are coordinated by OLDI like every flight whose route touches both sides (see [level coordination](controller.md)) |
 | slow traffic | Share of slow aircraft (C550, C130, A400) at FL170–250 on the arrival routes, in the way of the sequences |
 | long-haul | Share of heavy, long-range types |
+| separation | The horizontal minimum of the exercise (empty: the airspace's). Every flight enters the sectors at least this far from the traffic at its level; a planted pair is re-timed so that it meets inside, not at the boundary |
+| aerodromes | For the aerodromes the ticked sectors handle (North, Central, South, East...): departures and arrivals per hour. Departures take off on a SID and climb into the sectors; arrivals are filed to the aerodrome (by its sequencing fix when it has one). Empty: only what the random traffic brings |
 | levels | The cruise band of the background traffic |
 | seed | Same seed and parameters, same scenario; empty draws one (the last is shown) |
+
+Every level follows the semicircular rule for the direction the flight has in the sectors (odd southbound, even northbound, below FL290 too), so same-level crossings are between flights of the same direction. Flights appear 55 NM before their entry; a flight from a nearby aerodrome with SIDs is filed from the point where its SID joins the route and appears on the runway, climbing to the level it enters at (the result says how many). Departures and destinations follow the route: a nearby aerodrome when the route passes it, otherwise a distant one in the direction the flight comes from or goes to (North America for the IBALU - SUBAL / BEXAL flow).
 
 Each planted aircraft is given a point and a time (be *here* at *T+x*), and the designer works back to when it appears. The situations are planted first, at the time and place they meet; the background traffic is then cleared of any
 conflict not planned, and flights that cannot fly their route are dropped. The result lists what was planted, and the

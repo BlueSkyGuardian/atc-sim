@@ -261,6 +261,13 @@ def designer_generate(body: GenerateBody):
         raise HTTPException(400, str(e))
 
 
+@app.get("/designer/generate/airports")
+def designer_generate_airports(control: str):
+    """The aerodromes whose departures / arrivals the sectors handle (per-aerodrome rates of the generator)."""
+    from . import generator
+    return generator.airports_for([s for s in control.split(",") if s])
+
+
 @app.post("/designer/compile")
 def designer_compile(body: DesignerBody):
     """Build an edited scenario: errors, lint warnings, planned trajectories and the conflicts they contain."""

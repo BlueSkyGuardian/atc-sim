@@ -171,6 +171,8 @@
           <label>transatlantic / h</label><span><input id="g-tat" type="number" value="2" min="0" max="10" style="width:64px"> <span class="c-dim">to / from North America by IBALU and SUBAL / BEXAL (westbound: Moroccan departures still climbing)</span></span>
           <label>slow traffic</label><span><input id="g-slow" type="number" value="12" min="0" max="60" style="width:64px"> % <span class="c-dim">C550, C130, A400 at FL170-250, on the arrival routes</span></span>
           <label>long-haul</label><span><input id="g-heavy" type="number" value="30" min="0" max="100" style="width:64px"> %</span>
+          <label>separation</label><span><input id="g-sep" type="number" min="3" max="20" step="0.5" placeholder="7" style="width:64px"> NM <span class="c-dim">(empty: the airspace minimum) every flight enters the sectors at least this far from the traffic at its level</span></span>
+          <label>aerodromes</label><div id="g-aps" class="c-dim" style="font-size:12px">tick sectors above</div>
           <label>levels</label><span>FL <input id="g-lo" type="number" value="290" step="10" style="width:56px"> – <input id="g-hi" type="number" value="400" step="10" style="width:56px"></span>
           <label>seed</label><span><input id="g-seed" type="number" placeholder="random" style="width:90px"> <span class="c-dim">same seed, same scenario</span></span>
         </div>
@@ -334,6 +336,28 @@ $('#newBtn').onclick = () => {
   setScenario(s);
 };
 // ---- generated traffic: a random scenario from parameters, opened like any other (edit, save)
+// per-aerodrome departures / arrivals per hour, for the aerodromes the ticked sectors handle
+async function loadGenAirports() {
+  const box = $('#g-aps'), ctl = [...document.querySelectorAll('#newCtl input:checked')].map(i => i.value);
+  if ($('#newAsp').value === 'training' || !ctl.length) { box.textContent = 'tick sectors above'; return; }
+  try {
+    const list = await api(`/designer/generate/airports?control=${ctl.join(',')}`);
+    if (!list.length) { box.textContent = 'none for these sectors'; return; }
+    box.innerHTML = `<table style="border-collapse:collapse"><tr><th></th><th style="font-weight:400;padding:0 6px">dep / h</th><th style="font-weight:400;padding:0 6px">arr / h</th></tr>` +
+      list.map(a => `<tr title="${esc(a.name)}"><td style="font-family:var(--mono);padding-right:6px">${a.id}</td>
+        <td><input data-ap="${a.id}" data-k="dep" type="number" min="0" max="30" style="width:52px" ${a.dep ? '' : 'disabled title="no SID joining these sectors"'}></td>
+        <td><input data-ap="${a.id}" data-k="arr" type="number" min="0" max="30" style="width:52px" ${a.arr ? '' : 'disabled'}></td></tr>`).join('') +
+      `</table><div style="margin-top:3px">empty = only in the random traffic; departures take off on a SID and climb into the sectors; part of the flights / h</div>`;
+  } catch (e) { box.textContent = e.message; }
+}
+function genAirports() {
+  const out = {};
+  document.querySelectorAll('#g-aps input[data-ap]').forEach(i => { if (i.value !== '') (out[i.dataset.ap] = out[i.dataset.ap] || {})[i.dataset.k] = +i.value; });
+  return Object.keys(out).length ? out : null;
+}
+document.getElementById('newCtl').addEventListener('change', loadGenAirports);
+$('#newAsp').addEventListener('change', () => setTimeout(loadGenAirports, 50));
+setTimeout(loadGenAirports, 800);
 $('#genBtn').onclick = async () => {
   const asp = $('#newAsp').value, ctl = [...document.querySelectorAll('#newCtl input:checked')].map(i => i.value);
   if (asp === 'training' || !ctl.length) { $('#genMsg').textContent = 'tick the sectors (Agadir / Casablanca airspace) first'; return; }
@@ -341,13 +365,13 @@ $('#genBtn').onclick = async () => {
   const params = { control: ctl, aircraft_per_hour: v('#g-aph'), density: v('#g-dens'), duration_min: v('#g-dur'),
     sequences_per_hour: v('#g-seq'), seq_size: [v('#g-smin'), Math.max(v('#g-smin'), v('#g-smax'))], overtakes_per_hour: v('#g-ovt'),
     crossings_per_hour: v('#g-cross'), level_crossings_per_hour: v('#g-lvl'), transatlantic_per_hour: v('#g-tat'),
-    slow_share: v('#g-slow') / 100, heavy_share: v('#g-heavy') / 100, levels: [v('#g-lo'), v('#g-hi')], seed: v('#g-seed') };
+    slow_share: v('#g-slow') / 100, separation_nm: v('#g-sep'), airports: genAirports(), heavy_share: v('#g-heavy') / 100, levels: [v('#g-lo'), v('#g-hi')], seed: v('#g-seed') };
   $('#genBtn').disabled = true; $('#genMsg').textContent = 'generating… (planting the situations, then clearing the background of unplanned conflicts: 10-30 s)';
   try {
     const s = await api('/designer/generate', { method: 'POST', body: JSON.stringify({ params }) });
     await setScenario(s);
     const p = s.generator.planted;
-    $('#genMsg').textContent = `${s.aircraft.length} aircraft · ${p.sequences} sequences · ${p.overtakes} overtakes · ${p.crossings} crossings · ${p.level_crossings} level requests · ${p.transatlantic} transatlantic (seed ${s.generator.seed}) — the details are in the design notes`;
+    $('#genMsg').textContent = `${s.aircraft.length} aircraft · ${p.sequences} sequences · ${p.overtakes} overtakes · ${p.crossings} crossings · ${p.level_crossings} level requests · ${p.transatlantic} transatlantic${p.departures || p.arrivals ? ` · ${p.departures} departures · ${p.arrivals} arrivals` : ''} · ${s.generator.departures_from_takeoff} shown from take-off (seed ${s.generator.seed}) — the details are in the design notes`;
     $('#g-seed').placeholder = `random (last ${s.generator.seed})`;
   } catch (e) { $('#genMsg').textContent = e.message; }
   finally { $('#genBtn').disabled = false; }
@@ -741,6 +765,21 @@ function acAt(p, maxPx = 12) {
   for (const a of positionsAt(T)) { const d = dist(p, [a.x, a.y]); if (d < bd) { bd = d; best = a; } }
   return best;
 }
+// what an RBL end at this map point is: the aircraft under it, else a fix within 10 px (snapped), else the point itself
+function rblTargetAt(p) {
+  const a = acAt(p); if (a) return a.cs;
+  const w = nearestWp(p, 10); if (w && !w.startsWith('@')) return { pt: sector.waypoints[w], name: w };
+  return { pt: [+p[0].toFixed(2), +p[1].toFixed(2)] };
+}
+const rblSame = (x, y) => typeof x === 'string' ? x === y : typeof y !== 'string' && Math.hypot(x.pt[0] - y.pt[0], x.pt[1] - y.pt[1]) < 0.2;
+function addRbl(a, b) { if (a && b && !rblSame(a, b) && !rbls.some(r => (rblSame(r.a, a) && rblSame(r.b, b)) || (rblSame(r.a, b) && rblSame(r.b, a)))) rbls.push({ a, b }); }
+// a line being drawn: B at the cursor (placed by a click or B again, Esc cancels) or a right-drag; shown live
+let rblLive = null;                                  // {from, key, x, y, moved}
+function rblFromKey() {
+  if (rblLive && rblLive.key) { if (hover) addRbl(rblLive.from, rblTargetAt(hover)); rblLive = null; return; }
+  const from = hover ? rblTargetAt(hover) : (sel && sel.kind === 'ac' ? sel.cs : null);
+  if (from) rblLive = { from, key: true, moved: true };
+}
 function stratAt(p) {
   const st = scn.weather.stratiform || [];
   for (let i = st.length - 1; i >= 0; i--) {
@@ -816,7 +855,14 @@ function routeOptions() {
   return out.join('');
 }
 cv.addEventListener('mousedown', e => {
-  if (!scn || e.button !== 0) return;
+  if (!scn) return;
+  if (rblLive && rblLive.key) { e.preventDefault(); e.stopPropagation(); if (e.button === 0) addRbl(rblLive.from, rblTargetAt(evNm(e))); rblLive = null; return; }
+  if (e.button === 2) {
+    const [x, y] = evPt(e);
+    if (!rblRects.some(q => x >= q.x0 && x <= q.x1 && y >= q.y0 && y <= q.y1)) rblLive = { from: rblTargetAt(evNm(e)), key: false, x: e.clientX, y: e.clientY, moved: false };
+    return;
+  }
+  if (e.button !== 0) return;
   const p = evNm(e);
   if (tool === 'select') {
     const a = acAt(p);
@@ -847,11 +893,9 @@ cv.addEventListener('mousedown', e => {
       placeAircraft(r, pr.pt, w && r.includes(w) && dist(sector.waypoints[w], pr.pt) < 2.5 ? w : null);
     } else if (w && w !== r[r.length - 1]) { r.push(w); hint(); }
   } else if (tool === 'rbl') {                   // an aircraft, else a waypoint, else the point clicked
-    const a = acAt(p), w = !a && nearestWp(p);
-    const end = a ? a.cs : w ? { pt: sector.waypoints[w], name: w } : { pt: [+p[0].toFixed(2), +p[1].toFixed(2)] };
+    const end = rblTargetAt(p);
     if (!rblFirst) { rblFirst = end; hint(); return; }
-    const same = (x, y) => typeof x === 'string' ? x === y : typeof y !== 'string' && x.pt[0] === y.pt[0] && x.pt[1] === y.pt[1];
-    if (!same(end, rblFirst)) rbls.push({ a: rblFirst, b: end });
+    addRbl(rblFirst, end);
     rblFirst = null; hint(); return;
   } else if (tool === 'cell') {
     snapshot(); const cells = scn.weather.cells = scn.weather.cells || [];
@@ -868,6 +912,7 @@ cv.addEventListener('mousedown', e => {
 });
 window.addEventListener('mousemove', e => {
   mouseCv = e.target === cv ? evPt(e) : null;
+  if (rblLive) { if (e.target === cv) hover = evNm(e); if (!rblLive.key && Math.abs(e.clientX - rblLive.x) + Math.abs(e.clientY - rblLive.y) > 6) rblLive.moved = true; return; }
   if (!mdrag) { if (e.target === cv) hover = evNm(e); return; }
   const p = evNm(e);
   if (mdrag.kind === 'pan') { view.cx = mdrag.cx - (e.clientX - mdrag.px) * devicePixelRatio / view.s; view.cy = mdrag.cy + (e.clientY - mdrag.py) * devicePixelRatio / view.s; return; }
@@ -906,7 +951,8 @@ window.addEventListener('mousemove', e => {
   mdrag.cur = p;
 });
 let hover = null;
-window.addEventListener('mouseup', () => {
+window.addEventListener('mouseup', e => {
+  if (e.button === 2 && rblLive && !rblLive.key) { const d = rblLive; rblLive = null; if (d.moved && hover) { addRbl(d.from, rblTargetAt(hover)); d.placed = true; lastRightDrag = performance.now(); } return; }
   if (!mdrag) return;
   const d = mdrag; mdrag = null;
   if (['ac', 'cell', 'area', 'squallMove', 'stratMove', 'regionMove'].includes(d.kind)) { if (d.moved) changed(d.kind === 'ac' || d.kind === 'area'); return; }
@@ -937,7 +983,10 @@ window.addEventListener('mouseup', () => {
   }
   setTool('select'); changed(); showTab('sel');
 });
+let lastRightDrag = 0;
 cv.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (performance.now() - lastRightDrag < 300 || (rblLive && rblLive.moved)) return;   // the end of a right-drag RBL
   const [x, y] = evPt(e), hit = rblRects.find(q => x >= q.x0 && x <= q.x1 && y >= q.y0 && y <= q.y1);
   if (hit) { e.preventDefault(); rbls.splice(rbls.indexOf(hit.r), 1); }
 });
@@ -992,7 +1041,7 @@ window.addEventListener('keydown', e => {
   if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
   if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); return; }
   if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); redo(); return; }
-  if (e.key === 'Escape') { setTool('select'); sel = null; renderSel(); return; }
+  if (e.key === 'Escape') { if (rblLive) { rblLive = null; return; } setTool('select'); sel = null; renderSel(); return; }
   if (e.key === 'Enter' && tool === 'areaPoly') { finishPoly(); return; }
   if (e.key === 'Enter' && tool === 'aircraft') { placeStarted(); return; }
   if (e.key === 'Backspace' && tool === 'aircraft' && draft && (draft.route.length || draft.start)) { e.preventDefault(); if (draft.route.length) draft.route.pop(); else delete draft.start; hint(); return; }
@@ -1006,7 +1055,8 @@ window.addEventListener('keydown', e => {
   }
   if (e.key === 'ArrowRight') { setT(T + (e.shiftKey ? 60 : 10)); return; }
   if (e.key === 'ArrowLeft') { setT(T - (e.shiftKey ? 60 : 10)); return; }
-  const k = { v: 'select', a: 'aircraft', c: 'cell', l: 'squall', r: 'region', p: 'areaPoly', o: 'areaCircle', b: 'rbl', w: 'strat' }[e.key.toLowerCase()];
+  if (e.key.toLowerCase() === 'b' && !e.ctrlKey && !e.metaKey) { rblFromKey(); return; }
+  const k = { v: 'select', a: 'aircraft', c: 'cell', l: 'squall', r: 'region', p: 'areaPoly', o: 'areaCircle', w: 'strat' }[e.key.toLowerCase()];
   if (k && !e.ctrlKey && !e.metaKey) setTool(k);
 });
 function deleteSel() {
@@ -1231,7 +1281,12 @@ function draw() {
   rblRects.length = 0;
   const rblEnd = e => typeof e === 'string' ? byCs[e] : { x: e.pt[0], y: e.pt[1], fl: null, cs: e.name || '' };
   const rblName = e => typeof e === 'string' ? e : e.name || 'point';
-  for (const r of rbls) {
+  const live = [];
+  const ring = t => { if (!t || (typeof t !== 'string' && !t.name)) return; const P = rblEnd(t); if (!P) return; const [x, y] = toPx(P.x, P.y);
+    ctx.strokeStyle = '#d79bff'; ctx.lineWidth = 1.5 * dpr; ctx.beginPath(); ctx.arc(x, y, 9 * dpr, 0, Math.PI * 2); ctx.stroke(); };
+  if (rblLive && hover) { const t = rblTargetAt(hover); ring(rblLive.from); ring(t); if (rblLive.moved && !rblSame(rblLive.from, t)) live.push({ a: rblLive.from, b: t, live: true }); }
+  else if (tool === 'rbl' && hover) { ring(rblTargetAt(hover)); if (rblFirst) { ring(rblFirst); const t = rblTargetAt(hover); if (!rblSame(rblFirst, t)) live.push({ a: rblFirst, b: t, live: true }); } }
+  for (const r of rbls.concat(live)) {
     const A = rblEnd(r.a), B = rblEnd(r.b); if (!A || !B) continue;
     const both = typeof r.a === 'string' && typeof r.b === 'string';
     const c = both ? rblCpa(r.a, r.b, T) : null, [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y);
@@ -1241,10 +1296,11 @@ function draw() {
     const bad = c && c.d < hmin && Math.abs((c.A.fl || 0) - (c.B.fl || 0)) * 100 < vNeed;
     const col = bad ? '#ff6b9a' : '#d79bff';
     ctx.strokeStyle = col; ctx.lineWidth = 1.3 * dpr; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+    for (const [P, px2, py2] of [[A, ax, ay], [B, bx, by]]) if (P.fl == null) { ctx.beginPath(); ctx.moveTo(px2 - 5 * dpr, py2); ctx.lineTo(px2 + 5 * dpr, py2); ctx.moveTo(px2, py2 - 5 * dpr); ctx.lineTo(px2, py2 + 5 * dpr); ctx.stroke(); }
     if (c && c.t > T) {
       const [qax, qay] = toPx(c.A.x, c.A.y), [qbx, qby] = toPx(c.B.x, c.B.y);
       ctx.setLineDash([4 * dpr, 4 * dpr]); ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(qax, qay); ctx.lineTo(qbx, qby); ctx.stroke(); ctx.setLineDash([]);
-      for (const [qx, qy, cs] of [[qax, qay, r.a], [qbx, qby, r.b]]) { ctx.beginPath(); ctx.arc(qx, qy, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = col; ctx.font = mono(9.5); ctx.fillText(cs, qx + 6 * dpr, qy + 3 * dpr); }
+    for (const [qx, qy, cs] of [[qax, qay, r.a], [qbx, qby, r.b]]) { ctx.beginPath(); ctx.arc(qx, qy, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = col; ctx.font = mono(9.5); ctx.fillText(cs, qx + 6 * dpr, qy + 3 * dpr); }
     }
     const brg = (Math.atan2(B.x - A.x, B.y - A.y) * 180 / Math.PI + 360) % 360, rng = Math.hypot(B.x - A.x, B.y - A.y);
     const l1 = `${rblName(r.a)}→${rblName(r.b)} ${String(Math.round(brg)).padStart(3, '0')}° ${rng.toFixed(1)} NM` + (A.fl != null && B.fl != null ? ` ΔFL ${Math.abs(A.fl - B.fl)}` : '');
@@ -1253,7 +1309,7 @@ function draw() {
     const mx = (ax + bx) / 2, my = (ay + by) / 2;
     ctx.fillStyle = '#0b1016dd'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, 28 * dpr);
     ctx.fillStyle = col; ctx.fillText(l1, mx, my); ctx.fillText(l2, mx, my + 13 * dpr);
-    rblRects.push({ r, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my + 16 * dpr });
+    if (!r.live) rblRects.push({ r, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my + 16 * dpr });
   }
   // the shared tools' view of the traffic at T (Find, geographic cursor)
   state = shown = { sim_time_s: T, transferred: [],
