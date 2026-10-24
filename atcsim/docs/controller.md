@@ -218,7 +218,7 @@ before, when the aircraft leaves your sectors or is decontrolled.
 
 ### Start-up requests
 
-Departures from the aerodromes under the sectors (all but GMMN, whose departures are *silent*) ask for a **start-up
+Departures from the aerodromes under the sectors (all but GMMN and GMAD, whose departures are *silent*); sectors with no aerodrome under them (West, Oceanic) get none ask for a **start-up
 clearance** before they take off: the aerodrome's approach phones you about 10 minutes before. Give the point where
 the aircraft will leave the TMA and the level it is cleared to, or refuse (approach asks again 5 minutes later). It
 does not take off before your clearance, and needs about 3 minutes after it to start up and taxi; it then climbs to

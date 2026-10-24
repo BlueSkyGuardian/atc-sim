@@ -1,5 +1,6 @@
-"""Start-up clearances: before each departure from an aerodrome under the Casablanca sectors (but GMMN, whose departures
-are "silent": released by agreement), its approach asks the ACC sector above for a start-up clearance - by phone.
+"""Start-up clearances: before each departure from an aerodrome under the sectors being worked (North, Central, South,
+East...; but GMMN and GMAD, whose departures are "silent": released by agreement), its approach asks the ACC sector above for a
+start-up clearance - by phone. Sectors with no aerodrome under them (West, Oceanic) get no request.
 
 The request comes LEAD_S before the planned take-off (the time to start up and taxi). The sector answers with the
 point where the aircraft will leave the TMA and the level it is cleared to (or refuses: approach asks again
@@ -13,7 +14,7 @@ Requests from the same aerodrome due close together (GROUP_S) come in one call. 
   the clearance received (point, level) or the refusal;
 * in both: POST /sessions/{id}/startup/answer {callsigns, approve, point, level}.
 
-Scenario: "startup_requests": true (default) | false, "startup_exempt": ["GMMN"] (default), and per aircraft
+Scenario: "startup_requests": true (default) | false, "startup_exempt": ["GMMN", "GMAD"] (default), and per aircraft
 "startup": false | {"request_s": t}.
 """
 from __future__ import annotations
@@ -35,13 +36,17 @@ def _recs(w) -> Dict[str, dict]:
         w.startups = {}
         cfg = _cfg(w)
         if cfg.get("enabled", True):
-            exempt = {str(x).upper() for x in cfg.get("exempt", ["GMMN"])}
+            exempt = {str(x).upper() for x in cfg.get("exempt", ["GMMN", "GMAD"])}
             per = cfg.get("per", {})
+            from .approach import _inside_ours
+            ours = {k: _inside_ours(w, ad) for k, ad in w.aerodromes.items()}
             for ac in w.aircraft.values():
                 s = getattr(ac, "sid", None)
                 if not s or ac.status != "scheduled" or getattr(ac, "spawn_alt_ft", None) is None:
                     continue
                 spec = per.get(ac.callsign)
+                if not ours.get(s["aerodrome"]) and not isinstance(spec, dict):
+                    continue                    # an aerodrome not under the sectors worked: not asked of us
                 if spec is False or (s["aerodrome"] in exempt and not isinstance(spec, dict)):
                     continue
                 t_req = float(spec["request_s"]) if isinstance(spec, dict) and "request_s" in spec else \

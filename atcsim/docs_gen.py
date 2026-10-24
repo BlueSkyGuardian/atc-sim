@@ -202,7 +202,7 @@ SCHEMA = {
         "startup_requests": {"type": "boolean", "default": True,
                              "description": "departures shown from take-off need a start-up clearance from the sector above: "
                                             "their aerodrome's approach asks it about 10 min before take-off (atcsim/startup.py)"},
-        "startup_exempt": {"type": "array", "items": {"type": "string"}, "default": ["GMMN"],
+        "startup_exempt": {"type": "array", "items": {"type": "string"}, "default": ["GMMN", "GMAD"],
                            "description": "aerodromes whose departures need none (silent departures)"},
         "runway_changes": {"type": "array", "description": "runway changes at the aerodromes, on top of their defaults",
                            "items": {"type": "object", "required": ["aerodrome", "time", "runway"], "properties": {

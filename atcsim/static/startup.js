@@ -86,8 +86,12 @@
     el.querySelector('.wb').innerHTML = rs.length ? `<table style="width:100%;border-collapse:collapse;font-size:12px">${rs.map(r => row(r, r.state === 'cleared')).join('')}</table>`
       : '<div class="empty">No start-up clearance waiting for take-off.</div>';
   }
+  let seen = false;                    // the Start-ups button only once the exercise has start-up traffic
   function tick() {
     if (!mine() || !state) return;
+    const b = document.getElementById('suBtn');
+    if ((state.startups || []).length) seen = true;
+    if (b) b.style.display = seen ? '' : 'none';
     const g = groups(), ids = Object.keys(g);
     if (!picked && ids.length) {
       const gid = ids[0], ad = g[gid][0].aerodrome;
@@ -103,7 +107,7 @@
     if (host && !document.getElementById('suBtn')) {
       const b = document.createElement('button'); b.id = 'suBtn'; b.textContent = 'Start-ups';
       b.title = 'Start-up clearances given to the aerodromes\' departures: change the point or the level until take-off';
-      b.onclick = () => atcIsOpen('suList') ? atcCloseWin('suList') : list(); host.appendChild(b);
+      b.style.display = 'none'; b.onclick = () => atcIsOpen('suList') ? atcCloseWin('suList') : list(); host.appendChild(b);
     }
     setInterval(() => { tick(); if (atcIsOpen('suList') && !document.querySelector('#suList').contains(document.activeElement)) list(); }, 1000);
   }

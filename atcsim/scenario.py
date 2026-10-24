@@ -811,7 +811,7 @@ def build_world(scn: dict) -> World:
     for ac in aircraft:
         ac.mag_var = w.mag_var
     w.auto_assume = bool(scn.get("auto_assume", False))
-    w.startup_cfg = {"enabled": bool(scn.get("startup_requests", True)), "exempt": scn.get("startup_exempt", ["GMMN"]),
+    w.startup_cfg = {"enabled": bool(scn.get("startup_requests", True)), "exempt": scn.get("startup_exempt", ["GMMN", "GMAD"]),
                      "per": {str(a["callsign"]).upper(): a["startup"] for a in scn.get("aircraft", []) if "startup" in a}}
     w.build_ctx = {"pre_entry_nm": pre_entry_nm, "checkin_nm": checkin_nm, "start_min": start_min,
                    "auto_routes": scn.get("auto_routes", True)}       # to add aircraft during the run

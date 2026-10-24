@@ -1239,8 +1239,12 @@ def generate(params: Optional[dict] = None) -> dict:
     left = _deconflict(scn, c.keep, caps=c.level_cap)
     scn["generator"]["planted"] = planted
     scn["generator"]["runway_changes"] = scn.get("runway_changes", [])
-    scn["generator"]["startup_requests"] = sum(1 for a in scn["aircraft"] if a["dep"] in c.sid_ads
-                                               and a["dep"] not in ("GMMN",))
+    try:                                            # as the exercise will make them (aerodromes under the sectors)
+        from .scenario import build_world
+        from . import startup as _su
+        scn["generator"]["startup_requests"] = len(_su._recs(build_world(copy.deepcopy(scn))))
+    except Exception:                               # noqa: BLE001
+        scn["generator"]["startup_requests"] = None
     scn["generator"]["departures_from_takeoff"] = checks["from_takeoff"]
     scn["generator"]["departures_levelled"] = checks.get("levelled", 0)
     scn["generator"]["planted_too_close_at_entry"] = entry_left

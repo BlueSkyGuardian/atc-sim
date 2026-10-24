@@ -353,13 +353,13 @@ established are re-planned for it (its STAR and final). An unknown aerodrome or 
 
 ### Start-up requests
 
-Every departure from an aerodrome under the Casablanca sectors needs a **start-up clearance**: its approach phones
-the ACC sector above about 10 minutes before take-off, and the aircraft does not take off before the sector has given
-the point where it leaves the TMA and its level. GMMN's departures are *silent* (released by agreement) and ask for
-nothing.
+Every departure from an aerodrome under the sectors being worked (North, Central, South, East...) needs a **start-up
+clearance**: its approach phones the ACC sector above about 10 minutes before take-off, and the aircraft does not take
+off before the sector has given the point where it leaves the TMA and its level. Sectors with no aerodrome under them
+(West, Oceanic) get no request. GMMN's and GMAD's departures are *silent* (released by agreement) and ask for nothing.
 
 - `"startup_requests": true` (default) | `false`: no requests at all.
-- `"startup_exempt": ["GMMN"]` (default): aerodromes whose departures ask for nothing.
+- `"startup_exempt": ["GMMN", "GMAD"]` (default): aerodromes whose departures ask for nothing.
 - per aircraft, `"startup": false` (this one asks for nothing) or `{"request_s": 300}` (asks at that time instead of
   10 minutes before its take-off; also for an aircraft of an exempt aerodrome).
 
