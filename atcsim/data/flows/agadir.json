@@ -146,7 +146,6 @@
   "MAE": [
    "GMFF",
    "GMFO",
-   "GMTT",
    "GMMW",
    "GMTA",
    "GMTN"
@@ -983,6 +982,143 @@
     "FRN"
    ],
    "route": "TNA ADM UG850 MAK UB11 GALTO"
+  },
+  {
+   "id": "tng_cmn",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "MAN"
+   ],
+   "route": "SOBMA VARAS UA411 LAKAM"
+  },
+  {
+   "id": "tng_rak",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "GMMX"
+   ],
+   "route": "SOBMA UN10 BARIS UB11 MAK"
+  },
+  {
+   "id": "tng_aga",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "GMAD"
+   ],
+   "route": "SOBMA UN10 BARIS UB11 PELAX UN869 ADM"
+  },
+  {
+   "id": "tng_canaries",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "CAN",
+    "CANE"
+   ],
+   "route": "SOBMA UN10 BARIS UB11 MAK UG850 DEVLA"
+  },
+  {
+   "id": "tng_waf",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "WAFC"
+   ],
+   "route": "SOBMA UN10 BARIS UB11 MAK UG850 ADM UR975 ECHED"
+  },
+  {
+   "id": "tng_east",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "GMFO",
+    "EAST"
+   ],
+   "route": "NARMI UN726 OJD UA411 ORSUP"
+  },
+  {
+   "id": "tng_fes",
+   "from": [
+    "GMTT"
+   ],
+   "to": [
+    "GMFF",
+    "GMFK"
+   ],
+   "route": "MADOV UM240 ERA"
+  },
+  {
+   "id": "cmn_tng",
+   "from": [
+    "MAN"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "LAKAM UA411 VARAS SOBMA"
+  },
+  {
+   "id": "rak_tng",
+   "from": [
+    "GMMX"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "MAK UB11 BARIS UN10 SOBMA"
+  },
+  {
+   "id": "aga_tng",
+   "from": [
+    "GMAD"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "ADM UG850 MAK UB11 BARIS UN10 SOBMA"
+  },
+  {
+   "id": "south_tng",
+   "from": [
+    "CAN",
+    "CANE",
+    "WAFC"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "DEVLA UG850 MAK UB11 BARIS UN10 SOBMA"
+  },
+  {
+   "id": "east_tng",
+   "from": [
+    "EAST",
+    "GMFO"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "ORSUP UA411 OJD UN726 NARMI"
+  },
+  {
+   "id": "fes_tng",
+   "from": [
+    "GMFF",
+    "GMFK"
+   ],
+   "to": [
+    "GMTT"
+   ],
+   "route": "ERA UM240 MADOV"
   }
  ]
 }
