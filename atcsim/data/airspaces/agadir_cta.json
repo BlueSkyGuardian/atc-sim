@@ -1,5 +1,5 @@
 {
- "_source": "AIP MAROC ENR 4.4 (AIRAC AMDT 08/26) for point coordinates; ENR 6 upper/lower charts for airways, sector lines and the CTA boundary table (CTA AGADIR). ADILI is not listed in ENR 4.4: its position is read off the chart. The sector-line junctions J and V are read off the upper chart (georeferenced on 17 ENR 4.4 points, residual about 0.5 NM). CTA Casablanca sectors North / East / Central / South-South: ENR 2.1 (AIRAC 08/24); Casablanca upper airways: ENR 3.1 / 3.2; the FIR outline from ENR 2.1 (the Moroccan-Algerian border between the Mediterranean coast and 31 50N 002 40W is approximate); prohibited, restricted and danger areas: ENR 5.1.",
+ "_source": "AIP MAROC ENR 4.4 (AIRAC AMDT 08/26) for point coordinates; ENR 6 upper/lower charts for airways, sector lines and the CTA boundary table (CTA AGADIR). ADILI is not listed in the Moroccan ENR 4.4: its position is the Portuguese AIP's (ENR 4.4). The sector-line junctions J and V are read off the upper chart (georeferenced on 17 ENR 4.4 points, residual about 0.5 NM). CTA Casablanca sectors North / East / Central / South-South: ENR 2.1 (AIRAC 08/24); Casablanca upper airways: ENR 3.1 / 3.2; the FIR outline from ENR 2.1 (the Moroccan-Algerian border between the Mediterranean coast and 31 50N 002 40W is approximate); prohibited, restricted and danger areas: ENR 5.1.",
  "id": "agadir",
  "name": "Agadir CTA (Casablanca FIR GMMM)",
  "unit": "ACC AGADIR",
@@ -138,10 +138,10 @@
    "fra": "EX"
   },
   "ADILI": {
-   "coord": "355800N 0093410W",
-   "role": "FIR GMMM/LPPC (position read off the chart)",
+   "coord": "355800N 0093422W",
+   "role": "FIR GMMM/LPPC",
    "fra": "EX",
-   "estimated": true
+   "source": "NAV Portugal AIP ENR 4.4 (not in the Moroccan ENR 4.4; was read off the chart, 0.16 NM east)"
   },
   "TAKAV": {
    "coord": "355800N 0092219.24W",
@@ -5773,10 +5773,11 @@
   "points": {
    "ELVAR": {
     "coord": "391310N 0071324W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": false,
-    "name": "L14, N975 BDRY FIR/UIR MADRID / FIR LISBOA"
+    "name": "A975, UL14, UN975, UN979, UZ219, FRA (I) / Z219 MADRID / LISBOA FIR BDRY below FL245",
+    "fra": "I"
    },
    "BARDI": {
     "coord": "403501N 0061809W",
@@ -5795,19 +5796,19 @@
    },
    "MINTA": {
     "coord": "370744N 0072300W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": false,
     "fra": "I",
-    "name": "(I) N747Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660,ODD FL FM LECS TO LPPC FL245-FL660 BDRY FIR/UIR MADRID / FIR LISBO"
+    "name": "R47, UN747 FRA (I): Compulsory for BDRY crossing: EVEN FL FM LPPC TO LECS FL245-FL660 ODD FL FM LECS TO LPPC FL245-FL660 MADRID / LISBOA FIR"
    },
    "PESAS": {
     "coord": "370212N 0072300W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": false,
     "fra": "I",
-    "name": "(I) N858Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660 BDRY UIR MADRID / FIR LISBOA"
+    "name": "UN858 FRA (I): Compulsory for BDRY crossing: EVEN FL FM LPPC TO LECS FL245-FL660 MADRID / LISBOA FIR BDRY"
    },
    "PINEK": {
     "coord": "415104N 0083552W",
@@ -5888,7 +5889,10 @@
    "OBOLO": {
     "coord": "363153N 0080757W",
     "region": "Lisboa",
-    "source": "given by the user (Lisboa FIR)"
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": false,
+    "fra": "I",
+    "name": "UL14, UN858 FRA (I) / NIL"
    },
    "TOSDI": {
     "coord": "405927N 0061719W",
@@ -5917,23 +5921,35 @@
    },
    "MANOX": {
     "coord": "361140N 0152325W",
-    "region": "Lisboa/Santa Maria (Madeira)",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": false,
+    "fra": "EX",
+    "name": "T13 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
    },
    "NAVIX": {
     "coord": "353114N 0161404W",
-    "region": "Lisboa/Santa Maria (Madeira)",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": false,
+    "fra": "EX",
+    "name": "T16, UZ225 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
    },
    "KOMUT": {
     "coord": "380000N 0150000W",
-    "region": "Lisboa/Santa Maria (Madeira)",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": false,
+    "fra": "EX",
+    "name": "UM744 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
    },
    "GUNTI": {
     "coord": "390000N 0150000W",
-    "region": "Lisboa/Santa Maria (Madeira)",
-    "source": "Lisboa ENR 4.4 (eAIP Portugal)"
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": false,
+    "fra": "EX",
+    "name": "UZ21, UZ23, T25 FRA (EX):ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
    },
    "ODAXA": {
     "coord": "335938N 0081432W",
@@ -7315,11 +7331,11 @@
    },
    "ADINO": {
     "coord": "400104N 0062225W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I) L14Compulsory for BDRY crossing : ODD FL FM LECM TO LPPC FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+    "name": "NIL FRA (I): Compulsory for BDRY crossing: ODD FL FM LECM TO LPPC FL245-FL660 LECM FIR BDRY of ATS delegation"
    },
    "ADOKI": {
     "coord": "274356N 0152546W",
@@ -7663,10 +7679,11 @@
    },
    "BABOV": {
     "coord": "395235N 0065225W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "N873 Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+    "name": "NIL FRA (I) / NIL",
+    "fra": "I"
    },
    "BAFEM": {
     "coord": "274952N 0150909W",
@@ -7812,11 +7829,11 @@
    },
    "BIMBO": {
     "coord": "312517N 0160158W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "fra": "ID",
-    "name": "(ID) N729, N981 (D): GCTS, GCXO, GCLP, GCLACompulsory for BDRY crossing:EVEN FL FM GCCC TO LPPC FL305- FL660 BDRY FIR/UIR CANARIAS / FIR LIS",
+    "fra": "D",
+    "name": "B18, UN729, UN745, UN981, UZ9 FRA (D): GCTS, GCXO, GCLP, GCLA FRA (E): EVEN FL245-FL305 FRA (I): Compulsory for BDRY crossing: EVEN FL FM GC",
     "tma": "Canarias"
    },
    "BINVA": {
@@ -9109,11 +9126,11 @@
    },
    "LASIB": {
     "coord": "380215N 0071322W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I) M744Compulsory for BDRY crossing:ODD FL FM LPPC TO LECS FL245- FL660,EVEN FL FM LECS TO LPPC FL245-FL660 BDRY UIR MADRID / FIR LISBOA / "
+    "name": "UM744 FRA (I): Compulsory for BDRY crossing: ODD FL FM LPPC TO LECS FL245-FL660 EVEN FL FM LECS TO LPPC FL245-FL660 BDRY of ATS delegation"
    },
    "LASPO": {
     "coord": "391657N 0003240W",
@@ -9677,12 +9694,12 @@
     "tma": "Sevilla"
    },
    "NELSO": {
-    "coord": "314058N 0172725W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "coord": "314059N 0172725W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "fra": "I",
-    "name": "(I) N741Compulsory for BDRY crossing:EVEN AND ODD FL FM LPPC TO GCCC FL305-FL660 BDRY UIR CANARIAS / FIR LISBOA"
+    "fra": "X",
+    "name": "R1, UN741 FRA (X) ODD/ EVEN FL245-FL305 FRA (I): Compulsory for BDRY crossing ODD/ EVEN FL FM LPPC TO GCCC FL305-FL660 CANARIAS / LISBOA / S"
    },
    "NENOS": {
     "coord": "385142N 0011959W",
@@ -9788,10 +9805,10 @@
    },
    "NIRAK": {
     "coord": "371445N 0072543W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "Y136 BDRY FIR MADRID / LISBOA"
+    "name": "Y136 MADRID / LISBOA FIR BDRY"
    },
    "NIRPO": {
     "coord": "291412N 0131343W",
@@ -9909,11 +9926,11 @@
    },
    "OGERO": {
     "coord": "394806N 0062402W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I) Z409Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECM FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+    "name": "NIL FRA (I): Compulsory for BDRY crossing: EVEN FL FM LPPC TO LECM FL245-FL660 LECM FIR BDRY of ATS delegation"
    },
    "OGROH": {
     "coord": "362900N 0045438W",
@@ -9983,20 +10000,20 @@
    },
    "ORTIS": {
     "coord": "312425N 0163325W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "fra": "IA",
-    "name": "(IA) N728 (A): GCLP, GCLA, GCTS, GCXOCompulsory for BDRY crossing:ODD FL FM LPPC TO GCCC FL305- FL660 BDRY FIR/UIR CANARIAS / FIR LISBOA TMA",
+    "fra": "A",
+    "name": "G851, UN728, UN975, UP47, UZ8 FRA (A): GCLP, GCLA, GCTS, GCXO FRA (X): ODD FL245-FL305 FRA (I): Compulsory for BDRY crossing: ODD FL FM LPPC",
     "tma": "Canarias"
    },
    "ORTOP": {
     "coord": "360136N 0072300W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I) N726, T100Compulsory for BDRY crossing:ODD FL FM LPPC TO LECS FL245- FL660, EVEN FL FM LECS TO LPPC FL245-FL660 BDRY FIR/UIR MADRID / FI"
+    "name": "A5, UN726 FRA (I): Compulsory for BDRY crossing: ODD FL FM LPPC TO LECS FL245-FL660 EVEN FL FM LECS TO LPPC FL245-FL660 BDRY FIR MADRID / LI"
    },
    "ORVEK": {
     "coord": "255830N 0184850W",
@@ -10236,11 +10253,11 @@
    },
    "PIREN": {
     "coord": "365000N 0072300W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I)Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECS FL245- FL660,ODD FL FM LECS TO LPPC FL245-FL660 BDRY UIR MADRID / FIR LISBOA"
+    "name": "UZ5, W1 FRA (I): Compulsory for BDRY crossing: EVEN FL FM LPPC TO LECS FL245-FL660 ODD FL FM LECS TO LPPC FL245-FL660 LISBOA / MADRID FIR BD"
    },
    "PITAB": {
     "coord": "302110N 0162657W",
@@ -10299,10 +10316,11 @@
    },
    "PORTA": {
     "coord": "391948N 0071809W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "L185, N873 BDRY FIR/UIR MADRID / FIR LISBOA"
+    "name": "B60,UN873 FRA (I) / MADRID UIR / LISBOA FIR BDRY",
+    "fra": "I"
    },
    "PRADO": {
     "coord": "400851N 0020037W",
@@ -10347,10 +10365,11 @@
    },
    "RAKOD": {
     "coord": "394651N 0063743W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "L14, N870, Punto del espacio áereo delegado a Lisboa ACC // Z409 Point of airspace delegated to Lisboa ACC"
+    "name": "NIL FRA (I) / NIL",
+    "fra": "I"
    },
    "RASEP": {
     "coord": "284139N 0142648W",
@@ -10491,10 +10510,11 @@
    },
    "RODAP": {
     "coord": "393757N 0070355W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "N870, N873 Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+    "name": "NIL FRA (I) / NIL",
+    "fra": "I"
    },
    "ROFIX": {
     "coord": "401248N 0034730W",
@@ -10536,11 +10556,11 @@
    },
    "ROSAL": {
     "coord": "380117N 0070605W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "IAD",
-    "name": "(IAD) M744 (AD): LEZL BDRY FIR/UIR MADRID / FIR LISBOA"
+    "name": "A44, UM744, UZ227, Z227 NIL / MADRID/LISBOA FIR BDRY"
    },
    "ROSTA": {
     "coord": "281522N 0200000W",
@@ -11004,10 +11024,11 @@
    },
    "TOFEF": {
     "coord": "393144N 0072159W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "N870 BDRY UIR MADRID / FIR LISBOA, Punto del espacio aéreo delegado a Lisboa ACC // Point of airspace delegated to Lisboa ACC"
+    "name": "UN870, UZ15 FRA (I) MADRID UIR / LISBOA FIR BDRY",
+    "fra": "I"
    },
    "TOLVO": {
     "coord": "374004N 0053654W",
@@ -11065,10 +11086,10 @@
    },
    "TUPIX": {
     "coord": "370434N 0072300W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
-    "name": "Y135 BDRY FIR MADRID / LISBOA"
+    "name": "NIL MADRID / LISBOA FIR BDRY"
    },
    "TUTIS": {
     "coord": "355520N 0064159W",
@@ -11147,11 +11168,11 @@
    },
    "UREDI": {
     "coord": "395135N 0062336W",
-    "region": "Sevilla/Madrid",
-    "source": "ENAIRE AIP ENR 4.4 (WEF 01-OCT-26)",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
     "minor": true,
     "fra": "I",
-    "name": "(I) N870Compulsory for BDRY crossing:EVEN FL FM LPPC TO LECM FL245- FL660 BDRY ATS DELEGATION (LECMDLGLP)"
+    "name": "NIL FRA (I): Compulsory for BDRY crossing: EVEN FL FM LPPC TO LECM FL245-FL660 LECM FIR BDRY of ATS delegation"
    },
    "URIAS": {
     "coord": "391409N 0003000W",
@@ -11522,6 +11543,1513 @@
     "minor": true,
     "name": "USO EXCLUSIVO MILITAR // EXCLUSIVE MILITARY USE TMA SEVILLA",
     "tma": "Sevilla"
+   },
+   "ABALO": {
+    "coord": "321952N 0180749W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "EX",
+    "name": "UM190, UQ11, UZ220, Z220 FRA (EX): ODD/EVEN FL LISBOA / SANTA MARIA FIR BDRY"
+   },
+   "ABETO": {
+    "coord": "402547N 0080323W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN726, UN872 FRA (I) / NIL"
+   },
+   "ABRAT": {
+    "coord": "394918N 0073915W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN745 FRA (I) / NIL"
+   },
+   "ABRIL": {
+    "coord": "402346N 0083449W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "ABUSU": {
+    "coord": "325201N 0163808W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / MADEIRA TMA, FRA (D): LPPS / Holding Pattern, MADEIRA CONTINGENCY"
+   },
+   "ADSAD": {
+    "coord": "382841N 0085852W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / LISBOA TMA, Holding Pattern"
+   },
+   "AIREZ": {
+    "coord": "392717N 0083958W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ALAGU": {
+    "coord": "380519N 0073652W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A44, UL14, UM744, UZ222, W13, Z222 FRA (I) FRA (AD): LPFR"
+   },
+   "ALAMA": {
+    "coord": "391324N 0083300W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "AMZIC": {
+    "coord": "322058N 0160406W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "ARNIT": {
+    "coord": "385927N 0085734W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ASMAR": {
+    "coord": "392221N 0113544W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R1, T12,UN741, UN981, UZ8 FRA (I) / NIL"
+   },
+   "ATECA": {
+    "coord": "383930N 0083721W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A975, UN975, UZ218 FRA (I) / NIL"
+   },
+   "BEVOP": {
+    "coord": "373557N 0092315W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT"
+   },
+   "BIGPI": {
+    "coord": "315707N 0171456W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "BIRBA": {
+    "coord": "390620N 0073043W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A975, UN873, UN975, UZ15, UZ222 FRA (I) / NIL"
+   },
+   "BOMKO": {
+    "coord": "385713N 0090237W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA"
+   },
+   "BURAG": {
+    "coord": "315114N 0160651W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "BUSEN": {
+    "coord": "383242N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A44,UM744, UN870, UZ21, UZ22 FRA (I) / NIL"
+   },
+   "CASLU": {
+    "coord": "383224N 0094836W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "CEFOX": {
+    "coord": "383306N 0092410W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "COCUN": {
+    "coord": "390136N 0090407W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "DEDUX": {
+    "coord": "372441N 0075729W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPFR"
+   },
+   "DEGUN": {
+    "coord": "332507N 0153930W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UQ11, UZ11, UZ13, UZ225 FRA (I) FRA (D): LPMA LPPS"
+   },
+   "DEKKI": {
+    "coord": "385747N 0084144W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "DEKUS": {
+    "coord": "380055N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "UN745 NIL / NIL"
+   },
+   "DEMZO": {
+    "coord": "331348N 0171528W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "DIGAL": {
+    "coord": "394427N 0075923W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN726, UZ218, UZ222 FRA (I) / NIL"
+   },
+   "DIKUV": {
+    "coord": "361054N 0124502W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "DOGUT": {
+    "coord": "381743N 0075527W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "DONOC": {
+    "coord": "331326N 0162121W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "DUTWA": {
+    "coord": "372158N 0083326W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "DUZOP": {
+    "coord": "374011N 0083906W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT, LPCS FRA (A): LPFR"
+   },
+   "EKLID": {
+    "coord": "390833N 0091549W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "EKMAR": {
+    "coord": "383327N 0093117W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "Y207 FRA (I) Holding Pattern"
+   },
+   "EKNOT": {
+    "coord": "321035N 0161745W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (A): LPPS LPMA"
+   },
+   "EKPER": {
+    "coord": "382523N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ELBIM": {
+    "coord": "330629N 0170703W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "ELDUK": {
+    "coord": "374840N 0075626W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R72, UN726 FRA (I) / NIL"
+   },
+   "ELNUB": {
+    "coord": "390456N 0104016W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT"
+   },
+   "EMPAD": {
+    "coord": "385344N 0090319W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "EPAKA": {
+    "coord": "334352N 0160730W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "ERNIL": {
+    "coord": "382953N 0093147W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ERPES": {
+    "coord": "400000N 0150000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "EX",
+    "name": "UZ22, UZ25 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
+   },
+   "ERTIS": {
+    "coord": "372500N 0073653W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ222, Y105, Z222 FRA (I) / NIL"
+   },
+   "ERUKU": {
+    "coord": "384733N 0085859W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA"
+   },
+   "ESEBI": {
+    "coord": "392411N 0083959W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPPT"
+   },
+   "ESUTI": {
+    "coord": "375136N 0102549W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPCS / Holding Pattern"
+   },
+   "ETTOL": {
+    "coord": "364616N 0083812W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "D",
+    "name": "NIL FRA (D): LPFR FRA (I)"
+   },
+   "EVGOT": {
+    "coord": "325504N 0162038W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "EVPAP": {
+    "coord": "390909N 0084738W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "EVURA": {
+    "coord": "383954N 0075507W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R72, UN726, UN873 FRA (I) FRA (AD): LPFR"
+   },
+   "EXFUN": {
+    "coord": "384128N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "EXODO": {
+    "coord": "334528N 0161910W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "EXONA": {
+    "coord": "385416N 0080100W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ227, Z227 FRA (I) / Holding Pattern"
+   },
+   "FADEF": {
+    "coord": "391144N 0085447W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "FAGUT": {
+    "coord": "320633N 0162818W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "G851, UN975 FRA (I) FRA (D): LPPS"
+   },
+   "FERFE": {
+    "coord": "390331N 0100021W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "FUSSI": {
+    "coord": "391239N 0085417W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "FUSUL": {
+    "coord": "323605N 0163943W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "GAIOS": {
+    "coord": "381632N 0083235W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A44 FRA (I) / NIL"
+   },
+   "GALOZ": {
+    "coord": "330201N 0172514W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPMA"
+   },
+   "GALPA": {
+    "coord": "342353N 0144349W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN728, UN745, UN975 FRA (I) / NIL"
+   },
+   "GANSU": {
+    "coord": "380000N 0094903W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "B18, UN975, UZ18 FRA (I) / Holding Pattern"
+   },
+   "GEBTI": {
+    "coord": "365822N 0074031W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "GENRO": {
+    "coord": "371135N 0073653W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "Y105, Y136 FRA (I) FRA (A): LPFR / Holding Pattern"
+   },
+   "GIKAR": {
+    "coord": "340958N 0140148W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UQ11, UZ9 FRA (I) / NIL"
+   },
+   "GIMAL": {
+    "coord": "364552N 0080021W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "Y103 FRA (I) FRA (A): LPFR / Holding Pattern"
+   },
+   "GODGI": {
+    "coord": "382527N 0091108W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "GOKHA": {
+    "coord": "371732N 0083659W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "GOSGA": {
+    "coord": "320456N 0163752W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPMA"
+   },
+   "GUDAV": {
+    "coord": "383902N 0083500W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "GUWEX": {
+    "coord": "373547N 0080108W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "IBBAN": {
+    "coord": "332035N 0170832W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (A): LPMA"
+   },
+   "IDBID": {
+    "coord": "391642N 0080100W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "IDLIP": {
+    "coord": "370049N 0075830W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "IDREL": {
+    "coord": "342030N 0161730W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "ILCAT": {
+    "coord": "332603N 0170254W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "W3, UL600 FRA (I) FRA (AD): LPPS"
+   },
+   "INBOM": {
+    "coord": "400007N 0081807W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ226, Z226 FRA (I) FRA (A): LPPT / Holding Pattern"
+   },
+   "INLIB": {
+    "coord": "381936N 0091410W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "IPSIK": {
+    "coord": "393353N 0075453W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "IRKID": {
+    "coord": "335530N 0180409W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "EX",
+    "name": "UL600, W3 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
+   },
+   "IRSAN": {
+    "coord": "331000N 0163016W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ITVIT": {
+    "coord": "385741N 0083344W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "IXIDA": {
+    "coord": "393918N 0080100W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPPT, LPCS"
+   },
+   "IXOLI": {
+    "coord": "365835N 0084206W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (AD): LPFR"
+   },
+   "IZENI": {
+    "coord": "380827N 0110221W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "KEKOS": {
+    "coord": "322657N 0161338W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "B18 NIL / MADEIRA CONTINGENCY"
+   },
+   "KELIK": {
+    "coord": "382931N 0090023W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA"
+   },
+   "KICAS": {
+    "coord": "334502N 0162824W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (A): LPMA"
+   },
+   "KIZEV": {
+    "coord": "373437N 0081004W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "KOPAV": {
+    "coord": "370326N 0081609W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "LAMDI": {
+    "coord": "391221N 0105754W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN729 FRA (I) / NIL"
+   },
+   "LAPPA": {
+    "coord": "331745N 0162131W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPMA"
+   },
+   "LATRU": {
+    "coord": "370000N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "LAZET": {
+    "coord": "385526N 0104016W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPPT, LPCS / Holding Pattern"
+   },
+   "LERLI": {
+    "coord": "391254N 0090210W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "LIDRO": {
+    "coord": "334003N 0155659W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R1, UN741, UZ14 FRA (I) FRA (A): LPMA"
+   },
+   "LIGRA": {
+    "coord": "380000N 0093527W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "G52, UN872 FRA (I) FRA (A): LPPT"
+   },
+   "LISGU": {
+    "coord": "385316N 0090946W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "LUKAN": {
+    "coord": "332828N 0145553W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "LUTAK": {
+    "coord": "370000N 0150000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "EX",
+    "name": "UN870 FRA (EX): ODD / EVEN FL LISBOA / SANTA MARIA FIR BDRY"
+   },
+   "LUVUP": {
+    "coord": "374313N 0101007W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPPT / Holding Pattern"
+   },
+   "LUXUT": {
+    "coord": "375959N 0090137W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "MADAT": {
+    "coord": "320943N 0170507W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "MAGUM": {
+    "coord": "391003N 0082333W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "G52,UN745, UN870, UP600, UZ218, FRA (I) / NIL UZ7, W7"
+   },
+   "MANEL": {
+    "coord": "383900N 0085650W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "MARCU": {
+    "coord": "325104N 0162028W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "MARIM": {
+    "coord": "372500N 0075028W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "W13 FRA (I) FRA (A): LPFR"
+   },
+   "MARUM": {
+    "coord": "363720N 0132616W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ8 FRA (I) / NIL"
+   },
+   "MAZUK": {
+    "coord": "383538N 0093315W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "MIGFO": {
+    "coord": "382050N 0092157W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "MOMAS": {
+    "coord": "391909N 0080100W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN870, UZ219, Z219 FRA (I) / NIL"
+   },
+   "MONEC": {
+    "coord": "322723N 0164949W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "MORAS": {
+    "coord": "390950N 0080107W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "NAKOS": {
+    "coord": "380000N 0092004W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ4, W8 FRA (I) FRA (A): LPPT"
+   },
+   "NARTA": {
+    "coord": "360323N 0123329W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "B18, R47, UN745, UN747, UN975, FRA (I) UZ13, UZ14, UZ9"
+   },
+   "NASAS": {
+    "coord": "361932N 0125824W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN729 FRA (I) / NIL"
+   },
+   "NATID": {
+    "coord": "385254N 0093252W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "NEGRI": {
+    "coord": "385243N 0132416W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ21 FRA (I) / NIL"
+   },
+   "NETVO": {
+    "coord": "383824N 0091241W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA"
+   },
+   "NEVUD": {
+    "coord": "383404N 0091849W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "NIDUL": {
+    "coord": "322155N 0172111W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ220, Z220 FRA (I) FRA (AD): LPMA"
+   },
+   "NIKED": {
+    "coord": "372630N 0082819W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "NOKSO": {
+    "coord": "370502N 0085647W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "OBESA": {
+    "coord": "363926N 0141445W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UM190 FRA (I) / NIL"
+   },
+   "ODEMI": {
+    "coord": "372951N 0082302W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A5, Y101 FRA (I)"
+   },
+   "ODLIX": {
+    "coord": "384044N 0091902W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "Y207 FRA (I) / NIL"
+   },
+   "ODPAK": {
+    "coord": "380742N 0075536W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A44, R72, UM744, UN726, UN979, FRA (I) / NIL UZ7, UZ15"
+   },
+   "OKARI": {
+    "coord": "362655N 0080933W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPFR"
+   },
+   "OKNIB": {
+    "coord": "384208N 0091043W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "OLBOD": {
+    "coord": "380838N 0104016W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT"
+   },
+   "OLGAR": {
+    "coord": "391100N 0075611W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "B60, R72 FRA (I) / NIL"
+   },
+   "ORSOS": {
+    "coord": "390000N 0101232W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ9 FRA (I) / NIL"
+   },
+   "ORTUG": {
+    "coord": "382414N 0085946W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "ORVED": {
+    "coord": "392300N 0073907W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT, LPCS"
+   },
+   "OTZIL": {
+    "coord": "330525N 0162102W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "OXFIN": {
+    "coord": "383428N 0091802W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "PECKY": {
+    "coord": "343149N 0152016W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R1, UN741, UN747 FRA (I) / NIL"
+   },
+   "PELUS": {
+    "coord": "332643N 0170416W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UM190, UN747 FRA (I) / NIL"
+   },
+   "PESEX": {
+    "coord": "383532N 0091413W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA, Holding Pattern"
+   },
+   "PEVAP": {
+    "coord": "351449N 0144906W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "PIGOR": {
+    "coord": "392802N 0134917W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ22, UZ23 FRA (I) / NIL"
+   },
+   "PILIM": {
+    "coord": "325115N 0163529W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) FRA (D): LPMA"
+   },
+   "PINOX": {
+    "coord": "401726N 0070633W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "G52,UN745, UZ15 FRA (I) / NIL"
+   },
+   "RAKUN": {
+    "coord": "333325N 0154653W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "B18, UN975 FRA (I) FRA (A): LPMA, LPPS"
+   },
+   "RARUR": {
+    "coord": "393956N 0082934W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "RELKU": {
+    "coord": "382501N 0092739W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "RIMIV": {
+    "coord": "341016N 0153539W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "RINOR": {
+    "coord": "391237N 0084728W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "ROKOB": {
+    "coord": "385111N 0090551W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA"
+   },
+   "ROKTE": {
+    "coord": "363458N 0082019W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ROLAR": {
+    "coord": "341241N 0151221W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ11, UZ14 FRA (I) / NIL"
+   },
+   "ROMEP": {
+    "coord": "390355N 0084314W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ROTBU": {
+    "coord": "391147N 0090933W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "RULET": {
+    "coord": "341506N 0145456W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "B18, UN745, UN975 FRA (I) / NIL"
+   },
+   "RULOX": {
+    "coord": "385400N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "RUPEP": {
+    "coord": "353219N 0154252W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "SONAP": {
+    "coord": "363000N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "SOPOP": {
+    "coord": "402624N 0122312W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "T12, UZ25 FRA (I) / NIL"
+   },
+   "SOTEX": {
+    "coord": "381734N 0081312W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN873, UP600, UZ223, W7 FRA (I) FRA (AD): LPFR"
+   },
+   "SUNES": {
+    "coord": "371827N 0090000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN873 FRA (I) / NIL"
+   },
+   "TABAX": {
+    "coord": "380926N 0134457W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UM744 FRA (I) / NIL"
+   },
+   "TAGUX": {
+    "coord": "385644N 0075451W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A975, R72, UN726, UN975 FRA (I) / NIL"
+   },
+   "TELMU": {
+    "coord": "353816N 0143150W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN741, UP47 FRA (I) / NIL"
+   },
+   "TERVA": {
+    "coord": "402500N 0093528W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "TOPVI": {
+    "coord": "385507N 0090345W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "TORVU": {
+    "coord": "343910N 0140013W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "TROIA": {
+    "coord": "380424N 0085245W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A5 FRA (I) / NIL"
+   },
+   "TUNAV": {
+    "coord": "391854N 0112225W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN728 FRA (I) / NIL"
+   },
+   "TUXIV": {
+    "coord": "334314N 0173827W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "UBESO": {
+    "coord": "364451N 0074850W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ULTIT": {
+    "coord": "383156N 0091218W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ULVOT": {
+    "coord": "373728N 0095923W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT"
+   },
+   "UNPOT": {
+    "coord": "381046N 0100000W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / Holding Pattern"
+   },
+   "UPKAT": {
+    "coord": "385759N 0090212W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LISBOA TMA, Holding Pattern"
+   },
+   "UPULO": {
+    "coord": "390238N 0073907W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPPT, LPCS / Holding Pattern"
+   },
+   "USALU": {
+    "coord": "371320N 0081801W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "Y101, Y102 FRA (I) FRA (A): LPFR / Holding Pattern"
+   },
+   "VABEM": {
+    "coord": "363257N 0131922W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UN728, UN981 FRA (I) / NIL"
+   },
+   "VAGAR": {
+    "coord": "383007N 0092956W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "VATZI": {
+    "coord": "373552N 0085147W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "IA",
+    "name": "NIL FRA (IA): LPPT, LPCS / Holding Pattern FRA (D): LPFR"
+   },
+   "VEDEL": {
+    "coord": "395127N 0124012W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UZ23 FRA (I) / NIL"
+   },
+   "VERAM": {
+    "coord": "364621N 0134031W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R1, UN741, UZ11 FRA (I) / NIL"
+   },
+   "XAMAX": {
+    "coord": "400152N 0083210W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "A5 FRA (I) FRA (A): LPPT, LPCS / Holding Pattern"
+   },
+   "XANEL": {
+    "coord": "392411N 0121213W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "UM190 FRA (I) / NIL"
+   },
+   "XAPAS": {
+    "coord": "373550N 0075700W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "R72, Y102 FRA (I) FRA (D): LPFR"
+   },
+   "XEGEN": {
+    "coord": "321859N 0160058W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "XERON": {
+    "coord": "322253N 0165637W",
+    "region": "Madeira",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / MADEIRA CONTINGENCY"
+   },
+   "XEXEH": {
+    "coord": "373030N 0082148W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I)"
+   },
+   "YETSI": {
+    "coord": "381918N 0085343W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / LPPT Holding Pattern"
+   },
+   "ZACRA": {
+    "coord": "382048N 0090623W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "I",
+    "name": "NIL FRA (I) / NIL"
+   },
+   "ZEFFI": {
+    "coord": "382145N 0092128W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "ZEZZU": {
+    "coord": "383805N 0091920W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "name": "NIL NIL / NIL"
+   },
+   "ZIFOG": {
+    "coord": "384147N 0104016W",
+    "region": "Lisboa",
+    "source": "NAV Portugal AIP ENR 4.4 (14-MAY-2026)",
+    "minor": true,
+    "fra": "ID",
+    "name": "NIL FRA (ID): LPPT, LPCS"
    }
   }
  },
@@ -16488,5 +18016,5 @@
   }
  ],
  "_airports_source": "OurAirports (public domain, github.com/davidmegginson/ourairports-data): every aerodrome of Morocco (Western Sahara included) and the Canary Islands, Gibraltar, southern Spain (Andalucia, Extremadura, Murcia, southern Castilla-La Mancha, Ceuta, Melilla) and southern Portugal (south of 40N) with Madeira; runway thresholds and true headings as OurAirports has them",
- "_enr44_source": "ENAIRE AIP ENR 4.4 01-OCT-26: 1083 points, those south of 40.5N and west of 0.5E as external points"
+ "_enr44_pt_source": "NAV Portugal AIP ENR 4.4 14-MAY-2026: 435 points, those of the region as external points"
 }

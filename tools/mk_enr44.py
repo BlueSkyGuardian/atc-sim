@@ -1,10 +1,11 @@
-"""Significant points of the Spanish AIP (ENAIRE AIP ENR 4.4, name-code designators) south of 40.5N and west of 0.5E -
-southern Spain, the Strait and the Canary Islands - into the airspace file's external points. A point already in the
-file keeps its Moroccan AIP position (points) and an external point is updated to the ENAIRE position. They are
+"""Significant points of an AIP's ENR 4.4 (name-code designators) into the airspace file's external points: the
+Spanish AIP (ENAIRE) south of 40.5N and west of 0.5E - southern Spain, the Strait, the Canary Islands - and the
+Portuguese AIP (NAV Portugal) south of 40.5N and east of 20W - southern Portugal, Madeira, the Lisboa oceanic part. A point already in the
+file keeps its Moroccan AIP position (points) and an external point is updated to the AIP's position. They are
 "minor" points: on the scope their names show when zoomed in.
 
-  pdftotext -layout ENAIRE_AIP_ENR_4.4.pdf enr44.txt
-  python tools/mk_enr44.py enr44.txt
+  pdftotext -layout ENAIRE_AIP_ENR_4.4.pdf enr44.txt && python tools/mk_enr44.py enr44.txt es
+  pdftotext -layout LP_ENR_4_4_en.pdf lp44.txt && python tools/mk_enr44.py lp44.txt pt
 """
 import json
 import math
@@ -15,7 +16,12 @@ import sys
 P = os.path.join(os.path.dirname(__file__), "..", "atcsim", "data", "airspaces", "agadir_cta.json")
 d = json.loads(open(P).read())
 L = open(sys.argv[1], encoding="utf-8").read().split("\n")
-edition = next((m.group(1) for l in L[:6] for m in [re.search(r"WEF (\d{2}-[A-Z]{3}-\d{2})", l)] if m), "")
+AIP = sys.argv[2] if len(sys.argv) > 2 else "es"
+edition = next((m.group(1) for l in L[:8] for m in [re.search(r"(?:WEF )?(\d{2}-[A-Z]{3}-\d{2,4})", l)] if m), "")
+SRC = {"es": "ENAIRE AIP ENR 4.4", "pt": "NAV Portugal AIP ENR 4.4"}[AIP]
+inside = {"es": lambda la, lo: la < 40.5 and lo < 0.5, "pt": lambda la, lo: la < 40.5 and lo > -20.0}[AIP]
+region_of = {"es": lambda la, lo: "Canarias" if la < 30.5 else ("Sevilla/Madrid" if lo < -1.0 or la < 38 else "Madrid/Valencia"),
+             "pt": lambda la, lo: "Madeira" if la < 34.0 else "Lisboa"}[AIP]
 
 
 def parse(s):
@@ -46,7 +52,7 @@ for i, line in enumerate(L):
             while k < len(L) and k < j + 6 and L[k].strip() and not re.match(r"^\s*[A-Z]{5}\s+\d{6}", L[k]):
                 rem.append(L[k]); k += 1
             txt = " ".join(" ".join(r.split()) for r in rem).strip()
-            fra = re.search(r"\(([IEXAD]+)\)", rest)
+            fra = re.search(r"\(([IEXAD]+)\)", " ".join(rem))
             pts[name] = {"coord": f"{lat} {mm.group(1)}", "remarks": txt, "fra": fra.group(1) if fra else ""}
             break
 
@@ -54,11 +60,11 @@ ext = d["external_points"]["points"]
 added = updated = kept = 0
 for k, v in sorted(pts.items()):
     lat, lon = parse(v["coord"])
-    if lat >= 40.5 or lon >= 0.5:
+    if not inside(lat, lon):
         continue
     tma = re.search(r"TMA ([A-ZÁÉÍÓÚÑ]+(?: [A-ZÁÉÍÓÚÑ]+)?)", v["remarks"])
-    region = "Canarias" if lat < 30.5 else ("Sevilla/Madrid" if lon < -1.0 or lat < 38 else "Madrid/Valencia")
-    entry = {"coord": v["coord"], "region": region, "source": f"ENAIRE AIP ENR 4.4 (WEF {edition})" if edition else "ENAIRE AIP ENR 4.4",
+    region = region_of(lat, lon)
+    entry = {"coord": v["coord"], "region": region, "source": f"{SRC} ({edition})" if edition else SRC,
              "minor": True, **({"fra": v["fra"]} if v["fra"] else {}),
              **({"name": re.sub(r"\s*Obligatorio.*?// ?", "", v["remarks"])[:140]} if v["remarks"] else {}),
              **({"tma": tma.group(1).title()} if tma else {})}
@@ -66,12 +72,16 @@ for k, v in sorted(pts.items()):
         kept += 1                                       # Moroccan AIP point: its position stays
         continue
     if k in ext:
-        if nm(parse(ext[k]["coord"]), (lat, lon)) > 0.05 or "ENAIRE" not in ext[k].get("source", ""):
+        if nm(parse(ext[k]["coord"]), (lat, lon)) > 0.05 or SRC not in ext[k].get("source", ""):
             ext[k] = {**ext[k], **entry, "minor": ext[k].get("minor", False)}
             updated += 1
         continue
     ext[k] = entry
     added += 1
-d["_enr44_source"] = f"ENAIRE AIP ENR 4.4 {edition}: {len(pts)} points, those south of 40.5N and west of 0.5E as external points"
+d[f"_enr44_{AIP}_source"] = f"{SRC} {edition}: {len(pts)} points, those of the region as external points"
+d.pop("_enr44_source", None)
 open(P, "w").write(json.dumps(d, indent=1, ensure_ascii=False) + "\n")
-print(f"{len(pts)} points in ENR 4.4 ({edition}); {added} added, {updated} external updated, {kept} already Moroccan points")
+print(f"{SRC}: {len(pts)} points ({edition}); {added} added, {updated} external updated, {kept} already Moroccan points")
+for k in ("ADILI",):
+    if k in pts and k in d["points"]:
+        print(f"  {k}: Moroccan {d['points'][k]['coord']}  vs  {SRC} {pts[k]['coord']}")
