@@ -307,6 +307,13 @@ class _Ctx:
                 sid_on.append(i)
             elif d >= 12.0 or (d < 3.0 and not ends):   # (its own VOR, for an aerodrome without SIDs)
                 ahead.append(i)
+        # an aerodrome under or beside our sectors: approach keeps the departure until a point some way out, so that
+        # it is handed to us level - not at its own VOR or a SID end next to the field (when such a point exists)
+        keep_out = False
+        if self.on_sectors(ad, tol=15.0):
+            far = lambda lst: [i for i in lst if dist(ad, r["pts"][i]) >= 22.0]
+            if far(sid_on) or far(ahead):
+                sid_on, ahead, keep_out = far(sid_on), far(ahead), True
         if sid_on:                                   # a SID ends on the route: the furthest such point
             return names[sid_on[-1]:]
         if not ends and ahead:
@@ -316,7 +323,7 @@ class _Ctx:
             for k in range(1, len(names)):
                 along.append(along[-1] + dist(r["pts"][k - 1], r["pts"][k]))
             first = ahead[0]
-            if dist(ad, r["pts"][first]) < 3.0:
+            if dist(ad, r["pts"][first]) < 3.0 and not keep_out:
                 return names[first:]
             via = lambda k: dist(ad, r["pts"][first]) + along[k] - along[first]
             best = max(ahead, key=lambda k: via(k) - dist(ad, r["pts"][k]))
@@ -1076,7 +1083,7 @@ def _climb_alt_at(perf, mass: float, along_nm: float, elev_ft: float, sid_kt: fl
         else:
             mode, val = perf.schedule(alt)
         tas = perf.tas_for(mode, val, alt)
-        alt += max(300.0, perf.roc_fpm(alt, mode, val, mass)) * dt / 60.0
+        alt += max(300.0, 0.75 * perf.roc_fpm(alt, mode, val, mass)) * dt / 60.0   # (the simulation climbs a bit slower)
         d += tas * dt / 3600.0
         t += dt
     return alt
