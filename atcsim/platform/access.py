@@ -27,8 +27,8 @@ SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
 WRITE_RIGHTS = {
-    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live|bookmark)$",),   # pseudo-pilots run the simulation too
-    "atc": (r"^/(probe|mtcd|mtcd/settings|sequence|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+)$",),
+    "pilot": (r"^/(instructions|command|probe|mtcd|cpdlc/respond|cpdlc/downlink|chat|control|live|bookmark|startup/answer)$",),   # pseudo-pilots run the simulation too (and enter the start-up clearances, as approach)
+    "atc": (r"^/(probe|mtcd|mtcd/settings|sequence|cpdlc/parse|cpdlc/command|chat|entries|assume/[A-Z0-9]+|release/[A-Z0-9]+|oldi/answer)$",),
 }
 
 
@@ -106,8 +106,9 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
         for pat in WRITE_RIGHTS.get(seat, ()):
             if re.match(pat, rest):
                 return None
-        if seat == "atc" and rest in ("/control", "/live", "/bookmark") and db.is_solo(sid):
-            return None                                # solo radar: the controller runs the simulation
+        if seat == "atc" and rest in ("/control", "/live", "/bookmark", "/startup/answer") and db.is_solo(sid):
+            return None                                # solo radar: the controller runs the simulation (and answers
+                                                       # the approaches' start-up calls itself)
         return f"not allowed for the {seat} seat"
     if path in ("/sessions",) and method == "POST":
         return None if role in ("instructor", "admin") else "only instructors create sessions"
