@@ -1107,10 +1107,14 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
                     k = ac.route.index(ac.entry_wp)
                     pts = [wps[n] for n in ac.route[:k + 1] if n in wps]
                     L = sum(dist(p, q) for p, q in zip(pts, pts[1:]))
-                    reach = _climb_alt_at(ac.perf, ac.mass, max(0.0, L - LEVEL_BY_NM), ac.sid.get("elev_ft", 0.0),
+                    # level LEVEL_BY_NM before the boundary, or (an aerodrome right under it: Fes, Tanger, Errachidia)
+                    # a third of the way there - approach releases those low
+                    margin = min(LEVEL_BY_NM, L / 3.0)
+                    reach = _climb_alt_at(ac.perf, ac.mass, max(0.0, L - margin), ac.sid.get("elev_ft", 0.0),
                                           ac.sid.get("max_kt", 250.0))
-                    cap = next((l for l in range(int(reach // 1000) * 10, 90, -10)
-                                if level_parity_ok(l, ac.southbound)), None)
+                    floor = int(ac.sid.get("elev_ft", 0.0) // 1000) * 10 + 40
+                    cap = next((l for l in range(int(reach // 1000) * 10, floor - 1, -10)
+                                if level_parity_ok(l, ac.southbound)), None) or max(60, floor)
                     if cap is not None:
                         c.level_cap[a["callsign"]] = cap
                         if a["fl"] > cap:
