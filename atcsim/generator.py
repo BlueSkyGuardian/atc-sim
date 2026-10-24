@@ -296,7 +296,7 @@ class _Ctx:
                 break
             p, q = r["pts"][i], r["pts"][i + 1]
             d = dist(ad, p)
-            if d > 90.0:
+            if d > (90.0 if ends else 250.0):          # (no SIDs: a direct of any length to its airway)
                 continue
             # from here the route leads away from the aerodrome: a departure can join here without turning back
             away = d < 3.0 or turn(bearing(ad, p), bearing(p, q)) <= 90.0
@@ -308,11 +308,18 @@ class _Ctx:
                 ahead.append(i)
         if sid_on:                                   # a SID ends on the route: the furthest such point
             return names[sid_on[-1]:]
-        if not ends and ahead:                       # no SIDs: direct to the point that saves the most way
+        if not ends and ahead:
+            # no SIDs: out by its own VOR when the route starts there (LAY, DKH, TNA), else the first point heading
+            # away - or a longer direct further on when it saves more than 30 NM (Smara direct ADM, not via SOLNA)
             along = [0.0]
             for k in range(1, len(names)):
                 along.append(along[-1] + dist(r["pts"][k - 1], r["pts"][k]))
-            return names[min(ahead, key=lambda k: dist(ad, r["pts"][k]) - along[k]):]
+            first = ahead[0]
+            if dist(ad, r["pts"][first]) < 3.0:
+                return names[first:]
+            via = lambda k: dist(ad, r["pts"][first]) + along[k] - along[first]
+            best = max(ahead, key=lambda k: via(k) - dist(ad, r["pts"][k]))
+            return names[best:] if via(best) - dist(ad, r["pts"][best]) > 30.0 else names[first:]
         # otherwise the first point heading away that a SID reaches in line: from the SID's end to the point and on
         # along the route, neither leg turning back (the SID end lies on the way, not beyond the point)
         sid_xy = [self.wp[e] for e in ends if e in self.wp]
