@@ -1110,9 +1110,14 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
                 out["from_takeoff"] += 1
                 # it must reach us level: the transfer level is one it reaches LEVEL_BY_NM before the entry; the
                 # level it wants goes into its requested level (it asks us for the climb)
-                if ac.entry_wp in ac.route:
-                    k = ac.route.index(ac.entry_wp)
-                    pts = [wps[n] for n in ac.route[:k + 1] if n in wps]
+                if ac.entry_wp in wps:
+                    # distance from the runway to the entry (a boundary crossing point is not always in the route:
+                    # up to the route point nearest it, then on to it)
+                    pts_all = [wps[n] for n in ac.route if n in wps]
+                    e = wps[ac.entry_wp]
+                    k = ac.route.index(ac.entry_wp) if ac.entry_wp in ac.route else \
+                        min(range(len(ac.route)), key=lambda i: dist(wps.get(ac.route[i], (1e9, 1e9)), e))
+                    pts = [wps[n] for n in ac.route[:k + 1] if n in wps] + ([e] if ac.entry_wp not in ac.route else [])
                     L = sum(dist(p, q) for p, q in zip(pts, pts[1:]))
                     # level LEVEL_BY_NM before the boundary, or (an aerodrome right under it: Fes, Tanger, Errachidia)
                     # a third of the way there - approach releases those low

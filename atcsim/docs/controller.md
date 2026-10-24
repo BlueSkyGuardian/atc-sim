@@ -223,6 +223,11 @@ and, when needed, *✓ coordinated by phone*.
   *not in your sector yet / has left your sector: coordinate this clearance with* the unit concerned (counted in the
   exercise's statistics): follow it up with a coordination.
 - **Re-assume** a decontrolled aircraft: its grey label's callsign is a button with *Assume*.
+- **Arrivals to an aerodrome inside your sectors** (Casablanca, Rabat, Tanger under North; Marrakech, Agadir under
+  Central and South; Fes, Oujda under East): you sequence them yourself, by vectors. Approach (the simulated next
+  unit) only takes one over - its own sequencing, speed control, vectors, holding - once you have decontrolled it.
+  Until then it flies its flight plan towards its STAR and is yours to vector, slow down or hold. Arrivals to an
+  aerodrome outside your sectors are taken over by the next units as soon as they leave you.
 
 Losses of separation, area infringements and weather penetrations count only for aircraft on your frequency. An area infringement is being at an active area's levels closer to it than its lateral spacing: 3 NM from a prohibited area (GMP), 5 NM from a danger (GMD) or restricted (GMR) area.
 

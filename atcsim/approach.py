@@ -1,9 +1,10 @@
 """After the handover: the next units (the sector after ours, then approach) bring arrivals down to land.
 
 Every aircraft that has left our sectors (transferred or handed down into a TMA) and whose destination is one of the
-airspace's aerodromes is flown to its runway by simulated controllers - once it is 30 NM past its transfer point and
-the controller has decontrolled it and every other transferred arrival to that aerodrome (until then it flies its
-flight plan at its level, still the controller's to act on with coordination):
+airspace's aerodromes is flown to its runway by simulated controllers - as soon as it is transferred, or, for an
+aerodrome inside the sectors we control (Casablanca under North, Agadir under South...), only once the controller
+has decontrolled it: those arrivals are sequenced by our own vectors, and until the decontrol the aircraft flies its
+flight plan (towards its STAR), ours to vector, slow down or hold:
 
   lateral   : the rest of its flight plan towards the aerodrome (onward points that still bring it closer), then the
               approach path from there (straight-in, or the reversal procedure when it comes from the far side):
@@ -105,6 +106,16 @@ def _start(world: "World", ac: "Aircraft") -> None:
                  text=f"{ac.callsign} with the next units: {ad.id} runway {ad.in_use} ({path['type']})")
 
 
+def _inside_ours(world: "World", ad) -> bool:
+    """The aerodrome lies under (or just at the edge of) the sectors we control."""
+    from .airspace import _seg_dist
+    asp = world.airspace
+    if asp.inside(ad.pos):
+        return True
+    polys = [s.polygon for s in asp.sectors if s.id in (asp.controlled or [])] or [asp.polygon]
+    return any(_seg_dist(ad.pos, a, b) < 15.0 for poly in polys for a, b in zip(poly, poly[1:] + poly[:1]))
+
+
 def _to_go(world: "World", ac: "Aircraft") -> float:
     pts = [ac.pos] + [world.waypoints[w] for w in ac.route[ac.next_index:] if w in world.waypoints]
     return polyline_length(pts)
@@ -157,7 +168,10 @@ def update(world: "World") -> None:
     # transfer leaves it high and close, and it is up to them to lose the height (expedite, vectors, the hold)
     waiting = [a for a in arr if getattr(a, "app", None) is None]
     if waiting:
-        ready = waiting
+        # an aerodrome inside the sectors we work (Casablanca under North, Agadir under South, Fes under East): we
+        # sequence its arrivals ourselves, by vectors - the next units take one over only once we decontrol it;
+        # until then it flies its flight plan (towards its STAR) and is ours to vector, slow down or hold
+        ready = [a for a in waiting if not (a.assumed and _inside_ours(world, _dest(world, a)))]
         for a in sorted(ready, key=lambda a: dist(a.pos, _dest(world, a).pos)):   # closest first: the order
             _start(world, a)
             _schedule(world, a)
