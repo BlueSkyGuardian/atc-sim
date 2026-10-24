@@ -836,6 +836,22 @@ def oldi_answer(sid: str, body: LevelAnswer, request: Request):
     return _act(sid, request, "oldi_answer", body.model_dump())
 
 
+class StartupAnswer(BaseModel):
+    callsigns: List[str] = []
+    callsign: Optional[str] = None
+    approve: bool = True
+    point: Optional[str] = None
+    level: Optional[int] = None
+
+
+@app.post("/sessions/{sid}/startup/answer")
+def startup_answer(sid: str, body: StartupAnswer, request: Request):
+    """The ACC sector's answer to an approach's start-up request (or a change of a clearance before take-off): approve
+    with the point where the aircraft leaves the TMA and its cleared level, or refuse (approach asks again later).
+    The controller answers it in solo; with a pseudo-pilot, the pseudo-pilot (playing approach) enters it."""
+    return _act(sid, request, "startup_answer", body.model_dump())
+
+
 @app.get("/sessions/{sid}/flightplans")
 def flightplans(sid: str):
     """Every flight plan of the session (planned, inbound, on frequency, transferred)."""

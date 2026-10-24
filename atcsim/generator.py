@@ -21,6 +21,10 @@ Parameters (all optional, see DEFAULTS):
   levels                   [lowest, highest] cruise level of the background traffic
   separation_nm            horizontal minimum of the exercise (None: the airspace's); flights enter the sectors spaced
                            at least this much from the traffic at their level
+  runway_changes           "none" | "random" (each aerodrome of the sectors changes runway with runway_change_share,
+                           at a random time) | "wind" (likely where the runway in use has little or no headwind);
+                           departures take the SID of the runway in use when they take off, approach re-plans the
+                           arrivals not yet established
   airports                 {"GMMN": {"dep": 6, "arr": 8}, ...}: departures and arrivals per hour of the aerodromes of the
                            sectors (airports_for(control) lists them); departures take off on a SID and climb into the
                            sectors, arrivals are filed to the aerodrome (by its sequencing fix when it has one)
@@ -44,7 +48,8 @@ from .geometry import bearing, dist, point_in_polygon, segment_intersection
 DEFAULTS = dict(control=["WS"], duration_min=60, seed=None, start_utc="10:00", aircraft_per_hour=30, density=2,
                 sequences_per_hour=2, seq_size=[3, 4], overtakes_per_hour=1, crossings_per_hour=2,
                 level_crossings_per_hour=2, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
-                levels=[290, 400], weather="calm", airports=None, separation_nm=None)
+                levels=[290, 400], weather="calm", airports=None, separation_nm=None,
+                runway_changes="none", runway_change_share=0.3)
 
 SHORT = ["B738", "A320", "A321", "B38M", "A20N", "A21N", "A319", "B739", "E190", "E195", "CRJ9", "B752"]
 LONG = ["A332", "A333", "B77W", "B789", "B788", "A359", "B772", "A343", "B744", "A388", "B763"]
@@ -1154,6 +1159,39 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
     return out
 
 
+def _runway_changes(scn: dict, c: _Ctx) -> List[dict]:
+    """Runway changes at the aerodromes of the sectors, each on its own: at random, or driven by the wind."""
+    mode = str(c.P.get("runway_changes") or "none").lower()
+    if mode not in ("random", "wind"):
+        return []
+    import math as _m
+    from .scenario import build_world
+    w = build_world(copy.deepcopy(scn))
+    share = float(c.P.get("runway_change_share", 0.3))
+    ids = {a["id"] for a in airports_for(c.P["control"])}
+    out = []
+    for ad in w.aerodromes.values():
+        if ad.id not in ids or len(ad.runways) < 2 or not c.on_sectors((ad.x, ad.y), tol=40.0):
+            continue                                   # the aerodromes under or beside the sectors
+        cur = ad.runways[ad.in_use]
+        recips = [r for r, h in ad.runways.items() if abs((h - cur + 540) % 360 - 180) > 120]
+        if not recips:
+            continue
+        p = share
+        if mode == "wind":
+            u, v = w.env.weather.at(ad.x, ad.y, 0.0, 0.0)
+            h = _m.radians(cur)
+            head = -(u * _m.sin(h) + v * _m.cos(h))
+            p = 0.8 if head < 5.0 else 0.4 if head < 10.0 else 0.08
+        if c.rng.random() >= p:
+            continue
+        t = int(c.rng.uniform(0.2, 0.8) * c.T)
+        new = min(recips, key=lambda r: abs((ad.runways[r] - cur + 360) % 360 - 180))
+        out.append({"aerodrome": ad.id, "time": t, "runway": new,
+                    "reason": "wind shift" if mode == "wind" else "runway change"})
+    return out
+
+
 def generate(params: Optional[dict] = None) -> dict:
     params = dict(params or {})
     if "coordinations_per_hour" in params:                 # the earlier name
@@ -1189,6 +1227,9 @@ def generate(params: Optional[dict] = None) -> dict:
     extended = _whole_routes(scn, c)
     reverted = _check_whole_routes(scn)
     _prune(scn)
+    rc = _runway_changes(scn, c)
+    if rc:
+        scn["runway_changes"] = rc
     checks = _check_built(scn, c)
     for _ in range(3):
         if not checks.get("retimed"):
@@ -1197,6 +1238,9 @@ def generate(params: Optional[dict] = None) -> dict:
     entry_left = _entry_spacing(scn, c.keep)
     left = _deconflict(scn, c.keep, caps=c.level_cap)
     scn["generator"]["planted"] = planted
+    scn["generator"]["runway_changes"] = scn.get("runway_changes", [])
+    scn["generator"]["startup_requests"] = sum(1 for a in scn["aircraft"] if a["dep"] in c.sid_ads
+                                               and a["dep"] not in ("GMMN",))
     scn["generator"]["departures_from_takeoff"] = checks["from_takeoff"]
     scn["generator"]["departures_levelled"] = checks.get("levelled", 0)
     scn["generator"]["planted_too_close_at_entry"] = entry_left

@@ -284,6 +284,12 @@ def build(scn: dict, waypoints: Dict[str, Point], weather, asp=None) -> Tuple[Di
             raise ValueError(f"aerodrome {ad.id}: unknown runway {want}")
         ad.in_use = want
         ads[ad.id] = ad
+    # runway changes on top of the aerodromes' defaults ("runway_changes": [{aerodrome, time, runway}])
+    for rc in scn.get("runway_changes") or []:
+        ad = ads.get(str(rc.get("aerodrome", "")).upper())
+        if ad is None or str(rc.get("runway")) not in ad.runways:
+            raise ValueError(f"runway change: unknown aerodrome / runway {rc}")
+        ad.schedule = sorted(ad.schedule + [(float(rc["time"]), str(rc["runway"]))])
     seq: Dict[str, SeqFix] = {}
     for s in scn.get("sequencing", d_seq):
         if s["fix"] not in waypoints:

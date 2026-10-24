@@ -54,6 +54,10 @@ def describe(kind: str, body: dict) -> str:
         return f"{body.get('action')} {cs}".strip()
     if kind == "oldi_answer":
         return f"level coordination {cs} " + (f"F{int(body['level']):03d}" if body.get("level") else "no climb")
+    if kind == "startup_answer":
+        cs_ = ", ".join(body.get("callsigns") or [body.get("callsign") or ""])
+        return f"start-up {cs_} " + (f"{body.get('point') or ''} F{int(body['level']):03d}".strip() if body.get("approve", True)
+                                     and body.get("level") else ("approved" if body.get("approve", True) else "refused"))
     if kind == "auto_wx":
         return "pilots avoid weather: " + ("on" if body.get("value", True) else "off")
     if kind == "area":
@@ -93,6 +97,16 @@ def _oldi_answer(w, body, actor):
     lvl = body.get("level")
     return levelcoord.answer(w, body.get("callsign") or "", int(lvl) if lvl not in (None, "") else None,
                              by=actor.get("name") or "atc")
+
+
+def _startup_answer(w, body, actor):
+    from . import startup
+    cs = body.get("callsigns") or ([body["callsign"]] if body.get("callsign") else [])
+    try:
+        return startup.answer(w, cs, bool(body.get("approve", True)), body.get("point"), body.get("level"),
+                              by=actor.get("name") or actor.get("seat") or "atc")
+    except ValueError as e:
+        raise Refused(str(e))
 
 
 def _assume(w, body, actor):
@@ -205,7 +219,7 @@ def _auto_wx(w, body, actor):
 
 
 ACTIONS: Dict[str, Callable] = {
-    "instructions": _instructions, "command": _command, "entries": _entries, "oldi_answer": _oldi_answer, "assume": _assume, "release": _release,
+    "instructions": _instructions, "command": _command, "entries": _entries, "oldi_answer": _oldi_answer, "startup_answer": _startup_answer, "assume": _assume, "release": _release,
     "mtcd_settings": _mtcd_settings, "cpdlc_command": _cpdlc_command, "cpdlc_respond": _cpdlc_respond,
     "cpdlc_downlink": _cpdlc_downlink, "chat": _chat, "area": _area, "runway": _runway, "live": _live,
     "bookmark": _bookmark, "auto_wx": _auto_wx,

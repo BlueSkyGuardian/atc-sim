@@ -332,6 +332,10 @@ def may_take_off(world: "World", ac: "Aircraft") -> Tuple[bool, str]:
     if not s:
         return True, ""
     adid = s["aerodrome"]
+    from . import startup
+    ok, why = startup.may_take_off(world, ac)           # its start-up clearance
+    if not ok:
+        return False, why
     last = getattr(world, "_last_takeoff", {}).get(adid)
     if last is not None and world.t - last < DEP_INTERVAL_S:
         return False, "departure interval"

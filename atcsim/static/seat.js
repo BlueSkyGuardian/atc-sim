@@ -455,8 +455,24 @@
     for (const a of allAc().filter(x => x.emergency && x.emergency.kind === 'radio')) items.push(`<div class="todo call" data-cs="${a.callsign}"><span class="tg">7600</span><div class="tx"><b>${a.callsign}</b> · radio failure: <i>do not answer</i> for it on the frequency; it flies its flight plan<small>squawk 7600 · CPDLC still works · cleared from Live actions</small></div></div>`);
     // aircraft dealing with weather (they asked for a deviation, were cleared one, or deviate): report clear of it
     for (const a of allAc().filter(x => x.wx_handling)) items.push(`<div class="todo req" data-cs="${a.callsign}"><span class="tg">WX</span><div class="tx"><b>${a.callsign}</b> is dealing with weather · when clear, say <i>“${a.callsign} clear of weather”</i><small>its weather is not counted as a penetration until then</small></div><div class="bt"><button class="yes" data-wxclear="${a.callsign}">Clear of weather</button></div></div>`);
+    // start-up requests (you play the aerodrome's approach): phone the controller, enter the clearance received
+    for (const r of state.startups || []) {
+      const opts = (r.points || [r.point]).map(p => `<option${p === (r.cleared_point || r.point) ? ' selected' : ''}>${h(p)}</option>`).join('');
+      const inp = `<select data-su-pt="${r.callsign}">${opts}</select> F<input data-su-lv="${r.callsign}" type="number" step="10" min="20" max="450" value="${r.cleared_level || r.level}" style="width:54px">`;
+      const what = `<b>${r.callsign}</b> ${h(r.type)} → ${h(r.dest || '')} · RWY ${h(r.runway || '')} ${h(r.sid || '')} · take-off ~${Math.max(0, Math.round((r.t_takeoff - state.sim_time_s) / 60))} min`;
+      if (r.state === 'requested')
+        items.push(`<div class="todo call" data-cs="${r.callsign}"><span class="tg">START-UP</span><div class="tx">Phone the controller as <b>${h(r.aerodrome)} approach</b>: start-up for ${what}<small>suggest leaving the TMA at ${h(r.point)} F${String(r.level).padStart(3, '0')} · enter what the controller clears · no take-off before</small>${inp}</div><div class="bt"><button class="yes" data-suok="${r.callsign}">Cleared</button><button class="no" data-suno="${r.callsign}" title="refused: you ask again in 5 minutes">Refused</button></div></div>`);
+      else if (r.state === 'cleared')
+        items.push(`<div class="todo req" data-cs="${r.callsign}"><span class="tg">START-UP</span><div class="tx">${what}<small>cleared ${h(r.cleared_point)} F${String(r.cleared_level).padStart(3, '0')} by the controller · change it until take-off if the controller does</small>${inp}</div><div class="bt"><button data-suok="${r.callsign}">Change</button></div></div>`);
+    }
     const html = items.join('') || '<div class="empty">Nothing to say right now. Fly what the controller gives you.</div>';
-    if (html !== todoH) { $('#todo').innerHTML = html; todoH = html; }
+    if (html !== todoH) {
+      const keep = {}; $('#todo').querySelectorAll('[data-su-pt],[data-su-lv]').forEach(i => { keep[(i.dataset.suPt ? 'p' : 'l') + (i.dataset.suPt || i.dataset.suLv)] = i.value; });
+      const foc = document.activeElement && document.activeElement.closest && document.activeElement.closest('#todo') ? document.activeElement : null;
+      const fk = foc && ((foc.dataset.suPt ? 'p' : 'l') + (foc.dataset.suPt || foc.dataset.suLv));
+      $('#todo').innerHTML = html; todoH = html;
+      $('#todo').querySelectorAll('[data-su-pt],[data-su-lv]').forEach(i => { const k = (i.dataset.suPt ? 'p' : 'l') + (i.dataset.suPt || i.dataset.suLv); if (k in keep) i.value = keep[k]; if (k === fk) i.focus(); });
+    }
     $('#todoN').textContent = items.length ? `(${items.length})` : '';
   }
   // ---- CPDLC: the uplinks to answer, the requests sent, the message log
@@ -491,7 +507,14 @@
       const c = e.target.closest('[data-cs]'); if (c) { select(c.dataset.cs); if (window.centerOn) centerOn(c.dataset.cs); }
     });
     $('#dlBox').addEventListener('keydown', e => e.stopPropagation());
+    $('#todo').addEventListener('keydown', e => e.stopPropagation());
     $('#todo').addEventListener('mousedown', e => {
+      const so = e.target.closest('[data-suok],[data-suno]');
+      if (so) { e.preventDefault(); const cs = so.dataset.suok || so.dataset.suno, ok = !!so.dataset.suok;
+        const pt = $(`#todo [data-su-pt="${cs}"]`), lv = $(`#todo [data-su-lv="${cs}"]`);
+        api(`/sessions/${SID}/startup/answer`, { method: 'POST', body: JSON.stringify({ callsigns: [cs], approve: ok, point: pt ? pt.value : null, level: lv && lv.value ? +lv.value : null }) })
+          .then(() => note(`${cs} start-up ${ok ? 'clearance entered' : 'refused'}`)).catch(err => note(err.message, true)); return; }
+      if (e.target.closest('select,input')) return;
       const da = e.target.closest('[data-dlid]');
       if (da) { e.preventDefault(); dlAnswer(da.dataset.cs, +da.dataset.dlid, da.dataset.ans, da.dataset.why); return; }
       const rb = e.target.closest('[data-rbt]');

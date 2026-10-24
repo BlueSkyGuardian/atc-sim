@@ -199,6 +199,15 @@ SCHEMA = {
         "oldi": {"type": "object", "properties": {"abi_s": {"type": "number"}, "act_s": {"type": "number"},
                                                   "rev_limit_s": {"type": "number"}}},
         "auto_assume": {"type": "boolean", "default": False},
+        "startup_requests": {"type": "boolean", "default": True,
+                             "description": "departures shown from take-off need a start-up clearance from the sector above: "
+                                            "their aerodrome's approach asks it about 10 min before take-off (atcsim/startup.py)"},
+        "startup_exempt": {"type": "array", "items": {"type": "string"}, "default": ["GMMN"],
+                           "description": "aerodromes whose departures need none (silent departures)"},
+        "runway_changes": {"type": "array", "description": "runway changes at the aerodromes, on top of their defaults",
+                           "items": {"type": "object", "required": ["aerodrome", "time", "runway"], "properties": {
+                               "aerodrome": {"type": "string"}, "time": {"type": "number"}, "runway": {"type": "string"},
+                               "reason": {"type": "string"}}}},
         "auto_routes": {"type": "boolean", "default": True},
         "sid_departures": {"type": "boolean", "default": True,
                            "description": "departures from an aerodrome with published SIDs (GMMN, GMME, GMMX, GMAD) take "
@@ -307,6 +316,8 @@ SCHEMA = {
                 "gaps": {"type": "integer"}, "gap_list": {"type": "array"}, "spacing_nm": {"type": "number"}}}}},
         "aircraft": {"type": "object", "required": ["callsign", "type", "route", "fl"], "properties": {
             "callsign": {"type": "string", "pattern": "^[A-Z0-9]{2,8}$"},
+            "startup": {"description": "start-up clearance: false = none needed, {request_s} = when approach asks",
+                        "oneOf": [{"const": False}, {"type": "object", "properties": {"request_s": {"type": "number"}}}]},
             "type": {"type": "string", "description": "ICAO type from the appendix"},
             "route": {"type": "array", "items": {"type": "string"}, "minItems": 1,
                       "description": "point names in flying order (2+, or 1 with start)"},

@@ -12,7 +12,7 @@ from .geometry import SEP_H_NM, SEP_V_FT, Point, api_hdg, dist, polyline_length
 from .model import Area, Request
 import numpy as np
 
-from . import approach, arrivals, levelcoord, pilot, tma
+from . import approach, arrivals, levelcoord, pilot, startup, tma
 
 ARRIVAL_FLOOR_FL = 100        # lowest level an arrival can be cleared to (after coordination)
 MAX_MACH_CHANGE = 0.03       # a speed is adjusted by at most this from the aircraft's own Mach in practice
@@ -1222,6 +1222,7 @@ class World:
             from . import oldi
             oldi.update(self)
             levelcoord.update(self)
+            startup.update(self)
             from . import cpdlc, live as _live
             cpdlc.update(self)
             _live.update(self)
@@ -1669,6 +1670,7 @@ class World:
                              "headings_speeds_without_limit": self.m.get("no_limit", 0)},
             "readback": dict(self.m.get("readback", {"errors": 0, "caught": 0, "missed": 0})),
             "coordination": levelcoord.metrics(self),
+            "startup": startup.metrics(self),
             "assumption": (lambda ts, never: {
                 "assumed": len(ts), "mean_delay_s": round(sum(ts) / len(ts), 1) if ts else None,
                 "max_delay_s": max(ts) if ts else None, "late_over_30s": sum(1 for x in ts if x > 30),
@@ -1917,6 +1919,7 @@ class World:
             "system_cfl": atctools.system_cfls(self),
             "coord": oldi.coord_view(self),
             "lvlreq": levelcoord.view(self),
+            "startups": startup.view(self),
             "dyn_points": self.dyn_points,
             "oldi_last": self.oldi[-1]["id"] if self.oldi else 0,
             "cpdlc": cpdlc.state_view(self),
