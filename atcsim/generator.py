@@ -663,7 +663,10 @@ def _dep_routes(c: _Ctx, icao: str):
     if icao not in c.sid_ads:
         return []
     out = []
-    pool = [r for r in c.routes if icao in (r.get("deps") or [])] or [r for r in c.routes if not r.get("deps")]
+    flows = [r for r in c.routes if icao in (r.get("deps") or [])]
+    if flows:                                          # the planned flows from it: those its SIDs join cleanly
+        return [r for r in flows if c.join_route(r, icao) is not None]
+    pool = [r for r in c.routes if not r.get("deps")]
     for r in pool:
         entry = _along(r["pts"], r["s_in"])
         part = _cut(r["pts"], 0.0, r["s_in"]) if r["s_in"] > 1 else [r["pts"][0], entry]
