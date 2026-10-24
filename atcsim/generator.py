@@ -308,8 +308,11 @@ class _Ctx:
                 ahead.append(i)
         if sid_on:                                   # a SID ends on the route: the furthest such point
             return names[sid_on[-1]:]
-        if not ends and ahead:                       # no SIDs: straight out to the first point heading away
-            return names[ahead[0]:]
+        if not ends and ahead:                       # no SIDs: direct to the point that saves the most way
+            along = [0.0]
+            for k in range(1, len(names)):
+                along.append(along[-1] + dist(r["pts"][k - 1], r["pts"][k]))
+            return names[min(ahead, key=lambda k: dist(ad, r["pts"][k]) - along[k]):]
         # otherwise the first point heading away that a SID reaches in line: from the SID's end to the point and on
         # along the route, neither leg turning back (the SID end lies on the way, not beyond the point)
         sid_xy = [self.wp[e] for e in ends if e in self.wp]
@@ -1002,6 +1005,8 @@ def _whole_routes(scn: dict, c: _Ctx) -> int:
                 if dest in c.ap_xy and after:              # stop where it is closest to its destination
                     k = min(range(len(after)), key=lambda i: dist(c.wp[after[i]], c.ap_xy[dest]))
                     after = after[:k + 1]
+                    if dist(c.wp[after[-1]], c.ap_xy[dest]) >= dist(c.wp[names[-1]], c.ap_xy[dest]):
+                        after = []                          # already where it leaves for its destination
         # ---- before the first point (not for a departure joining from its SID: that is its way in)
         before = []
         if a.get("dep") not in c.sid_ads:
