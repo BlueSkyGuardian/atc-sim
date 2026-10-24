@@ -307,8 +307,16 @@ class _Ctx:
                 ahead.append(i)
         if sid_on:                                   # a SID ends on the route: the furthest such point
             return names[sid_on[-1]:]
-        if ahead:                                    # the first point heading away: the builder finds its SID
-            return names[ahead[0]:]
+        # otherwise the first point heading away that a SID reaches in line: from the SID's end to the point and on
+        # along the route, neither leg turning back (the SID end lies on the way, not beyond the point)
+        sid_xy = [self.wp[e] for e in ends if e in self.wp]
+        for i in ahead:
+            p, q = r["pts"][i], r["pts"][i + 1]
+            for e in sid_xy:
+                de = dist(e, p)
+                if de < 0.5 or (de < 45.0 and turn(bearing(ad, e), bearing(e, p)) <= 90.0
+                                and turn(bearing(e, p), bearing(p, q)) <= 90.0):
+                    return names[i:]
         return None                                  # every way onto this route turns back: not a departure of it
 
     def dest_for(self, r) -> str:
