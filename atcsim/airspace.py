@@ -576,6 +576,9 @@ def _geo_airspace(name: str, control: Tuple[str, ...]) -> Airspace:
         routes.append(list(v["points"]))
         if not v.get("one_way"):
             routes.append(list(v["points"])[::-1])
+    for k, v in (d.get("external_airways") or {}).items():    # beyond the FIR (ASECNA...): routing only
+        if not k.startswith("_"):
+            routes.append(list(v["points"])); routes.append(list(v["points"])[::-1])
     std = [list(r) for r in d.get("standard_routes", {}).get("routes", [])]
     routes += std
     rad = [list(r) for r in d.get("rad_routes", {}).get("routes", [])]

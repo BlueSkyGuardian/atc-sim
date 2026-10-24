@@ -2045,9 +2045,16 @@
     "LAY",
     "ARENA",
     "CABEL",
-    "DKH"
+    "DKH",
+    "LOLOS",
+    "MAURI",
+    "ERENA",
+    "KISBA",
+    "BOTLO",
+    "KETAS"
    ],
-   "lower": "A600"
+   "lower": "A600",
+   "_continued": "beyond the FIR: AIP ASECNA ENR 4.4 (01 OCT 2026)"
   },
   "UB11": {
    "points": [
@@ -2205,16 +2212,28 @@
     "ARSOL",
     "DIDAN",
     "MOROX",
-    "ECHED"
+    "ECHED",
+    "BIMOG",
+    "OSVOR",
+    "ARDAR",
+    "MINBA",
+    "SABDU",
+    "KETAS"
    ],
-   "lower": "R975"
+   "lower": "R975",
+   "_continued": "beyond the FIR: AIP ASECNA ENR 4.4 (01 OCT 2026)"
   },
   "UR977": {
    "points": [
     "ADM",
     "KUVEL",
-    "BULIS"
-   ]
+    "BULIS",
+    "EBATI",
+    "POVAS",
+    "IPONA",
+    "TAPUS"
+   ],
+   "_continued": "beyond the FIR: AIP ASECNA ENR 4.4 (01 OCT 2026)"
   },
   "UV203": {
    "points": [
@@ -2298,8 +2317,12 @@
     "MAK",
     "TOPMA",
     "DIVUX",
-    "BULIS"
-   ]
+    "BULIS",
+    "SADKA",
+    "TAMUL",
+    "POSIV"
+   ],
+   "_continued": "beyond the FIR: AIP ASECNA ENR 4.4 (01 OCT 2026)"
   },
   "UM985": {
    "points": [
@@ -13050,6 +13073,509 @@
     "minor": true,
     "fra": "ID",
     "name": "NIL FRA (ID): LPPT, LPCS"
+   },
+   "AGROB": {
+    "coord": "181327.2N 0161354.7W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "AMSEP": {
+    "coord": "181559.5N 0154835W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUAKCHOTT IAWP"
+   },
+   "ANURO": {
+    "coord": "175626.8N 0160435.1W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "ARBUT": {
+    "coord": "203845.9N 0125009.8W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "ARDAR": {
+    "coord": "203000N 0130400W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UR620 - UB728 - UA854 - R975/UR975"
+   },
+   "ARDOS": {
+    "coord": "181048.2N 0154607W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "ARIDO": {
+    "coord": "204312N 0170516.9W",
+    "region": "Dakar (Nouadhibou)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUADHIBOU IAF"
+   },
+   "BIMOG": {
+    "coord": "251300N 0113300W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "R975/UR975"
+   },
+   "BIMUT": {
+    "coord": "182329.7N 0180000W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UG853"
+   },
+   "BINAD": {
+    "coord": "180449.6N 0160614.6W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "BOTLO": {
+    "coord": "192059N 0162540W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "A600 C/R Limite TMA NOUAKCHOTT"
+   },
+   "BUDOS": {
+    "coord": "175608.5N 0160450W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUAKCHOTT IAF"
+   },
+   "BUGAM": {
+    "coord": "181810.7N 0131537.7W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM725 - UB728"
+   },
+   "DEGAM": {
+    "coord": "181545.2N 0155017.3W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUAKCHOTT IAF"
+   },
+   "DEKET": {
+    "coord": "183321N 0103138W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UQ596 - UG851"
+   },
+   "DELOV": {
+    "coord": "180809.1N 0161914.6W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "MAHP NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "DIKTA": {
+    "coord": "182954.2N 0154955.4W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "DILBI": {
+    "coord": "175932.4N 0160843W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "EBATI": {
+    "coord": "241529N 0085046W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM122 - UA854 - UR977"
+   },
+   "EBSIR": {
+    "coord": "180014.8N 0153123.3W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "ERENA": {
+    "coord": "195820N 0164004W",
+    "region": "Dakar (Nouadhibou)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "A600 T/R Limite TMA NOUADHIBOU"
+   },
+   "GAKDO": {
+    "coord": "182215.5N 0153713.6W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "GALOR": {
+    "coord": "183123.2N 0155147.5W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "GAMON": {
+    "coord": "180441.3N 0154941.1W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "GANSI": {
+    "coord": "182533.3N 0160945.3W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "GASOT": {
+    "coord": "180325.9N 0154854.8W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "ILGAS": {
+    "coord": "184000N 0200000W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "INEDI": {
+    "coord": "183347.8N 0160729.9W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "IPONA": {
+    "coord": "200000N 0082953W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM122 - UR977"
+   },
+   "KETAS": {
+    "coord": "180529.7N 0155653.8W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "A600/UA600 - UB601 - UG615 - UR865 - R975"
+   },
+   "KISBA": {
+    "coord": "193000N 0162907W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UA600 FIR DAKAR - SENEGAL"
+   },
+   "KOMIR": {
+    "coord": "182937.8N 0154447.2W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "KONAD": {
+    "coord": "180000N 0101647W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "G851/UG851 FIR DAKAR - MAURITANIE"
+   },
+   "KOSAP": {
+    "coord": "183138.4N 0155851.5W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "LIDUV": {
+    "coord": "181211.1N 0154502W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "LILEP": {
+    "coord": "180634.4N 0161314W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "LINAR": {
+    "coord": "180929.7N 0160938.7W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "MAHWP NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "LITIP": {
+    "coord": "183948.8N 0111355.8W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IF/IAF TIDJIKJA",
+    "tma": "Tidjikja"
+   },
+   "LOSNA": {
+    "coord": "180929.7N 0160938.7W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "MELED": {
+    "coord": "182858.6N 0113608.1W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IF/IAF TIDJIKJA",
+    "tma": "Tidjikja"
+   },
+   "MENES": {
+    "coord": "181822.5N 0155318.3W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "MERAR": {
+    "coord": "182244.9N 0154407.5W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "MINBA": {
+    "coord": "194512N 0135819W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "R975 T/R Limite TMA NOUAKCHOTT"
+   },
+   "NEBKO": {
+    "coord": "204444N 0130116.8W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "NUSIT": {
+    "coord": "182505N 0171300W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "B600/UB600 UTA NOUAKCHOTT- MAURITANIE - FIR DAKAR"
+   },
+   "ODPAT": {
+    "coord": "182616.2N 0154153.8W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "ONABI": {
+    "coord": "201755.3N 0131007.4W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "OSVOR": {
+    "coord": "232718.4N 0121225.1W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UT365 - UR975"
+   },
+   "POBLA": {
+    "coord": "210631.9N 0165854.3W",
+    "region": "Dakar (Nouadhibou)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUADHIBOU IAF"
+   },
+   "PODVI": {
+    "coord": "181516.9N 0154910W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true
+   },
+   "POKRA": {
+    "coord": "201456.6N 0130434.5W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "POSIV": {
+    "coord": "180311.2N 0113846.6W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM372 - UQ596 - UR722"
+   },
+   "POVAS": {
+    "coord": "220744N 0084010W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM122 - UT365 - UM725 - UR977"
+   },
+   "SABDU": {
+    "coord": "185850N 0145357W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "R975 T/R Limite TMA NOUAKCHOTT"
+   },
+   "SADKA": {
+    "coord": "225241.8N 0102606.7W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UT365 - UM372 - UR722 - UA854"
+   },
+   "SEROR": {
+    "coord": "213358N 0115402W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "G851/UG851 - UA854 Nouakchott UTA (MAURITANIA)"
+   },
+   "SITMI": {
+    "coord": "180553.2N 0162030.9W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "MAHWP NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "SOLVO": {
+    "coord": "184510.7N 0111648.3W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF TIDJIKJA",
+    "tma": "Tidjikja"
+   },
+   "TAMUL": {
+    "coord": "195900N 0111016W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM372 - UR722 - UM725 - G851/UG851"
+   },
+   "TANEB": {
+    "coord": "182857.5N 0160431.7W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "TAPUS": {
+    "coord": "192739.4N 0082719.6W",
+    "region": "Dakar FIR",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "UM122 - UY509 - UQ596 - UR977"
+   },
+   "TEKBI": {
+    "coord": "183426.9N 0111103.5W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF TIDJIKJA",
+    "tma": "Tidjikja"
+   },
+   "TIVEV": {
+    "coord": "202053.8N 0131540.4W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "TUSUR": {
+    "coord": "195447N 0170631W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "B600 T/R Limite TMA NOUADHIBOU/TMA NOUAKCHOTT"
+   },
+   "TUTAN": {
+    "coord": "175544.1N 0160509.9W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "NOUAKCHOTT IAWP"
+   },
+   "TUVAT": {
+    "coord": "180252N 0155339.3W",
+    "region": "Dakar (Nouakchott)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF NOUAKCHOTT OUMTOUNSY",
+    "tma": "Nouakchott"
+   },
+   "TUVOL": {
+    "coord": "183420.1N 0113901.1W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF TIDJIKJA",
+    "tma": "Tidjikja"
+   },
+   "VABIR": {
+    "coord": "204145N 0125543.2W",
+    "region": "Dakar (Atar)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF ATAR",
+    "tma": "Atar"
+   },
+   "VODMO": {
+    "coord": "182337N 0113315.3W",
+    "region": "Dakar (Tidjikja)",
+    "source": "AIP ASECNA ENR 4.4 (01 OCT 2026)",
+    "minor": true,
+    "name": "IAF TIDJIKJA",
+    "tma": "Tidjikja"
    }
   }
  },
@@ -18016,5 +18542,109 @@
   }
  ],
  "_airports_source": "OurAirports (public domain, github.com/davidmegginson/ourairports-data): every aerodrome of Morocco (Western Sahara included) and the Canary Islands, Gibraltar, southern Spain (Andalucia, Extremadura, Murcia, southern Castilla-La Mancha, Ceuta, Melilla) and southern Portugal (south of 40N) with Madeira; runway thresholds and true headings as OurAirports has them",
- "_enr44_pt_source": "NAV Portugal AIP ENR 4.4 14-MAY-2026: 435 points, those of the region as external points"
+ "_enr44_pt_source": "NAV Portugal AIP ENR 4.4 14-MAY-2026: 435 points, those of the region as external points",
+ "external_airways": {
+  "_note": "ATS route segments beyond the GMMM FIR (not Moroccan airways): used to carry routes on, drawn as external",
+  "B600": {
+   "points": [
+    "TUSUR",
+    "NUSIT"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "G851": {
+   "points": [
+    "MIYEC",
+    "SEROR",
+    "TAMUL",
+    "KONAD"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UA854": {
+   "points": [
+    "EBATI",
+    "SADKA",
+    "SEROR",
+    "ARDAR"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UB601": {
+   "points": [
+    "GUPEL",
+    "KETAS"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UB728": {
+   "points": [
+    "ARDAR",
+    "BUGAM"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UG851": {
+   "points": [
+    "MIYEC",
+    "SEROR",
+    "TAMUL",
+    "DEKET",
+    "KONAD"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UG853": {
+   "points": [
+    "NOCUT",
+    "BIMUT"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UM122": {
+   "points": [
+    "BULIS",
+    "EBATI",
+    "POVAS",
+    "IPONA",
+    "TAPUS"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UM725": {
+   "points": [
+    "POVAS",
+    "TAMUL",
+    "BUGAM"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UQ596": {
+   "points": [
+    "TAPUS",
+    "DEKET",
+    "POSIV"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UR722": {
+   "points": [
+    "BULIS",
+    "SADKA",
+    "TAMUL",
+    "POSIV"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  },
+  "UT365": {
+   "points": [
+    "MIYEC",
+    "OSVOR",
+    "SADKA",
+    "POVAS"
+   ],
+   "_source": "AIP ASECNA ENR 4.4 (01 OCT 2026)"
+  }
+ },
+ "_enr44_asecna_source": "AIP ASECNA ENR 4.4 (01 OCT 2026): 1475 points, 76 south of the GMMM FIR (69 added)"
 }
