@@ -62,6 +62,21 @@
   .chip:hover { border-color: var(--dim); }
   small.note { color: var(--dim); display: block; font-size: 11.5px; margin-top: 4px; }
   kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+  /* floating windows (Find) and the View menu, as on the radar */
+  .win { position: absolute; z-index: 8; background: #10233af7; border: 1px solid #3b5e82; border-radius: 6px; box-shadow: 0 10px 30px #000b; font-size: 12px; min-width: 260px; max-height: calc(100% - 70px); display: flex; flex-direction: column; }
+  .win .wh { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); cursor: move; user-select: none; font-weight: 600; }
+  .win .wh button { padding: 0 6px; }
+  .win .wb { padding: 8px 10px; overflow: auto; }
+  .win .sub { color: var(--dim); font: 600 10px system-ui; text-transform: uppercase; letter-spacing: .07em; margin: 10px 0 4px; }
+  .win input.flt { width: 100%; margin-bottom: 6px; font-family: var(--mono); text-transform: uppercase; }
+  .win .empty { color: var(--dim); font-style: italic; }
+  #tools .vg { position: relative; display: inline-flex; }
+  #tools .vgb::after { content: " ▾"; font-size: 9px; color: var(--dim); }
+  #tools .vgm { display: none; position: absolute; left: 0; top: calc(100% + 3px); z-index: 9; flex-direction: column; gap: 3px; padding: 6px; background: #10233af7; border: 1px solid #3b5e82; border-radius: 6px; box-shadow: 0 10px 30px #000b; min-width: 170px; }
+  #tools .vg.open .vgm { display: flex; }
+  #tools .vgm button { text-align: left; }
+  #tools .vgm button.on { border-color: var(--accent); color: var(--accent); }
+  #tools .vgm button::before { content: "\2002\2002"; } #tools .vgm button.on::before { content: "✓ "; }
 </style>
 <link rel="stylesheet" href="/static/theme.css">
 </head>
@@ -80,6 +95,13 @@
       <button data-tool="areaCircle" title="Drag from the centre (O)">◯ Area (circle)</button>
       <button data-tool="rbl" title="Range and bearing line between two aircraft, with their closest point of approach along their routes (B)">↔ RBL</button>
       <button id="rblClear" title="Remove all RBLs">✕ Clear RBLs</button>
+      <span class="vg" id="viewMenu"><button class="vgb" title="Map layers">View</button><div class="vgm">
+        <button data-v="coast" title="Land and coastlines">Coast</button><button data-v="routes" title="Airways and RAD routings">Routes</button>
+        <button data-v="names" title="Point names (the minor points of the neighbours when zoomed in)">Points</button>
+        <button data-v="airports" title="Aerodromes with their runways">Airports</button><button data-v="navaids" title="VOR, NDB, DME">Navaids</button>
+        <button data-v="sid" title="SIDs of the runways in use">SID</button><button data-v="star" title="STARs of the runways in use">STAR</button>
+        <button data-v="hold" title="Published holding patterns">Hold</button><button data-v="procAll" title="Procedures of every runway, not only those in use">All runways</button>
+        <button data-v="labels" title="Aircraft labels (callsign, level, type)">Labels</button></div></span>
     </div>
     <div id="hint"></div>
     <div id="hud"></div>
@@ -135,6 +157,24 @@
           <button id="undoBtn" title="Undo (Ctrl+Z)">↶</button>
           <button id="redoBtn" title="Redo (Ctrl+Y)">↷</button>
         </div>
+      </section>
+      <section id="genSec">
+        <h2>Generate traffic <span class="c-dim" style="text-transform:none;letter-spacing:0;font-weight:400">for the sectors ticked above</span></h2>
+        <div class="grid gen-grid">
+          <label>flights / h</label><span><input id="g-aph" type="number" value="30" min="0" max="120" style="width:64px"> <span class="c-dim">through the sectors</span></span>
+          <label>density</label><span><select id="g-dens"><option value="1">1 — even over the hour</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5 — tight waves</option></select></span>
+          <label>duration</label><span><input id="g-dur" type="number" value="60" min="15" max="180" step="5" style="width:64px"> min</span>
+          <label>sequences / h</label><span><input id="g-seq" type="number" value="2" min="0" max="12" style="width:64px"> of <input id="g-smin" type="number" value="3" min="2" max="8" style="width:44px"> – <input id="g-smax" type="number" value="4" min="2" max="10" style="width:44px"> aircraft <span class="c-dim">(sectors with sequencing fixes)</span></span>
+          <label>overtakes / h</label><span><input id="g-ovt" type="number" value="1" min="0" max="10" style="width:64px"> <span class="c-dim">same route and level, faster behind</span></span>
+          <label>crossings / h</label><span><input id="g-cross" type="number" value="2" min="0" max="12" style="width:64px"> <span class="c-dim">same level</span></span>
+          <label>level changes / h</label><span><input id="g-lvl" type="number" value="2" min="0" max="12" style="width:64px"> <span class="c-dim">pilot requests through crossing traffic</span></span>
+          <label>West ↔ Oceanic</label><span><input id="g-coord" type="number" value="2" min="0" max="10" style="width:64px"> <span class="c-dim">flights to coordinate / h (SUBAL, BEXAL, SAMAR)</span></span>
+          <label>slow traffic</label><span><input id="g-slow" type="number" value="12" min="0" max="60" style="width:64px"> % <span class="c-dim">C550, C130, A400 at FL170-250, on the arrival routes</span></span>
+          <label>long-haul</label><span><input id="g-heavy" type="number" value="30" min="0" max="100" style="width:64px"> %</span>
+          <label>levels</label><span>FL <input id="g-lo" type="number" value="290" step="10" style="width:56px"> – <input id="g-hi" type="number" value="400" step="10" style="width:56px"></span>
+          <label>seed</label><span><input id="g-seed" type="number" placeholder="random" style="width:90px"> <span class="c-dim">same seed, same scenario</span></span>
+        </div>
+        <div class="row" style="margin-top:6px"><button id="genBtn" class="primary">Generate</button><span id="genMsg" class="c-dim" style="font-size:12px;flex:1"></span></div>
       </section>
       <section>
         <h2>Scenario</h2>
@@ -292,6 +332,25 @@ $('#newBtn').onclick = () => {
   if (asp !== 'training') { s.weather.wind = { climatology: { month: new Date().getUTCMonth() + 1 }, noise_kt: 5 }; delete s.weather.temperature; }
   else setWind(s.weather, 260, 60);
   setScenario(s);
+};
+// ---- generated traffic: a random scenario from parameters, opened like any other (edit, save)
+$('#genBtn').onclick = async () => {
+  const asp = $('#newAsp').value, ctl = [...document.querySelectorAll('#newCtl input:checked')].map(i => i.value);
+  if (asp === 'training' || !ctl.length) { $('#genMsg').textContent = 'tick the sectors (Agadir / Casablanca airspace) first'; return; }
+  const v = id => $(id).value === '' ? null : +$(id).value;
+  const params = { control: ctl, aircraft_per_hour: v('#g-aph'), density: v('#g-dens'), duration_min: v('#g-dur'),
+    sequences_per_hour: v('#g-seq'), seq_size: [v('#g-smin'), Math.max(v('#g-smin'), v('#g-smax'))], overtakes_per_hour: v('#g-ovt'),
+    crossings_per_hour: v('#g-cross'), level_crossings_per_hour: v('#g-lvl'), coordinations_per_hour: v('#g-coord'),
+    slow_share: v('#g-slow') / 100, heavy_share: v('#g-heavy') / 100, levels: [v('#g-lo'), v('#g-hi')], seed: v('#g-seed') };
+  $('#genBtn').disabled = true; $('#genMsg').textContent = 'generating… (planting the situations, then clearing the background of unplanned conflicts: 10-30 s)';
+  try {
+    const s = await api('/designer/generate', { method: 'POST', body: JSON.stringify({ params }) });
+    await setScenario(s);
+    const p = s.generator.planted;
+    $('#genMsg').textContent = `${s.aircraft.length} aircraft · ${p.sequences} sequences · ${p.overtakes} overtakes · ${p.crossings} crossings · ${p.level_crossings} level requests · ${p.coordinations} coordinations (seed ${s.generator.seed}) — the details are in the design notes`;
+    $('#g-seed').placeholder = `random (last ${s.generator.seed})`;
+  } catch (e) { $('#genMsg').textContent = e.message; }
+  finally { $('#genBtn').disabled = false; }
 };
 function setWind(w, dir, kt) {
   w.wind = { profile: DEFAULT_WIND.map(([fl, k]) => ({ fl, dir: (dir + (fl < 200 ? -10 : 0) + 360) % 360, kt: Math.round(kt * k) })), noise_kt: 4, noise_scale_nm: 45 };
@@ -466,7 +525,7 @@ async function compile() {
   try {
     const r = await api('/designer/compile', { method: 'POST', body: JSON.stringify({ scenario: cleanScenario() }) });
     if (my !== compSeq) return;
-    comp = r; if (r.ok) { lastGoodComp = r; showEstimates(); }
+    comp = r; if (r.aerodromes) arrInfo = { aerodromes: r.aerodromes }; if (r.ok) { lastGoodComp = r; showEstimates(); }
     $('#compState').innerHTML = r.ok ? `<span class="c-ok">builds</span> · ${Object.keys(r.plans).length} aircraft` : '<span class="c-los">error</span>';
     status(r.ok ? `${Object.keys(r.plans).length} aircraft · ${r.planned_conflicts.length} planned conflicts · ${r.warnings.length} warnings` : r.error, r.ok ? 'c-dim' : 'c-los');
   } catch (e) { if (my === compSeq) status(e.message, 'c-los'); }
@@ -592,6 +651,39 @@ function posOf(cs, t) {
 // ---- RBL: range / bearing now, and the closest point of approach along both trajectories (filed plans, or the
 // preview run when it is shown) - not a straight-line extrapolation, so a turn or a level change is accounted for
 const rbls = []; let rblFirst = null; const rblRects = [];
+// what the shared radar tools (lookup.js: Find, the geographic cursor) expect of the page
+let state = null, shown = null, arrInfo = null, selected = null, mouseCv = null;
+const V = Object.assign({ coast: true, routes: true, names: true, airports: true, navaids: true, sid: true, star: true, hold: true, procAll: false, labels: true },
+  (() => { try { return JSON.parse(localStorage.getItem('dsg_view') || '{}'); } catch (e) { return {}; } })());
+function pollSelected() { if (selected) selectAc(selected, true); }
+function centerOn(t) {
+  let p = t;
+  if (typeof t === 'string') { const a = state && state.aircraft.find(x => x.callsign === t); if (!a) return false; p = [a.x_nm, a.y_nm]; }
+  view.cx = p[0]; view.cy = p[1]; return true;
+}
+const wins = document.createElement('div'); wins.id = 'wins'; document.getElementById('map').appendChild(wins);
+function atcWin(id, title, x, y, w) {
+  let el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div'); el.className = 'win'; el.id = id;
+    el.innerHTML = `<div class="wh"><span class="wt"></span><span><button data-close title="close (Esc)">✕</button></span></div><div class="wb"></div>`;
+    el.style.left = x + 'px'; el.style.top = y + 'px'; if (w) el.style.width = w + 'px';
+    wins.appendChild(el);
+    el.querySelector('[data-close]').onclick = () => el.remove();
+    el.querySelector('.wh').addEventListener('mousedown', e => {
+      if (e.target.closest('button')) return;
+      const sx = e.clientX, sy = e.clientY, ox = el.offsetLeft, oy = el.offsetTop;
+      const mv = ev => { el.style.left = ox + ev.clientX - sx + 'px'; el.style.top = Math.max(0, oy + ev.clientY - sy) + 'px'; };
+      const up = () => { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+      window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up); e.preventDefault();
+    });
+    el.addEventListener('mousedown', e => e.stopPropagation()); el.addEventListener('keydown', e => e.stopPropagation());
+  }
+  el.querySelector('.wt').innerHTML = title;
+  return el;
+}
+const atcCloseWin = id => { const el = document.getElementById(id); if (el) el.remove(); };
+const atcIsOpen = id => !!document.getElementById(id);
 function rblCpa(a, b, t0) {
   const end = Math.min(scn.duration_s + 600, t0 + 3600);
   let best = null;
@@ -623,6 +715,7 @@ const toPx = (x, y) => [cv.width / 2 + (x - view.cx) * view.s, cv.height / 2 - (
 const fromPx = (px, py) => [(px - cv.width / 2) / view.s + view.cx, -(py - cv.height / 2) / view.s + view.cy];
 const evPt = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; };
 const evNm = e => fromPx(...evPt(e));
+const canvasPt = evPt;
 const pxNm = px => px * devicePixelRatio / view.s;
 
 // ---- geometry helpers
@@ -701,7 +794,7 @@ function hint() {
     region: 'Drag a rectangle where random cells develop during the scenario (adds to the existing weather).',
     strat: 'Drag a rectangle for a stratiform rain area (adds to the existing weather).',
     areaPoly: 'Click the corners; double-click or press Enter to close.', areaCircle: 'Drag from the centre to set the radius.',
-    rbl: rblFirst ? `RBL from <b>${rblFirst}</b>: click the second aircraft.` : 'Click two aircraft. The line shows bearing, range and ΔFL at the cursor time and their closest point of approach along their routes; it follows them as you scroll the timeline. Right-click a label to remove it.',
+    rbl: rblFirst ? `RBL from <b>${typeof rblFirst === 'string' ? rblFirst : rblFirst.name || 'the point'}</b>: click the second end (aircraft, waypoint or anywhere).` : 'Click two ends: aircraft, waypoints or anywhere on the map. Bearing and range (and ΔFL) at the cursor time; between two aircraft, their closest point of approach along their routes too. It follows the aircraft as you scroll the timeline. Right-click a label to remove it.',
   }[tool];
   if (tool === 'aircraft') {
     const r = draft && draft.route || [], st = draft && draft.start;
@@ -753,10 +846,12 @@ cv.addEventListener('mousedown', e => {
     if (pr && pr.d < pxNm(10) && !(w && w !== r[r.length - 1] && !r.includes(w) && dist(p, sector.waypoints[w]) < pr.d + pxNm(3))) {
       placeAircraft(r, pr.pt, w && r.includes(w) && dist(sector.waypoints[w], pr.pt) < 2.5 ? w : null);
     } else if (w && w !== r[r.length - 1]) { r.push(w); hint(); }
-  } else if (tool === 'rbl') {
-    const a = acAt(p); if (!a) return;
-    if (!rblFirst) { rblFirst = a.cs; hint(); return; }
-    if (a.cs !== rblFirst && !rbls.some(r => (r.a === rblFirst && r.b === a.cs) || (r.a === a.cs && r.b === rblFirst))) rbls.push({ a: rblFirst, b: a.cs });
+  } else if (tool === 'rbl') {                   // an aircraft, else a waypoint, else the point clicked
+    const a = acAt(p), w = !a && nearestWp(p);
+    const end = a ? a.cs : w ? { pt: sector.waypoints[w], name: w } : { pt: [+p[0].toFixed(2), +p[1].toFixed(2)] };
+    if (!rblFirst) { rblFirst = end; hint(); return; }
+    const same = (x, y) => typeof x === 'string' ? x === y : typeof y !== 'string' && x.pt[0] === y.pt[0] && x.pt[1] === y.pt[1];
+    if (!same(end, rblFirst)) rbls.push({ a: rblFirst, b: end });
     rblFirst = null; hint(); return;
   } else if (tool === 'cell') {
     snapshot(); const cells = scn.weather.cells = scn.weather.cells || [];
@@ -772,6 +867,7 @@ cv.addEventListener('mousedown', e => {
   }
 });
 window.addEventListener('mousemove', e => {
+  mouseCv = e.target === cv ? evPt(e) : null;
   if (!mdrag) { if (e.target === cv) hover = evNm(e); return; }
   const p = evNm(e);
   if (mdrag.kind === 'pan') { view.cx = mdrag.cx - (e.clientX - mdrag.px) * devicePixelRatio / view.s; view.cy = mdrag.cy + (e.clientY - mdrag.py) * devicePixelRatio / view.s; return; }
@@ -944,7 +1040,7 @@ function draw() {
   view.s = baseScale() * userZoom;
   const poly = (pts, close = true) => { ctx.beginPath(); pts.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }); if (close) ctx.closePath(); };
   const mono = sz => `${sz * dpr}px ui-monospace,monospace`;
-  if (sector.coast) {                                    // land and coastlines
+  if (sector.coast && V.coast) {                         // land and coastlines
     ctx.beginPath(); for (const r of sector.coast.land) r.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
     ctx.fillStyle = '#13263a'; ctx.fill('evenodd');
     ctx.beginPath(); for (const l of sector.coast.lines) l.forEach((p, i) => { const [px, py] = toPx(p[0], p[1]); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); });
@@ -965,10 +1061,10 @@ function draw() {
   if (sector.outline && sector.shape.type !== 'square') { poly(sector.outline); ctx.strokeStyle = '#2d4258'; ctx.lineWidth = 1.2 * dpr; ctx.stroke(); }
   poly(sector.shape.polygon || sector.shape.corners); ctx.strokeStyle = '#4a6886'; ctx.lineWidth = 1.8 * dpr; ctx.stroke();
   const radSet = new Set((sector.rad_routes || []).map(r => r.join('-'))), routeKeys = new Set((sector.routes || []).map(r => r.join('-')));
-  for (const r of sector.routes) { if (!r.every(n => wp[n])) continue; const rkey = [...r].reverse().join('-'), rad = radSet.has(r.join('-')) || radSet.has(rkey), twoWay = routeKeys.has(rkey);
+  if (V.routes) for (const r of sector.routes) { if (!r.every(n => wp[n])) continue; const rkey = [...r].reverse().join('-'), rad = radSet.has(r.join('-')) || radSet.has(rkey), twoWay = routeKeys.has(rkey);
     ctx.strokeStyle = rad ? '#26392e' : '#1b2835'; ctx.lineWidth = dpr; ctx.setLineDash(rad ? [6 * dpr, 6 * dpr] : []); poly(r.map(n => wp[n]), false); ctx.stroke(); ctx.setLineDash([]);
     if (rad && !twoWay) legArrows(r.map(n => wp[n]), '#3d5c48'); }
-  if (sector.airways) for (const aw of Object.values(sector.airways)) if (aw.one_way) {
+  if (sector.airways && V.routes) for (const aw of Object.values(sector.airways)) if (aw.one_way) {
     const p = aw.points; ctx.strokeStyle = '#3a5068';
     for (let k = 0; k < p.length - 1; k++) { if (!wp[p[k]] || !wp[p[k + 1]]) continue; const [x1, y1] = toPx(...wp[p[k]]), [x2, y2] = toPx(...wp[p[k + 1]]);
       const cx = (x1 + x2) / 2, cy = (y1 + y2) / 2, an = Math.atan2(y2 - y1, x2 - x1), L = 6 * dpr;
@@ -1007,20 +1103,62 @@ function draw() {
     const [lx, ly] = toPx(...c0); ctx.fillStyle = on ? col : col + '99'; ctx.font = mono(10.5);
     ctx.fillText(`${a.id} ${String(a.lower_fl).padStart(3, '0')}-${a.upper_fl} ${on ? 'ACT' : 'off'}`, lx - 30 * dpr, ly);
   });
-  // waypoints
+  // aerodromes and their runways; names when zoomed in
+  if (V.airports && sector.airports) {
+    ctx.font = mono(9.5);
+    for (const ap of sector.airports) {
+      const [ax, ay] = toPx(ap.x, ap.y); if (ax < -50 || ay < -50 || ax > W + 50 || ay > H + 50) continue;
+      ctx.strokeStyle = ctx.fillStyle = '#7fa8c9' + (ap.type === 'small' ? '99' : 'dd'); let drew = false;
+      for (const r of ap.runways || []) { const [e1, e2] = r.ends; if (!e1 || !e2 || e1.x == null || e2.x == null) continue;
+        const [x1, y1] = toPx(e1.x, e1.y), [x2, y2] = toPx(e2.x, e2.y); ctx.lineWidth = (ap.type === 'large' ? 2.6 : ap.type === 'medium' ? 2 : 1.4) * dpr;
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); drew = true;
+        if (userZoom >= 6) { ctx.fillText(e1.id, x1 + 3 * dpr, y1 + 10 * dpr); ctx.fillText(e2.id, x2 + 3 * dpr, y2 + 10 * dpr); } }
+      if (!drew) { ctx.lineWidth = dpr; ctx.beginPath(); ctx.arc(ax, ay, 3 * dpr, 0, Math.PI * 2); ctx.stroke(); }
+      if (userZoom >= 2.2 || (ap.type === 'large' && userZoom >= 0.9) || (ap.type === 'medium' && userZoom >= 1.4)) ctx.fillText(ap.id, ax + 6 * dpr, ay - 5 * dpr);
+    }
+  }
+  // published procedures (runways in use, or all): SIDs dotted, STARs dashed, holds
+  if (arrInfo && (V.sid || V.star || V.hold)) for (const ad of arrInfo.aerodromes || []) {
+    const pr = ad.procedures; if (!pr) continue;
+    const rw = ad.runway_in_use, onRw = r => V.procAll || !r || !r.length || r.includes(rw);
+    const pl = (pts, col, dash) => { ctx.strokeStyle = col; ctx.lineWidth = dpr; ctx.setLineDash(dash.map(d => d * dpr)); poly(pts, false); ctx.stroke(); ctx.setLineDash([]); };
+    if (V.sid) for (const sd of pr.sids) if (V.procAll || sd.runway === rw) { pl(sd.points, '#5fd3a3b0', [2, 3]); if (userZoom >= 1.6) { const q = sd.points[sd.points.length - 1], [qx, qy] = toPx(q[0], q[1]); ctx.fillStyle = '#5fd3a3cc'; ctx.font = mono(9); ctx.fillText(sd.name, qx + 4 * dpr, qy - 4 * dpr); } }
+    if (V.star) for (const st of pr.stars) if (onRw(st.runways)) { pl(st.points, '#e2a35fb0', [6, 3]); if (userZoom >= 1.6) { const q = st.points[0], [qx, qy] = toPx(q[0], q[1]); ctx.fillStyle = '#e2a35fcc'; ctx.font = mono(9); ctx.fillText(st.name, qx + 4 * dpr, qy - 4 * dpr); } }
+    if (V.hold) for (const h of pr.holds) if (onRw(h.runways)) { pl(h.points, '#b48ce6', []); }
+  }
+  // waypoints (navaids with their symbol; the neighbours' minor points named when zoomed in)
   ctx.font = mono(10.5);
   const xfer = new Set(sector.transfer_points || []), draftR = draft && draft.route ? new Set(draft.route) : null;
   const extSet = new Set(sector.external_points || []), provSet = new Set(sector.provisional_points || []);
+  const minorSet = new Set(sector.minor_points || []), navs = sector.navaids || {};
   for (const [n, p] of Object.entries(wp)) {
     const [px, py] = toPx(...p), hot = draftR && draftR.has(n);
+    if (n.startsWith('@') || px < -20 || py < -20 || px > W + 20 || py > H + 20) continue;
+    const nav = navs[n];
+    if (nav) {
+      if (!V.navaids && !hot) continue;
+      const r = 5 * dpr; ctx.strokeStyle = ctx.fillStyle = hot ? '#7fb8ff' : extSet.has(n) ? '#4a6178' : '#5c7a96'; ctx.lineWidth = dpr; ctx.beginPath();
+      if (nav === 'NDB') { ctx.arc(px, py, r, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(px, py, 1.3 * dpr, 0, Math.PI * 2); ctx.fill(); }
+      else if (nav === 'DME') ctx.strokeRect(px - r * 0.8, py - r * 0.8, r * 1.6, r * 1.6);
+      else { for (let k = 0; k < 6; k++) { const an = Math.PI / 3 * k; k ? ctx.lineTo(px + r * Math.cos(an), py + r * Math.sin(an)) : ctx.moveTo(px + r, py); } ctx.closePath(); ctx.stroke(); }
+      if ((V.names && (!extSet.has(n) || userZoom >= 1.6)) || hot) ctx.fillText(n, px + 7 * dpr, py + 4 * dpr);
+      continue;
+    }
+    if (minorSet.has(n) && !hot) {
+      if (!V.names) continue;
+      ctx.strokeStyle = ctx.fillStyle = '#41586e'; ctx.lineWidth = dpr; ctx.beginPath();
+      ctx.moveTo(px, py - 3 * dpr); ctx.lineTo(px + 3 * dpr, py); ctx.lineTo(px, py + 3 * dpr); ctx.lineTo(px - 3 * dpr, py); ctx.closePath(); ctx.stroke();
+      if (userZoom >= 1.6) ctx.fillText(n, px + 5 * dpr, py + 4 * dpr);
+      continue;
+    }
     if (extSet.has(n)) {
       ctx.strokeStyle = ctx.fillStyle = hot ? '#7fb8ff' : '#4a6178'; ctx.lineWidth = dpr; ctx.beginPath();
       ctx.moveTo(px, py - 4 * dpr); ctx.lineTo(px + 4 * dpr, py); ctx.lineTo(px, py + 4 * dpr); ctx.lineTo(px - 4 * dpr, py); ctx.closePath(); ctx.stroke();
-      ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); continue;
+      if (V.names || hot) ctx.fillText(n + (provSet.has(n) ? '?' : ''), px + 6 * dpr, py + 4 * dpr); continue;
     }
     ctx.fillStyle = ctx.strokeStyle = hot ? '#7fb8ff' : '#5c7a96'; ctx.lineWidth = dpr; ctx.beginPath();
     ctx.moveTo(px, py - 5 * dpr); ctx.lineTo(px + 4.5 * dpr, py + 3.5 * dpr); ctx.lineTo(px - 4.5 * dpr, py + 3.5 * dpr); ctx.closePath();
-    xfer.has(n) ? ctx.fill() : ctx.stroke(); ctx.fillText(n, px + 7 * dpr, py + 4 * dpr);
+    xfer.has(n) ? ctx.fill() : ctx.stroke(); if (V.names || hot) ctx.fillText(n, px + 7 * dpr, py + 4 * dpr);
   }
   // explicit cells
   (scn.weather.cells || []).forEach((c, i) => {
@@ -1085,15 +1223,19 @@ function draw() {
     ctx.strokeRect(px - 4 * dpr, py - 4 * dpr, 8 * dpr, 8 * dpr);
     const r = a.trk * Math.PI / 180, L = 2 * 60 * 7.5 / 60;   // 2-minute vector at ~450 kt
     const [qx, qy] = toPx(a.x + Math.sin(r) * L, a.y + Math.cos(r) * L); ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(qx, qy); ctx.stroke();
+    if (!V.labels && !isSel && !conf) continue;
     ctx.font = mono(10.5); ctx.fillText(a.cs, px + 8 * dpr, py - 10 * dpr);
     const i = a.info; ctx.fillText(`${a.fl} ${i.type}${i.rvsm !== 'approved' ? ' NRVSM' : ''}${i.formation ? ' x' + i.formation : ''}`, px + 8 * dpr, py + 2 * dpr);
   }
   // RBLs
   rblRects.length = 0;
+  const rblEnd = e => typeof e === 'string' ? byCs[e] : { x: e.pt[0], y: e.pt[1], fl: null, cs: e.name || '' };
+  const rblName = e => typeof e === 'string' ? e : e.name || 'point';
   for (const r of rbls) {
-    const A = byCs[r.a], B = byCs[r.b]; if (!A || !B) continue;
-    const c = rblCpa(r.a, r.b, T), [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y);
-    const g = lastGoodComp, fa = g.aircraft[r.a], fb = g.aircraft[r.b];
+    const A = rblEnd(r.a), B = rblEnd(r.b); if (!A || !B) continue;
+    const both = typeof r.a === 'string' && typeof r.b === 'string';
+    const c = both ? rblCpa(r.a, r.b, T) : null, [ax, ay] = toPx(A.x, A.y), [bx, by] = toPx(B.x, B.y);
+    const g = lastGoodComp || { aircraft: {} }, fa = g.aircraft[r.a], fb = g.aircraft[r.b];
     const H = g.separation_horizontal_nm || 5, hmin = Math.max(H, ...[fa, fb].map(f => f && f.formation ? H + 1 : H));
     const vNeed = (fa && fa.rvsm !== 'approved') || (fb && fb.rvsm !== 'approved') || (fa && fa.formation) || (fb && fb.formation) ? 2000 : 1000;
     const bad = c && c.d < hmin && Math.abs((c.A.fl || 0) - (c.B.fl || 0)) * 100 < vNeed;
@@ -1105,14 +1247,20 @@ function draw() {
       for (const [qx, qy, cs] of [[qax, qay, r.a], [qbx, qby, r.b]]) { ctx.beginPath(); ctx.arc(qx, qy, 4 * dpr, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = col; ctx.font = mono(9.5); ctx.fillText(cs, qx + 6 * dpr, qy + 3 * dpr); }
     }
     const brg = (Math.atan2(B.x - A.x, B.y - A.y) * 180 / Math.PI + 360) % 360, rng = Math.hypot(B.x - A.x, B.y - A.y);
-    const l1 = `${r.a}→${r.b} ${String(Math.round(brg)).padStart(3, '0')}° ${rng.toFixed(1)} NM ΔFL ${Math.abs(A.fl - B.fl)}`;
-    const l2 = !c ? 'no common time' : c.t <= T + 2 ? `diverging (closest now)` : `CPA ${c.d.toFixed(1)} NM at T+${fmtT(c.t)} (in ${fmtT(c.t - T)}) ΔFL ${Math.abs((c.A.fl || 0) - (c.B.fl || 0))}`;
+    const l1 = `${rblName(r.a)}→${rblName(r.b)} ${String(Math.round(brg)).padStart(3, '0')}° ${rng.toFixed(1)} NM` + (A.fl != null && B.fl != null ? ` ΔFL ${Math.abs(A.fl - B.fl)}` : '');
+    const l2 = !both ? `${(rng / 7.5).toFixed(1)} min at 450 kt` : !c ? 'no common time' : c.t <= T + 2 ? `diverging (closest now)` : `CPA ${c.d.toFixed(1)} NM at T+${fmtT(c.t)} (in ${fmtT(c.t - T)}) ΔFL ${Math.abs((c.A.fl || 0) - (c.B.fl || 0))}`;
     ctx.font = mono(10.5); const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 8 * dpr;
     const mx = (ax + bx) / 2, my = (ay + by) / 2;
     ctx.fillStyle = '#0b1016dd'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, 28 * dpr);
     ctx.fillStyle = col; ctx.fillText(l1, mx, my); ctx.fillText(l2, mx, my + 13 * dpr);
     rblRects.push({ r, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my + 16 * dpr });
   }
+  // the shared tools' view of the traffic at T (Find, geographic cursor)
+  state = shown = { sim_time_s: T, transferred: [],
+    aircraft: pos.map(p => ({ callsign: p.cs, x_nm: p.x, y_nm: p.y, fl: p.fl, type: p.info.type, squawk: ((p.info.flight_plan || {}).ssr) || '' })),
+    areas: scn.areas.map(a => ({ id: a.id, name: a.name, kind: a.kind, active: areaActive(a, T), lower_fl: a.lower_fl, upper_fl: a.upper_fl,
+      shape: a.circle ? { type: 'circle', center: nm(a.circle.center), radius_nm: a.circle.radius_nm } : { type: 'polygon', points: a.polygon.map(nm) } })) };
+  if (window.drawLookup) drawLookup(Object.fromEntries(state.aircraft.map(a => [a.callsign, a])));
   // HUD
   const nIn = pos.filter(a => a.src === 'plan' ? T >= a.info.entry_s : a.onf).length;
   $('#hud').innerHTML = `<b>${esc(scn.name || '')}</b> · SEP ${(lastGoodComp && lastGoodComp.separation_horizontal_nm) || '?'} NM<br>T+ <b>${fmtT(T)}</b> / ${fmtT(scn.duration_s)}<br>${nIn} in sector · ${pos.length - nIn} inbound<br>${pv ? `showing <b>${previewPolicy}</b> run` : 'showing filed plans'}`;
@@ -1535,6 +1683,17 @@ function renderSel() {
   else if ($('#loadSel').options.length) { $('#loadSel').value = [...$('#loadSel').options].some(o => o.value === 's02_climb_request_into_crossing') ? 's02_climb_request_into_crossing' : $('#loadSel').options[0].value; }
   renderPreview(); renderSel(); requestAnimationFrame(draw);
 })();
+// the View menu (map layers), remembered per browser
+(function () {
+  const vm = document.getElementById('viewMenu');
+  const sync = () => vm.querySelectorAll('[data-v]').forEach(b => b.classList.toggle('on', !!V[b.dataset.v]));
+  vm.querySelector('.vgb').onclick = e => { e.stopPropagation(); vm.classList.toggle('open'); };
+  vm.querySelector('.vgm').onclick = e => { const b = e.target.closest('[data-v]'); if (!b) return; e.stopPropagation();
+    V[b.dataset.v] = !V[b.dataset.v]; sync(); try { localStorage.setItem('dsg_view', JSON.stringify(V)); } catch (er) {} };
+  document.addEventListener('click', e => { if (!vm.contains(e.target)) vm.classList.remove('open'); });
+  sync();
+})();
 </script>
+<script src="/static/lookup.js"></script>
 </body>
 </html>

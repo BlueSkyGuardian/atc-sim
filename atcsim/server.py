@@ -245,6 +245,22 @@ class DesignerBody(BaseModel):
     overwrite: bool = False
 
 
+class GenerateBody(BaseModel):
+    params: dict = {}
+
+
+@app.post("/designer/generate")
+def designer_generate(body: GenerateBody):
+    """A random scenario for the sectors given, from parameters (see atcsim/generator.py): flights per hour, density,
+    sequences per hour and their size, overtakes, crossings, level requests through traffic, West / Oceanic
+    coordinations, slow and long-haul shares, levels, seed. Returns the scenario (not saved)."""
+    from . import generator
+    try:
+        return generator.generate(body.params)
+    except (ValueError, KeyError) as e:
+        raise HTTPException(400, str(e))
+
+
 @app.post("/designer/compile")
 def designer_compile(body: DesignerBody):
     """Build an edited scenario: errors, lint warnings, planned trajectories and the conflicts they contain."""

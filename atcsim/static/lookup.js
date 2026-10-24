@@ -136,7 +136,7 @@
   }
   const btn = document.createElement('button');
   btn.id = 'findBtn'; btn.textContent = 'FIND'; btn.title = 'Find an aircraft (callsign, SSR code), a point, an aerodrome, an airway, an area or a coordinate (Ctrl+F)';
-  const al = document.getElementById('alBtn'); if (al) al.after(btn); else document.getElementById('viewbar').prepend(btn);
+  const al = document.getElementById('alBtn'); if (al) al.after(btn); else (document.getElementById('viewbar') || document.getElementById('tools')).appendChild(btn);
   btn.onclick = () => { if (atcIsOpen('lkWin')) atcCloseWin('lkWin'); else open(); };
   window.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); open(); }

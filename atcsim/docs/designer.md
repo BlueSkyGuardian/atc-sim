@@ -46,7 +46,10 @@ in the preview run.
 | ≈ Rain area | <kbd>W</kbd> | Drag a rectangle: stratiform (widespread moderate) rain |
 | ⬠ Area (polygon) | <kbd>P</kbd> | Click the corners, double-click or <kbd>Enter</kbd> to close |
 | ◯ Area (circle) | <kbd>O</kbd> | Drag from the centre |
-| ↔ RBL | <kbd>B</kbd> | Click two aircraft: bearing, range, ΔFL at the cursor time and the **CPA along their trajectories** (follows the timeline) |
+| ↔ RBL | <kbd>B</kbd> | Click two ends: aircraft, waypoints or any spot. Bearing, range (and ΔFL) at the cursor time; between two aircraft also the **CPA along their trajectories** (follows the timeline). Right-click a label to remove it |
+| View | | Map layers, remembered in the browser: coast, routes, point names (the neighbours' minor points are named when zoomed in), airports with their runways, navaids, SIDs, STARs, holds (of the runways in use, or *All runways*), aircraft labels |
+| FIND | <kbd>Ctrl</kbd>+<kbd>F</kbd> | As on the radar: an aircraft (callsign, SSR code), a point, an aerodrome (ICAO, IATA, name), an airway, an area, a sector, a coordinate or `POINT/BRG/DIST`. Aircraft are selected and centred; the rest is marked until removed |
+| Geographic cursor | <kbd>Q</kbd> | The cursor shows its coordinates (degrees, minutes, seconds); a click drops a marked coordinate (<kbd>Shift</kbd>-click keeps the cursor on) |
 
 Other keys: <kbd>Delete</kbd> removes the selection, <kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Ctrl</kbd>+<kbd>Y</kbd>
 undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the cursor. While you place an aircraft's route, the four arrows pan the map instead (<kbd>Shift</kbd> for bigger steps), so you can carry on beyond the edge of the screen; <kbd>↑</kbd>/<kbd>↓</kbd> pan at any time.
@@ -78,6 +81,30 @@ undo / redo, <kbd>Space</kbd> plays, <kbd>←</kbd>/<kbd>→</kbd> step the curs
 | design notes | The traps (hidden from agents) |
 | Weather | Seed, intensity of the next storm drawn, surface temperature, tropopause, the wind - on the Agadir airspace the **ERA5 climatology** (month, the jet that day: from the seed or −2σ … +2σ, variability 0–2; see [weather](weather.md#climatological-wind-era5)) or a profile from the wind at FL350 -, the list of storm patterns, cells and rain areas, and the full weather JSON (*Apply JSON*) |
 | Expected results | The `expected` block (see [Expected and solution](scenario-json.md#expected-and-solution)); *from previews* fills it from the last preview runs |
+
+### Generate traffic
+
+In the Scenario tab, **Generate traffic** builds a random scenario for the sectors ticked under *Open / New*
+(Agadir or Casablanca airspace). It replaces the scenario open; save it under its name or a new one.
+
+| Parameter | Meaning |
+|---|---|
+| flights / h | Flights through the controlled sectors per hour (the planted situations included) |
+| density | 1–5: how bunched the traffic is (waves) |
+| duration | Minutes |
+| sequences / h, of *a*–*b* aircraft | Arrival streams of *a* to *b* aircraft converging on a sequencing fix of the sectors that have one (North, West, South, Central, East). None in Oceanic |
+| overtakes / h | Same route and level, the faster one behind |
+| crossings / h | Two flights at the same level whose routes cross inside the sectors, meeting at the crossing |
+| level changes / h | A pilot request to climb or descend through a crossing flight's level |
+| West ↔ Oceanic | Flights to coordinate per hour (SUBAL, BEXAL, SAMAR): only when one side of the West / Oceanic boundary is controlled (see [level coordination](controller.md)) |
+| slow traffic | Share of slow aircraft (C550, C130, A400) at FL170–250 on the arrival routes, in the way of the sequences |
+| long-haul | Share of heavy, long-range types |
+| levels | The cruise band of the background traffic |
+| seed | Same seed and parameters, same scenario; empty draws one (the last is shown) |
+
+The situations are planted first, at the time and place they meet; the background traffic is then cleared of any
+conflict not planned, and flights that cannot fly their route are dropped. The result lists what was planted, and the
+design notes describe each situation (who, where, when) for the debrief.
 
 ### Selected tab
 

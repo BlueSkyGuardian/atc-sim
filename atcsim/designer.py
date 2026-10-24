@@ -170,7 +170,10 @@ def compile(scn: dict) -> dict:
             "arrival": a.destination, "flight_plan": a.flight_plan,
             "route_before": list(a.route_before), "route_after": list(a.route_after),
         }
+    from .arrivals import procedures
+    ads = [{**a.snapshot(), "procedures": procedures(a)} for a in w.aerodromes.values()]
     return {"ok": True, "duration_s": w.duration_s, "separation_horizontal_nm": w.sep_h, "plans": plans, "aircraft": info,
+            "aerodromes": ads,
             "planned_conflicts": _planned_conflicts(w, plans), "warnings": _lint(scn, w),
             "traffic_load": (load := _load(scn, w)),
             "ratings": _ratings({**scn, "traffic_load": load, "complexity": None, "density": None})}
