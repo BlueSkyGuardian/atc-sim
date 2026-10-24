@@ -300,8 +300,13 @@ class _Ctx:
         s = r["s_in"] + 10.0 if at_s is None else at_s
         p = _along(r["pts"], s)
         dep = dep or self.dep_for(r)
+        names = self.join_route(r, dep)
+        if kw.get("arrival") and dest:                 # an arrival ends at its aerodrome's sequencing fix
+            fx = next((q["fix"] for q in self.asp.default_sequencing if q["aerodrome"] == dest and q["fix"] in names[1:]), None)
+            if fx:
+                names = names[:names.index(fx) + 1]
         a = {"callsign": self.callsign(ops or (OPS_LONG if typ in LONG else OPS_SHORT)), "type": typ,
-             "route": self.join_route(r, dep), "fl": int(fl),
+             "route": names, "fl": int(fl),
              "dep": dep,
              "dest": dest or self.dest_for(r),
              "reach": {"point": [round(p[0], 3), round(p[1], 3)], "time": int(round(t))}}
@@ -737,6 +742,158 @@ def _prune(scn: dict) -> None:
                 raise
 
 
+# ---------------------------------------------------------------- whole routes (beyond the sectors)
+def _graph(c: _Ctx):
+    """The route network: published routes and airways (one-way ones one way), forward and backward."""
+    fwd, bwd = {}, {}
+    one_way = {tuple(v["points"]) for v in (c.asp.airways or {}).values() if v.get("one_way")}
+    seqs = [list(r) for r in c.asp.routes] + [list(v["points"]) for v in (c.asp.airways or {}).values()]
+    for r in seqs:
+        r = [n for n in r if n in c.wp]
+        ow = tuple(r) in one_way
+        for a, b in zip(r, r[1:]):
+            fwd.setdefault(a, set()).add(b); bwd.setdefault(b, set()).add(a)
+            if not ow:
+                fwd.setdefault(b, set()).add(a); bwd.setdefault(a, set()).add(b)
+    return fwd, bwd
+
+
+def _shortest(c: _Ctx, adj, start: str, targets: set, avoid: set, limit_nm: float):
+    import heapq
+    best, prev, heap = {start: 0.0}, {}, [(0.0, start)]
+    while heap:
+        d, n = heapq.heappop(heap)
+        if n in targets:
+            path = [n]
+            while path[-1] != start:
+                path.append(prev[path[-1]])
+            return path[::-1][1:]
+        if d > best.get(n, 1e18) or d > limit_nm:
+            continue
+        for m in adj.get(n, ()):
+            if m in avoid:
+                continue
+            nd = d + dist(c.wp[n], c.wp[m])
+            if nd < best.get(m, 1e18):
+                best[m], prev[m] = nd, n
+                heapq.heappush(heap, (nd, m))
+    return None
+
+
+def _onward(c: _Ctx, adj, path: List[str], toward: Optional[float], avoid: set, steps: int = 30) -> List[str]:
+    """Carry on along the network as straight as possible (and toward a direction when given) until it runs out."""
+    out, seen = [], set(path) | avoid
+    a, b = path[-2], path[-1]
+    for _ in range(steps):
+        trk = bearing(c.wp[a], c.wp[b])
+        cands = []
+        for m in adj.get(b, ()):
+            if m in seen or dist(c.wp[b], c.wp[m]) < 0.5:
+                continue
+            brg = bearing(c.wp[b], c.wp[m])
+            turn = abs((brg - trk + 540) % 360 - 180)
+            if turn > 60:
+                continue
+            aim = abs((brg - toward + 540) % 360 - 180) if toward is not None else 0.0
+            cands.append((turn + 0.6 * aim, m))
+        if not cands:
+            break
+        m = min(cands)[1]
+        out.append(m); seen.add(m)
+        a, b = b, m
+    return out
+
+
+def _inside_any(c: _Ctx, n: str) -> bool:
+    return any(point_in_polygon(c.wp[n], p) for p in c.polys)
+
+
+def _whole_routes(scn: dict, c: _Ctx) -> int:
+    """Each flight's route from its departure (or as far back as the network goes) to its destination (when in the
+    GMMM FIR: by the airways to a STAR, then the STAR) or as far on as the network goes, never back into our sectors
+    (the entry and exit stay where they were)."""
+    fwd, bwd = _graph(c)
+    stars = {d["id"]: d.get("stars") or [] for d in c.asp.default_aerodromes}
+    n_ext = 0
+    for a in scn["aircraft"]:
+        names = list(a["route"])
+        if len(names) < 2:
+            continue
+        inside = {n for n in names if _inside_any(c, n)}
+        avoid = {n for n in c.wp if n not in names and _inside_any(c, n)}       # our sectors: entered once
+        # ---- after the last point
+        dest, after = a.get("dest", ""), []
+        st = [s_ for s_ in stars.get(dest, []) if s_.get("via")]
+        if a.get("arrival") and any(q["fix"] == names[-1] for q in c.asp.default_sequencing):
+            star = next((s_ for s_ in st if s_["via"][0] == names[-1]), None)       # the STAR from its fix
+            after = [n for n in (star["via"][1:] if star else []) if n in c.wp and n not in names]
+        else:
+            if st:
+                tgt = {s_["via"][0] for s_ in st if s_["via"][0] in c.wp}
+                if names[-1] in tgt:
+                    path = []
+                else:
+                    path = _shortest(c, fwd, names[-1], tgt, avoid | set(names), 400.0)
+                if path is not None:
+                    star = next(s_ for s_ in st if s_["via"][0] == (path[-1] if path else names[-1]))
+                    after = path + [n for n in star["via"][1:] if n in c.wp and n not in names and n not in path]
+            if not after:
+                toward = None
+                if dest in c.ap_xy:
+                    toward = bearing(c.wp[names[-1]], c.ap_xy[dest])
+                after = _onward(c, fwd, names, toward, avoid)
+                if dest in c.ap_xy and after:              # stop where it is closest to its destination
+                    k = min(range(len(after)), key=lambda i: dist(c.wp[after[i]], c.ap_xy[dest]))
+                    after = after[:k + 1]
+        # ---- before the first point (not for a departure joining from its SID: that is its way in)
+        before = []
+        if a.get("dep") not in c.sid_ads:
+            dep = a.get("dep", "")
+            toward = bearing(c.wp[names[0]], c.ap_xy[dep]) if dep in c.ap_xy else None
+            back = _onward(c, bwd, names[::-1], toward, avoid | set(after))
+            if dep in c.ap_xy and back:
+                k = min(range(len(back)), key=lambda i: dist(c.wp[back[i]], c.ap_xy[dep]))
+                back = back[:k + 1]
+            before = back[::-1]
+        if before or after:
+            a["_route_core"] = names
+            a["route"] = before + names + after
+            n_ext += 1
+    return n_ext
+
+
+def _check_whole_routes(scn: dict) -> int:
+    """Back to the published part for any flight whose whole route changed where it enters or leaves our sectors."""
+    from .scenario import build_world
+    core = {a["callsign"]: a["_route_core"] for a in scn["aircraft"] if "_route_core" in a}
+    if not core:
+        return 0
+    test = copy.deepcopy(scn)
+    for a in test["aircraft"]:
+        a.pop("_route_core", None)
+    short = copy.deepcopy(test)
+    for a in short["aircraft"]:
+        if a["callsign"] in core:
+            a["route"] = core[a["callsign"]]
+    reverted = 0
+    try:
+        w1, w0 = build_world(test), build_world(short)
+    except Exception:
+        w1 = None
+    for a in scn["aircraft"]:
+        cs = a["callsign"]
+        if cs in core:
+            ok = w1 is not None and cs in w1.aircraft and cs in w0.aircraft and (
+                w1.aircraft[cs].entry_wp == w0.aircraft[cs].entry_wp
+                and w1.aircraft[cs].planned_exit == w0.aircraft[cs].planned_exit
+                and bool(getattr(w1.aircraft[cs], "arr", None)) == bool(getattr(w0.aircraft[cs], "arr", None)))
+            if not ok:
+                a["route"] = core[cs]
+                reverted += 1
+        a.pop("_route_core", None)
+    return reverted
+
+
 def _check_built(scn: dict, c: _Ctx) -> dict:
     """On the built exercise: a flight filed from an aerodrome with SIDs that cannot be shown from take-off (too early
     in the exercise, or no SID joins its route) is refiled from a distant aerodrome; a level against the
@@ -803,6 +960,8 @@ def generate(params: Optional[dict] = None) -> dict:
            "pre_entry_nm": 55.0,     # on the scope well before they call (the departures nearby from take-off)
            "areas": [], "events": [], "aircraft": c.aircraft, "requests": c.requests,
            "design_notes": " ".join(c.notes), "generator": {k: P[k] for k in DEFAULTS}}
+    extended = _whole_routes(scn, c)
+    reverted = _check_whole_routes(scn)
     _prune(scn)
     checks = _check_built(scn, c)
     for _ in range(3):
@@ -814,5 +973,6 @@ def generate(params: Optional[dict] = None) -> dict:
     scn["generator"]["planted"] = planted
     scn["generator"]["departures_from_takeoff"] = checks["from_takeoff"]
     scn["generator"]["planted_too_close_at_entry"] = entry_left
+    scn["generator"]["whole_routes"] = extended - reverted
     scn["generator"]["unplanned_conflicts_left"] = left
     return scn
