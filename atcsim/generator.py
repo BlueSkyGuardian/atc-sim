@@ -157,13 +157,74 @@ class _Ctx:
         self.requests: List[dict] = []
         self.notes: List[str] = []
         self.keep: set = set()
-        self.forced_dep: set = set()          # departures asked per aerodrome: re-timed, never refiled
+        self.forced_dep: set = set()
+        self.flow_cs: set = set()             # flights of a planned flow: they keep their origin          # departures asked per aerodrome: re-timed, never refiled
         self.T = P["duration_min"] * 60.0
         self._routes()
 
-    # ---- the published routes through the controlled sectors
+    # ---- the routes through the controlled sectors: the planned traffic flows when the airspace has them
+    def _flows(self):
+        import json as _json
+        import os as _os
+        path = _os.path.join(_os.path.dirname(__file__), "data", "airspaces", "agadir_flows.json")
+        if not _os.path.exists(path):
+            return []
+        d = _json.loads(open(path, encoding="utf-8").read())
+        groups = d.get("groups", {})
+        aw = {k: v["points"] for k, v in (self.asp.airways or {}).items()}
+        raw = _json.loads(open(_os.path.join(_os.path.dirname(__file__), "data", "airspaces", "agadir_cta.json"),
+                               encoding="utf-8").read())
+        for k, v in (raw.get("external_airways") or {}).items():       # beyond the FIR: only where ours stop
+            if not k.startswith("_") and k not in aw:
+                aw[k] = v["points"]
+        expand = lambda lst: [a for g in lst for a in (groups.get(g) or [g])]
+        out = []
+        for f in d.get("flows", []):
+            toks = f["route"].split()
+            names, ok = [toks[0]], True
+            i = 1
+            while i < len(toks):
+                t = toks[i]
+                if t in aw and i + 1 < len(toks):
+                    pts, a, b = aw[t], names[-1], toks[i + 1]
+                    if a not in pts or b not in pts:
+                        ok = False
+                        break
+                    ia, ib = pts.index(a), pts.index(b)
+                    seg = pts[ia:ib + 1] if ia <= ib else pts[ib:ia + 1][::-1]
+                    names += seg[1:]
+                    i += 2
+                elif t == "DCT":
+                    i += 1
+                else:
+                    names.append(t)
+                    i += 1
+            if not ok or any(n not in self.wp for n in names):
+                self.flow_errors.append(f["id"])
+                continue
+            out.append((names, f["id"], expand(f["from"]), expand(f["to"])))
+        return out
+
     def _routes(self):
+        self.flow_errors = []
+        flows = self._flows()
         out, seen = [], set()
+        src = [(n, fid, fr, to) for n, fid, fr, to in flows] if flows else []
+        for names, fid, fr, to in src:
+            pts = [self.wp[n] for n in names]
+            Lin = _poly_len_inside(pts, self.polys)
+            if Lin < 15.0:
+                continue
+            s_in = _first_inside(pts, self.polys) or 0.0
+            s_out = _last_inside(pts, self.polys) or _poly_len(pts)
+            south = 90.0 <= bearing(_along(pts, s_in), _along(pts, s_out)) < 270.0
+            out.append({"route": names, "pts": pts, "inside_nm": Lin, "south": south, "s_in": s_in, "s_out": s_out,
+                        "flow": fid, "deps": fr, "dests": to})
+        if len(out) >= 3:
+            self.routes = out
+            self._aerodromes()
+            return
+        out = []                                       # no flows here: the published routes
         for r in self.asp.routes:
             r = [n for n in r if n in self.wp]
             if len(r) < 2 or tuple(r) in seen:
@@ -179,6 +240,9 @@ class _Ctx:
             south = 90.0 <= bearing(_along(pts, s_in), _along(pts, s_out)) < 270.0
             out.append({"route": r, "pts": pts, "inside_nm": Lin, "south": south, "s_in": s_in, "s_out": s_out})
         self.routes = out
+        self._aerodromes()
+
+    def _aerodromes(self):
         # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations
         self.sid_ads = {d["id"]: (d["x"], d["y"]) for d in self.asp.default_aerodromes if d.get("sids") and "y" in d}
         self.ap_xy = {a["id"]: (a["x"], a["y"]) for a in (getattr(self.asp, "airports", None) or [])
@@ -199,6 +263,8 @@ class _Ctx:
     def dep_for(self, r, domestic=0.6) -> str:
         """A departure aerodrome consistent with the route: one with SIDs near the route before it enters (it is then
         shown from take-off), else a distant one beyond the unit the route comes from (none close to the entry)."""
+        if r.get("deps"):                      # a planned flow: its own origins
+            return self.rng.choice(r["deps"])
         if r["route"][0] in ("SUBAL", "BEXAL") and "IBALU" in r["route"] and self.rng.random() < 0.85:
             return self.rng.choice(NAT)        # the North Atlantic flow
         entry = _along(r["pts"], r["s_in"])
@@ -222,6 +288,8 @@ class _Ctx:
         return names[best[1]:]
 
     def dest_for(self, r) -> str:
+        if r.get("dests"):
+            return self.rng.choice(r["dests"])
         if r["route"][-1] in ("SUBAL", "BEXAL") and "IBALU" in r["route"] and self.rng.random() < 0.85:
             return self.rng.choice(NAT)
         exitp = _along(r["pts"], r["s_out"])
@@ -310,6 +378,8 @@ class _Ctx:
              "dep": dep,
              "dest": dest or self.dest_for(r),
              "reach": {"point": [round(p[0], 3), round(p[1], 3)], "time": int(round(t))}}
+        if r.get("flow"):
+            self.flow_cs.add(a["callsign"])
         if mach:
             a["mach"] = round(mach, 2)
         a.update(kw)
@@ -339,7 +409,8 @@ class _Ctx:
 # ------------------------------------------------------------------------------------------- planted situations
 def _sequences(c: _Ctx):
     fixes = [q for q in c.asp.default_sequencing if q["fix"] in c.wp and c.on_sectors(c.wp[q["fix"]])]
-    fixes = [q for q in fixes if any(r["route"][-1] == q["fix"] or q["fix"] in r["route"] for r in c.routes)]
+    fixes = [q for q in fixes if any((r["route"][-1] == q["fix"] or q["fix"] in r["route"][1:])
+                                     and (not r.get("dests") or q["aerodrome"] in r["dests"]) for r in c.routes)]
     n = int(round(c.P["sequences_per_hour"] * c.T / 3600.0))
     if not fixes or n <= 0:
         return 0
@@ -347,7 +418,8 @@ def _sequences(c: _Ctx):
     for ts in c.times(n, lo=420.0, hi=c.T - 300.0):
         q = c.rng.choice(fixes)
         fix = q["fix"]
-        inbound = [r for r in c.routes if fix in r["route"] and r["route"].index(fix) > 0]
+        inbound = [r for r in c.routes if fix in r["route"] and r["route"].index(fix) > 0
+                   and (not r.get("dests") or q["aerodrome"] in r["dests"])]
         if not inbound:
             continue
         k = c.rng.randint(*c.P["seq_size"])
@@ -418,6 +490,19 @@ def _crossing_pairs(c: _Ctx):
                             pairs.append((r1, r2, x, s1 + dist(a1, x), s2 + dist(a2, x), name))
                     s2 += dist(a2, b2)
                 s1 += dist(a1, b1)
+            # converging on a common fix inside the sectors from different directions (a merge: IBALU, MAK, ADM...)
+            for k1, n in enumerate(r1["route"][1:], 1):
+                if n not in r2["route"][1:] or not any(point_in_polygon(c.wp[n], p) for p in c.polys):
+                    continue
+                k2 = r2["route"].index(n)
+                p1, p2 = r1["route"][k1 - 1], r2["route"][k2 - 1]
+                if p1 == p2:
+                    continue
+                ang = abs((bearing(c.wp[p1], c.wp[n]) - bearing(c.wp[p2], c.wp[n]) + 540) % 360 - 180)
+                if 15 <= ang <= 150:
+                    s1n = sum(dist(a, b) for a, b in zip(r1["pts"][:k1 + 1], r1["pts"][1:k1 + 1]))
+                    s2n = sum(dist(a, b) for a, b in zip(r2["pts"][:k2 + 1], r2["pts"][1:k2 + 1]))
+                    pairs.append((r1, r2, c.wp[n], s1n, s2n, n))
     return pairs
 
 
@@ -534,7 +619,8 @@ def _dep_routes(c: _Ctx, icao: str):
     if icao not in c.sid_ads:
         return []
     out = []
-    for r in c.routes:
+    pool = [r for r in c.routes if icao in (r.get("deps") or [])] or [r for r in c.routes if not r.get("deps")]
+    for r in pool:
         entry = _along(r["pts"], r["s_in"])
         part = _cut(r["pts"], 0.0, r["s_in"]) if r["s_in"] > 1 else [r["pts"][0], entry]
         if icao in c._near({icao: c.sid_ads[icao]}, part, entry, max_off=30.0, max_ref=130.0):
@@ -545,6 +631,9 @@ def _dep_routes(c: _Ctx, icao: str):
 def _arr_routes(c: _Ctx, icao: str):
     """Routes to icao: ending at its sequencing fix, else passing close to it after leaving the sectors."""
     fixes = {q["fix"] for q in c.asp.default_sequencing if q["aerodrome"] == icao}
+    flows = [r for r in c.routes if icao in (r.get("dests") or [])]
+    if flows:                                          # the planned flows to it
+        return flows, any(r["route"][-1] in fixes for r in flows)
     seq = [r for r in c.routes if r["route"][-1] in fixes]
     if seq:
         return seq, True
@@ -601,7 +690,8 @@ def _airport_flows(c: _Ctx) -> Dict[str, int]:
                 r = c.rng.choice(arr)
                 typ = c.pick_type()
                 fl = c.level(r["south"], max(250, lo_fl - 40), hi_fl, typ) or 330
-                c.add(r, typ, fl, t, dest=icao, arrival=seq)
+                c.add(r, typ, fl, t, dest=icao,
+                      arrival=any(q["fix"] == r["route"][-1] and q["aerodrome"] == icao for q in c.asp.default_sequencing))
                 done["arrivals"] += 1
     return done
 
@@ -626,6 +716,10 @@ def _background(c: _Ctx):
         if fl is None:
             continue
         seq = next((q for q in c.asp.default_sequencing if q["fix"] == r["route"][-1]), None)
+        if r.get("dests"):                         # a planned flow: its destination; an arrival when it lands there
+            dest = c.rng.choice(r["dests"])
+            c.add(r, typ, fl, t, dest=dest, arrival=bool(seq and seq["aerodrome"] == dest))
+            continue
         c.add(r, typ, fl, t, **({"dest": seq["aerodrome"], "arrival": True} if seq else {"arrival": False}))
 
 
@@ -909,10 +1003,12 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
         if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "sids", None):
             if getattr(ac, "sid", None):
                 out["from_takeoff"] += 1
-            elif a["callsign"] in c.forced_dep:
+            elif a["callsign"] in c.forced_dep or (a["callsign"] in c.flow_cs and a["callsign"] not in c.keep):
                 if a["reach"]["time"] + 300 <= scn["duration_s"] - 240:
                     a["reach"]["time"] += 300               # later: time to take off and climb in view
                     out["retimed"] = out.get("retimed", 0) + 1
+            elif a["callsign"] in c.flow_cs:
+                pass                                        # a planted flight of a planned flow: airborne, same origin
             elif not a.get("start"):
                 r = by_route.get(tuple(a["route"]))
                 if r is not None:
