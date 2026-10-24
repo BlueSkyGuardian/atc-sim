@@ -201,6 +201,31 @@ Departures from Casablanca (GMMN) climbing into the sector ask for their **final
 (*RAM6589K B788 FL260, checking in, requesting FL360*): a level request is opened at the same time as the first call.
 Their filed cruise level is that level, so it may be given without asking the pilot first.
 
+### Arrivals to GMMN: the FL160 handover
+
+The Casablanca North sector does not sequence GMMN's arrivals onto the STARs: it builds a **pseudo-sequence**,
+handing them to approach by the fix they come in by (LAKAM, RAVOL, BISMI) at **FL160**, and approach vectors them from
+there. Approach takes an arrival over once you have decontrolled it inside the Casablanca TMA (below).
+
+### Terminal areas (TMA, CTR) and approach
+
+The terminal airspaces of the Moroccan aerodromes (TMAs and CTAs, CTRs and ATZs, from the AIP) are drawn on the
+scope: **Map ▸ TMA** (on by default) and **Map ▸ CTR** (off), dashed, with their name and limits when zoomed in
+(colours in Display). They decide when the simulated approach takes an arrival: only once it is **inside its
+aerodrome's terminal area and decontrolled** by you. Until then it is yours, even if it is already flying its STAR or
+your vectors; an arrival you keep assumed is never taken. An aerodrome without terminal areas is handed over as
+before, when the aircraft leaves your sectors or is decontrolled.
+
+### Start-up requests
+
+Departures from the aerodromes under the sectors (all but GMMN, whose departures are *silent*) ask for a **start-up
+clearance** before they take off: the aerodrome's approach phones you about 10 minutes before. Give the point where
+the aircraft will leave the TMA and the level it is cleared to, or refuse (approach asks again 5 minutes later). It
+does not take off before your clearance, and needs about 3 minutes after it to start up and taxi; it then climbs to
+the level you gave towards that point. With a pseudo-pilot the request comes by telephone; on the solo radar see
+[Start-up calls](#solo-radar-practising-alone). The runway in use can change during the exercise (scenario or wind):
+departures then take off from the new runway, arrivals are re-planned for it.
+
 ### The full label menu
 
 The full menu holds the CFL (with quick levels coloured by the probe), XFL, speed (`M78`, `280`, `SN`), heading,
@@ -561,6 +586,12 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   dims the others. Every follower gets its ellipse (one already far enough behind is said so); an aircraft whose route
   does not go through the point is taken direct to it. The point can also be typed in the panel's *point* field (a
   waypoint under a label is hard to click).
+- **Start-up calls**: when an aerodrome's approach asks for start-up, the phone rings and a badge at the top shows
+  *☎ GMMX approach calling · start-up for …* with **Pick up**. The call window lists its flights (requests from the
+  same aerodrome close together come in one call), each with its runway, SID, time to take-off, the suggested exit
+  point (a list of the points it can name) and level: change them if you want, then **Approve** or **Refuse** each one,
+  or **Approve all**. The window closes when every flight in the call has an answer. **Tools ▸ Start-ups** lists the
+  clearances given: change the point or level (**Change**) until the aircraft takes off.
 - **⚑ Mark** on the control bar (key <kbd>K</kbd>) marks a moment with a note, to find it again in the debrief.
 - **End** keeps the run in your exercises and your statistics (marked *solo*), with its recording, and opens the way to
   its **debrief**.

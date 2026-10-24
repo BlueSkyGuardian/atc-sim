@@ -16,7 +16,8 @@ transferred (an aerodrome under our sectors: once decontrolled):
               FAF, final approach speed on the glide path
   sequence  : the arrivals to one aerodrome keep the order they come in (distance to touchdown); a follower closer than
               the approach spacing (6 NM, 7 NM behind a heavy) to the one ahead is slowed (never below its final
-              approach speed until the FAF) - the next units keep the sequence the controller built
+              approach speed until the FAF; on final, down to the minimum approach speed to 4 NM) - the next units keep
+              the sequence the controller built
   holding   : a long delay (its landing slot behind the ones ahead), or too much height for the miles left, is taken
               in the aerodrome's published approach holding pattern (fix, inbound track, turn direction, 1 minute legs
               or the published leg length, no lower than its minimum holding altitude, its maximum speed): the hold
@@ -44,6 +45,8 @@ GLIDE_FT_PER_NM = 318.0              # 3 degrees
 APP_SPACING_NM = 6.0
 HEAVY_SPACING_NM = 7.0
 FINAL_KT = 145.0
+MIN_FINAL_KT = 130.0               # minimum approach speed: a follower closing on the one ahead on final, down to 4 NM
+SLOT_MARGIN_S = 15.0               # behind the one ahead: the spacing plus this (the estimates are not exact)
 LANDED_NM = 0.4
 HOLD_LAP_NM = 21.0                 # a 1-minute racetrack at about 220 kt
 HOLD_AGL_FT = 6000.0
@@ -327,7 +330,7 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
     # its landing slot: never earlier than the one ahead (as it really flies) plus the approach spacing
     sta = st["sta"]
     if ahead is not None:
-        sta = max(sta, ahead[1] + _sep_s(ahead[2]))
+        sta = max(sta, ahead[1] + _sep_s(ahead[2]) + SLOT_MARGIN_S)
     if ahead is not None and not st["established"] and to_go < final_nm + 20:
         # turning in: the one ahead must be at least the approach spacing (plus a margin) ahead along the track,
         # whatever the time estimates said - else one more dogleg before the final approach fix
@@ -382,7 +385,8 @@ def _fly(world: "World", ac: "Aircraft", ad, to_go: float, eta: float, ahead) ->
             and not _holding(ac)):
         _delay(world, ac, 0.8 * early * max(ac.gs, 180.0) / 3600.0)
     elif early > 10:
-        floor_kt = FINAL_KT if st["established"] or to_go <= final_nm + 4.0 else 180.0
+        floor_kt = (MIN_FINAL_KT if to_go > 4.0 else FINAL_KT) if st["established"] else \
+            FINAL_KT if to_go <= final_nm + 4.0 else 180.0
         cur = ac.cas()
         want = max(floor_kt, min(want or cur, cur - (20.0 if early > 30 else 10.0)))
     if want is not None and (ac.alt_ft < 26000 or _holding(ac)):

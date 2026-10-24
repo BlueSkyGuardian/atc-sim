@@ -26,6 +26,13 @@ The list shows what to say on the frequency, oldest first:
   controller answered on the frequency.
 - **WX items** list the aircraft that are dealing with weather (see [Weather](#weather)).
 
+- **START-UP** items: an aerodrome's approach needs a start-up clearance for a departure (*Phone the controller as
+  GMMX approach: start-up for AFR2339*). Call the controller from the Telephone panel as that approach, ask for
+  start-up, then enter what was cleared: the point where the aircraft leaves the TMA (the list) and the level, then
+  **Cleared**, or **Refused** (approach asks again 5 minutes later, the item comes back). The aircraft does not take
+  off before it is cleared. Once cleared the item stays with **Change** until take-off: enter a new point or level the
+  controller gives. Requests from one aerodrome close together are listed together: one call for all of them.
+
 The simulated pilots generate the requests: a deviation when their onboard radar sees weather ahead on their path,
 a ride level after a while in turbulence, a descent at their top of descent. The scenario adds scripted ones. You
 choose how to phrase them.

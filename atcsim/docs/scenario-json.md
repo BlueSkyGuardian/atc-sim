@@ -339,6 +339,33 @@ keys to change them.
 - **Sequencing fields:** `fix` (a point), `aerodrome`, `spacing_nm` (10), `cross_at_fl` or `cross_at_or_below_fl`,
   `min_fl` (the lowest level the controller may give without coordination, 250), `speed_at_fix_kt` (optional).
 
+### Runway changes
+
+`"runway_changes"` changes an aerodrome's runway in use during the exercise, each aerodrome on its own:
+
+```json
+"runway_changes": [{"aerodrome": "GMMN", "time": 1500, "runway": "17L", "reason": "wind backing south"},
+                   {"aerodrome": "GMMX", "time": 2400, "runway": "28"}]
+```
+
+From `time` (seconds from the start) departures take off on the new runway and its SIDs, and arrivals not yet
+established are re-planned for it (its STAR and final). An unknown aerodrome or runway is an error.
+
+### Start-up requests
+
+Every departure from an aerodrome under the Casablanca sectors needs a **start-up clearance**: its approach phones
+the ACC sector above about 10 minutes before take-off, and the aircraft does not take off before the sector has given
+the point where it leaves the TMA and its level. GMMN's departures are *silent* (released by agreement) and ask for
+nothing.
+
+- `"startup_requests": true` (default) | `false`: no requests at all.
+- `"startup_exempt": ["GMMN"]` (default): aerodromes whose departures ask for nothing.
+- per aircraft, `"startup": false` (this one asks for nothing) or `{"request_s": 300}` (asks at that time instead of
+  10 minutes before its take-off; also for an aircraft of an exempt aerodrome).
+
+Requests from one aerodrome due within 4 minutes of each other come in one call. A refusal is asked again 5 minutes
+later; after the clearance the aircraft needs 3 minutes to start up and taxi.
+
 ## Expected and solution
 
 These are optional. They are used by the library build (`tools/build_scenarios.py`) and the designer's *Check &
