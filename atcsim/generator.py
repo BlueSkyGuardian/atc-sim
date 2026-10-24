@@ -285,21 +285,31 @@ class _Ctx:
         # ends at NIKZO for the south, LACAJ for the east...), never back along the route; the furthest such point
         # within the first part of the route (before the exit)
         ends = self.sid_ends.get(dep, set())
-        acc, on = 0.0, []
+        ad = self.sid_ads[dep]
+        turn = lambda b1, b2: abs((b2 - b1 + 540.0) % 360.0 - 180.0)
+        acc, sid_on, ahead = 0.0, [], []
         for i in range(len(names) - 1):
             if i:
                 acc += dist(r["pts"][i - 1], r["pts"][i])
-            if names[i] in ends and acc < r["s_out"] - 10.0 and dist(self.sid_ads[dep], r["pts"][i]) < 90.0:
-                on.append(i)
-        if on:
-            return names[on[-1]:]
-        ad, acc, best = self.sid_ads[dep], 0.0, (dist(self.sid_ads[dep], r["pts"][0]), 0)
-        for i in range(1, len(names)):
-            acc += dist(r["pts"][i - 1], r["pts"][i])
-            if acc > r["s_in"] + 1.0 or i >= len(names) - 1:
+            if acc >= r["s_out"] - 10.0:
                 break
-            best = min(best, (dist(ad, r["pts"][i]), i))
-        return names[best[1]:]
+            p, q = r["pts"][i], r["pts"][i + 1]
+            d = dist(ad, p)
+            if d > 90.0:
+                continue
+            # from here the route leads away from the aerodrome: a departure can join here without turning back
+            away = d < 3.0 or turn(bearing(ad, p), bearing(p, q)) <= 90.0
+            if not away:
+                continue
+            if names[i] in ends:
+                sid_on.append(i)
+            elif d >= 12.0:
+                ahead.append(i)
+        if sid_on:                                   # a SID ends on the route: the furthest such point
+            return names[sid_on[-1]:]
+        if ahead:                                    # the first point heading away: the builder finds its SID
+            return names[ahead[0]:]
+        return None                                  # every way onto this route turns back: not a departure of it
 
     def dest_for(self, r) -> str:
         if r.get("dests"):
@@ -383,6 +393,13 @@ class _Ctx:
         p = None
         dep = dep or self.dep_for(r)
         names = self.join_route(r, dep)
+        tries = 0
+        while names is None and tries < 12:              # its SIDs all lead the other way: another origin
+            tries += 1
+            dep = self.rng.choice([d for d in (r.get("deps") or []) if d != dep] or [self._far(r, "dep")])
+            names = self.join_route(r, dep)
+        if names is None:
+            dep, names = self._far(r, "dep"), list(r["route"])
         if names and names[0] != r["route"][0]:            # joined further on: the timing point after the join
             k = r["route"].index(names[0])
             s0 = sum(dist(a_, b_) for a_, b_ in zip(r["pts"][:k], r["pts"][1:k + 1]))
@@ -642,7 +659,8 @@ def _dep_routes(c: _Ctx, icao: str):
     for r in pool:
         entry = _along(r["pts"], r["s_in"])
         part = _cut(r["pts"], 0.0, r["s_in"]) if r["s_in"] > 1 else [r["pts"][0], entry]
-        if icao in c._near({icao: c.sid_ads[icao]}, part, entry, max_off=30.0, max_ref=130.0):
+        if icao in c._near({icao: c.sid_ads[icao]}, part, entry, max_off=30.0, max_ref=130.0) \
+                and c.join_route(r, icao) is not None:          # its SIDs lead onto it without turning back
             out.append(r)
     return out
 
