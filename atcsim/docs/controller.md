@@ -599,8 +599,12 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   either side) in bold, the one the plan used highlighted. Hover a cell for its range and why. When the one ahead has
   already turned near the largest turn, the follower may be vectored to the other side (checked clear of everyone);
   when one vector cannot absorb the delay within the rules (70° turns, 25 NM off the axis, 15 minutes), the plan uses
-  first **weaving behind the aircraft ahead** (2 to 6 headings across its track, each crossing it at least the
-  separation behind it, so it works at the same level or behind traffic that is not descending), then two vectors,
+  first **weaving behind the aircraft ahead**: headings across its track, each crossing it at least the separation
+  behind it, so it works at the same level or behind traffic that is not descending. Behind an aircraft that is itself
+  vectored or weaving the weave is **nested**: it follows that aircraft's track all along its turns (shorter legs,
+  turns closer together down the stream, up to 12 legs) and goes on across its last straight part until the delay is
+  absorbed. Next, **the same headings as the aircraft ahead, each held longer** (as many clearances as it has); then
+  two vectors,
   then a zigzag with the fewest legs that works, drawn on the scope as the path with its headings; the later legs are
   listed with the time to give them (*at T+…*). No leg of a multi-leg plan is longer than 60 NM, and a single vector
   longer than 90 NM is given only when nothing with shorter legs works. The tool also tries the order with one aircraft

@@ -279,6 +279,89 @@ def weave(P, path: "Path", T, n: int, theta: float, h: float, side: int, g_kt: f
             "back_deg": _ang(back, tracks[-1][0]), "crossings": cross, "time_s": t_f - t0}
 
 
+def last_bend(path: "Path", min_deg: float = 4.0) -> float:
+    """Arc length of the last turn of the reference track (where the aircraft ahead resumes direct to the point):
+    a nested weave follows the track up to there."""
+    pts = path.p
+    end = 0.0
+    for i in range(1, len(pts) - 1):
+        b1 = math.degrees(math.atan2(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]))
+        b2 = math.degrees(math.atan2(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]))
+        if _ang(b1, b2) >= min_deg and path.s[i] > 1.0:
+            end = path.s[i]
+    return end
+
+
+def weave_along(P, path: "Path", T, theta: float, h: float, side: int, g_kt: float, sep_nm: float, s_end: float,
+                n_max: int = 12, need_nm: float = 0.0) -> Optional[Dict]:
+    """A nested weave: legs across the reference track (the path of the aircraft ahead, itself weaving or vectored)
+    all along it - each leg at theta to the track's direction where it crosses, from offset +h to -h and back, never
+    past one of the track's turns by more than a leg - until the last turn of the track (s_end), then direct T. The
+    follower flies the leader's whole pattern plus its own short crossings: its delay is the leader's plus its own.
+    Each crossing at least sep_nm behind the leader. {tracks, points, stretch_nm, ...} or None."""
+    s0, off, _ = path.project(P)
+    pos, t_f = tuple(P), 0.0
+    tracks, pts, cross = [], [], []
+    path_len = 0.0
+    tt = math.radians(theta)
+    k = 0
+    tgt = side * h
+    D = math.hypot(T[0] - P[0], T[1] - P[1])
+    while k < n_max:
+        s_here, off, brg_here = path.project(pos)
+        # past the last turn of the track, and enough stretch already: direct T (else on across the track)
+        if s_here >= s_end - 0.5 and k > 0 and path_len + math.hypot(T[0] - pos[0], T[1] - pos[1]) - D >= need_nm:
+            break
+        # the track's direction a little ahead (where this leg will cross it), not only here
+        s_look = min(s_here + abs(tgt - off) / math.tan(tt) * 0.5, path.s[-1])
+        brg = _bearing_at(path, s_look)
+        sgn = 1.0 if tgt > off else -1.0
+        trk = (brg + sgn * theta) % 360.0
+        L = abs(tgt - off) / math.sin(tt)
+        L = min(L, MAX_LEG_NM)
+        if L < 2.0:
+            tgt = -tgt
+            k += 1
+            continue
+        ux, uy = _unit(trk)
+        end = (pos[0] + ux * L, pos[1] + uy * L)
+        s_e, off_e, _ = path.project(end)
+        if (off > 0.5 and off_e < -0.5) or (off < -0.5 and off_e > 0.5):        # it crosses the track: behind?
+            f = abs(off) / max(abs(off) + abs(off_e), 1e-6)
+            X = (pos[0] + ux * L * f, pos[1] + uy * L * f)
+            sx, _, _ = path.project(X)
+            t_x = t_f + L * f / g_kt * 3600.0
+            if t_x - path.time_at(sx) < sep_nm / g_kt * 3600.0:
+                return None
+            cross.append((round(sx, 1), round(t_x - path.time_at(sx))))
+        pos = end
+        path_len += L
+        t_f += L / g_kt * 3600.0
+        tracks.append((trk, L))
+        pts.append(pos)
+        tgt = -tgt
+        k += 1
+    if not tracks:
+        return None
+    s_last, _o, _b = path.project(pos)
+    if s_last < s_end - 3.0:
+        return None                                    # did not get past the last turn of the track: not nested
+    rest = math.hypot(T[0] - pos[0], T[1] - pos[1])
+    ux, uy = (T[0] - P[0]) / max(D, 1e-6), (T[1] - P[1]) / max(D, 1e-6)
+    along = (pos[0] - P[0]) * ux + (pos[1] - P[1]) * uy
+    back = math.degrees(math.atan2(T[0] - pos[0], T[1] - pos[1])) % 360.0
+    return {"tracks": tracks, "points": pts, "stretch_nm": path_len + rest - D, "along_nm": along, "D": D,
+            "back_deg": _ang(back, tracks[-1][0]), "crossings": cross, "time_s": t_f}
+
+
+def _bearing_at(path: "Path", s_: float) -> float:
+    for i in range(len(path.s) - 1):
+        if path.s[i] <= s_ <= path.s[i + 1] or i == len(path.s) - 2:
+            a_, b_ = path.p[i], path.p[i + 1]
+            return math.degrees(math.atan2(b_[0] - a_[0], b_[1] - a_[1])) % 360.0
+    return 0.0
+
+
 _CACHE: Dict[tuple, Dict] = {}
 
 
