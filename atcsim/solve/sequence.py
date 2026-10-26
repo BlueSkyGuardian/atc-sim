@@ -1189,7 +1189,7 @@ def _weave_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=Non
                                         + (" all along its own vectors" if nested else "")
                                         + f" (±{h:.0f} NM, {theta}° turns, each crossing {sep:.0f} NM or more behind it), "
                                           f"{eb:.1f} NM behind {ahead}"),
-                            f"{len(legs)} legs", side, theta, crossings_ok=behind, scale="last")
+                            "fan" if len(legs) == 1 else f"{len(legs)} legs", side, theta, crossings_ok=behind, scale="last")
         if sol is not None:
             sol["weave"] = True
             return sol
