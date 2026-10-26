@@ -586,6 +586,22 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   dims the others. Every follower gets its ellipse (one already far enough behind is said so); an aircraft whose route
   does not go through the point is taken direct to it. The point can also be typed in the panel's *point* field (a
   waypoint under a label is hard to click).
+
+  **Working backwards.** The tool first decides the end state: the order and each aircraft's time over the point,
+  every one the spacing behind the one ahead. Each follower then has one number to achieve, the **delay to lose**,
+  and the panel shows its **delay table**: how much each kind of clearance can absorb for that aircraft, there and
+  then: *speed* (its own Mach −0.03 at most, held to the point), *one vector* (a heading then direct, its ellipse),
+  *vector + speed*, *two vectors* (a heading off the axis, then a heading to the other side, then direct: the second
+  turn point on a second ellipse), *two vectors + speed*, *zigzags* of 3 to 6 legs (left and right across a corridor
+  along the axis, at most 25 NM each side: a long delay in short legs rather than one heading held for a long way,
+  each leg one more clearance), and a *hold* (advisory: coordinate it). The ones that can
+  absorb the delay are ticked ✓, the best of them (fewest clearances, then closest to the axis, then the most margin
+  either side) in bold, the one the plan used highlighted. Hover a cell for its range and why. When the one ahead has
+  already turned near the largest turn, the follower may be vectored to the other side (checked clear of everyone);
+  when one vector cannot absorb the delay within the rules (70° turns, 25 NM off the axis, 15 minutes), the plan uses
+  two vectors, then a zigzag with the fewest legs that works, drawn on the scope as the path with its headings; the
+  later legs are listed with the time to give them (*at T+…*). The tool also tries the order with one aircraft
+  moved one place from first come, first served, and takes it when it needs fewer clearances (the panel says so).
 - **Start-up calls**: when an aerodrome's approach asks for start-up, the phone rings and a badge at the top shows
   *☎ GMMX approach calling · start-up for …* with **Pick up**. The call window lists its flights (requests from the
   same aerodrome close together come in one call), each with its runway, SID, time to take-off, the suggested exit

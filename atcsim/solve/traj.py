@@ -228,10 +228,13 @@ def route_ahead(w, a) -> List[str]:
 
 def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, for_s: Optional[float] = None,
           direct: Optional[str] = None, cfl: Optional[int] = None, rates: str = "expected", speed_for_s: Optional[float] = None,
-          rate: Optional[float] = None, intermediate: Optional[int] = None, then: Optional[str] = None) -> Traj:
+          rate: Optional[float] = None, intermediate: Optional[int] = None, then: Optional[str] = None,
+          heading2: Optional[float] = None, for2_s: Optional[float] = None, legs=None) -> Traj:
     """The predicted trajectory of aircraft a over H seconds, with an optional clearance. A speed is held for
     speed_for_s (its limit) then the aircraft resumes its normal speed; a heading for for_s then the route; a level at
-    an assigned rate (ft/min) when rate is given. The limits of the clearances in force are flown as well."""
+    an assigned rate (ft/min) when rate is given. The limits of the clearances in force are flown as well. A second
+    heading (heading2 for for2_s, given at the end of the first) makes a two-leg vector before the point; legs, a list of
+    (heading, seconds) after the first, a zigzag of any number of legs."""
     from .. import atctools
     ent = dict(w.entries.get(a.callsign, {}))
     if cfl is not None:
@@ -277,6 +280,17 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
             pts, hdg = [tuple(p0), tuple(p1), tuple(p1 + _unit(trk_v) * 1000.0)], None
         else:
             p2 = p1 + _unit(trk_v) * gs_v / 3600.0 * for_s
+            extra = list(legs or []) + ([(heading2, for2_s)] if heading2 is not None and for2_s is not None else [])
+            legs = [tuple(p0), tuple(p1), tuple(p2)]
+            for h_k, s_k in extra:
+                # each next heading, given at the end of the leg before: half its turn on the old track, then the leg
+                trk_2, gs_2 = air_to_ground(tas0, float(h_k), wind)
+                turn_2 = abs((trk_2 - trk_v + 180) % 360 - 180)
+                p2b = p2 + _unit(trk_v) * gs_v / 3600.0 * (PILOT_DELAY_S + turn_2 / TURN_RATE_DPS / 2)
+                p2 = p2b + _unit(trk_2) * gs_2 / 3600.0 * float(s_k)
+                legs[-1] = tuple(p2b)                  # the leg before runs on to where the turn is half done
+                legs.append(tuple(p2))
+                trk_v, gs_v = trk_2, gs_2
             ahead = route_ahead(w, a)
             nxt_pt = None
             if then:
@@ -291,7 +305,8 @@ def build(w, a, H: float = 600.0, speed=None, heading: Optional[float] = None, f
                     brg_q = math.degrees(math.atan2(q[0], q[1])) % 360
                     turn_e = abs((brg_q - trk_v + 180) % 360 - 180)
                     p2 = p2 + _unit(trk_v) * gs_v / 3600.0 * (turn_e / TURN_RATE_DPS / 2)
-            pts, hdg = [tuple(p0), tuple(p1), tuple(p2)] + [w.waypoints[p] for p in rejoin], None
+            legs[-1] = tuple(p2)
+            pts, hdg = legs + [w.waypoints[p] for p in rejoin], None
     elif len(pts) >= 2:
         # a turn in progress or to come at once (past a point, a new direct): the track changes at a standard rate,
         # modelled as for a heading, half the turn on the present track; without it the prediction cuts the corner

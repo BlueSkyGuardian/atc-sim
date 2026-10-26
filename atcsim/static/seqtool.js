@@ -94,6 +94,7 @@
       if (!d.steps.length) body += '<div class="c-dim">No clearance needed: ' + esc((d.notes || []).join('; ') || 'already in trail') + '</div>';
       for (const cs of d.sequence) {
         const a = d.aircraft[cs]; if (!a || !a.headings) continue;
+        body += delayRow(cs, a);
         const all = a.headings.filter(h => h.leg_nm != null), hs = all.filter(h => h.ok);
         const outN = all.length - hs.length;
         const pk = pick[cs];
@@ -115,6 +116,25 @@
     const html = `<div class="hd"><span>SEQUENCE ${data ? '<span class="c-dim">T+' + mmss(data.sim_time_s) + '</span>' : ''}${busy ? ' …' : ''}</span>
       <span><button data-act="re" title="compute again now">↻</button> <button data-act="clr" title="clear the aircraft and the point">Clear</button> <button data-act="off" title="leave the tool (Esc)">✕</button></span></div>${body}`;
     if (html !== lastH) { inner.innerHTML = html; lastH = html; }
+  }
+
+  // the delay table of a follower: the delay it must lose for its slot, what each family of clearances can absorb for
+  // it, the ones that fit (✓), the best of them in bold, the one the plan took marked
+  const FAM = { speed: 'speed', dogleg: 'one vector', 'dogleg+speed': 'vector + speed', 'two legs': 'two vectors',
+    'two legs+speed': 'two vectors + speed', '3 legs': 'zigzag 3', '4 legs': 'zigzag 4', '5 legs': 'zigzag 5',
+    '6 legs': 'zigzag 6', hold: 'hold' };
+  const SOL = { speed: 'speed', fan: 'dogleg' };
+  function delayRow(cs, a) {
+    if (!a.options || !a.options.length || a.delay_s == null) return '';
+    const took = SOL[a.solution] || a.solution || null;
+    const cells = a.options.map(o => {
+      const rng = o.advisory ? `${Math.round(o.lo_s / 60)}' laps` : `${mmss(o.lo_s)}–${mmss(o.hi_s)}`;
+      const cls = `sq-fam ${o.fits ? 'fit' : 'no'} ${a.best === o.family ? 'best' : ''} ${took === o.family ? 'took' : ''}`;
+      const tip = `${FAM[o.family] || o.family}: absorbs ${rng} · ${o.advisory ? 'advisory (coordinate)' : o.instructions + ' clearance' + (o.instructions > 1 ? 's' : '')}`
+        + (o.fits ? ` · fits${o.off_axis_nm != null ? ', ' + o.off_axis_nm + ' NM off the axis' : ''}${o.slack != null ? ', slack ' + Math.round(o.slack * 100) + '%' : ''}` : ' · does not fit');
+      return `<span class="${cls}" title="${esc(tip)}">${o.fits ? '✓ ' : ''}${esc(FAM[o.family] || o.family)} <span class="c-dim">${rng}</span></span>`;
+    }).join('');
+    return `<div class="sq-delay"><span class="c-dim">${esc(cs)} to lose</span> <b>${a.delay_s > 8 ? mmss(a.delay_s) : 'nothing'}</b> ${a.delay_s > 8 ? cells : ''}</div>`;
   }
 
   async function enter(a) {
@@ -231,6 +251,15 @@
             const [x, y] = toPx(p[0], p[1]);
             label(String(h || 360).padStart(3, '0'), x + 5 * dpr, y, col + 'cc', dpr);
           }
+        }
+        if (/ legs$/.test(a.solution || '') && pick[cs] == null && a.path && a.path.length > 1) {   // several vectors: the planned path
+          ctx.strokeStyle = col + hex2(0.9 * dim); ctx.lineWidth = 1.3 * dpr; ctx.beginPath();
+          a.path.forEach((p, i) => { const [x, y] = toPx(p[0], p[1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); });
+          ctx.stroke();
+          if (!focusCs || hot) { const [ax, ay] = toPx(a.x, a.y);
+            const hs = (a.legs && a.legs.length ? a.legs.map(l => l[0]) : [a.chosen_heading, a.chosen_heading2]).filter(h => h != null);
+            label(hs.map(h => String(h).padStart(3, '0')).join(' → '), ax + 12 * dpr, ay + 12 * dpr, col, dpr); }
+          continue;
         }
         const show = pick[cs] != null ? pick[cs] : a.chosen_heading;   // the heading shown: picked, else the plan's
         const h = show != null && (a.headings || []).find(q => q.heading === show && q.turn_point);
