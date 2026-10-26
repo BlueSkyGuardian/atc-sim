@@ -38,6 +38,7 @@ MAX_SHIFT = 1                    # an aircraft moves at most one place from firs
 MAX_TWO_LEG_S = 1200.0           # a two-leg vector: at most 20 minutes on the headings in all
 HOLD_LAP_S = 300.0               # a lap of an en-route hold (1.5 minute legs at cruise speed)
 ZIGZAG_LEGS = (3, 4, 5, 6)       # zigzags of 3 to 6 legs, left and right across the axis
+MAX_LEG_NM = 60.0                # no leg of a multi-leg vector longer than this: more legs instead
 ZIGZAG_MAX_S = 1800.0            # at most 30 minutes on the headings of a zigzag
 FAMILIES = ("speed", "dogleg", "dogleg+speed", "two legs", "two legs+speed") + tuple(f"{n} legs" for n in ZIGZAG_LEGS) + ("hold",)
 INSTR = {"none": 0, "speed": 1, "dogleg": 2, "dogleg+speed": 3, "two legs": 3, "two legs+speed": 4,
@@ -187,6 +188,95 @@ def zigzag_range(w, a, T, S_nm: float, n: int) -> Optional[Tuple[float, float]]:
             lo = d if lo is None else min(lo, d)
             hi = d if hi is None else max(hi, d)
     return None if lo is None else (lo, hi)
+
+
+class Path:
+    """A reference track (the planned path of the aircraft ahead, extended backwards from where it is now along its
+    present track): points with their arc length s and the time the aircraft is (or would have been) there."""
+
+    def __init__(self, pts: List[Tuple[float, float]], times: List[float]):
+        self.p = [tuple(map(float, q)) for q in pts]
+        self.t = list(map(float, times))
+        self.s = [0.0]
+        for a_, b_ in zip(self.p, self.p[1:]):
+            self.s.append(self.s[-1] + math.hypot(b_[0] - a_[0], b_[1] - a_[1]))
+
+    def project(self, q) -> Tuple[float, float, float]:
+        """(s, signed offset - right of the track positive, bearing of the track there)."""
+        best = None
+        for i in range(len(self.p) - 1):
+            ax_, ay_ = self.p[i]
+            bx, by = self.p[i + 1]
+            dx, dy = bx - ax_, by - ay_
+            L2 = dx * dx + dy * dy
+            if L2 < 1e-12:
+                continue
+            u = max(0.0, min(1.0, ((q[0] - ax_) * dx + (q[1] - ay_) * dy) / L2))
+            px, py = ax_ + u * dx, ay_ + u * dy
+            d = math.hypot(q[0] - px, q[1] - py)
+            if best is None or d < best[0]:
+                L = math.sqrt(L2)
+                off = ((q[0] - ax_) * dy - (q[1] - ay_) * dx) / L        # right of the track positive
+                best = (d, self.s[i] + u * L, off, math.degrees(math.atan2(dx, dy)) % 360.0)
+        return (best[1], best[2], best[3]) if best else (0.0, 0.0, 0.0)
+
+    def time_at(self, s_: float) -> float:
+        """When the aircraft ahead is (was) at arc length s_."""
+        if s_ <= self.s[0]:
+            return self.t[0]
+        for i in range(len(self.s) - 1):
+            if self.s[i] <= s_ <= self.s[i + 1]:
+                f = (s_ - self.s[i]) / max(self.s[i + 1] - self.s[i], 1e-9)
+                return self.t[i] + f * (self.t[i + 1] - self.t[i])
+        return self.t[-1]
+
+
+def weave(P, path: "Path", T, n: int, theta: float, h: float, side: int, g_kt: float, t0: float,
+          sep_nm: float) -> Optional[Dict]:
+    """A weave of n legs across the reference track (the path of the aircraft ahead): the first leg towards side*h
+    (offset from the track, right positive), each next across it to the other side, at theta to the track's local
+    direction, then direct T. Each crossing of the track must come at least sep_nm behind the aircraft ahead (it
+    passed the crossing point sep_nm / its ground speed earlier, or more). {tracks, points, stretch_nm, crossings}
+    or None when a crossing would not be behind it, or the weave reaches T."""
+    s0, off0, _ = path.project(P)
+    pos, off, t_f = tuple(P), off0, t0
+    tracks, pts, cross = [], [], []
+    path_len = 0.0
+    tt = math.radians(theta)
+    for k in range(n):
+        tgt = side * h * (1 if k % 2 == 0 else -1)
+        if abs(tgt - off) < 1.0:
+            continue
+        s_here, _o, brg = path.project(pos)
+        sgn = 1.0 if tgt > off else -1.0            # towards the right of the track: +, left: -
+        trk = (brg + sgn * theta) % 360.0
+        L = abs(tgt - off) / math.sin(tt)
+        ux, uy = _unit(trk)
+        if (off > 0) != (tgt > 0) and abs(off) >= 0.5:   # this leg crosses the track: where, and when
+            f = abs(off) / abs(tgt - off)
+            X = (pos[0] + ux * L * f, pos[1] + uy * L * f)
+            sx, _, _ = path.project(X)
+            t_x = t_f + L * f / g_kt * 3600.0
+            # the aircraft ahead passed X at path.time_at(sx): it must be at least sep_nm further on by now
+            if t_x - path.time_at(sx) < sep_nm / g_kt * 3600.0:
+                return None
+            cross.append((round(sx, 1), round(t_x - path.time_at(sx))))
+        pos = (pos[0] + ux * L, pos[1] + uy * L)
+        off = tgt
+        path_len += L
+        t_f += L / g_kt * 3600.0
+        tracks.append((trk, L))
+        pts.append(pos)
+    if not tracks:
+        return None
+    D = math.hypot(T[0] - P[0], T[1] - P[1])
+    rest = math.hypot(T[0] - pos[0], T[1] - pos[1])
+    # the last turn point short of T (along the direct from the start), the turn back to T no more than 90 degrees
+    ux, uy = (T[0] - P[0]) / max(D, 1e-6), (T[1] - P[1]) / max(D, 1e-6)
+    along = (pos[0] - P[0]) * ux + (pos[1] - P[1]) * uy
+    back = math.degrees(math.atan2(T[0] - pos[0], T[1] - pos[1])) % 360.0
+    return {"tracks": tracks, "points": pts, "stretch_nm": path_len + rest - D, "along_nm": along, "D": D,
+            "back_deg": _ang(back, tracks[-1][0]), "crossings": cross, "time_s": t_f - t0}
 
 
 _CACHE: Dict[tuple, Dict] = {}

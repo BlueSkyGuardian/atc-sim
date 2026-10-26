@@ -29,6 +29,11 @@ How a controller does it, and how the planner does it:
   4d. TWO LEGS (concatenated ellipses) when one vector cannot absorb the delay within the rules: a heading off the
      axis, then a heading to the other side, then direct T - the second turn point on the ellipse of foci (first turn
      point, T); then with a speed as well.
+  4c'. WEAVING behind the one ahead (before two legs and zigzags): 2 to 6 headings across its track - its planned
+     path, extended backwards from where it is - each crossing at least the separation behind it, then direct T. The
+     next aircraft weaves across the path of this one, so the weaves nest down the stream (shorter legs, turns closer
+     together), every crossing behind the other aircraft by construction: it works at the same level and behind
+     traffic that is not descending.
   4e. A ZIGZAG of 3 to 6 legs for a longer delay: left and right across a corridor along the axis (25 NM each side at
      most), n headings then direct T - short legs rather than one heading held for a long way; the fewest legs that
      work. More than that: a hold at T, advised (coordinate it).
@@ -58,6 +63,8 @@ MAX_TURN_DEG = 70.0        # largest sequencing turn tried
 TURN_PER_MIN = 4.0         # cost: one minute on a vector weighs as 4 degrees of turn (shorter vectors, less wind error)
 PLAN_BUDGET_S = 8.0        # a plan's time: past it, no more two-leg or zigzag attempts, no reordered plan
 _DEADLINE = {"t": None}
+MAX_SINGLE_LEG_NM = 90.0   # a single vector longer than this only when no weave, two legs or zigzag works
+_LONG_OK = {"on": False}
 TWO_LEG_REFINE = 30        # two-leg candidates refined in the trajectory model, cheapest first
 MAX_REFINE = 30            # candidate headings refined in the trajectory model, cheapest first
 CONVERSION_KT = 280        # descent IAS after conversion when the aircraft's own is not known
@@ -386,6 +393,14 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
         if sol is None and fan_prev is not None:
             sol = _fan_member(w, a, cs, ahead, T_name, _ahead_only(planned, seq, k), t_assigned[ahead], S_k, None, sh,
                               planned[ahead], check_pts, g_lead)
+        # 5c) weaving behind the one ahead: legs across its track, each crossing at least the separation behind it
+        # (the weaves nest down the stream); the fewest legs that work
+        if sol is None and not _late():
+            for n_ in (2, 3, 4, 5, 6):
+                sol = _weave_member(w, a, cs, ahead, T_name, _ahead_only(planned, seq, k), t_assigned[ahead], S_k, sh,
+                                    planned[ahead], check_pts, need_s=delay, n=n_)
+                if sol is not None or _late():
+                    break
         # 6) two legs (concatenated ellipses): a delay one vector cannot absorb within the rules; then slowed as well
         # (not tried when the delay table already says two legs cannot absorb it)
         tbl_, two_ok = {"two legs+speed": {}}, sol is None and not _late()
@@ -429,6 +444,14 @@ def _plan(w, T_name: str, S: Optional[float] = None, members: Optional[List[str]
                                      planned[ahead], check_pts, need_s=delay, n=n_)
                 if sol is not None:
                     break
+        # 8) last resort: one heading held for a long way (up to 15 minutes), alone or with a speed
+        if sol is None and not _late():
+            _LONG_OK["on"] = True
+            try:
+                sol = _fan_member(w, a, cs, ahead, T_name, _ahead_only(planned, seq, k), t_assigned[ahead], S_k, None, sh,
+                                  planned[ahead], check_pts, g_lead)
+            finally:
+                _LONG_OK["on"] = False
         if sol is None:
             laps = max(1, int(math.ceil(delay / 300.0)))
             notes.append(f"{cs}: about {int(round(delay / 60))} min to lose - more than speed and vectors can within the "
@@ -647,8 +670,12 @@ def _fan_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, fan_prev, sh, T_
             break
         tried += 1
         h, side, turn = c["heading"], c["side"], c["turn"]
+        if not _LONG_OK["on"] and c.get("leg_nm") is not None and c["leg_nm"] > MAX_SINGLE_LEG_NM * 1.1:
+            continue                                  # a heading held for a long way: shorter legs first
         ref = _refine_against(w, a, planned, cs, T_name, h, S_k, c["time_s"], t_ahead, T_lead, check_pts)
         if ref is None or ref["time_s"] > MAX_VECTOR_S:
+            continue
+        if not _LONG_OK["on"] and ref["ground_nm"] > MAX_SINGLE_LEG_NM * 1.1:
             continue
         Tr_l = traj.build(w, a, H_SEQ, heading=h, for_s=ref["time_s"], then=T_name, **_capkw(cs))
         Tr = _adj(w, a, Tr_l, mach=SPEED_CAP.get(cs))
@@ -788,7 +815,7 @@ def _twoleg_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=No
                     if _angle(trk2, brg_r) > MAX_OFF_ROUTE_DEG or _angle(trk2, brg_x) > MAX_OFF_EXIT_DEG or _angle(trk2, trk1) < 30:
                         continue
                     r2 = ellipse.leg(e2, trk2)
-                    if r2 is None or r2 <= 3.0:
+                    if r2 is None or r2 <= 3.0 or r2 > backward.MAX_LEG_NM or r1 > backward.MAX_LEG_NM:
                         continue
                     M2 = (M1[0] + math.sin(math.radians(trk2)) * r2, M1[1] + math.cos(math.radians(trk2)) * r2)
                     if off_axis_nm(w, a, M2) > MAX_OFF_AXIS_NM or math.hypot(p[0] - M2[0], p[1] - M2[1]) < S_k:
@@ -844,6 +871,8 @@ def _twoleg_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=No
             continue
         trk1, gs1 = traj.air_to_ground(tas, h1, wind)
         n1, n2 = gs1 * t1 / 3600.0, gs2 * tb / 3600.0
+        if max(n1, n2) > backward.MAX_LEG_NM * 1.1:
+            continue                                  # one heading held too long: a zigzag or a weave instead
         turn2 = int(round(_angle(h2, h1)))
         side2 = "left" if side > 0 else "right"
         return {"kind": "two legs", "traj": Tr, "level": Tr_l, "side": side, "turn": th, "resume_t": w.t + t1 + tb,
@@ -900,6 +929,8 @@ def _zigzag_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=No
             ok = all(_angle(t_, brg_r) <= MAX_OFF_ROUTE_DEG and _angle(t_, brg_x) <= MAX_OFF_EXIT_DEG for t_, _ in z["tracks"])
             if not ok:
                 continue
+            if any(L > backward.MAX_LEG_NM for _, L in z["tracks"]):
+                continue
             legs = []
             for t_, L in z["tracks"]:
                 h_ = int(round(traj.heading_for_track(tas, t_, wind) / HDG_UNIT)) * HDG_UNIT % 360 or 360
@@ -912,72 +943,201 @@ def _zigzag_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=No
     for _cost, theta, side, hw, legs in cands[:8]:
         if _late():
             break
-        def build(k):
-            first, rest = legs[0], [(h_, max(20.0, t_ * k)) for h_, t_, _ in legs[1:]]
-            return traj.build(w, a, H_SEQ, heading=first[0], for_s=max(20.0, first[1] * k), then=T_name, legs=rest,
-                              **_capkw(cs))
+        sol = _realise_legs(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead, check_pts, legs,
+                            lambda eb: f"zigzag of {n} legs (±{hw:.0f} NM about the axis, {theta}° turns), {eb:.1f} NM behind {ahead}",
+                            f"{n} legs", side, theta)
+        if sol is not None:
+            return sol
+    return None
 
-        def err(k):
-            Tr = _adj(w, a, build(k), mach=SPEED_CAP.get(cs))
-            c = _cross(Tr, p)
-            if c is None:
-                return None
-            if T_lead is not None and check_pts:
-                tr_ = _trail(T_lead, Tr, check_pts)
-                return None if tr_ is None else tr_["spacing_nm"]
-            return (c - t_ahead) * _gs_at(Tr, c) / 3600.0 if c > t_ahead else -1.0
-        ka, ea = 1.0, err(1.0)
-        if ea is None:
+
+def _realise_legs(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead, check_pts, legs, describe, kind,
+                  side, theta, crossings_ok=None, scale: str = "all") -> Optional[Dict]:
+    """Legs [(heading, seconds, ground speed)] then direct T: all scaled together in the trajectory model (secant)
+    so that the spacing at T is exact, then checked as flown - the rules (25 NM off the axis of the route, the last
+    turn point short of T by the spacing, the turn back no more than 90 degrees, 30 minutes on the headings, inside
+    the sector) and separated from everyone; crossings_ok(trajectory, times) adds a check of its own."""
+    from . import backward
+    from .resolve import _angle
+    p = w.waypoints[T_name]
+    D = math.hypot(p[0] - a.x, p[1] - a.y)
+
+    def secs(k):
+        # all the legs scaled together, or (scale="last") only the last one - the crossings of a weave kept
+        if scale == "last":
+            return [t_ for _h, t_, _g in legs[:-1]] + [max(20.0, legs[-1][1] * k)]
+        return [max(20.0, t_ * k) for _h, t_, _g in legs]
+
+    def build(k):
+        ss = secs(k)
+        rest = [(h_, t_) for (h_, _t, _g), t_ in zip(legs[1:], ss[1:])]
+        return traj.build(w, a, H_SEQ, heading=legs[0][0], for_s=max(20.0, ss[0]), then=T_name, legs=rest,
+                          **_capkw(cs))
+
+    def err(k):
+        Tr = _adj(w, a, build(k), mach=SPEED_CAP.get(cs))
+        c = _cross(Tr, p)
+        if c is None:
+            return None
+        if T_lead is not None and check_pts:
+            tr_ = _trail(T_lead, Tr, check_pts)
+            return None if tr_ is None else tr_["spacing_nm"]
+        return (c - t_ahead) * _gs_at(Tr, c) / 3600.0 if c > t_ahead else -1.0
+    ka, ea = 1.0, err(1.0)
+    if ea is None:
+        return None
+    kb = 1.06
+    eb = err(kb)
+    for _ in range(7):
+        if eb is None or abs(eb - ea) < 1e-6:
+            break
+        kn = min(1.6 if scale == "all" else 2.5, max(0.3 if scale == "all" else 0.1, kb + (S_k - eb) * (kb - ka) / (eb - ea)))
+        ka, ea, kb, eb = kb, eb, kn, err(kn)
+        if eb is not None and abs(eb - S_k) < 0.05:
+            break
+    if eb is None or abs(eb - S_k) > 0.3:
+        return None
+    Tr_l = build(kb)
+    Tr = _adj(w, a, Tr_l, mach=SPEED_CAP.get(cs))
+    times = secs(kb)
+    if sum(times) > backward.ZIGZAG_MAX_S:
+        return None
+    if len(legs) > 1 and any(gs_h * t_ / 3600.0 > backward.MAX_LEG_NM * 1.1 for (_h, _t, gs_h), t_ in zip(legs, times)):
+        return None                                   # one heading held too long: more legs instead
+    cum = np.cumsum(times)
+    X, Y, _ = Tr_l.at(cum)
+    if max(off_axis_nm(w, a, (float(x_), float(y_))) for x_, y_ in zip(X, Y)) > MAX_OFF_AXIS_NM + 1.0:
+        return None
+    # as flown (the legs scaled, the wind): the last turn point short of T by the spacing along the axis, and the
+    # turn back to T no more than 90 degrees - never past the point and back
+    ux_, uy_ = (p[0] - a.x) / max(D, 1e-6), (p[1] - a.y) / max(D, 1e-6)
+    Mx, My = float(X[-1]), float(Y[-1])
+    if (Mx - a.x) * ux_ + (My - a.y) * uy_ > D - S_k:
+        return None
+    X2, Y2, _ = Tr_l.at(np.array([cum[-1] - 20.0]))
+    trk_last = math.degrees(math.atan2(Mx - float(X2[0]), My - float(Y2[0]))) % 360
+    if _angle(trk_last, math.degrees(math.atan2(p[0] - Mx, p[1] - My)) % 360) > MAX_TURN_BACK_DEG:
+        return None
+    if crossings_ok is not None and not crossings_ok(Tr, times):
+        return None
+    if not _inside(w, Tr, _cross(Tr, p)):
+        return None
+    if not _clear(Tr, {k_: v for k_, v in planned.items() if k_ != cs}, cs, sh):
+        return None
+    n = len(legs)
+    steps, t_at_ = [], w.t
+    for i, ((h_, _t, gs_h), t_) in enumerate(zip(legs, times)):
+        nm = gs_h * t_ / 3600.0
+        last = i == n - 1
+        act = {"type": "clear", "callsign": cs, "heading": h_, "limit": f"{nm:.0f}NM"}
+        if last:
+            act["then"] = T_name
+        why = (f"{cs} heading {h_:03d} for {nm:.0f} NM" + (f", then direct {T_name}" if last else "")
+               + (f": {describe(eb)}" if i == 0 else f" (leg {i + 1} of {n})"))
+        steps.append({"at_s": t_at_, "callsign": cs, "action": act, "why": why})
+        t_at_ += t_
+    return {"kind": kind, "traj": Tr, "level": Tr_l, "side": side, "turn": theta, "resume_t": w.t + sum(times),
+            "spacing": eb, "heading": legs[0][0], "time_s": times[0],
+            "legs": [(h_, round(t_)) for (h_, _, _), t_ in zip(legs, times)], "steps": steps}
+
+
+def _ref_path(w, T_lead, t_end: float, back_nm: float = 80.0):
+    """The reference track of a weave: the planned path of the aircraft ahead from now to t_end, extended backwards
+    from where it is now along its present track (where it would have been)."""
+    from . import backward
+    tt = np.arange(0.0, max(t_end, 60.0) + 1.0, 15.0)
+    X, Y, _ = T_lead.at(tt)
+    x0, y0 = float(X[0]), float(Y[0])
+    x1, y1 = float(X[1]), float(Y[1])
+    d = math.hypot(x1 - x0, y1 - y0) or 1e-6
+    g = d / (tt[1] - tt[0]) * 3600.0
+    bx, by = x0 - (x1 - x0) / d * back_nm, y0 - (y1 - y0) / d * back_nm
+    pts = [(bx, by)] + [(float(x_), float(y_)) for x_, y_ in zip(X, Y)]
+    times = [-back_nm / max(g, 150.0) * 3600.0] + [float(t_) for t_ in tt]
+    return backward.Path(pts, times), max(g, 150.0)
+
+
+def _weave_member(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead=None, check_pts=None,
+                  need_s: float = 0.0, n: int = 3) -> Optional[Dict]:
+    """Weaving behind the aircraft ahead: n headings across its track (its planned path, extended backwards from where
+    it is now), each crossing at least the separation behind it, then direct T. Each follower weaves across the path
+    of the one ahead - itself weaving - so the weaves nest down the stream, the legs shorter and the turns closer
+    together; every crossing behind the other aircraft by construction, so it works at the same level and behind
+    traffic that is not descending. The fewest legs that work; checked like any vector."""
+    from . import backward
+    from .resolve import route_bearings, _angle, MAX_OFF_ROUTE_DEG, MAX_OFF_EXIT_DEG
+    if T_lead is None:
+        return None
+    p = w.waypoints[T_name]
+    tas = a.tas if a.tas > 100 else max(a.gs, 150.0)
+    wind = tuple(a.wind_uv)
+    g = max(a.gs, 150.0)
+    brg_r, brg_x = route_bearings(w, a)
+    pts = [a.pos] + [w.waypoints[x] for x in traj.route_ahead(w, a)]
+    L_route = traj._along_to(pts, p) or math.hypot(p[0] - a.x, p[1] - a.y)
+    D = math.hypot(p[0] - a.x, p[1] - a.y)
+    need_nm = max(need_s, 0.0) * g / 3600.0 + (L_route - D)
+    path, g_lead = _ref_path(w, T_lead, t_ahead + 120.0)
+    sep = sh + 1.0
+    _s0, off0, _b = path.project(a.pos)
+    cands = []
+    for theta in (30, 40, 50, 60, 70):
+        if theta > MAX_TURN_DEG:
             continue
-        kb = 1.06
-        eb = err(kb)
-        for _ in range(7):
-            if eb is None or abs(eb - ea) < 1e-6:
-                break
-            kn = min(1.6, max(0.3, kb + (S_k - eb) * (kb - ka) / (eb - ea)))
-            ka, ea, kb, eb = kb, eb, kn, err(kn)
-            if eb is not None and abs(eb - S_k) < 0.05:
-                break
-        if eb is None or abs(eb - S_k) > 0.3:
-            continue
-        Tr_l = build(kb)
-        Tr = _adj(w, a, Tr_l, mach=SPEED_CAP.get(cs))
-        times = [max(20.0, t_ * kb) for _, t_, _ in legs]
-        if sum(times) > backward.ZIGZAG_MAX_S:
-            continue
-        cum = np.cumsum(times)
-        X, Y, _ = Tr_l.at(cum)
-        if max(off_axis_nm(w, a, (float(x_), float(y_))) for x_, y_ in zip(X, Y)) > MAX_OFF_AXIS_NM + 1.0:
-            continue
-        # as flown (the legs scaled, the wind): the last turn point short of T by the spacing along the axis, and the
-        # turn back to T no more than 90 degrees - never past the point and back
-        ux_, uy_ = (p[0] - a.x) / max(D, 1e-6), (p[1] - a.y) / max(D, 1e-6)
-        Mx, My = float(X[-1]), float(Y[-1])
-        if (Mx - a.x) * ux_ + (My - a.y) * uy_ > D - S_k:
-            continue
-        X2, Y2, _ = Tr_l.at(np.array([cum[-1] - 20.0]))
-        trk_last = math.degrees(math.atan2(Mx - float(X2[0]), My - float(Y2[0]))) % 360
-        if _angle(trk_last, math.degrees(math.atan2(p[0] - Mx, p[1] - My)) % 360) > MAX_TURN_BACK_DEG:
-            continue
-        if not _inside(w, Tr, _cross(Tr, p)):
-            continue
-        if not _clear(Tr, {k_: v for k_, v in planned.items() if k_ != cs}, cs, sh):
-            continue
-        steps, t_at_ = [], w.t
-        for i, ((h_, _t, gs_h), t_) in enumerate(zip(legs, times)):
-            nm = gs_h * t_ / 3600.0
-            last = i == len(legs) - 1
-            act = {"type": "clear", "callsign": cs, "heading": h_, "limit": f"{nm:.0f}NM"}
-            if last:
-                act["then"] = T_name
-            why = (f"{cs} heading {h_:03d} for {nm:.0f} NM" + (f", then direct {T_name}" if last else "")
-                   + (f": zigzag of {n} legs (±{hw:.0f} NM about the axis, {theta}° turns), {eb:.1f} NM behind {ahead}"
-                      if i == 0 else f" (leg {i + 1} of {n})"))
-            steps.append({"at_s": t_at_, "callsign": cs, "action": act, "why": why})
-            t_at_ += t_
-        return {"kind": f"{n} legs", "traj": Tr, "level": Tr_l, "side": side, "turn": theta, "resume_t": w.t + sum(times),
-                "spacing": eb, "heading": legs[0][0], "time_s": times[0], "legs": [(h_, round(t_)) for (h_, _, _), t_ in zip(legs, times)],
-                "steps": steps}
+        for side in ((1, -1) if off0 <= 0 else (-1, 1)):
+            # the corridor width whose stretch comes closest to the need, among the feasible ones (1 NM steps)
+            best = None
+            for hh in range(3, int(MAX_OFF_AXIS_NM) + 1):
+                z = backward.weave(a.pos, path, p, n, theta, float(hh), side, g, 0.0, sep)
+                if z is None or z["D"] - z["along_nm"] < S_k or z["back_deg"] > MAX_TURN_BACK_DEG:
+                    continue
+                if any(L > backward.MAX_LEG_NM for _, L in z["tracks"]):
+                    continue
+                if not all(_angle(t_, brg_r) <= MAX_OFF_ROUTE_DEG and _angle(t_, brg_x) <= MAX_OFF_EXIT_DEG
+                           for t_, _ in z["tracks"]):
+                    continue
+                if any(off_axis_nm(w, a, q) > MAX_OFF_AXIS_NM for q in z["points"]):
+                    continue                          # its own route's axis: 25 NM at most, whatever the track ahead
+                miss = abs(z["stretch_nm"] - need_nm)
+                if best is None or miss < best[0]:
+                    best = (miss, float(hh), z)
+            if best is None or not (0.6 * need_nm <= best[2]["stretch_nm"] <= 1.5 * need_nm + 3.0):
+                continue
+            _miss, h, z = best
+            legs = []
+            for t_, L in z["tracks"]:
+                h_ = int(round(traj.heading_for_track(tas, t_, wind) / HDG_UNIT)) * HDG_UNIT % 360 or 360
+                _trk, gs_h = traj.air_to_ground(tas, h_, wind)
+                legs.append((h_, L / gs_h * 3600.0, gs_h))
+            if sum(x[1] for x in legs) > backward.ZIGZAG_MAX_S:
+                continue
+            cands.append((_miss + theta / 10.0, theta, side, h, legs))
+    cands.sort(key=lambda c: c[0])
+
+    def behind(Tr, times):
+        # as flown: wherever it crosses the path of the one ahead, that one went by at least the separation earlier
+        tt = np.arange(0.0, float(np.sum(times)) + 1.0, 10.0)
+        X, Y, _ = Tr.at(tt)
+        prev = None                                   # the side it is on, once clearly off the track (0.5 NM)
+        for t_, x_, y_ in zip(tt, X, Y):
+            s_, off, _ = path.project((float(x_), float(y_)))
+            if abs(off) < 0.5:
+                continue
+            if prev is not None and (off > 0) != prev:
+                if t_ - path.time_at(s_) < sep / g_lead * 3600.0:
+                    return False
+            prev = off > 0
+        return True
+    for _c, theta, side, h, legs in cands[:8]:
+        if _late():
+            break
+        sol = _realise_legs(w, a, cs, ahead, T_name, planned, t_ahead, S_k, sh, T_lead, check_pts, legs,
+                            lambda eb: (f"weaving behind {ahead}: {len(legs)} legs across its track (±{h:.0f} NM, "
+                                        f"{theta}° turns, each crossing {sep:.0f} NM or more behind it), {eb:.1f} NM behind {ahead}"),
+                            f"{len(legs)} legs", side, theta, crossings_ok=behind, scale="last")
+        if sol is not None:
+            sol["weave"] = True
+            return sol
     return None
 
 

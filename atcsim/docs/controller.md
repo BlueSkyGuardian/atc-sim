@@ -599,8 +599,11 @@ line, MTCD, CPDLC, flight plans, OLDI, RBLs. There is no radio and no telephone;
   either side) in bold, the one the plan used highlighted. Hover a cell for its range and why. When the one ahead has
   already turned near the largest turn, the follower may be vectored to the other side (checked clear of everyone);
   when one vector cannot absorb the delay within the rules (70° turns, 25 NM off the axis, 15 minutes), the plan uses
-  two vectors, then a zigzag with the fewest legs that works, drawn on the scope as the path with its headings; the
-  later legs are listed with the time to give them (*at T+…*). The tool also tries the order with one aircraft
+  first **weaving behind the aircraft ahead** (2 to 6 headings across its track, each crossing it at least the
+  separation behind it, so it works at the same level or behind traffic that is not descending), then two vectors,
+  then a zigzag with the fewest legs that works, drawn on the scope as the path with its headings; the later legs are
+  listed with the time to give them (*at T+…*). No leg of a multi-leg plan is longer than 60 NM, and a single vector
+  longer than 90 NM is given only when nothing with shorter legs works. The tool also tries the order with one aircraft
   moved one place from first come, first served, and takes it when it needs fewer clearances (the panel says so).
 - **Start-up calls**: when an aerodrome's approach asks for start-up, the phone rings and a badge at the top shows
   *☎ GMMX approach calling · start-up for …* with **Pick up**. The call window lists its flights (requests from the
