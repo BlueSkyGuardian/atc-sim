@@ -127,6 +127,11 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   1200x630 picture (the title next to the article's first figure); `/news` has the site's own. The previews need full
   addresses: set `ATC_PUBLIC_URL` (otherwise the address the request came to, through the proxy's X-Forwarded headers).
   WhatsApp keeps a link's preview for a while: a link shared before the preview existed may need a little time.
+* **Search engines**: `/robots.txt` (the public pages open, the application closed), `/sitemap.xml` (landing page,
+  news, every article, the newsletter issues, the documentation: submit it in Google Search Console), the landing page
+  at the site's own address for visitors, and each public page with its title, description, canonical address and
+  structured data (NewsArticle for the articles). Google Search Console's ownership file
+  (`googledb6d43d3018dfdc9.html`) is served at the root; more with `ATC_SITE_VERIFY="google....html,..."`.
 * `ATC_NEWS=off` stops the hourly reading and the newsletter (a test machine without internet).
 
 ## 6. Data, backups, updates

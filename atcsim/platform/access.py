@@ -22,6 +22,7 @@ from .auth import current_user
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
           "/news", "/news/", "/api/news", "/api/news/",     # the aviation news page (admin calls check the role)
           "/help", "/help/", "/api/help", "/api/help/", "/api/landing",
+          "/robots.txt", "/sitemap.xml", "/favicon.svg", "/apple-touch-icon.png", "/share.jpg",   # search engines, previews
           "/ai-data/")            # datasets for a training machine (RunPod pod): the link's token is the access       # the documentation is public
 PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/ai", "/admin", "/profile", "/x/", "/stats", "/help")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
@@ -72,6 +73,11 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
     if config.AUTH == "off":
         return None
     if any(path == p or (p.endswith("/") and path.startswith(p)) for p in PUBLIC):
+        return None
+    if path == "/" and method in ("GET", "HEAD"):                  # signed out: the landing page (seo.landing)
+        return None
+    from .seo import VERIFY_FILES
+    if path[1:] in VERIFY_FILES:                                   # Google Search Console's ownership file
         return None
     if user is None:
         return "sign in first"

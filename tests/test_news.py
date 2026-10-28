@@ -334,7 +334,14 @@ ok(meta(gen, "og:image") == "https://atc.example.com/news/share.jpg" and meta(ge
    "the news page: the site's own preview")
 rs = anon.get("/news/share.jpg")
 ok(rs.status_code == 200 and Image.open(io.BytesIO(rs.content)).size == (1200, 630), "the site's picture")
-ok(meta(anon.get("/news/a/2020-01-01-no-such").text, "og:url") == "https://atc.example.com/news", "an unknown article: the site's preview")
+nf = anon.get("/news/a/2020-01-01-no-such")
+ok(nf.status_code == 404 and meta(nf.text, "robots") == "noindex", "an unknown article: not found, not indexed")
+ok('id="article"><span class="reg">Morocco' in pg and "<h1>ONDA &amp; &quot;Agadir&quot; &lt;radar&gt;</h1>" in pg and "word word" in pg
+   and '<div id="articleView">' in pg and '<div id="latestView" hidden>' in pg, "the article's text is in the page as served (no JavaScript needed)")
+ld = [json.loads(x) for x in _re.findall(r'<script type="application/ld\+json">(.*?)</script>', pg, _re.S)]
+ok(ld and ld[0]["@type"] == "NewsArticle" and ld[0]["headline"].startswith("ONDA") and ld[0]["image"][0] == img
+   and len(ld[0]["citation"]) == 2 and ld[1]["@type"] == "BreadcrumbList", "structured data: NewsArticle with its picture and sources, breadcrumbs")
+ok(f'href="/news/a/{slug}"' in gen and '<div id="roomWrap">' in gen, "the news page lists the newsroom's articles as served")
 r = boss.post("/api/news/admin/sync")
 ok(r.status_code == 200 and r.json()["new"] == 0 and r.json()["count"] == 2 and r.json()["status"].startswith("ok"),
    f"admin: 'read the newsroom now' ({r.status_code} {r.text[:80]})")

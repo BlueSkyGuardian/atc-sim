@@ -846,63 +846,130 @@ def _share_card(slug: str, rebuild: bool = False) -> Optional[str]:
 
 
 def _site_base(request: Request) -> str:
-    """The site's address for absolute links (ATC_PUBLIC_URL, else what the request came to, proxy headers included)."""
-    if config.PUBLIC_URL:
-        return config.PUBLIC_URL
-    proto = (request.headers.get("x-forwarded-proto") or request.url.scheme).split(",")[0].strip()
-    host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc).split(",")[0].strip()
-    return f"{proto}://{host}"
-
-
-_PAGE_CACHE: Dict[str, str] = {}
-
-
-def _page_with(meta: Dict[str, str], title: str, description: str) -> HTMLResponse:
-    """news.html with the page's own title, description and link-preview (Open Graph / Twitter) tags."""
-    path = STATIC + "/news.html"
-    mt = str(_os.path.getmtime(path))
-    if _PAGE_CACHE.get("mt") != mt:
-        _PAGE_CACHE.update(mt=mt, html=open(path, encoding="utf-8").read())
-    page = _PAGE_CACHE["html"]
-    e = lambda v: html.escape(str(v), quote=True)                           # noqa: E731
-    tags = [f'<meta name="description" content="{e(description)}">']
-    for k, v in meta.items():
-        if v is None:
-            continue
-        attr = "name" if k.startswith("twitter:") else "property"
-        tags.append(f'<meta {attr}="{k}" content="{e(v)}">')
-    if meta.get("og:url"):
-        tags.append(f'<link rel="canonical" href="{e(meta["og:url"])}">')
-    page = re.sub(r"<title>.*?</title>", lambda m: f"<title>{e(title)}</title>", page, count=1, flags=re.S)
-    page = re.sub(r'<meta name="description"[^>]*>', lambda m: "\n".join(tags), page, count=1)
-    return HTMLResponse(page)
-
-
-def _og(base: str, url: str, title: str, description: str, image: str, kind: str = "website", **more) -> Dict[str, str]:
-    return {"og:site_name": "ATC SIM", "og:type": kind, "og:title": title, "og:description": description, "og:url": url,
-            "og:image": image, "og:image:secure_url": image if image.startswith("https://") else None,
-            "og:image:type": "image/jpeg", "og:image:width": "1200", "og:image:height": "630", "og:image:alt": title,
-            "og:locale": "en_US", **more, "twitter:card": "summary_large_image", "twitter:title": title,
-            "twitter:description": description, "twitter:image": image}
+    from . import seo
+    return seo.base_url(request)
 
 
 SITE_DESCRIPTION = ("Aviation news for air traffic controllers: Morocco first, then Europe and the world - air traffic control "
                     "and airspace, technology, safety, airlines and airports.")
 
+_INLINE = re.compile(r"\*\*(.+?)\*\*|\[([^\]]+)\]\((https://[^)\s]+)\)")
+
+
+def _inline(t: str) -> str:
+    """One line of the article's Markdown, escaped: **bold** and [links](https://...) only."""
+    out, i = [], 0
+    for m in _INLINE.finditer(t):
+        out.append(html.escape(t[i:m.start()]))
+        if m.group(1) is not None:
+            out.append(f"<strong>{html.escape(m.group(1))}</strong>")
+        else:
+            out.append(f'<a href="{html.escape(m.group(3), quote=True)}" rel="noopener nofollow" target="_blank">{html.escape(m.group(2))}</a>')
+        i = m.end()
+    out.append(html.escape(t[i:]))
+    return "".join(out)
+
+
+def _md_html(md: str, figures: List[dict]) -> str:
+    """The article's body as HTML, for the page as served (search engines, link readers, no JavaScript): headings,
+    paragraphs, lists, bold, https links and the figures; the browser then draws it again with the full Markdown."""
+    figs = {f["file"]: f for f in figures}
+    used, blocks, para, items = set(), [], [], []
+
+    def fig(f):
+        return (f'<figure><img src="{html.escape(f["url"], quote=True)}" alt="{html.escape(f.get("alt") or "", quote=True)}">'
+                f'<figcaption>{html.escape(f.get("caption") or "")}</figcaption></figure>')
+
+    def flush():
+        if para:
+            blocks.append("<p>" + _inline(" ".join(para)) + "</p>")
+            para.clear()
+        if items:
+            blocks.append("<ul>" + "".join(f"<li>{_inline(x)}</li>" for x in items) + "</ul>")
+            items.clear()
+    for line in md.splitlines():
+        t = line.strip()
+        m = re.fullmatch(r"\{\{figure:([^}]+)\}\}", t)
+        if not t:
+            flush()
+        elif m:
+            flush()
+            if m.group(1) in figs:
+                used.add(m.group(1))
+                blocks.append(fig(figs[m.group(1)]))
+        elif t.startswith("#"):
+            flush()
+            lvl = min(4, max(2, len(t) - len(t.lstrip("#"))))
+            blocks.append(f"<h{lvl}>{_inline(t.lstrip('#').strip())}</h{lvl}>")
+        elif re.match(r"^([-*]|\d+\.)\s+", t):
+            if para:
+                flush()
+            items.append(re.sub(r"^([-*]|\d+\.)\s+", "", t))
+        else:
+            if items:
+                flush()
+            para.append(t)
+    flush()
+    rest = [fig(f) for f in figures if f["file"] not in used]
+    if rest:
+        k = next((i for i, x in enumerate(blocks) if x.startswith("<p>")), -1)
+        blocks[k + 1:k + 1] = rest
+    return "\n".join(blocks)
+
+
+def _news_html(request: Request, *, title: str, description: str, url: str, image: str, kind: str = "website",
+               jsonld: Optional[list] = None, extra: Optional[Dict[str, str]] = None, fill=None, status: int = 200,
+               robots: Optional[str] = None, og_title: Optional[str] = None) -> HTMLResponse:
+    from . import seo
+    page = seo.static_page("news.html")
+    if fill:
+        page = fill(page)
+    tags = seo.head_tags(title=og_title or title, description=description, url=url, image=image, kind=kind, jsonld=jsonld,
+                         extra=extra, robots=robots)
+    return HTMLResponse(seo.with_head(page, title, tags), status_code=status)
+
+
+def _card_html(a: dict) -> str:
+    f = (a.get("figures") or [None])[0]
+    img = f'<img src="{html.escape(f["url"], quote=True)}" alt="{html.escape(f.get("alt") or "", quote=True)}" loading="lazy">' if f else ""
+    try:
+        dt = datetime.strptime(a["date"], "%Y-%m-%d")
+        day = f" · {dt.day} {dt:%b}"
+    except ValueError:
+        day = ""
+    return (f'<a class="card acard" href="/news/a/{a["slug"]}">{img}<div class="in"><span class="reg">{html.escape(a["region_name"])}{day}</span>'
+            f'<span class="t">{html.escape(a["title"])}</span><span class="s">{html.escape(a.get("summary") or "")}</span></div></a>')
+
 
 @router.get("/news", include_in_schema=False)
 @router.get("/news/issue/{iid}", include_in_schema=False)
 def news_page(request: Request, iid: Optional[int] = None):
+    from . import seo
     base = _site_base(request)
-    title, desc = "Aviation news · ATC SIM", SITE_DESCRIPTION
+    _schema()
+    title, desc, status, robots = "Aviation news · ATC SIM", SITE_DESCRIPTION, 200, None
     if iid is not None:
-        _schema()
         r = db.q1("SELECT title, intro, status FROM news_issues WHERE id=?", (iid,))
         if r and r["status"] == "sent":
             title = f"{r['title']} · ATC SIM"
             desc = clean(r["intro"] or desc, 300)
+        else:
+            title, status, robots = "Not found · ATC SIM", 404, "noindex"
     url = base + (f"/news/issue/{iid}" if iid is not None else "/news")
-    return _page_with(_og(base, url, title, desc, base + "/news/share.jpg"), title, desc)
+    arts = articles(limit=12) if iid is None else []
+    ld = [{"@context": "https://schema.org", "@type": "CollectionPage", "name": title, "description": desc, "url": url,
+           "inLanguage": "en", "publisher": seo.organization(base),
+           **({"mainEntity": {"@type": "ItemList", "itemListElement": [
+               {"@type": "ListItem", "position": i + 1, "url": f"{base}/news/a/{a['slug']}", "name": a["title"]}
+               for i, a in enumerate(arts)]}} if arts else {})}]
+
+    def fill(page: str) -> str:                      # the newsroom's latest, in the page as served
+        if not arts:
+            return page
+        page = page.replace('<div class="room" id="room"></div>', '<div class="room" id="room">' + "".join(map(_card_html, arts)) + "</div>", 1)
+        return page.replace('<div id="roomWrap" hidden>', '<div id="roomWrap">', 1)
+    return _news_html(request, title=title, description=desc, url=url, image=base + "/news/share.jpg", jsonld=ld,
+                      fill=fill, status=status, robots=robots)
 
 
 @router.get("/news/share.jpg", include_in_schema=False)
@@ -938,23 +1005,50 @@ def list_news(section: Optional[str] = None, q: Optional[str] = None, before: Op
 
 @router.get("/news/a/{slug}", include_in_schema=False)
 def article_page(slug: str, request: Request):
+    from . import seo
     base = _site_base(request)
     _schema()
     r = db.q1("SELECT * FROM news_articles WHERE slug=?", (slug,)) if _SLUG.match(slug) else None
     if r is None:
-        return news_page(request)
+        return _news_html(request, title="Article not found · ATC SIM", description=SITE_DESCRIPTION, url=base + "/news",
+                          image=base + "/news/share.jpg", status=404, robots="noindex")
+    a = _article_out(r, full=True)
     try:
         _share_card(slug)
         img = f"{base}/news/media/{slug}/share.jpg?v={int(r['updated'] or 0)}"
     except Exception as e:                               # noqa: BLE001
         log.warning("share card %s: %s", slug, e)
         img = base + "/news/share.jpg"
-    title = r["title"]
-    desc = r["summary"] or SITE_DESCRIPTION
-    meta = _og(base, f"{base}/news/a/{slug}", title, desc, img, "article",
-               **{"article:published_time": r["date"], "article:section": r["section"] or REGION_NAMES.get(r["region"]),
-                  "article:author": r["author"] or "ATC SIM newsroom"})
-    return _page_with(meta, f"{title} · ATC SIM", desc)
+    url, title, desc = f"{base}/news/a/{slug}", a["title"], a["summary"] or SITE_DESCRIPTION
+    modified = datetime.fromtimestamp(int(r["updated"] or time.time()), timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    section = a["section"] or a["region_name"]
+    ld = [{"@context": "https://schema.org", "@type": "NewsArticle", "mainEntityOfPage": {"@type": "WebPage", "@id": url},
+           "headline": title[:110], "description": desc, "image": [img] + [base + f["png_url"] for f in a["figures"]],
+           "datePublished": a["date"], "dateModified": modified, "articleSection": section, "inLanguage": "en",
+           "contentLocation": {"@type": "Place", "name": a["region_name"]},
+           "author": {"@type": "Organization", "name": a["author"] or "ATC SIM newsroom", "url": base + "/news"},
+           "publisher": seo.organization(base),
+           "citation": [{"@type": "CreativeWork", "name": x["title"], "url": x["url"]} for x in a["sources"]]},
+          {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+              {"@type": "ListItem", "position": 1, "name": "Aviation news", "item": base + "/news"},
+              {"@type": "ListItem", "position": 2, "name": a["region_name"], "item": base + "/news"},
+              {"@type": "ListItem", "position": 3, "name": title, "item": url}]}]
+
+    def fill(page: str) -> str:                      # the article itself in the page as served (no JavaScript needed)
+        srcs = "".join(f'<li><a href="{html.escape(x["url"], quote=True)}" target="_blank" rel="noopener nofollow">{html.escape(x["title"])}</a>'
+                       f' <span class="dim">· {html.escape(x["site"])}</span></li>' for x in a["sources"])
+        body = (f'<span class="reg">{html.escape(a["region_name"])}{" · " + html.escape(a["section"]) if a["section"] else ""}</span>'
+                f'<h1>{html.escape(title)}</h1><div class="dim" style="font-size:13px"><time datetime="{a["date"]}">{a["date"]}</time>'
+                f' · {html.escape(a["author"] or "ATC SIM newsroom")}</div><p class="lead">{html.escape(a["summary"] or "")}</p>'
+                f'<div class="body">{_md_html(a["body"], a["figures"])}</div>'
+                f'<h2 style="font-size:15px;margin-top:26px">Sources</h2><ul class="srcs">{srcs}</ul>')
+        page = page.replace('<article class="card art" id="article"></article>', f'<article class="card art" id="article">{body}</article>', 1)
+        page = page.replace('<div id="articleView" hidden>', '<div id="articleView">', 1)
+        page = page.replace('<div class="nw-top">', '<div class="nw-top" style="display:none">', 1)     # the article's title is the page's h1
+        return page.replace('<div id="latestView">', '<div id="latestView" hidden>', 1)
+    return _news_html(request, title=f"{title} · ATC SIM", og_title=title, description=desc, url=url, image=img, kind="article", jsonld=ld,
+                      extra={"article:published_time": a["date"], "article:modified_time": modified, "article:section": section,
+                             "article:author": a["author"] or "ATC SIM newsroom"}, fill=fill)
 
 
 @router.get("/api/news/articles")
@@ -1094,7 +1188,7 @@ def unsubscribe(t: str = ""):
 def _msg_page(title: str, body: str, raw: bool = False) -> HTMLResponse:
     b = body if raw else f"<p>{html.escape(body)}</p>"
     return HTMLResponse(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{html.escape(title)}</title><link rel="stylesheet" href="/static/app.css"></head><body>
+<title>{html.escape(title)}</title><meta name="robots" content="noindex"><link rel="stylesheet" href="/static/app.css"></head><body>
 <main style="max-width:560px;padding-top:60px"><div class="card"><div style="font-weight:800;letter-spacing:.02em;margin-bottom:12px">ATC <span style="color:var(--magenta)">SIM</span></div>
 <h1 style="font-size:22px">{html.escape(title)}</h1>{b}<p><a href="/news">Aviation news</a></p></div></main></body></html>""")
 

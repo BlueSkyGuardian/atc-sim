@@ -29,12 +29,17 @@ def page(name: str) -> FileResponse:
 
 # ------------------------------------------------------------------ pages
 @router.get("/login", include_in_schema=False)
-def login_page():
-    return page("login.html")
+def login_page(request: Request):
+    from . import seo
+    return seo.landing(request)
 
 
 @router.get("/", include_in_schema=False)
-def home_page():
+def home_page(request: Request):
+    """Signed in: the hub. Signed out: the landing page (with the sign-in), at the site's own address."""
+    if getattr(request.state, "user", None) is None and config.AUTH != "off":
+        from . import seo
+        return seo.landing(request)
     return page("home.html")
 
 
@@ -98,7 +103,8 @@ def landing_geometry():
 @router.get("/help", include_in_schema=False)
 @router.get("/help/{slug}", include_in_schema=False)
 def help_page(request: Request, slug: str = "index"):
-    return page("help.html")
+    from . import seo
+    return seo.help_page(request, slug)
 
 
 @router.get("/api/help")

@@ -33,7 +33,8 @@ def ok(cond, msg):
 
 COPY = f"zz_test_{int(time.time())}"
 anon = TestClient(app)
-ok(anon.get("/", follow_redirects=False).status_code == 303, "signed out: pages redirect to /login")
+ok(anon.get("/radar", follow_redirects=False).status_code == 303, "signed out: pages redirect to /login")
+ok(anon.get("/", follow_redirects=False).status_code == 200 and 'id="google"' in anon.get("/").text, "signed out: the site's address shows the landing page")
 ok(anon.get("/api/exercises").status_code == 401, "signed out: API refused")
 
 boss, ins, atc, pil, other = (client(e) for e in ("boss@gmail.com", "ins@gmail.com", "atc@gmail.com", "pil@gmail.com",
