@@ -125,6 +125,13 @@ def _schema() -> None:
             for name, url, sec in DEFAULT_SOURCES:
                 db.x("INSERT OR IGNORE INTO news_sources (name, url, section, created_at) VALUES (?,?,?,?)",
                      (name, url, sec, time.time()))
+        if db.q1("SELECT 1 AS x FROM news_settings WHERE key='_users_subscribed'") is None:
+            # the newsletter is on by default for every account: the accounts made before it, once
+            now = time.time()
+            for u in db.q("SELECT id, email FROM users WHERE active=1 AND email LIKE '%@%'"):
+                db.x("INSERT OR IGNORE INTO news_subscribers (email, user_id, token, created_at, confirmed_at) VALUES (?,?,?,?,?)",
+                     (u["email"].lower(), u["id"], secrets.token_urlsafe(24), now, now))
+            db.x("INSERT OR REPLACE INTO news_settings (key, value) VALUES ('_users_subscribed', 'true')")
         _ready = True
 
 
@@ -631,6 +638,13 @@ def subscribe_user(u: dict, on: bool) -> dict:
     return user_status(u)
 
 
+def subscribe_default(u: dict) -> None:
+    """A new account: subscribed (unless that address unsubscribed before - their choice stands)."""
+    _schema()
+    if u.get("email") and "@" in u["email"] and db.q1("SELECT 1 AS x FROM news_subscribers WHERE email=?", (u["email"].lower(),)) is None:
+        subscribe_user(u, True)
+
+
 def user_status(u: dict) -> dict:
     _schema()
     r = db.q1("SELECT * FROM news_subscribers WHERE email=?", (u["email"].lower(),))
@@ -793,10 +807,13 @@ def my_newsletter(request: Request):
 
 class OnOff(BaseModel):
     on: bool
+    confirm: bool = False                    # unsubscribing is confirmed (the profile asks first)
 
 
 @router.put("/api/me/newsletter")
 def set_my_newsletter(body: OnOff, request: Request):
+    if not body.on and not body.confirm:
+        raise HTTPException(409, "confirm that you want to unsubscribe")
     return subscribe_user(require_user(request), body.on)
 
 

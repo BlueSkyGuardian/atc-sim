@@ -73,8 +73,8 @@ squall line.
 - **Scenario designer** (instructors): build and edit scenarios.
 - **Solo radar** (everyone): fly a scenario alone on the controller's screen, with simulated pilots.
 - **Stats**: your statistics by role.
-- **News**: aviation news, air traffic control first - open to everyone, without signing in. Tick *Send me the
-  aviation newsletter every morning* in your **Profile** to get the day's stories by e-mail.
+- **News**: aviation news, air traffic control first - open to everyone, without signing in. Your account gets the
+  aviation newsletter every morning; unsubscribe (or subscribe again) in your **Profile**.
 - **Help**: this documentation. The search box searches every page.
 - **The bell** (top right): your notifications - invited to an exercise or a debrief, a scenario shared with you,
   an evaluation of your work, your account or role. The number is how many you have not opened; click one to go to

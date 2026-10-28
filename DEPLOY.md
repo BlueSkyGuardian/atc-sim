@@ -102,9 +102,11 @@ the administrator edits the list on the *Users* page) and keeps the headline, th
 never the article. Every morning (07:00 Casablanca time by default) it builds the newsletter from the last day's
 stories and mails it to the subscribers; the issue is then on the news page too.
 
-* **Who gets it**: subscribers only. Signed-in users tick it in their profile (or on the news page); anyone else
-  subscribes on the news page and confirms by a link sent to the address. Every newsletter has an unsubscribe link and
-  the one-click `List-Unsubscribe` header.
+* **Who gets it**: every account, by default (new accounts at their first sign-in or when the administrator adds
+  them; the accounts that existed before, once). Each person unsubscribes from their **Profile** (asked to confirm)
+  or from the link in every newsletter (a page with a button, and the one-click `List-Unsubscribe` header); their
+  choice stands - signing in again does not subscribe them back. Anyone without an account subscribes on the news
+  page and confirms by a link sent to the address.
 * **The writing**: with a language model, the stories are picked, sorted into sections and summarized in one or two
   sentences (from the headline and excerpt only), with a title and an introduction. Add the model in the **AI lab**
   as an OpenAI-compatible endpoint, then choose it in the newsletter settings. For example DeepSeek: base URL

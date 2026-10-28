@@ -125,15 +125,11 @@ async function showIssue(id) {
 function subForm() {
   const m = $('#subMsg');
   const say = (t, bad) => { m.className = 'msg ' + (bad ? 'bad' : 'ok'); m.textContent = t; };
-  if (NW.me) {
+  if (NW.me) {                                      // signed in: on by default, managed in the profile
     getJSON('/api/me/newsletter').then(st => {
-      $('#subForm').innerHTML = `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="subOn" style="width:auto" ${st.subscribed ? 'checked' : ''}>
-        Send it to ${esc(NW.me.email)}</label>`;
-      $('#subOn').onchange = async e => {
-        try { await getJSON('/api/me/newsletter', { method: 'PUT', body: JSON.stringify({ on: e.target.checked }) });
-          say(e.target.checked ? 'Subscribed: tomorrow morning in your inbox.' : 'Unsubscribed.'); }
-        catch (er) { say(er.message, true); }
-      };
+      $('#subForm').innerHTML = st.subscribed
+        ? `<div>✓ It reaches <span class="mono">${esc(NW.me.email)}</span> every morning.</div><div class="note" style="margin-top:6px"><a href="/profile">Manage it in your profile</a></div>`
+        : `<div class="dim">You are not subscribed.</div><div class="note" style="margin-top:6px"><a href="/profile">Subscribe in your profile</a></div>`;
     });
     return;
   }

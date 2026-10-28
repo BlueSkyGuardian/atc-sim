@@ -18,9 +18,14 @@
     <label class="f" style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="mailOn" style="width:auto">
       E-mail me when I am invited to an exercise or a debrief, a scenario is shared with me, or my work is evaluated</label>
     <div class="dim" style="font-size:12px">The bell at the top always shows them.</div>
-    <label class="f" style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="newsOn" style="width:auto">
-      Send me the aviation newsletter every morning (<a href="/news">see the news</a>)</label>
     <div class="row" style="margin-top:16px"><button class="primary" id="save">Save</button><span class="msg" id="msg"></span></div>
+  </div>
+  <div class="card" style="margin-top:14px" id="newsCard">
+    <label class="f" style="margin-top:0">Aviation newsletter</label>
+    <div class="row" style="align-items:center;gap:12px;flex-wrap:wrap">
+      <span id="newsState" class="grow">…</span><button id="newsBtn"></button>
+    </div>
+    <div class="dim" style="font-size:12px;margin-top:6px">Every morning, the day's aviation stories that matter to controllers. <a href="/news">See the news</a>.</div>
   </div>
   <p class="dim" style="font-size:12px">Your role (controller, pseudo-pilot, instructor) is set by the administrator.</p>
 </main>
@@ -32,11 +37,30 @@
   $('#email').value = me.email; $('#fn').value = me.first_name; $('#ln').value = me.last_name; $('#lic').value = me.licence;
   $('#role').value = ROLE_NAMES[me.role] || me.role;
   try { const p = await api('/api/me/notify'); $('#mailOn').checked = p.email_notify; } catch (e) {}
-  try { $('#newsOn').checked = (await api('/api/me/newsletter')).subscribed; } catch (e) {}
-  $('#newsOn').onchange = async () => {
-    try { await api('/api/me/newsletter', { method: 'PUT', body: JSON.stringify({ on: $('#newsOn').checked }) });
-      $('#msg').className = 'msg ok'; $('#msg').textContent = $('#newsOn').checked ? 'Newsletter on' : 'Newsletter off'; }
-    catch (e) { $('#msg').className = 'msg bad'; $('#msg').textContent = e.message; }
+  // the newsletter: subscribe at once; unsubscribing asks first
+  let subscribed = false;
+  const drawNews = () => {
+    $('#newsState').innerHTML = subscribed ? `<span style="color:var(--accent)">●</span> Subscribed: it reaches <span class="mono">${esc(me.email)}</span> every morning`
+      : '<span class="dim">○ Not subscribed</span>';
+    $('#newsBtn').textContent = subscribed ? 'Unsubscribe' : 'Subscribe';
+    $('#newsBtn').className = subscribed ? '' : 'primary';
+  };
+  const setNews = async (on, confirm) => {
+    const r = await api('/api/me/newsletter', { method: 'PUT', body: JSON.stringify({ on, confirm: !!confirm }) });
+    subscribed = r.subscribed; drawNews();
+    $('#msg').className = 'msg ok'; $('#msg').textContent = subscribed ? 'Subscribed to the newsletter' : 'Unsubscribed from the newsletter';
+  };
+  try { subscribed = (await api('/api/me/newsletter')).subscribed; } catch (e) {}
+  drawNews();
+  $('#newsBtn').onclick = () => {
+    if (!subscribed) { setNews(true).catch(e => { $('#msg').className = 'msg bad'; $('#msg').textContent = e.message; }); return; }
+    modal(`<h3>Unsubscribe from the newsletter?</h3><p class="dim">You will no longer get the aviation news by e-mail every morning.
+      You can subscribe again here at any time.</p><div class="row" style="justify-content:flex-end;gap:8px;margin-top:16px">
+      <button data-no>Keep it</button><button class="primary" data-yes>Unsubscribe</button></div>`, (m, close) => {
+      m.querySelector('[data-no]').onclick = close;
+      m.querySelector('[data-yes]').onclick = async () => { try { await setNews(false, true); } catch (e) {} close(); };
+      m.querySelector('[data-no]').focus();
+    });
   };
   $('#mailOn').onchange = async () => {
     try { await api('/api/me/notify', { method: 'PUT', body: JSON.stringify({ email_notify: $('#mailOn').checked }) });

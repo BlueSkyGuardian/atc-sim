@@ -124,11 +124,16 @@ def _welcome(before: Optional[dict], u: dict, request: Request) -> None:
     if before is not None and before.get("last_login"):
         return
     try:
+        from . import news
+        news.subscribe_default(u)                       # the daily aviation newsletter: on by default
+    except Exception:                                   # noqa: BLE001
+        pass
+    try:
         from . import notify
         notify.notify(u["id"], "welcome", "Welcome to the ATC simulator",
                       "Complete your profile (name and licence number) so instructors can invite you to exercises. "
-                      "Meanwhile, fly a scenario on your own on the solo radar, read the manuals in Help, and follow "
-                      "the aviation news; you can get it every morning by e-mail from your profile.",
+                      "Meanwhile, fly a scenario on your own on the solo radar and read the manuals in Help. You will "
+                      "also get the aviation newsletter every morning (unsubscribe from your profile at any time).",
                       "/profile", base_url=notify.base_of(request))
     except Exception:                                   # noqa: BLE001 - never blocks a sign-in
         pass
@@ -243,6 +248,11 @@ def pre_register(body: Invite, request: Request):
         raise HTTPException(409, "already registered")
     db.x("INSERT INTO users (email, role, created_at) VALUES (?,?,?)", (email, body.role, time.time()))
     nu = db.user_by_email(email)
+    try:
+        from . import news
+        news.subscribe_default(nu)
+    except Exception:                                   # noqa: BLE001
+        pass
     from . import notify
     roles = {"admin": "administrator", "instructor": "instructor", "atc": "controller", "pilot": "pseudo-pilot"}
     notify.notify(nu["id"], "account", f"You have an account on the ATC simulator as {roles.get(body.role, body.role)}",
