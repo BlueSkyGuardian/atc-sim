@@ -19,7 +19,14 @@
     <div class="msg" id="msg"></div>
     <table><thead><tr><th>Name</th><th>Email</th><th>Licence</th><th>Role</th><th>Active</th><th>Last sign-in</th></tr></thead><tbody id="rows"></tbody></table>
   </div>
-  <p class="dim" style="font-size:12px">People sign in with their Google account. A new account starts as a controller until you change its role here. Disabling an account signs it out everywhere.</p>
+  <p class="dim" style="font-size:12px">People sign in with their Google account. A new account starts as a controller until you change its role here. Disabling an account signs it out everywhere. An account added in advance gets an e-mail telling them how to sign in.</p>
+  <h2>E-mail</h2>
+  <div class="card">
+    <div class="row"><span id="mailMode" class="grow"></span>
+      <input id="testTo" placeholder="send a test to (default: you)" style="max-width:260px"><button id="testMail">Send a test e-mail</button></div>
+    <div class="msg" id="mailMsg"></div>
+    <table><thead><tr><th>When</th><th>To</th><th>What</th><th>E-mail</th></tr></thead><tbody id="mailRows"></tbody></table>
+  </div>
 </main>
 <script src="/static/common.js"></script>
 <script>
@@ -51,7 +58,23 @@ async function load() { users = await api('/api/users'); render(); }
     catch (e) { msg(e.message, true); }
   };
   load();
+  mail();
+  $('#testMail').onclick = async () => {
+    try { const r = await post('/api/admin/test-email', { to: $('#testTo').value || null });
+      $('#mailMsg').className = 'msg ok'; $('#mailMsg').textContent = `${r.to}: ${r.note}`; mail(); }
+    catch (e) { $('#mailMsg').className = 'msg bad'; $('#mailMsg').textContent = e.message; }
+  };
 })();
+async function mail() {
+  const m = await api('/api/admin/mail');
+  $('#mailMode').innerHTML = m.mode === 'smtp'
+    ? `Sent through <span class="mono">${esc(m.host)}</span> (${esc(m.security)}) from <span class="mono">${esc(m.from)}</span>.`
+    : 'No mail server set (<span class="mono">ATC_SMTP_HOST</span>): e-mails are written to the data folder\'s <span class="mono">outbox</span> instead of being sent. See DEPLOY.md.';
+  const st = s => !s ? '<span class="dim">queued</span>' : s === 'sent' ? '<span style="color:var(--accent)">sent</span>'
+    : s === 'off' ? '<span class="dim">off (their choice)</span>' : s === 'outbox' ? '<span class="dim">outbox</span>' : `<span style="color:var(--alert)">${esc(s)}</span>`;
+  $('#mailRows').innerHTML = m.recent.map(r => `<tr><td class="dim">${fmtDate(r.created_at)}</td><td class="mono">${esc(r.email)}</td>
+    <td>${esc(r.title)}</td><td>${st(r.emailed)}</td></tr>`).join('') || '<tr><td colspan="4" class="dim">Nothing sent yet.</td></tr>';
+}
 </script>
 </body>
 </html>

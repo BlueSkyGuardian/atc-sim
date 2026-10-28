@@ -938,10 +938,15 @@ def invite(eid: str, body: Invite, request: Request):
     u = require_user(request)
     _need_leader(eid, u)
     from .access import seat_for
+    from . import notify
+    e = db.exercise(eid) or {}
     for uid in body.user_ids[:50]:
         o = db.user_by_id(uid)
         if o and o.get("active") and seat_for(eid, o) is None:
             db.add_member(eid, uid, GUEST)
+            notify.notify(uid, "debrief_invite", f"{notify.actor_name(u)} invited you to the debrief of {e.get('name') or eid}",
+                          "Replay the exercise, see what happened and why, and join the debrief session when it is on.",
+                          f"/debrief/{eid}", actor=u, base_url=notify.base_of(request))
     return {"people": _people(eid)}
 
 

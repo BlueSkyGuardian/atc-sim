@@ -64,6 +64,11 @@ administrator. Complete your profile (first name, last name, licence number).
 | `ATC_AUTH` | `off` = the old open single-user mode (only on your own computer, never on the internet) |
 | `ATC_PRED_INTERVAL_S` | minimum seconds between two runs of the 10-minute conflict look-ahead of an exercise (default 8; it also waits 3× its own computing time). The short-term conflict alert (3 min) is a separate fast check, every second |
 | `ATC_PRED_WORKERS` | look-aheads computed at the same time over the whole server (default 1; raise it on a server with more cores) |
+| `ATC_SMTP_HOST` | the mail server for the notification e-mails (invitations to exercises and debriefs, shared scenarios, evaluations, new accounts, role changes). Not set: the e-mails are written to the data folder's `outbox` instead of being sent |
+| `ATC_SMTP_PORT` | default 587 |
+| `ATC_SMTP_SECURITY` | `starttls` (default, port 587), `ssl` (port 465) or `none` |
+| `ATC_SMTP_USER`, `ATC_SMTP_PASSWORD` | the mail account (for Gmail: an [app password](https://support.google.com/accounts/answer/185833), not the account's password) |
+| `ATC_SMTP_FROM` | the sender address (default: `ATC_SMTP_USER`) |
 | `ATC_DEV_LOGIN` | `1` = password-less test login form (anyone signs in as any e-mail). Off unless set; for a local test machine only, never online |
 
 ## Oracle Cloud (Always Free) notes
@@ -79,6 +84,15 @@ administrator. Complete your profile (first name, last name, licence number).
   `sudo systemctl enable --now docker`, `sudo usermod -aG docker opc`.
 * 1 OCPU / 6 GB runs a couple of exercises: the look-ahead is shared and throttled (see `ATC_PRED_*`), and the
   recordings are rendered one at a time at low priority after the exercises.
+
+### E-mail and notifications
+
+Everyone gets a notification in the bell at the top of the pages, and an e-mail, when they are invited to an
+exercise or a debrief, a scenario is shared with them, their work is evaluated, their account is created in
+advance or their role changes. The links in the e-mails use `ATC_PUBLIC_URL`. Each user can turn the e-mails off in
+their profile (the bell stays). The administrator's *Users* page shows how mail goes out, the last e-mails and their
+delivery, and sends a test e-mail. Mail is sent in the background: a mail server that is down never fails an
+invitation (the failure shows on the *Users* page).
 
 ## 6. Data, backups, updates
 

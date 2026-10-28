@@ -263,7 +263,14 @@ def share(name: str, body: Share, request: Request):
     t = db.user_by_id(body.user_id)
     if t is None or t["role"] not in ("instructor", "admin"):
         raise HTTPException(400, "scenarios are shared with instructors")
+    had = db.q1("SELECT perm FROM scenario_shares WHERE name=? AND user_id=?", (name, body.user_id))
     db.x("INSERT OR REPLACE INTO scenario_shares (name, user_id, perm) VALUES (?,?,?)", (name, body.user_id, body.perm))
+    if not had or had["perm"] != body.perm:
+        from . import notify
+        what = "to read and run" if body.perm == "read" else "to edit"
+        notify.notify(body.user_id, "scenario_share", f"{notify.actor_name(u)} shared the scenario {name} with you",
+                      f"You can now open it {what} in the scenario designer, and run exercises with it.",
+                      f"/designer?scenario={name}", actor=u, base_url=notify.base_of(request))
     return db.shares(name)
 
 
@@ -502,7 +509,16 @@ def add_member(eid: str, body: Member, request: Request):
         raise HTTPException(400, f"seat: {config.SEATS}")
     if db.user_by_id(body.user_id) is None:
         raise HTTPException(404, "no such user")
+    before = db.seat_of(eid, db.user_by_id(body.user_id))
     db.add_member(eid, body.user_id, body.seat)
+    if before != body.seat:                       # a new invitation, or a new seat: they hear about it
+        from . import notify
+        e = db.exercise(eid) or {}
+        seat = {"instructor": "instructor", "atc": "controller", "pilot": "pseudo-pilot"}.get(body.seat, body.seat)
+        notify.notify(body.user_id, "exercise_invite",
+                      f"{notify.actor_name(u)} invited you to the exercise {e.get('name') or eid} as {seat}",
+                      f"Scenario: {e.get('scenario', '')}. Open it from your home page when the instructor starts it.",
+                      f"/x/{eid}", actor=u, base_url=notify.base_of(request))
     return db.members(eid)
 
 

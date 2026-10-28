@@ -74,6 +74,9 @@ squall line.
 - **Solo radar** (everyone): fly a scenario alone on the controller's screen, with simulated pilots.
 - **Stats**: your statistics by role.
 - **Help**: this documentation. The search box searches every page.
+- **The bell** (top right): your notifications - invited to an exercise or a debrief, a scenario shared with you,
+  an evaluation of your work, your account or role. The number is how many you have not opened; click one to go to
+  it, or *Mark all read*. You get each one by e-mail too; turn the e-mails off in your **Profile** (the bell stays).
 - On the radar, **?** (or the <kbd>?</kbd> key) shows the keyboard shortcuts.
 
 The land and coastlines on the maps come from [Natural Earth](https://www.naturalearthdata.com) (1:10m, public domain).

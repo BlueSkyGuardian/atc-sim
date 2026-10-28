@@ -88,7 +88,8 @@ tabs on the side panel:
 
 - **Members and invitations**: invite people from the user list (name, licence) as **controller**,
   **pseudo-pilot** or **co-instructor**, or copy the controller / pseudo-pilot link and send it. Remove a member
-  with ×.
+  with ×. Each person invited gets a notification (the bell at the top of their pages) and an e-mail with the link,
+  unless they turned e-mails off in their profile; so do people invited to a debrief or sharing your scenario.
 - **Run / Pause**, **time factor** (×1 is real time), **Restart**, **Replay**.
 - **Simulated pilots deviate around weather by themselves**: off by default. Off, only the pseudo-pilot makes
   aircraft deviate, and an unanswered weather request is closed as a task not handled. On, the old behaviour

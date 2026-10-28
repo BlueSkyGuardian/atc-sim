@@ -195,6 +195,12 @@ def patch_user(uid: int, body: UserPatch, request: Request):
         if t["id"] == admin["id"] and body.role != "admin":
             raise HTTPException(400, "you cannot remove your own admin role")
         db.x("UPDATE users SET role=? WHERE id=?", (body.role, uid))
+        if body.role != t["role"]:
+            from . import notify
+            roles = {"admin": "administrator", "instructor": "instructor", "atc": "controller", "pilot": "pseudo-pilot"}
+            notify.notify(uid, "role", f"Your role on the simulator is now {roles.get(body.role, body.role)}",
+                          "What you can open and do has changed accordingly.", "/", actor=admin,
+                          base_url=notify.base_of(request))
     if body.active is not None:
         if t["id"] == admin["id"] and not body.active:
             raise HTTPException(400, "you cannot disable your own account")
@@ -210,11 +216,17 @@ class Invite(BaseModel):
 @router.post("/api/users")
 def pre_register(body: Invite, request: Request):
     """Admin: create an account in advance for a Gmail address (the person signs in with Google later)."""
-    require_user(request, roles=("admin",))
+    admin = require_user(request, roles=("admin",))
     if body.role not in config.ROLES:
         raise HTTPException(400, f"role must be one of {config.ROLES}")
     email = body.email.strip().lower()
     if db.user_by_email(email):
         raise HTTPException(409, "already registered")
     db.x("INSERT INTO users (email, role, created_at) VALUES (?,?,?)", (email, body.role, time.time()))
-    return db.public_user(db.user_by_email(email))
+    nu = db.user_by_email(email)
+    from . import notify
+    roles = {"admin": "administrator", "instructor": "instructor", "atc": "controller", "pilot": "pseudo-pilot"}
+    notify.notify(nu["id"], "account", f"You have an account on the ATC simulator as {roles.get(body.role, body.role)}",
+                  f"Sign in with your Google account {email}, then complete your profile (name and licence number) so "
+                  f"instructors can invite you to exercises.", "/login", actor=admin, base_url=notify.base_of(request))
+    return db.public_user(nu)

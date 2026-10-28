@@ -32,6 +32,30 @@ header.top nav a { color: var(--dim); padding: 4px 0; border-bottom: 2px solid t
 header.top nav a:hover { color: var(--text); text-decoration: none; }
 header.top nav a.cur { color: var(--text); border-bottom-color: var(--magenta); }
 header.top .who { color: var(--dim); font-size: 13px; display: flex; gap: 10px; align-items: center; }
+/* notifications bell and its drop-down */
+header.top .bell-wrap { position: relative; }
+header.top .bell { position: relative; background: transparent; border: 1px solid transparent; color: var(--dim); padding: 5px 7px;
+  border-radius: 7px; cursor: pointer; display: flex; align-items: center; }
+header.top .bell:hover, header.top .bell[aria-expanded="true"] { color: var(--text); border-color: var(--line); background: var(--panel2); }
+header.top .bell-n { position: absolute; top: -4px; right: -5px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px;
+  background: var(--magenta); color: #fff; font: 700 10.5px/17px var(--sans); text-align: center; }
+header.top .bell-menu { position: absolute; right: 0; top: calc(100% + 8px); width: min(380px, calc(100vw - 32px)); max-height: 70vh;
+  overflow: auto; background: rgba(19, 38, 58, .97); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--depth);
+  backdrop-filter: var(--glass); -webkit-backdrop-filter: var(--glass); z-index: 30; }
+.bell-hd { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line-2);
+  position: sticky; top: 0; background: rgba(19, 38, 58, .98); }
+.bell-it { display: flex; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line-2); color: var(--dim); }
+.bell-it:hover { background: var(--panel2); text-decoration: none; }
+.bell-it.new { color: var(--text); background: rgba(209, 71, 143, .07); }
+.bell-it.new .bell-t::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--magenta);
+  margin-right: 6px; vertical-align: 1px; }
+.bell-ic { width: 20px; flex: none; text-align: center; color: var(--chart); }
+.bell-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.bell-t { font-size: 13px; line-height: 1.35; }
+.bell-b { font-size: 12px; color: var(--dim); }
+.bell-w { font-size: 11px; color: var(--dim); opacity: .8; }
+.bell-empty { padding: 18px 14px; color: var(--dim); font-size: 13px; }
+@media (max-width: 700px) { header.top .bell-menu { position: fixed; left: 16px; right: 16px; width: auto; } }
 
 main { max-width: 1240px; margin: 0 auto; padding: 22px 24px 70px; }
 h1 { font-size: 26px; font-weight: 700; font-variation-settings: "wdth" 112; margin: 6px 0 16px; letter-spacing: -.005em; }

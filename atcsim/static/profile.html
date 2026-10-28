@@ -15,6 +15,9 @@
     <label class="f">Last name</label><input id="ln" autocomplete="family-name">
     <label class="f">Licence number</label><input id="lic" class="mono" style="text-transform:uppercase">
     <label class="f">Role</label><input id="role" disabled>
+    <label class="f" style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="mailOn" style="width:auto">
+      E-mail me when I am invited to an exercise or a debrief, a scenario is shared with me, or my work is evaluated</label>
+    <div class="dim" style="font-size:12px">The bell at the top always shows them.</div>
     <div class="row" style="margin-top:16px"><button class="primary" id="save">Save</button><span class="msg" id="msg"></span></div>
   </div>
   <p class="dim" style="font-size:12px">Your role (controller, pseudo-pilot, instructor) is set by the administrator.</p>
@@ -26,6 +29,12 @@
   if (new URLSearchParams(location.search).get('first') || !me.profile_complete) $('#first').style.display = '';
   $('#email').value = me.email; $('#fn').value = me.first_name; $('#ln').value = me.last_name; $('#lic').value = me.licence;
   $('#role').value = ROLE_NAMES[me.role] || me.role;
+  try { const p = await api('/api/me/notify'); $('#mailOn').checked = p.email_notify; } catch (e) {}
+  $('#mailOn').onchange = async () => {
+    try { await api('/api/me/notify', { method: 'PUT', body: JSON.stringify({ email_notify: $('#mailOn').checked }) });
+      $('#msg').className = 'msg ok'; $('#msg').textContent = $('#mailOn').checked ? 'E-mails on' : 'E-mails off'; }
+    catch (e) { $('#msg').className = 'msg bad'; $('#msg').textContent = e.message; }
+  };
   $('#save').onclick = async () => {
     try {
       const u = await api('/api/me', { method: 'PUT', body: JSON.stringify({ first_name: $('#fn').value, last_name: $('#ln').value, licence: $('#lic').value }) });

@@ -110,6 +110,11 @@ def evaluate(body: Evaluation, request: Request):
          "VALUES (?,?,?,?,?,?,?,?)", (body.exercise_id, body.kind, u["id"], body.ratee_id,
                                       db.dumps({k: int(body.scores[k]) for k in keys}), body.grade,
                                       body.comment.strip()[:4000], time.time()))
+    from . import notify
+    e = db.exercise(body.exercise_id) or {}
+    who = "your controlling" if body.kind == "atc" else "your pseudo-piloting"
+    notify.notify(body.ratee_id, "evaluation", f"{notify.actor_name(u)} evaluated {who} in {e.get('name') or body.exercise_id}",
+                  "Read it and acknowledge it in your statistics.", "/stats", actor=u, base_url=notify.base_of(request))
     return {"ok": True}
 
 
