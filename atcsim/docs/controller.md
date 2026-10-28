@@ -364,10 +364,12 @@ are not (hover to see with whom).
 
 ![Key B over an aircraft: the line follows the mouse and already shows bearing, range and the closest point of approach](/static/docs/c_rbl.jpg "Key B over an aircraft: the line follows the mouse and already shows bearing, range and the closest point of approach")
 
-An end snaps to a fix only when you click within 10 px of the fix symbol. A ring shows what it will snap to.
-Otherwise it is the position itself. The label gives the bearing, range and ΔFL, then the **CPA** (closest point
-of approach) distance and time, from straight-line extrapolation of the tracks. The positions at CPA are drawn as
-circles. A fixed point stands still, so the CPA is the aircraft's closest approach to it. The line turns red when
+Either end snaps to an aircraft when you click its symbol **or its label**, and to a fix when you click within 12 px
+of the fix symbol **or on its name**. A ring shows what it will snap to. Otherwise it is the position itself. The
+label gives the bearing, range and ΔFL, then the **CPA** (closest point of approach) distance and time, from
+straight-line extrapolation of the tracks. The CPA line is a button, like the values of a traffic label: click it to
+draw the positions at the CPA (dashed tracks and circles), click again to hide them. A fixed point stands still, so
+the CPA is the aircraft's closest approach to it. The line turns red when
 the CPA is below the minima. Drag an RBL label to move it, right-click it to remove it, use
 <kbd>Delete</kbd> to remove the last line and <kbd>Shift</kbd>+<kbd>Delete</kbd> to remove them all.
 

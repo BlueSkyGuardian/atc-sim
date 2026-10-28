@@ -534,7 +534,7 @@
 <button data-v="star" class="on" title="STARs of the runways in use">STAR</button>
 <button data-v="hold" class="on" title="Published holding patterns (runways in use)">Hold</button>
 <button data-v="procAll" title="Off: the procedures of the runways in use only. On: every runway's">All runways</button></div></span>
-      <span class="vg"><button class="vgb" title="Measuring and decision tools">Tools</button><div class="vgm" id="toolsMenu"><button id="rblBtn" title="Range/bearing line: right-drag from an aircraft or a point to another (no need for this button), or shift-click two of them, or click this button then two. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="seqBtn" title="Sequencing tool: click two or more aircraft, then the point where they must be in trail; shows each follower's sequencing ellipse and the headings that give the spacing (Esc to leave)">Sequence</button></div></span>
+      <span class="vg"><button class="vgb" title="Measuring and decision tools">Tools</button><div class="vgm" id="toolsMenu"><button id="rblBtn" title="Range/bearing line: key B or right-drag from an aircraft (its symbol or label) or a fix (its symbol or name) to another (no need for this button), or shift-click two of them, or click this button then two. Click the CPA line of its label to show the positions at the CPA. Drag its label to move it, right-click the label to remove it.">RBL</button><button id="rblClear" title="Remove all range/bearing lines (Shift+Delete)">✕ RBL</button><button id="forceBtn" title="Simulated pilots comply with every clearance (no refusal for weather or performance): to test what a clearance would give. Off: they refuse what they could not do, and a refused clearance can still be forced from the radio log.">Comply</button><button id="solveBtn" title="Conflict solver: for each predicted conflict, the clearances that leave everyone separated (speed, then heading, then level), checked by running the simulation ahead; Apply enters one">Solver</button><button id="seqBtn" title="Sequencing tool: click two or more aircraft, then the point where they must be in trail; shows each follower's sequencing ellipse and the headings that give the spacing (Esc to leave)">Sequence</button></div></span>
       <span class="vg"><button class="vgb" title="Flight plans, MTCD, track info, OLDI, timeline, information box">Windows</button><div class="vgm"><button id="flBtn" class="ctl-only" title="Flight plans: every flight of the session (G)">FPL</button><button id="mtBtn" class="ctl-only" title="Medium-term conflict detection on / off: conflicts over the look-ahead, 20 minutes unless changed in the MTCD window (M)">MTCD off</button><button id="infoBtn" title="Track info window: the aircraft under the mouse (I)">INFO</button><button id="olBtn" title="OLDI: coordination messages with the adjacent units (O)">OLDI</button><button id="tlBtn" title="Show / hide the timeline under the scope: look back through the run (replay)">Timeline</button><button id="hudBtn" title="Show / hide the information box (scenario, time, traffic, weather)">HUD</button></div></span>
       <span class="vg"><button class="vgb" title="CPDLC, coordination chat">Comms</button><div class="vgm" id="commsMenu"></div></span>
       <button id="homeBtn" title="Reset the view (0)">⌂</button><button id="dispBtn" title="Display settings: zoom, sizes, colours">⚙ Display</button><button id="helpBtn" title="Keyboard shortcuts (?)">?</button>
@@ -1309,8 +1309,9 @@ cv.addEventListener('wheel', e => {
 const labelOff = {}, labelRects = [];
 let drag = null;
 function canvasPt(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * devicePixelRatio, (e.clientY - r.top) * devicePixelRatio]; }
-function labelAt(e) {                 // the label under the mouse: one whose text is right there, else the one on top
-  const [x, y] = canvasPt(e), hit = labelRects.filter(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1);
+function labelAt(e) { return labelAtPt(canvasPt(e)); }
+function labelAtPt(q) {                // the label at this point: one whose text is right there, else the one on top
+  const [x, y] = q, hit = labelRects.filter(l => x >= l.x0 && x <= l.x1 && y >= l.y0 && y <= l.y1);
   if (hit.length > 1) {
     const onText = new Set(fieldRects.filter(f => x >= f.x0 && x <= f.x1 && y >= f.y0 && y <= f.y1).map(f => f.cs));
     const t = hit.filter(l => onText.has(l.cs));
@@ -1357,7 +1358,7 @@ cv.addEventListener('mousedown', e => {
   if (window.seqToolActive && seqToolActive() && (!labelAt(e) || onSymbol(e))) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true, seq: true }; return; }
   if (window.routeEditActive && routeEditActive()) { drag = { x: e.clientX, y: e.clientY, cx: view.cx, cy: view.cy, moved: false, re: true }; return; }
   const [qx, qy] = canvasPt(e), rh = rblRects.find(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1);
-  if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false }; return; }
+  if (rh && rbls[rh.i]) { const R = rbls[rh.i]; drag = { rbl: R, x: e.clientX, y: e.clientY, ox: R.ox || 0, oy: R.oy || 0, moved: false, cpaBtn: inR(rh.cpa, qx, qy) }; return; }
   const mh = window.mtcdLabelAt && mtcdLabelAt(qx, qy);              // an MTCD label: drag it away
   if (mh) { const o = mtOff[mh.k] || [0, 0]; drag = { mt: mh.k, x: e.clientX, y: e.clientY, ox: o[0], oy: o[1], moved: false }; return; }
   const l = labelAt(e), fld = l ? fieldAt(e) : null;
@@ -1380,7 +1381,7 @@ window.addEventListener('mouseup', e => {
     return;
   }
   if (e.button !== 0) return;
-  if (drag && (drag.rbl || drag.mt)) { drag = null; return; }
+  if (drag && (drag.rbl || drag.mt)) { if (drag.rbl && drag.cpaBtn && !drag.moved) drag.rbl.cpa = !drag.rbl.cpa; drag = null; return; }
   clearTimeout(pressTimer);
   if (drag && drag.re) { const d0 = drag; drag = null; if (!d0.moved) { if (d0.seq) seqToolClick(e); else if (window.routeEditClick) routeEditClick(e); } return; }
   if (drag && drag.long) { if (!drag.menu && routeShow) routeShow.until = performance.now() + 4000; drag = null; return; }
@@ -1397,7 +1398,8 @@ window.addEventListener('mousemove', e => {
     const l = e.target === cv ? labelAt(e) : null, f = l ? fieldAt(e) : null;
     hoverLbl = l ? l.cs : null; hoverField = f; hoverAc = l ? l.cs : (e.target === cv ? nearestAircraft(e) : null);
     const [qx, qy] = e.target === cv ? canvasPt(e) : [-1, -1];
-    cv.style.cursor = (window.seqToolActive && seqToolActive() && (!l || onSymbol(e))) || (window.routeEditActive && routeEditActive()) ? 'copy' : f && (SEAT === 'atc' || f.f === 'type') ? 'pointer'
+    const rc = rblRects.find(r => inR(r.cpa, qx, qy)); hoverRblCpa = rc ? rc.i : null;
+    cv.style.cursor = (window.seqToolActive && seqToolActive() && (!l || onSymbol(e))) || (window.routeEditActive && routeEditActive()) ? 'copy' : rc || (f && (SEAT === 'atc' || f.f === 'type')) ? 'pointer'
       : l || rblRects.some(r => qx >= r.x0 && qx <= r.x1 && qy >= r.y0 && qy <= r.y1) || (window.mtcdLabelAt && mtcdLabelAt(qx, qy)) ? 'move' : 'crosshair'; return; }
   const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) { drag.moved = true; clearTimeout(pressTimer); }
@@ -1522,7 +1524,8 @@ function drawRoute(byCs) {
 }
 // ---------- RBL (range and bearing line): between two aircraft, an aircraft and a point, or two points.
 // A point (a map position, snapped to a nearby fix) does not move: the CPA is the aircraft's closest approach to it.
-const rbls = [];                 // [{a, b}]  endpoint = callsign | {x, y, name}
+const rbls = [];                 // [{a, b, ox, oy, cpa}]  endpoint = callsign | {x, y, name}; cpa: projection shown
+let hoverRblCpa = null;          // the RBL whose CPA button is under the mouse
 let rblMode = false, rblFirst = null;
 const rblRects = [];
 function setRblMode(on) {
@@ -1532,20 +1535,27 @@ function setRblMode(on) {
 }
 $('#rblBtn').onclick = () => setRblMode(!rblMode);
 $('#rblClear').onclick = () => { rbls.length = 0; setRblMode(false); };
+const inR = (r, x, y) => r && x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
 window.addEventListener('keydown', e => { if (e.key === 'Escape') { setRblMode(false); if (rblDrag && rblDrag.key) rblDrag = null; } });
 const endName = t => typeof t === 'string' ? t : (t.name || `${t.x.toFixed(0)},${t.y.toFixed(0)}`);
 const sameEnd = (p, q) => typeof p === 'string' ? p === q : typeof q !== 'string' && Math.hypot(p.x - q.x, p.y - q.y) < 0.2;
 function rblTarget(e) { return rblTargetAt(canvasPt(e)); }
-// what an RBL end at this screen point is: an aircraft, a fix (snapped when the click is within 10 px of the fix
-// symbol), or the map position itself
+// what an RBL end at this screen point is (either end): an aircraft (its symbol or its label), a fix (within 12 px of
+// its symbol, or on its name), or the map position itself
 function rblTargetAt(q) {
   const [x, y] = fromPx(q[0], q[1]), dpr = devicePixelRatio;
   let ac = null, ad = 12 * dpr / view.s;
   if (shown) for (const a of shown.aircraft.concat(shown.transferred || [])) { const d = Math.hypot(a.x_nm - x, a.y_nm - y); if (d < ad) { ad = d; ac = a.callsign; } }
   if (ac) return ac;
-  let best = null, bd = 10 * dpr / view.s;
+  const lb = labelAtPt(q);                             // on an aircraft's label: that aircraft
+  if (lb && shown && shown.aircraft.concat(shown.transferred || []).some(a => a.callsign === lb.cs)) return lb.cs;
+  let best = null, bd = 12 * dpr / view.s;
   for (const [n, p] of Object.entries((sector && sector.waypoints) || {})) { const d = Math.hypot(p[0] - x, p[1] - y); if (d < bd && !COPS().has(n) && !n.startsWith('@')) { bd = d; best = { x: p[0], y: p[1], name: n }; } }
-  return best || { x, y };
+  if (best) return best;
+  const nm = nameRects.find(r => q[0] >= r.x0 && q[0] <= r.x1 && q[1] >= r.y0 && q[1] <= r.y1);   // on a fix's name
+  const np = nm && sector && sector.waypoints[nm.n];
+  if (np && !COPS().has(nm.n) && !nm.n.startsWith('@')) return { x: np[0], y: np[1], name: nm.n };
+  return { x, y };
 }
 function snapMark(t, byCs) {                          // ring around what the RBL end would snap to
   if (!t || (typeof t === 'object' && !t.name)) return;
@@ -1593,7 +1603,7 @@ function drawRblPair(A, B, r, i) {
     const [ax, ay] = toPx(A.x_nm, A.y_nm), [bx, by] = toPx(B.x_nm, B.y_nm);
     ctx.strokeStyle = col; ctx.lineWidth = 1.3 * dpr; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
     for (const [P, x, y] of [[A, ax, ay], [B, bx, by]]) if (P.point) { ctx.beginPath(); ctx.moveTo(x - 5 * dpr, y); ctx.lineTo(x + 5 * dpr, y); ctx.moveTo(x, y - 5 * dpr); ctx.lineTo(x, y + 5 * dpr); ctx.stroke(); }
-    if (c.moving && c.t > 0) {
+    if (c.moving && c.t > 0 && r.cpa) {                // the positions at the CPA: shown when its button is on
       const [qax, qay] = toPx(...c.pa), [qbx, qby] = toPx(...c.pb);
       ctx.setLineDash([4 * dpr, 4 * dpr]); ctx.lineWidth = 1 * dpr;
       ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(qax, qay); ctx.moveTo(bx, by); ctx.lineTo(qbx, qby); ctx.stroke();
@@ -1612,7 +1622,11 @@ function drawRblPair(A, B, r, i) {
     const w = Math.max(ctx.measureText(l1).width, ctx.measureText(l2).width) + 8 * dpr, h = (l2 ? 28 : 16) * dpr;
     ctx.fillStyle = '#0b1016cc'; ctx.fillRect(mx - 4 * dpr, my - 12 * dpr, w, h);
     ctx.fillStyle = col; ctx.fillText(l1, mx, my); if (l2) ctx.fillText(l2, mx, my + 13 * dpr);
-    if (i != null) rblRects.push({ i, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my - 12 * dpr + h });
+    // the CPA line is a flat button (as the values of the traffic labels): it shows / hides the positions at the CPA;
+    // underlined under the mouse, and while they are shown
+    const btn = l2 && c.t > 0 && i != null ? { x0: mx - 1 * dpr, y0: my + 2 * dpr, x1: mx + ctx.measureText(l2).width + 1 * dpr, y1: my + 16 * dpr } : null;
+    if (btn && (r.cpa || hoverRblCpa === i)) ctx.fillRect(mx, my + 15 * dpr, btn.x1 - btn.x0 - 2 * dpr, 1 * dpr);
+    if (i != null) rblRects.push({ i, x0: mx - 4 * dpr, y0: my - 12 * dpr, x1: mx - 4 * dpr + w, y1: my - 12 * dpr + h, cpa: btn });
   }
 }
 // selecting an aircraft fills the shorthand line with its callsign; only the solo radar puts the cursor there -
