@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aviation news</title>
+<meta name="description" content="Aviation news for air traffic controllers: air traffic control and airspace, technology, safety, Morocco and Africa, airlines and airports.">
+<link rel="stylesheet" href="/static/app.css">
+<style>
+  .nw-top { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; }
+  .nw-top h1 { margin-bottom: 4px; }
+  .nw-sub { flex: 1 1 300px; }
+  .nw-box { flex: 0 1 380px; }
+  .nw-box .row { display: flex; gap: 8px; }
+  .nw-box input { flex: 1; min-width: 0; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 18px 0 14px; align-items: center; }
+  .chip { background: var(--panel2); border: 1px solid var(--line); color: var(--dim); border-radius: 999px; padding: 4px 11px;
+    font-size: 12.5px; cursor: pointer; }
+  .chip.on { color: var(--text); border-color: var(--magenta); background: rgba(209, 71, 143, .12); }
+  .chips input { margin-left: auto; max-width: 240px; }
+  .nw-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
+  .story { display: flex; flex-direction: column; gap: 4px; padding: 13px 0; border-bottom: 1px solid var(--line-2); }
+  .story:last-child { border-bottom: 0; }
+  .story a.t { color: var(--text); font-weight: 620; font-size: 15.5px; line-height: 1.35; }
+  .story a.t:hover { color: var(--sel); }
+  .story .s { color: var(--dim); font-size: 13.5px; line-height: 1.5; }
+  .story .m { font-size: 12px; color: var(--dim); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tag { font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--chart); font-weight: 650; }
+  .issues a { display: block; padding: 7px 0; border-bottom: 1px solid var(--line-2); font-size: 13px; }
+  .issues a span { display: block; color: var(--dim); font-size: 11.5px; }
+  .issue h2 { margin-top: 22px; color: var(--magenta); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; }
+  .issue .intro { color: var(--text); font-size: 15px; line-height: 1.6; }
+  .note { font-size: 12px; color: var(--dim); }
+  header.pub { display: flex; align-items: center; gap: 22px; padding: 12px 24px; border-bottom: 1px solid var(--line);
+    background: rgba(13, 27, 42, .72); backdrop-filter: var(--glass); position: sticky; top: 0; z-index: 5; }
+  header.pub .brand { font-weight: 800; font-variation-settings: "wdth" 125; letter-spacing: .02em; font-size: 17px; }
+  header.pub .brand span { color: var(--magenta); }
+  header.pub .grow { flex: 1; }
+  .btnlink { border: 1px solid var(--line); border-radius: 7px; padding: 5px 12px; color: var(--text); background: var(--panel2); }
+  .btnlink:hover { border-color: var(--magenta); text-decoration: none; }
+  @media (max-width: 860px) { .nw-grid { grid-template-columns: 1fr; } .chips input { margin-left: 0; max-width: none; flex: 1 1 100%; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="nw-top">
+    <div class="nw-sub">
+      <h1 id="pgTitle">Aviation news</h1>
+      <div class="dim" id="updated">Air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.</div>
+    </div>
+    <div class="card nw-box" id="subBox">
+      <b>The newsletter, every morning</b>
+      <div class="note" style="margin:2px 0 10px">The day's stories that matter to controllers, in a two-minute read.</div>
+      <div id="subForm"></div>
+      <div class="msg" id="subMsg"></div>
+    </div>
+  </div>
+  <div id="latestView">
+    <div class="chips" id="chips"></div>
+    <div class="nw-grid">
+      <div class="card"><div id="list"><div class="dim">Loading…</div></div>
+        <div style="margin-top:12px"><button id="more" hidden>Older stories</button></div></div>
+      <aside class="card issues"><b>Newsletter issues</b><div id="issues" style="margin-top:6px"><div class="dim note">None yet.</div></div></aside>
+    </div>
+  </div>
+  <div id="issueView" hidden>
+    <p><a href="/news">← All the news</a></p>
+    <div class="card issue" id="issue"></div>
+  </div>
+  <p class="note" style="margin-top:22px">Headlines and short excerpts from the sites' public news feeds and Google News, with
+    summaries written for this page; every story links to its site, where you read it. Gathered automatically every hour.</p>
+</main>
+<script src="/static/common.js"></script>
+<script>
+const NW = { section: '', q: '', items: [], me: null, sections: [] };
+const ago2 = t => { const d = Date.now() / 1000 - t; return d < 3600 ? Math.max(1, Math.round(d / 60)) + ' min ago'
+  : d < 86400 ? Math.round(d / 3600) + ' h ago' : new Date(t * 1000).toLocaleDateString([], { day: 'numeric', month: 'short' }); };
+function story(it, withSummary = true) {
+  const s = withSummary ? (it.summary || it.excerpt) : it.excerpt;
+  return `<div class="story"><div class="m"><span class="tag">${esc(it.section || '')}</span></div>
+    <a class="t" href="${esc(it.link)}" target="_blank" rel="noopener nofollow">${esc(it.title)}</a>
+    ${s ? `<div class="s">${esc(s)}</div>` : ''}
+    <div class="m"><span>${esc(it.source || it.site)}</span>·<span>${ago2(it.published)}</span></div></div>`;
+}
+async function getJSON(u, opt) {
+  const r = await fetch(u, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opt });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.detail || r.statusText);
+  return j;
+}
+async function load(more) {
+  const p = new URLSearchParams();
+  if (NW.section) p.set('section', NW.section);
+  if (NW.q) p.set('q', NW.q);
+  if (more && NW.items.length) p.set('before', NW.items[NW.items.length - 1].published);
+  const d = await getJSON('/api/news?' + p);
+  NW.sections = d.sections;
+  NW.items = more ? NW.items.concat(d.items) : d.items;
+  if (d.updated) $('#updated').textContent = `Updated ${ago2(d.updated)} · air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.`;
+  $('#list').innerHTML = NW.items.map(it => story(it)).join('') || '<div class="dim">No stories yet: the feeds are read every hour.</div>';
+  $('#more').hidden = d.items.length < 40;
+  chips();
+}
+function chips() {
+  if ($('#chips').dataset.done) { $$('.chip').forEach(c => c.classList.toggle('on', c.dataset.s === NW.section)); return; }
+  $('#chips').dataset.done = 1;
+  $('#chips').innerHTML = [['', 'All'], ...NW.sections.map(s => [s, s])].map(([s, t]) => `<button class="chip ${s === NW.section ? 'on' : ''}" data-s="${esc(s)}">${esc(t)}</button>`).join('')
+    + '<input id="q" placeholder="search the news" aria-label="search the news">';
+  $('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; NW.section = c.dataset.s; load(); });
+  let tq; $('#q').addEventListener('input', e => { clearTimeout(tq); tq = setTimeout(() => { NW.q = e.target.value.trim(); load(); }, 300); });
+}
+async function issues() {
+  const l = await getJSON('/api/news/issues');
+  if (l.length) $('#issues').innerHTML = l.map(i => `<a href="/news/issue/${i.id}">${esc(i.title)}<span>${new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}</span></a>`).join('');
+}
+async function showIssue(id) {
+  $('#latestView').hidden = true; $('#issueView').hidden = false;
+  try {
+    const i = await getJSON('/api/news/issues/' + id);
+    document.title = i.title + ' · Aviation news';
+    $('#pgTitle').textContent = 'Aviation news · ' + new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    $('#issue').innerHTML = `<h1 style="font-size:22px;margin-top:0">${esc(i.title)}</h1>${i.intro ? `<p class="intro">${esc(i.intro)}</p>` : ''}`
+      + i.sections.map(s => `<h2>${esc(s.name)}</h2>${s.items.map(it => story(it)).join('')}`).join('');
+  } catch (e) { $('#issue').innerHTML = '<p class="dim">This issue is not available.</p>'; }
+}
+function subForm() {
+  const m = $('#subMsg');
+  const say = (t, bad) => { m.className = 'msg ' + (bad ? 'bad' : 'ok'); m.textContent = t; };
+  if (NW.me) {
+    getJSON('/api/me/newsletter').then(st => {
+      $('#subForm').innerHTML = `<label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="subOn" style="width:auto" ${st.subscribed ? 'checked' : ''}>
+        Send it to ${esc(NW.me.email)}</label>`;
+      $('#subOn').onchange = async e => {
+        try { await getJSON('/api/me/newsletter', { method: 'PUT', body: JSON.stringify({ on: e.target.checked }) });
+          say(e.target.checked ? 'Subscribed: tomorrow morning in your inbox.' : 'Unsubscribed.'); }
+        catch (er) { say(er.message, true); }
+      };
+    });
+    return;
+  }
+  $('#subForm').innerHTML = `<div class="row"><input id="subEmail" type="email" placeholder="your e-mail address" aria-label="your e-mail address" autocomplete="email">
+    <button class="primary" id="subGo">Subscribe</button></div>`;
+  const go = async () => {
+    try { const r = await getJSON('/api/news/subscribe', { method: 'POST', body: JSON.stringify({ email: $('#subEmail').value }) });
+      say(r.status === 'confirm' ? 'Almost there: open the link we just sent you to confirm.' : 'You are subscribed.'); }
+    catch (e) { say(e.message, true); }
+  };
+  $('#subGo').onclick = go;
+  $('#subEmail').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+}
+(async () => {
+  try { const r = await fetch('/api/me', { credentials: 'same-origin' }); if (r.ok) NW.me = await r.json(); } catch (e) {}
+  if (NW.me) await header('/news');
+  else {
+    const h = document.createElement('header'); h.className = 'pub';
+    h.innerHTML = '<div class="brand">ATC <span>SIM</span></div><span class="dim">Aviation news</span><span class="grow"></span><a class="btnlink" href="/login?next=/news">Sign in</a>';
+    document.body.prepend(h); ambientScene();
+  }
+  subForm();
+  const m = location.pathname.match(/^\/news\/issue\/(\d+)/);
+  if (m) { showIssue(m[1]); return; }
+  $('#more').onclick = () => load(true);
+  await load(); issues();
+})();
+</script>
+</body>
+</html>

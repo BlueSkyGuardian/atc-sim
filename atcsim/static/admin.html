@@ -27,6 +27,30 @@
     <div class="msg" id="mailMsg"></div>
     <table><thead><tr><th>When</th><th>To</th><th>What</th><th>E-mail</th></tr></thead><tbody id="mailRows"></tbody></table>
   </div>
+  <h2>Aviation newsletter <a href="/news">the news page</a></h2>
+  <div class="card" id="nl">
+    <div class="row" style="flex-wrap:wrap;gap:14px">
+      <label><input type="checkbox" id="nlOn" style="width:auto"> read the feeds every hour</label>
+      <label><input type="checkbox" id="nlSend" style="width:auto"> send the newsletter every day at</label>
+      <input id="nlHour" type="number" min="0" max="23" style="width:64px"><span class="dim">h</span>
+      <input id="nlTz" style="width:170px" title="time zone">
+      <label class="dim">stories <input id="nlMax" type="number" min="3" max="25" style="width:60px"></label>
+      <label class="dim">at most <input id="nlCap" type="number" min="1" style="width:76px"> e-mails a day</label>
+    </div>
+    <div class="row" style="margin-top:10px;flex-wrap:wrap;gap:10px">
+      <label class="dim">written by</label><select id="nlModel"></select>
+      <span class="dim" style="font-size:12px">Any OpenAI-compatible model added in the <a href="/ai">AI lab</a> (DeepSeek, Gemini, ...); without one, stories are picked by keywords with the feeds' own excerpts.</span>
+    </div>
+    <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button id="nlSave" class="primary">Save</button>
+      <button id="nlFetch">Read the feeds now</button><button id="nlBuild">Build today's issue</button>
+      <span id="nlSubs" class="dim grow"></span></div>
+    <div class="msg" id="nlMsg"></div>
+    <table style="margin-top:8px"><thead><tr><th>Day</th><th>Issue</th><th>Written by</th><th>Status</th><th></th></tr></thead><tbody id="nlIssues"></tbody></table>
+    <h3 style="margin:18px 0 6px;font-size:14px">Sources</h3>
+    <table><thead><tr><th>On</th><th>Name</th><th>Feed</th><th>Section</th><th>Last read</th><th></th></tr></thead><tbody id="nlSrc"></tbody></table>
+    <div class="row" style="margin-top:8px;flex-wrap:wrap;gap:8px"><input id="srcName" placeholder="name" style="max-width:160px">
+      <input id="srcUrl" class="grow" placeholder="feed address: https://site/feed/ or a Google News search feed"><select id="srcSec"></select><button id="srcAdd">Add feed</button></div>
+  </div>
 </main>
 <script src="/static/common.js"></script>
 <script>
@@ -59,12 +83,49 @@ async function load() { users = await api('/api/users'); render(); }
   };
   load();
   mail();
+  newsletterButtons(); newsletter();
   $('#testMail').onclick = async () => {
     try { const r = await post('/api/admin/test-email', { to: $('#testTo').value || null });
       $('#mailMsg').className = 'msg ok'; $('#mailMsg').textContent = `${r.to}: ${r.note}`; mail(); }
     catch (e) { $('#mailMsg').className = 'msg bad'; $('#mailMsg').textContent = e.message; }
   };
 })();
+async function newsletter() {
+  const d = await api('/api/news/admin'), st = d.settings;
+  const nm = (t, bad) => { $('#nlMsg').className = 'msg ' + (bad ? 'bad' : 'ok'); $('#nlMsg').textContent = t; };
+  $('#nlOn').checked = st.enabled; $('#nlSend').checked = st.send; $('#nlHour').value = st.send_hour; $('#nlTz').value = st.tz;
+  $('#nlMax').value = st.max_items; $('#nlCap').value = st.max_per_day;
+  $('#nlModel').innerHTML = '<option value="0">keywords (no model)</option>' + d.models.map(m => `<option value="${m.id}" ${m.id === st.model_id ? 'selected' : ''}>${esc(m.name)} · ${esc(m.model)}</option>`).join('');
+  const sb = d.subscribers;
+  $('#nlSubs').innerHTML = `${sb.active} subscriber${sb.active === 1 ? '' : 's'}${sb.pending ? ` · ${sb.pending} waiting for confirmation` : ''}${sb.left ? ` · ${sb.left} left` : ''} · ${d.items_24h} stories in the last 24 h${d.mail === 'outbox' ? ' · <span style="color:var(--warn)">no mail server: e-mails go to the outbox</span>' : ''}`;
+  $('#nlIssues').innerHTML = d.issues.map(i => `<tr><td class="mono">${esc(i.day)}</td><td><a href="/news/issue/${i.id}">${esc(i.title)}</a></td>
+    <td class="dim">${esc(i.model || 'keywords')}</td><td>${i.status === 'sent' ? `sent to ${i.sent_count}${i.failed_count ? `, <span style="color:var(--alert)">${i.failed_count} failed</span>` : ''}` : '<span class="dim">draft</span>'}</td>
+    <td style="white-space:nowrap"><button class="small" data-test="${i.id}">Send me a test</button>${i.status !== 'sent' ? ` <button class="small" data-send="${i.id}">Send to everyone now</button>` : ''}</td></tr>`).join('')
+    || '<tr><td colspan="5" class="dim">No issue yet.</td></tr>';
+  $('#srcSec').innerHTML = '<option value="">section: by keywords</option>' + d.sections.map(x => `<option>${esc(x)}</option>`).join('');
+  $('#nlSrc').innerHTML = d.sources.map(r => `<tr><td><input type="checkbox" style="width:auto" data-src-on="${r.id}" ${r.enabled ? 'checked' : ''}></td>
+    <td>${esc(r.name)}</td><td class="mono" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(r.url)}">${esc(r.url)}</td>
+    <td class="dim">${esc(r.section || 'by keywords')}</td><td class="dim" style="font-size:12px">${r.last_fetch ? fmtDate(r.last_fetch) + ' · ' : ''}<span style="color:${String(r.last_status || '').startsWith('error') ? 'var(--alert)' : 'inherit'}">${esc(r.last_status || 'not read yet')}</span></td>
+    <td><button class="small" data-src-del="${r.id}">×</button></td></tr>`).join('');
+  $$('[data-src-on]').forEach(c => c.onchange = async () => { const r = d.sources.find(x => x.id === +c.dataset.srcOn);
+    await api(`/api/news/admin/sources/${r.id}`, { method: 'PATCH', body: JSON.stringify({ name: r.name, url: r.url, section: r.section, enabled: c.checked }) }); });
+  $$('[data-src-del]').forEach(b => b.onclick = async () => { await api(`/api/news/admin/sources/${b.dataset.srcDel}`, { method: 'DELETE' }); newsletter(); });
+  $$('[data-test]').forEach(b => b.onclick = async () => { try { const r = await post(`/api/news/admin/issues/${b.dataset.test}/send`, { test: true }); nm(`Test sent to ${ME.email}${d.mail === 'outbox' ? ' (outbox)' : ''}`); } catch (e) { nm(e.message, true); } });
+  $$('[data-send]').forEach(b => b.onclick = async () => { if (!confirm('Send this issue to every subscriber now?')) return;
+    try { const r = await post(`/api/news/admin/issues/${b.dataset.send}/send`, { test: false }); nm(`Sent to ${r.sent}${r.failed ? `, ${r.failed} failed` : ''}`); newsletter(); } catch (e) { nm(e.message, true); } });
+}
+function newsletterButtons() {
+  const nm = (t, bad) => { $('#nlMsg').className = 'msg ' + (bad ? 'bad' : 'ok'); $('#nlMsg').textContent = t; };
+  $('#nlSave').onclick = async () => {
+    try { await api('/api/news/admin/settings', { method: 'PUT', body: JSON.stringify({ enabled: $('#nlOn').checked, send: $('#nlSend').checked,
+      send_hour: +$('#nlHour').value, tz: $('#nlTz').value.trim(), max_items: +$('#nlMax').value, max_per_day: +$('#nlCap').value, model_id: +$('#nlModel').value }) });
+      nm('Saved'); newsletter(); } catch (e) { nm(e.message, true); }
+  };
+  $('#nlFetch').onclick = async () => { nm('Reading the feeds…'); try { const r = await post('/api/news/admin/fetch'); nm(`${r.new} new stories from ${r.sources} feeds`); newsletter(); } catch (e) { nm(e.message, true); } };
+  $('#nlBuild').onclick = async () => { nm('Building…'); try { const i = await post('/api/news/admin/build', { replace: true }); nm(`Built: "${i.title}" (${i.model || 'keywords'}) - a draft until its hour; send yourself a test first`); newsletter(); } catch (e) { nm(e.message, true); } };
+  $('#srcAdd').onclick = async () => { try { const r = await post('/api/news/admin/sources', { name: $('#srcName').value, url: $('#srcUrl').value, section: $('#srcSec').value || null });
+    nm(`${r.name}: ${r.last_status}`); $('#srcName').value = ''; $('#srcUrl').value = ''; newsletter(); } catch (e) { nm(e.message, true); } };
+}
 async function mail() {
   const m = await api('/api/admin/mail');
   $('#mailMode').innerHTML = m.mode === 'smtp'

@@ -20,6 +20,7 @@ from . import config, db
 from .auth import current_user
 
 PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/",
+          "/news", "/news/", "/api/news", "/api/news/",     # the aviation news page (admin calls check the role)
           "/help", "/help/", "/api/help", "/api/help/", "/api/landing",
           "/ai-data/")            # datasets for a training machine (RunPod pod): the link's token is the access       # the documentation is public
 PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/ai", "/admin", "/profile", "/x/", "/stats", "/help")

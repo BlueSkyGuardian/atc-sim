@@ -46,6 +46,12 @@ boss, ins, ins2, atc, pil = (client(e) for e in ("boss@gmail.com", "ins@gmail.co
 for c, (fn, ln) in zip((boss, ins, ins2, atc, pil), (("Big", "Boss"), ("Ina", "Structor"), ("Ian", "Two"), ("Alaa", "Hamza"), ("Pierre", "Lote"))):
     c.put("/api/me", json={"first_name": fn, "last_name": ln, "licence": "X-1"})
 uid = {u["email"]: u["id"] for u in boss.get("/api/users").json()}
+notify.flush()                                            # the welcome of each first sign-in: read, and out of the way
+for c in (boss, ins, ins2, atc, pil):
+    c.post("/api/notifications/read", json={})
+ok(len(outbox("atc@gmail.com")) == 1, "a welcome e-mail at the first sign-in")
+for f in outbox():
+    os.remove(os.path.join(notify.OUTBOX, f))
 
 # ---------------------------------------------------------------- roles, accounts made in advance
 boss.patch(f"/api/users/{uid['ins@gmail.com']}", json={"role": "instructor"})

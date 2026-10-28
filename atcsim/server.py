@@ -26,7 +26,7 @@ app = FastAPI(
                 "Coordinates in NM (origin = sector centre, x east, y north).",
 )
 from .platform import config as pconfig
-from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec, stats as pstats, debriefs as pdeb, ailab as pai, notify as pnotify
+from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec, stats as pstats, debriefs as pdeb, ailab as pai, notify as pnotify, news as pnews
 from .platform.access import AccessMiddleware, seat_for
 
 if pconfig.AUTH == "off":
@@ -70,6 +70,7 @@ app.include_router(pcomms.router)
 app.include_router(prec.router)
 app.include_router(pstats.router)
 app.include_router(pnotify.router)
+app.include_router(pnews.router)
 
 
 @app.on_event("startup")
@@ -78,6 +79,7 @@ def _startup():
     if restored:
         print(f"  restored {len(restored)} exercise(s): {', '.join(restored)}")
     prec.recover()
+    pnews.start()                               # aviation news: the feeds every hour, the newsletter once a day
     import threading
     from . import docs_gen                     # build the documentation's generated reference in the background
     threading.Thread(target=docs_gen.reference_md, daemon=True).start()

@@ -105,7 +105,9 @@ def callback(request: Request, code: str = "", state: str = "", error: str = "")
                      headers={"Authorization": f"Bearer {tok.json()['access_token']}"}).json()
     if not info.get("email") or not info.get("email_verified"):
         raise HTTPException(403, "Google account email not verified")
+    before = db.user_by_email(info["email"].strip().lower())
     u = db.upsert_login(info["email"], info.get("sub", ""), info.get("given_name", ""), info.get("family_name", ""))
+    _welcome(before, u, request)
     if not u["active"]:
         return RedirectResponse("/login?error=account%20disabled", status_code=303)
     r = _login_response(u, st.get("next", "/"))
@@ -117,14 +119,31 @@ class DevLogin(BaseModel):
     email: str
 
 
+def _welcome(before: Optional[dict], u: dict, request: Request) -> None:
+    """The first sign-in (a new account, or one made in advance signing in for the first time): a welcome e-mail."""
+    if before is not None and before.get("last_login"):
+        return
+    try:
+        from . import notify
+        notify.notify(u["id"], "welcome", "Welcome to the ATC simulator",
+                      "Complete your profile (name and licence number) so instructors can invite you to exercises. "
+                      "Meanwhile, fly a scenario on your own on the solo radar, read the manuals in Help, and follow "
+                      "the aviation news; you can get it every morning by e-mail from your profile.",
+                      "/profile", base_url=notify.base_of(request))
+    except Exception:                                   # noqa: BLE001 - never blocks a sign-in
+        pass
+
+
 @router.post("/auth/dev")
-def dev_login(body: DevLogin):
+def dev_login(body: DevLogin, request: Request):
     if not config.DEV_LOGIN:
         raise HTTPException(404, "not available")
     email = body.email.strip().lower()
     if "@" not in email:
         raise HTTPException(400, "give an email address")
+    before = db.user_by_email(email)
     u = db.upsert_login(email)
+    _welcome(before, u, request)
     r = JSONResponse({"ok": True, "user": db.public_user(u)})
     r.set_cookie(COOKIE, _ser.dumps({"uid": u["id"]}), max_age=MAX_AGE, httponly=True, samesite="lax",
                  secure=config.COOKIE_SECURE)

@@ -37,7 +37,7 @@ async function header(cur) {
   if (ME.role === 'instructor' || ME.role === 'admin') links.push(['/designer', 'Scenario designer'], ['/ai', 'AI lab']);
   links.push(['/solo', 'Solo radar']);
   if (ME.role === 'admin') links.push(['/admin', 'Users']);
-  links.push(['/stats', 'Stats'], ['/help', 'Help'], ['/profile', 'Profile']);
+  links.push(['/stats', 'Stats'], ['/news', 'News'], ['/help', 'Help'], ['/profile', 'Profile']);
   const h = document.createElement('header'); h.className = 'top';
   h.innerHTML = `<div class="brand">ATC <span>SIM</span></div><nav>${links.map(([u, t]) => `<a href="${u}" class="${u === cur ? 'cur' : ''}">${t}</a>`).join('')}</nav>
     <div class="bell-wrap"><button class="bell" id="bell" aria-haspopup="true" aria-expanded="false" title="Notifications">
@@ -54,7 +54,7 @@ async function header(cur) {
 }
 // the notifications bell: unread count, the latest in a drop-down (newest first); opening one marks it read and
 // goes to it; "Mark all read"; refreshed every 30 s and when the page comes back into view
-const NOTE_ICONS = { exercise_invite: '✈', debrief_invite: '▶', scenario_share: '⇄', evaluation: '★', account: '◉', role: '◉' };
+const NOTE_ICONS = { exercise_invite: '✈', debrief_invite: '▶', scenario_share: '⇄', evaluation: '★', account: '◉', role: '◉', welcome: '✦' };
 function ago(t) {
   const d = Math.max(0, Date.now() / 1000 - t);
   if (d < 60) return 'just now'; if (d < 3600) return Math.floor(d / 60) + ' min ago';

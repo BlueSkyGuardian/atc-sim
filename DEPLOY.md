@@ -94,6 +94,28 @@ their profile (the bell stays). The administrator's *Users* page shows how mail 
 delivery, and sends a test e-mail. Mail is sent in the background: a mail server that is down never fails an
 invitation (the failure shows on the *Users* page).
 
+### Aviation news and the daily newsletter
+
+`/news` is public (no sign-in): the latest aviation stories, air traffic control first. The server reads RSS feeds
+every hour (aviation sites and Google News searches on air traffic control, air navigation technology and Morocco;
+the administrator edits the list on the *Users* page) and keeps the headline, the feed's short excerpt and the link -
+never the article. Every morning (07:00 Casablanca time by default) it builds the newsletter from the last day's
+stories and mails it to the subscribers; the issue is then on the news page too.
+
+* **Who gets it**: subscribers only. Signed-in users tick it in their profile (or on the news page); anyone else
+  subscribes on the news page and confirms by a link sent to the address. Every newsletter has an unsubscribe link and
+  the one-click `List-Unsubscribe` header.
+* **The writing**: with a language model, the stories are picked, sorted into sections and summarized in one or two
+  sentences (from the headline and excerpt only), with a title and an introduction. Add the model in the **AI lab**
+  as an OpenAI-compatible endpoint, then choose it in the newsletter settings. For example DeepSeek: base URL
+  `https://api.deepseek.com/v1`, model `deepseek-chat`, its API key; Google Gemini: base URL
+  `https://generativelanguage.googleapis.com/v1beta/openai`, model `gemini-2.5-flash-lite`. One issue is a few
+  thousand tokens: well under a cent a day with these. Without a model the stories are picked by keywords, with the
+  feeds' own excerpts.
+* **Volume**: a Gmail account sends about 500 e-mails a day (the setting *at most … e-mails a day*, 450 by default);
+  beyond that, use a mail service's SMTP relay (Brevo, Mailgun, Amazon SES...) with the same `ATC_SMTP_*` settings.
+* `ATC_NEWS=off` stops the hourly reading and the newsletter (a test machine without internet).
+
 ## 6. Data, backups, updates
 
 Everything lives in the `atc-data` Docker volume: `atcsim.db` (accounts, scenario sharing, exercises),

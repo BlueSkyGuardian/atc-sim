@@ -18,6 +18,8 @@
     <label class="f" style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="mailOn" style="width:auto">
       E-mail me when I am invited to an exercise or a debrief, a scenario is shared with me, or my work is evaluated</label>
     <div class="dim" style="font-size:12px">The bell at the top always shows them.</div>
+    <label class="f" style="display:flex;gap:8px;align-items:center;margin-top:14px"><input type="checkbox" id="newsOn" style="width:auto">
+      Send me the aviation newsletter every morning (<a href="/news">see the news</a>)</label>
     <div class="row" style="margin-top:16px"><button class="primary" id="save">Save</button><span class="msg" id="msg"></span></div>
   </div>
   <p class="dim" style="font-size:12px">Your role (controller, pseudo-pilot, instructor) is set by the administrator.</p>
@@ -30,6 +32,12 @@
   $('#email').value = me.email; $('#fn').value = me.first_name; $('#ln').value = me.last_name; $('#lic').value = me.licence;
   $('#role').value = ROLE_NAMES[me.role] || me.role;
   try { const p = await api('/api/me/notify'); $('#mailOn').checked = p.email_notify; } catch (e) {}
+  try { $('#newsOn').checked = (await api('/api/me/newsletter')).subscribed; } catch (e) {}
+  $('#newsOn').onchange = async () => {
+    try { await api('/api/me/newsletter', { method: 'PUT', body: JSON.stringify({ on: $('#newsOn').checked }) });
+      $('#msg').className = 'msg ok'; $('#msg').textContent = $('#newsOn').checked ? 'Newsletter on' : 'Newsletter off'; }
+    catch (e) { $('#msg').className = 'msg bad'; $('#msg').textContent = e.message; }
+  };
   $('#mailOn').onchange = async () => {
     try { await api('/api/me/notify', { method: 'PUT', body: JSON.stringify({ email_notify: $('#mailOn').checked }) });
       $('#msg').className = 'msg ok'; $('#msg').textContent = $('#mailOn').checked ? 'E-mails on' : 'E-mails off'; }

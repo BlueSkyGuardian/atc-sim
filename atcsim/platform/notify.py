@@ -182,26 +182,39 @@ e-mails off in your profile.</p></div></body></html>"""
 
 
 def send(to: str, subject: str, body: str = "", link: str = "", base: str = "", greeting: str = "") -> str:
-    """Send one e-mail now: 'sent' (SMTP) or 'outbox' (written to data/outbox). Raises on an SMTP error."""
-    m = _message(to, subject, body, link, base, greeting)
+    """Send one notification e-mail now: 'sent' (SMTP) or 'outbox' (written to data/outbox). Raises on an SMTP
+    error."""
+    return deliver(_message(to, subject, body, link, base, greeting))
+
+
+def compose(to: str, subject: str, text: str, page: str, headers: Optional[Dict[str, str]] = None) -> EmailMessage:
+    """A ready-made e-mail (plain text and HTML), with extra headers (List-Unsubscribe for the newsletter)."""
+    m = EmailMessage()
+    m["Subject"] = subject
+    m["From"] = formataddr((APP_NAME, SMTP_FROM))
+    m["To"] = to
+    m["Message-ID"] = make_msgid(domain=(SMTP_FROM.split("@")[-1] or "atcsim"))
+    for k, v in (headers or {}).items():
+        m[k] = v
+    m.set_content(text)
+    m.add_alternative(page, subtype="html")
+    return m
+
+
+def deliver(m: EmailMessage, smtp=None) -> str:
+    """Send a message: 'sent' (SMTP) or 'outbox'. smtp: an open connection to reuse (a newsletter to many)."""
+    to = str(m["To"])
     if not SMTP_HOST:
         os.makedirs(OUTBOX, exist_ok=True)
         name = f"{time.strftime('%Y%m%d-%H%M%S')}-{int(time.time() * 1000) % 1000:03d}-{to.replace('@', '_at_')}.eml"
         with open(os.path.join(OUTBOX, name), "wb") as f:
             f.write(bytes(m))
         return "outbox"
-    ctx = ssl.create_default_context()
-    if SMTP_SECURITY == "ssl":
-        s = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=20)
-    else:
-        s = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20)
+    if smtp is not None:
+        smtp.send_message(m)
+        return "sent"
+    s = connect()
     try:
-        s.ehlo()
-        if SMTP_SECURITY == "starttls":
-            s.starttls(context=ctx)
-            s.ehlo()
-        if SMTP_USER:
-            s.login(SMTP_USER, SMTP_PASSWORD)
         s.send_message(m)
     finally:
         try:
@@ -209,6 +222,22 @@ def send(to: str, subject: str, body: str = "", link: str = "", base: str = "", 
         except Exception:                               # noqa: BLE001
             pass
     return "sent"
+
+
+def connect():
+    """An open, signed-in SMTP connection (the caller quits it)."""
+    ctx = ssl.create_default_context()
+    if SMTP_SECURITY == "ssl":
+        s = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ctx, timeout=20)
+    else:
+        s = smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20)
+    s.ehlo()
+    if SMTP_SECURITY == "starttls":
+        s.starttls(context=ctx)
+        s.ehlo()
+    if SMTP_USER:
+        s.login(SMTP_USER, SMTP_PASSWORD)
+    return s
 
 
 # ------------------------------------------------------------------ API: the bell
