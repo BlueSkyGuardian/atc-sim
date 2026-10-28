@@ -122,6 +122,11 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   (`ATC_ARTICLES_URL`, default `https://raw.githubusercontent.com/BlueSkyGuardian/atc-sim/news/articles`), checks
   each article again (no HTML, https links only, figures that are plain SVG and PNG) and publishes it on `/news/a/<slug>`
   and at the top of the next newsletter. The *Users* page shows the newsroom's last reading.
+  *Read the newsroom now* (admin page, newsletter section) takes the new articles in at once.
+* **Link previews**: a shared article (WhatsApp, LinkedIn, Facebook, X, Slack...) shows its title, summary and its own
+  1200x630 picture (the title next to the article's first figure); `/news` has the site's own. The previews need full
+  addresses: set `ATC_PUBLIC_URL` (otherwise the address the request came to, through the proxy's X-Forwarded headers).
+  WhatsApp keeps a link's preview for a while: a link shared before the preview existed may need a little time.
 * `ATC_NEWS=off` stops the hourly reading and the newsletter (a test machine without internet).
 
 ## 6. Data, backups, updates

@@ -302,6 +302,39 @@ ok(mr.status_code == 200 and mr.headers["content-type"].startswith("image/svg+xm
 ok(anon.get(f"/news/media/{day}-morocco-story/..%2Fmeta.json").status_code == 404 and anon.get("/news/media/x/y.svg").status_code == 404, "nothing else served")
 ok(anon.get(f"/news/a/{day}-morocco-story").status_code == 200, "the article page is public")
 ok(news.sync_articles()["new"] == 0, "synced again: nothing new")
+
+# ---------------------------------------------------------------- link previews (WhatsApp, LinkedIn, X...)
+import io  # noqa: E402
+import re as _re  # noqa: E402
+from PIL import Image  # noqa: E402
+
+slug = f"{day}-morocco-story"
+db.x("UPDATE news_articles SET title=?, summary=? WHERE slug=?", ('ONDA & "Agadir" <radar>', "Short & clear.", slug))
+pg = anon.get(f"/news/a/{slug}", headers={"user-agent": "WhatsApp/2.23.20.0"}).text
+
+
+def meta(page, k):
+    m = _re.search(rf'<meta (?:property|name)="{_re.escape(k)}" content="([^"]*)"', page)
+    return m and m.group(1)
+
+
+ok(meta(pg, "og:title") == "ONDA &amp; &quot;Agadir&quot; &lt;radar&gt;" and "<title>ONDA &amp; &quot;Agadir&quot; &lt;radar&gt; · ATC SIM</title>" in pg,
+   "an article's page: its own title in the page and the preview, escaped")
+ok(meta(pg, "og:description") == "Short &amp; clear." and meta(pg, "og:type") == "article" and meta(pg, "twitter:card") == "summary_large_image"
+   and meta(pg, "og:url") == f"https://atc.example.com/news/a/{slug}", "its summary, type article, the large card, its address")
+img = (meta(pg, "og:image") or "").replace("&amp;", "&")
+ok(img.startswith(f"https://atc.example.com/news/media/{slug}/share.jpg?v="), f"its own picture, an absolute address ({img})")
+ri = anon.get(img.replace("https://atc.example.com", ""))
+pic = Image.open(io.BytesIO(ri.content))
+ok(ri.status_code == 200 and ri.headers["content-type"] == "image/jpeg" and pic.size == (1200, 630) and len(ri.content) < 300_000,
+   f"the picture: a 1200x630 JPEG under 300 kB ({len(ri.content)} bytes)")
+ok(pg.count('name="description"') == 1 and "news.html" not in pg and 'id="' in pg, "the page is still the news page, one description")
+gen = anon.get("/news").text
+ok(meta(gen, "og:image") == "https://atc.example.com/news/share.jpg" and meta(gen, "og:title") == "Aviation news · ATC SIM",
+   "the news page: the site's own preview")
+rs = anon.get("/news/share.jpg")
+ok(rs.status_code == 200 and Image.open(io.BytesIO(rs.content)).size == (1200, 630), "the site's picture")
+ok(meta(anon.get("/news/a/2020-01-01-no-such").text, "og:url") == "https://atc.example.com/news", "an unknown article: the site's preview")
 r = boss.post("/api/news/admin/sync")
 ok(r.status_code == 200 and r.json()["new"] == 0 and r.json()["count"] == 2 and r.json()["status"].startswith("ok"),
    f"admin: 'read the newsroom now' ({r.status_code} {r.text[:80]})")

@@ -406,6 +406,10 @@ def sync_articles() -> dict:
                       clean(m["title"], 140), clean(m.get("summary"), 400), body, json.dumps(srcs), json.dumps(figs),
                       clean(m.get("author") or "ATC SIM newsroom", 80), int(a.get("updated") or time.time()), time.time()))
                 new += 1
+                try:
+                    _share_card(slug, rebuild=True)
+                except Exception as e:                   # noqa: BLE001 - no preview picture is not a reason to refuse
+                    log.warning("share card %s: %s", slug, e)
             except Exception as e:                       # noqa: BLE001 - one bad article never stops the others
                 bad.append(f"{slug}: {e}")
     ART_STATE.update(last_sync=time.time(), status=f"ok: {len(idx)} in the index, {new} new or changed"
@@ -822,10 +826,93 @@ def _limited(key: str, n: int, per_s: float) -> bool:
 STATIC = config.ROOT + "/atcsim/static"
 
 
+def _share_card(slug: str, rebuild: bool = False) -> Optional[str]:
+    """The article's link-preview picture (built once, when the article comes in)."""
+    from . import share
+    out = _os.path.join(MEDIA, slug, "share.jpg")
+    if _os.path.exists(out) and not rebuild:
+        return out
+    r = db.q1("SELECT * FROM news_articles WHERE slug=?", (slug,))
+    if r is None:
+        return None
+    figs = json.loads(r["figures"] or "[]")
+    png = _os.path.join(MEDIA, slug, figs[0]["png"]) if figs else None
+    try:
+        dt = datetime.strptime(r["date"], "%Y-%m-%d")
+        day = f"{dt.day} {dt:%b %Y}"
+    except ValueError:
+        day = r["date"]
+    return share.card(out, r["title"], f"{REGION_NAMES.get(r['region'], r['region'])} · {day}", png)
+
+
+def _site_base(request: Request) -> str:
+    """The site's address for absolute links (ATC_PUBLIC_URL, else what the request came to, proxy headers included)."""
+    if config.PUBLIC_URL:
+        return config.PUBLIC_URL
+    proto = (request.headers.get("x-forwarded-proto") or request.url.scheme).split(",")[0].strip()
+    host = (request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc).split(",")[0].strip()
+    return f"{proto}://{host}"
+
+
+_PAGE_CACHE: Dict[str, str] = {}
+
+
+def _page_with(meta: Dict[str, str], title: str, description: str) -> HTMLResponse:
+    """news.html with the page's own title, description and link-preview (Open Graph / Twitter) tags."""
+    path = STATIC + "/news.html"
+    mt = str(_os.path.getmtime(path))
+    if _PAGE_CACHE.get("mt") != mt:
+        _PAGE_CACHE.update(mt=mt, html=open(path, encoding="utf-8").read())
+    page = _PAGE_CACHE["html"]
+    e = lambda v: html.escape(str(v), quote=True)                           # noqa: E731
+    tags = [f'<meta name="description" content="{e(description)}">']
+    for k, v in meta.items():
+        if v is None:
+            continue
+        attr = "name" if k.startswith("twitter:") else "property"
+        tags.append(f'<meta {attr}="{k}" content="{e(v)}">')
+    if meta.get("og:url"):
+        tags.append(f'<link rel="canonical" href="{e(meta["og:url"])}">')
+    page = re.sub(r"<title>.*?</title>", lambda m: f"<title>{e(title)}</title>", page, count=1, flags=re.S)
+    page = re.sub(r'<meta name="description"[^>]*>', lambda m: "\n".join(tags), page, count=1)
+    return HTMLResponse(page)
+
+
+def _og(base: str, url: str, title: str, description: str, image: str, kind: str = "website", **more) -> Dict[str, str]:
+    return {"og:site_name": "ATC SIM", "og:type": kind, "og:title": title, "og:description": description, "og:url": url,
+            "og:image": image, "og:image:secure_url": image if image.startswith("https://") else None,
+            "og:image:type": "image/jpeg", "og:image:width": "1200", "og:image:height": "630", "og:image:alt": title,
+            "og:locale": "en_US", **more, "twitter:card": "summary_large_image", "twitter:title": title,
+            "twitter:description": description, "twitter:image": image}
+
+
+SITE_DESCRIPTION = ("Aviation news for air traffic controllers: Morocco first, then Europe and the world - air traffic control "
+                    "and airspace, technology, safety, airlines and airports.")
+
+
 @router.get("/news", include_in_schema=False)
 @router.get("/news/issue/{iid}", include_in_schema=False)
-def news_page(iid: Optional[int] = None):
-    return FileResponse(STATIC + "/news.html")
+def news_page(request: Request, iid: Optional[int] = None):
+    base = _site_base(request)
+    title, desc = "Aviation news · ATC SIM", SITE_DESCRIPTION
+    if iid is not None:
+        _schema()
+        r = db.q1("SELECT title, intro, status FROM news_issues WHERE id=?", (iid,))
+        if r and r["status"] == "sent":
+            title = f"{r['title']} · ATC SIM"
+            desc = clean(r["intro"] or desc, 300)
+    url = base + (f"/news/issue/{iid}" if iid is not None else "/news")
+    return _page_with(_og(base, url, title, desc, base + "/news/share.jpg"), title, desc)
+
+
+@router.get("/news/share.jpg", include_in_schema=False)
+def site_share():
+    from . import share
+    out = _os.path.join(MEDIA, "_site", "share.jpg")
+    if not _os.path.exists(out):
+        _os.makedirs(_os.path.dirname(out), exist_ok=True)
+        share.site_card(out)
+    return FileResponse(out, media_type="image/jpeg", headers={"Cache-Control": "public, max-age=86400"})
 
 
 @router.get("/api/news")
@@ -850,8 +937,24 @@ def list_news(section: Optional[str] = None, q: Optional[str] = None, before: Op
 
 
 @router.get("/news/a/{slug}", include_in_schema=False)
-def article_page(slug: str):
-    return FileResponse(STATIC + "/news.html")
+def article_page(slug: str, request: Request):
+    base = _site_base(request)
+    _schema()
+    r = db.q1("SELECT * FROM news_articles WHERE slug=?", (slug,)) if _SLUG.match(slug) else None
+    if r is None:
+        return news_page(request)
+    try:
+        _share_card(slug)
+        img = f"{base}/news/media/{slug}/share.jpg?v={int(r['updated'] or 0)}"
+    except Exception as e:                               # noqa: BLE001
+        log.warning("share card %s: %s", slug, e)
+        img = base + "/news/share.jpg"
+    title = r["title"]
+    desc = r["summary"] or SITE_DESCRIPTION
+    meta = _og(base, f"{base}/news/a/{slug}", title, desc, img, "article",
+               **{"article:published_time": r["date"], "article:section": r["section"] or REGION_NAMES.get(r["region"]),
+                  "article:author": r["author"] or "ATC SIM newsroom"})
+    return _page_with(meta, f"{title} · ATC SIM", desc)
 
 
 @router.get("/api/news/articles")
@@ -873,12 +976,18 @@ def get_article(slug: str):
 @router.get("/news/media/{slug}/{name}", include_in_schema=False)
 def media(slug: str, name: str):
     """A figure: SVG (the site) or PNG (the e-mails), never anything that runs."""
-    if not (_SLUG.match(slug) and _FILE.match(name)):
+    if not (_SLUG.match(slug) and (_FILE.match(name) or name == "share.jpg")):
         raise HTTPException(404, "not found")
     path = _os.path.join(MEDIA, slug, name)
+    if name == "share.jpg" and not _os.path.exists(path):
+        try:
+            _share_card(slug)
+        except Exception as e:                           # noqa: BLE001
+            log.warning("share card %s: %s", slug, e)
     if not _os.path.exists(path):
         raise HTTPException(404, "not found")
-    return FileResponse(path, media_type="image/svg+xml" if name.endswith(".svg") else "image/png", headers={
+    kind = "image/svg+xml" if name.endswith(".svg") else "image/jpeg" if name.endswith(".jpg") else "image/png"
+    return FileResponse(path, media_type=kind, headers={
         "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
         "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=86400"})
 
