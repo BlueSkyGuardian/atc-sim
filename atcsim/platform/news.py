@@ -1101,6 +1101,15 @@ def fetch_now(request: Request):
         return fetch_all()
 
 
+@router.post("/api/news/admin/sync")
+def sync_now(request: Request):
+    """Read the newsroom's articles now (instead of waiting for the hourly read)."""
+    _admin(request)
+    with _job_lock:
+        r = sync_articles()
+    return dict(r, status=ART_STATE.get("status"), count=db.q1("SELECT COUNT(*) AS n FROM news_articles")["n"])
+
+
 class BuildIn(BaseModel):
     replace: bool = True
 

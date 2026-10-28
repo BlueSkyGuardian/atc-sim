@@ -42,7 +42,7 @@
       <span class="dim" style="font-size:12px">Any OpenAI-compatible model added in the <a href="/ai">AI lab</a> (DeepSeek, Gemini, ...); without one, stories are picked by keywords with the feeds' own excerpts.</span>
     </div>
     <div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button id="nlSave" class="primary">Save</button>
-      <button id="nlFetch">Read the feeds now</button><button id="nlBuild">Build today's issue</button>
+      <button id="nlFetch">Read the feeds now</button><button id="nlSync">Read the newsroom now</button><button id="nlBuild">Build today's issue</button>
       <span id="nlSubs" class="dim grow"></span></div>
     <div class="msg" id="nlMsg"></div>
     <table style="margin-top:8px"><thead><tr><th>Day</th><th>Issue</th><th>Written by</th><th>Status</th><th></th></tr></thead><tbody id="nlIssues"></tbody></table>
@@ -124,6 +124,7 @@ function newsletterButtons() {
       nm('Saved'); newsletter(); } catch (e) { nm(e.message, true); }
   };
   $('#nlFetch').onclick = async () => { nm('Reading the feeds…'); try { const r = await post('/api/news/admin/fetch'); nm(`${r.new} new stories from ${r.sources} feeds`); newsletter(); } catch (e) { nm(e.message, true); } };
+  $('#nlSync').onclick = async () => { nm('Reading the newsroom…'); try { const r = await post('/api/news/admin/sync'); nm(r.error ? `Newsroom: ${r.error}` : `Newsroom: ${r.new} new or changed article${r.new === 1 ? '' : 's'}, ${r.count} in all${(r.refused || []).length ? ` - refused: ${r.refused.join('; ')}` : ''}`, !!r.error || !!(r.refused || []).length); newsletter(); } catch (e) { nm(e.message, true); } };
   $('#nlBuild').onclick = async () => { nm('Building…'); try { const i = await post('/api/news/admin/build', { replace: true }); nm(`Built: "${i.title}" (${i.model || 'keywords'}) - a draft until its hour; send yourself a test first`); newsletter(); } catch (e) { nm(e.message, true); } };
   $('#srcAdd').onclick = async () => { try { const r = await post('/api/news/admin/sources', { name: $('#srcName').value, url: $('#srcUrl').value, section: $('#srcSec').value || null });
     nm(`${r.name}: ${r.last_status}`); $('#srcName').value = ''; $('#srcUrl').value = ''; newsletter(); } catch (e) { nm(e.message, true); } };

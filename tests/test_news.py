@@ -289,6 +289,7 @@ idx.append({"slug": f"{day}-evil-story", "date": day, "region": "international",
 json.dump({"articles": idx}, open(os.path.join(root, "articles", "index.json"), "w"))
 open(os.path.join(root, "articles", f"{day}-morocco-story", "body.md"), "a").write(" <script>alert(1)</script> [js](javascript:alert(1))")
 news.ARTICLES_URL = os.path.join(root, "articles")
+db.x("DELETE FROM news_articles")                        # only the local test articles (not what the startup read from GitHub)
 r = news.sync_articles()
 ok(r["new"] == 2 and any("evil" in x for x in r["refused"]), f"synced: 2 articles, the unsafe one refused ({r})")
 d = anon.get("/api/news/articles").json()["articles"]
@@ -301,6 +302,10 @@ ok(mr.status_code == 200 and mr.headers["content-type"].startswith("image/svg+xm
 ok(anon.get(f"/news/media/{day}-morocco-story/..%2Fmeta.json").status_code == 404 and anon.get("/news/media/x/y.svg").status_code == 404, "nothing else served")
 ok(anon.get(f"/news/a/{day}-morocco-story").status_code == 200, "the article page is public")
 ok(news.sync_articles()["new"] == 0, "synced again: nothing new")
+r = boss.post("/api/news/admin/sync")
+ok(r.status_code == 200 and r.json()["new"] == 0 and r.json()["count"] == 2 and r.json()["status"].startswith("ok"),
+   f"admin: 'read the newsroom now' ({r.status_code} {r.text[:80]})")
+ok(ins.post("/api/news/admin/sync").status_code == 403, "admins only")
 db.x("DELETE FROM news_issues")                          # a fresh day: its issue is built after the articles came in
 iss = news.build(day)
 ok([a["region"] for a in iss["articles"]] == ["morocco", "europe"], "the next issue opens with the newsroom's articles, Morocco first")
