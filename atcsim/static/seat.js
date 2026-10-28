@@ -23,11 +23,16 @@
     buildUnits();
     voice = window.__voice = new Voice(EXID, {
       onCalls: renderCalls, onRoster: renderMembers, onHello: renderMembers, onPtt: renderRx, onTx: renderTx,
-      onClosed: showEnded, onError: e => note(e, true),
+      onClosed: showEnded, onError: e => { note(e, true); renderTx(voice.tx); },
+      onMic: () => renderTx(voice.tx), onSound: () => renderTx(voice.tx),
     });
-    // ask for the microphone at the first click/key, so the first transmission is not cut
-    const pre = () => { voice.ensureMic(); window.removeEventListener('pointerdown', pre); window.removeEventListener('keydown', pre); };
-    window.addEventListener('pointerdown', pre); window.addEventListener('keydown', pre);
+    // the microphone opens with the seat (the browser asks once, then remembers); if it could not, the next click
+    // or key tries again. Sound itself waits for a first click or key on the page (the browser's rule) unless the
+    // microphone is already live.
+    voice.ensureMic().then(() => renderTx(voice.tx));
+    const retry = () => { if (!voice.node) voice.ensureMic(); };
+    window.addEventListener('pointerdown', retry); window.addEventListener('keydown', retry);
+    renderTx(false);
     setupPTT();
     setupTabs();
     if (SEAT === 'instructor') setupInstructor();
@@ -94,7 +99,9 @@
   function renderTx(on) {
     const k = $('#pttKey');
     k.classList.toggle('tx', on);
-    k.textContent = on ? '● TRANSMITTING' : (voice.micError ? '🎙 ' + voice.micError : '🎙 hold SPACE to transmit');
+    k.textContent = on ? (voice.node ? '● TRANSMITTING' : '… opening the microphone') : voice.micError ? '🎙 ' + voice.micError + ' · click to retry'
+      : voice.soundBlocked() ? '🔇 click anywhere to turn the radio on' : !voice.node ? '🎙 opening the microphone…' : '🎙 hold SPACE to transmit';
+    k.classList.toggle('warn', !on && (!!voice.micError || voice.soundBlocked()));
   }
   function renderRx() {
     if (!voice) return;

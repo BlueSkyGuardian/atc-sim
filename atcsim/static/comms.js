@@ -5,24 +5,26 @@
 // little jitter buffer on playback.
 (function () {
   const RATE = 16000, FRAME = 640;              // 40 ms per frame
+  // capture: resample the context's rate to 16 kHz (linear, continuous across the 128-sample blocks)
   const WORKLET = `
     class Cap extends AudioWorkletProcessor {
-      constructor() { super(); this.r = sampleRate / ${RATE}; this.p = 0; this.buf = new Int16Array(${FRAME}); this.n = 0; this.on = false;
+      constructor() { super(); this.r = sampleRate / ${RATE}; this.p = 0; this.prev = 0; this.buf = new Int16Array(${FRAME}); this.n = 0; this.on = false;
         this.port.onmessage = e => { this.on = e.data; if (!this.on) this.n = 0; }; }
       process(inputs) {
         const ch = inputs[0] && inputs[0][0]; if (!ch) return true;
-        if (!this.on) { this.p = 0; return true; }
-        for (; this.p < ch.length; this.p += this.r) {
-          const i = Math.floor(this.p), f = this.p - i, a = ch[i], b = i + 1 < ch.length ? ch[i + 1] : a;
+        if (!this.on) { this.p = 0; this.prev = ch[ch.length - 1]; return true; }
+        // this.p: position in this block, -1 = the last sample of the previous block
+        for (; this.p < ch.length - 1; this.p += this.r) {
+          const i = Math.floor(this.p), f = this.p - i, a = i < 0 ? this.prev : ch[i], b = ch[i + 1];
           let v = a + (b - a) * f; v = Math.max(-1, Math.min(1, v));
           this.buf[this.n++] = v * 32767;
           if (this.n === ${FRAME}) { this.port.postMessage(this.buf.slice(0)); this.n = 0; }
         }
-        this.p -= ch.length;
+        this.p -= ch.length; this.prev = ch[ch.length - 1];
         return true;
       }
     }
-    registerProcessor('cap', Cap);`;
+    try { registerProcessor('cap', Cap); } catch (e) {}`;
   function lin2ulaw(s) {
     let sign = (s >> 8) & 0x80; if (sign) s = -s; if (s > 32635) s = 32635; s += 0x84;
     let exp = 7; for (let m = 0x4000; (s & m) === 0 && exp > 0; exp--, m >>= 1);
@@ -70,36 +72,60 @@
           const b = this.ctx.createBiquadFilter(); b.type = 'lowpass'; b.frequency.value = hi; a.connect(b); b.connect(this.out); return a; };
         this.radioIn = mk(250, 3600); this.phoneIn = mk(300, 3400);
       }
-      if (this.ctx.state === 'suspended') this.ctx.resume();
+      if (this.ctx.state === 'suspended') this.ctx.resume().then(() => this.h.onSound && this.h.onSound(true)).catch(() => {});
+      if (!this._sw) { this._sw = true; this.ctx.onstatechange = () => this.h.onSound && this.h.onSound(this.ctx.state === 'running'); }
       return this.ctx;
     }
-    async ensureMic() {
-      if (this.node) return true;
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { this.micError = 'the microphone needs an HTTPS connection'; this.h.onError && this.h.onError(this.micError); return false; }
-      const ctx = this.audio(); if (!ctx) return false;
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
-        const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
-        await ctx.audioWorklet.addModule(url);
-        this.mic = ctx.createMediaStreamSource(stream);
-        this.node = new AudioWorkletNode(ctx, 'cap');
-        this.node.port.onmessage = e => this.frame(e.data);
-        const sink = ctx.createGain(); sink.gain.value = 0;
-        this.mic.connect(this.node); this.node.connect(sink); sink.connect(ctx.destination);
-        this.micError = null; this.updateMic(); return true;
-      } catch (e) { this.micError = 'microphone: ' + (e.message || e.name); this.h.onError && this.h.onError(this.micError); return false; }
+    // The microphone is opened once per page: one stream, one capture node, whatever asks for it (the seat at its
+    // start, push-to-talk, a call) and however many times; a failed attempt can be tried again.
+    ensureMic() {
+      if (this.node) return Promise.resolve(true);
+      if (this._micP) return this._micP;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { this.micError = 'the microphone needs an HTTPS connection'; this.h.onError && this.h.onError(this.micError); return Promise.resolve(false); }
+      const ctx = this.audio(); if (!ctx) return Promise.resolve(false);
+      this._micP = (async () => {
+        let stream = null;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+          if (!this._wk) {
+            const url = URL.createObjectURL(new Blob([WORKLET], { type: 'application/javascript' }));
+            this._wk = ctx.audioWorklet.addModule(url).catch(e => { this._wk = null; throw e; });
+          }
+          await this._wk;
+          this.stream = stream;
+          this.mic = ctx.createMediaStreamSource(stream);
+          this.node = new AudioWorkletNode(ctx, 'cap');
+          this.node.port.onmessage = e => this.frame(e.data);
+          const sink = ctx.createGain(); sink.gain.value = 0;
+          this.mic.connect(this.node); this.node.connect(sink); sink.connect(ctx.destination);
+          this.micError = null;
+          if (ctx.state === 'suspended') ctx.resume().catch(() => {});   // a page with a live microphone may play sound
+          this.updateMic(); this.h.onMic && this.h.onMic(true);
+          return true;
+        } catch (e) {
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          this.micError = e && e.name === 'NotAllowedError' ? 'microphone blocked: allow it in the address bar' : 'microphone: ' + ((e && (e.message || e.name)) || e);
+          this.h.onError && this.h.onError(this.micError); this.h.onMic && this.h.onMic(false);
+          return false;
+        } finally { this._micP = null; }
+      })();
+      return this._micP;
     }
+    // sound needs a click or a key on the page first (the browser's rule), unless the microphone is already live
+    soundBlocked() { return !this.ctx || this.ctx.state !== 'running'; }
     myCall() { return this.me && this.calls.find(c => c.state === 'active' && ((c.caller && c.caller.conn === this.me.conn) || (c.answerer && c.answerer.conn === this.me.conn))); }
     live() { return this.open ? !this.muted : (this.tx || !!this.myCall()); }
     mute(on) { this.muted = !!on; this.send({ op: 'mute', on: this.muted }); this.updateMic(); }
     speaking(conn) { return this.ctx && (this.heard[conn] || 0) > this.ctx.currentTime - 0.35; }
     updateMic() {
       const on = this.live();
-      if (on && !this.node) { this.ensureMic(); return; }
+      if (on && !this.node) { this.ensureMic(); return; }            // (updates again once it is open)
       if (this.node) this.node.port.postMessage(on);
     }
     frame(pcm) {
-      if (!this.live()) return;
+      // after push-to-talk is released, the frames the microphone had already captured still go (the transmission's
+      // last syllable): the frequency is released 150 ms later
+      if (!this.live() && !(this._offT && performance.now() < this._tail)) return;
       const u = new Uint8Array(pcm.length);
       for (let i = 0; i < pcm.length; i++) u[i] = lin2ulaw(pcm[i]);
       this.send(u.buffer);
@@ -107,14 +133,23 @@
     async ptt(on) {
       if (on === this.tx) return;
       this.tx = on;
-      if (on) this.audio();
-      this.send({ op: 'ptt', on });
+      if (on) {
+        this.audio();
+        if (this._offT) { clearTimeout(this._offT); this._offT = null; }      // pressed again within the tail: still on
+        else this.send({ op: 'ptt', on: true });
+      } else {
+        this._tail = performance.now() + 150;
+        this._offT = setTimeout(() => { this._offT = null; if (!this.tx) this.send({ op: 'ptt', on: false }); }, 150);
+      }
       this.updateMic();
       this.h.onTx && this.h.onTx(on);
     }
     call(unit) { this.audio(); this.ensureMic(); this.send({ op: 'call', unit }); }
     answer(id) { this.audio(); this.ensureMic(); this.send({ op: 'answer', call: id }); }
     hangup(id) { this.send({ op: 'hangup', call: id }); }
+    // Playback: each speaker's frames are queued back to back behind a jitter buffer of 150 ms; a frame that comes
+    // too late (the stream ran dry) restarts it, and every restart lengthens that speaker's buffer (up to 400 ms),
+    // so a connection that stutters gets a little more delay instead of a choppy voice.
     play(buf) {
       const ctx = this.ctx; if (!ctx || ctx.state !== 'running') return;
       const dv = new DataView(buf), chan = dv.getUint8(0), conn = dv.getUint16(1, true), n = buf.byteLength - 3;
@@ -123,8 +158,13 @@
       const u = new Uint8Array(buf, 3), ab = ctx.createBuffer(1, n, RATE), d = ab.getChannelData(0);
       for (let i = 0; i < n; i++) d[i] = ULAW[u[i]];
       const key = chan * 65536 + conn, now = ctx.currentTime;
-      let t = this.next[key] || 0;
-      if (t < now + 0.03 || t > now + 0.8) t = now + 0.12;          // (re)start with a 120 ms jitter buffer
+      this.jb = this.jb || {};
+      let t = this.next[key] || 0, jb = this.jb[key] || 0.15;
+      if (t < now + 0.005) {                                         // ran dry (or the first frame): (re)start
+        if (t) { jb = Math.min(0.4, jb + 0.05); this.underruns = (this.underruns || 0) + 1; }
+        t = now + jb;
+      } else if (t > now + jb + 0.6) t = now + jb;                    // far behind (the tab was asleep): catch up
+      this.jb[key] = jb;
       const src = ctx.createBufferSource(); src.buffer = ab; src.connect(chan === 0 ? this.radioIn : chan === 1 ? this.phoneIn : this.out); src.start(t);
       this.heard[conn] = t + ab.duration;
       this.next[key] = t + ab.duration;

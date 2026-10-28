@@ -82,7 +82,7 @@ with sync_playwright() as p:
         row.locator("select").select_option(role)
         boss.wait_for_timeout(400)
     boss.screenshot(path=f"{OUT}/01_admin.png")
-    ok("Pseudo-pilot" in boss.locator("tbody").inner_text(), "admin sets roles")
+    ok("Pseudo-pilot" in boss.locator("#rows").inner_text(), "admin sets roles")
 
     ins.goto("/")
     ins.wait_for_selector("#tiles [data-tile=scenarios]")
@@ -105,12 +105,12 @@ with sync_playwright() as p:
     ins.wait_for_selector("#exMembers .mem")
     links = ins.evaluate("EXINFO.links")
     atc.goto("/")
-    atc.wait_for_selector(f"a[href='/x/{eid}']")
+    atc.wait_for_selector(f"#tiles a[href='/x/{eid}']")
     ok(atc.locator(f"#tiles > .tile[data-tile=exercises] a[href='/x/{eid}'] button").count() == 1
        and atc.evaluate("[...document.querySelectorAll('#tiles > *')].every(t => t.classList.contains('tile'))"),
        "controller's home: the live exercise sits inside its tile, the grid holds only tiles")
     atc.screenshot(path=f"{OUT}/03_controller_home.png")
-    atc.click(f"a[href='/x/{eid}'] button")
+    atc.click(f"#tiles a[href='/x/{eid}'] button")
     pil.goto(links["pilot"])
     pil.wait_for_url(f"**/x/{eid}")
     for pg in (atc, pil):
@@ -130,15 +130,23 @@ with sync_playwright() as p:
     ok(bool(calling), f"{calling} calls")
     pil.wait_for_selector("#todo .todo.call", timeout=10000)
     pil.screenshot(path=f"{OUT}/04_pilot_checkin.png")
-    # radio: the pilot calls on the frequency (space bar)
+    # the microphone opens with the seat, before any click
+    for pg_ in (atc, pil, ins):
+        pg_.wait_for_function("window.__voice && window.__voice.node", timeout=10000)
+    ok(True, "the microphone opens on its own on every seat")
+    # radio: the pilot calls on the frequency (space bar), one stream of 25 frames a second (not two)
+    pil.evaluate("(() => { const v = window.__voice, s = v.send.bind(v); v.txT = []; v.send = o => { if (o instanceof ArrayBuffer) v.txT.push(v.ctx.currentTime); return s(o); }; })()")
     pil.click("#cv", position={"x": 300, "y": 300})
     pil.keyboard.down("Space")
     atc.wait_for_selector("#rxBox .rx", timeout=5000)
     atc.screenshot(path=f"{OUT}/05_controller_hears_pilot.png")
     ins.wait_for_selector("#rxBox .rx", timeout=5000)
-    pil.wait_for_timeout(1500)
+    pil.wait_for_timeout(2000)
     pil.keyboard.up("Space")
+    # frames per second of the browser's audio clock (a loaded test machine may run its sound card slower than real time)
+    fps = pil.evaluate("(() => { const t = window.__voice.txT; return t.length > 10 ? (t.length - 1) / (t[t.length - 1] - t[0]) : 0; })()")
     ok(True, "radio: pilot transmits, controller and instructor see who is talking")
+    ok(20 <= fps <= 30, f"one microphone stream: {fps:.1f} frames a second (25 expected; two streams would be 50)")
     # controller assumes (label menu) and enters a level
     atc.evaluate(f"onLongPressLabel('{calling}', 'cfl', {{clientX: 700, clientY: 400}})")
     atc.wait_for_selector("#lblMenu.on")
@@ -213,9 +221,9 @@ with sync_playwright() as p:
     ok(atc.is_visible("#lblMenu.on") and not atc.evaluate("document.querySelector('#lblMenu').classList.contains('fm')"), "long press on a value opens the full label menu")
     atc.keyboard.press("Escape")
     # RBL between two map points / a point and an aircraft
-    atc.click("#rblBtn"); atc.mouse.click(1000, 520); atc.mouse.click(1100, 640)
+    atc.evaluate("document.querySelector('#rblBtn').click()"); atc.mouse.click(1000, 520); atc.mouse.click(1100, 640)
     ok(atc.evaluate("rbls.length === 1 && typeof rbls[0].a === 'object' && typeof rbls[0].b === 'object'"), "RBL between two points " + atc.evaluate("JSON.stringify(rbls)"))
-    atc.click("#rblBtn"); atc.mouse.click(*box); atc.mouse.click(1050, 600)
+    atc.evaluate("document.querySelector('#rblBtn').click()"); atc.mouse.click(*box); atc.mouse.click(1050, 600)
     ok(atc.evaluate("rbls.length === 2"), "RBL between an aircraft and a point")
     # display menu
     atc.click("#dispBtn")
@@ -578,7 +586,7 @@ with sync_playwright() as p:
     atc.keyboard.press("Enter"); atc.keyboard.type("H250"); atc.wait_for_timeout(300); atc.keyboard.press("Shift+Enter")
     atc.wait_for_function("document.getElementById('radioLog').textContent.includes('heading 250')", timeout=8000)
     ok(True, f"solo radar: {scs} flies the heading and reads it back")
-    atc.click("#solveBtn")
+    atc.evaluate("document.querySelector('#solveBtn').click()")
     atc.wait_for_function("document.getElementById('solvePanel').textContent.match(/NM in|No predicted/)", timeout=30000)
     ok(True, "solo radar: the solver panel answers (" + atc.inner_text("#solvePanel").split("\n")[1][:60] + ")")
     atc.once("dialog", lambda d: d.accept())

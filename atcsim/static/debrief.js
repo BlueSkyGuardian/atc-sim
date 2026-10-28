@@ -300,7 +300,9 @@
       onClosed: () => { voice = null; refresh(); },
       onError: e => banner(h(e), 6000),
     }, { url: `/debriefs/${DBID}/comms`, open: true });
-    const pre = () => { if (voice) voice.ensureMic().then(() => { lastBar = ''; render(); }); window.removeEventListener('pointerdown', pre); };
+    // the microphone opens with the call (the browser asks once); if it could not, the next click tries again
+    voice.ensureMic().then(() => { lastBar = ''; render(); });
+    const pre = () => { if (voice && !voice.node) voice.ensureMic().then(() => { lastBar = ''; render(); }); };
     window.addEventListener('pointerdown', pre);
     setInterval(() => { if (voice) render(); }, 400);                         // who is speaking (redrawn only when it changes)
   }
