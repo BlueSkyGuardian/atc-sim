@@ -59,6 +59,11 @@ ok(sm.status_code == 200 and sm.headers["content-type"].startswith("application/
    and "<loc>https://atc.example.com/help/controller</loc>" in sm.text and "/radar" not in sm.text,
    "the sitemap: landing, news, every article (with its date), the documentation")
 
+hd = anon.head("/sitemap.xml")
+ok(hd.status_code == 200 and hd.headers["content-type"].startswith("application/xml") and hd.content == b""
+   and anon.head("/robots.txt").status_code == 200 and anon.head("/").status_code == 200,
+   "HEAD (crawlers ask it first): answered as GET, without the body - not 405")
+
 # ---------------------------------------------------------------- the landing page
 r = anon.get("/", follow_redirects=False)
 ok(r.status_code == 200 and "Online radar simulator for GMAC" in r.text and canon(r.text) == "https://atc.example.com/",

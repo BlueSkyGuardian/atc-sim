@@ -57,6 +57,31 @@ class NoStaleMiddleware:
 
 
 app.add_middleware(NoStaleMiddleware)
+
+
+class HeadMiddleware:
+    """HEAD answered as GET without the body (the routes only declare GET): crawlers and link checkers - Google's
+    among them - ask HEAD first, and a 405 there reads as a broken page or sitemap."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope.get("method") != "HEAD":
+            return await self.app(scope, receive, send)
+        done = False
+
+        async def send2(msg):
+            nonlocal done
+            if msg["type"] == "http.response.body":
+                if done:
+                    return
+                done = True
+                msg = {"type": "http.response.body", "body": b"", "more_body": False}
+            await send(msg)
+        await self.app(dict(scope, method="GET"), receive, send2)
+
+
+app.add_middleware(HeadMiddleware)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 manager = SessionManager()
 from .world import World as _World  # noqa: E402
