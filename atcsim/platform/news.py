@@ -107,6 +107,10 @@ CREATE TABLE IF NOT EXISTS news_subscribers (
   created_at REAL NOT NULL, confirmed_at REAL, unsub_at REAL, last_sent REAL, confirm_sent REAL, ip TEXT
 );
 CREATE TABLE IF NOT EXISTS news_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS news_articles (
+  slug TEXT PRIMARY KEY, date TEXT NOT NULL, region TEXT NOT NULL, section TEXT, title TEXT NOT NULL, summary TEXT,
+  body TEXT NOT NULL, sources TEXT NOT NULL, figures TEXT NOT NULL, author TEXT, updated INTEGER, synced_at REAL
+);
 """
 _ready = False
 _ready_lock = threading.Lock()
@@ -125,6 +129,10 @@ def _schema() -> None:
             for name, url, sec in DEFAULT_SOURCES:
                 db.x("INSERT OR IGNORE INTO news_sources (name, url, section, created_at) VALUES (?,?,?,?)",
                      (name, url, sec, time.time()))
+        try:
+            db.conn().execute("ALTER TABLE news_issues ADD COLUMN articles TEXT")
+        except Exception:                                # noqa: BLE001 - already there
+            pass
         if db.q1("SELECT 1 AS x FROM news_settings WHERE key='_users_subscribed'") is None:
             # the newsletter is on by default for every account: the accounts made before it, once
             now = time.time()
@@ -317,6 +325,118 @@ def classify(text: str, hint: Optional[str]) -> tuple:
     return sec, score
 
 
+# ------------------------------------------------------------------ the newsroom's own articles
+# Written every morning by the newsroom (a scheduled agent, tools/newsdesk/INSTRUCTIONS.md) and pushed to the `news`
+# branch of the repository; read from there (or a local folder) every hour. Everything is checked again here: no HTML
+# in the text, https links only, figures that are plain SVG (no script, nothing loaded from elsewhere) and PNG.
+import os as _os
+
+ARTICLES_URL = _os.environ.get("ATC_ARTICLES_URL", "https://raw.githubusercontent.com/BlueSkyGuardian/atc-sim/news/articles").rstrip("/")
+MEDIA = _os.path.join(config.DATA_DIR, "news_media")
+REGION_ORDER = ("morocco", "europe", "international")
+REGION_NAMES = {"morocco": "Morocco", "europe": "Europe", "international": "International"}
+_SLUG = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*$")
+_FILE = re.compile(r"^[a-z0-9][a-z0-9_.-]{0,80}\.(svg|png)$")
+_UNSAFE_SVG = ("<script", "javascript:", "<foreignobject", "<iframe", "<object", "<embed", " onload", " onclick",
+               " onerror", " onmouse", "xlink:href=\"http", "href=\"http")
+ART_STATE = {"last_sync": None, "status": None}
+
+
+def _get(rel: str, client) -> bytes:
+    if ARTICLES_URL.startswith(("http://", "https://")):
+        r = client.get(f"{ARTICLES_URL}/{rel}", params={"t": int(time.time() // 300)})     # past the CDN's cache
+        r.raise_for_status()
+        return r.content
+    with open(_os.path.join(ARTICLES_URL, rel), "rb") as f:
+        return f.read()
+
+
+def _clean_body(md: str) -> str:
+    md = re.sub(r"<[^>]*>", "", md)                                       # no HTML, ever
+    md = re.sub(r"\]\(\s*(?!https://)[^)]*\)", "]", md)                    # links: https only
+    md = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", md)                            # images: only the figures
+    return md.strip()
+
+
+def sync_articles() -> dict:
+    """Read the newsroom's index and take in the new or changed articles."""
+    _schema()
+    import httpx
+    new, bad = 0, []
+    with httpx.Client(timeout=20, follow_redirects=True, headers={"User-Agent": "ATC-SIM-News/1.0"}) as c:
+        try:
+            idx = json.loads(_get("index.json", c)).get("articles") or []
+        except Exception as e:                           # noqa: BLE001
+            ART_STATE.update(last_sync=time.time(), status=f"index: {e}"[:200])
+            return {"new": 0, "error": str(e)}
+        for a in idx[:300]:
+            slug = str(a.get("slug") or "")
+            if not _SLUG.match(slug):
+                continue
+            row = db.q1("SELECT updated FROM news_articles WHERE slug=?", (slug,))
+            if row and int(row["updated"] or 0) >= int(a.get("updated") or 0):
+                continue
+            try:
+                m = json.loads(_get(f"{slug}/meta.json", c))
+                body = _clean_body(_get(f"{slug}/body.md", c).decode("utf-8"))
+                if m.get("region") not in REGION_ORDER or not m.get("title") or len(body) < 400:
+                    raise ValueError("incomplete")
+                figs = []
+                _os.makedirs(_os.path.join(MEDIA, slug), exist_ok=True)
+                for f in (m.get("figures") or [])[:3]:
+                    sv, pn = str(f.get("file") or ""), str(f.get("png") or "")
+                    if not (_FILE.match(sv) and sv.endswith(".svg") and _FILE.match(pn) and pn.endswith(".png")):
+                        continue
+                    svg = _get(f"{slug}/{sv}", c)
+                    low = svg[:2_000_000].decode("utf-8", "replace").lower()
+                    if any(u in low for u in _UNSAFE_SVG) or not low.lstrip().startswith("<svg") or len(svg) > 2_000_000:
+                        raise ValueError(f"unsafe figure {sv}")
+                    png = _get(f"{slug}/{pn}", c)
+                    if not png.startswith(b"\x89PNG") or len(png) > 3_000_000:
+                        raise ValueError(f"bad png {pn}")
+                    open(_os.path.join(MEDIA, slug, sv), "wb").write(svg)
+                    open(_os.path.join(MEDIA, slug, pn), "wb").write(png)
+                    figs.append({"file": sv, "png": pn, "caption": clean(f.get("caption"), 300), "alt": clean(f.get("alt"), 300),
+                                 "credit": clean(f.get("credit"), 120)})
+                srcs = [{"title": clean(x.get("title"), 200), "url": str(x.get("url")), "site": clean(x.get("site"), 80)}
+                        for x in (m.get("sources") or [])[:12] if str(x.get("url", "")).startswith("https://")]
+                db.x("INSERT OR REPLACE INTO news_articles (slug, date, region, section, title, summary, body, sources, figures, "
+                     "author, updated, synced_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                     (slug, str(m.get("date") or slug[:10]), m["region"], m.get("section") if m.get("section") in SECTIONS else None,
+                      clean(m["title"], 140), clean(m.get("summary"), 400), body, json.dumps(srcs), json.dumps(figs),
+                      clean(m.get("author") or "ATC SIM newsroom", 80), int(a.get("updated") or time.time()), time.time()))
+                new += 1
+            except Exception as e:                       # noqa: BLE001 - one bad article never stops the others
+                bad.append(f"{slug}: {e}")
+    ART_STATE.update(last_sync=time.time(), status=f"ok: {len(idx)} in the index, {new} new or changed"
+                     + (f"; refused: {'; '.join(bad)[:300]}" if bad else ""))
+    return {"new": new, "refused": bad}
+
+
+def _article_out(r: dict, full: bool = False) -> dict:
+    figs = json.loads(r["figures"] or "[]")
+    out = {"slug": r["slug"], "date": r["date"], "region": r["region"], "region_name": REGION_NAMES.get(r["region"], r["region"]),
+           "section": r["section"], "title": r["title"], "summary": r["summary"], "author": r["author"],
+           "figures": [dict(f, url=f"/news/media/{r['slug']}/{f['file']}", png_url=f"/news/media/{r['slug']}/{f['png']}") for f in figs]}
+    if full:
+        out.update(body=r["body"], sources=json.loads(r["sources"] or "[]"))
+    return out
+
+
+def articles(days: Optional[int] = None, region: Optional[str] = None, limit: int = 30, since_day: Optional[str] = None) -> List[dict]:
+    _schema()
+    sql, args = "SELECT * FROM news_articles WHERE 1=1", []
+    if region:
+        sql += " AND region=?"
+        args.append(region)
+    if since_day:
+        sql += " AND date >= ?"
+        args.append(since_day)
+    sql += " ORDER BY date DESC, CASE region WHEN 'morocco' THEN 0 WHEN 'europe' THEN 1 ELSE 2 END, slug LIMIT ?"
+    args.append(limit)
+    return [_article_out(r) for r in db.q(sql, tuple(args))]
+
+
 # ------------------------------------------------------------------ the daily issue
 def candidates(hours: float = 26.0, limit: int = 80) -> List[dict]:
     since = time.time() - hours * 3600
@@ -416,8 +536,12 @@ def build(day: Optional[str] = None, replace: bool = False) -> dict:
         return issue(old["id"])
     if old and old["status"] == "sent":
         raise ValueError(f"the issue of {day} was sent already")
+    try:
+        sync_articles()
+    except Exception as e:                               # noqa: BLE001
+        log.warning("newsroom sync: %s", e)
     cands = candidates()
-    if not cands:
+    if not cands and not articles(since_day=(datetime.strptime(day, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d"), limit=1):
         raise ValueError("no stories in the last day (read the feeds first)")
     n = int(s.get("max_items") or 10)
     built, why = None, ""
@@ -428,7 +552,7 @@ def build(day: Optional[str] = None, replace: bool = False) -> dict:
             why = f"model failed ({e}); picked by keywords"
             log.warning("newsletter model: %s", e)
     if built is None:
-        built = _heuristic(cands, n)
+        built = _heuristic(cands, n) if cands else {"title": "Aviation news", "intro": "", "sections": [], "model": None}
         if why:
             built["model"] = why[:200]
     for sec in built["sections"]:
@@ -442,13 +566,21 @@ def build(day: Optional[str] = None, replace: bool = False) -> dict:
             full.append(_item_out(row, it["summary"] or row["excerpt"]))     # the issue keeps its own copy
         sec["items"] = full
     built["sections"] = [x for x in built["sections"] if x["items"]]
+    # the newsroom's articles since the last issue sent (the day's, and the day before's if not sent yet)
+    prev = db.q1("SELECT day FROM news_issues WHERE status='sent' AND day < ? ORDER BY day DESC LIMIT 1", (day,))
+    since = (datetime.strptime(prev["day"], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d") if prev else \
+        (datetime.strptime(day, "%Y-%m-%d") - timedelta(days=1)).strftime("%Y-%m-%d")
+    arts = [x for x in articles(since_day=since, limit=8) if x["date"] <= day]
+    arts.sort(key=lambda x: (REGION_ORDER.index(x["region"]) if x["region"] in REGION_ORDER else 9, x["date"]))
+    if arts and not str(built.get("model") or "") or (arts and not cands):
+        built["title"] = arts[0]["title"][:120]           # no model: the lead article is the issue's title
     if old:
-        db.x("UPDATE news_issues SET title=?, intro=?, sections=?, model=?, created_at=? WHERE id=?",
-             (built["title"], built["intro"], json.dumps(built["sections"]), built["model"], time.time(), old["id"]))
+        db.x("UPDATE news_issues SET title=?, intro=?, sections=?, model=?, created_at=?, articles=? WHERE id=?",
+             (built["title"], built["intro"], json.dumps(built["sections"]), built["model"], time.time(), json.dumps(arts), old["id"]))
         iid = old["id"]
     else:
-        iid = db.x("INSERT INTO news_issues (day, title, intro, sections, model, created_at) VALUES (?,?,?,?,?,?)",
-                   (day, built["title"], built["intro"], json.dumps(built["sections"]), built["model"], time.time()))
+        iid = db.x("INSERT INTO news_issues (day, title, intro, sections, model, created_at, articles) VALUES (?,?,?,?,?,?,?)",
+                   (day, built["title"], built["intro"], json.dumps(built["sections"]), built["model"], time.time(), json.dumps(arts)))
     return issue(iid)
 
 
@@ -463,7 +595,8 @@ def issue(iid: int) -> dict:
     if r is None:
         raise HTTPException(404, "no such issue")
     secs = [x for x in json.loads(r["sections"]) if x.get("items")]
-    return {"id": r["id"], "day": r["day"], "title": r["title"], "intro": r["intro"], "sections": secs,
+    arts = json.loads(r.get("articles") or "[]")
+    return {"id": r["id"], "day": r["day"], "title": r["title"], "intro": r["intro"], "sections": secs, "articles": arts,
             "model": r["model"], "status": r["status"], "sent_at": r["sent_at"], "sent_count": r["sent_count"],
             "failed_count": r["failed_count"], "created_at": r["created_at"]}
 
@@ -482,6 +615,11 @@ def render(iss: dict, unsub_url: str = "", base: str = "") -> tuple:
     lines = [f"AVIATION NEWS · {day}", "", iss["title"], ""]
     if iss["intro"]:
         lines += [iss["intro"], ""]
+    arts = iss.get("articles") or []
+    if arts:
+        lines += ["FROM OUR NEWSROOM", ""]
+        for a in arts:
+            lines += [f"• {a['title']} ({a['region_name']})", f"  {a['summary']}", f"  {base}/news/a/{a['slug']}" if base else "", ""]
     for s in iss["sections"]:
         lines += [s["name"].upper(), ""]
         for it in s["items"]:
@@ -492,6 +630,19 @@ def render(iss: dict, unsub_url: str = "", base: str = "") -> tuple:
         lines += [f"Unsubscribe: {unsub_url}"]
     text = "\n".join(lines)
     e = html.escape
+    newsroom = ""
+    for k, a in enumerate(arts):
+        fig = (a.get("figures") or [None])[0]
+        img = (f'<a href="{e(base)}/news/a/{e(a["slug"])}"><img src="{e(base)}{e(fig["png_url"])}" alt="{e(fig.get("alt") or "")}" '
+               f'width="548" style="width:100%;max-width:548px;height:auto;border:1px solid #e1e6eb;border-radius:6px;display:block;margin:0 0 10px"></a>') \
+            if fig and base and k < 3 else ""
+        newsroom += f"""<tr><td style="padding:14px 0 16px;border-bottom:1px solid #eef1f4">{img}
+<div style="color:#2f6fa8;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">{e(a['region_name'])}</div>
+<a href="{e(base)}/news/a/{e(a['slug'])}" style="color:#13263a;font-weight:700;font-size:17px;text-decoration:none;line-height:1.35">{e(a['title'])}</a>
+<div style="color:#3c4a57;font-size:14px;line-height:1.55;margin-top:5px">{e(a['summary'])}</div>
+<div style="margin-top:6px"><a href="{e(base)}/news/a/{e(a['slug'])}" style="color:#c2185b;font-size:13px;font-weight:600;text-decoration:none">Read the article →</a></div></td></tr>"""
+    if newsroom:
+        newsroom = f"""<tr><td style="padding:22px 0 4px;color:#c2185b;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">From our newsroom</td></tr>{newsroom}"""
     secs = ""
     for s in iss["sections"]:
         rows = "".join(f"""<tr><td style="padding:10px 0 12px;border-bottom:1px solid #eef1f4">
@@ -507,7 +658,7 @@ def render(iss: dict, unsub_url: str = "", base: str = "") -> tuple:
 <span style="color:#8693a0;font-weight:500;font-size:13px">· aviation news · {e(day)}</span></div>
 <h1 style="font-size:21px;line-height:1.3;margin:14px 0 8px">{e(iss['title'])}</h1>
 {f'<p style="font-size:15px;line-height:1.55;color:#3c4a57;margin:0">{e(iss["intro"])}</p>' if iss['intro'] else ''}</td></tr>
-<tr><td style="padding:0 26px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{secs}</table></td></tr>
+<tr><td style="padding:0 26px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{newsroom}{('<tr><td style="padding:22px 0 0;color:#8693a0;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Around the web</td></tr>' if newsroom and secs else '')}{secs}</table></td></tr>
 <tr><td style="padding:14px 26px 22px;color:#8693a0;font-size:12px;line-height:1.5">Headlines and short summaries; each story is on its own site.
 {f'<a href="{e(view)}" style="color:#8693a0">Read it on the site</a>.' if view else ''}
 {f' You get this because you subscribed to the simulator\'s aviation newsletter. <a href="{e(unsub_url)}" style="color:#8693a0">Unsubscribe</a>.' if unsub_url else ''}</td></tr>
@@ -582,6 +733,11 @@ def tick(now: Optional[float] = None) -> Optional[str]:
             STATE["last_fetch"] = now
             r = fetch_all()
             did = f"fetched {r['new']} new"
+            try:
+                ra = sync_articles()
+                did += f", {ra['new']} newsroom article(s)"
+            except Exception as e:                       # noqa: BLE001
+                log.warning("newsroom sync: %s", e)
         loc = datetime.fromtimestamp(now, _tz(s))
         day = loc.strftime("%Y-%m-%d")
         if s.get("send") and loc.hour >= int(s.get("send_hour") or 7):
@@ -691,6 +847,40 @@ def list_news(section: Optional[str] = None, q: Optional[str] = None, before: Op
     rows = db.q(sql, tuple(args))
     last = db.q1("SELECT MAX(fetched_at) AS t FROM news_items")
     return {"items": [_item_out(r) for r in rows], "sections": SECTIONS, "updated": last["t"] if last else None}
+
+
+@router.get("/news/a/{slug}", include_in_schema=False)
+def article_page(slug: str):
+    return FileResponse(STATIC + "/news.html")
+
+
+@router.get("/api/news/articles")
+def list_articles(region: Optional[str] = None, limit: int = 30):
+    """Public: the newsroom's articles, newest first (Morocco, then Europe, then international within a day)."""
+    return {"articles": articles(region=region if region in REGION_ORDER else None, limit=max(1, min(limit, 100))),
+            "regions": [{"id": r, "name": REGION_NAMES[r]} for r in REGION_ORDER]}
+
+
+@router.get("/api/news/articles/{slug}")
+def get_article(slug: str):
+    _schema()
+    r = db.q1("SELECT * FROM news_articles WHERE slug=?", (slug,))
+    if r is None:
+        raise HTTPException(404, "no such article")
+    return _article_out(r, full=True)
+
+
+@router.get("/news/media/{slug}/{name}", include_in_schema=False)
+def media(slug: str, name: str):
+    """A figure: SVG (the site) or PNG (the e-mails), never anything that runs."""
+    if not (_SLUG.match(slug) and _FILE.match(name)):
+        raise HTTPException(404, "not found")
+    path = _os.path.join(MEDIA, slug, name)
+    if not _os.path.exists(path):
+        raise HTTPException(404, "not found")
+    return FileResponse(path, media_type="image/svg+xml" if name.endswith(".svg") else "image/png", headers={
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:",
+        "X-Content-Type-Options": "nosniff", "Cache-Control": "public, max-age=86400"})
 
 
 @router.get("/api/news/issues")
@@ -836,7 +1026,8 @@ def admin_state(request: Request):
             "subscribers": {k: int(v or 0) for k, v in subs.items()}, "models": models, "mail": notify.mode(),
             "issues": db.q("SELECT id, day, title, status, sent_at, sent_count, failed_count, model FROM news_issues ORDER BY day DESC LIMIT 14"),
             "items_24h": db.q1("SELECT COUNT(*) AS n FROM news_items WHERE published > ?", (time.time() - 86400,))["n"],
-            "job": STATE}
+            "job": STATE, "newsroom": {**ART_STATE, "source": ARTICLES_URL,
+                                       "count": db.q1("SELECT COUNT(*) AS n FROM news_articles")["n"]}}
 
 
 class SettingsIn(BaseModel):

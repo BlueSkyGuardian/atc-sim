@@ -37,6 +37,27 @@
   header.pub .grow { flex: 1; }
   .btnlink { border: 1px solid var(--line); border-radius: 7px; padding: 5px 12px; color: var(--text); background: var(--panel2); }
   .btnlink:hover { border-color: var(--magenta); text-decoration: none; }
+  .room { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0 6px; }
+  .acard { display: flex; flex-direction: column; gap: 6px; padding: 0; overflow: hidden; color: var(--text); }
+  .acard:hover { text-decoration: none; border-color: var(--chart); }
+  .acard img { width: 100%; aspect-ratio: 16 / 9; object-fit: contain; background: #fff; display: block; }
+  .acard .in { padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 5px; }
+  .acard .t { font-weight: 650; font-size: 16px; line-height: 1.3; }
+  .acard .s { color: var(--dim); font-size: 13px; line-height: 1.5; }
+  .reg { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--magenta); }
+  .art { max-width: 760px; }
+  .art h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 10px; }
+  .art .lead { font-size: 17px; line-height: 1.6; color: var(--text); }
+  .art .body { font-size: 15.5px; line-height: 1.7; }
+  .art .body h2 { font-size: 19px; margin: 26px 0 8px; color: var(--text); }
+  .art .body a { text-decoration: underline; }
+  .art figure { margin: 22px 0; }
+  .art figure img { width: 100%; height: auto; border-radius: 8px; background: #fff; display: block; }
+  .art figcaption { font-size: 12.5px; color: var(--dim); margin-top: 6px; }
+  .art .srcs li { font-size: 13px; margin: 4px 0; }
+  .disclose { font-size: 12px; color: var(--dim); border-top: 1px solid var(--line-2); padding-top: 12px; margin-top: 24px; }
+  @media (max-width: 1000px) { .room { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 640px) { .room { grid-template-columns: 1fr; } .art h1 { font-size: 24px; } }
   @media (max-width: 860px) { .nw-grid { grid-template-columns: 1fr; } .chips input { margin-left: 0; max-width: none; flex: 1 1 100%; } }
 </style>
 </head>
@@ -55,12 +76,19 @@
     </div>
   </div>
   <div id="latestView">
+    <div id="roomWrap" hidden><h2 style="margin-bottom:0">From our newsroom <span class="dim" style="font-size:13px;font-weight:400">Morocco first, then Europe, then the world</span></h2>
+      <div class="room" id="room"></div></div>
+    <h2 id="webHd" hidden style="margin-bottom:0">Around the web</h2>
     <div class="chips" id="chips"></div>
     <div class="nw-grid">
       <div class="card"><div id="list"><div class="dim">Loading…</div></div>
         <div style="margin-top:12px"><button id="more" hidden>Older stories</button></div></div>
       <aside class="card issues"><b>Newsletter issues</b><div id="issues" style="margin-top:6px"><div class="dim note">None yet.</div></div></aside>
     </div>
+  </div>
+  <div id="articleView" hidden>
+    <p><a href="/news">← All the news</a></p>
+    <article class="card art" id="article"></article>
   </div>
   <div id="issueView" hidden>
     <p><a href="/news">← All the news</a></p>
@@ -70,6 +98,7 @@
     summaries written for this page; every story links to its site, where you read it. Gathered automatically every hour.</p>
 </main>
 <script src="/static/common.js"></script>
+<script src="/static/vendor/marked.min.js"></script>
 <script>
 const NW = { section: '', q: '', items: [], me: null, sections: [] };
 const ago2 = t => { const d = Date.now() / 1000 - t; return d < 3600 ? Math.max(1, Math.round(d / 60)) + ' min ago'
@@ -108,6 +137,45 @@ function chips() {
   $('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; NW.section = c.dataset.s; load(); });
   let tq; $('#q').addEventListener('input', e => { clearTimeout(tq); tq = setTimeout(() => { NW.q = e.target.value.trim(); load(); }, 300); });
 }
+const dayName = d => new Date(d + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+function acard(a) {
+  const f = (a.figures || [])[0];
+  return `<a class="card acard" href="/news/a/${esc(a.slug)}">${f ? `<img src="${esc(f.url)}" alt="${esc(f.alt || '')}" loading="lazy">` : ''}
+    <div class="in"><span class="reg">${esc(a.region_name)} · ${new Date(a.date + 'T12:00').toLocaleDateString([], { day: 'numeric', month: 'short' })}</span>
+    <span class="t">${esc(a.title)}</span><span class="s">${esc(a.summary || '')}</span></div></a>`;
+}
+async function newsroom() {
+  try {
+    const d = await getJSON('/api/news/articles?limit=9');
+    if (!d.articles.length) return;
+    $('#room').innerHTML = d.articles.map(acard).join('');
+    $('#roomWrap').hidden = false; $('#webHd').hidden = false;
+  } catch (e) {}
+}
+async function showArticle(slug) {
+  $('#latestView').hidden = true; $('#articleView').hidden = false; $('#subBox').hidden = true;
+  $('#pgTitle').parentElement.hidden = true;
+  try {
+    const a = await getJSON('/api/news/articles/' + encodeURIComponent(slug));
+    document.title = a.title + ' · Aviation news';
+    const fig = f => `<figure><img src="${esc(f.url)}" alt="${esc(f.alt || '')}"><figcaption>${esc(f.caption || '')}${f.credit ? ' · ' + esc(f.credit) : ''}</figcaption></figure>`;
+    let md = a.body, used = new Set();
+    md = md.replace(/\{\{figure:([^}]+)\}\}/g, (_, n) => { used.add(n); return `\n\nFIGURE_${n.replace(/[^a-z0-9]/gi, '_')}\n\n`; });
+    let html = window.marked ? marked.parse(md, { gfm: true }) : `<p>${esc(md)}</p>`;
+    for (const f of a.figures) {
+      const key = 'FIGURE_' + f.file.replace(/[^a-z0-9]/gi, '_');
+      html = html.replace(new RegExp(`<p>${key}</p>`), fig(f));
+    }
+    const rest = a.figures.filter(f => !used.has(f.file));
+    if (rest.length) html = html.replace('</p>', '</p>' + rest.map(fig).join(''));        // after the first paragraph
+    $('#article').innerHTML = `<span class="reg">${esc(a.region_name)}${a.section ? ' · ' + esc(a.section) : ''}</span>
+      <h1>${esc(a.title)}</h1><div class="dim" style="font-size:13px">${dayName(a.date)} · ${esc(a.author || 'ATC SIM newsroom')}</div>
+      <p class="lead">${esc(a.summary || '')}</p><div class="body">${html}</div>
+      <h2 style="font-size:15px;margin-top:26px">Sources</h2><ul class="srcs">${a.sources.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener nofollow">${esc(x.title)}</a> <span class="dim">· ${esc(x.site)}</span></li>`).join('')}</ul>
+      <div class="disclose">Written for ATC SIM by an AI model (Claude) from the sources listed, in its own words; the charts and maps are drawn from the figures in those sources. Spotted a mistake? Tell your instructor.</div>`;
+    $('#article').querySelectorAll('.body a').forEach(l => { l.target = '_blank'; l.rel = 'noopener nofollow'; });
+  } catch (e) { $('#article').innerHTML = '<p class="dim">This article is not available.</p>'; }
+}
 async function issues() {
   const l = await getJSON('/api/news/issues');
   if (l.length) $('#issues').innerHTML = l.map(i => `<a href="/news/issue/${i.id}">${esc(i.title)}<span>${new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}</span></a>`).join('');
@@ -119,6 +187,7 @@ async function showIssue(id) {
     document.title = i.title + ' · Aviation news';
     $('#pgTitle').textContent = 'Aviation news · ' + new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     $('#issue').innerHTML = `<h1 style="font-size:22px;margin-top:0">${esc(i.title)}</h1>${i.intro ? `<p class="intro">${esc(i.intro)}</p>` : ''}`
+      + ((i.articles || []).length ? `<h2>From our newsroom</h2><div class="room">${i.articles.map(acard).join('')}</div>` : '')
       + i.sections.map(s => `<h2>${esc(s.name)}</h2>${s.items.map(it => story(it)).join('')}`).join('');
   } catch (e) { $('#issue').innerHTML = '<p class="dim">This issue is not available.</p>'; }
 }
@@ -154,6 +223,9 @@ function subForm() {
   subForm();
   const m = location.pathname.match(/^\/news\/issue\/(\d+)/);
   if (m) { showIssue(m[1]); return; }
+  const ma = location.pathname.match(/^\/news\/a\/([a-z0-9-]+)/);
+  if (ma) { showArticle(ma[1]); return; }
+  newsroom();
   $('#more').onclick = () => load(true);
   await load(); issues();
 })();

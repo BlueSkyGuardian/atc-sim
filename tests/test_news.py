@@ -245,4 +245,66 @@ did = news.tick(tomorrow.timestamp())
 ok(did and "sent to 4" in did, f"the daily job at its hour: read, built, sent ({did})")
 ok(len(mails("atc@gmail.com")) == n_before + 1 and len(mails("reader@example.org")) == 2, "to the subscribers left (not to the one who left)")
 ok("sent to" not in str(news.tick(tomorrow.timestamp() + 120)), "once a day")
+
+# ---------------------------------------------------------------- the newsroom's own articles (a local `news` branch)
+import shutil, subprocess  # noqa: E401,E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "newsdesk"))
+import publish  # noqa: E402
+
+root = tempfile.mkdtemp(prefix="newsbranch-")
+day = datetime.now(tz).strftime("%Y-%m-%d")
+PNG = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000" "1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082")
+
+
+def article(slug, region, body, svg='<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><rect width="10" height="10"/></svg>'):
+    d = os.path.join(root, "articles", slug)
+    os.makedirs(d, exist_ok=True)
+    open(os.path.join(d, "fig.svg"), "w").write(svg)
+    open(os.path.join(d, "fig.png"), "wb").write(PNG)
+    json.dump({"slug": slug, "date": slug[:10], "region": region, "section": "Air traffic control & airspace",
+               "title": f"Title of {slug}", "summary": "A summary.", "author": "ATC SIM newsroom",
+               "sources": [{"title": "One", "url": "https://one.example/x", "site": "One"}, {"title": "Two", "url": "https://two.example/y", "site": "Two"}],
+               "figures": [{"file": "fig.svg", "png": "fig.png", "caption": "A figure.", "alt": "A figure", "credit": "ATC SIM"}]},
+              open(os.path.join(d, "meta.json"), "w"))
+    open(os.path.join(d, "body.md"), "w").write(body)
+    return d
+
+
+words = " ".join(["word"] * 400)
+article(f"{day}-europe-story", "europe", f"{words}\n\n## More\n\n{{{{figure:fig.svg}}}}\n\nSee [it](https://one.example/x).")
+article(f"{day}-morocco-story", "morocco", f"{words}\n\nMore.")
+bad = article(f"{day}-bad-story", "morocco", f"{words} <b>html</b> [x](http://plain.example) ![img](https://i.example/a.png)",
+              svg='<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>')
+errs = publish.check(bad)
+ok(any("no HTML" in x for x in errs) and any("https" in x for x in errs) and any("unsafe SVG" in x for x in errs)
+   and any("no Markdown images" in x for x in errs), f"the publisher refuses HTML, plain-http links, images, unsafe SVG ({len(errs)} problems)")
+ok(publish.main(["publish", root]) == 1, "and does not build the index while an article is wrong")
+shutil.rmtree(bad)
+ok(publish.main(["publish", root]) == 0, "all good: the index is built")
+idx = json.load(open(os.path.join(root, "articles", "index.json")))["articles"]
+ok([a["region"] for a in idx] == ["morocco", "europe"], "the index: Morocco first, then Europe")
+# an unsafe figure slipped past the publisher (written after the index): the server refuses that article
+evil = article(f"{day}-evil-story", "international", words, svg='<svg xmlns="http://www.w3.org/2000/svg" onload="x()"></svg>')
+idx.append({"slug": f"{day}-evil-story", "date": day, "region": "international", "updated": int(time.time())})
+json.dump({"articles": idx}, open(os.path.join(root, "articles", "index.json"), "w"))
+open(os.path.join(root, "articles", f"{day}-morocco-story", "body.md"), "a").write(" <script>alert(1)</script> [js](javascript:alert(1))")
+news.ARTICLES_URL = os.path.join(root, "articles")
+r = news.sync_articles()
+ok(r["new"] == 2 and any("evil" in x for x in r["refused"]), f"synced: 2 articles, the unsafe one refused ({r})")
+d = anon.get("/api/news/articles").json()["articles"]
+ok([a["region"] for a in d] == ["morocco", "europe"] and d[0]["figures"][0]["url"].endswith("/fig.svg"), "public list: Morocco first, with figures")
+full = anon.get(f"/api/news/articles/{day}-morocco-story").json()
+ok("<script" not in full["body"] and "javascript:" not in full["body"] and len(full["sources"]) == 2, "HTML and script links stripped by the server too")
+mr = anon.get(f"/news/media/{day}-morocco-story/fig.svg")
+ok(mr.status_code == 200 and mr.headers["content-type"].startswith("image/svg+xml") and "default-src 'none'" in mr.headers["content-security-policy"],
+   "figures served as images, under a content security policy that runs nothing")
+ok(anon.get(f"/news/media/{day}-morocco-story/..%2Fmeta.json").status_code == 404 and anon.get("/news/media/x/y.svg").status_code == 404, "nothing else served")
+ok(anon.get(f"/news/a/{day}-morocco-story").status_code == 200, "the article page is public")
+ok(news.sync_articles()["new"] == 0, "synced again: nothing new")
+db.x("DELETE FROM news_issues")                          # a fresh day: its issue is built after the articles came in
+iss = news.build(day)
+ok([a["region"] for a in iss["articles"]] == ["morocco", "europe"], "the next issue opens with the newsroom's articles, Morocco first")
+subj, txt, page = news.render(iss, "https://atc.example.com/news/unsubscribe?t=x", "https://atc.example.com")
+ok("From our newsroom" in page and f"https://atc.example.com/news/media/{day}-morocco-story/fig.png" in page
+   and f"https://atc.example.com/news/a/{day}-morocco-story" in txt, "the e-mail: the articles with their PNG figure and links to the site")
 print("news checks passed")

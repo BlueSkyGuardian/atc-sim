@@ -116,6 +116,12 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   feeds' own excerpts.
 * **Volume**: a Gmail account sends about 500 e-mails a day (the setting *at most … e-mails a day*, 450 by default);
   beyond that, use a mail service's SMTP relay (Brevo, Mailgun, Amazon SES...) with the same `ATC_SMTP_*` settings.
+* **The newsroom's own articles**: 3 to 5 a day (Morocco first, then Europe, then international), each with a chart
+  or a map, written every morning by a scheduled agent (Claude) following `tools/newsdesk/INSTRUCTIONS.md` and pushed
+  to the `news` branch of the repository. The server reads `articles/index.json` there every hour
+  (`ATC_ARTICLES_URL`, default `https://raw.githubusercontent.com/BlueSkyGuardian/atc-sim/news/articles`), checks
+  each article again (no HTML, https links only, figures that are plain SVG and PNG) and publishes it on `/news/a/<slug>`
+  and at the top of the next newsletter. The *Users* page shows the newsroom's last reading.
 * `ATC_NEWS=off` stops the hourly reading and the newsletter (a test machine without internet).
 
 ## 6. Data, backups, updates

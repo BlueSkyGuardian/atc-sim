@@ -98,6 +98,8 @@ async function newsletter() {
   $('#nlModel').innerHTML = '<option value="0">keywords (no model)</option>' + d.models.map(m => `<option value="${m.id}" ${m.id === st.model_id ? 'selected' : ''}>${esc(m.name)} · ${esc(m.model)}</option>`).join('');
   const sb = d.subscribers;
   $('#nlSubs').innerHTML = `${sb.active} subscriber${sb.active === 1 ? '' : 's'}${sb.pending ? ` · ${sb.pending} waiting for confirmation` : ''}${sb.left ? ` · ${sb.left} left` : ''} · ${d.items_24h} stories in the last 24 h${d.mail === 'outbox' ? ' · <span style="color:var(--warn)">no mail server: e-mails go to the outbox</span>' : ''}`;
+  const nr = d.newsroom || {};
+  $('#nlSubs').innerHTML += ` · newsroom: ${nr.count || 0} article${nr.count === 1 ? '' : 's'}${nr.last_sync ? `, read ${fmtDate(nr.last_sync)}: <span style="color:${String(nr.status || '').startsWith('ok') ? 'inherit' : 'var(--alert)'}">${esc(nr.status || '')}</span>` : ''}`;
   $('#nlIssues').innerHTML = d.issues.map(i => `<tr><td class="mono">${esc(i.day)}</td><td><a href="/news/issue/${i.id}">${esc(i.title)}</a></td>
     <td class="dim">${esc(i.model || 'keywords')}</td><td>${i.status === 'sent' ? `sent to ${i.sent_count}${i.failed_count ? `, <span style="color:var(--alert)">${i.failed_count} failed</span>` : ''}` : '<span class="dim">draft</span>'}</td>
     <td style="white-space:nowrap"><button class="small" data-test="${i.id}">Send me a test</button>${i.status !== 'sent' ? ` <button class="small" data-send="${i.id}">Send to everyone now</button>` : ''}</td></tr>`).join('')
