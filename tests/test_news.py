@@ -238,6 +238,8 @@ ok("You are unsubscribed" in anon.post(path).text, "the button (or the one-click
 from datetime import datetime, timedelta  # noqa: E402
 tz = news._tz(news.settings())
 tomorrow = (datetime.now(tz) + timedelta(days=1)).replace(hour=8, minute=0, second=0, microsecond=0)
+if tomorrow.timestamp() - time.time() < 13 * 3600:       # run late in the evening: the day after (nobody gets two in 12 h)
+    tomorrow += timedelta(days=1)
 FEEDS["/rss.xml"] = RSS.replace("</channel>", f"""<item><title>New ATC sector opens over the Atlantic</title><link>https://wings.example/sector</link>
 <guid>wings-9</guid><pubDate>{rfc(tomorrow.timestamp() - 1800)}</pubDate><description>Airspace redesign.</description></item></channel>""")
 n_before = len(mails("atc@gmail.com"))

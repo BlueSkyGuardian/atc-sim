@@ -150,24 +150,36 @@
     // Playback: each speaker's frames are queued back to back behind a jitter buffer of 150 ms; a frame that comes
     // too late (the stream ran dry) restarts it, and every restart lengthens that speaker's buffer (up to 400 ms),
     // so a connection that stutters gets a little more delay instead of a choppy voice.
+    // The delay is bounded: after a burst (the server or the network held the frames, then let them all go) the
+    // voice would otherwise stay that much late - and an open call (the debrief) never pauses to catch up. Behind
+    // the buffer by more than 50 ms it plays 8 % faster until it is back; by more than 100 ms quiet frames are
+    // skipped; by more than 250 ms, any frame.
     play(buf) {
       const ctx = this.ctx; if (!ctx || ctx.state !== 'running') return;
       const dv = new DataView(buf), chan = dv.getUint8(0), conn = dv.getUint16(1, true), n = buf.byteLength - 3;
       if (n <= 0) return;
       this.rxFrames = (this.rxFrames || 0) + 1;
-      const u = new Uint8Array(buf, 3), ab = ctx.createBuffer(1, n, RATE), d = ab.getChannelData(0);
-      for (let i = 0; i < n; i++) d[i] = ULAW[u[i]];
       const key = chan * 65536 + conn, now = ctx.currentTime;
       this.jb = this.jb || {};
       let t = this.next[key] || 0, jb = this.jb[key] || 0.15;
+      const u = new Uint8Array(buf, 3);
+      const over = t - (now + jb);
+      if (over > 0.1) {                                              // behind: catch up
+        let e = 0; for (let i = 0; i < n; i += 4) { const v = ULAW[u[i]]; e += v * v; }
+        if (over > 0.25 || e / (n / 4) < 4e-4) { this.skipped = (this.skipped || 0) + 1; return; }
+      }
+      const ab = ctx.createBuffer(1, n, RATE), d = ab.getChannelData(0);
+      for (let i = 0; i < n; i++) d[i] = ULAW[u[i]];
       if (t < now + 0.005) {                                         // ran dry (or the first frame): (re)start
         if (t) { jb = Math.min(0.4, jb + 0.05); this.underruns = (this.underruns || 0) + 1; }
         t = now + jb;
-      } else if (t > now + jb + 0.6) t = now + jb;                    // far behind (the tab was asleep): catch up
+      }
       this.jb[key] = jb;
-      const src = ctx.createBufferSource(); src.buffer = ab; src.connect(chan === 0 ? this.radioIn : chan === 1 ? this.phoneIn : this.out); src.start(t);
-      this.heard[conn] = t + ab.duration;
-      this.next[key] = t + ab.duration;
+      const rate = t - (now + jb) > 0.05 ? 1.08 : 1, dur = ab.duration / rate;
+      const src = ctx.createBufferSource(); src.buffer = ab; src.playbackRate.value = rate;
+      src.connect(chan === 0 ? this.radioIn : chan === 1 ? this.phoneIn : this.out); src.start(t);
+      this.heard[conn] = t + dur;
+      this.next[key] = t + dur;
     }
     // ring (incoming) and ring-back (outgoing) tones, 425 Hz
     tone(kind) {

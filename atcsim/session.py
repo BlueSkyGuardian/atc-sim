@@ -69,6 +69,9 @@ class Session:
         self.rewinds = 0
         self._persisted_frames = 0
         self._snapshot()
+        # the world at T+0, kept for a restart: loading it takes milliseconds, building it again seconds (seconds in
+        # which the server does little else - voice included); only while the scenario is the one it was built from
+        self._start = (self._snaps[0][1], self._scn_sig()) if self._snaps and self._snaps[0][0] == 0 else None
         self._thread = threading.Thread(target=self._run, daemon=True, name=f"session-{self.id}")
         self._thread.start()
         if autostart and mode == "realtime":
@@ -171,7 +174,14 @@ class Session:
                 self.world.auto_wx = bool(time_factor if time_factor is not None else True)
             elif action == "restart":
                 auto = getattr(self.world, "auto_wx", True)
-                self.world = build_world(self.scn)
+                start = getattr(self, "_start", None)
+                if start is not None and start[1] == self._scn_sig():
+                    w = self._load_world(start[0])                   # T+0 as it was built (milliseconds)
+                    w.recording = {"every_s": w.recording.get("every_s", 5.0), "frames": [], "meta": dict(w.recording.get("meta") or {})}
+                    w._last_frame_t = -1e9
+                    self.world = w
+                else:
+                    self.world = build_world(self.scn)
                 self.world.multi = self._multi
                 self.world.auto_wx = auto
                 self.world.auto_pilot = self.solo
@@ -195,6 +205,12 @@ class Session:
             return self.summary()
 
     # ------------------------------------------------------------------ snapshots / rewind
+    def _scn_sig(self) -> int:
+        try:
+            return hash(json.dumps(self.scn, sort_keys=True, default=str))
+        except (TypeError, ValueError):
+            return id(self.scn)
+
     def _snapshot(self) -> None:
         w = self.world
         rec = w.recording

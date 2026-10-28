@@ -38,6 +38,8 @@ from .auth import LOCAL_ADMIN, current_user
 router = APIRouter()
 manager = None
 MAX_QUEUE = 120                     # frames waiting for a slow client before its audio is dropped
+MAX_AUDIO_AGE_S = 0.4               # a voice frame held up longer than this (a busy moment of the server) is dropped:
+                                    # late speech is worse than a gap - the listeners would hear everything later and later
 
 
 class Conn:
@@ -75,8 +77,10 @@ class Conn:
             pass                                    # its loop is gone: the connection is closing
 
     def _put(self, item) -> None:
-        if isinstance(item, (bytes, bytearray)) and self.q.qsize() > MAX_QUEUE:
-            return                                  # client too slow: drop audio, keep control messages
+        if isinstance(item, (bytes, bytearray)):
+            if self.q.qsize() > MAX_QUEUE:
+                return                              # client too slow: drop audio, keep control messages
+            item = (time.monotonic(), item)         # audio: when it was queued, to drop it if it is sent too late
         self.q.put_nowait(item)
 
 
@@ -312,8 +316,11 @@ async def serve(ws: WebSocket, room: Room, user: dict, seat: str, leader: bool =
             if item is None:
                 await ws.close()
                 return
-            if isinstance(item, (bytes, bytearray)):
-                await ws.send_bytes(bytes(item))
+            if isinstance(item, tuple):             # audio
+                if time.monotonic() - item[0] > MAX_AUDIO_AGE_S:
+                    conn.dropped = getattr(conn, "dropped", 0) + 1
+                    continue
+                await ws.send_bytes(bytes(item[1]))
             else:
                 await ws.send_text(json.dumps(item))
 

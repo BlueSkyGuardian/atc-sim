@@ -52,4 +52,17 @@ ok(ins.get(B + f"/sessions/{eid}/state").json()["sim_time_s"] > st["sim_time_s"]
 r = ins.post(B + f"/api/exercises/{eid}/end")
 ok(r.status_code == 200 and not os.path.exists(S + f"/rsdata/live/{eid}"), "ended: its save is removed")
 p.terminate()
+
+# the simulation's Restart: from the world saved at T+0 (milliseconds; building it again took seconds in which the
+# server did little else, voice included), the same start exactly
+import json, warnings  # noqa: E401,E402
+warnings.filterwarnings("ignore")
+from atcsim.session import SessionManager  # noqa: E402
+sm = SessionManager()
+ss = sm.create(scenario_name="c02_cta_severe_wx", mode="stepped", time_factor=1, autostart=False)
+pic0 = json.dumps(ss.world.state(False), sort_keys=True, default=str)
+ss.control("step", seconds=120)
+t_ = time.perf_counter(); ss.control("restart"); dt_ = time.perf_counter() - t_
+ok(dt_ < 1.0 and json.dumps(ss.world.state(False), sort_keys=True, default=str) == pic0 and ss.world.t == 0
+   and ss.world.recording["frames"] == [], f"Restart: back to T+0 exactly, in {dt_ * 1000:.0f} ms")
 print("restart checks passed")
