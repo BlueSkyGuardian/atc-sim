@@ -1,0 +1,35 @@
+{
+ "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
+ "date": "2026-10-28",
+ "region": "international",
+ "section": "Safety",
+ "title": "Sydney tower under scrutiny: ATSB releases its last two preliminary reports on 2026 ground conflicts",
+ "summary": "The Australian Transport Safety Bureau has published preliminary reports on two August taxiing conflicts at Sydney Airport, completing six. Both describe tower staffing and fatigue risk; an incomplete readback and a pushback clearance are at the centre.",
+ "sources": [
+  {
+   "title": "Sydney air traffic controller had high fatigue risk when Virgin jet cut in front of Qantas, report says",
+   "url": "https://www.abc.net.au/news/2026-10-26/sydney-air-traffic-controller-high-fatigue-risk-report-says/107310362",
+   "site": "ABC News"
+  },
+  {
+   "title": "ATSB releases last 2 Sydney ground conflict preliminary reports",
+   "url": "https://asianaviation.com/posts/atsb-releases-last-2-sydney-ground-conflict-preliminary-reports",
+   "site": "Asian Aviation"
+  },
+  {
+   "title": "Sydney Airport runway conflict in July one of Australia's most severe, safety investigator says",
+   "url": "https://www.abc.net.au/news/2026-09-30/nsw-atsb-sydney-airport-runway-conflict-preliminary-reports/107210322",
+   "site": "ABC News"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Sydney Kingsford Smith Airport, where the ATSB is investigating six occurrences from July and August 2026; the Virgin Australia flight involved on 17 August had diverted there from Newcastle because of weather.",
+   "alt": "Map of south-eastern Australia marking Sydney Kingsford Smith Airport and Newcastle, with a dashed line for the VA1589 diversion from Newcastle to Sydney.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}

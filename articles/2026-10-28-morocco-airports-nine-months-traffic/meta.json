@@ -1,0 +1,57 @@
+{
+ "slug": "2026-10-28-morocco-airports-nine-months-traffic",
+ "date": "2026-10-28",
+ "region": "morocco",
+ "section": "Morocco & Africa",
+ "title": "Moroccan airports pass 29.3 million passengers in nine months, with aircraft movements up 9.7%",
+ "summary": "ONDA's figures to the end of September 2026 show 29.33 million passengers (+8.74%) and 214,607 aircraft movements (+9.70%), with Casablanca, Marrakech and Agadir carrying most of the load for the country's towers and approach units.",
+ "sources": [
+  {
+   "title": "Aéroports marocains : 29,3 millions de passagers à fin septembre 2026",
+   "url": "https://www.aeronautique.ma/Aeroports-marocains-le-trafic-progresse-de-874-a-fin-septembre-2026_a6128.html",
+   "site": "Aeronautique.ma"
+  },
+  {
+   "title": "Aéroports du Maroc : plus de 29,3 millions de passagers à fin septembre",
+   "url": "https://leguide.ma/aeroports-du-maroc-plus-de-293-millions-de-passagers-a-fin-septembre/",
+   "site": "Le Guide du Maroc"
+  },
+  {
+   "title": "Aéroports du Maroc : plus de 29,3 millions de passagers à fin septembre (ONDA)",
+   "url": "https://maroc-diplomatique.net/aeroports-du-maroc-plus-de-293-millions-de-passagers-a-fin-septembre-onda/",
+   "site": "Maroc Diplomatique"
+  },
+  {
+   "title": "Morocco's airports handle 29.3 million passengers, up 8.7% in nine months",
+   "url": "https://en.hespress.com/148003-moroccos-airports-handle-29-3-million-passengers-up-8-7-in-nine-months.html",
+   "site": "Hespress English"
+  },
+  {
+   "title": "Rabat-Sale Airport Rolls Out Automated Self Bag Drop in National Deployment",
+   "url": "https://www.moroccoworldnews.com/2026/10/343516/rabat-sale-airport-rolls-out-automated-self-bag-drop-in-national-deployment/",
+   "site": "Morocco World News"
+  },
+  {
+   "title": "Marrakech Airshow 2026 : l'ONDA met en scène sa transformation sous la marque Airports of Morocco",
+   "url": "https://www.aeronautique.ma/Marrakech-Airshow-2026-l-ONDA-met-en-scene-sa-transformation-sous-la-marque-Airports-of-Morocco_a6117.html",
+   "site": "Aeronautique.ma"
+  }
+ ],
+ "figures": [
+  {
+   "file": "airports.svg",
+   "png": "airports.png",
+   "caption": "Passengers handled by Morocco's five busiest airports from January to September 2026.",
+   "alt": "Horizontal bar chart: Casablanca Mohammed V 9.36 million passengers, Marrakech-Ménara 8.11 million, Agadir-Al Massira 2.79 million, Tangier Ibn Battouta 2.33 million, Rabat-Salé 1.90 million, January to September 2026.",
+   "credit": "ATC SIM newsroom; data ONDA"
+  },
+  {
+   "file": "movements.svg",
+   "png": "movements.png",
+   "caption": "Aircraft movements (landings and take-offs) from January to September 2026: the national total and the three busiest airports.",
+   "alt": "Bar chart of aircraft movements, January to September 2026: all Moroccan airports 214,607, Casablanca Mohammed V 73,194, Marrakech-Ménara 53,164, Agadir-Al Massira 19,041.",
+   "credit": "ATC SIM newsroom; data ONDA"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}

@@ -1,0 +1,20 @@
+{
+ "slug": "2026-10-28-italy-enav-strike-october-30",
+ "date": "2026-10-28",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "Italy: four-hour ENAV strike called for Friday as the government moves to postpone transport walkouts",
+ "summary": "Uiltrasporti has called ENAV and Techno Sky staff out for four hours on Friday 30 October, the same day as a 24-hour USB general strike that covers air transport. The transport ministry has ordered a postponement, which USB says it will defy.",
+ "sources": [
+  {"title": "Strikes: two 'Black Fridays' on the horizon in less than a month", "url": "https://en.ilsole24ore.com/art/strikes-with-two-black-fridays-to-go-in-a-months-time-AJma66tB", "site": "Il Sole 24 Ore"},
+  {"title": "Scioperi, il 30 ottobre e il 20 novembre due venerdì neri di proteste", "url": "https://askanews.it/2026/10/25/scioperi-il-30-ottobre-e-il-20-novembre-due-venerdi-neri-di-proteste/", "site": "Askanews"},
+  {"title": "Confermato sciopero 30 ottobre, USB sfida la precettazione: cosa si rischia", "url": "https://quifinanza.it/info-utili/scioperi/precettazione-sciopero-generale-30-ottobre-2026/1021624/", "site": "QuiFinanza"},
+  {"title": "Sciopero Usb del 30 ottobre: la franchigia dei trasporti, il Comitato a Milano e i cortei davanti alle stazioni", "url": "https://www.sbircialanotizia.it/articoli/2026/10/26/sciopero-30-ottobre-fk9he/", "site": "Sbircia la Notizia"},
+  {"title": "Italy Aviation Strikes Oct. 29–30: Bologna, Pisa & Florence", "url": "https://www.traveltourister.com/news/italy-aviation-strike-october-29-30-2026-bologna-la-lucente-enav-atc-tuscany-pisa-florence-half-term-eu261-uk261/", "site": "TravelTourister"},
+  {"title": "Europe Flight Strikes: October and November 2026", "url": "https://myflyright.com/blog/europe-flight-strikes-october-and-november-2026/", "site": "MyFlyRight"}
+ ],
+ "figures": [
+  {"file": "map.svg", "png": "map.png", "caption": "Italian airports named in the strike notices for 29 October to 6 November; the ENAV and Techno Sky stoppage on 30 October is nationwide.", "alt": "Map of Italy marking Bologna (handling strike 29 October), Pisa and Florence (handling strike 30 October) and Bari (ENAV strike 6 November), with Rome Fiumicino for reference.", "credit": "ATC SIM newsroom; Natural Earth"}
+ ],
+ "author": "ATC SIM newsroom"
+}

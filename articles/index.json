@@ -1,4 +1,67 @@
 {
- "generated": 1793205135,
- "articles": []
+ "generated": 1793205998,
+ "articles": [
+  {
+   "slug": "2026-10-28-morocco-airports-nine-months-traffic",
+   "date": "2026-10-28",
+   "region": "morocco",
+   "section": "Morocco & Africa",
+   "title": "Moroccan airports pass 29.3 million passengers in nine months, with aircraft movements up 9.7%",
+   "summary": "ONDA's figures to the end of September 2026 show 29.33 million passengers (+8.74%) and 214,607 aircraft movements (+9.70%), with Casablanca, Marrakech and Agadir carrying most of the load for the country's towers and approach units.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "airports.svg",
+    "airports.png",
+    "movements.svg",
+    "movements.png"
+   ],
+   "updated": 1793205892
+  },
+  {
+   "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
+   "date": "2026-10-28",
+   "region": "morocco",
+   "section": "Airlines & airports",
+   "title": "Ryanair chief in Rabat confirms 5.3 million winter seats and a fifth Moroccan base at Rabat-Salé",
+   "summary": "On 27 October Ryanair's CEO Eddie Wilson presented the airline's winter 2026 programme for Morocco in Rabat with the national tourism office: 156 routes, 17 of them new, 13 Moroccan airports and 16 based aircraft.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png"
+   ],
+   "updated": 1793205923
+  },
+  {
+   "slug": "2026-10-28-italy-enav-strike-october-30",
+   "date": "2026-10-28",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "Italy: four-hour ENAV strike called for Friday as the government moves to postpone transport walkouts",
+   "summary": "Uiltrasporti has called ENAV and Techno Sky staff out for four hours on Friday 30 October, the same day as a 24-hour USB general strike that covers air transport. The transport ministry has ordered a postponement, which USB says it will defy.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png"
+   ],
+   "updated": 1793205956
+  },
+  {
+   "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
+   "date": "2026-10-28",
+   "region": "international",
+   "section": "Safety",
+   "title": "Sydney tower under scrutiny: ATSB releases its last two preliminary reports on 2026 ground conflicts",
+   "summary": "The Australian Transport Safety Bureau has published preliminary reports on two August taxiing conflicts at Sydney Airport, completing six. Both describe tower staffing and fatigue risk; an incomplete readback and a pushback clearance are at the centre.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png"
+   ],
+   "updated": 1793205998
+  }
+ ]
 }
