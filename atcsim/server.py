@@ -1,6 +1,7 @@
 """HTTP API (FastAPI). Interactive docs at /docs once the server runs."""
 from __future__ import annotations
 
+import math
 import os
 from typing import List, Literal, Optional, Union
 
@@ -58,6 +59,8 @@ class NoStaleMiddleware:
 app.add_middleware(NoStaleMiddleware)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 manager = SessionManager()
+from .world import World as _World  # noqa: E402
+_World.radar_sweep_s = pconfig.RADAR_SWEEP_S         # the radar's sweep: the picture taken at each (ATC_RADAR_SWEEP_S)
 pex.manager = manager
 pcomms.manager = manager
 prec.manager = manager
@@ -102,7 +105,9 @@ class Instruction(BaseModel):
     type: Literal["altitude", "heading", "direct", "speed", "resume", "reply", "deviation", "assume", "release",
                   "reroute", "wx_clear"]
     fl: Optional[int] = Field(None, description="altitude: target flight level, e.g. 360")
-    rate_fpm: Optional[float] = Field(None, description="altitude: optional vertical rate")
+    rate_fpm: Optional[float] = Field(None, description="altitude: optional vertical rate, ft/min")
+    rate_mode: Optional[Literal["min", "max", "exact"]] = Field(
+        None, description="altitude: the rate is a minimum (at X or greater, the default), a maximum (at X or less) or exact (at X)")
     heading: Optional[float] = Field(None, description="heading: 1-360")
     turn: Optional[Literal["left", "right"]] = None
     waypoint: Optional[str] = Field(None, description="direct: waypoint name")
@@ -440,11 +445,12 @@ def timeline(sid: str):
 
 
 @app.get("/sessions/{sid}/state")
-def state(sid: str, trails: bool = False):
-    """Full snapshot: aircraft, inbound traffic, pending requests, pending instructions, areas, current losses."""
+def state(sid: str, trails: bool = False, sweep: bool = False):
+    """Full snapshot: aircraft, inbound traffic, pending requests, pending instructions, areas, current losses.
+    sweep=true: the aircraft as the radar painted them at its last sweep (ATC_RADAR_SWEEP_S); default: live."""
     s = _session(sid)
     with s.lock:
-        st = s.world.state(trails)
+        st = s.world.state(trails, pconfig.RADAR_SWEEP_S if sweep else None)
         st["session"] = s.summary()
         return st
 
@@ -1113,11 +1119,21 @@ def weather_wind(sid: str, fl: float = Query(350, ge=0, le=800), res_nm: float =
 # ------------------------------------------------------------------ live stream
 @app.websocket("/sessions/{sid}/stream")
 async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool = True, lookahead_s: float = 600,
-                 since: int = 0, client: str = "stream"):
-    """Push stream. Every new sim second the server sends
-         {"type": "tick", "state": {...}, "events": [...new events...], "separation": {...} (every 2 s wall time)}
+                 since: int = 0, client: str = "stream", sweep_s: Optional[float] = None):
+    """Push stream of {"type": "tick", "state": {...}, "events": [...new events...], "separation": {...}}.
+    What goes out, and when (one message carries everything; nothing waits behind anything else):
+      - at once (within 0.15 s): new events (read-backs, requests, CPDLC, coordination, calls, alerts...) and every
+        action on the session (clearances, entries, assume...), with the system data they change;
+      - the radar picture: once per sweep (sweep_s seconds of simulation time; the radar screens ask for
+        ATC_RADAR_SWEEP_S, 4 s by default): positions, levels, speeds and trails as painted at the sweep;
+        sweep_s=0 (the default for other clients): every new simulation second, live;
+      - the conflict look-ahead (separation): attached to the next message as soon as it is computed.
+    Voice goes over its own socket (/sessions/{id}/comms), never behind the picture.
     The client may send {"op": "instruction", ...instruction fields} or {"op": "command", "text": "..."} or
     {"op": "control", "action": "pause"}; each gets {"type": "ack", ...} back."""
+    if sweep_s is None:
+        sweep_s = pconfig.RADAR_SWEEP_S if client == "radar" else 0.0
+    sweep_s = max(0.0, min(float(sweep_s), 30.0))
     try:
         s = manager.get(sid)
     except KeyError:
@@ -1135,7 +1151,7 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
     def build():
         with s.lock:
             w = s.world
-            st = w.state(trails)
+            st = w.state(trails, sweep_s or None)
             st["session"] = s.summary()
             ev = [e for e in w.events if e["seq"] > last_seq]
             return w.t, {"type": "tick", "state": st, "events": ev}
@@ -1168,8 +1184,9 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
             await ws.send_json(obj)
 
     async def sender():
-        # state every new sim second (cheap); the separation look-ahead is computed by separator() in parallel and
-        # attached to the next tick when ready, so a slow prediction never delays the picture
+        # a message as soon as there is something new: an event or an action at once, the picture once per sweep
+        # (or every simulation second), the separation look-ahead (computed by separator() in parallel) when ready -
+        # a slow prediction never delays the rest
         nonlocal last_t, last_seq
         seen_rw = getattr(s, "rewinds", 0)
         seen_ver = getattr(s, "version", 0)
@@ -1180,10 +1197,15 @@ async def stream(ws: WebSocket, sid: str, separation: bool = True, trails: bool 
                     seen_rw, last_t = s.rewinds, -1.0
                     last_seq = ev[-80]["seq"] if len(ev) > 80 else 0
                 sep_msg = latest_sep["msg"]
-                ver = getattr(s, "version", 0)            # something changed without the clock moving (paused)
-                if s.world.t != last_t or sep_msg is not None or ver != seen_ver:
+                ver = getattr(s, "version", 0)            # an action on the session (clearance, entry, assume...)
+                w = s.world
+                pic = math.floor(w.t / sweep_s + 1e-9) * sweep_s if sweep_s else w.t      # the picture's time
+                evs = w.events
+                new_ev = bool(evs) and evs[-1]["seq"] > last_seq
+                if pic != last_t or new_ev or sep_msg is not None or ver != seen_ver:
                     seen_ver = ver
                     t, msg = await run_in_threadpool(build)
+                    t = math.floor(t / sweep_s + 1e-9) * sweep_s if sweep_s else t
                     if sep_msg is not None:
                         msg["separation"] = sep_msg
                         latest_sep["msg"] = None

@@ -165,7 +165,7 @@ is over it.
 | **Aircraft type** | The type performance window: type data, speed schedule, assignable Mach / IAS, mass now, and by level at the present weight the speeds, climb rate, idle descent, and whether the level can be reached |
 | **Cleared level** | Levels list, coloured by the level probe (green = no conflict in 20 min, red = conflict, hover for which) |
 | **Exit level** | Levels list with *= CFL* |
-| **Cleared level** | (with the list) a **rate** field: `1500` = at 1500 ft/min or greater, `1500-` = or less, to climb or descend two aircraft together |
+| **Cleared level** | (with the list) a **rate** field: `1500` = at 1500 ft/min or greater, `1500-` = or less, `1500=` = exactly, to climb or descend two aircraft together |
 | **Speed** | Mach / IAS values, *SN* (resume normal speed), and its **limit**: minutes, miles or a point (`10MIN`, `40NM`, `IBALU`, quick buttons) |
 | **Heading** | Left / right steps, *own navigation*, and its **limit** (`4MIN`, `20NM`) with the point to proceed to at the limit (`→ERMED`) |
 | **Next point** | Directs (points of the route, or any point), *Edit route…*, back to the filed route |
@@ -415,7 +415,7 @@ the callsign (`RAM201 H270`) without selecting the aircraft.
 | Type | Sends | Type | Sends |
 |---|---|---|---|
 | `CL350`, `C350` | CLIMB TO FL350 | `DES240` | DESCEND TO FL240 |
-| `350`, `FL350` | climb / descend / maintain, from the present level | `V1500` / `V1500-` after a level | AT 1500 FT/MIN MINIMUM / MAXIMUM |
+| `350`, `FL350` | climb / descend / maintain, from the present level | `V1500` / `V1500-` / `V1500=` after a level | AT 1500 FT/MIN MINIMUM / MAXIMUM / exactly (free text: no standard element) |
 | `4MIN`, `20NM` after a heading or a speed | its limit: FOR 4 MIN / FOR 20 NM | `UNTIL IBALU` after a speed, `THEN ERMED` after a heading | MAINTAIN … UNTIL IBALU / … THEN PROCEED DIRECT TO ERMED |
 | `H270` | FLY HEADING 270 | `L270` / `R270` | TURN LEFT / RIGHT HEADING 270 |
 | `D ROLRO`, `DROLRO`, `ROLRO` | PROCEED DIRECT TO ROLRO | `VIA IBALU TERTO` | CLEARED TO TERTO VIA IBALU TERTO |

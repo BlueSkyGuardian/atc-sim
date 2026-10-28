@@ -185,7 +185,7 @@ class Aircraft:
     wind_uv: Tuple[float, float] = (0.0, 0.0)
     cleared_alt_ft: float = 0.0
     vs_cmd_fpm: Optional[float] = None
-    vs_cmd_mode: str = "min"           # assigned rate: "min" (at X ft/min or greater) | "max" (at X or less)
+    vs_cmd_mode: str = "min"           # assigned rate: "min" (at X ft/min or greater) | "max" (at X or less) | "exact"
     # limits of the clearances in force (a heading or a speed is given with its limit): {"heading": {...}, "speed":
     # {...}}, each with until_t (s) or nm_left (NM flown) or until_wp (a point passed), and for a heading "then" (point)
     clr_limits: dict = field(default_factory=dict)
@@ -696,8 +696,13 @@ class Aircraft:
                 dvk = (1 - DECEL_DESCENT_SHARE) * pex_d / V * dt / atm.KT
                 self.tas += dvk if abs(dvk) < abs(dv) else dv
             elif climbing and dv > 0:
-                rocd = (1 - SPEED_SHARE) * pex / atm.G0
-                dvk = SPEED_SHARE * pex / V * dt / atm.KT
+                share = SPEED_SHARE
+                if self.vs_cmd_fpm and getattr(self, "vs_cmd_mode", "min") in ("min", "exact") and pex > 0:
+                    # a rate assigned: the rate first, the acceleration with what power is left
+                    want = self.vs_cmd_fpm * atm.FT / 60.0 * atm.G0                  # W/kg for that rate
+                    share = max(0.0, min(SPEED_SHARE, 1.0 - want / pex))
+                rocd = (1 - share) * pex / atm.G0
+                dvk = share * pex / V * dt / atm.KT
                 self.tas += dvk if abs(dvk) < abs(dv) else dv
             else:                                            # trade: climb while slowing / descend while speeding up
                 rocd = pex / atm.G0 * esf
@@ -707,13 +712,15 @@ class Aircraft:
             mode = getattr(self, "vs_cmd_mode", "min")
             if climbing:
                 fpm = max(fpm, 0.0)
-                if self.vs_cmd_fpm and mode == "max":
-                    fpm = min(fpm, self.vs_cmd_fpm)          # at X or less (an "or greater" was checked when given)
+                if self.vs_cmd_fpm and mode in ("max", "exact"):
+                    fpm = min(fpm, self.vs_cmd_fpm)          # at X or less / exactly X (what it can, if less)
             else:
                 fpm = min(fpm, 0.0)
                 if self.vs_cmd_fpm:
                     if mode == "max":
                         fpm = -min(self.vs_cmd_fpm, abs(fpm))
+                    elif mode == "exact":                    # thrust above idle, or speedbrakes, to hold X
+                        fpm = -min(self.vs_cmd_fpm, SPEEDBRAKE_FACTOR * abs(fpm))
                     else:                                    # at X or greater: speedbrakes if idle is not enough
                         fpm = -min(max(self.vs_cmd_fpm, abs(fpm)), SPEEDBRAKE_FACTOR * abs(fpm))
                 elif self.speedbrake:

@@ -24,6 +24,16 @@ MAX_EVENTS = 20000
 PREDICT_DT = 4.0
 
 
+def parse_rate(v) -> tuple:
+    """A vertical rate as typed: '1500' or '1500+' = at 1500 ft/min or greater, '1500-' = or less, '1500=' = exactly."""
+    t = str(v).strip().upper().replace("FT/MIN", "").replace("FPM", "").strip()
+    mode = {"-": "max", "=": "exact", "+": "min"}.get(t[-1:], "min")
+    t = t.rstrip("+-=").strip()
+    if not t.isdigit():
+        raise InstructionError(f"rate {v!r}: e.g. 1500 (or greater), 1500- (or less), 1500= (exactly)")
+    return int(t), mode
+
+
 class InstructionError(ValueError):
     pass
 
@@ -290,9 +300,12 @@ class World:
             out["fl"] = fl
             if instr.get("rate_fpm") is not None:
                 r = float(instr["rate_fpm"])
-                if r < 300:
-                    raise InstructionError("rate_fpm must be at least 300")
-                if str(instr.get("rate_mode") or "min").lower() == "max":
+                mode = str(instr.get("rate_mode") or "min").lower()
+                if mode not in ("min", "max", "exact"):
+                    raise InstructionError("rate_mode: min (at X ft/min or greater), max (at X or less) or exact (at X)")
+                if r < 100 or r > 8000:
+                    raise InstructionError("rate_fpm: 100 to 8000 ft/min")
+                if mode == "max":
                     pass                                       # at X or less: always possible
                 elif climbing:
                     avail = ac.climb_rate_available((ac.alt_ft + fl * 100.0) / 2)
@@ -303,9 +316,6 @@ class World:
                     if r > maxd and not force:
                         raise InstructionError(f"{cs} unable {int(r)} ft/min, best rate about {int(maxd // 100 * 100)} ft/min")
                 out["rate_fpm"] = r
-                mode = str(instr.get("rate_mode") or "min").lower()
-                if mode not in ("min", "max"):
-                    raise InstructionError("rate_mode: min (at X ft/min or greater) or max (at X or less)")
                 out["rate_mode"] = mode
             spec = self._parse_speed(ac, instr, fl * 100.0, allow_value=False)
             if spec is not None:
@@ -802,8 +812,8 @@ class World:
         if t == "altitude":
             ac = self.aircraft.get(cs)
             verb = "climb" if ac and n["fl"] * 100 > ac.alt_ft else "descend"
-            rate = (f", {int(n['rate_fpm'])} ft/min or {'less' if n.get('rate_mode') == 'max' else 'greater'}"
-                    if n.get("rate_fpm") else "")
+            rate = ("" if not n.get("rate_fpm") else f" at {int(n['rate_fpm'])} ft/min" if n.get("rate_mode") == "exact"
+                    else f", {int(n['rate_fpm'])} ft/min or {'less' if n.get('rate_mode') == 'max' else 'greater'}")
             spd = f", {self.speed_phrase(n['speed'])}" if n.get("speed") else ""
             return f"{cs} {verb} FL{n['fl']}{rate}{spd}"
         if t == "heading":
@@ -1230,6 +1240,9 @@ class World:
             self._monitor_weather(dt)
             if self.t - self._last_frame_t >= self.recording["every_s"] - 1e-6 or self.finished:
                 self._record_frame()
+            sw = self.radar_sweep_s
+            if sw and math.floor(self.t / sw + 1e-9) != math.floor((self.t - dt) / sw + 1e-9):
+                self._paint(sw)                     # the radar's sweep: the picture the screens show until the next
             self._check_finished()
 
     def _record_frame(self) -> None:
@@ -1798,10 +1811,10 @@ class World:
                 v = str(v).upper()
                 if v not in self.waypoints or v.startswith("@"):
                     raise InstructionError(f"unknown point {v}")
-            elif k == "rate":                     # 1500 (ft/min or greater), 1500- (or less)
+            elif k == "rate":                     # 1500 (ft/min or greater), 1500- (or less), 1500= (exactly)
                 v = str(v).upper().replace(" ", "").replace("FPM", "")
-                if not re.fullmatch(r"\d{3,4}[+-]?", v):
-                    raise InstructionError("rate: ft/min, e.g. 1500 (or greater) or 1500- (or less)")
+                if not re.fullmatch(r"\d{3,4}[+=-]?", v):
+                    raise InstructionError("rate: ft/min, e.g. 1500 (or greater), 1500- (or less) or 1500= (exactly)")
             elif k == "speed":
                 v = str(v).upper().replace(" ", "")
                 if not re.match(r"^(M0?\.?\d{2}|\d{3}(KT)?|S\d{3}|K\d{3}|SN|MIN|MAX|M0?\.?\d{2}/K?\d{3})$", v):
@@ -1833,8 +1846,7 @@ class World:
             ins = {"type": "altitude", "fl": int(str(f["cfl"]).upper().lstrip("FL").lstrip("F"))}
             rt = f.get("rate") if f.get("rate") not in (None, "") else None
             if rt:
-                ins["rate_fpm"] = int(str(rt).rstrip("+-"))
-                ins["rate_mode"] = "max" if str(rt).endswith("-") else "min"
+                ins["rate_fpm"], ins["rate_mode"] = parse_rate(rt)
             instrs.append(ins)
         if f.get("heading") not in (None, ""):
             ins = {"type": "heading", "heading": int(f["heading"])}
@@ -1901,7 +1913,56 @@ class World:
                 out.append({"status": "accepted", "text": txt, "warnings": r.get("warnings") or []})
         return out
 
-    def state(self, trails: bool = False) -> dict:
+    # what the radar measures, painted once per sweep; the rest of a track (the system's data: cleared level,
+    # entries, coordination, CPDLC...) is live
+    RADAR_FIELDS = ("x_nm", "y_nm", "altitude_ft", "fl", "vertical_speed_fpm", "heading", "heading_deg", "track_deg",
+                    "bank_deg", "tas_kt", "gs_kt", "ias_kt", "mach", "mode_s", "to_exit_nm", "to_exit_s", "wind")
+
+    radar_sweep_s = 4.0                     # the session sets it (ATC_RADAR_SWEEP_S); 0: no sweep pictures kept
+
+    def _paint(self, sweep_s: float, acs: Optional[list] = None, transferred: Optional[list] = None) -> dict:
+        """Take the radar picture now (at a sweep): what the radar measures of every aircraft on the picture."""
+        if acs is None:
+            acs = [a.snapshot(False) for a in self.aircraft.values() if a.active]
+            for d in acs:
+                a = self.aircraft[d["callsign"]]
+                nm = a.to_exit_nm(self.waypoints)
+                d["to_exit_nm"] = None if nm is None else round(nm, 1)
+                d["to_exit_s"] = None if nm is None or a.gs < 50 else round(nm / a.gs * 3600)
+            transferred = [a.snapshot(False) for a in self.aircraft.values() if a.outside]
+        pic = {}
+        for d in acs + (transferred or []):
+            a = self.aircraft.get(d["callsign"])
+            r = {k: d[k] for k in self.RADAR_FIELDS if k in d}
+            r["trail"] = [list(p) for p in a.trail] if a is not None else d.get("trail", [])
+            pic[d["callsign"]] = r
+        self._radar = {"t": math.floor(self.t / sweep_s + 1e-9) * sweep_s, "sweep": sweep_s, "ac": pic}
+        return self._radar
+
+    def _sweep(self, acs: list, transferred: list, sweep_s: float):
+        """The radar picture of the last sweep (every sweep_s seconds of simulation time), the same for every screen:
+        positions, levels, speeds and trails as painted then; an aircraft that appeared since waits for the next."""
+        st = math.floor(self.t / sweep_s + 1e-9) * sweep_s
+        cache = getattr(self, "_radar", None)
+        if cache is None or cache["t"] != st or cache["sweep"] != sweep_s:
+            cache = self._paint(sweep_s, acs, transferred)      # (not taken at the sweep: a seek, another sweep length)
+
+        def paint(lst):
+            out = []
+            for d in lst:
+                r = cache["ac"].get(d["callsign"])
+                if r is None:
+                    continue                                   # not painted yet
+                had_trail = "trail" in d
+                d.update(r)
+                if not had_trail:
+                    d.pop("trail", None)
+                out.append(d)
+            return out
+        return paint(acs), paint(transferred), st
+
+    def state(self, trails: bool = False, sweep_s: Optional[float] = None) -> dict:
+        """The picture. sweep_s: the radar's (positions as of the last sweep, every sweep_s seconds); None: live."""
         from . import atctools, oldi, cpdlc
         acs = [a.snapshot(trails) for a in self.aircraft.values() if a.active]
         for d in acs:
@@ -1910,7 +1971,13 @@ class World:
             d["to_exit_nm"] = None if nm is None else round(nm, 1)
             d["to_exit_s"] = None if nm is None or a.gs < 50 else round(nm / a.gs * 3600)
             d["wx_handling"] = self.wx_handling(a)
+        transferred = [a.snapshot(trails) for a in self.aircraft.values() if a.outside]
+        radar_t = None
+        if sweep_s:
+            acs, transferred, radar_t = self._sweep(acs, transferred, float(sweep_s))
         return {
+            "radar_t": radar_t,
+            "radar_sweep_s": sweep_s or None,
             "sim_time_s": round(self.t, 1),
             "utc": atctools.utc(self),
             "mtcd": atctools.mtcd(self),
@@ -1930,7 +1997,7 @@ class World:
             "duration_s": self.duration_s,
             "finished": self.finished,
             "aircraft": acs,
-            "transferred": [a.snapshot(trails) for a in self.aircraft.values() if a.outside],
+            "transferred": transferred,
             "inbound": self.inbound(),
             "pending_requests": self.requests_list("pending"),
             "pending_instructions": [{"id": p["id"], "text": self.phrase(p["instruction"]),

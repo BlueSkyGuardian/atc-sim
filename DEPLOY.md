@@ -132,6 +132,8 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   at the site's own address for visitors, and each public page with its title, description, canonical address and
   structured data (NewsArticle for the articles). Google Search Console's ownership file
   (`googledb6d43d3018dfdc9.html`) is served at the root; more with `ATC_SITE_VERIFY="google....html,..."`.
+* `ATC_RADAR_SWEEP_S` (default 4): the radar screens' picture, one sweep every so many seconds of simulation time
+  (positions, levels, speeds); clearances, coordination, CPDLC, calls and alerts go out at once. `0`: every second.
 * `ATC_NEWS=off` stops the hourly reading and the newsletter (a test machine without internet).
 
 ## 6. Data, backups, updates

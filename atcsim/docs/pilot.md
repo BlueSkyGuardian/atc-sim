@@ -73,7 +73,8 @@ speed, heading and navigation, what the aircraft is executing, and its limits no
 
 | Row | What you can do |
 |---|---|
-| **Level** | A value, ±10 / ±20 buttons, an optional minimum rate, then *Climb / Descend FLxxx* |
+| **Level** | A value, ±10 / ±20 buttons, then *Climb / Descend FLxxx* (with the rate below, if one is typed) |
+| **Rate** | A vertical speed in ft/min (±100 / ±500 buttons) and how: *exactly*, *or more*, *or less*. *Set rate* flies it now to the level already cleared; *Own rate* removes it |
 | **Heading** | Left / right / shortest turn to a heading; *resume own navigation* |
 | **Speed** | Mach, knots now, knots on conversion; *resume normal* |
 | **Direct** | The next points of the route as buttons, or any point typed |
@@ -92,7 +93,7 @@ The deck shows the aircraft's **present limits** and refreshes them every 10 s:
 - the climb rate available now, the idle descent rate (and with speed brakes), the turn radius;
 - the assignable Mach and IAS range and its own speed schedule (Mach / IAS / conversion level).
 
-Rates the aircraft cannot fly are greyed out. Use these limits to make realistic requests when you go off script
+A rate the aircraft cannot fly is refused, with its best rate. Use these limits to make realistic requests when you go off script
 (*"unable FL390 at this weight, can accept FL370"*).
 
 ### Shorthand line

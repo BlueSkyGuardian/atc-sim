@@ -60,14 +60,23 @@ curl -s -H "X-API-Key: $KEY" -H 'Content-Type: application/json' -d '{"action": 
 
 `wss://…/sessions/{id}/stream?separation=true&trails=true&lookahead_s=600`
 
-Every new sim second the server pushes:
+The server pushes:
 
 ```json
 {"type": "tick", "state": {…}, "events": [{"seq": 812, "type": "request", …}], "separation": {…}}
 ```
 
-`separation` (current pairs and the predicted conflicts) is attached when a new look-ahead result is ready, about
-every few seconds. Send operations on the same socket. Each one gets an `{"type": "ack", "ok": true, "result": …}`
+What goes out, and when (one message carries everything, nothing waits behind anything else):
+
+- **at once** (within 0.15 s): new events (read-backs, requests, CPDLC, coordination, calls, alerts…) and every
+  action on the session (clearances, entries, assume…) with the system data they change;
+- **the picture**: every new simulation second (the default), or, with `sweep_s=4`, once per radar sweep: the
+  positions, levels, speeds and trails as painted at the sweep (`state.radar_t`), the system data live. The radar
+  screens use the sweep (`ATC_RADAR_SWEEP_S`, 4 s by default); `GET /state?sweep=true` gives the same picture;
+- **the conflict look-ahead** (`separation`: current pairs and the predicted conflicts): attached to the next message
+  as soon as a new result is ready, about every few seconds.
+
+Voice uses its own socket (`/sessions/{id}/comms`), never behind the picture. Send operations on the same socket. Each one gets an `{"type": "ack", "ok": true, "result": …}`
 back:
 
 ```json
@@ -130,8 +139,9 @@ move aircraft):
 
 With a clearance, what qualifies it: `"hlim"` (the heading's limit, `"4MIN"` / `"20NM"`) and `"then"` (the point to
 proceed to at it), `"slim"` (the speed's limit, `"10MIN"` / `"40NM"` / a point), `"rate"` (with a level: `1500` = at
-1500 ft/min or greater, `"1500-"` = or less). In the instructions API the same are `"limit"` (`{"min": 4}`,
-`{"nm": 20}`, `{"until": "IBALU"}` or the text forms), `"then"`, and `"rate_fpm"` with `"rate_mode"` (`min` / `max`).
+1500 ft/min or greater, `"1500-"` = or less, `"1500="` = exactly). In the instructions API the same are `"limit"`
+(`{"min": 4}`, `{"nm": 20}`, `{"until": "IBALU"}` or the text forms), `"then"`, and `"rate_fpm"` with `"rate_mode"`
+(`min` / `max` / `exact`).
 
 Entries drive the labels, MTCD, route adherence and OLDI. An empty string clears a field.
 

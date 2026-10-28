@@ -309,17 +309,22 @@ def parse(w, text: str, callsign: Optional[str] = None) -> dict:
                         "instr": {"type": "altitude", "fl": fl}, "entry": {"cfl": fl}})
             i += 1
             continue
-        m = re.fullmatch(r"V(\d{3,4})([+-]?)", tk)
+        m = re.fullmatch(r"V(\d{3,4})([+=-]?)", tk)
         lvl = next((e for e in reversed(els) if e.get("kind") == "level"), None)
         if m and lvl is not None:
-            r, mx = int(m.group(1)), m.group(2) == "-"
+            r, sfx = int(m.group(1)), m.group(2)
+            mode = {"-": "max", "=": "exact"}.get(sfx, "min")
             up = lvl["code"] == "UM20"
             lvl["instr"]["rate_fpm"] = r
-            lvl["instr"]["rate_mode"] = "max" if mx else "min"
-            lvl.setdefault("entry", {})["rate"] = f"{r}{'-' if mx else ''}"
-            els.append({"code": ("UM172" if up else "UM174") if mx else ("UM171" if up else "UM173"),
-                        "text": f"{'CLIMB' if up else 'DESCEND'} AT {r} FT/MIN {'MAXIMUM' if mx else 'MINIMUM'}",
-                        "resp": "WU", "kind": "rate"})
+            lvl["instr"]["rate_mode"] = mode
+            lvl.setdefault("entry", {})["rate"] = str(r) + {"max": "-", "exact": "="}.get(mode, "")
+            verb = "CLIMB" if up else "DESCEND"
+            if mode == "exact":               # no standard element for an exact rate: the clearance in free text
+                els.append({"code": "UM169", "text": f"{verb} AT {r} FT/MIN", "resp": "WU", "kind": "rate"})
+            else:                             # UM171-174: CLIMB / DESCEND AT [rate] MINIMUM / MAXIMUM
+                els.append({"code": ("UM172" if up else "UM174") if mode == "max" else ("UM171" if up else "UM173"),
+                            "text": f"{verb} AT {r} FT/MIN {'MAXIMUM' if mode == 'max' else 'MINIMUM'}",
+                            "resp": "WU", "kind": "rate"})
             i += 1
             continue
         # the limit of the heading or speed just given: 5MIN, 20NM, UNTIL IBALU (speeds); THEN IBALU after a heading

@@ -517,7 +517,8 @@ def sector_description(w: Optional[World] = None) -> dict:
         **d,
         "pilot_delay_s": w.pilot_delay_s if w else None,
         "instruction_types": {
-            "altitude": {"fl": "int, multiple of 10", "rate_fpm": "optional: 'at X ft/min or greater'"},
+            "altitude": {"fl": "int, multiple of 10", "rate_fpm": "optional vertical rate, ft/min",
+                         "rate_mode": "optional: 'min' (at X or greater, default), 'max' (at X or less), 'exact'"},
             "heading": {"heading": "1-360 (true)", "turn": "optional 'left'|'right'"},
             "direct": {"waypoint": "waypoint name; a transfer point on the boundary becomes the new exit"},
             "speed": {"mach": "e.g. 0.76 (flown above the conversion altitude)",
@@ -585,9 +586,10 @@ def parse_command(text: str, world: World) -> List[dict]:
             p = m.group(1)
             turn = "left" if p in ("L", "HL", "TL") else "right" if p in ("R", "HR", "TR") else None
             out.append({"callsign": cs, "type": "heading", "heading": int(m.group(2)), "turn": turn}); i += 1; continue
-        m = re.fullmatch(r"V(\d{3,4})", tk)
+        m = re.fullmatch(r"V(\d{3,4})([+=-]?)", tk)
         if m and out and out[-1]["type"] == "altitude":
-            out[-1]["rate_fpm"] = int(m.group(1)); i += 1; continue
+            out[-1]["rate_fpm"] = int(m.group(1))
+            out[-1]["rate_mode"] = {"-": "max", "=": "exact"}.get(m.group(2), "min"); i += 1; continue
         m = re.fullmatch(r"(?:S|SPD|IAS)(\d{3})", tk)
         mm = re.fullmatch(r"M\.?0?(\d{2})", tk)
         mk = re.fullmatch(r"K(\d{3})", tk)

@@ -62,7 +62,7 @@
 
   const KEYWORDS = [
     ['CL', 'CL350', 'climb to FL350'], ['DES', 'DES240', 'descend to FL240'], ['FL', 'FL330', 'climb / descend / maintain'],
-    ['H', 'H270', 'fly heading 270'], ['L', 'L270', 'turn left heading 270'], ['R', 'R270', 'turn right heading 270'],
+    ['V', 'V2000', 'rate after a level: V2000 or greater · V2000- or less · V2000= exactly'], ['H', 'H270', 'fly heading 270'], ['L', 'L270', 'turn left heading 270'], ['R', 'R270', 'turn right heading 270'],
     ['D', 'D ROLRO', 'proceed direct'], ['M', 'M78', 'maintain Mach .78'], ['S', 'S280', 'maintain 280 kt'], ['K', 'K280', '280 kt on conversion'],
     ['SN', 'SN', 'resume normal speed'], ['VIA', 'VIA IBALU TERTO', 'cleared via points'], ['DEV', 'DEVL20', 'cleared to deviate (L / R / either, NM)'],
     ['RES', 'RES', 'resume own navigation'], ['CT', 'CT', 'contact the next unit (or CT GCCC)'], ['MON', 'MON', 'monitor the next unit'],
@@ -79,7 +79,13 @@
       const ahead = () => { const a = state && state.aircraft.find(x => x.callsign === cs()); if (!a) return [];
         const i = a.route.indexOf(a.next_waypoint); return [...new Set(a.route.slice(Math.max(0, i)).concat(a.route_after_exit || []).filter(n => !n.startsWith('@')))].slice(0, 7); };
       const unitMode = ['CT', 'CONTACT', 'MON', 'MONITOR', 'NDA'].includes(prev);
-      if (last === 'D' || last === 'DCT') sugg = ahead().map(n => ({ ins: last + ' ' + n, show: last + ' ' + n, what: 'route point' }));
+      const rateMode = /^V\d{0,4}[+=-]?$/.test(last) && toks.slice(0, -1).some(t => /^(CL|C|DES|FL|F)\d{2,3}$/.test(t));
+      if (rateMode) {                                    // a rate after a level: the usual ones, in the three forms
+        const typed = last.slice(1).replace(/[+=-]$/, '');
+        sugg = [1000, 1500, 2000, 2500, 3000, 500].filter(r => String(r).startsWith(typed) || !typed)
+          .flatMap(r => [{ ins: 'V' + r, show: 'V' + r, what: r + ' ft/min or greater (MINIMUM)' }, { ins: 'V' + r + '-', show: 'V' + r + '-', what: 'or less (MAXIMUM)' }, { ins: 'V' + r + '=', show: 'V' + r + '=', what: 'exactly' }]).slice(0, 9);
+      }
+      else if (last === 'D' || last === 'DCT') sugg = ahead().map(n => ({ ins: last + ' ' + n, show: last + ' ' + n, what: 'route point' }));
       else if (unitMode) sugg = ((EXINFO && EXINFO.units) || ['GMMM', 'LPPC', 'GCCC', 'LECS']).filter(u => u.startsWith(last)).map(u => ({ ins: u, show: u, what: 'unit' }));
       else {
         const m = last.match(/^(DCT|D)?([A-Z]{2,})$/);

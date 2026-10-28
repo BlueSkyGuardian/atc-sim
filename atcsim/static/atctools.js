@@ -370,7 +370,11 @@
   setInterval(() => {
     const el = document.getElementById('utcClock');
     if (!state || !state.utc) { el.textContent = ''; return; }
-    el.textContent = `${state.utc}:${String(Math.floor(state.sim_time_s) % 60).padStart(2, '0')} UTC`;
+    // the UTC of the last picture, run on to now (the radar paints every few seconds, the clock runs)
+    const [hh, mm] = state.utc.split(':').map(Number), t0 = state.sim_time_s, now = window.simNow ? simNow() : t0;
+    const sod = (((hh * 3600 + mm * 60 + Math.floor(t0) % 60 + Math.floor(now - t0)) % 86400) + 86400) % 86400;
+    const p2 = n => String(n).padStart(2, '0');
+    el.textContent = `${p2(Math.floor(sod / 3600))}:${p2(Math.floor(sod / 60) % 60)}:${p2(sod % 60)} UTC`;
   }, 500);
 
   // ------------------------------------------------------------------ keyboard shortcuts

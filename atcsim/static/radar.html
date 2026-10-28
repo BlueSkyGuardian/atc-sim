@@ -888,15 +888,23 @@ function openStream(id) {
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type !== 'tick' || id !== SID) return;
-    state = m.state; mergeDyn(); renderSide(); gotPicture();
+    state = m.state; stateAt = performance.now(); mergeDyn(); renderSide(); gotPicture();
     if (m.separation) { sep = m.separation; renderConfl(); }
     if (m.events.length) { lastSeq = m.events[m.events.length - 1].seq; eventsBuf = eventsBuf.concat(m.events).slice(-200); renderEvents(); }
   };
   ws.onclose = () => { wsOk = false; if (id === SID) setTimeout(() => SID === id && openStream(id), 2000); };
 }
 
+// the simulation clock between two pictures (the radar paints every few seconds; the clock keeps running)
+let stateAt = 0;
+window.simNow = () => {
+  if (!state) return 0;
+  const run = state.session && state.session.status === 'running' && !replayMode;
+  const dt = run ? (performance.now() - stateAt) / 1000 * (state.session.time_factor || 1) : 0;
+  return state.sim_time_s + Math.min(Math.max(0, dt), 2 * (state.radar_sweep_s || 4));
+};
 // ---------- polling
-async function pollState() { if (!SID) return; try { state = await api(`/sessions/${SID}/state?trails=true`); mergeDyn(); renderSide(); gotPicture(); } catch (e) {} }
+async function pollState() { if (!SID) return; try { state = await api(`/sessions/${SID}/state?trails=true&sweep=1`); stateAt = performance.now(); mergeDyn(); renderSide(); gotPicture(); } catch (e) {} }
 function mergeDyn() { if (sector && state && state.dyn_points) Object.assign(sector.waypoints, state.dyn_points); }
 async function pollSep() { if (!SID) return; try { sep = await api(`/sessions/${SID}/separation?lookahead_s=600`); renderConfl(); } catch (e) {} }
 async function pollEvents() {
@@ -1157,8 +1165,10 @@ function frameIndex(t) {           // last frame with time <= t (binary search)
 }
 function replayState() {
   if (!rec || !rec.frames.length) return state;
-  const i = frameIndex(replayT), f0 = rec.frames[i], f1 = rec.frames[Math.min(i + 1, rec.frames.length - 1)];
-  const k = f1.t > f0.t ? Math.max(0, Math.min(1, (replayT - f0.t) / (f1.t - f0.t))) : 0;
+  // as the radar painted it: one picture per sweep (the clock and the rest at replayT)
+  const sw = (state && state.radar_sweep_s) || 4, tp = Math.floor(replayT / sw + 1e-9) * sw;
+  const i = frameIndex(tp), f0 = rec.frames[i], f1 = rec.frames[Math.min(i + 1, rec.frames.length - 1)];
+  const k = f1.t > f0.t ? Math.max(0, Math.min(1, (tp - f0.t) / (f1.t - f0.t))) : 0;
   const nxt = Object.fromEntries(f1.ac.map(r => [r[0], r]));
   const trails = {};
   for (let j = Math.max(0, i - 12); j < i; j += 2) for (const r of rec.frames[j].ac) (trails[r[0]] = trails[r[0]] || []).push([r[1], r[2]]);
@@ -1421,7 +1431,7 @@ function vrate(a) {
   const v = a.vertical_speed_fpm || 0;
   if (Math.abs(v) < 200) return '';
   let t = ` ${v > 0 ? '+' : '-'}${pad(Math.round(Math.abs(v) / 100), 2)}`;
-  if (a.assigned_rate_fpm) t += ` R${Math.round(a.assigned_rate_fpm / 100)}${a.assigned_rate_mode === 'max' ? '-' : '+'}`;
+  if (a.assigned_rate_fpm) t += ` R${Math.round(a.assigned_rate_fpm / 100)}${a.assigned_rate_mode === 'max' ? '-' : a.assigned_rate_mode === 'exact' ? '' : '+'}`;
   return t;
 }
 function labelLine3(a, ent) {

@@ -129,7 +129,7 @@ Aircraft on the same route (en-route traffic) appear in the conflict lines with 
   itself. With the rules on, a heading or speed without a limit is refused; with them off it is flown and costs 1
   point. The situation shows each limit and the time left (*ON HEADING 174 — limit 05:14 left, then direct S1*,
   *M74 (assigned, 10:34 left, then normal speed)*).
-- **Rates.** A level may carry a rate: `"rate": "1500"` (at 1500 ft/min or greater) or `"1500-"` (or less) — to climb
+- **Rates.** A level may carry a rate: `"rate": "1500"` (at 1500 ft/min or greater), `"1500-"` (or less) or `"1500="` (exactly) — to climb
   or descend two aircraft together, or to pass another's level later.
 - **Positive separation.** Every clearance and every approved request is checked when it is given, for the whole
   manoeuvre (the exact closest approach of the aircraft's trajectory with it against everyone, a level change at the

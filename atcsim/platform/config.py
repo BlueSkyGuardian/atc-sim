@@ -9,6 +9,9 @@ DATA_DIR = os.environ.get("ATC_DATA_DIR", os.path.join(ROOT, "data"))
 os.makedirs(DATA_DIR, exist_ok=True)
 
 PUBLIC_URL = os.environ.get("ATC_PUBLIC_URL", "").rstrip("/")     # e.g. https://atc.example.com
+# the radar screens' picture: one sweep every RADAR_SWEEP_S seconds of simulation time (positions, levels, speeds);
+# everything else (clearances, coordination, CPDLC, calls, alerts) goes out as soon as it happens
+RADAR_SWEEP_S = max(0.0, float(os.environ.get("ATC_RADAR_SWEEP_S", "4") or 0))
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 ADMIN_EMAILS = {e.strip().lower() for e in os.environ.get("ATC_ADMIN_EMAILS", "").split(",") if e.strip()}

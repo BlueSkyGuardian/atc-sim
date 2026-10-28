@@ -201,7 +201,7 @@
       <div id="lmAssume" style="margin-bottom:7px"><button class="on" id="lmAsBtn" style="width:100%;padding:4px">ASSUME ${cs}</button></div>
       <div id="lmRelease" style="margin-bottom:7px"><button id="lmRelBtn" style="width:100%;padding:4px" title="hand it off: it keeps flying as another sector's traffic">DECONTROL ${cs}</button></div>
       <div class="f"><span class="c-dim">CFL</span><input data-f="cfl" value="${sys}" inputmode="numeric"><button data-ok="cfl">OK</button></div>
-      <div class="f sub"><span class="c-dim" title="rate of climb / descent with the level: 1500 = at 1500 ft/min or greater, 1500- = or less (to climb or descend aircraft together)">rate</span><input data-f="rate" value="${h(ent.rate || '')}" placeholder="1500 · 1500-"><span></span></div>
+      <div class="f sub"><span class="c-dim" title="rate of climb / descent with the level: 1500 = at 1500 ft/min or greater, 1500- = or less, 1500= = exactly (to climb or descend aircraft together)">rate</span><input data-f="rate" value="${h(ent.rate || '')}" placeholder="1500 · 1500- · 1500="><span></span></div>
       <div class="lv">${lv.map(l => `<button data-lv="${l}">${l}</button>`).join('')}</div>
       <div class="f"><span class="c-dim" title="exit level for the coordination with the next unit (OLDI); empty = the cleared level">XFL</span><input data-f="xfl" value="${ent.xfl != null ? ent.xfl : ''}" placeholder="= CFL" inputmode="numeric"><button data-ok="xfl">OK</button></div>
       <div id="lmCoord" class="c-dim" style="font-size:11px;margin:-2px 0 6px 59px"></div>
@@ -299,7 +299,7 @@
     } else if (f === 'cfl' || f === 'xfl') {
       const cur = f === 'cfl' ? sys : (co.xfl != null ? co.xfl : sys);
       body = `<input data-v value="${f === 'xfl' && !co.xfl_entered ? '' : cur}" placeholder="${f === 'xfl' ? '= CFL ' + sys : ''}" inputmode="numeric">
-        ${f === 'cfl' ? `<div class="lim"><span class="c-dim" title="rate of climb / descent: 1500 = 1500 ft/min or greater, 1500- = or less (climb or descend aircraft together)">rate</span><input data-q="rate" value="" placeholder="1500 · 1500-"></div>` : ''}
+        ${f === 'cfl' ? `<div class="lim"><span class="c-dim" title="rate of climb / descent: 1500 = 1500 ft/min or greater, 1500- = or less, 1500= = exactly (climb or descend aircraft together)">rate</span><input data-q="rate" value="" placeholder="1500 · 1500- · 1500="></div>` : ''}
         <div class="fl">${f === 'xfl' ? `<button data-x="">= CFL (F${p3(sys)})</button>` : ''}${levels(cur).map(l => `<button data-x="${l}" class="${l === cur ? 'cur' : ''}">F${p3(l)}</button>`).join('')}</div>`;
     } else if (f === 'spd') {
       const mach = Math.round(a.mach * 100), ias = Math.round(a.ias_kt / 10) * 10;
@@ -581,8 +581,13 @@
       <div class="dk-row"><label>Level</label><div class="dk-ctl">
         <input data-i="fl" inputmode="numeric" value="${a.cleared_fl}" style="width:62px">
         <span class="dk-steps"><button data-step="-20">−20</button><button data-step="-10">−10</button><button data-step="10">+10</button><button data-step="20">+20</button></span>
-        <select data-i="rate" title="rate"><option value="">any rate</option><option value="1000">≥1000 ft/min</option><option value="1500">≥1500</option><option value="2000">≥2000</option></select>
-        <button class="go" data-go="fl">Climb / descend</button><div class="dk-hint" data-hint="fl"></div></div></div>
+        <button class="go" data-go="fl" title="with the rate below if one is typed">Climb / descend</button><div class="dk-hint" data-hint="fl"></div></div></div>
+      <div class="dk-row"><label>Rate</label><div class="dk-ctl">
+        <input data-i="rate" inputmode="numeric" placeholder="ft/min" value="${a.assigned_rate_fpm ? Math.round(a.assigned_rate_fpm) : ''}" style="width:62px" title="vertical speed, ft/min">
+        <select data-i="rmode" title="exactly this rate, or at least / at most"><option value="exact"${!a.assigned_rate_mode || a.assigned_rate_mode === 'exact' ? ' selected' : ''}>exactly</option><option value="min"${a.assigned_rate_mode === 'min' ? ' selected' : ''}>or more</option><option value="max"${a.assigned_rate_mode === 'max' ? ' selected' : ''}>or less</option></select>
+        <span class="dk-steps"><button data-rstep="-500">−500</button><button data-rstep="-100">−100</button><button data-rstep="100">+100</button><button data-rstep="500">+500</button></span>
+        <button class="go" data-go="rate" title="fly this rate now, to the level already cleared">Set rate</button><button data-go="rown" title="the aircraft's own rate (no rate restriction)">Own rate</button>
+        <div class="dk-hint" data-hint="rate"></div></div></div>
       <div class="dk-row"><label>Heading</label><div class="dk-ctl">
         <input data-i="hdg" inputmode="numeric" placeholder="${String(Math.round(a.heading)).padStart(3, '0')}" style="width:62px">
         <button data-go="hl">◀ Left</button><button data-go="h">Turn</button><button data-go="hr">Right ▶</button>
@@ -616,9 +621,20 @@
       flBtn.textContent = !cur || !v ? 'Climb / descend' : v * 100 > cur.altitude_ft + 50 ? `Climb FL${v}` : v * 100 < cur.altitude_ft - 50 ? `Descend FL${v}` : `Maintain FL${v}`; };
     flIn.oninput = label; label();
     box.querySelectorAll('[data-step]').forEach(b => b.onclick = () => { flIn.value = Math.max(100, (parseInt(flIn.value, 10) || a.cleared_fl) + +b.dataset.step); label(); });
+    const rIn = box.querySelector('[data-i=rate]');
+    box.querySelectorAll('[data-rstep]').forEach(b => b.onclick = () => {      // from the typed rate, else the present one
+      const cur = allAc().find(x => x.callsign === cs), base = parseInt(rIn.value, 10) || Math.round(Math.abs((cur || a).vertical_speed_fpm || 0) / 100) * 100 || 1000;
+      rIn.value = Math.min(8000, Math.max(100, base + +b.dataset.rstep)); });
+    rIn.onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') go('rate'); };
     const go = async k => {
-      if (k === 'fl') { const v = parseInt(val('fl').replace(/^F(L)?/i, ''), 10); if (!v) return; const r = val('rate');
-        await fly(cs, { type: 'altitude', fl: v, ...(r ? { rate_fpm: +r } : {}) }, out); }
+      if (k === 'fl') { const v = parseInt(val('fl').replace(/^F(L)?/i, ''), 10); if (!v) return; const r = parseInt(val('rate'), 10);
+        await fly(cs, { type: 'altitude', fl: v, ...(r ? { rate_fpm: r, rate_mode: val('rmode') } : {}) }, out); }
+      else if (k === 'rate' || k === 'rown') {                 // a new rate (or none) to the level already cleared
+        const cur = allAc().find(x => x.callsign === cs), r = parseInt(val('rate'), 10);
+        if (!cur) return;
+        if (Math.abs(cur.altitude_ft - cur.cleared_fl * 100) < 60) { out.className = 'dk-out bad'; out.textContent = `level at FL${cur.cleared_fl}: give it a new level first (with the rate)`; return; }
+        if (k === 'rate' && !r) { out.className = 'dk-out bad'; out.textContent = 'type a rate in ft/min first'; return; }
+        await fly(cs, { type: 'altitude', fl: cur.cleared_fl, ...(k === 'rate' ? { rate_fpm: r, rate_mode: val('rmode') } : {}) }, out); }
       else if (k === 'h' || k === 'hl' || k === 'hr') { const v = parseInt(val('hdg'), 10); if (!v) { out.className = 'dk-out bad'; out.textContent = 'type a heading first'; return; }
         await fly(cs, { type: 'heading', heading: v, turn: k === 'hl' ? 'left' : k === 'hr' ? 'right' : null }, out); }
       else if (k === 'res') await fly(cs, { type: 'resume' }, out);
@@ -658,8 +674,7 @@
     set('fl', `levels FL${fl[0]}–FL${maxNow} (max FL${p.max_fl_at_present_weight} at this weight) · climb now ≤ ${p.climb_rate_available_fpm} ft/min · idle descent ${p.idle_descent_rate_fpm} ft/min (up to ${Math.round(p.idle_descent_rate_fpm * 1.5 / 100) * 100} with speed brakes)`);
     set('hdg', `turn radius ${p.turn_radius_nm} NM at present speed`);
     set('spd', `Mach ${m.join('–')} · ${kt.join('–')} kt · own schedule M${own.mach ? '.' + Math.round(own.mach * 100) : '?'} / ${own.cas_kt || '?'} kt, conversion FL${own.conversion_fl || '?'} · a speed may still be refused at some levels (buffet, VMO/MMO)`);
-    const rate = box.querySelector('[data-i=rate]');
-    if (rate) for (const o of rate.options) if (o.value) o.disabled = +o.value > Math.max(p.climb_rate_available_fpm, p.idle_descent_rate_fpm * 1.5);
+    set('rate', `climb up to ${p.climb_rate_available_fpm} ft/min now · descent ${p.idle_descent_rate_fpm} ft/min at idle, up to ${Math.round(p.idle_descent_rate_fpm * 1.5 / 100) * 100} with speed brakes · exactly: it holds the rate (or does what it can)`);
     const mi = box.querySelector('[data-i=mach]'), ki = box.querySelector('[data-i=kt]'), fi = box.querySelector('[data-i=fl]');
     if (mi) mi.placeholder = m.join('–'); if (ki) ki.placeholder = kt.join('–'); if (fi) fi.title = `FL${fl[0]}–FL${maxNow}`;
   }
