@@ -27,7 +27,7 @@ app = FastAPI(
                 "Coordinates in NM (origin = sector centre, x east, y north).",
 )
 from .platform import config as pconfig
-from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec, stats as pstats, debriefs as pdeb, ailab as pai, notify as pnotify, news as pnews, seo as pseo
+from .platform import auth as pauth, exercises as pex, comms as pcomms, recorder as prec, stats as pstats, debriefs as pdeb, ailab as pai, notify as pnotify, news as pnews, seo as pseo, traffic as ptraffic
 from .platform.access import AccessMiddleware, seat_for
 
 if pconfig.AUTH == "off":
@@ -100,6 +100,7 @@ app.include_router(pstats.router)
 app.include_router(pnotify.router)
 app.include_router(pnews.router)
 app.include_router(pseo.router)
+app.include_router(ptraffic.router)
 
 
 @app.on_event("startup")
@@ -109,6 +110,7 @@ def _startup():
         print(f"  restored {len(restored)} exercise(s): {', '.join(restored)}")
     prec.recover()
     pnews.start()                               # aviation news: the feeds every hour, the newsletter once a day
+    ptraffic.start()                            # live traffic: the coverage measurement from the first start
     import threading
     from . import docs_gen                     # build the documentation's generated reference in the background
     threading.Thread(target=docs_gen.reference_md, daemon=True).start()
@@ -371,7 +373,7 @@ def create_session(body: SessionCreate, request: Request):
 @app.get("/sessions")
 def list_sessions(request: Request):
     u = _user(request)
-    return [x for x in manager.list() if seat_for(x["session_id"], u) == "instructor"]
+    return [x for x in manager.list() if seat_for(x["session_id"], u) == "instructor" and x["session_id"] != ptraffic.LIVE_SID]
 
 
 @app.get("/sessions/{sid}")

@@ -21,7 +21,7 @@
   ptIn.addEventListener('change', () => { const v = ptIn.value.trim().toUpperCase(); if (sector && (sector.waypoints || {})[v]) { point = v; compute(true); } else if (v) msg(`unknown point ${v}`, true); });
   // the solo radar, the sandbox and the controller's (or instructor's) seat in an exercise; not the pseudo-pilot, a
   // debrief or an AI run being watched
-  const allowed = () => !DBID && !AIW && SID && SEAT !== 'pilot';
+  const allowed = () => !DBID && !AIW && !LIVETR && SID && SEAT !== 'pilot';
   setInterval(() => document.body.classList.toggle('seq-ok', !!allowed()), 1000);
   const COLORS = ['#8fcfa0', '#7fc4dc', '#e2b07e', '#c3a6e0', '#d9cc86', '#e09aa6', '#9db8e0', '#b5d38e'];   // muted
   let on = false, sel = [], point = null, data = null, err = '', busy = false, lastKey = '';

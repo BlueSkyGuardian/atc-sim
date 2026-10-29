@@ -10,7 +10,7 @@
 
   // ------------------------------------------------------------------ start
   async function init() {
-    if (DBID || AIW) return;
+    if (DBID || AIW || LIVETR) return;
     try { EXINFO = await api(`/api/exercises/${EXID}`); }
     catch (e) { document.body.innerHTML = `<p style="padding:30px;font:15px system-ui;color:#c9d6e2">${h(e.message)} · <a style="color:#7fb8ff" href="/">home</a></p>`; return; }
     SEAT = EXINFO.seat;

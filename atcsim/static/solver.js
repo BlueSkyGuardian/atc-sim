@@ -8,7 +8,7 @@
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const btn = $('#solveBtn'), box = $('#solvePanel');
   if (!btn || !box) return;
-  const allowed = () => !DBID && !AIW && SID && (!EXID || (EXINFO && EXINFO.solo));
+  const allowed = () => !DBID && !AIW && !LIVETR && SID && (!EXID || (EXINFO && EXINFO.solo));
   let on = false; try { on = localStorage.getItem('atc_solver') === '1'; } catch (e) {}
   let data = null, busy = false, lastKey = '', err = '';
   const resumes = {};                         // callsign -> {at (sim s), heading}

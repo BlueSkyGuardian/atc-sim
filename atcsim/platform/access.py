@@ -24,7 +24,7 @@ PUBLIC = ("/login", "/auth/", "/static/", "/api/health", "/favicon.ico", "/join/
           "/help", "/help/", "/api/help", "/api/help/", "/api/landing",
           "/robots.txt", "/sitemap.xml", "/favicon.svg", "/apple-touch-icon.png", "/share.jpg",   # search engines, previews
           "/ai-data/")            # datasets for a training machine (RunPod pod): the link's token is the access       # the documentation is public
-PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/ai", "/admin", "/profile", "/x/", "/stats", "/help")
+PAGES = ("/", "/designer", "/radar", "/solo", "/debrief/", "/ai", "/admin", "/profile", "/x/", "/stats", "/help", "/live")
 SESS = re.compile(r"^/sessions/([0-9a-f]{6,32})(/.*)?$")
 
 # per-seat rights on /sessions/{id}/<rest> for non-GET methods (GET is open to every member)
@@ -48,6 +48,9 @@ class _Req:                      # minimal request-like view of an ASGI scope fo
 def seat_for(sid: str, user: dict) -> Optional[str]:
     if config.AUTH == "off" or user.get("id") == 0:
         return "instructor"
+    from .traffic import LIVE_SID
+    if sid == LIVE_SID:                # the live traffic: everybody signed in, view only
+        return "atc"
     if _watch(sid) is not None:        # the live view of an AI run: staff, read-only
         return "atc" if user.get("role") in ("instructor", "admin") else None
     o = _debrief(sid)
@@ -85,6 +88,10 @@ def allowed(path: str, method: str, user: Optional[dict]) -> Optional[str]:
     m = SESS.match(path)
     if m:
         sid, rest = m.group(1), m.group(2) or ""
+        from .traffic import LIVE_SID
+        if sid == LIVE_SID:                        # the live traffic: look only
+            return None if (method in ("GET", "HEAD") and rest != "/comms") or rest == "/stream" \
+                or (method == "POST" and rest == "/connect") else "live traffic: view only"
         seat = seat_for(sid, user)
         if seat is None:
             return "you are not a member of this exercise"

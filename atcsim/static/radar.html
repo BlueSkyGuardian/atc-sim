@@ -484,6 +484,20 @@
   #dbMsg { display: none; position: absolute; left: 50%; top: 110px; transform: translateX(-50%); z-index: 7; max-width: 660px; background: #10263bf2;
     border: 1px solid #3b6e93; border-radius: 8px; padding: 9px 14px; font-size: 13px; color: #dbe9f6; box-shadow: 0 8px 26px #000a; }
   #dbMsg a { color: #9fd0ff; }
+  /* ---- the live traffic (traffic.js) */
+  body.live #tl, body.live #tlCtl, body.live #cmdBar, body.live #radioLog, body.live #liveBtn, body.live #dbCtl, body.live #hud { display: none !important; }
+  #ltPanel { position: absolute; left: 10px; top: 44px; z-index: 6; width: 300px; background: #0d1b2ae8; border: 1px solid var(--line);
+    border-radius: 8px; box-shadow: 0 6px 20px #0008; font-size: 12.5px; }
+  #ltPanel .hd2 { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 9px; border-bottom: 1px solid var(--line); }
+  #ltPanel .bd { padding: 7px 9px; display: flex; flex-direction: column; gap: 6px; color: #cfe0ee; }
+  #ltPanel .bd .c-dim { font-size: 11.5px; } #ltPanel .bd .bad { color: #ffb3b3; }
+  #ltPanel .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; } #ltPanel button { font-size: 11.5px; padding: 2px 8px; }
+  #ltPanel button.on { background: #1f4a6e; color: #fff; border-color: #3b6e93; }
+  #ltPanel .cov-key { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--dim); }
+  #ltPanel .cov-key i { display: inline-block; width: 46px; height: 8px; border-radius: 2px; background: linear-gradient(90deg, #2a6f9a55, #5fd3a3cc); }
+  #ltPanel .cov-key b { display: inline-block; width: 10px; height: 8px; border-radius: 2px; background: repeating-linear-gradient(45deg, #ff6b6b88 0 2px, transparent 2px 4px); border: 1px solid #ff6b6b66; }
+  #ltPanel .credit { font-size: 10.5px; color: var(--dim); border-top: 1px solid var(--line); padding: 5px 9px; }
+  #ltPanel .credit a { color: var(--sel); }
   /* ---- an AI run, live (aiwatch.js) */
   #aiwPanel { position: absolute; left: 10px; top: 150px; z-index: 6; width: 340px; max-height: calc(100% - 220px); display: flex; flex-direction: column;
     background: #0d1b2ae8; border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 20px #0008; font-size: 12.5px; }
@@ -638,7 +652,8 @@ const API = '';
 let SID = new URLSearchParams(location.search).get('session');
 const DBID = (location.pathname.match(/^\/debrief\/([0-9a-f]+)\/?$/) || [])[1] || null;   // debrief on the simulator (debrief.js)
 const AIW = (location.pathname.match(/^\/ai\/watch\/([0-9a-f]+)\/?$/) || [])[1] || null;      // an AI run, live (aiwatch.js)
-const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || null;
+const LIVETR = /^\/live\/?$/.test(location.pathname) ? 'live' : null;                       // the live traffic, view only (traffic.js)
+const EXID = (location.pathname.match(/^\/x\/([0-9a-f]+)/) || [])[1] || DBID || AIW || LIVETR || null;
 let SEAT = 'instructor', EXINFO = null;          // seat in a connected exercise (seat.js)
 const V = { coast: true, areas: true, routes: true, rad: true, sectors: true, freqs: true, names: true, trails: true, sid: true, star: true, hold: true, procAll: false, airports: true, navaids: true, tma: true, ctr: false };
 try { Object.assign(V, JSON.parse(localStorage.getItem('atc_view') || '{}')); } catch (e) {}
@@ -658,7 +673,7 @@ const TH_DEF = {
 const TH = { ...TH_DEF };
 try { Object.assign(TH, JSON.parse(localStorage.getItem('atc_theme') || '{}')); } catch (e) {}
 function saveTheme() { try { localStorage.setItem('atc_theme', JSON.stringify(TH)); } catch (e) {} }
-if (EXID && !DBID && !AIW) SID = EXID;
+if (EXID && !DBID && !AIW && !LIVETR) SID = EXID;
 let mtcdOn = false; try { mtcdOn = localStorage.getItem('atc_mtcd') === '1'; } catch (e) {}
 let sector = null, state = null, sep = null, selected = null, lastSeq = 0, eventsBuf = [], weather = null, ws = null, wsOk = false;
 let wxImg = null, wxMeta = null, wxCellsData = [], arrInfo = null;
@@ -1250,7 +1265,7 @@ function drawTimeline() {
   for (const e of rec.events) { const row = TL_ROW[e.type]; if (row == null) continue;
     tctx.fillStyle = TL_COL[e.type] || '#888'; tctx.fillRect(X(e.time_s) - dpr, (7 + row * 8) * dpr, 2 * dpr, 6 * dpr); }
   if (window.tlExtra) window.tlExtra(tctx, X, W, H, dpr);           // debrief: branch point, extrapolated part
-  if (state && (!recOffline || DBID || AIW)) { tctx.fillStyle = '#5fd3a3'; tctx.fillRect(X(state.sim_time_s) - dpr, 2 * dpr, 2 * dpr, H - 12 * dpr); }
+  if (state && (!recOffline || DBID || AIW || LIVETR)) { tctx.fillStyle = '#5fd3a3'; tctx.fillRect(X(state.sim_time_s) - dpr, 2 * dpr, 2 * dpr, H - 12 * dpr); }
   if (replayMode) { tctx.fillStyle = '#ffffff'; tctx.fillRect(X(replayT) - dpr, 0, 2 * dpr, H - 10 * dpr);
     tctx.fillText(fmtT(replayT), Math.min(X(replayT) + 4 * dpr, W - 40 * dpr), 9 * dpr); }
 }
@@ -1458,7 +1473,7 @@ function labelLine3(a, ent) {
     const co = ent && shown && shown.coord ? shown.coord[a.callsign] : null;
     const rt = ent && ent.route && co && co.route_ahead && co.route_ahead.length ? co.route_ahead[0] : null;
     const nx = ent && ent.direct ? ent.direct : rt || nextReal(a);
-    segs.push([` >${nx}`, ent && ent.direct && ent.direct !== nextReal(a) ? 'chg' : 0, 'route']);
+    if (nx || !a.live) segs.push([` >${nx}`, ent && ent.direct && ent.direct !== nextReal(a) ? 'chg' : 0, 'route']);   // (live traffic: no route known)
   } else segs.push([' >', 0, 'route']);
   return segs;
 }
@@ -1720,6 +1735,7 @@ function draw() {
     const [wx0, wy0] = toPx(wxMeta.bbox[0], wxMeta.bbox[3]), [wx1, wy1] = toPx(wxMeta.bbox[2], wxMeta.bbox[1]);
     ctx.imageSmoothingEnabled = true; ctx.globalAlpha = +TH.wxAlpha; ctx.drawImage(wxImg, wx0, wy0, wx1 - wx0, wy1 - wy0); ctx.globalAlpha = 1;
   }
+  if (window.drawCoverage) drawCoverage();           // live traffic: where the ADS-B network receives (traffic.js)
   if (wxCellsData.length && $('#wxCells').checked && $('#wxMode').value !== 'off') {
     ctx.font = `${10 * dpr}px ui-monospace,monospace`; ctx.fillStyle = TH.cellTops;
     const drawn = [];
@@ -2127,6 +2143,7 @@ requestAnimationFrame(draw);
 <script src="/static/uirec.js"></script>
 <script src="/static/debrief.js"></script>
 <script src="/static/aiwatch.js"></script>
+<script src="/static/traffic.js"></script>
 <script src="/static/solver.js"></script>
 <script src="/static/seqtool.js"></script>
 <script src="/static/lookup.js"></script>

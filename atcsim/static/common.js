@@ -35,7 +35,7 @@ async function header(cur) {
   ME = await api('/api/me');
   const links = [['/', 'Home']];
   if (ME.role === 'instructor' || ME.role === 'admin') links.push(['/designer', 'Scenario designer'], ['/ai', 'AI lab']);
-  links.push(['/solo', 'Solo radar']);
+  links.push(['/solo', 'Solo radar'], ['/live', 'Live traffic']);
   if (ME.role === 'admin') links.push(['/admin', 'Users']);
   links.push(['/stats', 'Stats'], ['/news', 'News'], ['/help', 'Help'], ['/profile', 'Profile']);
   const h = document.createElement('header'); h.className = 'top';

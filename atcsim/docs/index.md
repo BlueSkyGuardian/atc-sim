@@ -72,6 +72,13 @@ squall line.
 - **Home**: live exercises, scenarios (instructors), recordings, evaluations.
 - **Scenario designer** (instructors): build and edit scenarios.
 - **Solo radar** (everyone): fly a scenario alone on the controller's screen, with simulated pilots.
+- **Live traffic** (everyone signed in): the real aircraft over and around the Agadir CTA, from a public ADS-B
+  network, on the controller's screen - view only. Labels, history, STCA and MTCD, RBLs and track info all work; the
+  level selected in the cockpit (Mode S, when the aircraft broadcasts it) shows as the cleared level, the origin and
+  destination come from the network's route database. Flight plans are not public, so no route is shown and the
+  look-ahead flies each track straight ahead. *Coverage map* shows where the network actually receives positions
+  (hatched red: inside the CTA, nothing received): the ground receivers cover the coast and the Canaries better than
+  the oceanic sectors.
 - **Stats**: your statistics by role.
 - **News**: aviation news, air traffic control first - open to everyone, without signing in. Your account gets the
   aviation newsletter every morning; unsubscribe (or subscribe again) in your **Profile**.
