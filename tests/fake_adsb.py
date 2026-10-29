@@ -62,6 +62,9 @@ def _dist_nm(lat1, lon1, lat2, lon2):
 
 class H(BaseHTTPRequestHandler):
     requests = []
+    min_gap = 0.0          # > 0: requests closer than this are refused (429, Retry-After), like a network under load
+    last_t = 0.0
+    refused = 0
 
     def log_message(self, *a):
         pass
@@ -77,6 +80,17 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         H.requests.append(self.path)
         H.last_headers = dict(self.headers)
+        now = time.time()
+        if H.min_gap and now - H.last_t < H.min_gap:
+            H.refused += 1
+            b = b'{"error": "too many requests"}'
+            self.send_response(429)
+            self.send_header("Retry-After", str(int(math.ceil(H.min_gap))))
+            self.send_header("Content-Length", str(len(b)))
+            self.end_headers()
+            self.wfile.write(b)
+            return
+        H.last_t = now
         p = self.path.strip("/").split("/")
         if len(p) == 5 and p[0] == "v2" and p[1] == "point":
             lat, lon, nm = float(p[2]), float(p[3]), float(p[4])

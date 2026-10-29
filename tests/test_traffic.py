@@ -17,7 +17,8 @@ os.environ["ATC_ADMIN_EMAILS"] = "boss@gmail.com"
 os.environ["ATC_NEWS"] = "off"
 os.environ["ATC_LIVE_URL"] = f"http://127.0.0.1:{PORT}/v2/point/{{lat}}/{{lon}}/{{nm}}"
 os.environ["ATC_LIVE_ROUTES_URL"] = f"http://127.0.0.1:{PORT}/api/0/routeset"
-os.environ["ATC_LIVE_EVERY_S"] = "2"
+os.environ["ATC_LIVE_EVERY_S"] = "0.5"
+os.environ["ATC_LIVE_GAP_S"] = "0.5"
 os.environ["ATC_LIVE_HEADERS"] = "X-Api-Key: test-key-123; X-Other: 2"
 
 from tests import fake_adsb  # noqa: E402
@@ -116,6 +117,22 @@ ok(traffic.FEED.mode() == "idle", "nobody watching, not measuring: the feed is n
 traffic.FEED.save_grid()
 ok(os.path.exists(os.path.join(traffic.LIVE_DIR, "coverage.json")), "the map is kept across restarts")
 ok(boss.post("/api/live/coverage/reset").status_code == 200 and sum(atc.get("/api/live/coverage").json()["counts"]) == 0, "an admin may start it again")
+
+# ---------------------------------------------------------------- the network's limit (429 Too Many Requests)
+traffic.FEED.watched_at = time.time()
+n_air = len(atc.get(f"/sessions/{sid}/state").json()["aircraft"])
+fake_adsb.H.min_gap, fake_adsb.H.refused = 2.0, 0
+t0, r0 = time.time(), traffic.FEED.status["requests"]
+while time.time() - t0 < 25:
+    atc.get("/api/live")                                   # (somebody watches)
+    time.sleep(1)
+info = atc.get("/api/live").json()
+reqs = traffic.FEED.status["requests"] - r0
+ok(info["limited"] >= 1 and info["gap_s"] >= 2.0, f"refused: it slows down (requests now {info['gap_s']} s apart, {info['limited']} refusals)")
+ok(fake_adsb.H.refused <= 5 and reqs <= 20, f"and stays under the limit: {fake_adsb.H.refused} refusals in {reqs} requests over 25 s, not a storm")
+ok(not info["last_error"] or "429" not in str(info["last_error"]), "a refusal is a slow-down, not an error on the page")
+ok(len(atc.get(f"/sessions/{sid}/state").json()["aircraft"]) >= n_air - 1, "the aircraft stay on the picture meanwhile")
+fake_adsb.H.min_gap = 0.0
 
 # ---------------------------------------------------------------- the feed down
 traffic.SOURCE = "http://127.0.0.1:9/v2/point/{lat}/{lon}/{nm}"

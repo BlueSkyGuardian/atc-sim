@@ -19,7 +19,9 @@ Settings (environment):
                                    https://opendata.adsb.fi/api/v2/lat/{lat}/lon/{lon}/dist/{nm})
   ATC_LIVE_ROUTES_URL             origin / destination by callsign (adsb.lol's routeset; empty: none)
   ATC_LIVE_CREDIT                 the credit shown on the page
-  ATC_LIVE_EVERY_S                a full reading while watched (default 6 s); ATC_LIVE_IDLE_S while measuring (60 s)
+  ATC_LIVE_EVERY_S                the closest two requests may be (default 3 s); ATC_LIVE_GAP_S the spacing to begin
+                                  with (6 s: it adapts to the network's limit); ATC_LIVE_IDLE_S a round while
+                                  measuring (60 s)
   ATC_LIVE_HEADERS                headers sent with every request, "Name: value; Name2: value2" - an API key when the
                                   network asks for one (adsb.lol has announced a key for its feeders; a paid feed
                                   such as ADS-B Exchange on RapidAPI: "X-RapidAPI-Key: ...; X-RapidAPI-Host: ...")
@@ -49,13 +51,18 @@ ENABLED = os.environ.get("ATC_LIVE", "on").lower() not in ("off", "0", "no", "fa
 SOURCE = os.environ.get("ATC_LIVE_URL", "https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}")
 ROUTES_URL = os.environ.get("ATC_LIVE_ROUTES_URL", "https://api.adsb.lol/api/0/routeset")
 CREDIT = os.environ.get("ATC_LIVE_CREDIT", "ADS-B data: adsb.lol (Open Database License)")
-EVERY_S = max(2.0, float(os.environ.get("ATC_LIVE_EVERY_S", "6") or 6))
+# the requests go one at a time, spaced: GAP_S to begin with, never closer than EVERY_S; a refusal (429 Too Many
+# Requests) doubles the spacing (and waits what the network asks), a run of answers shortens it again - the reading
+# settles just under the network's limit, which adsb.lol sets by its load
+EVERY_S = max(1.0, float(os.environ.get("ATC_LIVE_EVERY_S", "3") or 3))
+GAP_S = max(EVERY_S, float(os.environ.get("ATC_LIVE_GAP_S", "6") or 6))
+MAX_GAP_S = 120.0
 IDLE_S = max(10.0, float(os.environ.get("ATC_LIVE_IDLE_S", "60") or 60))
 HEADERS = {k.strip(): v.strip() for k, _, v in (h.partition(":") for h in os.environ.get("ATC_LIVE_HEADERS", "").split(";"))
            if k.strip() and v.strip()}
-MARGIN_NM = 90.0                      # the picture: the CTA and this much around it
+MARGIN_NM = 25.0                      # the picture: the CTA and this much around it (two circles of 250 NM)
 RADIUS_NM = 250.0                     # the feeds' largest circle
-STALE_S = 60.0                        # an aircraft not heard for this long leaves the picture
+STALE_S = 60.0                        # an aircraft not heard for this long (or 3 rounds of reading) leaves the picture
 WATCH_S = 30.0                        # a page that asked for the status this recently is watching
 CELL_NM = 10.0                        # the coverage map's cells
 MEASURE_H = 24.0                      # the first measurement of the coverage
@@ -93,7 +100,11 @@ class Feed:
         self.lock = threading.Lock()
         self.targets: Dict[str, dict] = {}            # hex -> the latest report (+ "t_pos": epoch of the position)
         self.routes: Dict[str, dict] = {}             # callsign -> {"orig", "dest", "t"}
-        self.status = {"last_ok": None, "last_error": None, "errors": 0, "requests": 0, "polls": 0, "mode": "idle"}
+        self.status = {"last_ok": None, "last_error": None, "errors": 0, "requests": 0, "polls": 0, "mode": "idle",
+                       "limited": 0, "last_limit_t": None}
+        self.gap = GAP_S                              # the spacing of the requests now (adapts)
+        self.floor = EVERY_S                          # not faster than this: 1.3 x a spacing that was refused (30 min)
+        self.hold_until = 0.0                         # refused: no request before this
         self.watched_at = 0.0
         self.measure_until = 0.0
         self.circles: List[tuple] = []                # (lat, lon, nm)
@@ -106,8 +117,10 @@ class Feed:
         """The circles to read (covering the CTA and its margin) and the coverage grid, from the airspace."""
         x0, y0, x1, y1 = asp.bbox
         x0, y0, x1, y1 = x0 - MARGIN_NM, y0 - MARGIN_NM, x1 + MARGIN_NM, y1 + MARGIN_NM
-        step = RADIUS_NM * math.sqrt(2) * 0.95           # squares inside the circles: no gap between them
-        nx, ny = max(1, math.ceil((x1 - x0) / step)), max(1, math.ceil((y1 - y0) / step))
+        # as few circles as cover the area (each request counts against the network's limit): the smallest grid of
+        # rectangles whose half-diagonal fits in a circle
+        nx, ny = min(((a, b) for a in range(1, 6) for b in range(1, 6)
+                      if math.hypot((x1 - x0) / a, (y1 - y0) / b) / 2 <= RADIUS_NM - 2), key=lambda g: (g[0] * g[1], g))
         sx, sy = (x1 - x0) / nx, (y1 - y0) / ny
         circ = []
         for i in range(nx):
@@ -115,7 +128,7 @@ class Feed:
                 cx, cy = x0 + sx * (i + 0.5), y0 + sy * (j + 0.5)
                 ll = asp.to_latlon(cx, cy)
                 if ll:
-                    circ.append((round(ll[0], 3), round(ll[1], 3), int(min(RADIUS_NM, math.ceil(math.hypot(sx, sy) / 2) + 5))))
+                    circ.append((round(ll[0], 3), round(ll[1], 3), int(min(RADIUS_NM, math.ceil(math.hypot(sx, sy) / 2) + 2))))
         self.circles = circ
         self.box = (x0, y0, x1, y1)
         gx, gy = int(math.ceil((x1 - x0) / CELL_NM)), int(math.ceil((y1 - y0) / CELL_NM))
@@ -147,45 +160,76 @@ class Feed:
         now = now or time.time()
         return "watched" if now - self.watched_at < WATCH_S else "measuring" if now < self.measure_until else "idle"
 
-    def read_once(self, client, to_xy) -> int:
-        """One reading of every circle; returns the number of aircraft heard."""
+    def cycle_s(self, m: Optional[str] = None) -> float:
+        """How often every circle is read again, at the present spacing."""
+        m = m or self.mode()
+        n = max(1, len(self.circles))
+        return (self.gap if m == "watched" else max(self.gap, IDLE_S / n)) * n
+
+    def merge(self, d: dict, to_xy) -> int:
+        """One circle's answer into the picture and the coverage map; returns the number of aircraft heard."""
         heard = {}
-        for lat, lon, nm in self.circles:
-            url = SOURCE.format(lat=lat, lon=lon, nm=nm)
-            self.status["requests"] += 1
-            r = client.get(url)
-            r.raise_for_status()
-            d = r.json()
-            now_s = (d.get("now") or time.time() * 1000) / 1000.0
-            for a in d.get("ac") or d.get("aircraft") or []:
-                if a.get("lat") is None or a.get("lon") is None or not a.get("hex"):
-                    continue
-                a = dict(a)
-                a["t_pos"] = now_s - float(a.get("seen_pos") or a.get("seen") or 0)
-                old = heard.get(a["hex"])
-                if old is None or a["t_pos"] > old["t_pos"]:
-                    heard[a["hex"]] = a
+        now_s = (d.get("now") or time.time() * 1000) / 1000.0
+        for a in d.get("ac") or d.get("aircraft") or []:
+            if a.get("lat") is None or a.get("lon") is None or not a.get("hex"):
+                continue
+            a = dict(a)
+            a["t_pos"] = now_s - float(a.get("seen_pos") or a.get("seen") or 0)
+            old = heard.get(a["hex"])
+            if old is None or a["t_pos"] > old["t_pos"]:
+                heard[a["hex"]] = a
         now = time.time()
+        stale = max(STALE_S, 3 * self.cycle_s())
         with self.lock:
             for h, a in heard.items():
                 if h not in self.targets or a["t_pos"] >= self.targets[h]["t_pos"]:
                     self.targets[h] = a
-            for h in [h for h, a in self.targets.items() if now - a["t_pos"] > STALE_S]:
+            for h in [h for h, a in self.targets.items() if now - a["t_pos"] > stale]:
                 self.targets.pop(h, None)
             g = self.grid
             if g is not None:                            # coverage: the positions received, cell by cell
-                seen = set()
                 for a in heard.values():
-                    if now - a["t_pos"] > 2 * EVERY_S + 5:   # an old position repeated: not a reception now
+                    if now - a["t_pos"] > 30:            # an old position repeated: not a reception now
                         continue
                     x, y = to_xy(a["lat"], a["lon"])
                     i, j = int((x - g["x0"]) // g["cell"]), int((y - g["y0"]) // g["cell"])
-                    if 0 <= i < g["nx"] and 0 <= j < g["ny"] and (i, j, a["hex"]) not in seen:
-                        seen.add((i, j, a["hex"]))
+                    if 0 <= i < g["nx"] and 0 <= j < g["ny"]:
                         g["counts"][j * g["nx"] + i] += 1
-                g["polls"] += 1
-            self.status.update(last_ok=now, polls=self.status["polls"] + 1, heard=len(heard))
+            self.status.update(last_ok=now, heard=len(heard))
         return len(heard)
+
+    def read_circle(self, client, i: int, to_xy) -> str:
+        """Read circle i: "ok", or "limited" (the network refused: slower from now), or raises."""
+        lat, lon, nm = self.circles[i]
+        self.status["requests"] += 1
+        r = client.get(SOURCE.format(lat=lat, lon=lon, nm=nm))
+        if r.status_code == 429:
+            try:
+                wait = float(r.headers.get("Retry-After") or 0)
+            except ValueError:
+                wait = 0.0
+            self.floor = min(MAX_GAP_S, max(EVERY_S, self.gap * 1.3))
+            self.gap = min(MAX_GAP_S, self.gap * 2)
+            self.hold_until = time.time() + min(300.0, max(wait, self.gap))
+            self.status.update(limited=self.status["limited"] + 1, last_limit_t=time.time())
+            return "limited"
+        r.raise_for_status()
+        self.merge(r.json(), to_xy)
+        return "ok"
+
+    def read_once(self, client, to_xy) -> int:
+        """Every circle once (the tests): the number of aircraft on the picture after."""
+        for i in range(len(self.circles)):
+            self.read_circle(client, i, to_xy)
+        self.round_done()
+        with self.lock:
+            return len(self.targets)
+
+    def round_done(self) -> None:
+        with self.lock:
+            self.status["polls"] += 1
+            if self.grid is not None:
+                self.grid["polls"] += 1
 
     def read_routes(self, client) -> None:
         """Origin and destination of the callsigns not known yet (or known for more than 6 h), in one request."""
@@ -218,34 +262,50 @@ class Feed:
     def loop(self, to_xy) -> None:
         import httpx
         time.sleep(5)
-        last_routes = 0.0
+        last_routes, i, good = 0.0, 0, 0
         hdr = {"User-Agent": f"ATC-SIM-live/1.0 (+{config.PUBLIC_URL or 'training simulator'})", **HEADERS}
         with httpx.Client(timeout=12, headers=hdr) as c:
             while True:
                 m = self.mode()
                 self.status["mode"] = m
-                if m == "idle":
-                    time.sleep(1.0)
+                if m == "idle" or time.time() < self.hold_until or not self.circles:
+                    time.sleep(0.5)
                     continue
                 t0 = time.time()
                 try:
-                    self.read_once(c, to_xy)
-                    if m == "watched" and time.time() - last_routes > 60:
-                        last_routes = time.time()
+                    res = self.read_circle(c, i, to_xy)
+                    if res == "ok":
+                        i = (i + 1) % len(self.circles)
+                        if i == 0:
+                            self.round_done()                # every circle read once more: a round
+                        good += 1
+                        if good >= 2 * len(self.circles):    # answered for two rounds: a little faster, not into
+                            if time.time() - (self.status["last_limit_t"] or 0) > 1800:     # a refused pace again
+                                self.floor = EVERY_S
+                            self.gap, good = max(EVERY_S, self.floor, self.gap * 0.85), 0
+                    else:
+                        good = 0
+                    recently_limited = time.time() - (self.status["last_limit_t"] or 0) < 300
+                    if res == "ok" and m == "watched" and not recently_limited and time.time() - last_routes > 300:
+                        last_routes = time.time()            # origins and destinations: a request now and then
+                        time.sleep(self.gap)
                         try:
                             self.read_routes(c)
                         except Exception as e:              # noqa: BLE001 - the routes are a bonus
                             log.info("routes: %s", e)
-                except Exception as e:                      # noqa: BLE001 - the feed may be down: say so, try again
+                except Exception as e:                      # noqa: BLE001 - the feed may be down: say so, try again later
+                    good = 0
                     self.status.update(last_error=f"{type(e).__name__}: {e}"[:200], errors=self.status["errors"] + 1,
                                        last_error_t=time.time())
+                    self.hold_until = time.time() + min(120.0, 2 * self.gap)
                 if time.time() - self._last_save > 300:
                     try:
                         self.save_grid()
                     except OSError:
                         pass
-                every = EVERY_S if m == "watched" else IDLE_S
-                while time.time() - t0 < every:
+                n = max(1, len(self.circles))
+                spacing = self.gap if m == "watched" else max(self.gap, IDLE_S / n)
+                while time.time() - t0 < spacing:
                     if m != "watched" and self.mode() == "watched":     # somebody opened the page: read now
                         break
                     time.sleep(0.25)
@@ -469,7 +529,9 @@ def live_status(request: Request):
     return {"sid": s.id, "credit": CREDIT, "source": SOURCE.split("/")[2] if "//" in SOURCE else SOURCE,
             "mode": FEED.mode(), "aircraft": len(w.aircraft), "in_cta": sum(1 for a in w.aircraft.values() if a.active),
             "last_ok": st.get("last_ok"), "last_error": st.get("last_error"), "last_error_t": st.get("last_error_t"),
-            "every_s": EVERY_S, "measure_until": FEED.measure_until or None, "polls": st.get("polls"),
+            "every_s": round(FEED.cycle_s(), 1), "gap_s": round(FEED.gap, 1), "measure_until": FEED.measure_until or None,
+            "polls": st.get("polls"), "limited": st.get("limited"), "last_limit_t": st.get("last_limit_t"),
+            "hold_s": max(0, round(FEED.hold_until - time.time())),
             "circles": len(FEED.circles)}
 
 

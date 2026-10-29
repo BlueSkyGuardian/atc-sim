@@ -46,8 +46,9 @@
   const ago = t => { if (!t) return 'never'; const s = Math.max(0, Date.now() / 1000 - t); return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; };
   function render() {
     if (!info) return;
-    const fresh = info.last_ok && Date.now() / 1000 - info.last_ok < 30;
+    const fresh = info.last_ok && Date.now() / 1000 - info.last_ok < Math.max(30, 2 * info.every_s);
     const err = info.last_error && (!info.last_ok || info.last_error_t > info.last_ok);
+    const limited = info.last_limit_t && Date.now() / 1000 - info.last_limit_t < 120;
     const pill = fresh ? '<span class="db-pill live">● LIVE</span>' : '<span class="db-pill ready">WAITING FOR THE FEED</span>';
     const meas = info.measure_until && info.measure_until * 1000 > Date.now();
     const admin = me && me.role === 'admin';
@@ -59,7 +60,7 @@
     }
     const html = `<div class="hd2"><b>Live traffic</b>${pill}</div><div class="bd">
       <div><b>${info.aircraft}</b> aircraft on the picture, <b>${info.in_cta}</b> in the CTA</div>
-      <div class="c-dim">Read from ${h(info.source)} every ${info.every_s} s while somebody watches · last ${ago(info.last_ok)}${err ? ` · <span class="bad">${h(info.last_error)}</span>` : ''}</div>
+      <div class="c-dim">Read from ${h(info.source)} while somebody watches: the whole area every ${Math.round(info.every_s)} s, as fast as the network allows (the aircraft are carried along their tracks in between) · last ${ago(info.last_ok)}${limited ? ` · <span class="slow">the network asked to slow down${info.hold_s ? ', next request in ' + info.hold_s + ' s' : ''}</span>` : ''}${err ? ` · <span class="bad">${h(info.last_error)}</span>` : ''}</div>
       <div class="c-dim">The level selected in the cockpit (Mode S) shows as the cleared level. Flight plans are not public: the look-ahead (MTCD) flies each track straight ahead. View only.</div>
       <div class="row"><button data-a="cov" class="${covOn ? 'on' : ''}" title="Where the network receives positions: the readings since the measurement started, 10 NM cells">Coverage map</button>
         ${admin ? `<button data-a="measure" title="${meas ? 'Stop reading the feed when nobody watches' : 'Read the feed (once a minute) for 24 h even when nobody watches, for the coverage map'}">${meas ? 'Stop measuring' : 'Measure 24 h'}</button>${covOn ? '<button data-a="reset">Reset map</button>' : ''}` : ''}</div>

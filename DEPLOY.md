@@ -133,11 +133,13 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   structured data (NewsArticle for the articles). Google Search Console's ownership file
   (`googledb6d43d3018dfdc9.html`) is served at the root; more with `ATC_SITE_VERIFY="google....html,..."`.
 * **Live traffic** (`/live`): the real aircraft around the CTA from a public ADS-B network, view only. The server
-  reads the feed (four circles covering the CTA) every 6 s while somebody watches the page, and once a minute for
-  24 h after the first start, to measure the coverage map. `ATC_LIVE=off` turns it off; `ATC_LIVE_URL` changes the
+  reads the feed (two circles covering the CTA) one request at a time while somebody watches the page - 6 s apart to
+  begin with, faster while the network answers, slower when it refuses (429), never faster than a pace it refused -
+  and once a minute for 24 h after the first start, to measure the coverage map. `ATC_LIVE=off` turns it off; `ATC_LIVE_URL` changes the
   network (default `https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}`; airplanes.live and adsb.fi serve the same
   format), `ATC_LIVE_ROUTES_URL` the origin/destination lookup, `ATC_LIVE_CREDIT` the credit shown, and
-  `ATC_LIVE_EVERY_S` / `ATC_LIVE_IDLE_S` the reading intervals, `ATC_LIVE_HEADERS` the headers for a network that
+  `ATC_LIVE_EVERY_S` (the closest two requests may be, 3 s) / `ATC_LIVE_GAP_S` (to begin with, 6 s) /
+  `ATC_LIVE_IDLE_S` (a round while measuring, 60 s) the pace, `ATC_LIVE_HEADERS` the headers for a network that
   needs a key (`"Name: value; Name2: value2"`; adsb.lol needs none today but has announced a key for its feeders). The free networks are for non-commercial use, with
   the source credited (adsb.lol's data is under the Open Database License).
 * `ATC_RADAR_SWEEP_S` (default 4): the radar screens' picture, one sweep every so many seconds of simulation time
