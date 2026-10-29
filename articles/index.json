@@ -1,5 +1,5 @@
 {
- "generated": 1793291953,
+ "generated": 1793293527,
  "articles": [
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
@@ -27,7 +27,73 @@
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793291793
+   "updated": 1793292689
+  },
+  {
+   "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
+   "date": "2026-10-29",
+   "region": "morocco",
+   "section": "Airlines & airports",
+   "title": "Royal Air Maroc adds a fifth weekly Casablanca–São Paulo flight as the winter season begins",
+   "summary": "The new frequency started on 28 October with a 15:30 departure from Casablanca; RAM now flies to São Paulo-Guarulhos on five days a week, on a route it resumed in December 2024.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Royal Air Maroc ajoute un cinquième vol hebdomadaire Casablanca–São Paulo à l'entrée de la saison d'hiver",
+    "ar": "الخطوط الملكية المغربية تضيف رحلة أسبوعية خامسة بين الدار البيضاء وساو باولو مع بداية الموسم الشتوي"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793293503
+  },
+  {
+   "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
+   "date": "2026-10-29",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "Storms and ATC capacity: France and Spain caused 69% of Europe's en-route delay in week 43",
+   "summary": "EUROCONTROL's weekly overview shows 32,480 flights a day from 19 to 25 October; Barcelona, Marseille and Madrid led en-route delay per flight, and a Skyguide radar display failure cut Swiss capacity.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Tempêtes et capacité du contrôle : la France et l'Espagne à l'origine de 69 % des retards en route en Europe en semaine 43",
+    "ar": "العواصف وقدرة المراقبة: فرنسا وإسبانيا وراء 69% من التأخير على الطريق في أوروبا خلال الأسبوع 43"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "accs.svg",
+    "accs.png",
+    "causes.svg",
+    "causes.png",
+    "accs.fr.svg",
+    "accs.fr.png",
+    "causes.fr.svg",
+    "causes.fr.png",
+    "accs.ar.svg",
+    "accs.ar.png",
+    "causes.ar.svg",
+    "causes.ar.png"
+   ],
+   "updated": 1793293503
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -55,7 +121,67 @@
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793291843
+   "updated": 1793292689
+  },
+  {
+   "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
+   "date": "2026-10-29",
+   "region": "europe",
+   "section": "Technology & innovation",
+   "title": "EUROCONTROL keeps Frequentis on ARTAS, Europe's main surveillance tracker, until 2031",
+   "summary": "The new CAMOS VI industrial partner contract, announced on 29 October, extends a 25-year partnership on the multi-sensor tracker that supports about 90% of Europe's daily flights.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "EUROCONTROL conserve Frequentis sur ARTAS, le principal système de poursuite radar européen, jusqu'en 2031",
+    "ar": "EUROCONTROL تُبقي على Frequentis لتطوير ARTAS، نظام التتبع الرئيسي في أوروبا، إلى غاية 2031"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793293519
+  },
+  {
+   "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
+   "date": "2026-10-29",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "Atlanta's tower drops paper strips: the 26th US airport on the FAA's electronic flight strip system",
+   "summary": "Hartsfield-Jackson has switched to electronic flight strips under the FAA's TFDM programme, which aims to equip 89 towers by the end of 2028 as part of a $12.5 billion modernisation.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La tour d'Atlanta abandonne le papier : 26e aéroport américain équipé des strips électroniques de la FAA",
+    "ar": "برج أتلانتا يتخلى عن الورق: المطار الأمريكي السادس والعشرون المجهز بالأشرطة الإلكترونية لإدارة الطيران الفيدرالية"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "rollout.svg",
+    "rollout.png",
+    "rollout.fr.svg",
+    "rollout.fr.png",
+    "rollout.ar.svg",
+    "rollout.ar.png"
+   ],
+   "updated": 1793293503
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -83,7 +209,37 @@
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793291902
+   "updated": 1793292689
+  },
+  {
+   "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
+   "date": "2026-10-29",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "FAA funds in-flight engine airflow tests on JetZero's full-scale blended-wing demonstrator",
+   "summary": "JetZero receives $5.3 million from Phase IV of the FAA's CLEEN programme to instrument the top-mounted engines of Jet1, the Z4 demonstrator due to fly in the fourth quarter of 2027.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La FAA finance des mesures en vol de l'écoulement d'air des moteurs sur le démonstrateur d'aile volante de JetZero",
+    "ar": "إدارة الطيران الفيدرالية تموّل قياس تدفق الهواء في المحركات أثناء الطيران على النموذج التجريبي لـJetZero"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793293515
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -109,7 +265,7 @@
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793291953
+   "updated": 1793292689
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -137,7 +293,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793291592
+   "updated": 1793292689
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -163,7 +319,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793291640
+   "updated": 1793292689
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -189,7 +345,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793291691
+   "updated": 1793292689
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -215,7 +371,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793291748
+   "updated": 1793292689
   }
  ]
 }

@@ -1,0 +1,56 @@
+{
+ "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
+ "date": "2026-10-29",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "FAA funds in-flight engine airflow tests on JetZero's full-scale blended-wing demonstrator",
+ "summary": "JetZero receives $5.3 million from Phase IV of the FAA's CLEEN programme to instrument the top-mounted engines of Jet1, the Z4 demonstrator due to fly in the fourth quarter of 2027.",
+ "sources": [
+  {
+   "title": "JetZero Awarded $5.3M in FAA CLEEN IV",
+   "url": "https://www.prnewswire.com/news-releases/jetzero-awarded-5-3m-in-faa-cleen-iv-302921712.html",
+   "site": "PR Newswire"
+  },
+  {
+   "title": "FAA Funds JetZero Study of Top-mounted Engine Airflow",
+   "url": "https://www.ainonline.com/aviation-news/futureflight/2026-10-28/faa-funds-jetzero-study-top-mounted-engine-airflow",
+   "site": "AIN"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Where JetZero's programme takes shape: Jet1 is assembled at Mojave, the Z4 factory site is in Greensboro, and the award was announced from Long Beach.",
+   "alt": "Map of the contiguous United States, highlighted, with three points: Mojave, California (Jet1 assembly by Scaled Composites), Long Beach, California (press release dateline) and Greensboro, North Carolina (Z4 factory site).",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La FAA finance des mesures en vol de l'écoulement d'air des moteurs sur le démonstrateur d'aile volante de JetZero",
+   "summary": "JetZero reçoit 5,3 millions de dollars de la phase IV du programme CLEEN de la FAA pour instrumenter les moteurs dorsaux de Jet1, le démonstrateur du Z4 qui doit voler au quatrième trimestre 2027.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Où prend forme le programme de JetZero : Jet1 est assemblé à Mojave, l'usine du Z4 est à Greensboro, et l'attribution a été annoncée depuis Long Beach.",
+     "alt": "Carte des États-Unis contigus, mis en évidence, avec trois points : Mojave, en Californie (assemblage de Jet1 par Scaled Composites), Long Beach, en Californie (lieu du communiqué) et Greensboro, en Caroline du Nord (site de l'usine Z4)."
+    }
+   ]
+  },
+  "ar": {
+   "title": "إدارة الطيران الفيدرالية تموّل قياس تدفق الهواء في المحركات أثناء الطيران على النموذج التجريبي لـJetZero",
+   "summary": "تحصل JetZero على 5.3 مليون دولار من المرحلة الرابعة لبرنامج CLEEN لتجهيز المحركات العلوية للطائرة Jet1 بأجهزة قياس، وهي النموذج التجريبي للطائرة Z4 المنتظر أن تطير في الربع الأخير من 2027.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "أين يتشكل برنامج JetZero: تُجمَّع Jet1 في موهافي، ويوجد موقع مصنع Z4 في غرينزبورو، وأُعلن عن التمويل من لونغ بيتش.",
+     "alt": "خريطة للولايات المتحدة القارية مع إبرازها، وثلاث نقاط: موهافي بكاليفورنيا (تجميع Jet1 من طرف Scaled Composites)، ولونغ بيتش بكاليفورنيا (مكان صدور البلاغ)، وغرينزبورو بكارولاينا الشمالية (موقع مصنع Z4)."
+    }
+   ]
+  }
+ }
+}

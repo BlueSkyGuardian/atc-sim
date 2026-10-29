@@ -1,0 +1,80 @@
+{
+ "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
+ "date": "2026-10-29",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "Storms and ATC capacity: France and Spain caused 69% of Europe's en-route delay in week 43",
+ "summary": "EUROCONTROL's weekly overview shows 32,480 flights a day from 19 to 25 October; Barcelona, Marseille and Madrid led en-route delay per flight, and a Skyguide radar display failure cut Swiss capacity.",
+ "sources": [
+  {
+   "title": "EUROCONTROL European Aviation Overview 2026 - Week 43",
+   "url": "https://www.eurocontrol.int/publication/eurocontrol-european-aviation-overview-2026-week-43",
+   "site": "EUROCONTROL"
+  },
+  {
+   "title": "European Air Traffic Down 2.3% in Week 43 2026 as Storms Hit Northern and Western Europe",
+   "url": "https://www.indexbox.io/blog/european-air-traffic-falls-23-in-week-43-as-storms-austen-and-boelo-disrupt-flights/",
+   "site": "IndexBox"
+  },
+  {
+   "title": "Technical issue resolved",
+   "url": "https://www.skyguide.ch/media-centre/post/154176",
+   "site": "Skyguide"
+  }
+ ],
+ "figures": [
+  {
+   "file": "accs.svg",
+   "png": "accs.png",
+   "caption": "The five area control centres with the highest average en-route ATFM delay per flight in week 43.",
+   "alt": "Horizontal bar chart of en-route ATFM delay in minutes per flight, 19 to 25 October 2026: Barcelona 2.7, Marseille 2.6, Madrid 1.9, Reims 1.1, Brest 1.0.",
+   "credit": "ATC SIM newsroom; data EUROCONTROL"
+  },
+  {
+   "file": "causes.svg",
+   "png": "causes.png",
+   "caption": "The causes of en-route ATFM delay in Europe in week 43, as attributed by EUROCONTROL.",
+   "alt": "Horizontal bar chart of shares of en-route ATFM delay by cause, 19 to 25 October 2026: ATC capacity and staffing 65%, weather 20%, other causes (partly the new 4-FLIGHT system in France) 10%, ATC disruptions (Skyguide) 5%.",
+   "credit": "ATC SIM newsroom; data EUROCONTROL"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Tempêtes et capacité du contrôle : la France et l'Espagne à l'origine de 69 % des retards en route en Europe en semaine 43",
+   "summary": "Le rapport hebdomadaire d'EUROCONTROL fait état de 32 480 vols par jour du 19 au 25 octobre ; Barcelone, Marseille et Madrid en tête des retards en route par vol, et une panne d'affichage radar chez Skyguide a réduit la capacité suisse.",
+   "figures": [
+    {
+     "file": "accs.fr.svg",
+     "png": "accs.fr.png",
+     "caption": "Les cinq centres de contrôle régionaux au plus fort retard ATFM en route moyen par vol en semaine 43.",
+     "alt": "Graphique à barres horizontales du retard ATFM en route en minutes par vol, du 19 au 25 octobre 2026 : Barcelone 2,7, Marseille 2,6, Madrid 1,9, Reims 1,1, Brest 1,0."
+    },
+    {
+     "file": "causes.fr.svg",
+     "png": "causes.fr.png",
+     "caption": "Les causes des retards ATFM en route en Europe en semaine 43, selon EUROCONTROL.",
+     "alt": "Graphique à barres horizontales des parts des retards ATFM en route par cause, du 19 au 25 octobre 2026 : capacité et effectifs du contrôle 65 %, météo 20 %, autres causes (en partie le nouveau système 4-FLIGHT en France) 10 %, perturbations du contrôle (Skyguide) 5 %."
+    }
+   ]
+  },
+  "ar": {
+   "title": "العواصف وقدرة المراقبة: فرنسا وإسبانيا وراء 69% من التأخير على الطريق في أوروبا خلال الأسبوع 43",
+   "summary": "يُظهر التقرير الأسبوعي لـEUROCONTROL تسجيل 32480 رحلة يومياً من 19 إلى 25 أكتوبر؛ وتصدرت برشلونة ومرسيليا ومدريد التأخير على الطريق لكل رحلة، فيما خفّض عطل في شاشات الرادار لدى Skyguide القدرة السويسرية.",
+   "figures": [
+    {
+     "file": "accs.ar.svg",
+     "png": "accs.ar.png",
+     "caption": "مراكز المراقبة الإقليمية الخمسة الأعلى من حيث متوسط تأخير تدبير التدفق على الطريق لكل رحلة خلال الأسبوع 43.",
+     "alt": "رسم بياني بأعمدة أفقية لتأخير تدبير التدفق على الطريق بالدقائق لكل رحلة، من 19 إلى 25 أكتوبر 2026: برشلونة 2.7، مرسيليا 2.6، مدريد 1.9، رانس 1.1، بريست 1.0."
+    },
+    {
+     "file": "causes.ar.svg",
+     "png": "causes.ar.png",
+     "caption": "أسباب تأخير تدبير التدفق على الطريق في أوروبا خلال الأسبوع 43، حسب EUROCONTROL.",
+     "alt": "رسم بياني بأعمدة أفقية لحصص أسباب تأخير تدبير التدفق على الطريق، من 19 إلى 25 أكتوبر 2026: قدرة المراقبة وعدد المراقبين 65%، الأحوال الجوية 20%، أسباب أخرى (منها النظام الفرنسي الجديد 4-FLIGHT) 10%، اضطرابات المراقبة (Skyguide) 5%."
+    }
+   ]
+  }
+ }
+}

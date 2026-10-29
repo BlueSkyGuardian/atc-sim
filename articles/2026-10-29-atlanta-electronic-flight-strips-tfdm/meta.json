@@ -1,0 +1,61 @@
+{
+ "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
+ "date": "2026-10-29",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "Atlanta's tower drops paper strips: the 26th US airport on the FAA's electronic flight strip system",
+ "summary": "Hartsfield-Jackson has switched to electronic flight strips under the FAA's TFDM programme, which aims to equip 89 towers by the end of 2028 as part of a $12.5 billion modernisation.",
+ "sources": [
+  {
+   "title": "Atlanta airport gets major air traffic control upgrade as FAA replaces decades-old system",
+   "url": "https://www.wsbradio.com/news/local/atlanta-airport-gets-major-air-traffic-control-upgrade-faa-replaces-decades-old-system/YR6ZCLJM3BHCVLMFNL3UVDMHMU/",
+   "site": "WSB Radio"
+  },
+  {
+   "title": "After 2025 collision, air controllers at Reagan get new tools",
+   "url": "https://federalnewsnetwork.com/technology-main/2026/03/after-2025-collision-air-controllers-at-reagan-get-new-tools/",
+   "site": "Federal News Network"
+  },
+  {
+   "title": "What is TFDM?",
+   "url": "https://www.faa.gov/air_traffic/technology/tfdm/whatistfdm",
+   "site": "FAA"
+  }
+ ],
+ "figures": [
+  {
+   "file": "rollout.svg",
+   "png": "rollout.png",
+   "caption": "The rollout of electronic flight strips in US towers: Washington Reagan was the 15th airport, Atlanta the 26th, and the FAA targets 89 by the end of 2028.",
+   "alt": "Bar chart: 15 (Washington Reagan National, early 2026), 26 (Atlanta, October 2026) and 89 (FAA target for the end of 2028) US airports with electronic flight strips.",
+   "credit": "ATC SIM newsroom; data Federal News Network and WSB Radio"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La tour d'Atlanta abandonne le papier : 26e aéroport américain équipé des strips électroniques de la FAA",
+   "summary": "Hartsfield-Jackson est passé aux strips électroniques dans le cadre du programme TFDM de la FAA, qui vise à équiper 89 tours d'ici fin 2028 au sein d'une modernisation de 12,5 milliards de dollars.",
+   "figures": [
+    {
+     "file": "rollout.fr.svg",
+     "png": "rollout.fr.png",
+     "caption": "Le déploiement des strips électroniques dans les tours américaines : Washington Reagan était le 15e aéroport, Atlanta le 26e, et la FAA vise 89 d'ici fin 2028.",
+     "alt": "Graphique à barres : 15 (Washington Reagan National, début 2026), 26 (Atlanta, octobre 2026) et 89 (objectif de la FAA pour fin 2028) aéroports américains équipés de strips électroniques."
+    }
+   ]
+  },
+  "ar": {
+   "title": "برج أتلانتا يتخلى عن الورق: المطار الأمريكي السادس والعشرون المجهز بالأشرطة الإلكترونية لإدارة الطيران الفيدرالية",
+   "summary": "انتقل مطار هارتسفيلد-جاكسون إلى الأشرطة الإلكترونية في إطار برنامج TFDM التابع لإدارة الطيران الفيدرالية، الذي يهدف إلى تجهيز 89 برجاً بحلول نهاية 2028 ضمن برنامج تحديث بقيمة 12.5 مليار دولار.",
+   "figures": [
+    {
+     "file": "rollout.ar.svg",
+     "png": "rollout.ar.png",
+     "caption": "انتشار الأشرطة الإلكترونية في الأبراج الأمريكية: كان مطار واشنطن ريغان المطار الخامس عشر، وأتلانتا السادس والعشرين، وتستهدف الإدارة 89 مطاراً بنهاية 2028.",
+     "alt": "رسم بياني بالأعمدة: 15 (واشنطن ريغان الوطني، بداية 2026)، و26 (أتلانتا، أكتوبر 2026)، و89 (هدف إدارة الطيران الفيدرالية لنهاية 2028) مطاراً أمريكياً مجهزاً بالأشرطة الإلكترونية."
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
+ "date": "2026-10-29",
+ "region": "europe",
+ "section": "Technology & innovation",
+ "title": "EUROCONTROL keeps Frequentis on ARTAS, Europe's main surveillance tracker, until 2031",
+ "summary": "The new CAMOS VI industrial partner contract, announced on 29 October, extends a 25-year partnership on the multi-sensor tracker that supports about 90% of Europe's daily flights.",
+ "sources": [
+  {
+   "title": "EUROCONTROL awards FREQUENTIS new long-term contract to advance European air traffic surveillance",
+   "url": "https://www.atc-network.com/atc-news/frequentis/eurocontrol-awards-frequentis-new-long-term-contract-to-advance-european-air-traffic-surveillance",
+   "site": "ATC Network"
+  },
+  {
+   "title": "PTA-News: Frequentis AG: EUROCONTROL awards FREQUENTIS new long-term contract to advance European air traffic surveillance",
+   "url": "https://www.tradingview.com/news/reuters.com,2026-10-29:newsml_PexLrV2Ba:0-pta-news-frequentis-ag-eurocontrol-awards-frequentis-new-long-term-contract-to-advance-european-air-traffic-surveillance/",
+   "site": "TradingView (pressetext)"
+  },
+  {
+   "title": "Eurocontrol awards Frequentis Comsoft further five-year contract for the maintenance of ARTAS surveillance tracker",
+   "url": "https://www.atc-network.com/atc-news/frequentis-comsoft/eurocontrol-awards-frequentis-comsoft-further-five-year-contract-for-the-maintenance-of-artas-surveillance-tracker",
+   "site": "ATC Network (2020)"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Where ARTAS is managed and maintained: EUROCONTROL in Brussels, Frequentis in Vienna and Frequentis Comsoft in Karlsruhe.",
+   "alt": "Map of western and central Europe with three points: EUROCONTROL in Brussels, highlighted, Frequentis in Vienna and Frequentis Comsoft in Karlsruhe.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "EUROCONTROL conserve Frequentis sur ARTAS, le principal système de poursuite radar européen, jusqu'en 2031",
+   "summary": "Le nouveau contrat de partenaire industriel CAMOS VI, annoncé le 29 octobre, prolonge un partenariat de 25 ans sur le système de poursuite multicapteur qui traite environ 90 % des vols quotidiens en Europe.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Où ARTAS est géré et entretenu : EUROCONTROL à Bruxelles, Frequentis à Vienne et Frequentis Comsoft à Karlsruhe.",
+     "alt": "Carte de l'Europe de l'Ouest et centrale avec trois points : EUROCONTROL à Bruxelles, mis en évidence, Frequentis à Vienne et Frequentis Comsoft à Karlsruhe."
+    }
+   ]
+  },
+  "ar": {
+   "title": "EUROCONTROL تُبقي على Frequentis لتطوير ARTAS، نظام التتبع الرئيسي في أوروبا، إلى غاية 2031",
+   "summary": "يمدد عقد الشريك الصناعي الجديد CAMOS VI، المعلن عنه يوم 29 أكتوبر، شراكة عمرها 25 سنة حول نظام التتبع متعدد المستشعرات الذي يدعم نحو 90% من الرحلات اليومية في أوروبا.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "أين يُدار نظام ARTAS وتتم صيانته: EUROCONTROL في بروكسل، وFrequentis في فيينا، وFrequentis Comsoft في كارلسروه.",
+     "alt": "خريطة لغرب أوروبا ووسطها بثلاث نقاط: EUROCONTROL في بروكسل مع إبرازها، وFrequentis في فيينا، وFrequentis Comsoft في كارلسروه."
+    }
+   ]
+  }
+ }
+}

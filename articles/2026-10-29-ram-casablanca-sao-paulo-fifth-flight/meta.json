@@ -1,0 +1,56 @@
+{
+ "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
+ "date": "2026-10-29",
+ "region": "morocco",
+ "section": "Airlines & airports",
+ "title": "Royal Air Maroc adds a fifth weekly Casablanca–São Paulo flight as the winter season begins",
+ "summary": "The new frequency started on 28 October with a 15:30 departure from Casablanca; RAM now flies to São Paulo-Guarulhos on five days a week, on a route it resumed in December 2024.",
+ "sources": [
+  {
+   "title": "Royal Air Maroc passe à cinq vols hebdomadaires entre Casablanca et São Paulo",
+   "url": "https://www.aeronautique.ma/Royal-Air-Maroc-passe-a-cinq-vols-hebdomadaires-entre-Casablanca-et-Sao-Paulo_a6126.html",
+   "site": "Aeronautique.ma"
+  },
+  {
+   "title": "Royal Air Maroc estreia quinto voo Casablanca-SP",
+   "url": "https://anba.com.br/royal-air-maroc-estreia-quinto-voo-casablanca-sp/",
+   "site": "ANBA"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The Casablanca–São Paulo route, about 7,540 km on the great circle, now flown five times a week in each direction.",
+   "alt": "Map of the Atlantic between Morocco and Brazil, both highlighted, with a line from Casablanca Mohammed V (GMMN) to São Paulo-Guarulhos (SBGR), labelled about 7,540 km on the great circle.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Royal Air Maroc ajoute un cinquième vol hebdomadaire Casablanca–São Paulo à l'entrée de la saison d'hiver",
+   "summary": "La nouvelle fréquence a débuté le 28 octobre avec un départ de Casablanca à 15h30 ; RAM dessert désormais São Paulo-Guarulhos cinq jours par semaine, sur une ligne reprise en décembre 2024.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "La ligne Casablanca–São Paulo, environ 7 540 km en orthodromie, désormais exploitée cinq fois par semaine dans chaque sens.",
+     "alt": "Carte de l'Atlantique entre le Maroc et le Brésil, tous deux mis en évidence, avec une ligne de Casablanca Mohammed V (GMMN) à São Paulo-Guarulhos (SBGR), portant la mention environ 7 540 km en orthodromie."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الخطوط الملكية المغربية تضيف رحلة أسبوعية خامسة بين الدار البيضاء وساو باولو مع بداية الموسم الشتوي",
+   "summary": "انطلق التردد الجديد يوم 28 أكتوبر بإقلاع من الدار البيضاء على الساعة 15:30، وأصبحت الشركة تؤمن رحلاتها نحو ساو باولو-غواروليوس خمسة أيام في الأسبوع، على خط استأنفته في دجنبر 2024.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "خط الدار البيضاء–ساو باولو، نحو 7540 كلم على الدائرة العظمى، الذي أصبح يُشغَّل خمس مرات أسبوعياً في كل اتجاه.",
+     "alt": "خريطة للمحيط الأطلسي بين المغرب والبرازيل، مع إبراز البلدين، وخط يربط مطار الدار البيضاء محمد الخامس (GMMN) بمطار ساو باولو-غواروليوس (SBGR)، مع الإشارة إلى نحو 7540 كلم على الدائرة العظمى."
+    }
+   ]
+  }
+ }
+}
