@@ -114,10 +114,17 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   `https://generativelanguage.googleapis.com/v1beta/openai`, model `gemini-2.5-flash-lite`. One issue is a few
   thousand tokens: well under a cent a day with these. Without a model the stories are picked by keywords, with the
   feeds' own excerpts.
+* **Languages**: French (the default), English and Arabic (right to left). The news page has a language selector
+  (`?lang=fr|en|ar`; the choice is kept in a cookie; otherwise the reader's profile language, otherwise French). Each
+  account picks its news language in its **Profile** and gets the newsletter in it; a subscriber without an account
+  gets it in the language of the page they subscribed from. The newsroom writes every article in the three languages
+  (an older article only in English is shown in English, said so); the model writes the issue's title, introduction
+  and summaries in the three (without a model, the feeds' headlines and excerpts stay in their own language). The
+  link-preview picture exists in English and French (the Arabic page shows the English one).
 * **Volume**: a Gmail account sends about 500 e-mails a day (the setting *at most … e-mails a day*, 450 by default);
   beyond that, use a mail service's SMTP relay (Brevo, Mailgun, Amazon SES...) with the same `ATC_SMTP_*` settings.
-* **The newsroom's own articles**: 3 to 5 a day (Morocco first, then Europe, then international), each with a chart
-  or a map, written every morning by a scheduled agent (Claude) following `tools/newsdesk/INSTRUCTIONS.md` and pushed
+* **The newsroom's own articles**: 4 to 6 a day (Morocco first, then Europe, then international, and at least one on
+  an advance of the global aviation technology industry), each in French, English and Arabic with a chart or a map, written every morning by a scheduled agent (Claude) following `tools/newsdesk/INSTRUCTIONS.md` and pushed
   to the `news` branch of the repository. The server reads `articles/index.json` there every hour
   (`ATC_ARTICLES_URL`, default `https://raw.githubusercontent.com/BlueSkyGuardian/atc-sim/news/articles`), checks
   each article again (no HTML, https links only, figures that are plain SVG and PNG) and publishes it on `/news/a/<slug>`

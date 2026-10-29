@@ -175,6 +175,7 @@ class Profile(BaseModel):
     first_name: str
     last_name: str
     licence: str
+    news_lang: Optional[str] = None          # the language of the news page and the newsletter: fr, en or ar
 
 
 @router.put("/api/me")
@@ -186,6 +187,9 @@ def update_me(body: Profile, request: Request):
         raise HTTPException(400, "first name, last name and licence number are required")
     db.x("UPDATE users SET first_name=?, last_name=?, licence=? WHERE id=?",
          (body.first_name.strip(), body.last_name.strip(), body.licence.strip().upper(), u["id"]))
+    if body.news_lang is not None:
+        from . import news
+        news.set_user_lang(u, body.news_lang)
     return db.public_user(db.user_by_id(u["id"]))
 
 

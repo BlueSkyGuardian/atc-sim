@@ -15,6 +15,10 @@ Chart spec:
     {"type": "bar" | "hbar" | "line", "title": "...", "subtitle": "...", "labels": ["2023", "2024", "2025"],
      "series": [{"name": "Passengers (millions)", "values": [27.1, 32.7, 36.3]}], "unit": "M", "source": "ONDA"}
 
+Both: "lang": "fr" | "ar" draws the figure for the French or Arabic version: "Source" and the country names in that
+language (write the title, subtitle, labels and series names in it too); "country_names": {"DZA": "..."} overrides
+a country's name. Arabic text is laid out right to left by the browser that draws the PNG.
+
 Every number on a chart must come from the article's sources; the source line says where from.
 """
 from __future__ import annotations
@@ -29,7 +33,7 @@ from typing import Dict, List, Optional
 HERE = os.path.dirname(os.path.abspath(__file__))
 INK, DIM, GRID, LAND, LAND2, SEA, ACCENT, BLUE = "#1d2733", "#6b7885", "#e3e8ed", "#e9edf1", "#d6dde4", "#f7f9fb", "#c2185b", "#2f6fa8"
 PALETTE = ["#2f6fa8", "#c2185b", "#3f9b6e", "#d08a1e", "#6d5bb5", "#4a8fa3"]
-FONT = "font-family:Archivo,Helvetica,Arial,sans-serif"
+FONT = "font-family:Archivo,Helvetica,Arial,'Noto Sans Arabic','Noto Naskh Arabic','DejaVu Sans',Tahoma,sans-serif"
 REGIONS = {
     "morocco": [-17.5, 20.5, -0.5, 36.5], "maghreb": [-18, 18, 12, 38.5], "west-med": [-12, 27, 16, 46],
     "europe": [-25, 34, 42, 71], "mediterranean": [-10, 28, 37, 47], "atlantic": [-80, 5, 0, 60],
@@ -57,8 +61,41 @@ def _header(w: int, title: str, subtitle: str) -> str:
     return out
 
 
-def _footer(w: int, h: int, source: str) -> str:
-    return (f'<text x="24" y="{h - 14}" style="{FONT};font-size:11.5px" fill="{DIM}">{e(("Source: " + source) if source else "")}</text>'
+SOURCE_WORD = {"en": "Source: ", "fr": "Source : ", "ar": "المصدر: "}
+# country names on the maps, in French and Arabic (the countries the newsroom's maps show; others stay in English)
+COUNTRY = {
+    "MAR": ("Maroc", "المغرب"), "DZA": ("Algérie", "الجزائر"), "TUN": ("Tunisie", "تونس"), "LBY": ("Libye", "ليبيا"),
+    "EGY": ("Égypte", "مصر"), "MRT": ("Mauritanie", "موريتانيا"), "MLI": ("Mali", "مالي"), "SEN": ("Sénégal", "السنغال"),
+    "NER": ("Niger", "النيجر"), "TCD": ("Tchad", "تشاد"), "SDN": ("Soudan", "السودان"), "NGA": ("Nigeria", "نيجيريا"),
+    "CIV": ("Côte d'Ivoire", "كوت ديفوار"), "GHA": ("Ghana", "غانا"), "GIN": ("Guinée", "غينيا"), "BFA": ("Burkina Faso", "بوركينا فاسو"),
+    "CMR": ("Cameroun", "الكاميرون"), "GAB": ("Gabon", "الغابون"), "COD": ("RD Congo", "الكونغو الديمقراطية"),
+    "ESP": ("Espagne", "إسبانيا"), "PRT": ("Portugal", "البرتغال"), "FRA": ("France", "فرنسا"), "ITA": ("Italie", "إيطاليا"),
+    "DEU": ("Allemagne", "ألمانيا"), "GBR": ("Royaume-Uni", "المملكة المتحدة"), "IRL": ("Irlande", "أيرلندا"),
+    "BEL": ("Belgique", "بلجيكا"), "NLD": ("Pays-Bas", "هولندا"), "CHE": ("Suisse", "سويسرا"), "AUT": ("Autriche", "النمسا"),
+    "POL": ("Pologne", "بولندا"), "CZE": ("Tchéquie", "التشيك"), "HUN": ("Hongrie", "المجر"), "ROU": ("Roumanie", "رومانيا"),
+    "GRC": ("Grèce", "اليونان"), "TUR": ("Turquie", "تركيا"), "NOR": ("Norvège", "النرويج"), "SWE": ("Suède", "السويد"),
+    "FIN": ("Finlande", "فنلندا"), "DNK": ("Danemark", "الدنمارك"), "UKR": ("Ukraine", "أوكرانيا"), "RUS": ("Russie", "روسيا"),
+    "SAU": ("Arabie saoudite", "السعودية"), "ARE": ("Émirats arabes unis", "الإمارات"), "QAT": ("Qatar", "قطر"),
+    "IRN": ("Iran", "إيران"), "IRQ": ("Irak", "العراق"), "SYR": ("Syrie", "سوريا"), "JOR": ("Jordanie", "الأردن"),
+    "ISR": ("Israël", "إسرائيل"), "LBN": ("Liban", "لبنان"), "OMN": ("Oman", "عمان"), "YEM": ("Yémen", "اليمن"),
+    "USA": ("États-Unis", "الولايات المتحدة"), "CAN": ("Canada", "كندا"), "MEX": ("Mexique", "المكسيك"),
+    "BRA": ("Brésil", "البرازيل"), "ARG": ("Argentine", "الأرجنتين"), "CHL": ("Chili", "تشيلي"), "COL": ("Colombie", "كولومبيا"),
+    "PER": ("Pérou", "البيرو"), "VEN": ("Venezuela", "فنزويلا"), "CHN": ("Chine", "الصين"), "JPN": ("Japon", "اليابان"),
+    "IND": ("Inde", "الهند"), "AUS": ("Australie", "أستراليا"), "ZAF": ("Afrique du Sud", "جنوب إفريقيا"),
+    "ETH": ("Éthiopie", "إثيوبيا"), "KEN": ("Kenya", "كينيا"), "ISL": ("Islande", "آيسلندا"),
+}
+
+
+def country_name(c: dict, lang: str, own: Optional[dict] = None) -> str:
+    if own and c.get("a3") in own:
+        return own[c["a3"]]
+    if lang in ("fr", "ar") and c.get("a3") in COUNTRY:
+        return COUNTRY[c["a3"]][0 if lang == "fr" else 1]
+    return c["name"]
+
+
+def _footer(w: int, h: int, source: str, lang: str = "en") -> str:
+    return (f'<text x="24" y="{h - 14}" style="{FONT};font-size:11.5px" fill="{DIM}">{e((SOURCE_WORD.get(lang, "Source: ") + source) if source else "")}</text>'
             f'<text x="{w - 24}" y="{h - 14}" text-anchor="end" style="{FONT};font-size:11.5px;font-weight:700" fill="{INK}">ATC <tspan fill="{ACCENT}">SIM</tspan></text>')
 
 
@@ -110,7 +147,7 @@ def map_svg(spec: dict) -> str:
             # its size on the map (the largest ring): a name is written only where it fits
             big = max(c["rings"], key=lambda r: (max(p[0] for p in r) - min(p[0] for p in r)) * (max(p[1] for p in r) - min(p[1] for p in r)))
             wpx = (max(p[0] for p in big) - min(p[0] for p in big)) * k * s
-            labels.append((on, c["name"], P(lx, ly), wpx, c.get("rank") or 9))
+            labels.append((on, country_name(c, spec.get("lang", "en"), spec.get("country_names")), P(lx, ly), wpx, c.get("rank") or 9))
     body += f'<g clip-path="url(#mapclip)">{land}'
     for a in spec.get("areas") or []:
         pts = [P(x, y) for x, y in a["coords"]]
@@ -145,7 +182,7 @@ def map_svg(spec: dict) -> str:
             continue
         taken.append(b)
         body += (f'<text x="{x:.1f}" y="{y:.1f}" text-anchor="middle" style="{FONT};font-size:{size}px;'
-                 f'font-weight:{700 if on else 500};letter-spacing:.04em" fill="{ACCENT if on else "#8a96a2"}">{e(name.upper())}</text>')
+                 f'font-weight:{700 if on else 500};letter-spacing:{"0" if spec.get("lang") == "ar" else ".04em"}" fill="{ACCENT if on else "#8a96a2"}">{e(name.upper() if spec.get("lang", "en") != "ar" else name)}</text>')
     for ln in spec.get("lines") or []:
         if ln.get("label"):
             (x0, y0), (x1, y1) = P(*ln["coords"][0]), P(*ln["coords"][-1])
@@ -169,7 +206,7 @@ def map_svg(spec: dict) -> str:
             body += _halo_text(x + (-9 if anchor == "end" else 9), y + 4, pt["label"], INK, 12.5, anchor, 600)
     svg = (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" '
            f'aria-label="{e(spec.get("title", "map"))}"><defs>{clip}</defs>{_header(W, spec.get("title", ""), spec.get("subtitle", ""))}'
-           f'{body}{_footer(W, H, spec.get("source") or "Natural Earth")}</svg>')
+           f'{body}{_footer(W, H, spec.get("source") or "Natural Earth", spec.get("lang", "en"))}</svg>')
     return svg
 
 
@@ -278,7 +315,7 @@ def chart_svg(spec: dict) -> str:
         body += f'<line x1="{left}" y1="{Y(max(vmin, 0)):.1f}" x2="{left + pw}" y2="{Y(max(vmin, 0)):.1f}" stroke="#9aa6b2"/>'
     return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" '
             f'aria-label="{e(spec.get("title", "chart"))}">{_header(W, spec.get("title", ""), spec.get("subtitle", ""))}{body}'
-            f'{_footer(W, H, spec.get("source", ""))}</svg>')
+            f'{_footer(W, H, spec.get("source", ""), spec.get("lang", "en"))}</svg>')
 
 
 # ------------------------------------------------------------------ PNG and checks

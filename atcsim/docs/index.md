@@ -80,8 +80,9 @@ squall line.
   (hatched red: inside the CTA, nothing received): the ground receivers cover the coast and the Canaries better than
   the oceanic sectors.
 - **Stats**: your statistics by role.
-- **News**: aviation news, air traffic control first - open to everyone, without signing in. Your account gets the
-  aviation newsletter every morning; unsubscribe (or subscribe again) in your **Profile**.
+- **News**: aviation news, air traffic control first - open to everyone, without signing in, in French, English or
+  Arabic (the selector at the top). Your account gets the aviation newsletter every morning in the language chosen
+  in your **Profile**, where you also unsubscribe (or subscribe again).
 - **Help**: this documentation. The search box searches every page.
 - **The bell** (top right): your notifications - invited to an exercise or a debrief, a scenario shared with you,
   an evaluation of your work, your account or role. The number is how many you have not opened; click one to go to

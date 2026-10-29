@@ -105,6 +105,10 @@ def conn() -> sqlite3.Connection:
                     _conn.execute(f"ALTER TABLE recordings ADD COLUMN {col}")
                 except sqlite3.OperationalError:
                     pass
+            try:                                                     # the news in the reader's language
+                _conn.execute("ALTER TABLE users ADD COLUMN news_lang TEXT")
+            except sqlite3.OperationalError:
+                pass
             for col in ("metrics TEXT", "sim_time_s REAL", "multi INTEGER DEFAULT 1", "scn_info TEXT", "solo INTEGER DEFAULT 0", "debrief TEXT", "ai INTEGER DEFAULT 0"):   # added with the statistics
                 try:
                     _conn.execute(f"ALTER TABLE exercises ADD COLUMN {col}")
@@ -158,6 +162,7 @@ def upsert_login(email: str, google_sub: str = "", first: str = "", last: str = 
 
 def public_user(u: dict) -> dict:
     return {k: u[k] for k in ("id", "email", "first_name", "last_name", "licence", "role", "active")} | {
+        "news_lang": u.get("news_lang") or "fr",
         "name": (f"{u['first_name']} {u['last_name']}".strip() or u["email"]),
         "profile_complete": bool(u["first_name"] and u["last_name"] and u["licence"])}
 

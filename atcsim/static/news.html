@@ -16,7 +16,17 @@
   .chip { background: var(--panel2); border: 1px solid var(--line); color: var(--dim); border-radius: 999px; padding: 4px 11px;
     font-size: 12.5px; cursor: pointer; }
   .chip.on { color: var(--text); border-color: var(--magenta); background: rgba(209, 71, 143, .12); }
-  .chips input { margin-left: auto; max-width: 240px; }
+  .chips input { margin-inline-start: auto; max-width: 240px; }
+  .langs { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin: 8px 0 2px; }
+  .langs a { padding: 4px 11px; font-size: 13px; color: var(--dim); border-inline-end: 1px solid var(--line); }
+  .langs a:last-child { border-inline-end: 0; }
+  .langs a.on { color: var(--text); background: rgba(209, 71, 143, .14); font-weight: 650; }
+  .langs a:hover { text-decoration: none; color: var(--text); }
+  [dir="rtl"] body, [dir="rtl"] .art, [dir="rtl"] .card { font-family: "Noto Naskh Arabic", "Segoe UI", Tahoma, var(--font, sans-serif); }
+  [dir="rtl"] .art .body { font-size: 17px; line-height: 1.85; }
+  [dir="rtl"] .reg, [dir="rtl"] .tag, [dir="rtl"] .issue h2 { letter-spacing: 0; }
+  [dir="rtl"] .story .t[lang="en"], [dir="rtl"] .story .s[lang="en"] { direction: ltr; text-align: left; }
+  .only { font-size: 13px; border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; }
   .nw-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; align-items: start; }
   .story { display: flex; flex-direction: column; gap: 4px; padding: 13px 0; border-bottom: 1px solid var(--line-2); }
   .story:last-child { border-bottom: 0; }
@@ -58,56 +68,113 @@
   .disclose { font-size: 12px; color: var(--dim); border-top: 1px solid var(--line-2); padding-top: 12px; margin-top: 24px; }
   @media (max-width: 1000px) { .room { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 640px) { .room { grid-template-columns: 1fr; } .art h1 { font-size: 24px; } }
-  @media (max-width: 860px) { .nw-grid { grid-template-columns: 1fr; } .chips input { margin-left: 0; max-width: none; flex: 1 1 100%; } }
+  @media (max-width: 860px) { .nw-grid { grid-template-columns: 1fr; } .chips input { margin-inline-start: 0; max-width: none; flex: 1 1 100%; } }
 </style>
 </head>
 <body>
 <main>
   <div class="nw-top">
     <div class="nw-sub">
-      <h1 id="pgTitle">Aviation news</h1>
-      <div class="dim" id="updated">Air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.</div>
+      <h1 id="pgTitle" data-t="title">Aviation news</h1>
+      <div class="dim" id="updated" data-t="sub">Air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.</div>
+      <nav class="langs" id="langs" aria-label="Language / Langue / اللغة"><a href="/news" data-l="fr" lang="fr">Français</a><a href="/news?lang=en" data-l="en" lang="en">English</a><a href="/news?lang=ar" data-l="ar" lang="ar">العربية</a></nav>
     </div>
     <div class="card nw-box" id="subBox">
-      <b>The newsletter, every morning</b>
-      <div class="note" style="margin:2px 0 10px">The day's stories that matter to controllers, in a two-minute read.</div>
+      <b data-t="box">The newsletter, every morning</b>
+      <div class="note" style="margin:2px 0 10px" data-t="boxNote">The day's stories that matter to controllers, in a two-minute read.</div>
       <div id="subForm"></div>
       <div class="msg" id="subMsg"></div>
     </div>
   </div>
   <div id="latestView">
-    <div id="roomWrap" hidden><h2 style="margin-bottom:0">From our newsroom <span class="dim" style="font-size:13px;font-weight:400">Morocco first, then Europe, then the world</span></h2>
+    <div id="roomWrap" hidden><h2 style="margin-bottom:0"><span data-t="room">From our newsroom</span> <span class="dim" style="font-size:13px;font-weight:400" data-t="roomSub">Morocco first, then Europe, then the world</span></h2>
       <div class="room" id="room"></div></div>
-    <h2 id="webHd" hidden style="margin-bottom:0">Around the web</h2>
+    <h2 id="webHd" hidden style="margin-bottom:0"><span data-t="web">Around the web</span> <span class="dim" style="font-size:13px;font-weight:400" data-t="webNote"></span></h2>
     <div class="chips" id="chips"></div>
     <div class="nw-grid">
-      <div class="card"><div id="list"><div class="dim">Loading…</div></div>
-        <div style="margin-top:12px"><button id="more" hidden>Older stories</button></div></div>
-      <aside class="card issues"><b>Newsletter issues</b><div id="issues" style="margin-top:6px"><div class="dim note">None yet.</div></div></aside>
+      <div class="card"><div id="list"><div class="dim" data-t="loading">Loading…</div></div>
+        <div style="margin-top:12px"><button id="more" hidden data-t="older">Older stories</button></div></div>
+      <aside class="card issues"><b data-t="issues">Newsletter issues</b><div id="issues" style="margin-top:6px"><div class="dim note" data-t="none">None yet.</div></div></aside>
     </div>
   </div>
   <div id="articleView" hidden>
-    <p><a href="/news">← All the news</a></p>
+    <p><a href="/news" class="back" data-t="back">← All the news</a></p>
     <article class="card art" id="article"></article>
   </div>
   <div id="issueView" hidden>
-    <p><a href="/news">← All the news</a></p>
+    <p><a href="/news" class="back" data-t="back">← All the news</a></p>
     <div class="card issue" id="issue"></div>
   </div>
-  <p class="note" style="margin-top:22px">Headlines and short excerpts from the sites' public news feeds and Google News, with
+  <p class="note" style="margin-top:22px" data-t="foot">Headlines and short excerpts from the sites' public news feeds and Google News, with
     summaries written for this page; every story links to its site, where you read it. Gathered automatically every hour.</p>
 </main>
 <script src="/static/common.js"></script>
 <script src="/static/vendor/marked.min.js"></script>
 <script>
-const NW = { section: '', q: '', items: [], me: null, sections: [] };
-const ago2 = t => { const d = Date.now() / 1000 - t; return d < 3600 ? Math.max(1, Math.round(d / 60)) + ' min ago'
-  : d < 86400 ? Math.round(d / 3600) + ' h ago' : new Date(t * 1000).toLocaleDateString([], { day: 'numeric', month: 'short' }); };
+// the page's language: the one the server chose (?lang=, the page's own choice kept in a cookie, the profile, French)
+const LANG = document.documentElement.dataset.newsLang || 'fr';
+const LOC = { fr: 'fr-MA', en: 'en-GB', ar: 'ar-MA' }[LANG];
+const TX = {
+  fr: { title: 'Actualité aéronautique', sub: "Le contrôle et l'espace aériens d'abord, puis la technologie, la sécurité, le Maroc et l'Afrique, les compagnies et les aéroports.",
+    box: 'La lettre, chaque matin', boxNote: "Les nouvelles du jour qui comptent pour les contrôleurs, en deux minutes de lecture.",
+    room: 'De notre rédaction', roomSub: "Le Maroc d'abord, puis l'Europe, puis le monde", web: 'Sur le web', webNote: 'titres dans la langue de leur site',
+    all: 'Tout', search: "rechercher dans l'actualité", loading: 'Chargement…', none: "Aucun pour l'instant.", older: 'Articles plus anciens',
+    issues: 'Numéros de la lettre', back: "← Toute l'actualité", noStories: "Pas encore d'articles : les flux sont lus toutes les heures.",
+    updated: 'Mis à jour', foot: "Titres et courts extraits des flux publics des sites et de Google News, avec des résumés écrits pour cette page ; chaque article renvoie à son site, où vous le lisez. Collectés automatiquement toutes les heures.",
+    sources: 'Sources', notAvail: "Cet article n'est pas disponible.", issueNA: "Ce numéro n'est pas disponible.", onlyEn: "Cet article n'existe qu'en anglais.",
+    disclose: "Rédigé pour ATC SIM par un modèle d'IA (Claude) à partir des sources citées, avec ses propres mots ; les cartes et graphiques reprennent les chiffres de ces sources. Une erreur ? Signalez-la à votre instructeur.",
+    email: 'votre adresse e-mail', subscribe: "S'abonner", confirm: 'Presque fini : ouvrez le lien que nous venons de vous envoyer pour confirmer.', subscribed: 'Vous êtes abonné.',
+    reaches: e => `✓ Elle arrive chaque matin à <span class="mono">${e}</span>.`, manage: 'Gérer dans votre profil', notSub: "Vous n'êtes pas abonné.", subProfile: "S'abonner dans votre profil",
+    signIn: 'Se connecter', inLang: 'en français' },
+  en: { title: 'Aviation news', sub: 'Air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.',
+    box: 'The newsletter, every morning', boxNote: "The day's stories that matter to controllers, in a two-minute read.",
+    room: 'From our newsroom', roomSub: 'Morocco first, then Europe, then the world', web: 'Around the web', webNote: '',
+    all: 'All', search: 'search the news', loading: 'Loading…', none: 'None yet.', older: 'Older stories',
+    issues: 'Newsletter issues', back: '← All the news', noStories: 'No stories yet: the feeds are read every hour.',
+    updated: 'Updated', foot: "Headlines and short excerpts from the sites' public news feeds and Google News, with summaries written for this page; every story links to its site, where you read it. Gathered automatically every hour.",
+    sources: 'Sources', notAvail: 'This article is not available.', issueNA: 'This issue is not available.', onlyEn: '',
+    disclose: 'Written for ATC SIM by an AI model (Claude) from the sources listed, in its own words; the charts and maps are drawn from the figures in those sources. Spotted a mistake? Tell your instructor.',
+    email: 'your e-mail address', subscribe: 'Subscribe', confirm: 'Almost there: open the link we just sent you to confirm.', subscribed: 'You are subscribed.',
+    reaches: e => `✓ It reaches <span class="mono">${e}</span> every morning.`, manage: 'Manage it in your profile', notSub: 'You are not subscribed.', subProfile: 'Subscribe in your profile',
+    signIn: 'Sign in', inLang: 'in English' },
+  ar: { title: 'أخبار الطيران', sub: 'المراقبة الجوية والمجال الجوي أولاً، ثم التكنولوجيا والسلامة والمغرب وإفريقيا وشركات الطيران والمطارات.',
+    box: 'النشرة، كل صباح', boxNote: 'أخبار اليوم التي تهم المراقبين الجويين، في دقيقتين من القراءة.',
+    room: 'من غرفة أخبارنا', roomSub: 'المغرب أولاً، ثم أوروبا، ثم العالم', web: 'من الويب', webNote: 'العناوين بلغة مواقعها',
+    all: 'الكل', search: 'ابحث في الأخبار', loading: 'جارٍ التحميل…', none: 'لا شيء بعد.', older: 'أخبار أقدم',
+    issues: 'أعداد النشرة', back: '→ كل الأخبار', noStories: 'لا أخبار بعد: تُقرأ المصادر كل ساعة.',
+    updated: 'آخر تحديث', foot: 'عناوين ومقتطفات قصيرة من الخلاصات العامة للمواقع ومن أخبار Google، مع ملخصات مكتوبة لهذه الصفحة؛ يحيل كل خبر إلى موقعه حيث تقرؤه. تُجمع تلقائياً كل ساعة.',
+    sources: 'المصادر', notAvail: 'هذا المقال غير متاح.', issueNA: 'هذا العدد غير متاح.', onlyEn: 'هذا المقال متوفر باللغة الإنجليزية فقط.',
+    disclose: 'كتبه لـ ATC SIM نموذج ذكاء اصطناعي (Claude) انطلاقاً من المصادر المذكورة وبأسلوبه الخاص؛ الخرائط والرسوم مأخوذة من أرقام تلك المصادر. لاحظت خطأً؟ أخبر مدرّبك.',
+    email: 'بريدك الإلكتروني', subscribe: 'اشترك', confirm: 'اقتربت: افتح الرابط الذي أرسلناه إليك للتأكيد.', subscribed: 'تم اشتراكك.',
+    reaches: e => `✓ تصل كل صباح إلى <span class="mono">${e}</span>.`, manage: 'إدارتها من ملفك الشخصي', notSub: 'لست مشتركاً.', subProfile: 'اشترك من ملفك الشخصي',
+    signIn: 'تسجيل الدخول', inLang: 'بالعربية' },
+}[LANG];
+const Q = LANG === 'fr' ? '' : '?lang=' + LANG;                 // the language in the page's own links
+const NW = { section: '', q: '', items: [], me: null, sections: [], names: {} };
+const RTF = new Intl.RelativeTimeFormat(LOC, { numeric: 'auto' });
+const ago2 = t => { const d = Date.now() / 1000 - t; return d < 3600 ? RTF.format(-Math.max(1, Math.round(d / 60)), 'minute')
+  : d < 86400 ? RTF.format(-Math.round(d / 3600), 'hour') : new Date(t * 1000).toLocaleDateString(LOC, { day: 'numeric', month: 'short' }); };
+const dayName = d => new Date(d + 'T12:00').toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const shortDay = d => new Date(d + 'T12:00').toLocaleDateString(LOC, { day: 'numeric', month: 'short' });
+function words() {
+  document.querySelectorAll('[data-t]').forEach(el => { const v = TX[el.dataset.t]; if (typeof v === 'string' && v) el.textContent = v; else if (v === '') el.textContent = ''; });
+  document.querySelectorAll('#langs a').forEach(a => {
+    a.classList.toggle('on', a.dataset.l === LANG);
+    a.onclick = ev => { ev.preventDefault(); setLang(a.dataset.l); };
+  });
+  document.querySelectorAll('a.back').forEach(a => a.href = '/news' + Q);
+  document.title = TX.title;
+}
+function setLang(l) {              // the page's choice, kept (a year); the profile's choice is the default for a new browser
+  document.cookie = `news_lang=${l}; path=/; max-age=31536000; samesite=lax`;
+  const u = new URL(location.href); if (l === 'fr') u.searchParams.delete('lang'); else u.searchParams.set('lang', l);
+  location.href = u.pathname + u.search;
+}
 function story(it, withSummary = true) {
   const s = withSummary ? (it.summary || it.excerpt) : it.excerpt;
-  return `<div class="story"><div class="m"><span class="tag">${esc(it.section || '')}</span></div>
-    <a class="t" href="${esc(it.link)}" target="_blank" rel="noopener nofollow">${esc(it.title)}</a>
-    ${s ? `<div class="s">${esc(s)}</div>` : ''}
+  return `<div class="story"><div class="m"><span class="tag">${esc(it.section_name || NW.names[it.section] || it.section || '')}</span></div>
+    <a class="t" href="${esc(it.link)}" target="_blank" rel="noopener nofollow" dir="auto">${esc(it.title)}</a>
+    ${s ? `<div class="s" dir="auto">${esc(s)}</div>` : ''}
     <div class="m"><span>${esc(it.source || it.site)}</span>·<span>${ago2(it.published)}</span></div></div>`;
 }
 async function getJSON(u, opt) {
@@ -117,36 +184,35 @@ async function getJSON(u, opt) {
   return j;
 }
 async function load(more) {
-  const p = new URLSearchParams();
+  const p = new URLSearchParams({ lang: LANG });
   if (NW.section) p.set('section', NW.section);
   if (NW.q) p.set('q', NW.q);
   if (more && NW.items.length) p.set('before', NW.items[NW.items.length - 1].published);
   const d = await getJSON('/api/news?' + p);
-  NW.sections = d.sections;
+  NW.sections = d.sections; NW.names = d.section_names || {};
   NW.items = more ? NW.items.concat(d.items) : d.items;
-  if (d.updated) $('#updated').textContent = `Updated ${ago2(d.updated)} · air traffic control and airspace first, then technology, safety, Morocco and Africa, airlines and airports.`;
-  $('#list').innerHTML = NW.items.map(it => story(it)).join('') || '<div class="dim">No stories yet: the feeds are read every hour.</div>';
+  if (d.updated) $('#updated').textContent = `${TX.updated} ${ago2(d.updated)} · ${TX.sub}`;
+  $('#list').innerHTML = NW.items.map(it => story(it)).join('') || `<div class="dim">${esc(TX.noStories)}</div>`;
   $('#more').hidden = d.items.length < 40;
   chips();
 }
 function chips() {
   if ($('#chips').dataset.done) { $$('.chip').forEach(c => c.classList.toggle('on', c.dataset.s === NW.section)); return; }
   $('#chips').dataset.done = 1;
-  $('#chips').innerHTML = [['', 'All'], ...NW.sections.map(s => [s, s])].map(([s, t]) => `<button class="chip ${s === NW.section ? 'on' : ''}" data-s="${esc(s)}">${esc(t)}</button>`).join('')
-    + '<input id="q" placeholder="search the news" aria-label="search the news">';
+  $('#chips').innerHTML = [['', TX.all], ...NW.sections.map(s => [s, NW.names[s] || s])].map(([s, t]) => `<button class="chip ${s === NW.section ? 'on' : ''}" data-s="${esc(s)}">${esc(t)}</button>`).join('')
+    + `<input id="q" placeholder="${esc(TX.search)}" aria-label="${esc(TX.search)}">`;
   $('#chips').addEventListener('click', e => { const c = e.target.closest('.chip'); if (!c) return; NW.section = c.dataset.s; load(); });
   let tq; $('#q').addEventListener('input', e => { clearTimeout(tq); tq = setTimeout(() => { NW.q = e.target.value.trim(); load(); }, 300); });
 }
-const dayName = d => new Date(d + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 function acard(a) {
-  const f = (a.figures || [])[0];
-  return `<a class="card acard" href="/news/a/${esc(a.slug)}">${f ? `<img src="${esc(f.url)}" alt="${esc(f.alt || '')}" loading="lazy">` : ''}
-    <div class="in"><span class="reg">${esc(a.region_name)} · ${new Date(a.date + 'T12:00').toLocaleDateString([], { day: 'numeric', month: 'short' })}</span>
+  const f = (a.figures || [])[0], other = a.lang && a.lang !== LANG ? ` lang="${a.lang}" dir="${a.lang === 'ar' ? 'rtl' : 'ltr'}"` : '';
+  return `<a class="card acard" href="/news/a/${esc(a.slug)}${Q}"${other}>${f ? `<img src="${esc(f.url)}" alt="${esc(f.alt || '')}" loading="lazy">` : ''}
+    <div class="in"><span class="reg">${esc(a.region_name)} · ${shortDay(a.date)}</span>
     <span class="t">${esc(a.title)}</span><span class="s">${esc(a.summary || '')}</span></div></a>`;
 }
 async function newsroom() {
   try {
-    const d = await getJSON('/api/news/articles?limit=9');
+    const d = await getJSON('/api/news/articles?limit=9&lang=' + LANG);
     if (!d.articles.length) return;
     $('#room').innerHTML = d.articles.map(acard).join('');
     $('#roomWrap').hidden = false; $('#webHd').hidden = false;
@@ -156,8 +222,8 @@ async function showArticle(slug) {
   $('#latestView').hidden = true; $('#articleView').hidden = false; $('#subBox').hidden = true;
   $('#pgTitle').parentElement.hidden = true;
   try {
-    const a = await getJSON('/api/news/articles/' + encodeURIComponent(slug));
-    document.title = a.title + ' · Aviation news';
+    const a = await getJSON('/api/news/articles/' + encodeURIComponent(slug) + '?lang=' + LANG);
+    document.title = a.title + ' · ' + TX.title;
     const fig = f => `<figure><img src="${esc(f.url)}" alt="${esc(f.alt || '')}"><figcaption>${esc(f.caption || '')}${f.credit ? ' · ' + esc(f.credit) : ''}</figcaption></figure>`;
     let md = a.body, used = new Set();
     md = md.replace(/\{\{figure:([^}]+)\}\}/g, (_, n) => { used.add(n); return `\n\nFIGURE_${n.replace(/[^a-z0-9]/gi, '_')}\n\n`; });
@@ -168,56 +234,58 @@ async function showArticle(slug) {
     }
     const rest = a.figures.filter(f => !used.has(f.file));
     if (rest.length) html = html.replace('</p>', '</p>' + rest.map(fig).join(''));        // after the first paragraph
-    $('#article').innerHTML = `<span class="reg">${esc(a.region_name)}${a.section ? ' · ' + esc(a.section) : ''}</span>
-      <h1>${esc(a.title)}</h1><div class="dim" style="font-size:13px">${dayName(a.date)} · ${esc(a.author || 'ATC SIM newsroom')}</div>
+    const only = a.lang !== LANG && TX.onlyEn ? `<p class="dim only">${esc(TX.onlyEn)}</p>` : '';
+    $('#article').innerHTML = `${only}<div lang="${a.lang}" dir="${a.lang === 'ar' ? 'rtl' : 'ltr'}"><span class="reg">${esc(a.region_name)}${a.section_name ? ' · ' + esc(a.section_name) : ''}</span>
+      <h1>${esc(a.title)}</h1><div class="dim" style="font-size:13px">${dayName(a.date)} · ${esc(a.author || '')}</div>
       <p class="lead">${esc(a.summary || '')}</p><div class="body">${html}</div>
-      <h2 style="font-size:15px;margin-top:26px">Sources</h2><ul class="srcs">${a.sources.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener nofollow">${esc(x.title)}</a> <span class="dim">· ${esc(x.site)}</span></li>`).join('')}</ul>
-      <div class="disclose">Written for ATC SIM by an AI model (Claude) from the sources listed, in its own words; the charts and maps are drawn from the figures in those sources. Spotted a mistake? Tell your instructor.</div>`;
+      <h2 style="font-size:15px;margin-top:26px">${esc(TX.sources)}</h2><ul class="srcs">${a.sources.map(x => `<li><a href="${esc(x.url)}" target="_blank" rel="noopener nofollow" dir="auto">${esc(x.title)}</a> <span class="dim">· ${esc(x.site)}</span></li>`).join('')}</ul></div>
+      <div class="disclose">${esc(TX.disclose)}</div>`;
     $('#article').querySelectorAll('.body a').forEach(l => { l.target = '_blank'; l.rel = 'noopener nofollow'; });
-  } catch (e) { $('#article').innerHTML = '<p class="dim">This article is not available.</p>'; }
+  } catch (e) { $('#article').innerHTML = `<p class="dim">${esc(TX.notAvail)}</p>`; }
 }
 async function issues() {
-  const l = await getJSON('/api/news/issues');
-  if (l.length) $('#issues').innerHTML = l.map(i => `<a href="/news/issue/${i.id}">${esc(i.title)}<span>${new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long' })}</span></a>`).join('');
+  const l = await getJSON('/api/news/issues?lang=' + LANG);
+  if (l.length) $('#issues').innerHTML = l.map(i => `<a href="/news/issue/${i.id}${Q}">${esc(i.title)}<span>${new Date(i.day + 'T12:00').toLocaleDateString(LOC, { weekday: 'long', day: 'numeric', month: 'long' })}</span></a>`).join('');
 }
 async function showIssue(id) {
   $('#latestView').hidden = true; $('#issueView').hidden = false;
   try {
-    const i = await getJSON('/api/news/issues/' + id);
-    document.title = i.title + ' · Aviation news';
-    $('#pgTitle').textContent = 'Aviation news · ' + new Date(i.day + 'T12:00').toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    const i = await getJSON('/api/news/issues/' + id + '?lang=' + LANG);
+    document.title = i.title + ' · ' + TX.title;
+    $('#pgTitle').textContent = TX.title + ' · ' + dayName(i.day);
     $('#issue').innerHTML = `<h1 style="font-size:22px;margin-top:0">${esc(i.title)}</h1>${i.intro ? `<p class="intro">${esc(i.intro)}</p>` : ''}`
-      + ((i.articles || []).length ? `<h2>From our newsroom</h2><div class="room">${i.articles.map(acard).join('')}</div>` : '')
-      + i.sections.map(s => `<h2>${esc(s.name)}</h2>${s.items.map(it => story(it)).join('')}`).join('');
-  } catch (e) { $('#issue').innerHTML = '<p class="dim">This issue is not available.</p>'; }
+      + ((i.articles || []).length ? `<h2>${esc(TX.room)}</h2><div class="room">${i.articles.map(acard).join('')}</div>` : '')
+      + i.sections.map(s => `<h2>${esc(s.label || s.name)}</h2>${s.items.map(it => story(it)).join('')}`).join('');
+  } catch (e) { $('#issue').innerHTML = `<p class="dim">${esc(TX.issueNA)}</p>`; }
 }
 function subForm() {
   const m = $('#subMsg');
   const say = (t, bad) => { m.className = 'msg ' + (bad ? 'bad' : 'ok'); m.textContent = t; };
-  if (NW.me) {                                      // signed in: on by default, managed in the profile
+  if (NW.me) {                                      // signed in: on by default, managed (and its language) in the profile
     getJSON('/api/me/newsletter').then(st => {
       $('#subForm').innerHTML = st.subscribed
-        ? `<div>✓ It reaches <span class="mono">${esc(NW.me.email)}</span> every morning.</div><div class="note" style="margin-top:6px"><a href="/profile">Manage it in your profile</a></div>`
-        : `<div class="dim">You are not subscribed.</div><div class="note" style="margin-top:6px"><a href="/profile">Subscribe in your profile</a></div>`;
+        ? `<div>${TX.reaches(esc(NW.me.email))}</div><div class="note" style="margin-top:6px"><a href="/profile">${esc(TX.manage)}</a></div>`
+        : `<div class="dim">${esc(TX.notSub)}</div><div class="note" style="margin-top:6px"><a href="/profile">${esc(TX.subProfile)}</a></div>`;
     });
     return;
   }
-  $('#subForm').innerHTML = `<div class="row"><input id="subEmail" type="email" placeholder="your e-mail address" aria-label="your e-mail address" autocomplete="email">
-    <button class="primary" id="subGo">Subscribe</button></div>`;
+  $('#subForm').innerHTML = `<div class="row"><input id="subEmail" type="email" dir="ltr" placeholder="${esc(TX.email)}" aria-label="${esc(TX.email)}" autocomplete="email">
+    <button class="primary" id="subGo">${esc(TX.subscribe)}</button></div><div class="note" style="margin-top:6px">${esc(TX.inLang)}</div>`;
   const go = async () => {
-    try { const r = await getJSON('/api/news/subscribe', { method: 'POST', body: JSON.stringify({ email: $('#subEmail').value }) });
-      say(r.status === 'confirm' ? 'Almost there: open the link we just sent you to confirm.' : 'You are subscribed.'); }
+    try { const r = await getJSON('/api/news/subscribe', { method: 'POST', body: JSON.stringify({ email: $('#subEmail').value, lang: LANG }) });
+      say(r.status === 'confirm' ? TX.confirm : TX.subscribed); }
     catch (e) { say(e.message, true); }
   };
   $('#subGo').onclick = go;
   $('#subEmail').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
 }
 (async () => {
+  words();
   try { const r = await fetch('/api/me', { credentials: 'same-origin' }); if (r.ok) NW.me = await r.json(); } catch (e) {}
-  if (NW.me) await header('/news');
+  if (NW.me) { await header('/news'); document.documentElement.dir = LANG === 'ar' ? 'rtl' : 'ltr'; }
   else {
     const h = document.createElement('header'); h.className = 'pub';
-    h.innerHTML = '<div class="brand">ATC <span>SIM</span></div><span class="dim">Aviation news</span><span class="grow"></span><a class="btnlink" href="/login?next=/news">Sign in</a>';
+    h.innerHTML = `<div class="brand" dir="ltr">ATC <span>SIM</span></div><span class="dim">${esc(TX.title)}</span><span class="grow"></span><a class="btnlink" href="/login?next=/news">${esc(TX.signIn)}</a>`;
     document.body.prepend(h); ambientScene();
   }
   subForm();

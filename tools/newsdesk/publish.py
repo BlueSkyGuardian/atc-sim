@@ -8,10 +8,16 @@ An article is a folder articles/<slug>/ (slug: YYYY-MM-DD-words-with-dashes) wit
                  "title" (<= 110 characters), "summary" (one or two sentences, <= 320 characters),
                  "sources": [{"title", "url": "https://...", "site"}, ...] (two sites at least),
                  "figures": [{"file": "x.svg", "png": "x.png", "caption", "alt", "credit"}] (1 to 3),
-                 "author": "ATC SIM newsroom"}
-    body.md     the article, 350 to 1100 words of Markdown (## headings, paragraphs, lists, **bold**, links): no HTML;
-                {{figure:x.svg}} puts a figure there (otherwise the figures come after the first paragraph)
-    x.svg, x.png the figures (tools/newsdesk/gfx.py)
+                 "author": "ATC SIM newsroom",
+                 "translations": {"fr": {"title", "summary", "figures": [{"caption", "alt"} or {"file", "png", "caption",
+                                                                         "alt"}, ... one per figure, same order]},
+                                  "ar": {...}}}
+    body.md     the article in English, 350 to 1100 words of Markdown (## headings, paragraphs, lists, **bold**, links):
+                no HTML; {{figure:x.svg}} puts a figure there (otherwise the figures come after the first paragraph)
+    body.fr.md  the same article in French, body.ar.md in Arabic (Modern Standard Arabic): the same structure, the same
+                figure places, the same links; required from REQUIRE_FROM on
+    x.svg, x.png the figures (tools/newsdesk/gfx.py); a figure with words on it (titles, legends, axes) may have its own
+                 French / Arabic copy (x.fr.svg / x.fr.png ...), named in that translation's figures
 """
 from __future__ import annotations
 
@@ -25,6 +31,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from gfx import safe  # noqa: E402
 
 REGIONS = ("morocco", "europe", "international")
+LANGS = ("fr", "ar")                 # besides English (body.md)
+REQUIRE_FROM = "2026-10-30"          # articles of this day on are written in English, French and Arabic
 SECTIONS = ("Air traffic control & airspace", "Technology & innovation", "Safety", "Airlines & airports",
             "Morocco & Africa", "Defence & space")
 SLUG = re.compile(r"^\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*$")
@@ -97,6 +105,63 @@ def check(adir: str) -> list:
     for ref in re.findall(r"\{\{figure:([^}]+)\}\}", body):
         if ref not in {f.get("file") for f in figs}:
             errs.append(f"body.md: {{{{figure:{ref}}}}} is not one of the figures")
+    errs += _check_translations(adir, m, body, figs)
+    return errs
+
+
+def _check_translations(adir: str, m: dict, body: str, figs: list) -> list:
+    """The French and Arabic versions: there (from REQUIRE_FROM), complete, the same figures in the same places."""
+    errs = []
+    tr = m.get("translations") or {}
+    need = str(m.get("date") or "") >= REQUIRE_FROM
+    for lg in LANGS:
+        path = os.path.join(adir, f"body.{lg}.md")
+        t = tr.get(lg)
+        if not t and not os.path.exists(path):
+            if need:
+                errs.append(f"translations.{lg} and body.{lg}.md missing (every article is in English, French and Arabic)")
+            continue
+        if not isinstance(t, dict) or not t.get("title") or not t.get("summary"):
+            errs.append(f"translations.{lg}: title and summary")
+            continue
+        if len(t["title"]) > 140:
+            errs.append(f"translations.{lg}.title: 140 characters at most")
+        if len(t["summary"]) > 400:
+            errs.append(f"translations.{lg}.summary: 400 characters at most")
+        if not os.path.exists(path):
+            errs.append(f"body.{lg}.md missing")
+            continue
+        b = open(path, encoding="utf-8").read()
+        words = len(re.findall(r"\w+", re.sub(r"\(https?://[^)]*\)", "", b)))
+        if not 300 <= words <= 1400:
+            errs.append(f"body.{lg}.md: {words} words (300 to 1400)")
+        if re.search(r"<\s*[a-zA-Z/!]", b):
+            errs.append(f"body.{lg}.md: no HTML")
+        if re.search(r"\]\(\s*(?!https://)", b):
+            errs.append(f"body.{lg}.md: links must be https://")
+        if re.search(r"!\[", b):
+            errs.append(f"body.{lg}.md: no Markdown images")
+        if sorted(re.findall(r"\{\{figure:([^}]+)\}\}", b)) != sorted(re.findall(r"\{\{figure:([^}]+)\}\}", body)):
+            errs.append(f"body.{lg}.md: the same {{{{figure:...}}}} places as body.md (the English figure names)")
+        if lg == "ar" and len(re.findall(r"[\u0600-\u06FF]", b)) < 500:
+            errs.append("body.ar.md: not written in Arabic")
+        if lg == "fr" and not re.search(r"\b(le|la|les|des|du|une|est)\b", b):
+            errs.append("body.fr.md: not written in French")
+        tf = t.get("figures") or []
+        if len(tf) != len(figs):
+            errs.append(f"translations.{lg}.figures: one per figure ({len(figs)}), in the same order")
+        for k, f in enumerate(tf):
+            if not f.get("caption") or not f.get("alt"):
+                errs.append(f"translations.{lg}.figures[{k}]: caption and alt")
+            if f.get("file") or f.get("png"):
+                for key, ext in (("file", ".svg"), ("png", ".png")):
+                    fn = f.get(key) or ""
+                    if not fn.endswith(ext) or not os.path.exists(os.path.join(adir, fn)):
+                        errs.append(f"translations.{lg}.figures[{k}].{key}: the {ext} file is missing")
+                if f.get("file") and os.path.exists(os.path.join(adir, f["file"])):
+                    why = safe(open(os.path.join(adir, f["file"]), encoding="utf-8").read())
+                    if why:
+                        errs.append(f"figure {f['file']}: {why}")
     return errs
 
 
@@ -106,10 +171,13 @@ def build_index(root: str) -> list:
     for d in adirs:
         p = os.path.join(root, "articles", d)
         m = json.load(open(os.path.join(p, "meta.json"), encoding="utf-8"))
-        files = ["meta.json", "body.md"] + [x for f in m["figures"] for x in (f["file"], f["png"])]
+        langs = [lg for lg in LANGS if (m.get("translations") or {}).get(lg) and os.path.exists(os.path.join(p, f"body.{lg}.md"))]
+        files = ["meta.json", "body.md"] + [f"body.{lg}.md" for lg in langs] + [x for f in m["figures"] for x in (f["file"], f["png"])]
+        files += [x for lg in langs for f in (m["translations"][lg].get("figures") or []) for x in (f.get("file"), f.get("png")) if x]
         mt = max(os.path.getmtime(os.path.join(p, f)) for f in files)
         out.append({"slug": d, "date": m["date"], "region": m["region"], "section": m["section"], "title": m["title"],
-                    "summary": m["summary"], "files": files, "updated": int(mt)})
+                    "summary": m["summary"], "langs": ["en"] + langs,
+                    "titles": {lg: m["translations"][lg]["title"] for lg in langs}, "files": files, "updated": int(mt)})
     order = {r: i for i, r in enumerate(REGIONS)}
     out.sort(key=lambda a: (a["date"], -order[a["region"]]), reverse=True)
     return out

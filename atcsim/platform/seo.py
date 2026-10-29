@@ -185,10 +185,16 @@ def sitemap(request: Request):
     from . import news
     from .exercises import DOC_PAGES
     base = base_url(request)
-    urls = [(base + "/", None, "weekly", "1.0"), (base + "/news", None, "hourly", "0.9")]
+    urls = [(base + "/", None, "weekly", "1.0"), (base + "/news", None, "hourly", "0.9"),
+            (base + "/news?lang=en", None, "hourly", "0.8"), (base + "/news?lang=ar", None, "hourly", "0.8")]
     news._schema()
-    for r in db.q("SELECT slug, updated, date FROM news_articles ORDER BY date DESC, slug LIMIT 5000"):
-        urls.append((f"{base}/news/a/{r['slug']}", _lastmod(r["updated"]) or r["date"], "monthly", "0.8"))
+    for r in db.q("SELECT slug, updated, date, i18n FROM news_articles ORDER BY date DESC, slug LIMIT 5000"):
+        lm = _lastmod(r["updated"]) or r["date"]
+        urls.append((f"{base}/news/a/{r['slug']}", lm, "monthly", "0.8"))            # French (or English when not translated)
+        langs = json.loads(r["i18n"] or "{}")
+        urls.append((f"{base}/news/a/{r['slug']}?lang=en", lm, "monthly", "0.7"))
+        if "ar" in langs:
+            urls.append((f"{base}/news/a/{r['slug']}?lang=ar", lm, "monthly", "0.7"))
     for r in db.q("SELECT id, sent_at FROM news_issues WHERE status='sent' ORDER BY day DESC LIMIT 2000"):
         urls.append((f"{base}/news/issue/{r['id']}", _lastmod(r["sent_at"]), "never", "0.4"))
     for s, _, _ in DOC_PAGES:
