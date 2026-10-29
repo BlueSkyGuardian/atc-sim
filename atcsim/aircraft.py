@@ -270,9 +270,21 @@ class Aircraft:
             return "cas", self.spd_cas
         if a >= self.conversion_ft(m, c):
             return "mach", m
+        if self.spd_cas is None and self._cruising_at(a) and self._mach_cas(m, a) <= c + 25.0:
+            # level at its cruise level (FL250 and above), no IAS assigned: it cruises at its Mach even below the
+            # climb schedule's crossover (FL310 at M.78 rather than 300 kt), as the FMS does and as ATC controls it
+            return "mach", m
         if a < 10000.0 and self.spd_cas is None:
             return "cas", min(250.0, c)
         return "cas", c
+
+    def _cruising_at(self, a: float) -> bool:
+        cl = getattr(self, "cleared_alt_ft", None)
+        return cl is not None and cl >= 25000.0 and abs(a - cl) < 250.0
+
+    def _mach_cas(self, m: float, a: float) -> float:
+        """The IAS a Mach gives at an altitude (kt)."""
+        return atm.tas_to_cas(self.perf.tas_for("mach", m, a) * atm.KT, a * atm.FT, self.perf.dT) / atm.KT
 
     def mach(self) -> float:
         return atm.tas_to_mach(self.tas * atm.KT, self.alt_ft * atm.FT, self.perf.dT)

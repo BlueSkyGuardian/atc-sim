@@ -1,5 +1,5 @@
 {
- "_note": "Traffic flows that are actually planned through the Casablanca FIR: who flies which route. Each flow gives real departure and destination groups and the route through GMMM as an ICAO route string over the airspace file's airways (A AWY B = the airway's points from A to B; A B = direct). The generator builds its flights only from these flows (routes then extended beyond the sectors along the airways). Sources: AIP Maroc ENR 3 and RAD, AIP SUP 03/16 (contingency routes CRC1-18), the Canarias-Casablanca and Spain-Morocco letters of agreement, ICAO EUR/SAM corridor statistics, route-finder flight plans. See the doc 'GMMM traffic flows and planned routes'. Volumes are not modelled: every flow is equally likely.",
+ "_note": "Traffic flows that are actually planned through the Casablanca FIR: who flies which route. Each flow gives real departure and destination groups and the route through GMMM as an ICAO route string over the airspace file's airways (A AWY B = the airway's points from A to B; A B = direct). The generator builds its flights only from these flows (routes then extended beyond the sectors along the airways). Sources: AIP Maroc ENR 3 and RAD, AIP SUP 03/16 (contingency routes CRC1-18), the Canarias-Casablanca and Spain-Morocco letters of agreement, ICAO EUR/SAM corridor statistics, route-finder flight plans. See the doc 'GMMM traffic flows and planned routes'. Volumes: each flow's 'weight' is its share of the traffic (default 1; the Europe - Canaries flows carry most of it), and an origin or destination may be weighted with '*n' (GCLP*4: four times as likely as an unweighted one; a group weighted multiplies its members' weights). Routes follow the RAD (GMAC appendix): VASTO DCT BAROK, VASTO NIDEB TIGGI, SAMAR NEVTU TIGGI, DESUM DCT AKUDA (departures GCRR / GCFV only), TAKAV VEDOD (arrivals GCRR / GCFV only), IBALU DCT SAMAR (arrivals GCLP / GCXO only).",
  "groups": {
   "UKI": [
    "EGLL",
@@ -93,14 +93,14 @@
    "SBSV"
   ],
   "CAN": [
-   "GCLP",
-   "GCTS",
-   "GCXO",
+   "GCLP*4",
+   "GCTS*3",
+   "GCXO*2",
    "GCLA"
   ],
   "CANE": [
-   "GCRR",
-   "GCFV"
+   "GCRR*3",
+   "GCFV*2"
   ],
   "WAFC": [
    "GQNO",
@@ -136,7 +136,7 @@
    "CYYZ"
   ],
   "MAN": [
-   "GMMN",
+   "GMMN*6",
    "GMME"
   ],
   "MAS": [
@@ -168,11 +168,12 @@
     "PT"
    ],
    "to": [
-    "SAM",
-    "CAN",
+    "CAN*3",
+    "SAM*2",
     "GVAC"
    ],
-   "route": "BAROK UN873 SAMAR"
+   "route": "BAROK UN873 SAMAR",
+   "weight": 6
   },
   {
    "id": "eursam_un857_korno",
@@ -182,11 +183,12 @@
     "ITA"
    ],
    "to": [
-    "SAM",
     "CANE",
-    "CAN"
+    "CAN",
+    "SAM"
    ],
-   "route": "KORNO UN857 TERTO"
+   "route": "KORNO UN857 TERTO",
+   "weight": 3
   },
   {
    "id": "eursam_un857_oslad",
@@ -196,10 +198,11 @@
     "IBN"
    ],
    "to": [
-    "SAM",
-    "CANE"
+    "CANE",
+    "SAM"
    ],
-   "route": "OSLAD UR724 IBALU UN857 TERTO"
+   "route": "OSLAD UR724 IBALU UN857 TERTO",
+   "weight": 2
   },
   {
    "id": "canaries_runax",
@@ -211,9 +214,10 @@
    ],
    "to": [
     "CANE",
-    "CAN"
+    "CAN*2"
    ],
-   "route": "RUNAX UL82 IBALU UN857 TERTO"
+   "route": "RUNAX UL82 IBALU UN857 TERTO",
+   "weight": 3
   },
   {
    "id": "canaries_takav",
@@ -224,13 +228,14 @@
    "to": [
     "CANE"
    ],
-   "route": "TAKAV VEDOD TERTO"
+   "route": "TAKAV VEDOD TERTO",
+   "weight": 3
   },
   {
    "id": "sameur_un866",
    "from": [
+    "CAN*2",
     "SAM",
-    "CAN",
     "GVAC"
    ],
    "to": [
@@ -239,13 +244,14 @@
     "NWEU",
     "FRN"
    ],
-   "route": "KONBA UN866 BEXAL"
+   "route": "KONBA UN866 BEXAL",
+   "weight": 4
   },
   {
    "id": "sameur_un858",
    "from": [
-    "SAM",
-    "CAN"
+    "CAN*3",
+    "SAM"
    ],
    "to": [
     "IBN",
@@ -255,7 +261,8 @@
     "ITA",
     "NWEU"
    ],
-   "route": "VASTO UN858 AKUDA"
+   "route": "VASTO UN858 AKUDA",
+   "weight": 4
   },
   {
    "id": "canaries_lisbon",
@@ -265,7 +272,8 @@
    "to": [
     "PT"
    ],
-   "route": "VASTO NIDEB TIGGI"
+   "route": "VASTO NIDEB TIGGI",
+   "weight": 4
   },
   {
    "id": "canaries_nweu_vasto",
@@ -276,7 +284,8 @@
     "UKI",
     "NWEU"
    ],
-   "route": "VASTO BAROK"
+   "route": "VASTO BAROK",
+   "weight": 5
   },
   {
    "id": "canaries_samar_bexal",
@@ -288,7 +297,8 @@
     "PT",
     "NWEU"
    ],
-   "route": "SAMAR BEXAL"
+   "route": "SAMAR BEXAL",
+   "weight": 3
   },
   {
    "id": "canaries_samar_tiggi",
@@ -299,7 +309,8 @@
     "PT",
     "FRN"
    ],
-   "route": "SAMAR TIGGI"
+   "route": "SAMAR NEVTU TIGGI",
+   "weight": 3
   },
   {
    "id": "canaries_desum",
@@ -313,7 +324,39 @@
     "UKI",
     "IBE"
    ],
-   "route": "DESUM SULAM DIMSA IBLIV SUNID AKUDA"
+   "route": "DESUM AKUDA",
+   "weight": 3
+  },
+  {
+   "id": "eur_canaries_ibalu_samar",
+   "from": [
+    "UKI",
+    "FRN",
+    "NWEU"
+   ],
+   "to": [
+    "GCLP*2",
+    "GCXO"
+   ],
+   "route": "OSLAD UR724 IBALU SAMAR",
+   "weight": 1,
+   "_note": "RAD: IBALU DCT SAMAR, arrivals GCLP / GCXO only (weekends)"
+  },
+  {
+   "id": "med_canaries_ibalu_samar",
+   "from": [
+    "IBE",
+    "IBS",
+    "ITA",
+    "FRS"
+   ],
+   "to": [
+    "GCLP*2",
+    "GCXO"
+   ],
+   "route": "RUNAX UL82 IBALU SAMAR",
+   "weight": 1,
+   "_note": "RAD: IBALU DCT SAMAR, arrivals GCLP / GCXO only (weekends)"
   },
   {
    "id": "canaries_koral",
@@ -504,34 +547,38 @@
   {
    "id": "ma_lisbon_amsel",
    "from": [
-    "MAN",
-    "MAS"
+    "GMMN*4",
+    "GMMX*2",
+    "GMAD"
    ],
    "to": [
     "PT",
     "UKI"
    ],
-   "route": "MARJA UR722 AMSEL"
+   "route": "MARJA UR722 AMSEL",
+   "weight": 1.5
   },
   {
    "id": "ma_nam_subal",
    "from": [
-    "MAN"
+    "GMMN"
    ],
    "to": [
     "NAM"
    ],
-   "route": "SALCA IBALU SUBAL"
+   "route": "SALCA IBALU SUBAL",
+   "weight": 0.5
   },
   {
    "id": "ma_nam_bexal",
    "from": [
-    "MAN"
+    "GMMN"
    ],
    "to": [
     "NAM"
    ],
-   "route": "SALCA IBALU BEXAL"
+   "route": "SALCA IBALU BEXAL",
+   "weight": 0.5
   },
   {
    "id": "ma_east_orsup",
@@ -661,7 +708,8 @@
    "to": [
     "GMMN"
    ],
-   "route": "AMSEL UR722 MARJA"
+   "route": "AMSEL UR722 MARJA",
+   "weight": 1.5
   },
   {
    "id": "nam_ma_subal",
@@ -671,7 +719,8 @@
    "to": [
     "GMMN"
    ],
-   "route": "SUBAL IBALU SALCA"
+   "route": "SUBAL IBALU SALCA",
+   "weight": 0.5
   },
   {
    "id": "nam_ma_bexal",
@@ -681,7 +730,8 @@
    "to": [
     "GMMN"
    ],
-   "route": "BEXAL IBALU SALCA"
+   "route": "BEXAL IBALU SALCA",
+   "weight": 0.5
   },
   {
    "id": "east_ma_orsup",

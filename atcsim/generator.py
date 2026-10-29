@@ -3,22 +3,26 @@
 Parameters (all optional, see DEFAULTS):
   control                  sectors controlled (e.g. ["WN", "WS"], ["N"], ["ON", "OS"])
   duration_min, seed, start_utc
-  aircraft_per_hour        background traffic through the controlled sectors
+  aircraft_per_hour        flights through the controlled sectors over the exercise, all told: the planted ones and the
+                           ones already in at the start included
   density                  1-5: 1 = spread evenly over the hour, 5 = in tight waves
   sequences_per_hour       groups of arrivals reaching a sequencing fix too close together (sectors with sequencing
   seq_size                 fixes only), from different routes, speeds mixed: [min, max] aircraft per group
   overtakes_per_hour       same route, same level, the faster one behind
   crossings_per_hour       two routes crossing inside the sectors, same level, the same minute
   level_crossings_per_hour a pilot asking for a level through the level of crossing traffic
-  slow_share               share of slow traffic (C550, C130, A400) at FL170-250, on the arrival routes when there are
-                           some (in the way of the descending sequences)
-  heavy_share              share of long-haul types
+  splits_per_hour          waves of 2-4 flights entering at one point within a few minutes and leaving by different
+                           routes (VASTO: AKUDA, TIGGI, BAROK), some at the same level
+  slow_share               share of slow traffic: military transports (C130, A400) at FL170-250 on the routes to or
+                           from Morocco, business jets (C550) at their own high levels elsewhere
+  heavy_share              share of long-haul flights (on the flows that have both kinds; the type follows the flight)
   transatlantic_per_hour    flights to / from North America by IBALU and SUBAL / BEXAL (westbound: mostly Moroccan
                            departures still climbing to their requested level; eastbound: at cruise). Crossing the
                            West / Oceanic boundary, they are coordinated by OLDI like any flight whose route touches both
                            sides (IBALU - SAMAR included: that one is ordinary traffic, in the random flow and the
                            crossings)
-  levels                   [lowest, highest] cruise level of the background traffic
+  levels                   [lowest, highest] cruise level of the background traffic (within it, each flight's level
+                           follows how far it goes: most at FL340-380)
   separation_nm            horizontal minimum of the exercise (None: the airspace's); flights enter the sectors spaced
                            at least this much from the traffic at their level
   runway_changes           "none" | "random" (each aerodrome of the sectors changes runway with runway_change_share,
@@ -47,18 +51,74 @@ from .geometry import bearing, dist, point_in_polygon, segment_intersection
 
 DEFAULTS = dict(control=["WS"], duration_min=60, seed=None, start_utc="10:00", aircraft_per_hour=30, density=2,
                 sequences_per_hour=2, seq_size=[3, 4], overtakes_per_hour=1, crossings_per_hour=2,
-                level_crossings_per_hour=2, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
+                level_crossings_per_hour=2, splits_per_hour=1, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
                 levels=[290, 400], weather="calm", airports=None, separation_nm=None,
                 runway_changes="none", runway_change_share=0.3)
 
 SHORT = ["B738", "A320", "A321", "B38M", "A20N", "A21N", "A319", "B739", "E190", "E195", "CRJ9", "B752"]
 LONG = ["A332", "A333", "B77W", "B789", "B788", "A359", "B772", "A343", "B744", "A388", "B763"]
+LONG_FLOWN = ["A332", "A333", "B77W", "B789", "B789", "B788", "B788", "A359", "B772", "B763"]   # on these flows
 SLOW = [("C550", False), ("C550", False), ("C130", True), ("A400", True)]
 OPS_SHORT = ["RAM", "RYR", "EZY", "EXS", "TOM", "IBE", "VLG", "TVF", "EWG", "CFG", "BAW", "TAP", "KLM", "DLH", "AFR",
              "SWR", "BEL", "NAX", "AEA"]
 OPS_LONG = ["RAM", "AZU", "TAM", "GLO", "AVA", "AEA", "IBE", "TAP", "KLM", "AFR", "BAW", "DLH", "LAN", "ARG", "DAL",
             "UAE", "QTR"]
-OPS_SLOW = ["CNA", "RMAF", "FAF", "EXE", "NJE"]
+OPS_LONG_FLOWN = ["A332", "A333", "B77W", "B789", "B789", "B788", "B788", "A359", "B772", "B763"]   # on these flows
+SLOW = ["CNA", "RMAF", "FAF", "EXE", "NJE"]
+OPS_MIL = ["RMAF", "RMAF", "FAF", "AME"]
+OPS_BIZ = ["NJE", "EXE", "VJT", "CNA", "GAC"]
+
+# who flies where: the airlines of each end of a flight (repeated = more likely), by the first letters of its ICAO code
+_AREA = [("GM", "MA"), ("GC", "CAN"), ("LE", "ES"), ("GE", "ES"), ("LP", "PT"), ("EG", "UK"), ("EI", "IE"), ("LF", "FR"),
+         ("ED", "DE"), ("EH", "NL"), ("EB", "BE"), ("LS", "CH"), ("LO", "AT"), ("EK", "NORD"), ("EN", "NORD"),
+         ("ES", "NORD"), ("EF", "NORD"), ("EP", "PL"), ("LH", "PL"), ("LI", "IT"), ("LM", "IT"), ("DA", "MAG"),
+         ("DT", "MAG"), ("HE", "ME"), ("LT", "ME"), ("LL", "ME"), ("O", "ME"), ("SB", "BR"), ("SA", "AR"), ("SC", "CL"), ("S", "SAM"), ("K", "NAM"), ("C", "NAM"),
+         ("G", "WAF"), ("D", "WAF")]
+HOME = {"MA": ["RAM", "RAM", "RAM", "MAC"], "CAN": ["IBB", "IBB", "VLG", "IBS", "AEA"],
+        "ES": ["IBE", "VLG", "VLG", "IBS", "AEA", "RYR", "ANE"], "PT": ["TAP", "TAP", "TAP", "RYR", "EZY"],
+        "UK": ["BAW", "EZY", "EZY", "RYR", "RYR", "EXS", "EXS", "TOM", "TOM"], "IE": ["EIN", "RYR", "RYR"],
+        "FR": ["AFR", "TVF", "TVF", "EZY", "VOE"], "DE": ["DLH", "EWG", "EWG", "CFG", "CFG", "TUI", "TUI"],
+        "NL": ["KLM", "TRA", "TRA", "TFL"], "BE": ["BEL", "JAF", "JAF"], "CH": ["SWR", "EZS", "EDW"],
+        "AT": ["AUA", "EJU"], "NORD": ["SAS", "NOZ", "NOZ", "FIN", "TVS"], "PL": ["LOT", "ENT", "WZZ"],
+        "IT": ["ITY", "RYR", "NOS", "VOE"], "MAG": ["DAH", "TAR"], "ME": ["UAE", "QTR", "SVA", "MSR", "THY"],
+        "BR": ["TAM", "TAM", "AZU"], "AR": ["ARG"], "CL": ["LAN"], "SAM": ["TAM"], "NAM": [], "WAF": ["SZN", "TCV", "SKK"]}
+# airlines flying wide-bodies (long-haul flights)
+WIDE = {"RAM", "TAP", "IBE", "AFR", "KLM", "BAW", "DLH", "CFG", "TAM", "GLO", "AZU", "ARG", "LAN", "UAE", "QTR", "SVA",
+        "MSR", "THY", "ACA", "TSC", "DAL", "ITY", "SWR", "AEA", "TCV", "SZN"}
+LONG_AREAS = {"SAM", "BR", "AR", "CL", "NAM", "ME"}
+# where long-haul flights go in Europe and Morocco (not Valladolid to Buenos Aires)
+HUBS = {"LEMD", "LEBL", "LPPT", "LPPR", "LFPG", "LFPO", "EDDF", "EDDM", "EHAM", "EGLL", "EGKK", "LIRF", "LIMC", "LSZH",
+        "EBBR", "LOWW", "EKCH", "GMMN", "GCLP", "GCTS"}
+
+
+def _area(icao: str) -> str:
+    icao = (icao or "").upper()
+    return next((a for pre, a in _AREA if icao.startswith(pre)), "")
+
+
+def _long_pair(dep: str, dest: str) -> bool:
+    """A long-haul flight: one end in South or North America or the Middle East, the other elsewhere."""
+    a, b = _area(dep), _area(dest)
+    return a != b and bool({a, b} & LONG_AREAS)
+
+
+def ops_for(dep: str, dest: str, long: bool, rng) -> List[str]:
+    """The airlines likely on a flight between dep and dest: those of either end (a Moroccan one mostly Royal Air
+    Maroc; a Canaries one mostly the airlines of the other end, the holiday and low-cost ones), wide-body operators
+    for a long-haul flight."""
+    a, b = _area(dep), _area(dest)
+    cands = HOME.get(a, []) + HOME.get(b, [])
+    cands += [o for x in (dep, dest) if (x or "").startswith("C") for o in ("ACA", "TSC")]    # Canada
+    if "MA" in (a, b):
+        cands += ["RAM"] * 3
+    if "CAN" in (a, b):
+        other = b if a == "CAN" else a
+        if other not in ("ES", "PT", "MA", "CAN"):     # the Canaries' own airlines fly to Spain, Portugal, Morocco
+            cands = [o for o in cands if o not in HOME["CAN"]]
+        cands += HOME.get(other, []) * 2
+    if long:
+        cands = [o for o in cands if o in WIDE] or OPS_LONG
+    return cands or OPS_SHORT
 REGIONS = {  # neighbouring unit -> airports beyond it
     "LPPC": ["LPPT", "LPPR", "LFPG", "EGLL", "EHAM", "EDDF", "EGKK", "EIDW", "EBBR", "LSZH"],
     "LECM": ["LEMD", "LEBL", "LEMG", "LEZL", "LFPO", "LIRF", "LIMC", "EDDM", "LOWW"],
@@ -183,7 +243,18 @@ class _Ctx:
         for k, v in (raw.get("external_airways") or {}).items():       # beyond the FIR: only where ours stop
             if not k.startswith("_") and k not in aw:
                 aw[k] = v["points"]
-        expand = lambda lst: [a for g in lst for a in (groups.get(g) or [g])]
+        def expand(lst, mult=1):
+            """Aerodromes and groups, 'X*n' weighted n times (a group's weight multiplies its members'): as a list
+            with each aerodrome repeated by its weight (a random choice from it follows the weights)."""
+            res = []
+            for tok in lst:
+                name, _, w = str(tok).partition("*")
+                w = mult * (int(w) if w.strip().isdigit() else 1)
+                if name in groups:
+                    res += expand(groups[name], w)
+                else:
+                    res += [name] * w
+            return res
         out = []
         for f in d.get("flows", []):
             toks = f["route"].split()
@@ -208,7 +279,7 @@ class _Ctx:
             if not ok or any(n not in self.wp for n in names):
                 self.flow_errors.append(f["id"])
                 continue
-            out.append((names, f["id"], expand(f["from"]), expand(f["to"])))
+            out.append((names, f["id"], expand(f["from"]), expand(f["to"]), float(f.get("weight", 1.0))))
         return out
 
     def _routes(self):
@@ -216,7 +287,7 @@ class _Ctx:
         flows = self._flows()
         out, seen = [], set()
         src = self._split_flows(flows) if flows else []
-        for names, fid, fr, to in src:
+        for names, fid, fr, to, wt in src:
             pts = [self.wp[n] for n in names]
             Lin = _poly_len_inside(pts, self.polys)
             if Lin < 15.0:
@@ -225,7 +296,7 @@ class _Ctx:
             s_out = _last_inside(pts, self.polys) or _poly_len(pts)
             south = 90.0 <= bearing(_along(pts, s_in), _along(pts, s_out)) < 270.0
             out.append({"route": names, "pts": pts, "inside_nm": Lin, "south": south, "s_in": s_in, "s_out": s_out,
-                        "flow": fid, "deps": fr, "dests": to})
+                        "flow": fid, "deps": fr, "dests": to, "weight": wt})
         if len(out) >= 3:
             self.routes = out
             self._aerodromes()
@@ -257,26 +328,28 @@ class _Ctx:
             if a_.get("x") is not None and str(a_.get("id", "")).startswith("GM"):
                 xy.setdefault(a_["id"], (a_["x"], a_["y"]))
         out = []
-        for names, fid, fr, to in flows:
+        for names, fid, fr, to, wt in flows:
             pts = [self.wp[n] for n in names]
             keep_to, keep_fr = [], []
-            for ad in to:
+            for ad in dict.fromkeys(to):                # (an aerodrome is listed once per unit of its weight)
+                share = to.count(ad) / len(to)
                 if ad in xy and len(names) > 2:
                     k = min(range(len(names)), key=lambda i: dist(pts[i], xy[ad]))
                     if k < len(names) - 1 and dist(pts[k], xy[ad]) < dist(pts[-1], xy[ad]) - 15.0:
-                        out.append((names[:k + 1], f"{fid}>{ad}", fr, [ad]))
+                        out.append((names[:k + 1], f"{fid}>{ad}", fr, [ad], wt * share))
                         continue
-                keep_to.append(ad)
-            for ad in fr:
+                keep_to += [ad] * to.count(ad)
+            for ad in dict.fromkeys(fr):
+                share = fr.count(ad) / len(fr)
                 if ad in xy and len(names) > 2:
                     k = min(range(len(names)), key=lambda i: dist(pts[i], xy[ad]))
                     if k > 0 and dist(pts[k], xy[ad]) < dist(pts[0], xy[ad]) - 15.0:
-                        out.append((names[k:], f"{ad}>{fid}", [ad], keep_to or to))
+                        out.append((names[k:], f"{ad}>{fid}", [ad], keep_to or to, wt * share))
                         continue
-                keep_fr.append(ad)
+                keep_fr += [ad] * fr.count(ad)
             if keep_to and keep_fr:
-                out.append((names, fid, keep_fr, keep_to))
-        return [(n, f, fr, to) for n, f, fr, to in out if len(n) >= 2]
+                out.append((names, fid, keep_fr, keep_to, wt * len(keep_to) / len(to) * len(keep_fr) / len(fr)))
+        return [x for x in out if len(x[0]) >= 2]
 
     def _aerodromes(self):
         # aerodromes: the ones with SIDs (their departures are shown from take-off), every one for destinations
@@ -485,10 +558,13 @@ class _Ctx:
             fx = next((q["fix"] for q in self.asp.default_sequencing if q["aerodrome"] == dest and q["fix"] in names[1:]), None)
             if fx:
                 names = names[:names.index(fx) + 1]
-        a = {"callsign": self.callsign(ops or (OPS_LONG if typ in LONG else OPS_SHORT)), "type": typ,
+        dest = dest or self.dest_for(r)
+        if ops is None:
+            ops = ops_for(dep, dest, typ in LONG, self.rng)
+        a = {"callsign": self.callsign(ops), "type": typ,
              "route": names, "fl": int(fl),
              "dep": dep,
-             "dest": dest or self.dest_for(r),
+             "dest": dest,
              "reach": {"point": [round(p[0], 3), round(p[1], 3)], "time": int(round(t))}}
         if r.get("flow"):
             self.flow_cs.add(a["callsign"])
@@ -517,6 +593,47 @@ class _Ctx:
     def pick_type(self, long_share=None):
         return self.rng.choice(LONG if self.rng.random() < (self.P["heavy_share"] if long_share is None else long_share) else SHORT)
 
+    def flight(self, r, want_long=None, dest=None):
+        """(dep, dest, type) of a flight on route r: its ends from the flow (as weighted), long-haul as often as the
+        long-haul share asks when the flow has both kinds (want_long: one of that kind when it has one), then a type
+        to match - a wide-body for a long-haul flight, else a narrow-body."""
+        if not r.get("deps"):
+            typ = self.pick_type() if want_long is None else self.rng.choice(LONG if want_long else SHORT)
+            return None, dest, typ
+        want = (self.rng.random() < self.P["heavy_share"]) if want_long is None else want_long
+        pairs = [(self.rng.choice(r["deps"]), dest or self.rng.choice(r["dests"])) for _ in range(12)]
+        fits = lambda p: not _long_pair(*p) or all(x in HUBS or _area(x) in LONG_AREAS for x in p)
+        pairs = [p for p in pairs if fits(p)] or pairs
+        dep, dst = next((p for p in pairs if _long_pair(*p) == want), pairs[0])
+        long = _long_pair(dep, dst)
+        if long:
+            typ = self.rng.choice(LONG_FLOWN)
+        elif {_area(dep), _area(dst)} <= {"MA", "CAN", "ES", "PT"}:
+            typ = self.rng.choice(SHORT)
+        else:                                    # further (the UK, northern Europe to the Canaries): no regional jets
+            typ = self.rng.choice([t for t in SHORT if t not in ("E190", "E195", "CRJ9")])
+        return dep, dst, typ
+
+    def cruise(self, south, typ, dep, dest, lo=None, hi=None, avoid=()):
+        """A cruise level for the flight: by how far it goes (a domestic or short flight lower, most others FL340-380,
+        long-haul FL340-400), within the exercise's levels when they allow it, the right direction."""
+        lo = self.P["levels"][0] if lo is None else lo
+        hi = self.P["levels"][1] if hi is None else hi
+        a, b = _area(dep or ""), _area(dest or "")
+        if a == b == "MA" or {a, b} == {"MA", "CAN"}:
+            band, peak = (240, 340), 300
+        elif _long_pair(dep or "", dest or ""):
+            band, peak = (330, 410), 370
+        else:
+            band, peak = (300, 400), 360
+        mx = min(hi, _max_fl(typ))
+        lv = [l for l in range(max(lo, band[0]), min(mx, band[1]) + 1, 10) if level_parity_ok(l, south)]
+        if not lv:
+            return self.level(south, lo, hi, typ, avoid)
+        lv = [l for l in lv if l not in avoid] or lv
+        w = [max(0.15, 1.0 - abs(l - peak) / 60.0) for l in lv]
+        return self.rng.choices(lv, w)[0]
+
 
 # ------------------------------------------------------------------------------------------- planted situations
 def _sequences(c: _Ctx):
@@ -527,33 +644,45 @@ def _sequences(c: _Ctx):
     if not fixes or n <= 0:
         return 0
     done = 0
+    inb = lambda q: [r for r in c.routes if q["fix"] in r["route"] and r["route"].index(q["fix"]) > 0
+                     and (not r.get("dests") or q["aerodrome"] in r["dests"])]
     for ts in c.times(n, lo=420.0, hi=c.T - 300.0):
-        q = c.rng.choice(fixes)
+        # the fixes and the routes to them as busy as their traffic
+        q = c.rng.choices(fixes, [sum(_route_weight(r) for r in inb(q_)) or 1.0 for q_ in fixes])[0]
         fix = q["fix"]
-        inbound = [r for r in c.routes if fix in r["route"] and r["route"].index(fix) > 0
-                   and (not r.get("dests") or q["aerodrome"] in r["dests"])]
+        inbound = inb(q)
         if not inbound:
             continue
+        inbound = sorted(inbound, key=lambda r: -_route_weight(r) * c.rng.random())
         k = c.rng.randint(*c.P["seq_size"])
         t = ts
         names = []
         for i in range(k):
             r = inbound[i % len(inbound)] if c.rng.random() < 0.7 else c.rng.choice(inbound)
             s_fix = sum(dist(p, qq) for p, qq in zip(r["pts"], r["pts"][1:r["route"].index(fix) + 1]))
-            typ = c.pick_type(0.25)
+            dep, _, typ = c.flight(r, dest=q["aerodrome"])
             fl = c.level(r["south"], 300, 380, typ) or 330
             m = performance.get(typ).cruise_mach + c.rng.choice([-0.02, 0.0, 0.0, 0.02, 0.03])
-            a = c.add(r, typ, fl, t, at_s=s_fix, dest=q["aerodrome"], mach=m, keep=True, arrival=True)
+            a = c.add(r, typ, fl, t, at_s=s_fix, dep=dep, dest=q["aerodrome"], mach=m, keep=True, arrival=True)
             names.append(f"{a['callsign']} ({typ}, F{fl})")
             t += c.rng.uniform(25.0, 70.0)          # closer than the spacing: they must be sequenced
-        # slow traffic in the way of the descent
+        # slow traffic in the way of the descent: a military transport low on a route from Morocco, else (the
+        # oceanic and European routes) a business jet at the arrivals' levels
         if c.rng.random() < min(1.0, c.P["slow_share"] * 4):
-            r = c.rng.choice(inbound)
-            typ, mil = c.rng.choice(SLOW)
+            low = [r for r in inbound if _moroccan(r) and not any(_area(x) in LONG_AREAS for x in r["deps"])]
+            r = c.rng.choice(low or inbound)
             s_fix = sum(dist(p, qq) for p, qq in zip(r["pts"], r["pts"][1:r["route"].index(fix) + 1]))
-            fl = c.level(r["south"], 170, 250, typ) or 210
-            a = c.add(r, typ, fl, ts - c.rng.uniform(60, 240), at_s=s_fix, ops=OPS_SLOW,
-                      dest=q["aerodrome"], keep=True, arrival=True, **({"military": True} if mil else {}))
+            if low:
+                typ = c.rng.choice(["C130", "A400"])
+                fl = c.level(r["south"], 170, 250, typ) or 210
+                a = c.add(r, typ, fl, ts - c.rng.uniform(60, 240), at_s=s_fix, ops=["RMAF"],
+                          dep=MIL_BASE.get(_area(c.rng.choice(r["deps"])), "LPMT"), dest=q["aerodrome"], keep=True,
+                          arrival=True, military=True)
+            else:
+                typ = "C550"
+                fl = c.level(r["south"], 310, 370, typ) or 330
+                a = c.add(r, typ, fl, ts - c.rng.uniform(60, 240), at_s=s_fix, ops=OPS_BIZ,
+                          dest=q["aerodrome"], keep=True, arrival=True)
             names.append(f"slow {a['callsign']} ({typ}, F{fl}) just ahead")
         c.notes.append(f"Sequence at {fix} ({q['aerodrome']}) around T+{int(ts // 60)}': " + ", ".join(names) + ".")
         done += 1
@@ -566,17 +695,21 @@ def _overtakes(c: _Ctx):
     if not long_routes or n <= 0:
         return 0
     for t in c.times(n, lo=0.0, hi=c.T - 900.0):
-        r = c.rng.choice(long_routes)
-        t1 = c.rng.choice(SHORT[:8])
-        t2 = c.rng.choice(LONG)
+        r = c.rng.choices(long_routes, [_route_weight(x) for x in long_routes])[0]
+        d1, e1, _ = c.flight(r, want_long=False)
+        d2, e2, t2 = c.flight(r, want_long=True)
+        # the slower one: a narrow-body, or on a long-haul only flow a slower wide-body
+        t1 = c.rng.choice(["B763", "A332", "A333"]) if _long_pair(d1, e1) else c.rng.choice(SHORT[:8])
+        if t2 not in LONG:                            # no long-haul flight on this route: a faster narrow-body
+            t2 = c.rng.choice(["A21N", "B739", "A321"])
         fl = c.level(r["south"], 330, 390, t1) or 350
         m1 = performance.get(t1).cruise_mach - 0.02
         m2 = max(performance.get(t2).cruise_mach, m1 + 0.06)
         v1, v2 = _mach_tas(m1, fl), _mach_tas(m2, fl)
         L = r["inside_nm"] * 0.6
         gap_s = max(30.0, L / v1 * 3600.0 - L / v2 * 3600.0 - 40.0)   # it catches up about 60 % of the way across
-        a = c.add(r, t1, fl, t, mach=m1, keep=True)
-        b = c.add(r, t2, fl, t + gap_s, mach=m2, keep=True)
+        a = c.add(r, t1, fl, t, mach=m1, keep=True, dep=d1, dest=e1)
+        b = c.add(r, t2, fl, t + gap_s, mach=m2, keep=True, dep=d2, dest=e2)
         c.notes.append(f"Overtake on {r['route'][0]}-{r['route'][-1]} at F{fl} around T+{int(t // 60)}': "
                        f"{b['callsign']} ({t2}, M{m2:.2f}) behind {a['callsign']} ({t1}, M{m1:.2f}).")
     return n
@@ -619,14 +752,15 @@ def _crossing_pairs(c: _Ctx):
 
 
 def _pick_pair(c: _Ctx, pairs):
-    """A crossing pair, each route about as likely as any other (a route with many crossings, like the long Atlantic
-    ones, would otherwise crowd out a route with one, like IBALU - SAMAR)."""
+    """A crossing pair, each route about as likely as its traffic makes it (a route with many crossings, like the long
+    Atlantic ones, would otherwise crowd out a route with one, like IBALU - SAMAR)."""
     key = lambda r: tuple(r["route"])
     n = {}
     for p in pairs:
         for r in p[:2]:
             n[key(r)] = n.get(key(r), 0) + 1
-    return c.rng.choices(pairs, [1.0 / n[key(p[0])] + 1.0 / n[key(p[1])] for p in pairs])[0]
+    return c.rng.choices(pairs, [(1.0 / n[key(p[0])] + 1.0 / n[key(p[1])]) * math.sqrt(_route_weight(p[0]) * _route_weight(p[1]))
+                                 for p in pairs])[0]
 
 
 def _crossings(c: _Ctx, pairs):
@@ -639,12 +773,12 @@ def _crossings(c: _Ctx, pairs):
     for t in c.times(n, lo=300.0, hi=c.T - 300.0):
         r1, r2, xp, s1, s2, x = _pick_pair(c, pairs)
         x = x or f"{r1['route'][0]}-{r1['route'][-1]} x {r2['route'][0]}-{r2['route'][-1]}"
-        t1, t2 = c.pick_type(), c.pick_type()
+        (d1, e1, t1), (d2, e2, t2) = c.flight(r1), c.flight(r2)
         both = [l for l in range(330, 400, 10) if level_parity_ok(l, r1["south"]) and level_parity_ok(l, r2["south"])
                 and l <= min(_max_fl(t1), _max_fl(t2))]
         fl = c.rng.choice(both) if both else (c.level(r1["south"], 330, 390, t1) or 350)
-        a = c.add(r1, t1, fl, t, at_s=s1, keep=True)
-        b = c.add(r2, t2, fl, t + c.rng.uniform(-35, 35), at_s=s2, keep=True)
+        a = c.add(r1, t1, fl, t, at_s=s1, keep=True, dep=d1, dest=e1)
+        b = c.add(r2, t2, fl, t + c.rng.uniform(-35, 35), at_s=s2, keep=True, dep=d2, dest=e2)
         c.notes.append(f"Crossing at {x} at F{fl} around T+{int(t // 60)}': {a['callsign']} and {b['callsign']}.")
         done += 1
     return done
@@ -658,7 +792,7 @@ def _level_crossings(c: _Ctx, pairs):
     for t in c.times(n, lo=600.0, hi=c.T - 300.0):
         for _try in range(12):                             # a level step with a level of the crossing traffic inside it
             r1, r2, xp, s1, s2, x = _pick_pair(c, pairs)
-            t1, t2 = c.pick_type(), c.pick_type()
+            (d1, e1, t1), (d2, e2, t2) = c.flight(r1), c.flight(r2)
             mine = [l for l in range(300, min(400, _max_fl(t1)) + 1, 10) if level_parity_ok(l, r1["south"])]
             if len(mine) < 3:
                 continue
@@ -671,8 +805,8 @@ def _level_crossings(c: _Ctx, pairs):
             continue
         x = x or f"{r1['route'][0]}-{r1['route'][-1]} x {r2['route'][0]}-{r2['route'][-1]}"
         up = c.rng.random() < 0.5
-        a = c.add(r1, t1, lo if up else hi, t, at_s=s1, keep=True)
-        b = c.add(r2, t2, c.rng.choice(mid), t + c.rng.uniform(-40, 40), at_s=s2, keep=True)
+        a = c.add(r1, t1, lo if up else hi, t, at_s=s1, keep=True, dep=d1, dest=e1)
+        b = c.add(r2, t2, c.rng.choice(mid), t + c.rng.uniform(-40, 40), at_s=s2, keep=True, dep=d2, dest=e2)
         ask = hi if up else lo
         c.requests.append({"time": int(max(30, t - c.rng.uniform(150, 330))), "callsign": a["callsign"],
                            "type": "altitude", "value": ask,
@@ -717,8 +851,7 @@ def _transatlantic(c: _Ctx):
         kw = {"rfl": rfl} if fl != rfl else {}
         if west_bound:
             a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dest=c.rng.choice(NAT),
-                      dep=c.rng.choice(["GMMN", "GMMX", "GMMN", "GMME"]) if moroccan else None,
-                      ops=["RAM"] if moroccan else None, **kw)
+                      dep="GMMN" if moroccan else None, ops=["RAM"] if moroccan else None, **kw)
         else:
             a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dep=c.rng.choice(NAT))
         c.notes.append(f"Transatlantic: {a['callsign']} {a['dep']}-{a['dest']} {r['route'][0]}-{r['route'][-1]} F{fl}"
@@ -789,54 +922,132 @@ def _airport_flows(c: _Ctx) -> Dict[str, int]:
         if routes and nd > 0:
             for t in c.times(nd, lo=0.0, hi=c.T - 300.0):
                 r = c.rng.choice(routes)
-                typ = c.pick_type()
+                _, dst, typ = c.flight(r)
                 ad = c.sid_ads[icao]
                 fl = c.level(r["south"], 200, min(340, hi_fl), typ) or 260
                 # long enough after the start to be shown from take-off: the SID and the climb to its level
                 climb_s = max(240.0 + dist(ad, _along(r["pts"], r["s_in"])) / 300.0 * 3600.0, 180.0 + fl * 100.0 / 1800.0 * 60.0)
                 t = max(t, climb_s + 120.0)
-                rfl = c.level(r["south"], max(fl + 20, lo_fl), hi_fl, typ)
+                rfl = c.cruise(r["south"], typ, icao, dst, lo=max(fl + 20, lo_fl), hi=hi_fl)
                 kw = {"rfl": rfl} if rfl and rfl > fl else {}
-                a = c.add(r, typ, fl, t, dep=icao, **kw)
+                a = c.add(r, typ, fl, t, dep=icao, dest=dst, **kw)
                 c.forced_dep.add(a["callsign"])
                 done["departures"] += 1
         arr, seq = _arr_routes(c, icao)
         if arr and na > 0:
             for t in c.times(na, lo=-300.0, hi=c.T - 240.0):
                 r = c.rng.choice(arr)
-                typ = c.pick_type()
-                fl = c.level(r["south"], max(250, lo_fl - 40), hi_fl, typ) or 330
-                c.add(r, typ, fl, t, dest=icao,
+                dep, _, typ = c.flight(r, dest=icao)
+                fl = c.cruise(r["south"], typ, dep, icao, lo=max(250, lo_fl - 40), hi=hi_fl) or 330
+                c.add(r, typ, fl, t, dest=icao, dep=dep,
                       arrival=any(q["fix"] == r["route"][-1] and q["aerodrome"] == icao for q in c.asp.default_sequencing))
                 done["arrivals"] += 1
     return done
 
 
+def _moroccan(r) -> bool:
+    """A flow with a Moroccan end (domestic, or to / from Morocco): where the slow, low military traffic flies."""
+    return any(str(a).startswith("GM") for a in (r.get("deps") or []) + (r.get("dests") or []))
+
+
+MIL_BASE = {"PT": "LPMT", "UK": "EGVN", "ES": "LETO", "FR": "LFOE", "CAN": "GCLP", "IT": "LIRP", "DE": "ETNW"}
+
+
+def _mil_ends(c: _Ctx, r):
+    """A Moroccan military transport's ends on a flow to or from Morocco: Rabat-Sale (the air base) and an air base on
+    the flow's other end."""
+    dep, dest = c.rng.choice(r["deps"]), c.rng.choice(r["dests"])
+    if dep.startswith("GM"):
+        return "GMME", MIL_BASE.get(_area(dest), dest)
+    return MIL_BASE.get(_area(dep), dep), "GMME"
+
+
+def _route_weight(r) -> float:
+    """How much of the traffic a route carries: a planned flow's weight (its share of the real traffic), else (the
+    published routes, no flows known) the length inside the sectors."""
+    return float(r.get("weight", 1.0)) if r.get("deps") else r["inside_nm"]
+
+
 def _background(c: _Ctx):
-    # the hour's traffic minus the planted aircraft (they are part of it), plus the flights already in at the start
-    n = max(0, int(round(c.P["aircraft_per_hour"] * c.T / 3600.0)) - len(c.aircraft)
-            + int(round(c.P["aircraft_per_hour"] * 600.0 / 3600.0)))
-    weights = [r["inside_nm"] for r in c.routes]
-    arr_routes = [r for r in c.routes if any(r["route"][-1] == q["fix"] for q in c.asp.default_sequencing)]
-    lo, hi = c.P["levels"]
+    # the exercise's traffic is aircraft_per_hour over its duration, all told: the planted aircraft are part of it, and
+    # so are the flights already in the sectors at the start
+    n = max(0, int(round(c.P["aircraft_per_hour"] * c.T / 3600.0)) - len(c.aircraft))
+    weights = [_route_weight(r) for r in c.routes]
+    mil = [r for r in c.routes if _moroccan(r) and not any(_area(x) in LONG_AREAS for x in r["deps"] + r["dests"])]
     for t in c.times(n, lo=-600.0, hi=c.T - 240.0):
         if c.rng.random() < c.P["slow_share"]:
-            r = c.rng.choice(arr_routes) if arr_routes and c.rng.random() < 0.7 else c.rng.choices(c.routes, weights)[0]
-            typ, mil = c.rng.choice(SLOW)
-            fl = c.level(r["south"], 170, 250, typ) or 210
-            c.add(r, typ, fl, t, ops=OPS_SLOW, **({"military": True} if mil else {}))
+            # slow traffic: a military transport low (C130, A400) on a route to or from Morocco, else a business jet
+            # at its own (high) cruise level - never a turboprop low over the ocean
+            if mil and c.rng.random() < 0.5:
+                r = c.rng.choices(mil, [_route_weight(x) for x in mil])[0]
+                typ = c.rng.choice(["C130", "A400"])
+                fl = c.level(r["south"], 170, 250, typ) or 210
+                dep, dest = _mil_ends(c, r)
+                c.add(r, typ, fl, t, ops=["RMAF"], military=True, dep=dep, dest=dest)
+                continue
+            r = c.rng.choices(c.routes, weights)[0]
+            dep, dest, _ = c.flight(r, want_long=False)
+            fl = c.level(r["south"], 330, 410, "C550") or c.level(r["south"], 290, 410, "C550")
+            if fl is None:
+                continue
+            c.add(r, "C550", fl, t, ops=OPS_BIZ, dep=dep, dest=dest)
             continue
         r = c.rng.choices(c.routes, weights)[0]
-        typ = c.pick_type()
-        fl = c.level(r["south"], lo, hi, typ)
+        dep, dest, typ = c.flight(r)
+        fl = c.cruise(r["south"], typ, dep, dest)
         if fl is None:
             continue
         seq = next((q for q in c.asp.default_sequencing if q["fix"] == r["route"][-1]), None)
         if r.get("dests"):                         # a planned flow: its destination; an arrival when it lands there
-            dest = c.rng.choice(r["dests"])
-            c.add(r, typ, fl, t, dest=dest, arrival=bool(seq and seq["aerodrome"] == dest))
+            c.add(r, typ, fl, t, dep=dep, dest=dest, arrival=bool(seq and seq["aerodrome"] == dest))
             continue
         c.add(r, typ, fl, t, **({"dest": seq["aerodrome"], "arrival": True} if seq else {"arrival": False}))
+
+
+SPLIT_PREF = {"VASTO": 4.0}          # entry points whose waves are planted more often (VASTO: AKUDA, TIGGI, BAROK)
+
+
+def _splits(c: _Ctx):
+    """Waves at an entry point several routes leave from: 2-4 flights entering there within a few minutes, each
+    leaving by another route (VASTO: UN858 to AKUDA, NIDEB to TIGGI, direct BAROK), some at the same level - the
+    controller sorts them out as they fan out."""
+    n = int(round(c.P.get("splits_per_hour", 0) * c.T / 3600.0))
+    by = {}
+    for r in c.routes:
+        if r["s_in"] < 15.0 and r.get("deps"):          # starting at (or just before) our boundary
+            by.setdefault(r["route"][0], []).append(r)
+    fans = {k: v for k, v in by.items() if len({r["route"][-1] for r in v}) >= 2}
+    if not fans or n <= 0:
+        return 0
+    keys = list(fans)
+    done = 0
+    for t in c.times(n, lo=120.0, hi=c.T - 900.0):
+        e = c.rng.choices(keys, [SPLIT_PREF.get(k, 1.0) * len({r["route"][-1] for r in fans[k]}) for k in keys])[0]
+        exits = {}
+        for r in fans[e]:
+            exits.setdefault(r["route"][-1], []).append(r)
+        k = min(len(exits) + (1 if len(exits) >= 3 else 0), c.rng.randint(2, 4))
+        order = c.rng.sample(list(exits), len(exits))
+        chosen = [order[i % len(order)] for i in range(k)]
+        names, tt, base = [], t, None
+        for i, x in enumerate(chosen):
+            r = c.rng.choices(exits[x], [_route_weight(q) for q in exits[x]])[0]
+            dep, dest, typ = c.flight(r)
+            if base is None:
+                base = c.cruise(r["south"], typ, dep, dest) or 360
+                fl = base
+            else:
+                same = c.rng.random() < 0.5
+                fl = base if same else base + c.rng.choice([-20, 20])
+                fl = fl if level_parity_ok(fl, r["south"]) and fl <= _max_fl(typ) else base
+                # at the same level they come in trail (far enough apart to enter separated); at another level
+                # close together
+                tt += c.rng.uniform(70.0, 150.0) if fl == base else c.rng.uniform(10.0, 60.0)
+            a = c.add(r, typ, fl, tt, at_s=r["s_in"] + 3.0, keep=True, dep=dep, dest=dest)
+            names.append(f"{a['callsign']} to {x} F{fl}")
+        c.notes.append(f"Wave at {e} around T+{int(t // 60)}': " + ", ".join(names) + ".")
+        done += 1
+    return done
 
 
 def _deconflict(scn: dict, keep: set, rounds: int = 7, caps: Optional[Dict[str, int]] = None) -> int:
@@ -1239,6 +1450,7 @@ def generate(params: Optional[dict] = None) -> dict:
     planted["crossings"] = _crossings(c, pairs)
     planted["level_crossings"] = _level_crossings(c, pairs)
     planted["transatlantic"] = _transatlantic(c)
+    planted["splits"] = _splits(c)
     planted.update(_airport_flows(c))
     _background(c)
     scn = {"name": f"gen_{'_'.join(s.lower() for s in P['control'])}_{P['seed']}", "airspace": "agadir",
@@ -1247,7 +1459,7 @@ def generate(params: Optional[dict] = None) -> dict:
            "description": (f"Generated (seed {P['seed']}): {P['aircraft_per_hour']} flights/h, density {P['density']}, "
                            f"{P['sequences_per_hour']} sequences/h of {P['seq_size'][0]}-{P['seq_size'][1]}, "
                            f"{P['overtakes_per_hour']} overtakes/h, {P['crossings_per_hour']} crossings/h, "
-                           f"{P['level_crossings_per_hour']} level requests through traffic/h, slow traffic "
+                           f"{P['level_crossings_per_hour']} level requests through traffic/h, {P['splits_per_hour']} entry waves/h, slow traffic "
                            f"{int(P['slow_share'] * 100)} %, long-haul {int(P['heavy_share'] * 100)} %."),
            "weather": {"seed": P["seed"] % 1000, "wind": {"climatology": {"month": c.rng.randint(1, 12)}, "noise_kt": 5}},
            **({"separation": {"horizontal_nm": float(P["separation_nm"])}} if P.get("separation_nm") else {}),
