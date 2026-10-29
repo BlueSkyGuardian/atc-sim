@@ -171,6 +171,7 @@
           <label>level changes / h</label><span><input id="g-lvl" type="number" value="2" min="0" max="12" style="width:64px"> <span class="c-dim">pilot requests through crossing traffic</span></span>
           <label>transatlantic / h</label><span><input id="g-tat" type="number" value="2" min="0" max="10" style="width:64px"> <span class="c-dim">to / from North America by IBALU and SUBAL / BEXAL (westbound: Moroccan departures still climbing)</span></span>
           <label>entry waves / h</label><span><input id="g-split" type="number" value="1" min="0" max="10" style="width:64px"> <span class="c-dim">2-4 flights entering at one point within minutes, leaving by different routes (VASTO: AKUDA, TIGGI, BAROK)</span></span>
+          <label>nearby traffic / h</label><span><input id="g-near" type="number" value="12" min="0" max="60" style="width:64px"> <span class="c-dim">flights passing close on the neighbours' routes (other sectors, Casablanca, Canarias): on the picture, never yours, not counted above</span></span>
           <label>slow traffic</label><span><input id="g-slow" type="number" value="12" min="0" max="60" style="width:64px"> % <span class="c-dim">C130 / A400 at FL170-250 on the routes to or from Morocco, business jets (C550) high elsewhere</span></span>
           <label>long-haul</label><span><input id="g-heavy" type="number" value="30" min="0" max="100" style="width:64px"> % <span class="c-dim">of the flights on flows that have both (South / North America, the Gulf); the type follows the flight</span></span>
           <label>separation</label><span><input id="g-sep" type="number" min="3" max="20" step="0.5" placeholder="7" style="width:64px"> NM <span class="c-dim">(empty: the airspace minimum) every flight enters the sectors at least this far from the traffic at its level</span></span>
@@ -369,7 +370,7 @@ $('#genBtn').onclick = async () => {
   const v = id => $(id).value === '' ? null : +$(id).value;
   const params = { control: ctl, aircraft_per_hour: v('#g-aph'), density: v('#g-dens'), duration_min: v('#g-dur'),
     sequences_per_hour: v('#g-seq'), seq_size: [v('#g-smin'), Math.max(v('#g-smin'), v('#g-smax'))], overtakes_per_hour: v('#g-ovt'),
-    crossings_per_hour: v('#g-cross'), level_crossings_per_hour: v('#g-lvl'), transatlantic_per_hour: v('#g-tat'), splits_per_hour: v('#g-split'),
+    crossings_per_hour: v('#g-cross'), level_crossings_per_hour: v('#g-lvl'), transatlantic_per_hour: v('#g-tat'), splits_per_hour: v('#g-split'), nearby_per_hour: v('#g-near'),
     slow_share: v('#g-slow') / 100, separation_nm: v('#g-sep'), airports: genAirports(), runway_changes: $('#g-rwy').value, runway_change_share: (v('#g-rwys') ?? 30) / 100, heavy_share: v('#g-heavy') / 100, levels: [v('#g-lo'), v('#g-hi')], seed: v('#g-seed') };
   $('#genBtn').disabled = true; $('#genMsg').textContent = 'generating… (planting the situations, then clearing the background of unplanned conflicts: 10-30 s)';
   try {

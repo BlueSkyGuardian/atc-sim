@@ -13,6 +13,9 @@ Parameters (all optional, see DEFAULTS):
   level_crossings_per_hour a pilot asking for a level through the level of crossing traffic
   splits_per_hour          waves of 2-4 flights entering at one point within a few minutes and leaving by different
                            routes (VASTO: AKUDA, TIGGI, BAROK), some at the same level
+  nearby_per_hour          traffic flying past the controlled sectors on the neighbours' routes (the CTA's other
+                           sectors, Casablanca, Canarias, Lisbon): on the picture, never ours, not counted in
+                           aircraft_per_hour
   slow_share               share of slow traffic: military transports (C130, A400) at FL170-250 on the routes to or
                            from Morocco, business jets (C550) at their own high levels elsewhere
   heavy_share              share of long-haul flights (on the flows that have both kinds; the type follows the flight)
@@ -51,20 +54,20 @@ from .geometry import bearing, dist, point_in_polygon, segment_intersection
 
 DEFAULTS = dict(control=["WS"], duration_min=60, seed=None, start_utc="10:00", aircraft_per_hour=30, density=2,
                 sequences_per_hour=2, seq_size=[3, 4], overtakes_per_hour=1, crossings_per_hour=2,
-                level_crossings_per_hour=2, splits_per_hour=1, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
+                level_crossings_per_hour=2, splits_per_hour=1, nearby_per_hour=12, slow_share=0.12, heavy_share=0.3, transatlantic_per_hour=2,
                 levels=[290, 400], weather="calm", airports=None, separation_nm=None,
                 runway_changes="none", runway_change_share=0.3)
 
 SHORT = ["B738", "A320", "A321", "B38M", "A20N", "A21N", "A319", "B739", "E190", "E195", "CRJ9", "B752"]
 LONG = ["A332", "A333", "B77W", "B789", "B788", "A359", "B772", "A343", "B744", "A388", "B763"]
+PAIR_SHARE = 0.75        # flights drawn from the real city pairs (the rest from the flows' aerodromes)
 LONG_FLOWN = ["A332", "A333", "B77W", "B789", "B789", "B788", "B788", "A359", "B772", "B763"]   # on these flows
 SLOW = [("C550", False), ("C550", False), ("C130", True), ("A400", True)]
 OPS_SHORT = ["RAM", "RYR", "EZY", "EXS", "TOM", "IBE", "VLG", "TVF", "EWG", "CFG", "BAW", "TAP", "KLM", "DLH", "AFR",
              "SWR", "BEL", "NAX", "AEA"]
 OPS_LONG = ["RAM", "AZU", "TAM", "GLO", "AVA", "AEA", "IBE", "TAP", "KLM", "AFR", "BAW", "DLH", "LAN", "ARG", "DAL",
             "UAE", "QTR"]
-OPS_LONG_FLOWN = ["A332", "A333", "B77W", "B789", "B789", "B788", "B788", "A359", "B772", "B763"]   # on these flows
-SLOW = ["CNA", "RMAF", "FAF", "EXE", "NJE"]
+OPS_SLOW = ["CNA", "RMAF", "FAF", "EXE", "NJE"]
 OPS_MIL = ["RMAF", "RMAF", "FAF", "AME"]
 OPS_BIZ = ["NJE", "EXE", "VJT", "CNA", "GAC"]
 
@@ -189,6 +192,25 @@ def _last_inside(pts, polys) -> Optional[float]:
     return None if s is None else _poly_len(pts) - s
 
 
+NEAR_NM = 80.0           # nearby traffic: flows passing this close to the controlled sectors (not through them)
+
+
+def _closest_approach(pts, polys) -> Optional[Tuple[float, float]]:
+    """(distance NM, distance along the polyline) where it passes closest to the polygons' edges."""
+    best = None
+    s0 = 0.0
+    for p, q in zip(pts, pts[1:]):
+        L = dist(p, q)
+        n = max(1, int(L / 5))
+        for k in range(n + 1):
+            m = (p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n)
+            d = min(_seg_dist(m, a, b) for poly in polys for a, b in zip(poly, poly[1:] + poly[:1]))
+            if best is None or d < best[0]:
+                best = (d, s0 + L * k / n)
+        s0 += L
+    return best
+
+
 def _poly_len(pts) -> float:
     return sum(dist(p, q) for p, q in zip(pts, pts[1:]))
 
@@ -226,7 +248,34 @@ class _Ctx:
         self.flow_cs: set = set()
         self.level_cap: Dict[str, int] = {}     # departures: the highest level they reach level before our boundary             # flights of a planned flow: they keep their origin          # departures asked per aerodrome: re-timed, never refiled
         self.T = P["duration_min"] * 60.0
+        self._load_pairs()
         self._routes()
+
+    # ---- the real city pairs and their airlines (data/flows/agadir_pairs.json, tools/import_flight_pairs.py)
+    def _load_pairs(self):
+        import json as _json
+        import os as _os
+        path = _os.path.join(_os.path.dirname(__file__), "data", "flows", "agadir_pairs.json")
+        self.pairs, self.pair_ops, self.no_service = [], {}, set()
+        if not _os.path.exists(path):
+            return
+        doc = _json.loads(open(path, encoding="utf-8").read())
+        self.no_service = {tuple(x) for x in doc.get("no_service", [])}
+        for p in doc.get("pairs", []):
+            al = [a for a in p.get("airlines", []) if a.get("icao")]
+            if al:
+                self.pairs.append((p["dep"], p["dest"], sum(float(a.get("weight", 1.0)) for a in al)))
+                self.pair_ops[(p["dep"], p["dest"])] = al
+
+    def airline(self, dep, dest) -> Optional[str]:
+        """The code a real airline of this city pair flies it under (its group codes as shared: Ryanair RYR / MAY /
+        RUK, easyJet EZY / EJU...), or None when the pair is not in the table."""
+        al = self.pair_ops.get((dep, dest))
+        if not al:
+            return None
+        a = self.rng.choices(al, [float(x.get("weight", 1.0)) for x in al])[0]
+        codes = a.get("codes") or [[a["icao"], 1.0]]
+        return self.rng.choices([c for c, _ in codes], [w for _, w in codes])[0]
 
     # ---- the routes through the controlled sectors: the planned traffic flows when the airspace has them
     def _flows(self):
@@ -286,11 +335,18 @@ class _Ctx:
         self.flow_errors = []
         flows = self._flows()
         out, seen = [], set()
+        self.near_routes = []
         src = self._split_flows(flows) if flows else []
         for names, fid, fr, to, wt in src:
             pts = [self.wp[n] for n in names]
             Lin = _poly_len_inside(pts, self.polys)
             if Lin < 15.0:
+                if Lin == 0.0:                         # not through our sectors: nearby traffic when it passes close
+                    near = _closest_approach(pts, self.polys)
+                    if near is not None and near[0] <= NEAR_NM:
+                        self.near_routes.append({"route": names, "pts": pts, "flow": fid, "deps": fr, "dests": to,
+                                                 "weight": wt, "near_nm": near[0], "near_s": near[1],
+                                                 "south": 90.0 <= bearing(pts[0], pts[-1]) < 270.0})
                 continue
             s_in = _first_inside(pts, self.polys) or 0.0
             s_out = _last_inside(pts, self.polys) or _poly_len(pts)
@@ -560,7 +616,8 @@ class _Ctx:
                 names = names[:names.index(fx) + 1]
         dest = dest or self.dest_for(r)
         if ops is None:
-            ops = ops_for(dep, dest, typ in LONG, self.rng)
+            code = self.airline(dep, dest)
+            ops = [code] if code else ops_for(dep, dest, typ in LONG, self.rng)
         a = {"callsign": self.callsign(ops), "type": typ,
              "route": names, "fl": int(fl),
              "dep": dep,
@@ -601,7 +658,16 @@ class _Ctx:
             typ = self.pick_type() if want_long is None else self.rng.choice(LONG if want_long else SHORT)
             return None, dest, typ
         want = (self.rng.random() < self.P["heavy_share"]) if want_long is None else want_long
-        pairs = [(self.rng.choice(r["deps"]), dest or self.rng.choice(r["dests"])) for _ in range(12)]
+        # mostly a city pair really flown that this flow serves (data/flows/agadir_pairs.json), else ends drawn
+        # from the flow's own (weighted) aerodromes
+        real = [x for x in self.pairs if x[0] in r["deps"] and x[1] in r["dests"] and (dest is None or x[1] == dest)]
+        if real and self.rng.random() < PAIR_SHARE:
+            pref = [x for x in real if _long_pair(x[0], x[1]) == want] or real
+            dep, dst, _ = self.rng.choices(pref, [x[2] for x in pref])[0]
+            pairs = [(dep, dst)]
+        else:
+            pairs = [(self.rng.choice(r["deps"]), dest or self.rng.choice(r["dests"])) for _ in range(12)]
+            pairs = [p for p in pairs if p not in self.no_service and p[0] != p[1]] or pairs
         fits = lambda p: not _long_pair(*p) or all(x in HUBS or _area(x) in LONG_AREAS for x in p)
         pairs = [p for p in pairs if fits(p)] or pairs
         dep, dst = next((p for p in pairs if _long_pair(*p) == want), pairs[0])
@@ -851,7 +917,7 @@ def _transatlantic(c: _Ctx):
         kw = {"rfl": rfl} if fl != rfl else {}
         if west_bound:
             a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dest=c.rng.choice(NAT),
-                      dep="GMMN" if moroccan else None, ops=["RAM"] if moroccan else None, **kw)
+                      dep="GMMN" if moroccan else None, **kw)
         else:
             a = c.add(r, typ, fl, t, at_s=r["s_in"] + 5.0, keep=True, dep=c.rng.choice(NAT))
         c.notes.append(f"Transatlantic: {a['callsign']} {a['dep']}-{a['dest']} {r['route'][0]}-{r['route'][-1]} F{fl}"
@@ -971,7 +1037,7 @@ def _route_weight(r) -> float:
 def _background(c: _Ctx):
     # the exercise's traffic is aircraft_per_hour over its duration, all told: the planted aircraft are part of it, and
     # so are the flights already in the sectors at the start
-    n = max(0, int(round(c.P["aircraft_per_hour"] * c.T / 3600.0)) - len(c.aircraft))
+    n = max(0, int(round(c.P["aircraft_per_hour"] * c.T / 3600.0)) - sum(1 for a in c.aircraft if not a.get("nearby")))
     weights = [_route_weight(r) for r in c.routes]
     mil = [r for r in c.routes if _moroccan(r) and not any(_area(x) in LONG_AREAS for x in r["deps"] + r["dests"])]
     for t in c.times(n, lo=-600.0, hi=c.T - 240.0):
@@ -985,8 +1051,13 @@ def _background(c: _Ctx):
                 dep, dest = _mil_ends(c, r)
                 c.add(r, typ, fl, t, ops=["RMAF"], military=True, dep=dep, dest=dest)
                 continue
-            r = c.rng.choices(c.routes, weights)[0]
-            dep, dest, _ = c.flight(r, want_long=False)
+            for _try in range(8):                  # (a light business jet: not across an ocean)
+                r = c.rng.choices(c.routes, weights)[0]
+                dep, dest, _ = c.flight(r, want_long=False)
+                if not _long_pair(dep or "", dest or ""):
+                    break
+            else:
+                continue
             fl = c.level(r["south"], 330, 410, "C550") or c.level(r["south"], 290, 410, "C550")
             if fl is None:
                 continue
@@ -1002,6 +1073,42 @@ def _background(c: _Ctx):
             c.add(r, typ, fl, t, dep=dep, dest=dest, arrival=bool(seq and seq["aerodrome"] == dest))
             continue
         c.add(r, typ, fl, t, **({"dest": seq["aerodrome"], "arrival": True} if seq else {"arrival": False}))
+
+
+def _nearby(c: _Ctx):
+    """Traffic flying past the controlled sectors on the neighbours' routes (the other sectors of the CTA, Casablanca,
+    Canarias, Lisbon): on the picture for realism, never ours. Not part of aircraft_per_hour. A flight still close to
+    its departure is climbing, one close to its destination descending (about 3 NM per 1000 ft)."""
+    n = int(round(float(c.P.get("nearby_per_hour") or 0) * c.T / 3600.0))
+    if not c.near_routes or n <= 0:
+        return 0
+    w = [_route_weight(r) for r in c.near_routes]
+    done = 0
+    for t in c.times(n, lo=-300.0, hi=c.T - 300.0):
+        r = c.rng.choices(c.near_routes, w)[0]
+        dep, dest, typ = c.flight(r)
+        if not dep or not dest:
+            continue
+        cruise = c.cruise(r["south"], typ, dep, dest) or 350
+        L, s_ = _poly_len(r["pts"]), r["near_s"]
+        t = max(t, -(L - s_) / 480.0 * 3600.0 + 240.0)     # already flying at the start: not past its route's end
+        d_dep = s_ + (dist(c.ap_xy[dep], r["pts"][0]) if dep in c.ap_xy else 300.0)
+        d_dest = L - s_ + (dist(r["pts"][-1], c.ap_xy[dest]) if dest in c.ap_xy else 300.0)
+        fl = int(min(cruise, min(d_dep, d_dest) * 3.3) // 10 * 10)
+        while fl > 60 and not level_parity_ok(fl, r["south"]):
+            fl -= 10
+        fl = max(60, fl)
+        kw = {}
+        if fl < cruise:                            # still climbing to its cruise level, or descending to land
+            kw["cfl"] = cruise if d_dep <= d_dest else max(60, fl // 20 * 10)
+        code = c.airline(dep, dest)
+        p = _along(r["pts"], s_)
+        a = {"callsign": c.callsign([code] if code else ops_for(dep, dest, typ in LONG, c.rng)), "type": typ,
+             "route": list(r["route"]), "fl": fl, "dep": dep, "dest": dest, "nearby": True, "auto_route": False,
+             "reach": {"point": [round(p[0], 3), round(p[1], 3)], "time": int(round(t))}, **kw}
+        c.aircraft.append(a)
+        done += 1
+    return done
 
 
 SPLIT_PREF = {"VASTO": 4.0}          # entry points whose waves are planted more often (VASTO: AKUDA, TIGGI, BAROK)
@@ -1238,7 +1345,7 @@ def _whole_routes(scn: dict, c: _Ctx) -> int:
     n_ext = 0
     for a in scn["aircraft"]:
         names = list(a["route"])
-        if len(names) < 2:
+        if len(names) < 2 or a.get("nearby"):
             continue
         inside = {n for n in names if _inside_any(c, n)}
         avoid = {n for n in c.wp if n not in names and _inside_any(c, n)}       # our sectors: entered once
@@ -1349,7 +1456,7 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
     wps = w.env.waypoints
     for a in scn["aircraft"]:
         ac = w.aircraft.get(a["callsign"].upper())
-        if ac is None:
+        if ac is None or a.get("nearby"):
             continue
         if a["dep"] in w.aerodromes and getattr(w.aerodromes[a["dep"]], "runways", None):
             if getattr(ac, "sid", None):
@@ -1397,6 +1504,54 @@ def _check_built(scn: dict, c: _Ctx) -> dict:
                     a["fl"] += d
                     out["levels_fixed"] += 1
                     break
+    return out
+
+
+def _descent_requests(scn: dict, c: _Ctx) -> List[str]:
+    """A flight whose destination is close beyond the exit (Faro by AMSEL) reaches its top of descent (about 3 NM per
+    1000 ft, plus a little) while still ours: its pilot asks for descent there, to about the level of a 3:1 path at the
+    exit. Not for the arrivals ending at a sequencing fix (those are brought down by the letter of agreement)."""
+    from .designer import compile as dcompile
+    r = dcompile(scn)
+    if not r.get("ok"):
+        return []
+    by = {a["callsign"]: a for a in scn["aircraft"]}
+    asked = {q["callsign"] for q in scn["requests"]}
+    out = []
+    for cs, info in r["aircraft"].items():
+        a, plan = by.get(cs), r["plans"].get(cs) or []
+        if a is None or a.get("nearby") or info.get("arrival") or cs in asked or len(plan) < 2:
+            continue
+        dest = a.get("dest")
+        xy = c.ap_xy.get(dest)
+        if xy is None or str(dest).startswith(("GC", "GM")):
+            continue                                  # (the Canaries and Morocco: the LoA levels at the fixes)
+        fl = int(a.get("fl") or 0)
+        tod = fl * 0.33 + 10.0
+        d_exit = dist((plan[-1][1], plan[-1][2]), xy)
+        if d_exit >= tod or d_exit < 15.0:
+            continue
+        t_ask = None
+        for (t0, x0, y0), (t1, x1, y1) in zip(plan, plan[1:]):
+            for k in range(11):
+                x, y, t = x0 + (x1 - x0) * k / 10, y0 + (y1 - y0) * k / 10, t0 + (t1 - t0) * k / 10
+                if dist((x, y), xy) <= tod and any(point_in_polygon((x, y), p) for p in c.polys):
+                    t_ask = t
+                    break
+            if t_ask is not None:
+                break
+        if t_ask is None or not (60.0 <= t_ask - 30.0 <= scn["duration_s"] - 60.0):
+            continue
+        south = info.get("southbound", True)
+        want = int(min(fl - 40, d_exit * 3.3) // 10 * 10)
+        while want > 100 and not level_parity_ok(want, south):
+            want -= 10
+        if want < 100 or want >= fl:
+            continue
+        scn["requests"].append({"time": int(t_ask - 30.0), "callsign": cs, "type": "altitude", "value": want,
+                                "reason": f"requesting descent, inbound {dest}"})
+        out.append(f"{cs} to {dest} asks for descent to F{want} around T+{int(t_ask // 60)}'")
+    scn["requests"].sort(key=lambda q: q["time"])
     return out
 
 
@@ -1453,13 +1608,14 @@ def generate(params: Optional[dict] = None) -> dict:
     planted["splits"] = _splits(c)
     planted.update(_airport_flows(c))
     _background(c)
+    planted["nearby"] = _nearby(c)
     scn = {"name": f"gen_{'_'.join(s.lower() for s in P['control'])}_{P['seed']}", "airspace": "agadir",
            "control": P["control"], "duration_s": int(c.T), "pilot_delay_s": 4, "start_utc": P["start_utc"],
            "title": f"Generated - {'+'.join(P['control'])}, {P['aircraft_per_hour']} flights/h",
            "description": (f"Generated (seed {P['seed']}): {P['aircraft_per_hour']} flights/h, density {P['density']}, "
                            f"{P['sequences_per_hour']} sequences/h of {P['seq_size'][0]}-{P['seq_size'][1]}, "
                            f"{P['overtakes_per_hour']} overtakes/h, {P['crossings_per_hour']} crossings/h, "
-                           f"{P['level_crossings_per_hour']} level requests through traffic/h, {P['splits_per_hour']} entry waves/h, slow traffic "
+                           f"{P['level_crossings_per_hour']} level requests through traffic/h, {P['splits_per_hour']} entry waves/h, {P['nearby_per_hour']} nearby flights/h (not ours), slow traffic "
                            f"{int(P['slow_share'] * 100)} %, long-haul {int(P['heavy_share'] * 100)} %."),
            "weather": {"seed": P["seed"] % 1000, "wind": {"climatology": {"month": c.rng.randint(1, 12)}, "noise_kt": 5}},
            **({"separation": {"horizontal_nm": float(P["separation_nm"])}} if P.get("separation_nm") else {}),
@@ -1479,6 +1635,10 @@ def generate(params: Optional[dict] = None) -> dict:
         checks = _check_built(scn, c)
     entry_left = _entry_spacing(scn, c.keep)
     left = _deconflict(scn, c.keep, caps=c.level_cap)
+    desc = _descent_requests(scn, c)
+    if desc:
+        scn["design_notes"] += " Descent requests before the exit: " + ", ".join(desc) + "."
+    scn["generator"]["descent_requests"] = len(desc)
     scn["generator"]["planted"] = planted
     scn["generator"]["runway_changes"] = scn.get("runway_changes", [])
     try:                                            # as the exercise will make them (aerodromes under the sectors)

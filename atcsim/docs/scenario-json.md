@@ -157,6 +157,8 @@ Give **exactly one** of these. The simulator flies the route backwards in the 3D
 | `"reach": {"point": [12.3, 140.2], "time": 700}` | It is **at that position** at T+700. The position must be within 1 NM of the route | Planting a conflict where two routes cross between fixes |
 | `"start": {"point": [x, y], "time": 0}` | It **starts at that position** at that time, then flies its route (which then needs only one point). A departure (`dep`) from an aerodrome with published SIDs (GMMN, GMME, GMMX, GMAD) instead **takes off from the runway in use** earlier and flies the **SID** that leads to its route (the one whose last point is on it, else the nearest), with approach, climbing to its `cfl`; the start point becomes its **release point** (brought onto the SID), where it calls you at about the start time. `"sid": "LAKAM2D"` picks the SID, `"sid": false` (or the scenario's `"sid_departures": false`) keeps the old behaviour | A departure appearing inside the sector, an aircraft already somewhere at T+0 |
 
+**Nearby traffic**: `"nearby": true` (with `"auto_route": false`) makes an aircraft a neighbouring unit's traffic that flies past: its route must stay out of the controlled sectors; it appears at its first point (`reach` / `entry_time` as above), is shown like traffic gone to the next sector, never calls, cannot be given instructions and is not counted in the debrief's traffic. `"cfl"` makes it climb or descend from its `fl` (a departure still climbing, an arrival descending).
+
 Times may be **negative**: `"entry_time": -600` means the aircraft entered 10 minutes before T+0. It is already
 further along its route when the exercise starts, so the sector is not empty at T+0. An aircraft that would have
 already left the sector at T+0 is an error.

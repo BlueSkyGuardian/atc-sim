@@ -1,0 +1,4571 @@
+{
+ "_note": "Real city pairs and their airlines around the Agadir CTA, imported by tools/import_flight_pairs.py from tools/traffic/Agadir_CTA_Flight_Plan_Routes.xlsx. The generator draws a flight's departure, destination and airline from these pairs when the flow it flies serves them (the flows keep the RAD routes; the workbook's own routes are not flown). gmac_sectors / gmac_dist_nm: measured on the workbook route against the simulator's sectors (nearby when within 120 NM). codes: the airline's group codes and their shares. no_service: pairs not flown (never generated).",
+ "near_nm": 120.0,
+ "no_service": [
+  [
+   "EGLL",
+   "GCLP"
+  ],
+  [
+   "GABS",
+   "LFPG"
+  ],
+  [
+   "GCLP",
+   "EGLL"
+  ],
+  [
+   "GCTS",
+   "LEBL"
+  ],
+  [
+   "LEBL",
+   "GCTS"
+  ],
+  [
+   "LFPG",
+   "GABS"
+  ]
+ ],
+ "pairs": [
+  {
+   "dep": "CYUL",
+   "dest": "GMMN",
+   "category": "Americas -> Morocco",
+   "gmac_sectors": [
+    "ON",
+    "WN"
+   ],
+   "gmac_nm": 197,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "N"
+   ],
+   "workbook_status": "Near boundary (~22 nm) - verify",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "ACA",
+     "name": "Air Canada",
+     "callsign": "AIR CANADA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ACA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "DIAP",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "VRE",
+     "name": "Air Côte d'Ivoire",
+     "callsign": "COTE D'IVOIRE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VRE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "DNMM",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EBBR",
+   "dest": "GBYD",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 51,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "JAF",
+     "name": "TUI fly Belgium",
+     "callsign": "BEAUTY",
+     "service": "Seasonal",
+     "codes": [
+      [
+       "JAF",
+       1.0
+      ]
+     ],
+     "weight": 0.6
+    }
+   ]
+  },
+  {
+   "dep": "EBBR",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TRA",
+     "name": "Transavia",
+     "callsign": "TRANSAVIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TRA",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Transavia France uses TVF / FRANCE SOLEIL"
+    },
+    {
+     "icao": "JAF",
+     "name": "TUI fly Belgium",
+     "callsign": "BEAUTY",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "JAF",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EBBR",
+   "dest": "GFLL",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 51,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EBBR",
+   "dest": "GLRB",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 110,
+   "casablanca_sectors": [
+    "C",
+    "E"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EDDF",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CFG",
+     "name": "Condor",
+     "callsign": "CONDOR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CFG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "OCN",
+     "name": "Discover Airlines",
+     "callsign": "OCEAN",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "OCN",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TUI",
+     "name": "TUI fly Deutschland",
+     "callsign": "TUI JET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TUI",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EDDF",
+   "dest": "SBGR",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "DLH",
+     "name": "Lufthansa",
+     "callsign": "LUFTHANSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "DLH",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EDDM",
+   "dest": "GCFV",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CFG",
+     "name": "Condor",
+     "callsign": "CONDOR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CFG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "OCN",
+     "name": "Discover Airlines",
+     "callsign": "OCEAN",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "OCN",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TUI",
+     "name": "TUI fly Deutschland",
+     "callsign": "TUI JET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TUI",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EGKK",
+   "dest": "GBYD",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [
+    "WN"
+   ],
+   "gmac_nm": 145,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "SXE",
+     "name": "Air Sierra Leone",
+     "callsign": "SALONE AIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "SXE",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "ICAO code and callsign as given on Wikipedia - verify"
+    },
+    {
+     "icao": "EXS",
+     "name": "Jet2.com",
+     "callsign": "CHANNEX",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "EXS",
+       1.0
+      ]
+     ],
+     "weight": 0.6
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "callsign": "TOMJET",
+     "service": "Seasonal",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 0.6
+    }
+   ]
+  },
+  {
+   "dep": "EGKK",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BAW",
+     "name": "British Airways",
+     "callsign": "SPEEDBIRD",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BAW",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Gatwick leisure flights are flown by BA Euroflyer, still using the BAW / SPEEDBIRD callsign"
+    },
+    {
+     "icao": "EZY",
+     "name": "easyJet",
+     "callsign": "EASY",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EZY",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet UK"
+    },
+    {
+     "icao": "EXS",
+     "name": "Jet2.com",
+     "callsign": "CHANNEX",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EXS",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "callsign": "TOMJET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EGKK",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "replaces": "EGLL-GCLP (no scheduled service)",
+   "airlines": [
+    {
+     "icao": "BAW",
+     "name": "British Airways",
+     "codes": [
+      [
+       "BAW",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "EZY",
+     "name": "easyJet",
+     "codes": [
+      [
+       "EZY",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "EGSS",
+   "dest": "GCRR",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 422,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 36000,
+   "airlines": [
+    {
+     "icao": "EXS",
+     "name": "Jet2.com",
+     "callsign": "CHANNEX",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EXS",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.7
+      ],
+      [
+       "RUK",
+       0.2
+      ],
+      [
+       "MAY",
+       0.1
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "EHAM",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Seasonal",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 0.6,
+     "note": "easyJet Europe"
+    },
+    {
+     "icao": "TFL",
+     "name": "TUI fly Netherlands",
+     "callsign": "ORANGE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TFL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TRA",
+     "name": "Transavia",
+     "callsign": "TRANSAVIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TRA",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Transavia France uses TVF / FRANCE SOLEIL"
+    }
+   ]
+  },
+  {
+   "dep": "EHAM",
+   "dest": "GVBA",
+   "category": "Europe <-> Cape Verde",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TFL",
+     "name": "TUI fly Netherlands",
+     "callsign": "ORANGE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TFL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "FOOL",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GABS",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GBYD",
+   "dest": "EBBR",
+   "category": "West Africa -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 9,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "JAF",
+     "name": "TUI fly Belgium",
+     "callsign": "BEAUTY",
+     "service": "Seasonal",
+     "codes": [
+      [
+       "JAF",
+       1.0
+      ]
+     ],
+     "weight": 0.6
+    }
+   ]
+  },
+  {
+   "dep": "GCFV",
+   "dest": "EDDM",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 6,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CFG",
+     "name": "Condor",
+     "callsign": "CONDOR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CFG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "OCN",
+     "name": "Discover Airlines",
+     "callsign": "OCEAN",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "OCN",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TUI",
+     "name": "TUI fly Deutschland",
+     "callsign": "TUI JET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TUI",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "EBBR",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "BEL",
+     "name": "Brussels Airlines",
+     "callsign": "BEE-LINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BEL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "JAF",
+     "name": "TUI fly Belgium",
+     "callsign": "BEAUTY",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "JAF",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TRA",
+     "name": "Transavia",
+     "callsign": "TRANSAVIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TRA",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Transavia France uses TVF / FRANCE SOLEIL"
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "EDDF",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CFG",
+     "name": "Condor",
+     "callsign": "CONDOR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CFG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "OCN",
+     "name": "Discover Airlines",
+     "callsign": "OCEAN",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "OCN",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TUI",
+     "name": "TUI fly Deutschland",
+     "callsign": "TUI JET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TUI",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "EGKK",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "replaces": "GCLP-EGLL (no scheduled service)",
+   "airlines": [
+    {
+     "icao": "BAW",
+     "name": "British Airways",
+     "codes": [
+      [
+       "BAW",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "EZY",
+     "name": "easyJet",
+     "codes": [
+      [
+       "EZY",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "GMAD",
+   "category": "Canary Islands <-> Morocco / West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "GMMN",
+   "category": "Canary Islands <-> Morocco / West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "GMMX",
+   "category": "Canary Islands <-> Morocco / West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "C",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "LEMD",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    },
+    {
+     "icao": "IBS",
+     "name": "Iberia Express",
+     "callsign": "IBEREXPRES",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBS",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "LEMG",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    },
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "LEST",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "WZZ",
+     "name": "Wizz Air",
+     "callsign": "WIZZ AIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "WZZ",
+       0.7
+      ],
+      [
+       "WMT",
+       0.3
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by Wizz Air Malta (WMT / WIZZAS)"
+    }
+   ]
+  },
+  {
+   "dep": "GCLP",
+   "dest": "LEVC",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    },
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCRR",
+   "dest": "EGSS",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 422,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "EXS",
+     "name": "Jet2.com",
+     "callsign": "CHANNEX",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EXS",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.7
+      ],
+      [
+       "RUK",
+       0.2
+      ],
+      [
+       "MAY",
+       0.1
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "EGKK",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [],
+   "workbook_status": "Near boundary (~27 nm) - verify",
+   "cruise_ft": 36000,
+   "airlines": [
+    {
+     "icao": "BAW",
+     "name": "British Airways",
+     "callsign": "SPEEDBIRD",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "BAW",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Gatwick leisure flights are flown by BA Euroflyer, still using the BAW / SPEEDBIRD callsign"
+    },
+    {
+     "icao": "EZY",
+     "name": "easyJet",
+     "callsign": "EASY",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EZY",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet UK"
+    },
+    {
+     "icao": "EXS",
+     "name": "Jet2.com",
+     "callsign": "CHANNEX",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EXS",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "callsign": "TOMJET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "EHAM",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Seasonal",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 0.6,
+     "note": "easyJet Europe"
+    },
+    {
+     "icao": "TRA",
+     "name": "Transavia",
+     "callsign": "TRANSAVIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TRA",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Transavia France uses TVF / FRANCE SOLEIL"
+    },
+    {
+     "icao": "TFL",
+     "name": "TUI fly Netherlands",
+     "callsign": "ORANGE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TFL",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "LEBB",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "VOE",
+     "name": "Volotea",
+     "callsign": "VOLOTEA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VOE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCXO",
+   "dest": "LEBL",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "replaces": "GCTS-LEBL (no scheduled service)",
+   "airlines": [
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "LEMD",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "LEZL",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "GCTS",
+   "dest": "LFPG",
+   "category": "Canary Islands -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Seasonal+Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Scheduled+Seasonal",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet Europe"
+    }
+   ]
+  },
+  {
+   "dep": "GMAD",
+   "dest": "GMMN",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 27000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMH",
+   "dest": "GMMN",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMML",
+   "dest": "GMMN",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "CYUL",
+   "category": "Morocco -> Americas",
+   "gmac_sectors": [
+    "WN"
+   ],
+   "gmac_nm": 78,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "N"
+   ],
+   "workbook_status": "Near boundary (~27 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "ACA",
+     "name": "Air Canada",
+     "callsign": "AIR CANADA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ACA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "DFFD",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "DGAA",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "DIAP",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 36000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "VRE",
+     "name": "Air Côte d'Ivoire",
+     "callsign": "COTE D'IVOIRE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VRE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "DNMM",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "DRRN",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "FKKD",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "FOOL",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GABS",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GBYD",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GCLP",
+   "category": "Canary Islands <-> Morocco / West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 52,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GFLL",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GLRB",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GMAD",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 25100,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GMMH",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GMML",
+   "category": "Morocco domestic (via GMAC)",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GOBD",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "SZN",
+     "name": "Air Senegal",
+     "callsign": "SENSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "SZN",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GQNO",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "MAI",
+     "name": "Mauritania Airlines",
+     "callsign": "MAURITANIA AIRLINES",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "MAI",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "GUCY",
+   "category": "Morocco -> West/Central Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "KIAD",
+   "category": "Morocco -> Americas",
+   "gmac_sectors": [
+    "ON",
+    "WN"
+   ],
+   "gmac_nm": 912,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~23 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "KJFK",
+   "category": "Morocco -> Americas",
+   "gmac_sectors": [
+    "ON",
+    "WN"
+   ],
+   "gmac_nm": 912,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~23 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "KMIA",
+   "category": "Morocco -> Americas",
+   "gmac_sectors": [
+    "ON",
+    "OS",
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 861,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "C",
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~0 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GMMN",
+   "dest": "SBGR",
+   "category": "Morocco -> Americas",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 252,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "N"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GOBD",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "SZN",
+     "name": "Air Senegal",
+     "callsign": "SENSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "SZN",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GOBD",
+   "dest": "LFPG",
+   "category": "West Africa -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 9,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "SZN",
+     "name": "Air Senegal",
+     "callsign": "SENSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "SZN",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GOBD",
+   "dest": "LPPT",
+   "category": "West Africa -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TVS",
+     "name": "Smartwings",
+     "callsign": "SKYTRAVEL",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "TVS",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GQNO",
+   "dest": "GMMN",
+   "category": "West/Central Africa -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 64,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "MAI",
+     "name": "Mauritania Airlines",
+     "callsign": "MAURITANIA AIRLINES",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "MAI",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GUCY",
+   "dest": "LFPG",
+   "category": "West Africa -> Europe",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 9,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GVAC",
+   "dest": "EGKK",
+   "category": "Europe <-> Cape Verde",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [],
+   "workbook_status": "Near boundary (~27 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "EZY",
+     "name": "easyJet",
+     "callsign": "EASY",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EZY",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet UK"
+    },
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "callsign": "TOMJET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "GVAC",
+   "dest": "LPPT",
+   "category": "Europe <-> Cape Verde",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 39000,
+   "airlines": [
+    {
+     "icao": "LZB",
+     "name": "Bulgaria Air",
+     "callsign": "FLYING BULGARIA",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "LZB",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet Europe"
+    },
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TCV",
+     "name": "Cabo Verde Airlines",
+     "callsign": "CABOVERDE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TCV",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "EVE",
+     "name": "Iberojet",
+     "callsign": "EVELOP",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "EVE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "GVBA",
+   "dest": "EGKK",
+   "category": "Europe <-> Cape Verde",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [],
+   "workbook_status": "Near boundary (~27 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TOM",
+     "name": "TUI Airways",
+     "callsign": "TOMJET",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TOM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "KIAD",
+   "dest": "GMMN",
+   "category": "Americas -> Morocco",
+   "gmac_sectors": [
+    "ON",
+    "WN"
+   ],
+   "gmac_nm": 912,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~22 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "KJFK",
+   "dest": "GMMN",
+   "category": "Americas -> Morocco",
+   "gmac_sectors": [
+    "ON",
+    "WN"
+   ],
+   "gmac_nm": 912,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~22 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "KMIA",
+   "dest": "GMMN",
+   "category": "Americas -> Morocco",
+   "gmac_sectors": [
+    "ON",
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 861,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [
+    "C",
+    "E",
+    "N"
+   ],
+   "workbook_status": "Near boundary (~0 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEBB",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "VOE",
+     "name": "Volotea",
+     "callsign": "VOLOTEA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VOE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEBL",
+   "dest": "GCXO",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 435,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "replaces": "LEBL-GCTS (no scheduled service)",
+   "airlines": [
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEMD",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBS",
+     "name": "Iberia Express",
+     "callsign": "IBEREXPRES",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBS",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "LEMD",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "LEMD",
+   "dest": "GOBD",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 51,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "LEMD",
+   "dest": "SAEZ",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "ARG",
+     "name": "Aerolíneas Argentinas",
+     "callsign": "ARGENTINA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ARG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "PUE",
+     "name": "Plus Ultra Líneas Aéreas",
+     "callsign": "SPANISH",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "PUE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEMD",
+   "dest": "SBGR",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CCA",
+     "name": "Air China",
+     "callsign": "AIR CHINA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CCA",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Beijing - Madrid - Sao Paulo through service"
+    },
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEMG",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 462,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 43000,
+   "airlines": [
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only",
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "LEST",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "WZZ",
+     "name": "Wizz Air",
+     "callsign": "WIZZ AIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "WZZ",
+       0.7
+      ],
+      [
+       "WMT",
+       0.3
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by Wizz Air Malta (WMT / WIZZAS)"
+    }
+   ]
+  },
+  {
+   "dep": "LEVC",
+   "dest": "GCLP",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 462,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBB",
+     "name": "Binter Canarias",
+     "callsign": "BINTER",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBB",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    },
+    {
+     "icao": "VLG",
+     "name": "Vueling",
+     "callsign": "VUELING",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "VLG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LEZL",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 437,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RYR",
+     "name": "Ryanair",
+     "callsign": "RYANAIR",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RYR",
+       0.75
+      ],
+      [
+       "MAY",
+       0.2
+      ],
+      [
+       "RYS",
+       0.05
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Some flights are operated by group airlines: Malta Air (MAY), Buzz (RYS) or Ryanair UK (RUK)"
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "GCTS",
+   "category": "Europe -> Canary Islands",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 38000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled+Seasonal",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Seasonal+Scheduled",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet Europe"
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "GOBD",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 51,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "SZN",
+     "name": "Air Senegal",
+     "callsign": "SENSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "SZN",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "GQNO",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 51,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "GUCY",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 85,
+   "casablanca_sectors": [
+    "C",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "SBGL",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "ON",
+    "OS",
+    "WS"
+   ],
+   "gmac_nm": 751,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LFPG",
+   "dest": "SBGR",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LIRF",
+   "dest": "SAEZ",
+   "category": "Europe -> South America",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 398,
+   "casablanca_sectors": [],
+   "workbook_status": "Near boundary (~30 nm) - verify",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "ARG",
+     "name": "Aerolíneas Argentinas",
+     "callsign": "ARGENTINA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ARG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "ITY",
+     "name": "ITA Airways",
+     "callsign": "ITARROW",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ITY",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LPPT",
+   "dest": "GOBD",
+   "category": "Europe -> West Africa",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TVS",
+     "name": "Smartwings",
+     "callsign": "SKYTRAVEL",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "TVS",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "LPPT",
+   "dest": "GVAC",
+   "category": "Europe <-> Cape Verde",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TCV",
+     "name": "Cabo Verde Airlines",
+     "callsign": "CABOVERDE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TCV",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "EJU",
+     "name": "easyJet",
+     "callsign": "ALPINE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "EJU",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "easyJet Europe"
+    },
+    {
+     "icao": "EVE",
+     "name": "Iberojet",
+     "callsign": "EVELOP",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "EVE",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    },
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "LZB",
+     "name": "Bulgaria Air",
+     "callsign": "FLYING BULGARIA",
+     "service": "Seasonal charter",
+     "codes": [
+      [
+       "LZB",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  },
+  {
+   "dep": "LPPT",
+   "dest": "SBGR",
+   "category": "Europe -> South America",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 375,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 33000,
+   "airlines": [
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SAEZ",
+   "dest": "LEMD",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "ARG",
+     "name": "Aerolíneas Argentinas",
+     "callsign": "ARGENTINA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "ARG",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "PUE",
+     "name": "Plus Ultra Líneas Aéreas",
+     "callsign": "SPANISH",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "PUE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBBR",
+   "dest": "LPPT",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGL",
+   "dest": "LEMD",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGR",
+   "dest": "EDDF",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "DLH",
+     "name": "Lufthansa",
+     "callsign": "LUFTHANSA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "DLH",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGR",
+   "dest": "GMMN",
+   "category": "Americas -> Morocco",
+   "gmac_sectors": [],
+   "gmac_nm": 0,
+   "gmac_dist_nm": 11,
+   "casablanca_sectors": [
+    "C",
+    "N",
+    "SS"
+   ],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "RAM",
+     "name": "Royal Air Maroc",
+     "callsign": "ROYAL AIR MAROC",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "RAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGR",
+   "dest": "LEMD",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "CCA",
+     "name": "Air China",
+     "callsign": "AIR CHINA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "CCA",
+       1.0
+      ]
+     ],
+     "weight": 1.0,
+     "note": "Beijing - Madrid - Sao Paulo through service"
+    },
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGR",
+   "dest": "LFPG",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "AFR",
+     "name": "Air France",
+     "callsign": "AIRFRANS",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AFR",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SBGR",
+   "dest": "LPPT",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 340,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": null,
+   "airlines": [
+    {
+     "icao": "TAM",
+     "name": "LATAM Brasil",
+     "callsign": "TAM",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAM",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "TAP",
+     "name": "TAP Air Portugal",
+     "callsign": "AIR PORTUGAL",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "TAP",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SCEL",
+   "dest": "LEMD",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "ON",
+    "OS"
+   ],
+   "gmac_nm": 681,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 39000,
+   "airlines": [
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "LAN",
+     "name": "LATAM Chile",
+     "callsign": "LAN CHILE",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "LAN",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "dep": "SUMU",
+   "dest": "LEMD",
+   "category": "South America -> Europe",
+   "gmac_sectors": [
+    "WN",
+    "WS"
+   ],
+   "gmac_nm": 399,
+   "gmac_dist_nm": 0,
+   "casablanca_sectors": [],
+   "workbook_status": "Crosses GMAC",
+   "cruise_ft": 35000,
+   "airlines": [
+    {
+     "icao": "IBE",
+     "name": "Iberia",
+     "callsign": "IBERIA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "IBE",
+       1.0
+      ]
+     ],
+     "weight": 1.0
+    },
+    {
+     "icao": "AEA",
+     "name": "Air Europa",
+     "callsign": "EUROPA",
+     "service": "Scheduled",
+     "codes": [
+      [
+       "AEA",
+       1.0
+      ]
+     ],
+     "weight": 0.5,
+     "verify": "listed by one airport only"
+    }
+   ]
+  }
+ ]
+}

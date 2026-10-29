@@ -198,6 +198,15 @@ def _airspace_for(scn: dict):
         raise ScenarioError(f"airspace: {e}")
 
 
+def _enters(asp, pts, step_nm: float = 2.0) -> bool:
+    """Whether a polyline passes through the controlled airspace."""
+    for p, q in zip(pts, pts[1:]):
+        n = max(1, int(dist(p, q) / step_nm))
+        if any(asp.inside((p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n)) for k in range(n + 1)):
+            return True
+    return False
+
+
 def _place_pre_entry(names: List[str], waypoints: Dict[str, tuple], idx_entry: int, pre_nm: float):
     """Point `pre_nm` before the entry waypoint, along the upstream part of the route if there is one, else on the
     extension of the first leg. Returns (pre_point, upstream names still ahead of it)."""
@@ -286,7 +295,13 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     # entry = first route point on the controlled boundary (or inside); points before it are upstream
     # (previous sector); the route ends at the exit = last point on the boundary or inside.
     inside = [w in asp.boundary_points or asp.inside(waypoints[w]) for w in names]
-    if not any(inside):
+    nearby = bool(a.get("nearby"))
+    if nearby:
+        # nearby traffic: flies past, never in our sectors (the neighbours' traffic, on the picture, not ours)
+        if any(inside) or _enters(asp, [waypoints[w] for w in names]):
+            raise ScenarioError(f"{cs}: nearby traffic must stay out of the controlled airspace")
+        inside = [True] * len(names)
+    elif not any(inside):
         raise ScenarioError(f"{cs}: route {names} never enters the controlled airspace")
     idx_entry = inside.index(True)
     idx_exit = len(inside) - 1 - inside[::-1].index(True)
@@ -365,7 +380,7 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     else:
         raise ScenarioError(f"{cs}: needs 'entry_time' or 'reach'")
     # ---- appear before the entry waypoint (previous sector's traffic), along the upstream route if any
-    pre_nm = float(a.get("pre_entry_nm", pre_entry_nm))
+    pre_nm = 1.0 if nearby else float(a.get("pre_entry_nm", pre_entry_nm))   # nearby: from its first point
     if start_name:
         pre_name, pre_pt, upstream = start_name, waypoints[start_name], names[1:idx_entry]
     else:
@@ -408,7 +423,9 @@ def make_aircraft(a: dict, scn: dict, asp, waypoints: Dict[str, tuple], seqfixes
     ac.start_along_nm = start_along
     ac.planned_exit = route[-1]
     ac.planned_length_nm = polyline_length(pts) - max(0.0, start_along - head_len)
-    if sid_info is None and not start_name:
+    if nearby:
+        ac.nearby, ac.status = True, "nearby"        # appears at its entry time, outside from the start
+    if sid_info is None and not start_name and not nearby:
         _sid_from_runway(ac, a, scn, asp, waypoints, aerodromes, names, idx_entry, route, perf, mass, fl)
     dest_fp = str(a.get("dest") or "").upper()
     if (route[-1] in seqfixes and a.get("arrival", True)

@@ -61,7 +61,7 @@ def _dest(world: "World", ac: "Aircraft"):
 
 def lands_here(world: "World", ac: "Aircraft") -> bool:
     """An arrival to one of our aerodromes: it stays on the picture until it lands."""
-    return _dest(world, ac) is not None and not getattr(ac, "landed", False)
+    return _dest(world, ac) is not None and not getattr(ac, "landed", False) and not ac.nearby
 
 
 def candidates(world: "World") -> List["Aircraft"]:
@@ -69,8 +69,8 @@ def candidates(world: "World") -> List["Aircraft"]:
     aerodrome's terminal airspace (Casablanca's TMA lies under the North sector)."""
     out = []
     for a in world.aircraft.values():
-        if a.gone or getattr(a, "landed", False) or _dest(world, a) is None:
-            continue
+        if a.gone or a.nearby or getattr(a, "landed", False) or _dest(world, a) is None:
+            continue                                   # (nearby traffic is the neighbours', flown on its route)
         if a.outside or (a.active and not a.assumed and getattr(a, "released", False)
                          and world.airspace.in_terminal_area(_dest(world, a).id, a.pos)):
             out.append(a)

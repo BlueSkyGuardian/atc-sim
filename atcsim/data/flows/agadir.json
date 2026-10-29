@@ -90,7 +90,8 @@
    "SBBR",
    "SAEZ",
    "SCEL",
-   "SBSV"
+   "SBSV",
+   "SUMU"
   ],
   "CAN": [
    "GCLP*4",
@@ -110,7 +111,8 @@
    "GUCY",
    "GVAC",
    "GVNP",
-   "GLRB"
+   "GLRB",
+   "GFLL"
   ],
   "WAFI": [
    "GABS",
@@ -124,7 +126,9 @@
    "DNAA",
    "DGAA",
    "DXXX",
-   "DBBB"
+   "DBBB",
+   "FOOL",
+   "FKKD"
   ],
   "NAM": [
    "KJFK",
@@ -156,6 +160,10 @@
   ],
   "MAI": [
    "GMMZ"
+  ],
+  "CV": [
+   "GVAC*2",
+   "GVBA"
   ]
  },
  "flows": [
@@ -170,7 +178,8 @@
    "to": [
     "CAN*3",
     "SAM*2",
-    "GVAC"
+    "CV",
+    "GOBD"
    ],
    "route": "BAROK UN873 SAMAR",
    "weight": 6
@@ -236,7 +245,7 @@
    "from": [
     "CAN*2",
     "SAM",
-    "GVAC"
+    "CV"
    ],
    "to": [
     "PT",
@@ -748,7 +757,8 @@
    "id": "canaries_ma",
    "from": [
     "CAN",
-    "CANE"
+    "CANE",
+    "SBGR"
    ],
    "to": [
     "MAN"
@@ -1181,6 +1191,73 @@
     "GMTN"
    ],
    "route": "ERA UM240 MADOV"
+  },
+  {
+   "id": "canaries_aga",
+   "from": [
+    "CAN"
+   ],
+   "to": [
+    "GMAD"
+   ],
+   "route": "KORAL UG5 SONSO UG664 ADM",
+   "weight": 0.5
+  },
+  {
+   "id": "aga_canaries",
+   "from": [
+    "GMAD"
+   ],
+   "to": [
+    "CAN"
+   ],
+   "route": "ADM UG664 SONSO UG5 KORAL",
+   "weight": 0.5
+  },
+  {
+   "id": "canaries_rak",
+   "from": [
+    "CAN"
+   ],
+   "to": [
+    "GMMX"
+   ],
+   "route": "KORAL UG5 ESS",
+   "weight": 0.5
+  },
+  {
+   "id": "rak_canaries",
+   "from": [
+    "GMMX"
+   ],
+   "to": [
+    "CAN"
+   ],
+   "route": "ESS UG5 KORAL",
+   "weight": 0.5
+  },
+  {
+   "id": "gulf_ma",
+   "from": [
+    "GULF"
+   ],
+   "to": [
+    "GMMN"
+   ],
+   "route": "BAGBO UJ744 OZT UW900 SAK",
+   "weight": 1
+  },
+  {
+   "id": "ma_sam_un857",
+   "from": [
+    "GMMN"
+   ],
+   "to": [
+    "SBGR"
+   ],
+   "route": "SALCA UA411 IBALU UN857 TERTO",
+   "weight": 0.5,
+   "_note": "Royal Air Maroc Casablanca - Sao Paulo: out by IBALU and UN857 (the workbook's plan)"
   }
  ]
 }

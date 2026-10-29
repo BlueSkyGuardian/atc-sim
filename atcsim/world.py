@@ -227,6 +227,8 @@ class World:
         if itype not in INSTRUCTION_TYPES:
             raise InstructionError(f"unknown instruction type '{itype}', expected one of {INSTRUCTION_TYPES}")
         cs = str(instr.get("callsign", "")).upper()
+        if cs in self.aircraft and self.aircraft[cs].nearby:
+            raise InstructionError(f"{cs} is nearby traffic of a neighbouring unit: not under your control")
         if itype == "assume" and not by_pilot:      # first call, or taking back an aircraft decontrolled earlier
             ac = self.aircraft.get(cs)
             if ac is None or not (ac.active or ac.outside):
@@ -1045,6 +1047,10 @@ class World:
                     approach.runway_changed(self, ad)
         # 2. spawns
         for ac in self.aircraft.values():
+            if ac.status == "nearby" and ac.entry_time <= t_next:
+                ac.spawn(self.env, t_next)                 # the neighbours' traffic: on the picture, never ours
+                ac.status = "left_sector"
+                continue
             if ac.status == "scheduled" and ac.entry_time <= t_next:
                 if getattr(ac, "sid", None) and getattr(ac, "spawn_alt_ft", None) is not None:
                     okto, why = tma.may_take_off(self, ac)
@@ -1173,6 +1179,9 @@ class World:
         for ac in self.aircraft.values():
             if ac.outside and not getattr(ac, "app", None) and not approach.lands_here(self, ac):
                 out_nm = max(b[0] - ac.x, ac.x - b[2], b[1] - ac.y, ac.y - b[3], 0.0)
+                if ac.nearby and not getattr(ac, "_near_seen", False):
+                    ac._near_seen = out_nm <= 150.0      # nearby traffic: leaves the picture once it has crossed it
+                    continue
                 if out_nm > (40.0 if ac.released else 150.0):
                     ac.gone = True
                     self._event("aircraft_gone", callsign=ac.callsign)
@@ -1701,7 +1710,8 @@ class World:
                 "mean_response_time_s": round(sum(r.resolved_time - r.time for r in answered) / len(answered), 1) if answered else None,
             },
             "traffic": {
-                "total": len(self.aircraft),
+                "total": sum(1 for a in self.aircraft.values() if not a.nearby),
+                "nearby": sum(1 for a in self.aircraft.values() if a.nearby),    # the neighbours' traffic shown
                 "exited": len(exited),
                 "exited_at_planned_exit": sum(1 for a in exited if a.exit_point == a.planned_exit),
                 "rerouted_exits": [{"callsign": a.callsign, "planned": a.planned_exit, "actual": a.exit_point}

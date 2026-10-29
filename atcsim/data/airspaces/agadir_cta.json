@@ -14543,9 +14543,10 @@
    "GMMI",
    "GMMX",
    "GCRR",
-   "GCFV"
+   "GCFV",
+   "LPFR"
   ],
-  "_note": "Traffic to these aerodromes descends in or just after the CTA: pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
+  "_note": "Traffic to these aerodromes descends in or just after the CTA (Faro: its arrivals by AMSEL ask the West North sector for descent before the exit): pilots may request descent, levels below the sector or the LoA can be given (after coordination), and the semicircular rule does not apply to their descent levels."
  },
  "coastline": true,
  "cpdlc": {

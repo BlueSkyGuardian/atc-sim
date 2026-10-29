@@ -141,7 +141,8 @@ class Aircraft:
     start_along_nm: float = 0.0
     filed_mach: Optional[float] = None                 # filed cruise Mach (None = type's typical cruise Mach)
 
-    status: str = "scheduled"          # scheduled | active | exited | left_sector
+    status: str = "scheduled"          # scheduled | active | exited | left_sector (nearby: not ours, not yet shown)
+    nearby: bool = False               # traffic flying past our sectors, never in them (shown, never ours)
     # flight category, RVSM and formation (equipment = ICAO FPL item 10a/10b; 'W' = RVSM approved)
     military: bool = False
     formation: Optional[dict] = None   # {"size": 4, "types": "4xF16", "extent_nm": 1.0}: only the leader is on radar
@@ -806,6 +807,7 @@ class Aircraft:
             "type": self.icao,
             "type_name": self.perf.name,
             "status": self.status,
+            "nearby": self.nearby,             # the neighbours' traffic flying past: shown, never ours
             "x_nm": round(self.x, 3),
             "y_nm": round(self.y, 3),
             "altitude_ft": round(self.alt_ft),
