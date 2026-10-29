@@ -20,6 +20,9 @@ Settings (environment):
   ATC_LIVE_ROUTES_URL             origin / destination by callsign (adsb.lol's routeset; empty: none)
   ATC_LIVE_CREDIT                 the credit shown on the page
   ATC_LIVE_EVERY_S                a full reading while watched (default 6 s); ATC_LIVE_IDLE_S while measuring (60 s)
+  ATC_LIVE_HEADERS                headers sent with every request, "Name: value; Name2: value2" - an API key when the
+                                  network asks for one (adsb.lol has announced a key for its feeders; a paid feed
+                                  such as ADS-B Exchange on RapidAPI: "X-RapidAPI-Key: ...; X-RapidAPI-Host: ...")
 """
 from __future__ import annotations
 
@@ -48,6 +51,8 @@ ROUTES_URL = os.environ.get("ATC_LIVE_ROUTES_URL", "https://api.adsb.lol/api/0/r
 CREDIT = os.environ.get("ATC_LIVE_CREDIT", "ADS-B data: adsb.lol (Open Database License)")
 EVERY_S = max(2.0, float(os.environ.get("ATC_LIVE_EVERY_S", "6") or 6))
 IDLE_S = max(10.0, float(os.environ.get("ATC_LIVE_IDLE_S", "60") or 60))
+HEADERS = {k.strip(): v.strip() for k, _, v in (h.partition(":") for h in os.environ.get("ATC_LIVE_HEADERS", "").split(";"))
+           if k.strip() and v.strip()}
 MARGIN_NM = 90.0                      # the picture: the CTA and this much around it
 RADIUS_NM = 250.0                     # the feeds' largest circle
 STALE_S = 60.0                        # an aircraft not heard for this long leaves the picture
@@ -214,7 +219,8 @@ class Feed:
         import httpx
         time.sleep(5)
         last_routes = 0.0
-        with httpx.Client(timeout=12, headers={"User-Agent": f"ATC-SIM-live/1.0 (+{config.PUBLIC_URL or 'training simulator'})"}) as c:
+        hdr = {"User-Agent": f"ATC-SIM-live/1.0 (+{config.PUBLIC_URL or 'training simulator'})", **HEADERS}
+        with httpx.Client(timeout=12, headers=hdr) as c:
             while True:
                 m = self.mode()
                 self.status["mode"] = m

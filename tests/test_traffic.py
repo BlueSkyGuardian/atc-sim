@@ -18,6 +18,7 @@ os.environ["ATC_NEWS"] = "off"
 os.environ["ATC_LIVE_URL"] = f"http://127.0.0.1:{PORT}/v2/point/{{lat}}/{{lon}}/{{nm}}"
 os.environ["ATC_LIVE_ROUTES_URL"] = f"http://127.0.0.1:{PORT}/api/0/routeset"
 os.environ["ATC_LIVE_EVERY_S"] = "2"
+os.environ["ATC_LIVE_HEADERS"] = "X-Api-Key: test-key-123; X-Other: 2"
 
 from tests import fake_adsb  # noqa: E402
 
@@ -64,6 +65,8 @@ while time.time() - t0 < 20:
         break
     time.sleep(1)
 ok(info["mode"] == "watched" and info["last_ok"] and not info["last_error"], f"the feed is read while watched ({info['polls']} readings)")
+hd = {k.lower(): v for k, v in getattr(fake_adsb.H, "last_headers", {}).items()}
+ok(hd.get("x-api-key") == "test-key-123" and hd.get("x-other") == "2", "the key (ATC_LIVE_HEADERS) is sent with every request")
 by = {a["callsign"]: a for a in st["aircraft"] + st["transferred"]}
 ok(len(st["aircraft"]) >= 10 and "RAM201" in by, f"the aircraft on the picture: {len(st['aircraft'])} in the CTA, {len(st['transferred'])} around")
 a = by["RAM201"]

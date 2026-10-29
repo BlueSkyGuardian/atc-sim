@@ -76,6 +76,7 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         H.requests.append(self.path)
+        H.last_headers = dict(self.headers)
         p = self.path.strip("/").split("/")
         if len(p) == 5 and p[0] == "v2" and p[1] == "point":
             lat, lon, nm = float(p[2]), float(p[3]), float(p[4])

@@ -137,7 +137,8 @@ stories and mails it to the subscribers; the issue is then on the news page too.
   24 h after the first start, to measure the coverage map. `ATC_LIVE=off` turns it off; `ATC_LIVE_URL` changes the
   network (default `https://api.adsb.lol/v2/point/{lat}/{lon}/{nm}`; airplanes.live and adsb.fi serve the same
   format), `ATC_LIVE_ROUTES_URL` the origin/destination lookup, `ATC_LIVE_CREDIT` the credit shown, and
-  `ATC_LIVE_EVERY_S` / `ATC_LIVE_IDLE_S` the reading intervals. The free networks are for non-commercial use, with
+  `ATC_LIVE_EVERY_S` / `ATC_LIVE_IDLE_S` the reading intervals, `ATC_LIVE_HEADERS` the headers for a network that
+  needs a key (`"Name: value; Name2: value2"`; adsb.lol needs none today but has announced a key for its feeders). The free networks are for non-commercial use, with
   the source credited (adsb.lol's data is under the Open Database License).
 * `ATC_RADAR_SWEEP_S` (default 4): the radar screens' picture, one sweep every so many seconds of simulation time
   (positions, levels, speeds); clearances, coordination, CPDLC, calls and alerts go out at once. `0`: every second.
