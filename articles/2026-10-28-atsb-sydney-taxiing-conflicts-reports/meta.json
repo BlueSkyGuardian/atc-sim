@@ -31,5 +31,27 @@
    "credit": "ATC SIM newsroom; Natural Earth"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La tour de Sydney sous examen : l'ATSB publie ses deux derniers rapports préliminaires sur les conflits au sol de 2026",
+   "summary": "Le Bureau australien de la sécurité des transports a publié les rapports préliminaires sur deux conflits au roulage survenus en août à l'aéroport de Sydney, ce qui porte le total à six. Tous deux décrivent l'effectif de la tour et le risque de fatigue ; un collationnement incomplet et une autorisation de repoussage sont au centre.",
+   "figures": [
+    {
+     "caption": "L'aéroport de Sydney Kingsford Smith, où l'ATSB enquête sur six événements de juillet et août 2026 ; le vol Virgin Australia impliqué le 17 août s'y était dérouté depuis Newcastle en raison de la météo.",
+     "alt": "Carte du sud-est de l'Australie marquant l'aéroport de Sydney Kingsford Smith et Newcastle, avec une ligne en tirets pour le déroutement du VA1589 de Newcastle vers Sydney."
+    }
+   ]
+  },
+  "ar": {
+   "title": "برج سيدني تحت المجهر: مكتب سلامة النقل الأسترالي ينشر آخر تقريرين أوليين عن تعارضات أرضية في 2026",
+   "summary": "نشر المكتب الأسترالي لسلامة النقل التقريرين الأوليين حول تعارضين أثناء الدرج وقعا في غشت بمطار سيدني، ليكتمل عدد التقارير ستة. ويصف التقريران عدد العاملين في البرج وخطر الإرهاق، ويتمحوران حول تكرار ناقص للتعليمات وإذن بالدفع الخلفي.",
+   "figures": [
+    {
+     "caption": "مطار سيدني كينغسفورد سميث، حيث يحقق المكتب في ستة أحداث من يوليوز وغشت 2026؛ وكانت رحلة فيرجن أستراليا المعنية يوم 17 غشت قد حُوّلت إليه من نيوكاسل بسبب الأحوال الجوية.",
+     "alt": "خريطة جنوب شرق أستراليا تُظهر مطار سيدني كينغسفورد سميث ونيوكاسل، مع خط متقطع لتحويل الرحلة VA1589 من نيوكاسل إلى سيدني."
+    }
+   ]
+  }
+ }
 }

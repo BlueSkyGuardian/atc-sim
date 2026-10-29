@@ -48,5 +48,35 @@
    "credit": "ATC SIM newsroom; data FAA"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La FAA déploiera début 2027 les autorisations de départ IFR par texte pour les pilotes de l'aviation générale",
+   "summary": "Mobile Clearance, le service de la FAA qui envoie sous forme de texte les autorisations de départ IFR aux applications de préparation des vols des pilotes de l'aviation générale, est évalué dans onze aéroports américains et doit être déployé début 2027.",
+   "figures": [
+    {
+     "caption": "Les aéroports où la FAA évalue Mobile Clearance depuis mai 2026.",
+     "alt": "Carte du centre et de l'est des États-Unis. Des cercles marquent les premiers aéroports d'évaluation : trois dans la région de Houston (mai 2026), Appleton dans le Wisconsin et New Century AirCenter au Kansas (été 2026). Des points marquent les ajouts de l'automne 2026 autour d'Austin, College Station et Kansas City."
+    },
+    {
+     "caption": "Nombre d'aéroports ajoutés à l'évaluation de Mobile Clearance à chaque phase de 2026, selon la FAA.",
+     "alt": "Graphique à barres : 3 aéroports en mai 2026 (région de Houston), 2 à l'été 2026 (Appleton et New Century), 6 à l'automne 2026 (College Station, Kansas City Downtown, Johnson County, Austin Executive, Georgetown, San Marcos)."
+    }
+   ]
+  },
+  "ar": {
+   "title": "إدارة الطيران الأمريكية تعتمد مطلع 2027 أذونات المغادرة الآلية المكتوبة لطياري الطيران العام",
+   "summary": "تخضع خدمة Mobile Clearance التابعة لإدارة الطيران الفيدرالية، التي ترسل أذونات المغادرة وفق قواعد الطيران الآلي نصاً إلى تطبيقات إعداد الرحلات لدى طياري الطيران العام، للتقييم في أحد عشر مطاراً أمريكياً، ومن المقرر نشرها مطلع 2027.",
+   "figures": [
+    {
+     "caption": "المطارات التي تقيّم فيها إدارة الطيران الفيدرالية خدمة Mobile Clearance منذ ماي 2026.",
+     "alt": "خريطة وسط وشرق الولايات المتحدة. تشير دوائر مفرغة إلى مطارات التقييم الأولى: ثلاثة في منطقة هيوستن (ماي 2026)، وأبلتون في ويسكونسن ونيو سنتشري إيرسنتر في كانساس (صيف 2026). وتشير نقاط إلى إضافات خريف 2026 حول أوستن وكوليج ستيشن وكانساس سيتي."
+    },
+    {
+     "caption": "عدد المطارات المضافة إلى تقييم Mobile Clearance في كل مرحلة من 2026، حسب إدارة الطيران الفيدرالية.",
+     "alt": "رسم بياني بالأعمدة: 3 مطارات في ماي 2026 (منطقة هيوستن)، و2 في صيف 2026 (أبلتون ونيو سنتشري)، و6 في خريف 2026 (كوليج ستيشن، كانساس سيتي داونتاون، جونسون كاونتي، أوستن إكزكيوتيف، جورجتاون، سان ماركوس)."
+    }
+   ]
+  }
+ }
 }

@@ -43,5 +43,35 @@
    "credit": "ATC SIM newsroom; data ONDA via Hespress FR"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Royal Air Maroc ouvre dimanche une liaison directe Casablanca–Essaouira, deux fois par semaine",
+   "summary": "À partir du 1er novembre, Royal Air Maroc relie Casablanca et Essaouira le mercredi et le dimanche, offrant à Essaouira-Mogador, un aéroport dont le trafic est presque entièrement international, une liaison domestique régulière vers le hub national.",
+   "figures": [
+    {
+     "caption": "La nouvelle ligne de Royal Air Maroc entre Casablanca Mohammed V et Essaouira-Mogador, avec Marrakech-Ménara pour repère.",
+     "alt": "Carte de l'ouest du Maroc montrant une ligne entre l'aéroport Casablanca Mohammed V (GMMN) et, au sud-ouest, l'aéroport d'Essaouira-Mogador (GMMI), avec Marrakech-Ménara (GMMX) à l'intérieur des terres. Temps de vol programmé : 1 h 20."
+    },
+    {
+     "caption": "Passagers traités à l'aéroport d'Essaouira-Mogador en 2024 et 2025.",
+     "alt": "Graphique à barres : l'aéroport d'Essaouira-Mogador a traité 230 959 passagers en 2024 et 310 436 en 2025, soit une hausse de 34,4 %."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الخطوط الملكية المغربية تفتتح يوم الأحد خطاً مباشراً بين الدار البيضاء والصويرة مرتين في الأسبوع",
+   "summary": "ابتداء من فاتح نونبر، تربط الخطوط الملكية المغربية الدار البيضاء بالصويرة يومي الأربعاء والأحد، لتمنح مطار الصويرة موكادور، الذي تكاد حركته تكون دولية بالكامل، خطاً داخلياً منتظماً نحو المحور الوطني.",
+   "figures": [
+    {
+     "caption": "الخط الجديد للخطوط الملكية المغربية بين مطار محمد الخامس بالدار البيضاء ومطار الصويرة موكادور، مع مطار مراكش المنارة كمرجع.",
+     "alt": "خريطة غرب المغرب تُظهر خطاً من مطار محمد الخامس بالدار البيضاء (GMMN) نحو الجنوب الغربي إلى مطار الصويرة موكادور (GMMI)، مع مطار مراكش المنارة (GMMX) في الداخل. مدة الرحلة المبرمجة ساعة و20 دقيقة."
+    },
+    {
+     "caption": "عدد المسافرين في مطار الصويرة موكادور سنتي 2024 و2025.",
+     "alt": "رسم بياني بالأعمدة: عالج مطار الصويرة موكادور 230.959 مسافراً سنة 2024 و310.436 سنة 2025، بزيادة 34,4%."
+    }
+   ]
+  }
+ }
 }

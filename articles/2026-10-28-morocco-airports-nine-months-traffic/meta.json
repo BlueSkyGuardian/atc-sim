@@ -53,5 +53,35 @@
    "credit": "ATC SIM newsroom; data ONDA"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Les aéroports marocains dépassent 29,3 millions de passagers en neuf mois, mouvements en hausse de 9,7 %",
+   "summary": "Les chiffres de l'ONDA à fin septembre 2026 font état de 29,33 millions de passagers (+8,74 %) et de 214 607 mouvements d'aéronefs (+9,70 %), Casablanca, Marrakech et Agadir portant l'essentiel de la charge des tours et des approches du pays.",
+   "figures": [
+    {
+     "caption": "Passagers traités par les cinq premiers aéroports marocains de janvier à septembre 2026.",
+     "alt": "Graphique à barres horizontales : Casablanca Mohammed V 9,36 millions de passagers, Marrakech-Ménara 8,11 millions, Agadir-Al Massira 2,79 millions, Tanger Ibn Battouta 2,33 millions, Rabat-Salé 1,90 million, de janvier à septembre 2026."
+    },
+    {
+     "caption": "Mouvements d'aéronefs (atterrissages et décollages) de janvier à septembre 2026 : le total national et les trois premiers aéroports.",
+     "alt": "Graphique à barres des mouvements d'aéronefs, janvier à septembre 2026 : ensemble des aéroports marocains 214 607, Casablanca Mohammed V 73 194, Marrakech-Ménara 53 164, Agadir-Al Massira 19 041."
+    }
+   ]
+  },
+  "ar": {
+   "title": "المطارات المغربية تتجاوز 29,3 مليون مسافر في تسعة أشهر والحركات الجوية ترتفع بنسبة 9,7%",
+   "summary": "تُظهر أرقام المكتب الوطني للمطارات حتى نهاية شتنبر 2026 استقبال 29,33 مليون مسافر (+8,74%) و214.607 حركات جوية (+9,70%)، وتتحمل الدار البيضاء ومراكش وأكادير الجزء الأكبر من عبء أبراج المراقبة ومصالح الاقتراب في البلاد.",
+   "figures": [
+    {
+     "caption": "عدد المسافرين في أكبر خمسة مطارات مغربية من يناير إلى شتنبر 2026.",
+     "alt": "رسم بياني بأعمدة أفقية: الدار البيضاء محمد الخامس 9,36 ملايين مسافر، مراكش المنارة 8,11 ملايين، أكادير المسيرة 2,79 مليون، طنجة ابن بطوطة 2,33 مليون، الرباط سلا 1,90 مليون، من يناير إلى شتنبر 2026."
+    },
+    {
+     "caption": "الحركات الجوية (الهبوط والإقلاع) من يناير إلى شتنبر 2026: المجموع الوطني وأكبر ثلاثة مطارات.",
+     "alt": "رسم بياني بالأعمدة للحركات الجوية من يناير إلى شتنبر 2026: مجموع المطارات المغربية 214.607، الدار البيضاء محمد الخامس 73.194، مراكش المنارة 53.164، أكادير المسيرة 19.041."
+    }
+   ]
+  }
+ }
 }

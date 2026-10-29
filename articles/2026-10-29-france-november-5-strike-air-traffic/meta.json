@@ -43,5 +43,35 @@
    "credit": "ATC SIM newsroom; data DGAC via Reuters and Airkarma"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Grève du 5 novembre en France : ce qu'elle pourrait signifier pour le contrôle aérien, et ce qu'on ignore encore",
+   "summary": "Les syndicats français appellent à une grève nationale le jeudi 5 novembre. Les préavis de la fonction publique couvrent le personnel de la DGAC, contrôleurs compris, mais au 27 octobre aucun appel propre aux contrôleurs ni aucune demande de réduction de vols de la DGAC n'avait été signalé.",
+   "figures": [
+    {
+     "caption": "Les aéroports touchés lors de la précédente grève de la fonction publique, le 29 septembre 2026 : réductions de vols demandées à Paris-CDG et Marseille, perturbations attendues dans cinq aéroports régionaux.",
+     "alt": "Carte de la France. Paris-Charles de Gaulle marqué avec une réduction de 5 % des vols et Marseille-Provence avec une réduction de 25 % le 29 septembre 2026 ; Nantes, Strasbourg, Limoges, Pau et Tarbes-Lourdes marqués comme aéroports où des perturbations étaient attendues."
+    },
+    {
+     "caption": "La part des vols que la DGAC a demandé aux compagnies d'annuler le 29 septembre 2026, dernière journée de grève de la fonction publique.",
+     "alt": "Graphique à barres horizontales : le 29 septembre 2026, la DGAC a demandé aux compagnies d'annuler 25 % des vols à Marseille-Provence entre 16 h 00 et minuit, et 5 % à Paris-CDG entre 07 h 00 et 20 h 00."
+    }
+   ]
+  },
+  "ar": {
+   "title": "إضراب 5 نونبر في فرنسا: ما قد يعنيه للمراقبة الجوية وما لا يزال مجهولاً",
+   "summary": "دعت النقابات الفرنسية إلى إضراب وطني يوم الخميس 5 نونبر. وتشمل إشعارات الوظيفة العمومية مستخدمي المديرية العامة للطيران المدني، ومنهم المراقبون، لكن إلى غاية 27 أكتوبر لم يُسجَّل أي نداء خاص بالمراقبين ولا أي طلب من المديرية لتقليص الرحلات.",
+   "figures": [
+    {
+     "caption": "المطارات التي تأثرت خلال إضراب الوظيفة العمومية السابق في 29 شتنبر 2026: تقليص الرحلات في باريس شارل دوغول ومرسيليا، واضطرابات متوقعة في خمسة مطارات جهوية.",
+     "alt": "خريطة فرنسا. باريس شارل دوغول مع تقليص الرحلات بنسبة 5% ومرسيليا بروفانس مع تقليص بنسبة 25% يوم 29 شتنبر 2026؛ ونانت وستراسبورغ وليموج وبو وتارب لورد كمطارات كان يُتوقع فيها حدوث اضطرابات."
+    },
+    {
+     "caption": "حصة الرحلات التي طلبت المديرية العامة للطيران المدني من الشركات إلغاءها يوم 29 شتنبر 2026، آخر يوم إضراب في الوظيفة العمومية.",
+     "alt": "رسم بياني بأعمدة أفقية: في 29 شتنبر 2026 طلبت المديرية من الشركات إلغاء 25% من الرحلات في مرسيليا بروفانس بين 16:00 ومنتصف الليل، و5% في باريس شارل دوغول بين 07:00 و20:00."
+    }
+   ]
+  }
+ }
 }

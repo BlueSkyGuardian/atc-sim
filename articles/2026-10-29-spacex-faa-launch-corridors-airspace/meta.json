@@ -31,5 +31,27 @@
    "credit": "ATC SIM newsroom; data FAA and SpaceX"
   }
  ],
- "author": "ATC SIM newsroom"
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "SpaceX affirme à la FAA que c'est la gestion du trafic aérien, et non les fusées, qui limite sa cadence de lancement",
+   "summary": "Dans ses commentaires à une consultation de la FAA sur les spatioports et les couloirs de lancement prioritaires, SpaceX dit prévoir 10 000 lancements par an et demande la priorité dans l'espace aérien et des approbations automatiques ; les compagnies américaines demandent d'évaluer l'impact sur les autres usagers de l'espace aérien.",
+   "figures": [
+    {
+     "caption": "Le nombre de lancements américains en 2025 face aux objectifs et prévisions officiels et aux attentes de SpaceX.",
+     "alt": "Graphique à barres horizontales : 217 lancements américains en 2025 (tous, demande d'informations de la FAA) ; 182 lancements autorisés par la FAA en 2025 (document de SpaceX) ; un objectif de 1 000 lancements et rentrées par an d'ici 2030 (Politique nationale de transport spatial) ; une prévision de la FAA de 10 000 lancements et rentrées autorisés par an d'ici 2035 ; et l'attente de SpaceX de 10 000 lancements par an."
+    }
+   ]
+  },
+  "ar": {
+   "title": "سبيس إكس لإدارة الطيران الأمريكية: تدبير الحركة الجوية، لا الصواريخ، هو ما يحدّ من وتيرة إطلاقاتنا",
+   "summary": "في تعليقاتها على استشارة لإدارة الطيران الفيدرالية حول الموانئ الفضائية وممرات الإطلاق ذات الأولوية، تقول سبيس إكس إنها تتوقع 10.000 عملية إطلاق سنوياً وتطالب بأولوية في المجال الجوي وبموافقات تلقائية، بينما تطلب شركات الطيران الأمريكية تقييم الأثر على باقي مستعملي المجال الجوي.",
+   "figures": [
+    {
+     "caption": "عدد عمليات الإطلاق الأمريكية سنة 2025 مقارنة بالأهداف والتوقعات الرسمية وبتوقعات سبيس إكس.",
+     "alt": "رسم بياني بأعمدة أفقية: 217 عملية إطلاق أمريكية سنة 2025 (كلها، حسب طلب المعلومات لإدارة الطيران الفيدرالية)؛ 182 عملية إطلاق رخصتها الإدارة سنة 2025 (وثيقة سبيس إكس)؛ هدف 1.000 عملية إطلاق وعودة سنوياً بحلول 2030 (السياسة الوطنية للنقل الفضائي)؛ توقع الإدارة 10.000 عملية إطلاق وعودة مرخصة سنوياً بحلول 2035؛ وتوقع سبيس إكس 10.000 عملية إطلاق سنوياً."
+    }
+   ]
+  }
+ }
 }

@@ -1,5 +1,5 @@
 {
- "generated": 1793249636,
+ "generated": 1793291953,
  "articles": [
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
@@ -8,15 +8,26 @@
    "section": "Morocco & Africa",
    "title": "Royal Air Maroc opens a direct Casablanca–Essaouira link on Sunday, twice a week",
    "summary": "From 1 November, Royal Air Maroc flies Casablanca–Essaouira on Wednesdays and Sundays, giving Essaouira-Mogador, an airport whose traffic is almost entirely international, a scheduled domestic connection to the national hub.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Royal Air Maroc ouvre dimanche une liaison directe Casablanca–Essaouira, deux fois par semaine",
+    "ar": "الخطوط الملكية المغربية تفتتح يوم الأحد خطاً مباشراً بين الدار البيضاء والصويرة مرتين في الأسبوع"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png",
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793249565
+   "updated": 1793291793
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -25,15 +36,26 @@
    "section": "Air traffic control & airspace",
    "title": "France's 5 November strike: what it could mean for air traffic control, and what is still unknown",
    "summary": "French unions have called a nationwide strike for Thursday 5 November. Civil-service notices cover DGAC staff, including controllers, but as of 27 October no controller-specific call and no DGAC flight-reduction request had been reported.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Grève du 5 novembre en France : ce qu'elle pourrait signifier pour le contrôle aérien, et ce qu'on ignore encore",
+    "ar": "إضراب 5 نونبر في فرنسا: ما قد يعنيه للمراقبة الجوية وما لا يزال مجهولاً"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png",
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793249636
+   "updated": 1793291843
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -42,15 +64,26 @@
    "section": "Technology & innovation",
    "title": "FAA to roll out text IFR departure clearances for general aviation pilots in early 2027",
    "summary": "The FAA's Mobile Clearance, which sends IFR departure clearances to general-aviation pilots' flight-planning apps as text, is being evaluated at eleven US airports and is planned for deployment in early 2027.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La FAA déploiera début 2027 les autorisations de départ IFR par texte pour les pilotes de l'aviation générale",
+    "ar": "إدارة الطيران الأمريكية تعتمد مطلع 2027 أذونات المغادرة الآلية المكتوبة لطياري الطيران العام"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png",
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793249636
+   "updated": 1793291902
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -59,13 +92,24 @@
    "section": "Air traffic control & airspace",
    "title": "SpaceX tells the FAA that air traffic management, not rockets, limits its launch rate",
    "summary": "In comments to an FAA consultation on spaceports and priority launch corridors, SpaceX says it expects 10,000 launches a year and asks for airspace priority and automatic approvals; US airlines ask that the impact on other airspace users be assessed.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "SpaceX affirme à la FAA que c'est la gestion du trafic aérien, et non les fusées, qui limite sa cadence de lancement",
+    "ar": "سبيس إكس لإدارة الطيران الأمريكية: تدبير الحركة الجوية، لا الصواريخ، هو ما يحدّ من وتيرة إطلاقاتنا"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793249636
+   "updated": 1793291953
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -74,15 +118,26 @@
    "section": "Morocco & Africa",
    "title": "Moroccan airports pass 29.3 million passengers in nine months, with aircraft movements up 9.7%",
    "summary": "ONDA's figures to the end of September 2026 show 29.33 million passengers (+8.74%) and 214,607 aircraft movements (+9.70%), with Casablanca, Marrakech and Agadir carrying most of the load for the country's towers and approach units.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Les aéroports marocains dépassent 29,3 millions de passagers en neuf mois, mouvements en hausse de 9,7 %",
+    "ar": "المطارات المغربية تتجاوز 29,3 مليون مسافر في تسعة أشهر والحركات الجوية ترتفع بنسبة 9,7%"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "airports.svg",
     "airports.png",
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793248705
+   "updated": 1793291592
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -91,13 +146,24 @@
    "section": "Airlines & airports",
    "title": "Ryanair chief in Rabat confirms 5.3 million winter seats and a fifth Moroccan base at Rabat-Salé",
    "summary": "On 27 October Ryanair's CEO Eddie Wilson presented the airline's winter 2026 programme for Morocco in Rabat with the national tourism office: 156 routes, 17 of them new, 13 Moroccan airports and 16 based aircraft.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "À Rabat, le patron de Ryanair confirme 5,3 millions de sièges cet hiver et une cinquième base marocaine à Rabat-Salé",
+    "ar": "من الرباط، رئيس رايان إير يؤكد 5,3 ملايين مقعد هذا الشتاء وقاعدة مغربية خامسة في الرباط سلا"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png"
    ],
-   "updated": 1793248705
+   "updated": 1793291640
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -106,13 +172,24 @@
    "section": "Air traffic control & airspace",
    "title": "Italy: four-hour ENAV strike called for Friday as the government moves to postpone transport walkouts",
    "summary": "Uiltrasporti has called ENAV and Techno Sky staff out for four hours on Friday 30 October, the same day as a 24-hour USB general strike that covers air transport. The transport ministry has ordered a postponement, which USB says it will defy.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Italie : grève de quatre heures à ENAV vendredi, le gouvernement veut reporter les grèves des transports",
+    "ar": "إيطاليا: إضراب لأربع ساعات في ENAV يوم الجمعة والحكومة تسعى لتأجيل إضرابات النقل"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png"
    ],
-   "updated": 1793248705
+   "updated": 1793291691
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -121,13 +198,24 @@
    "section": "Safety",
    "title": "Sydney tower under scrutiny: ATSB releases its last two preliminary reports on 2026 ground conflicts",
    "summary": "The Australian Transport Safety Bureau has published preliminary reports on two August taxiing conflicts at Sydney Airport, completing six. Both describe tower staffing and fatigue risk; an incomplete readback and a pushback clearance are at the centre.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La tour de Sydney sous examen : l'ATSB publie ses deux derniers rapports préliminaires sur les conflits au sol de 2026",
+    "ar": "برج سيدني تحت المجهر: مكتب سلامة النقل الأسترالي ينشر آخر تقريرين أوليين عن تعارضات أرضية في 2026"
+   },
    "files": [
     "meta.json",
     "body.md",
+    "body.fr.md",
+    "body.ar.md",
     "map.svg",
     "map.png"
    ],
-   "updated": 1793248705
+   "updated": 1793291748
   }
  ]
 }
