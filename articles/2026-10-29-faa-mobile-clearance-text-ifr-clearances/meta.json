@@ -1,0 +1,52 @@
+{
+ "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
+ "date": "2026-10-29",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "FAA to roll out text IFR departure clearances for general aviation pilots in early 2027",
+ "summary": "The FAA's Mobile Clearance, which sends IFR departure clearances to general-aviation pilots' flight-planning apps as text, is being evaluated at eleven US airports and is planned for deployment in early 2027.",
+ "sources": [
+  {
+   "title": "FAA Mobile Clearances Begin In 2027 For GA",
+   "url": "https://aviationweek.com/business-aviation/safety-ops-regulation/faa-mobile-clearances-begin-2027-ga",
+   "site": "Aviation Week"
+  },
+  {
+   "title": "Mobile Clearance",
+   "url": "https://www.faa.gov/air_traffic/technology/mobile_clearance",
+   "site": "FAA"
+  },
+  {
+   "title": "FAA to Deploy Text-Based Mobile IFR Departure Clearances for General Aviation in Early 2027",
+   "url": "https://avi-go.com/news/articles/ddc7de514b8e6faa25975ff621f212a2",
+   "site": "Avi-Go"
+  },
+  {
+   "title": "FAA confirms nationwide rollout plan for Mobile Clearance",
+   "url": "https://worldairnews.co.za/faa-confirms-nationwide-rollout-plan-for-mobile-clearance-ending-evaluation-in-february-2027-as-digital-ifr-departure-clearances-expand/",
+   "site": "World Airnews"
+  },
+  {
+   "title": "Le Maroc accélère la transformation de son espace aérien (rapport LSSIP 2024)",
+   "url": "https://barlamane.com/fr/le-maroc-accelere-la-transformation-de-son-espace-aerien-et-structure-une-montee-en-capacite-nationale-selon-le-rapport-lssip-2024/",
+   "site": "Barlamane"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The airports where the FAA has evaluated Mobile Clearance since May 2026.",
+   "alt": "Map of the central and eastern United States. Open circles mark the first evaluation airports: three in the Houston area (May 2026), Appleton in Wisconsin and New Century AirCenter in Kansas (summer 2026). Dots mark the fall 2026 additions around Austin, College Station and Kansas City.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  },
+  {
+   "file": "phases.svg",
+   "png": "phases.png",
+   "caption": "Number of airports added to the Mobile Clearance evaluation at each phase in 2026, according to the FAA.",
+   "alt": "Bar chart: 3 airports in May 2026 (Houston area), 2 in summer 2026 (Appleton and New Century), 6 in fall 2026 (College Station, Kansas City Downtown, Johnson County, Austin Executive, Georgetown, San Marcos).",
+   "credit": "ATC SIM newsroom; data FAA"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}

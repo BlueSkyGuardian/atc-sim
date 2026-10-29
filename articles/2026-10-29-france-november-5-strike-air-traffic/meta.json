@@ -1,0 +1,47 @@
+{
+ "slug": "2026-10-29-france-november-5-strike-air-traffic",
+ "date": "2026-10-29",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "France's 5 November strike: what it could mean for air traffic control, and what is still unknown",
+ "summary": "French unions have called a nationwide strike for Thursday 5 November. Civil-service notices cover DGAC staff, including controllers, but as of 27 October no controller-specific call and no DGAC flight-reduction request had been reported.",
+ "sources": [
+  {
+   "title": "Grève du 5 novembre 2026 : avion, aéroports et vos droits",
+   "url": "https://airkarma.fr/actualites/greve-5-novembre-2026-avion-aeroports",
+   "site": "Airkarma"
+  },
+  {
+   "title": "Grève du 5 novembre 2026 : vols, aéroports, accès à Roissy et Orly, ce que l'on sait",
+   "url": "https://www.volclaim.com/actualite-aerienne/greve-5-novembre-2026-vols-aeroports.html",
+   "site": "Volclaim"
+  },
+  {
+   "title": "Tract SUD Aérien : grève du 5 novembre 2026",
+   "url": "https://www.sudaerien.fr/articles/2026-10-19-tract-sud-aerien-greve-du-5-novembre-2026",
+   "site": "SUD Aérien Solidaires"
+  },
+  {
+   "title": "French aviation regulator cancels flights due to civil servants strike (Reuters)",
+   "url": "https://live.euronext.com/en/financial-news/french-aviation-regulator-cancels-flights-due-civil-servants-strike",
+   "site": "Euronext / Reuters"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The airports affected during the previous civil-service strike, on 29 September 2026: flight cuts requested at Paris-CDG and Marseille, disruption expected at five regional airports.",
+   "alt": "Map of France. Paris-Charles de Gaulle marked with a 5% flight cut and Marseille-Provence with a 25% cut on 29 September 2026; Nantes, Strasbourg, Limoges, Pau and Tarbes-Lourdes marked as airports where disruption was expected.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  },
+  {
+   "file": "cuts.svg",
+   "png": "cuts.png",
+   "caption": "The share of flights the DGAC asked airlines to cancel on 29 September 2026, the last civil-service strike day.",
+   "alt": "Horizontal bar chart: on 29 September 2026 the DGAC asked airlines to cancel 25% of flights at Marseille-Provence between 16:00 and midnight, and 5% at Paris-CDG between 07:00 and 20:00.",
+   "credit": "ATC SIM newsroom; data DGAC via Reuters and Airkarma"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}

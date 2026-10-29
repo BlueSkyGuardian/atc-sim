@@ -1,6 +1,72 @@
 {
- "generated": 1793205998,
+ "generated": 1793249636,
  "articles": [
+  {
+   "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
+   "date": "2026-10-29",
+   "region": "morocco",
+   "section": "Morocco & Africa",
+   "title": "Royal Air Maroc opens a direct Casablanca–Essaouira link on Sunday, twice a week",
+   "summary": "From 1 November, Royal Air Maroc flies Casablanca–Essaouira on Wednesdays and Sundays, giving Essaouira-Mogador, an airport whose traffic is almost entirely international, a scheduled domestic connection to the national hub.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png",
+    "passengers.svg",
+    "passengers.png"
+   ],
+   "updated": 1793249565
+  },
+  {
+   "slug": "2026-10-29-france-november-5-strike-air-traffic",
+   "date": "2026-10-29",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "France's 5 November strike: what it could mean for air traffic control, and what is still unknown",
+   "summary": "French unions have called a nationwide strike for Thursday 5 November. Civil-service notices cover DGAC staff, including controllers, but as of 27 October no controller-specific call and no DGAC flight-reduction request had been reported.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png",
+    "cuts.svg",
+    "cuts.png"
+   ],
+   "updated": 1793249636
+  },
+  {
+   "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
+   "date": "2026-10-29",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "FAA to roll out text IFR departure clearances for general aviation pilots in early 2027",
+   "summary": "The FAA's Mobile Clearance, which sends IFR departure clearances to general-aviation pilots' flight-planning apps as text, is being evaluated at eleven US airports and is planned for deployment in early 2027.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "map.svg",
+    "map.png",
+    "phases.svg",
+    "phases.png"
+   ],
+   "updated": 1793249636
+  },
+  {
+   "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
+   "date": "2026-10-29",
+   "region": "international",
+   "section": "Air traffic control & airspace",
+   "title": "SpaceX tells the FAA that air traffic management, not rockets, limits its launch rate",
+   "summary": "In comments to an FAA consultation on spaceports and priority launch corridors, SpaceX says it expects 10,000 launches a year and asks for airspace priority and automatic approvals; US airlines ask that the impact on other airspace users be assessed.",
+   "files": [
+    "meta.json",
+    "body.md",
+    "launches.svg",
+    "launches.png"
+   ],
+   "updated": 1793249636
+  },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
    "date": "2026-10-28",
@@ -16,7 +82,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793205892
+   "updated": 1793248705
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -31,7 +97,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793205923
+   "updated": 1793248705
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -46,7 +112,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793205956
+   "updated": 1793248705
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -61,7 +127,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793205998
+   "updated": 1793248705
   }
  ]
 }

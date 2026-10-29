@@ -1,0 +1,47 @@
+{
+ "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
+ "date": "2026-10-29",
+ "region": "morocco",
+ "section": "Morocco & Africa",
+ "title": "Royal Air Maroc opens a direct Casablanca–Essaouira link on Sunday, twice a week",
+ "summary": "From 1 November, Royal Air Maroc flies Casablanca–Essaouira on Wednesdays and Sundays, giving Essaouira-Mogador, an airport whose traffic is almost entirely international, a scheduled domestic connection to the national hub.",
+ "sources": [
+  {
+   "title": "Casablanca-Essaouira : RAM propose un aller-retour à 800 DH",
+   "url": "https://www.lavieeco.com/au-royaume/casablanca-essaouira-ram-propose-un-aller-retour-a-800-dh/",
+   "site": "La Vie éco"
+  },
+  {
+   "title": "Royal Air Maroc lance une ligne directe Casablanca-Essaouira",
+   "url": "https://www.lebrief.ma/royal-air-maroc-lance-une-ligne-directe-casablanca-essaouira-100169731/",
+   "site": "LeBrief"
+  },
+  {
+   "title": "Hausse de plus de 34% du trafic de passagers en 2025 à l'aéroport Essaouira-Mogador",
+   "url": "https://fr.hespress.com/461858-hausse-de-plus-de-34-du-trafic-de-passagers-en-2025-a-de-laeroport-essaouira-mogador.html",
+   "site": "Hespress FR"
+  },
+  {
+   "title": "ONDA : hausse de plus de 10% du trafic de passagers à l'aéroport Essaouira-Mogador",
+   "url": "https://fr.hespress.com/470529-onda-hausse-de-plus-de-10-du-trafic-de-passagers-a-laeroport-essaouira-mogador.html",
+   "site": "Hespress FR"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The new Royal Air Maroc route between Casablanca Mohammed V and Essaouira-Mogador, with Marrakech-Ménara for reference.",
+   "alt": "Map of western Morocco showing a route line from Casablanca Mohammed V airport (GMMN) south-west to Essaouira-Mogador airport (GMMI), with Marrakech-Ménara (GMMX) marked inland. Scheduled flight time 1 hour 20 minutes.",
+   "credit": "ATC SIM newsroom; Natural Earth"
+  },
+  {
+   "file": "passengers.svg",
+   "png": "passengers.png",
+   "caption": "Passengers handled at Essaouira-Mogador airport in 2024 and 2025.",
+   "alt": "Bar chart: Essaouira-Mogador airport handled 230,959 passengers in 2024 and 310,436 in 2025, an increase of 34.4%.",
+   "credit": "ATC SIM newsroom; data ONDA via Hespress FR"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}

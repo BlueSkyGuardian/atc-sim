@@ -1,0 +1,35 @@
+{
+ "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
+ "date": "2026-10-29",
+ "region": "international",
+ "section": "Air traffic control & airspace",
+ "title": "SpaceX tells the FAA that air traffic management, not rockets, limits its launch rate",
+ "summary": "In comments to an FAA consultation on spaceports and priority launch corridors, SpaceX says it expects 10,000 launches a year and asks for airspace priority and automatic approvals; US airlines ask that the impact on other airspace users be assessed.",
+ "sources": [
+  {
+   "title": "SpaceX tells FAA outdated air traffic control, not rocket production, is its main constraint",
+   "url": "https://avi-go.com/news/articles/7010235cd56921c6f7e6f29f7f4b1fa0",
+   "site": "Avi-Go"
+  },
+  {
+   "title": "SpaceX tells FAA it expects 10,000 launches a year",
+   "url": "https://teslanorth.com/2026/10/28/spacex-faa-airspace-rules-cap-10000-launches/",
+   "site": "Tesla North"
+  },
+  {
+   "title": "Siting New Spaceports and Use of Priority Airspace for Critical Space Launch Corridors",
+   "url": "https://www.federalregister.gov/documents/2026/08/25/2026-17290/siting-new-spaceports-and-use-of-priority-airspace-for-critical-space-launch-corridors",
+   "site": "Federal Register"
+  }
+ ],
+ "figures": [
+  {
+   "file": "launches.svg",
+   "png": "launches.png",
+   "caption": "US launch numbers in 2025 against the official goals and forecasts and SpaceX's own expectation.",
+   "alt": "Horizontal bar chart: 217 US launches in 2025 (all, FAA request for information); 182 FAA-licensed launches in 2025 (SpaceX filing); a goal of 1,000 launches and reentries a year by 2030 (National Space Transportation Policy); an FAA forecast of 10,000 licensed launches and reentries a year by 2035; and SpaceX's own expectation of 10,000 launches a year.",
+   "credit": "ATC SIM newsroom; data FAA and SpaceX"
+  }
+ ],
+ "author": "ATC SIM newsroom"
+}
