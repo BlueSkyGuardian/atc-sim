@@ -1,0 +1,80 @@
+{
+ "slug": "2026-10-30-galileo-second-generation-four-more-satellites",
+ "date": "2026-10-30",
+ "region": "europe",
+ "section": "Technology & innovation",
+ "title": "ESA orders four more Galileo second-generation satellites, with anti-jamming and anti-spoofing protection",
+ "summary": "Contracts signed in Rome and Ottobrunn bring the Galileo G2 fleet to 16 satellites; the first launch is planned for 2028, as GNSS jamming and spoofing keep rising near conflict zones.",
+ "sources": [
+  {
+   "title": "ESA procures four new Galileo Second Generation satellites",
+   "url": "https://www.esa.int/Applications/Satellite_navigation/Galileo/ESA_procures_four_new_Galileo_Second_Generation_satellites",
+   "site": "ESA"
+  },
+  {
+   "title": "Airbus awarded contract for two additional Galileo satellites",
+   "url": "https://airbus.com/en/newsroom/press-releases/2026-10-airbus-awarded-contract-for-two-additional-galileo-satellites",
+   "site": "Airbus"
+  },
+  {
+   "title": "EASA updates aircraft GNSS jamming and spoofing guidance",
+   "url": "https://runwaygirlnetwork.com/2026/07/easa-updates-aircraft-gnss-jamming-and-spoofing-guidance/",
+   "site": "Runway Girl Network"
+  }
+ ],
+ "figures": [
+  {
+   "file": "fleet.svg",
+   "png": "fleet.png",
+   "caption": "The Galileo constellation: first-generation satellites built and launched, and second-generation satellites under contract.",
+   "alt": "Horizontal bar chart: 38 first-generation satellites, 34 of them launched; 12 G2 satellites ordered in 2021, 4 ordered in October 2026, 16 G2 under contract.",
+   "credit": "ATC SIM newsroom; data ESA"
+  },
+  {
+   "file": "signing.svg",
+   "png": "signing.png",
+   "caption": "Where the four new Galileo G2 satellites were ordered: Rome (Thales Alenia Space) and Ottobrunn near Munich (Airbus).",
+   "alt": "Map of Europe with Italy and Germany highlighted and two points: Rome, Thales Alenia Space contract signed 23 October; Ottobrunn, Airbus contract signed 26 October.",
+   "credit": "ATC SIM newsroom; Natural Earth; ESA, Airbus"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "L'ESA commande quatre nouveaux satellites Galileo de seconde génération, protégés contre le brouillage et le leurrage",
+   "summary": "Des contrats signés à Rome et à Ottobrunn portent la flotte Galileo G2 à 16 satellites ; le premier lancement est prévu en 2028, alors que le brouillage et le leurrage GNSS continuent d'augmenter près des zones de conflit.",
+   "figures": [
+    {
+     "file": "fleet.fr.svg",
+     "png": "fleet.fr.png",
+     "caption": "La constellation Galileo : satellites de première génération construits et lancés, et satellites de seconde génération sous contrat.",
+     "alt": "Graphique à barres horizontales : 38 satellites de première génération, dont 34 lancés ; 12 satellites G2 commandés en 2021, 4 commandés en octobre 2026, 16 G2 sous contrat."
+    },
+    {
+     "file": "signing.fr.svg",
+     "png": "signing.fr.png",
+     "caption": "Où ont été commandés les quatre nouveaux satellites Galileo G2 : Rome (Thales Alenia Space) et Ottobrunn près de Munich (Airbus).",
+     "alt": "Carte de l'Europe avec l'Italie et l'Allemagne en surbrillance et deux points : Rome, contrat Thales Alenia Space signé le 23 octobre ; Ottobrunn, contrat Airbus signé le 26 octobre."
+    }
+   ]
+  },
+  "ar": {
+   "title": "وكالة الفضاء الأوروبية تطلب أربعة أقمار إضافية من الجيل الثاني لـGalileo بحماية ضد التشويش والانتحال",
+   "summary": "عقود وُقعت في روما وأوتوبرون ترفع أسطول Galileo G2 إلى 16 قمراً، مع أول إطلاق مرتقب سنة 2028، في وقت يتواصل فيه ارتفاع التشويش على إشارات الملاحة بالأقمار الصناعية وانتحالها قرب مناطق النزاع.",
+   "figures": [
+    {
+     "file": "fleet.ar.svg",
+     "png": "fleet.ar.png",
+     "caption": "كوكبة Galileo: أقمار الجيل الأول المصنوعة والمُطلقة، وأقمار الجيل الثاني المتعاقد عليها.",
+     "alt": "رسم بياني بأعمدة أفقية: 38 قمراً من الجيل الأول أُطلق منها 34؛ و12 قمراً من الجيل الثاني طُلبت سنة 2021، و4 طُلبت في أكتوبر 2026، أي 16 قمراً من الجيل الثاني متعاقد عليها."
+    },
+    {
+     "file": "signing.ar.svg",
+     "png": "signing.ar.png",
+     "caption": "أين طُلبت أقمار Galileo G2 الأربعة الجديدة: روما (Thales Alenia Space) وأوتوبرون قرب ميونيخ (Airbus).",
+     "alt": "خريطة لأوروبا تبرز إيطاليا وألمانيا مع نقطتين: روما، عقد Thales Alenia Space الموقع في 23 أكتوبر؛ وأوتوبرون، عقد Airbus الموقع في 26 أكتوبر."
+    }
+   ]
+  }
+ }
+}

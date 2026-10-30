@@ -1,0 +1,75 @@
+{
+ "slug": "2026-10-30-airbus-nine-months-547-deliveries-870-target",
+ "date": "2026-10-30",
+ "region": "international",
+ "section": "Airlines & airports",
+ "title": "Airbus delivers 547 aircraft in nine months and keeps its 870 target, leaving 323 for the last quarter",
+ "summary": "Airbus's nine-month results show 428 A320 Family deliveries, a backlog of 9,310 aircraft and an unchanged 2026 guidance; reaching it needs about 108 deliveries a month to December.",
+ "sources": [
+  {
+   "title": "Airbus reports Nine-Month (9m) 2026 results",
+   "url": "https://www.airbus.com/en/newsroom/press-releases/2026-10-airbus-reports-nine-month-9m-2026-results",
+   "site": "Airbus"
+  },
+  {
+   "title": "Airbus needs record fourth-quarter delivery push to meet 2026 target",
+   "url": "https://aerospaceglobalnews.com/?p=53033",
+   "site": "Aerospace Global News"
+  }
+ ],
+ "figures": [
+  {
+   "file": "deliveries.svg",
+   "png": "deliveries.png",
+   "caption": "Airbus commercial deliveries from January to September 2026, by aircraft family.",
+   "alt": "Horizontal bar chart of Airbus deliveries, January to September 2026: A320 Family 428, A220 68, A350 38, A330 13; 547 in total.",
+   "credit": "ATC SIM newsroom; data Airbus"
+  },
+  {
+   "file": "target.svg",
+   "png": "target.png",
+   "caption": "Airbus deliveries so far against its 2026 target, compared with 2025.",
+   "alt": "Bar chart: 507 deliveries in January–September 2025, 547 in January–September 2026, 286 in the fourth quarter of 2025, 323 needed in the fourth quarter of 2026, target of 870 for 2026.",
+   "credit": "ATC SIM newsroom; data Airbus, Aerospace Global News"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Airbus livre 547 avions en neuf mois et maintient son objectif de 870, soit 323 à livrer au dernier trimestre",
+   "summary": "Les résultats à neuf mois d'Airbus montrent 428 livraisons de la famille A320, un carnet de 9 310 avions et des objectifs 2026 inchangés ; les atteindre exige environ 108 livraisons par mois jusqu'en décembre.",
+   "figures": [
+    {
+     "file": "deliveries.fr.svg",
+     "png": "deliveries.fr.png",
+     "caption": "Livraisons d'avions commerciaux Airbus de janvier à septembre 2026, par famille.",
+     "alt": "Graphique à barres horizontales des livraisons Airbus, janvier à septembre 2026 : famille A320 428, A220 68, A350 38, A330 13 ; 547 au total."
+    },
+    {
+     "file": "target.fr.svg",
+     "png": "target.fr.png",
+     "caption": "Les livraisons Airbus à ce jour face à l'objectif 2026, comparées à 2025.",
+     "alt": "Graphique à barres : 507 livraisons de janvier à septembre 2025, 547 de janvier à septembre 2026, 286 au quatrième trimestre 2025, 323 nécessaires au quatrième trimestre 2026, objectif de 870 pour 2026."
+    }
+   ]
+  },
+  "ar": {
+   "title": "Airbus تسلّم 547 طائرة في تسعة أشهر وتحافظ على هدف 870، أي 323 طائرة في الفصل الأخير",
+   "summary": "تُظهر نتائج Airbus لتسعة أشهر تسليم 428 طائرة من عائلة A320، وطلبيات غير منفذة تبلغ 9.310 طائرات، وتوقعات 2026 دون تغيير؛ وبلوغها يتطلب حوالي 108 عمليات تسليم شهرياً حتى دجنبر.",
+   "figures": [
+    {
+     "file": "deliveries.ar.svg",
+     "png": "deliveries.ar.png",
+     "caption": "تسليمات Airbus من الطائرات التجارية بين يناير وشتنبر 2026، حسب العائلة.",
+     "alt": "رسم بياني بأعمدة أفقية لتسليمات Airbus من يناير إلى شتنبر 2026: عائلة A320 ‏428، A220 ‏68، A350 ‏38، A330 ‏13؛ أي 547 إجمالاً."
+    },
+    {
+     "file": "target.ar.svg",
+     "png": "target.ar.png",
+     "caption": "تسليمات Airbus حتى الآن مقارنة بهدف 2026 وبسنة 2025.",
+     "alt": "رسم بياني بالأعمدة: 507 عمليات تسليم بين يناير وشتنبر 2025، و547 بين يناير وشتنبر 2026، و286 في الفصل الرابع من 2025، و323 مطلوبة في الفصل الرابع من 2026، وهدف 870 لسنة 2026."
+    }
+   ]
+  }
+ }
+}

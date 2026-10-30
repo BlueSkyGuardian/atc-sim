@@ -1,0 +1,80 @@
+{
+ "slug": "2026-10-30-iata-air-cargo-september-fuel-doubles",
+ "date": "2026-10-30",
+ "region": "international",
+ "section": "Airlines & airports",
+ "title": "Air cargo demand up 7.7% in September as jet fuel costs double, IATA says",
+ "summary": "Every region grew, led by North American carriers; African airlines rose 4.7%. Asia–North America traffic jumped 17% while lanes through the Gulf kept falling, and jet fuel was 103% dearer than a year earlier.",
+ "sources": [
+  {
+   "title": "Air Cargo Demand Accelerates in September, Up 7.7%",
+   "url": "https://www.iata.org/en/pressroom/2026-releases/10-29-air-cargo-demand-accelerates-september/",
+   "site": "IATA"
+  },
+  {
+   "title": "IATA: Air cargo demand up more than 7% in September",
+   "url": "https://www.aircargonews.net/data/2026/10/iata-air-cargo-demand-up-more-than-7-in-september/",
+   "site": "Air Cargo News"
+  },
+  {
+   "title": "EASA Extends Iran Airspace Avoidance Bulletin to 16 November 2026, Issues New Saudi Arabia Warning",
+   "url": "https://avi-go.com/news/articles/ca06a4019e5652b0c3496a130bab663c",
+   "site": "Avi-Go"
+  }
+ ],
+ "figures": [
+  {
+   "file": "regions.svg",
+   "png": "regions.png",
+   "caption": "Air cargo demand growth in September 2026 by region of airline registration, and for the world.",
+   "alt": "Horizontal bar chart of cargo tonne-kilometre growth on September 2025: North America 11.8%, Asia-Pacific 8.6%, world 7.7%, Latin America 6.7%, Africa 4.7%, Europe 4.5%, Middle East 3.8%.",
+   "credit": "ATC SIM newsroom; data IATA"
+  },
+  {
+   "file": "lanes.svg",
+   "png": "lanes.png",
+   "caption": "Air cargo growth on the main trade lanes in September 2026: the two lanes through the Gulf are the only ones to fall.",
+   "alt": "Horizontal bar chart of cargo tonne-kilometre change on September 2025: Asia–North America +17%, within Asia +10.2%, Europe–North America +9.3%, Europe–Asia +6%, Africa–Asia +2.6%, Middle East–Asia −10.2%, Europe–Middle East −18%.",
+   "credit": "ATC SIM newsroom; data IATA"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Fret aérien : la demande progresse de 7,7 % en septembre mais le kérosène coûte deux fois plus cher, selon l'IATA",
+   "summary": "Toutes les régions progressent, emmenées par les transporteurs nord-américains ; les compagnies africaines gagnent 4,7 %. Asie–Amérique du Nord bondit de 17 % tandis que les routes via le Golfe reculent, et le kérosène est 103 % plus cher qu'il y a un an.",
+   "figures": [
+    {
+     "file": "regions.fr.svg",
+     "png": "regions.fr.png",
+     "caption": "Croissance de la demande de fret aérien en septembre 2026 par région d'immatriculation des compagnies, et pour le monde.",
+     "alt": "Graphique à barres horizontales de la croissance des tonnes-kilomètres de fret sur septembre 2025 : Amérique du Nord 11,8 %, Asie-Pacifique 8,6 %, monde 7,7 %, Amérique latine 6,7 %, Afrique 4,7 %, Europe 4,5 %, Moyen-Orient 3,8 %."
+    },
+    {
+     "file": "lanes.fr.svg",
+     "png": "lanes.fr.png",
+     "caption": "Croissance du fret aérien sur les principales routes commerciales en septembre 2026 : les deux routes passant par le Golfe sont les seules en baisse.",
+     "alt": "Graphique à barres horizontales de la variation des tonnes-kilomètres de fret sur septembre 2025 : Asie–Amérique du Nord +17 %, intra-Asie +10,2 %, Europe–Amérique du Nord +9,3 %, Europe–Asie +6 %, Afrique–Asie +2,6 %, Moyen-Orient–Asie −10,2 %, Europe–Moyen-Orient −18 %."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الشحن الجوي: الطلب يرتفع 7,7% في شتنبر بينما تتضاعف تكلفة الوقود، حسب إياتا",
+   "summary": "سجلت جميع المناطق نمواً تتقدمها شركات أمريكا الشمالية، وارتفعت الشركات الإفريقية بنسبة 4,7%. وقفز ممر آسيا–أمريكا الشمالية بنسبة 17% بينما واصلت الممرات عبر الخليج تراجعها، وكان وقود الطائرات أغلى بنسبة 103% مما كان عليه قبل سنة.",
+   "figures": [
+    {
+     "file": "regions.ar.svg",
+     "png": "regions.ar.png",
+     "caption": "نمو الطلب على الشحن الجوي في شتنبر 2026 حسب منطقة تسجيل شركات الطيران، وعلى المستوى العالمي.",
+     "alt": "رسم بياني بأعمدة أفقية لنمو الطن-كيلومتر من الشحن مقارنة بشتنبر 2025: أمريكا الشمالية 11,8%، آسيا والمحيط الهادئ 8,6%، العالم 7,7%، أمريكا اللاتينية 6,7%، إفريقيا 4,7%، أوروبا 4,5%، الشرق الأوسط 3,8%."
+    },
+    {
+     "file": "lanes.ar.svg",
+     "png": "lanes.ar.png",
+     "caption": "نمو الشحن الجوي على الممرات التجارية الرئيسية في شتنبر 2026: الممران العابران للخليج وحدهما في تراجع.",
+     "alt": "رسم بياني بأعمدة أفقية لتغير الطن-كيلومتر من الشحن مقارنة بشتنبر 2025: آسيا–أمريكا الشمالية +17%، داخل آسيا +10,2%، أوروبا–أمريكا الشمالية +9,3%، أوروبا–آسيا +6%، إفريقيا–آسيا +2,6%، الشرق الأوسط–آسيا −10,2%، أوروبا–الشرق الأوسط −18%."
+    }
+   ]
+  }
+ }
+}

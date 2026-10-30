@@ -1,6 +1,150 @@
 {
- "generated": 1793293527,
+ "generated": 1793336501,
  "articles": [
+  {
+   "slug": "2026-10-30-royal-air-maroc-2026-outlook-9-3-million",
+   "date": "2026-10-30",
+   "region": "morocco",
+   "section": "Airlines & airports",
+   "title": "Royal Air Maroc expects 9.3 million passengers and more than 25 billion dirhams of revenue in 2026",
+   "summary": "The state's report on public companies, attached to the 2027 Finance Bill, shows a record 2025 for RAM, a net loss at end-April 2026 and the 2037 plan: 200 aircraft and 31.6 million passengers.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Royal Air Maroc prévoit 9,3 millions de passagers et plus de 25 milliards de dirhams de chiffre d'affaires en 2026",
+    "ar": "الخطوط الملكية المغربية تتوقع 9,3 ملايين مسافر وأكثر من 25 مليار درهم من رقم المعاملات في 2026"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "revenue.svg",
+    "revenue.png",
+    "targets.svg",
+    "targets.png",
+    "revenue.fr.svg",
+    "revenue.fr.png",
+    "targets.fr.svg",
+    "targets.fr.png",
+    "revenue.ar.svg",
+    "revenue.ar.png",
+    "targets.ar.svg",
+    "targets.ar.png"
+   ],
+   "updated": 1793336501
+  },
+  {
+   "slug": "2026-10-30-galileo-second-generation-four-more-satellites",
+   "date": "2026-10-30",
+   "region": "europe",
+   "section": "Technology & innovation",
+   "title": "ESA orders four more Galileo second-generation satellites, with anti-jamming and anti-spoofing protection",
+   "summary": "Contracts signed in Rome and Ottobrunn bring the Galileo G2 fleet to 16 satellites; the first launch is planned for 2028, as GNSS jamming and spoofing keep rising near conflict zones.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "L'ESA commande quatre nouveaux satellites Galileo de seconde génération, protégés contre le brouillage et le leurrage",
+    "ar": "وكالة الفضاء الأوروبية تطلب أربعة أقمار إضافية من الجيل الثاني لـGalileo بحماية ضد التشويش والانتحال"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "fleet.svg",
+    "fleet.png",
+    "signing.svg",
+    "signing.png",
+    "fleet.fr.svg",
+    "fleet.fr.png",
+    "signing.fr.svg",
+    "signing.fr.png",
+    "fleet.ar.svg",
+    "fleet.ar.png",
+    "signing.ar.svg",
+    "signing.ar.png"
+   ],
+   "updated": 1793336501
+  },
+  {
+   "slug": "2026-10-30-airbus-nine-months-547-deliveries-870-target",
+   "date": "2026-10-30",
+   "region": "international",
+   "section": "Airlines & airports",
+   "title": "Airbus delivers 547 aircraft in nine months and keeps its 870 target, leaving 323 for the last quarter",
+   "summary": "Airbus's nine-month results show 428 A320 Family deliveries, a backlog of 9,310 aircraft and an unchanged 2026 guidance; reaching it needs about 108 deliveries a month to December.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Airbus livre 547 avions en neuf mois et maintient son objectif de 870, soit 323 à livrer au dernier trimestre",
+    "ar": "Airbus تسلّم 547 طائرة في تسعة أشهر وتحافظ على هدف 870، أي 323 طائرة في الفصل الأخير"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "deliveries.svg",
+    "deliveries.png",
+    "target.svg",
+    "target.png",
+    "deliveries.fr.svg",
+    "deliveries.fr.png",
+    "target.fr.svg",
+    "target.fr.png",
+    "deliveries.ar.svg",
+    "deliveries.ar.png",
+    "target.ar.svg",
+    "target.ar.png"
+   ],
+   "updated": 1793336501
+  },
+  {
+   "slug": "2026-10-30-iata-air-cargo-september-fuel-doubles",
+   "date": "2026-10-30",
+   "region": "international",
+   "section": "Airlines & airports",
+   "title": "Air cargo demand up 7.7% in September as jet fuel costs double, IATA says",
+   "summary": "Every region grew, led by North American carriers; African airlines rose 4.7%. Asia–North America traffic jumped 17% while lanes through the Gulf kept falling, and jet fuel was 103% dearer than a year earlier.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Fret aérien : la demande progresse de 7,7 % en septembre mais le kérosène coûte deux fois plus cher, selon l'IATA",
+    "ar": "الشحن الجوي: الطلب يرتفع 7,7% في شتنبر بينما تتضاعف تكلفة الوقود، حسب إياتا"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "regions.svg",
+    "regions.png",
+    "lanes.svg",
+    "lanes.png",
+    "regions.fr.svg",
+    "regions.fr.png",
+    "lanes.fr.svg",
+    "lanes.fr.png",
+    "regions.ar.svg",
+    "regions.ar.png",
+    "lanes.ar.svg",
+    "lanes.ar.png"
+   ],
+   "updated": 1793336501
+  },
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
    "date": "2026-10-29",
@@ -27,7 +171,7 @@
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
@@ -57,7 +201,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793293503
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
@@ -93,7 +237,7 @@
     "causes.ar.svg",
     "causes.ar.png"
    ],
-   "updated": 1793293503
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -121,7 +265,7 @@
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
@@ -151,7 +295,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793293519
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
@@ -181,7 +325,7 @@
     "rollout.ar.svg",
     "rollout.ar.png"
    ],
-   "updated": 1793293503
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -209,7 +353,7 @@
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
@@ -239,7 +383,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793293515
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -265,7 +409,7 @@
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -293,7 +437,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -319,7 +463,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -345,7 +489,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -371,7 +515,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793292689
+   "updated": 1793335080
   }
  ]
 }

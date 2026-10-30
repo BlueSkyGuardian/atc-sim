@@ -1,0 +1,85 @@
+{
+ "slug": "2026-10-30-royal-air-maroc-2026-outlook-9-3-million",
+ "date": "2026-10-30",
+ "region": "morocco",
+ "section": "Airlines & airports",
+ "title": "Royal Air Maroc expects 9.3 million passengers and more than 25 billion dirhams of revenue in 2026",
+ "summary": "The state's report on public companies, attached to the 2027 Finance Bill, shows a record 2025 for RAM, a net loss at end-April 2026 and the 2037 plan: 200 aircraft and 31.6 million passengers.",
+ "sources": [
+  {
+   "title": "RAM prévoit de clôturer 2026 avec 9,3 millions de passagers et plus de 25 MMDH de CA",
+   "url": "https://www.lavieeco.com/affaires/entreprises/ram-prevoit-de-cloturer-2026-avec-93-millions-de-passagers-et-plus-de-25-mmdh-de-ca/",
+   "site": "La Vie éco"
+  },
+  {
+   "title": "الخطوط الملكية المغربية تتوقع تجاوز 25 مليار درهم من المداخيل ونقل 9,3 ملايين مسافر في 2026",
+   "url": "https://www.akhirsaa.com/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7-%D8%A7%D9%84%D9%85%D9%84%D9%83%D9%8A%D8%A9-%D8%A7%D9%84%D9%85%D8%BA%D8%B1%D8%A8%D9%8A%D8%A9-%D8%AA%D8%AA%D9%88%D9%82%D8%B9-%D8%AA%D8%AC%D8%A7%D9%88%D8%B2-25-%D9%85/",
+   "site": "Akhir Saa"
+  },
+  {
+   "title": "Morocco's airports handle 29.3 million passengers, up 8.7% in nine months",
+   "url": "https://en.hespress.com/148003-moroccos-airports-handle-29-3-million-passengers-up-8-7-in-nine-months.html",
+   "site": "Hespress English"
+  },
+  {
+   "title": "Morocco's Royal Air Maroc Scales Back Flights Due to Fuel Costs",
+   "url": "https://english.aawsat.com/business/5276768-morocco%E2%80%99s-royal-air-maroc-scales-back-flights-due-fuel-costs",
+   "site": "Asharq Al-Awsat"
+  }
+ ],
+ "figures": [
+  {
+   "file": "revenue.svg",
+   "png": "revenue.png",
+   "caption": "Royal Air Maroc's revenue: 2025 result, the first four months of 2026 and the 2026 forecast.",
+   "alt": "Bar chart of Royal Air Maroc revenue in billion dirhams: 21.5 in 2025, 11.0 from January to April 2026, and a forecast of more than 25 for 2026.",
+   "credit": "ATC SIM newsroom; data EEP report, PLF 2027"
+  },
+  {
+   "file": "targets.svg",
+   "png": "targets.png",
+   "caption": "Royal Air Maroc's 2026 passenger forecast against the 2037 target of its development contract.",
+   "alt": "Horizontal bar chart: 9.3 million passengers forecast for 2026, 31.6 million targeted for 2037.",
+   "credit": "ATC SIM newsroom; data EEP report, PLF 2027"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Royal Air Maroc prévoit 9,3 millions de passagers et plus de 25 milliards de dirhams de chiffre d'affaires en 2026",
+   "summary": "Le rapport sur les entreprises publiques joint au PLF 2027 montre une année 2025 record pour RAM, une perte nette à fin avril 2026 et le plan 2037 : 200 avions et 31,6 millions de passagers.",
+   "figures": [
+    {
+     "file": "revenue.fr.svg",
+     "png": "revenue.fr.png",
+     "caption": "Chiffre d'affaires de Royal Air Maroc : résultat 2025, quatre premiers mois de 2026 et prévision 2026.",
+     "alt": "Graphique à barres du chiffre d'affaires de Royal Air Maroc en milliards de dirhams : 21,5 en 2025, 11,0 de janvier à avril 2026 et une prévision de plus de 25 pour 2026."
+    },
+    {
+     "file": "targets.fr.svg",
+     "png": "targets.fr.png",
+     "caption": "Prévision de passagers 2026 de Royal Air Maroc face à l'objectif 2037 de son contrat-programme.",
+     "alt": "Graphique à barres horizontales : 9,3 millions de passagers prévus en 2026, 31,6 millions visés en 2037."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الخطوط الملكية المغربية تتوقع 9,3 ملايين مسافر وأكثر من 25 مليار درهم من رقم المعاملات في 2026",
+   "summary": "يكشف التقرير حول المقاولات العمومية المرفق بمشروع قانون المالية 2027 عن سنة 2025 قياسية للشركة، وخسارة صافية في نهاية أبريل 2026، وخطة 2037: 200 طائرة و31,6 مليون مسافر.",
+   "figures": [
+    {
+     "file": "revenue.ar.svg",
+     "png": "revenue.ar.png",
+     "caption": "رقم معاملات الخطوط الملكية المغربية: نتيجة 2025، والأشهر الأربعة الأولى من 2026، وتوقع 2026.",
+     "alt": "رسم بياني بالأعمدة لرقم معاملات الخطوط الملكية المغربية بمليارات الدراهم: 21,5 سنة 2025، و11,0 من يناير إلى أبريل 2026، وتوقع يفوق 25 لسنة 2026."
+    },
+    {
+     "file": "targets.ar.svg",
+     "png": "targets.ar.png",
+     "caption": "توقع عدد مسافري الخطوط الملكية المغربية لسنة 2026 مقارنة بهدف 2037 في عقد البرنامج.",
+     "alt": "رسم بياني بأعمدة أفقية: 9,3 ملايين مسافر متوقعة سنة 2026، و31,6 مليوناً مستهدفة سنة 2037."
+    }
+   ]
+  }
+ }
+}
