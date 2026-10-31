@@ -1,0 +1,85 @@
+{
+ "slug": "2026-10-31-marrakech-menara-8-1-million-nine-months",
+ "date": "2026-10-31",
+ "region": "morocco",
+ "section": "Airlines & airports",
+ "title": "Marrakech-Menara passes 8.1 million passengers in nine months, up 9.9%, with Paris and London on top",
+ "summary": "ONDA figures show 8,113,680 passengers at Marrakech-Menara from January to September 2026 and 877,833 in September alone (+7.65%); Paris-Orly, Paris-CDG and London Gatwick lead the international routes.",
+ "sources": [
+  {
+   "title": "مطار مراكش المنارة: ارتفاع بأزيد من 9 في المائة في حركة المسافرين (MAP)",
+   "url": "https://www.akhbarona.com/mobile/divers/434910.html",
+   "site": "Akhbarona"
+  },
+  {
+   "title": "أزيد من 8 ملايين مسافر بمطار مراكش المنارة خلال 9 أشهر",
+   "url": "https://www.mamlakapress.com/archives/293749",
+   "site": "Mamlaka Press"
+  },
+  {
+   "title": "Aéroport Marrakech-Menara: hausse de près de 8 % du trafic des passagers à fin septembre",
+   "url": "https://fr.hespress.com/494357-aeroport-marrakech-menara-hausse-de-pres-de-8-du-trafic-des-passagers-a-fin-septembre.html",
+   "site": "Hespress"
+  },
+  {
+   "title": "Marrakech Airshow 2026 : l'ONDA met en scène sa transformation sous la marque Airports of Morocco",
+   "url": "https://www.aeronautique.ma/Marrakech-Airshow-2026-l-ONDA-met-en-scene-sa-transformation-sous-la-marque-Airports-of-Morocco_a6117.html",
+   "site": "Aeronautique.ma"
+  }
+ ],
+ "figures": [
+  {
+   "file": "routes.svg",
+   "png": "routes.png",
+   "caption": "Marrakech-Menara's five busiest international routes in September 2026.",
+   "alt": "Horizontal bar chart of passengers in September 2026: Paris-Orly 61,746, Paris-Charles de Gaulle 53,778, London Gatwick 37,480, Madrid 35,597, London Stansted 27,279.",
+   "credit": "ATC SIM newsroom; data ONDA via MAP"
+  },
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Where Marrakech's top five international routes lead: Paris, London and Madrid.",
+   "alt": "Map of Morocco and western Europe with lines from Marrakech to Paris (Orly 61,746 and CDG 53,778 passengers in September), London (Gatwick 37,480 and Stansted 27,279) and Madrid (35,597).",
+   "credit": "ATC SIM newsroom; Natural Earth; data ONDA via MAP"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Marrakech-Ménara dépasse 8,1 millions de passagers en neuf mois, en hausse de 9,9 %, Paris et Londres en tête",
+   "summary": "Selon l'ONDA, Marrakech-Ménara a accueilli 8 113 680 passagers de janvier à septembre 2026 et 877 833 sur le seul mois de septembre (+7,65 %) ; Paris-Orly, Paris-CDG et Londres Gatwick sont les premières lignes internationales.",
+   "figures": [
+    {
+     "file": "routes.fr.svg",
+     "png": "routes.fr.png",
+     "caption": "Les cinq premières lignes internationales de Marrakech-Ménara en septembre 2026.",
+     "alt": "Graphique à barres horizontales des passagers de septembre 2026 : Paris-Orly 61 746, Paris-Charles-de-Gaulle 53 778, Londres Gatwick 37 480, Madrid 35 597, Londres Stansted 27 279."
+    },
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Les destinations des cinq premières lignes internationales de Marrakech : Paris, Londres et Madrid.",
+     "alt": "Carte du Maroc et de l'Europe de l'Ouest avec des lignes de Marrakech vers Paris (Orly 61 746 et CDG 53 778 passagers en septembre), Londres (Gatwick 37 480 et Stansted 27 279) et Madrid (35 597)."
+    }
+   ]
+  },
+  "ar": {
+   "title": "مطار مراكش المنارة يتجاوز 8.1 مليون مسافر في تسعة أشهر بارتفاع 9.9 في المائة، وباريس ولندن في الصدارة",
+   "summary": "تُظهر معطيات المكتب الوطني للمطارات أن مطار مراكش المنارة استقبل 8.113.680 مسافراً بين يناير وشتنبر 2026، و877.833 مسافراً في شتنبر وحده (+7.65 في المائة)؛ وتتصدر باريس أورلي وباريس شارل دوغول ولندن غاتويك الخطوط الدولية.",
+   "figures": [
+    {
+     "file": "routes.ar.svg",
+     "png": "routes.ar.png",
+     "caption": "الخطوط الدولية الخمسة الأولى في مطار مراكش المنارة خلال شتنبر 2026.",
+     "alt": "رسم بياني بأعمدة أفقية لعدد المسافرين في شتنبر 2026: باريس أورلي 61746، باريس شارل دوغول 53778، لندن غاتويك 37480، مدريد 35597، لندن ستانستد 27279."
+    },
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "وجهات الخطوط الدولية الخمسة الأولى لمراكش: باريس ولندن ومدريد.",
+     "alt": "خريطة للمغرب وأوروبا الغربية تُظهر خطوطاً من مراكش إلى باريس (أورلي 61746 وشارل دوغول 53778 مسافراً في شتنبر) ولندن (غاتويك 37480 وستانستد 27279) ومدريد (35597)."
+    }
+   ]
+  }
+ }
+}

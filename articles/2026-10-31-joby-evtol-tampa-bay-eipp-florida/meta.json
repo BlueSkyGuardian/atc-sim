@@ -1,0 +1,66 @@
+{
+ "slug": "2026-10-31-joby-evtol-tampa-bay-eipp-florida",
+ "date": "2026-10-31",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "Electric air taxi lands at Tampa International on the 1914 airline route, opening Florida's eVTOL pilot week",
+ "summary": "Joby flew its piloted eVTOL from St. Petersburg to Tampa International on 30 October under the US eIPP programme; Orlando, with routes built over two years of simulation with its controllers, and Kennedy Space Center come next.",
+ "sources": [
+  {
+   "title": "Joby Brings Its Vertical Takeoff and Landing Air Taxi to Florida (Business Wire)",
+   "url": "https://www.financialcontent.com/article/bizwire-2026-10-30-joby-brings-its-vertical-takeoff-and-landing-air-taxi-to-florida",
+   "site": "Joby Aviation / Business Wire"
+  },
+  {
+   "title": "Electric air taxi flies from St. Pete to Tampa International Airport in Florida test",
+   "url": "https://www.fox13news.com/news/electric-air-taxi-fly-from-st-pete-tampa-international-florida-test",
+   "site": "FOX 13 Tampa Bay"
+  },
+  {
+   "title": "Joby Flies Florida's 1914 Airline Route, Still Without a Fare",
+   "url": "https://dronexl.co/2026/10/30/joby-florida-eipp-tampa-bay-1914-airline-route/",
+   "site": "DroneXL"
+  },
+  {
+   "title": "Electric aircraft retrace historic Tampa Bay flight as Florida prepares for future of air travel",
+   "url": "https://www.yahoo.com/news/us/articles/electric-aircraft-retrace-historic-tampa-213934320.html",
+   "site": "Yahoo News"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The Florida eIPP week: the 30 October flight from St. Petersburg to Tampa International and the next stops at Orlando and Kennedy Space Center.",
+   "alt": "Map of central Florida: a solid line from Albert Whitted Airport (SPG) to Tampa International (TPA), then a dashed line to Orlando International (MCO) and the Kennedy Space Center Shuttle Landing Facility.",
+   "credit": "ATC SIM newsroom; Natural Earth; plan Joby / FDOT"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Un taxi aérien électrique se pose à Tampa sur la route aérienne de 1914 et ouvre la semaine eVTOL de Floride",
+   "summary": "Joby a fait voler son eVTOL piloté de St. Petersburg à l'aéroport international de Tampa le 30 octobre dans le cadre du programme américain eIPP ; suivent Orlando, aux routes conçues en deux ans de simulation avec ses contrôleurs, et le Kennedy Space Center.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "La semaine eIPP en Floride : le vol du 30 octobre de St. Petersburg à Tampa et les étapes suivantes à Orlando et au Kennedy Space Center.",
+     "alt": "Carte du centre de la Floride : un trait plein de l'aéroport Albert Whitted (SPG) à Tampa International (TPA), puis des pointillés vers Orlando International (MCO) et la Shuttle Landing Facility du Kennedy Space Center."
+    }
+   ]
+  },
+  "ar": {
+   "title": "سيارة أجرة جوية كهربائية تهبط في مطار تامبا على مسار طيران 1914 وتفتتح أسبوع eVTOL في فلوريدا",
+   "summary": "حلّقت Joby بطائرتها eVTOL المأهولة من سانت بطرسبرغ إلى مطار تامبا الدولي في 30 أكتوبر ضمن البرنامج الأمريكي eIPP؛ وتليها أورلاندو، حيث وُضعت المسارات خلال سنتين من المحاكاة مع مراقبيها الجويين، ثم مركز كينيدي للفضاء.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "أسبوع eIPP في فلوريدا: رحلة 30 أكتوبر من سانت بطرسبرغ إلى تامبا والمحطات التالية في أورلاندو ومركز كينيدي للفضاء.",
+     "alt": "خريطة لوسط فلوريدا: خط متصل من مطار ألبرت ويتيد (SPG) إلى مطار تامبا الدولي (TPA)، ثم خط متقطع نحو مطار أورلاندو الدولي (MCO) ومدرج هبوط المكوك في مركز كينيدي للفضاء."
+    }
+   ]
+  }
+ }
+}

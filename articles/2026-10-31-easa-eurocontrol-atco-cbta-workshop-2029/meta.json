@@ -1,0 +1,71 @@
+{
+ "slug": "2026-10-31-easa-eurocontrol-atco-cbta-workshop-2029",
+ "date": "2026-10-31",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "Controller training goes competency-based in 2029: EASA and EUROCONTROL prepare Europe's regulators",
+ "summary": "At a joint workshop on 27-28 October, EASA and EUROCONTROL worked with national authorities on the CBTA rules that apply to ATCO training from 1 January 2029, and promised an online course and a Data4Training initiative.",
+ "sources": [
+  {
+   "title": "EASA and EUROCONTROL joint Air Traffic Controller CBTA Workshop for National Competent Authorities",
+   "url": "https://www.eurocontrol.int/news/easa-and-eurocontrol-joint-air-traffic-controller-competency-based-training-and-assessment",
+   "site": "EUROCONTROL"
+  },
+  {
+   "title": "EASA and EUROCONTROL Hold Joint ATCO CBTA Workshop",
+   "url": "https://theaviationhub.co.uk/easa-eurocontrol-atco-cbta-workshop/",
+   "site": "The Aviation Hub"
+  },
+  {
+   "title": "EU Adopts New Regulation to Modernise Air Traffic Controller Training with Competency-Based and Virtual Methods",
+   "url": "https://www.easa.europa.eu/newsroom-and-events/news/eu-adopts-new-regulation-modernise-air-traffic-controller-training",
+   "site": "EASA"
+  },
+  {
+   "title": "CBTA for ATCO training: turning new regulation into better outcomes",
+   "url": "https://www.entrypointnorth.com/cbta-for-atco-training-turning-new-regulation-into-better-outcomes/",
+   "site": "Entry Point North"
+  },
+  {
+   "title": "EUROCONTROL Forecast 2026-2032 (Autumn 2026)",
+   "url": "https://www.eurocontrol.int/publication/eurocontrol-forecast-2026-2032",
+   "site": "EUROCONTROL"
+  }
+ ],
+ "figures": [
+  {
+   "file": "traffic.svg",
+   "png": "traffic.png",
+   "caption": "IFR flights in the ECAC area in 2025 and, in EUROCONTROL's base scenario, in 2029 when CBTA applies and in 2032.",
+   "alt": "Bar chart, millions of flights: 11.05 in 2025 (actual), 12.10 in 2029, 12.82 in 2032.",
+   "credit": "ATC SIM newsroom; data EUROCONTROL"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La formation des contrôleurs passe aux compétences en 2029 : l'AESA et EUROCONTROL préparent les régulateurs",
+   "summary": "Lors d'un atelier commun les 27 et 28 octobre, l'AESA et EUROCONTROL ont travaillé avec les autorités nationales sur les règles CBTA applicables à la formation des contrôleurs dès le 1er janvier 2029, et annoncé un cours en ligne et l'initiative Data4Training.",
+   "figures": [
+    {
+     "file": "traffic.fr.svg",
+     "png": "traffic.fr.png",
+     "caption": "Les vols IFR dans la zone CEAC en 2025 et, dans le scénario central d'EUROCONTROL, en 2029, année d'application de la CBTA, et en 2032.",
+     "alt": "Graphique à barres, en millions de vols : 11,05 en 2025 (réel), 12,10 en 2029, 12,82 en 2032."
+    }
+   ]
+  },
+  "ar": {
+   "title": "تكوين المراقبين الجويين يعتمد الكفاءات في 2029: EASA وEUROCONTROL تُعدّان الهيئات التنظيمية الأوروبية",
+   "summary": "خلال ورشة مشتركة يومي 27 و28 أكتوبر، اشتغلت EASA وEUROCONTROL مع السلطات الوطنية على قواعد CBTA التي تُطبق على تكوين المراقبين الجويين ابتداءً من 1 يناير 2029، وأعلنتا عن دورة عبر الإنترنت ومبادرة Data4Training.",
+   "figures": [
+    {
+     "file": "traffic.ar.svg",
+     "png": "traffic.ar.png",
+     "caption": "الرحلات IFR في منطقة ECAC سنة 2025، ووفق السيناريو الأساسي لـEUROCONTROL سنة 2029، سنة بدء تطبيق CBTA، وسنة 2032.",
+     "alt": "رسم بياني بالأعمدة بملايين الرحلات: 11.05 في 2025 (فعلي)، و12.10 في 2029، و12.82 في 2032."
+    }
+   ]
+  }
+ }
+}

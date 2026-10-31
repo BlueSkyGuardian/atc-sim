@@ -1,0 +1,61 @@
+{
+ "slug": "2026-10-31-gulf-airspace-saudi-airports-restrictions",
+ "date": "2026-10-31",
+ "region": "international",
+ "section": "Air traffic control & airspace",
+ "title": "Riyadh still requires prior permission for every flight while Gulf hubs keep operating",
+ "summary": "Saudi airports remain restricted after October's attacks, with about 86% of Riyadh departures lost from 8 to 25 October, while Dubai, Doha and Abu Dhabi operate normally; EASA's bulletins for the region are due for review on 16 November.",
+ "sources": [
+  {
+   "title": "Major Middle East Airports Remain Open October 30 as Riyadh Operates Limited Flights Amid Security Risks",
+   "url": "https://www.ibtimes.com.au/middle-east-airports-riyadh-flight-restrictions-1877624",
+   "site": "International Business Times"
+  },
+  {
+   "title": "Is Saudi Arabia Airspace Open? Flight Status & Travel Update (October 2026)",
+   "url": "https://blog.wego.com/saudi-arabia-airspace-flights-status-affected-airlines-what-travelers-need-to-know/",
+   "site": "Wego"
+  },
+  {
+   "title": "EASA Extends Iran Airspace Avoidance Bulletin to 16 November 2026, Issues New Saudi Arabia Warning",
+   "url": "https://avi-go.com/news/articles/ca06a4019e5652b0c3496a130bab663c",
+   "site": "Avi-Go"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Status of Saudi and Gulf airports on 30 October 2026.",
+   "alt": "Map of the Arabian Peninsula: Riyadh, Jeddah, Dammam, Abha, Jazan and Najran marked in red as Saudi airports with restrictions or disruption; Kuwait, Doha, Dubai, Abu Dhabi and Muscat marked as operating.",
+   "credit": "ATC SIM newsroom; Natural Earth; status IBTimes, Wego, EASA"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Riyad exige toujours une autorisation préalable pour chaque vol, les hubs du Golfe continuent d'opérer",
+   "summary": "Les aéroports saoudiens restent restreints après les attaques d'octobre, environ 86 % des départs de Riyad ayant été perdus du 8 au 25 octobre, tandis que Dubaï, Doha et Abou Dhabi fonctionnent normalement ; les bulletins de l'AESA pour la région seront réexaminés le 16 novembre.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Situation des aéroports saoudiens et du Golfe le 30 octobre 2026.",
+     "alt": "Carte de la péninsule Arabique : Riyad, Djeddah, Dammam, Abha, Jazan et Najran en rouge, aéroports saoudiens restreints ou perturbés ; Koweït, Doha, Dubaï, Abou Dhabi et Mascate signalés comme en fonctionnement."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الرياض لا تزال تشترط إذناً مسبقاً لكل رحلة بينما تواصل محاور الخليج عملها",
+   "summary": "لا تزال المطارات السعودية خاضعة للقيود بعد هجمات أكتوبر، إذ فُقدت حوالي 86 في المائة من رحلات الإقلاع من الرياض بين 8 و25 أكتوبر، بينما تعمل دبي والدوحة وأبوظبي بشكل طبيعي؛ ومن المرتقب أن تراجع EASA نشراتها الخاصة بالمنطقة في 16 نونبر.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "وضع المطارات السعودية ومطارات الخليج في 30 أكتوبر 2026.",
+     "alt": "خريطة لشبه الجزيرة العربية: الرياض وجدة والدمام وأبها وجازان ونجران بالأحمر كمطارات سعودية تخضع لقيود أو اضطرابات؛ والكويت والدوحة ودبي وأبوظبي ومسقط مطارات تعمل."
+    }
+   ]
+  }
+ }
+}

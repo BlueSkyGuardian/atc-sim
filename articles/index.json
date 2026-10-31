@@ -1,6 +1,168 @@
 {
- "generated": 1793336501,
+ "generated": 1793422566,
  "articles": [
+  {
+   "slug": "2026-10-31-marrakech-menara-8-1-million-nine-months",
+   "date": "2026-10-31",
+   "region": "morocco",
+   "section": "Airlines & airports",
+   "title": "Marrakech-Menara passes 8.1 million passengers in nine months, up 9.9%, with Paris and London on top",
+   "summary": "ONDA figures show 8,113,680 passengers at Marrakech-Menara from January to September 2026 and 877,833 in September alone (+7.65%); Paris-Orly, Paris-CDG and London Gatwick lead the international routes.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Marrakech-Ménara dépasse 8,1 millions de passagers en neuf mois, en hausse de 9,9 %, Paris et Londres en tête",
+    "ar": "مطار مراكش المنارة يتجاوز 8.1 مليون مسافر في تسعة أشهر بارتفاع 9.9 في المائة، وباريس ولندن في الصدارة"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "routes.svg",
+    "routes.png",
+    "map.svg",
+    "map.png",
+    "routes.fr.svg",
+    "routes.fr.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "routes.ar.svg",
+    "routes.ar.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793422561
+  },
+  {
+   "slug": "2026-10-31-easa-eurocontrol-atco-cbta-workshop-2029",
+   "date": "2026-10-31",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "Controller training goes competency-based in 2029: EASA and EUROCONTROL prepare Europe's regulators",
+   "summary": "At a joint workshop on 27-28 October, EASA and EUROCONTROL worked with national authorities on the CBTA rules that apply to ATCO training from 1 January 2029, and promised an online course and a Data4Training initiative.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La formation des contrôleurs passe aux compétences en 2029 : l'AESA et EUROCONTROL préparent les régulateurs",
+    "ar": "تكوين المراقبين الجويين يعتمد الكفاءات في 2029: EASA وEUROCONTROL تُعدّان الهيئات التنظيمية الأوروبية"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "traffic.svg",
+    "traffic.png",
+    "traffic.fr.svg",
+    "traffic.fr.png",
+    "traffic.ar.svg",
+    "traffic.ar.png"
+   ],
+   "updated": 1793422561
+  },
+  {
+   "slug": "2026-10-31-eurocontrol-autumn-forecast-11-2-million-flights",
+   "date": "2026-10-31",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "EUROCONTROL cuts its 2026 forecast to 11.2 million flights as the Middle East crisis removes 110,000",
+   "summary": "The autumn seven-year forecast lowers 2026 growth in Europe to 1.7% from 2.7%, expects a 3.2% rebound in 2027 and about 12.8 million flights in 2032 in the base case, with a wide range between scenarios.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "EUROCONTROL ramène sa prévision 2026 à 11,2 millions de vols, la crise au Moyen-Orient en retirant 110 000",
+    "ar": "EUROCONTROL تخفّض توقعاتها لسنة 2026 إلى 11.2 مليون رحلة بعدما حذفت أزمة الشرق الأوسط 110.000 رحلة"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "forecast.svg",
+    "forecast.png",
+    "growth.svg",
+    "growth.png",
+    "forecast.fr.svg",
+    "forecast.fr.png",
+    "growth.fr.svg",
+    "growth.fr.png",
+    "forecast.ar.svg",
+    "forecast.ar.png",
+    "growth.ar.svg",
+    "growth.ar.png"
+   ],
+   "updated": 1793422561
+  },
+  {
+   "slug": "2026-10-31-gulf-airspace-saudi-airports-restrictions",
+   "date": "2026-10-31",
+   "region": "international",
+   "section": "Air traffic control & airspace",
+   "title": "Riyadh still requires prior permission for every flight while Gulf hubs keep operating",
+   "summary": "Saudi airports remain restricted after October's attacks, with about 86% of Riyadh departures lost from 8 to 25 October, while Dubai, Doha and Abu Dhabi operate normally; EASA's bulletins for the region are due for review on 16 November.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Riyad exige toujours une autorisation préalable pour chaque vol, les hubs du Golfe continuent d'opérer",
+    "ar": "الرياض لا تزال تشترط إذناً مسبقاً لكل رحلة بينما تواصل محاور الخليج عملها"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793422566
+  },
+  {
+   "slug": "2026-10-31-joby-evtol-tampa-bay-eipp-florida",
+   "date": "2026-10-31",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "Electric air taxi lands at Tampa International on the 1914 airline route, opening Florida's eVTOL pilot week",
+   "summary": "Joby flew its piloted eVTOL from St. Petersburg to Tampa International on 30 October under the US eIPP programme; Orlando, with routes built over two years of simulation with its controllers, and Kennedy Space Center come next.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Un taxi aérien électrique se pose à Tampa sur la route aérienne de 1914 et ouvre la semaine eVTOL de Floride",
+    "ar": "سيارة أجرة جوية كهربائية تهبط في مطار تامبا على مسار طيران 1914 وتفتتح أسبوع eVTOL في فلوريدا"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793422561
+  },
   {
    "slug": "2026-10-30-royal-air-maroc-2026-outlook-9-3-million",
    "date": "2026-10-30",
@@ -35,7 +197,7 @@
     "targets.ar.svg",
     "targets.ar.png"
    ],
-   "updated": 1793336501
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-30-galileo-second-generation-four-more-satellites",
@@ -71,7 +233,7 @@
     "signing.ar.svg",
     "signing.ar.png"
    ],
-   "updated": 1793336501
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-30-airbus-nine-months-547-deliveries-870-target",
@@ -107,7 +269,7 @@
     "target.ar.svg",
     "target.ar.png"
    ],
-   "updated": 1793336501
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-30-iata-air-cargo-september-fuel-doubles",
@@ -143,7 +305,7 @@
     "lanes.ar.svg",
     "lanes.ar.png"
    ],
-   "updated": 1793336501
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
@@ -171,7 +333,7 @@
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
@@ -201,7 +363,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
@@ -237,7 +399,7 @@
     "causes.ar.svg",
     "causes.ar.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -265,7 +427,7 @@
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
@@ -295,7 +457,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
@@ -325,7 +487,7 @@
     "rollout.ar.svg",
     "rollout.ar.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -353,7 +515,7 @@
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
@@ -383,7 +545,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -409,7 +571,7 @@
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -437,7 +599,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -463,7 +625,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -489,7 +651,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -515,7 +677,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793335080
+   "updated": 1793421485
   }
  ]
 }

@@ -1,0 +1,80 @@
+{
+ "slug": "2026-10-31-eurocontrol-autumn-forecast-11-2-million-flights",
+ "date": "2026-10-31",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "EUROCONTROL cuts its 2026 forecast to 11.2 million flights as the Middle East crisis removes 110,000",
+ "summary": "The autumn seven-year forecast lowers 2026 growth in Europe to 1.7% from 2.7%, expects a 3.2% rebound in 2027 and about 12.8 million flights in 2032 in the base case, with a wide range between scenarios.",
+ "sources": [
+  {
+   "title": "EUROCONTROL Forecast 2026-2032 (Autumn 2026)",
+   "url": "https://www.eurocontrol.int/publication/eurocontrol-forecast-2026-2032",
+   "site": "EUROCONTROL"
+  },
+  {
+   "title": "EUROCONTROL Seven-Year Forecast 2026-2032, full report",
+   "url": "https://www.eurocontrol.int/sites/default/files/2026-10/eurocontrol-seven-year-forecast-2026-2032-report.pdf",
+   "site": "EUROCONTROL"
+  },
+  {
+   "title": "Eurocontrol cuts Europe's 2026 air traffic forecast by 110,000 flights",
+   "url": "https://ua.news/en/money/eurocontrol-zniziv-prognoz-aviatrafiku-evropi-na-110-tisiach-reisiv-u-2026-rotsi-anadolu-agency",
+   "site": "UA.NEWS (Anadolu Agency)"
+  }
+ ],
+ "figures": [
+  {
+   "file": "forecast.svg",
+   "png": "forecast.png",
+   "caption": "EUROCONTROL's three scenarios for IFR flights in the ECAC area, 2025 to 2032.",
+   "alt": "Line chart, millions of flights a year from 2025 (11.05 actual) to 2032: high scenario reaching 14.52, base 12.82, low 11.30.",
+   "credit": "ATC SIM newsroom; data EUROCONTROL"
+  },
+  {
+   "file": "growth.svg",
+   "png": "growth.png",
+   "caption": "Annual traffic growth in the base scenario, and the change since the spring forecast.",
+   "alt": "Bar chart: 2026 growth 2.7% in the spring forecast, 1.7% in the autumn forecast; 3.2% in 2027; 2.1% average over 2026-2032.",
+   "credit": "ATC SIM newsroom; data EUROCONTROL"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "EUROCONTROL ramène sa prévision 2026 à 11,2 millions de vols, la crise au Moyen-Orient en retirant 110 000",
+   "summary": "La prévision à sept ans de l'automne abaisse la croissance 2026 en Europe à 1,7 % au lieu de 2,7 %, prévoit un rebond de 3,2 % en 2027 et environ 12,8 millions de vols en 2032 dans le scénario central, avec un large écart entre scénarios.",
+   "figures": [
+    {
+     "file": "forecast.fr.svg",
+     "png": "forecast.fr.png",
+     "caption": "Les trois scénarios d'EUROCONTROL pour les vols IFR dans la zone CEAC, de 2025 à 2032.",
+     "alt": "Graphique linéaire, millions de vols par an de 2025 (11,05 réel) à 2032 : scénario haut jusqu'à 14,52, central 12,82, bas 11,30."
+    },
+    {
+     "file": "growth.fr.svg",
+     "png": "growth.fr.png",
+     "caption": "Croissance annuelle du trafic dans le scénario central, et le changement depuis la prévision de printemps.",
+     "alt": "Graphique à barres : croissance 2026 de 2,7 % dans la prévision de printemps, 1,7 % dans celle d'automne ; 3,2 % en 2027 ; 2,1 % en moyenne sur 2026-2032."
+    }
+   ]
+  },
+  "ar": {
+   "title": "EUROCONTROL تخفّض توقعاتها لسنة 2026 إلى 11.2 مليون رحلة بعدما حذفت أزمة الشرق الأوسط 110.000 رحلة",
+   "summary": "تخفّض توقعات السنوات السبع الصادرة في الخريف نمو الحركة في أوروبا سنة 2026 إلى 1.7 في المائة بدل 2.7، وتتوقع انتعاشاً بنسبة 3.2 في المائة في 2027 وحوالي 12.8 مليون رحلة في 2032 وفق السيناريو الأساسي، مع فارق واسع بين السيناريوهات.",
+   "figures": [
+    {
+     "file": "forecast.ar.svg",
+     "png": "forecast.ar.png",
+     "caption": "سيناريوهات EUROCONTROL الثلاثة للرحلات IFR في منطقة ECAC من 2025 إلى 2032.",
+     "alt": "رسم بياني خطي بملايين الرحلات سنوياً من 2025 (11.05 فعلي) إلى 2032: السيناريو المرتفع يصل إلى 14.52، والأساسي 12.82، والمنخفض 11.30."
+    },
+    {
+     "file": "growth.ar.svg",
+     "png": "growth.ar.png",
+     "caption": "النمو السنوي للحركة في السيناريو الأساسي والتغيير منذ توقعات الربيع.",
+     "alt": "رسم بياني بالأعمدة: نمو 2026 بنسبة 2.7 في المائة في توقعات الربيع و1.7 في المائة في توقعات الخريف؛ 3.2 في المائة في 2027؛ و2.1 في المائة كمتوسط للفترة 2026-2032."
+    }
+   ]
+  }
+ }
+}
