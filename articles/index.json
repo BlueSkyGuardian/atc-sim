@@ -1,6 +1,138 @@
 {
- "generated": 1793422566,
+ "generated": 1793509106,
  "articles": [
+  {
+   "slug": "2026-11-01-morocco-dgac-aerodrome-certification-2027",
+   "date": "2026-11-01",
+   "region": "morocco",
+   "section": "Safety",
+   "title": "Morocco's DGAC targets definitive certification of Tétouan, Al Hoceima, Dakhla and Essaouira airports in 2027",
+   "summary": "A report attached to the 2027 Finance Bill says the DGAC plans definitive aerodrome certification for four airports in 2027, after Tangier's definitive certificate and renewals at Marrakech and Agadir, and lists new cybersecurity requirements for air traffic service providers.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "La DGAC vise en 2027 la certification définitive des aéroports de Tétouan, Al Hoceima, Dakhla et Essaouira",
+    "ar": "الطيران المدني يبرمج الإشهاد النهائي لمطارات تطوان والحسيمة والداخلة والصويرة في 2027"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793509106
+  },
+  {
+   "slug": "2026-11-01-greenland-ilulissat-airport-opens-2200m-runway",
+   "date": "2026-11-01",
+   "region": "europe",
+   "section": "Airlines & airports",
+   "title": "Greenland opens Ilulissat International Airport with a 2,200 m runway and direct Copenhagen jets",
+   "summary": "The new airport opened on 29 October with an Air Greenland A330-800 from Copenhagen, completing Greenland's three-airport programme; it runs under temporary operating conditions, with full operations planned for summer 2027.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Le Groenland ouvre l'aéroport international d'Ilulissat, avec une piste de 2 200 m et des jets directs depuis Copenhague",
+    "ar": "غرينلاند تفتتح مطار إيلوليسات الدولي بمدرج طوله 2200 متر ورحلات نفاثة مباشرة من كوبنهاغن"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "runway.svg",
+    "runway.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "runway.fr.svg",
+    "runway.fr.png",
+    "map.ar.svg",
+    "map.ar.png",
+    "runway.ar.svg",
+    "runway.ar.png"
+   ],
+   "updated": 1793509106
+  },
+  {
+   "slug": "2026-11-01-nasa-x59-cross-country-ferry-flight",
+   "date": "2026-11-01",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "NASA's quiet supersonic X-59 crosses the US to Florida, a year after its first flight",
+   "summary": "The X-59 left Edwards on 28 October for Kennedy Space Center, via El Paso, Fort Worth and Birmingham, after more than 40 test flights reaching Mach 1.53 and over 56,000 feet; acoustic validation and community overflights come next.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Le X-59, avion supersonique silencieux de la NASA, traverse les États-Unis un an après son premier vol",
+    "ar": "طائرة X-59 الهادئة الأسرع من الصوت التابعة لناسا تعبر الولايات المتحدة نحو فلوريدا بعد سنة من رحلتها الأولى"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "route.svg",
+    "route.png",
+    "altitude.svg",
+    "altitude.png",
+    "route.fr.svg",
+    "route.fr.png",
+    "altitude.fr.svg",
+    "altitude.fr.png",
+    "route.ar.svg",
+    "route.ar.png",
+    "altitude.ar.svg",
+    "altitude.ar.png"
+   ],
+   "updated": 1793509106
+  },
+  {
+   "slug": "2026-11-01-ntsb-jfk-runway-4l-crossing-swiss-a330",
+   "date": "2026-11-01",
+   "region": "international",
+   "section": "Air traffic control & airspace",
+   "title": "NTSB: 'one at each' coordination sent four jets across JFK runway 4L in front of a departing Swiss A330",
+   "summary": "The NTSB's final report on the April 2024 JFK runway incursion blames nonstandard phraseology and ineffective coordination between two tower controllers; the Swiss A330 rejected its take-off at about 50 knots, some 1,430 metres from a crossing Delta 767.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "NTSB : la coordination « one at each » a fait traverser la piste 4L de JFK à quatre avions devant un A330 de Swiss",
+    "ar": "المجلس الأمريكي لسلامة النقل: تنسيق \"one at each\" جعل أربع طائرات تعبر المدرج 4L بمطار جون كينيدي أمام A330 لشركة Swiss"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "timeline.svg",
+    "timeline.png",
+    "timeline.fr.svg",
+    "timeline.fr.png",
+    "timeline.ar.svg",
+    "timeline.ar.png"
+   ],
+   "updated": 1793509106
+  },
   {
    "slug": "2026-10-31-marrakech-menara-8-1-million-nine-months",
    "date": "2026-10-31",
@@ -35,7 +167,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793422561
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-31-easa-eurocontrol-atco-cbta-workshop-2029",
@@ -65,7 +197,7 @@
     "traffic.ar.svg",
     "traffic.ar.png"
    ],
-   "updated": 1793422561
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-31-eurocontrol-autumn-forecast-11-2-million-flights",
@@ -101,7 +233,7 @@
     "growth.ar.svg",
     "growth.ar.png"
    ],
-   "updated": 1793422561
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-31-gulf-airspace-saudi-airports-restrictions",
@@ -131,7 +263,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793422566
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-31-joby-evtol-tampa-bay-eipp-florida",
@@ -161,7 +293,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793422561
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-30-royal-air-maroc-2026-outlook-9-3-million",
@@ -197,7 +329,7 @@
     "targets.ar.svg",
     "targets.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-30-galileo-second-generation-four-more-satellites",
@@ -233,7 +365,7 @@
     "signing.ar.svg",
     "signing.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-30-airbus-nine-months-547-deliveries-870-target",
@@ -269,7 +401,7 @@
     "target.ar.svg",
     "target.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-30-iata-air-cargo-september-fuel-doubles",
@@ -305,7 +437,7 @@
     "lanes.ar.svg",
     "lanes.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
@@ -333,7 +465,7 @@
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
@@ -363,7 +495,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
@@ -399,7 +531,7 @@
     "causes.ar.svg",
     "causes.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -427,7 +559,7 @@
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
@@ -457,7 +589,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
@@ -487,7 +619,7 @@
     "rollout.ar.svg",
     "rollout.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -515,7 +647,7 @@
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
@@ -545,7 +677,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -571,7 +703,7 @@
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -599,7 +731,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -625,7 +757,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -651,7 +783,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -677,7 +809,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793421485
+   "updated": 1793507876
   }
  ]
 }

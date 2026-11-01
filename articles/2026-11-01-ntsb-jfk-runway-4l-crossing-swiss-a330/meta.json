@@ -1,0 +1,61 @@
+{
+ "slug": "2026-11-01-ntsb-jfk-runway-4l-crossing-swiss-a330",
+ "date": "2026-11-01",
+ "region": "international",
+ "section": "Air traffic control & airspace",
+ "title": "NTSB: 'one at each' coordination sent four jets across JFK runway 4L in front of a departing Swiss A330",
+ "summary": "The NTSB's final report on the April 2024 JFK runway incursion blames nonstandard phraseology and ineffective coordination between two tower controllers; the Swiss A330 rejected its take-off at about 50 knots, some 1,430 metres from a crossing Delta 767.",
+ "sources": [
+  {
+   "title": "Clearance mix-up allowed four jets to cross JFK runway in front of departing A330",
+   "url": "https://www.flightglobal.com/ops-safety/2026/10/clearance-mix-up-allowed-four-jets-to-cross-jfk-runway-in-front-of-departing-a330/",
+   "site": "FlightGlobal"
+  },
+  {
+   "title": "NTSB: poor coordination between controllers forced a Swiss A330 to abort its takeoff at JFK",
+   "url": "https://www.aviacionline.com/english/accidents-and-incidents/ntsb-poor-coordination-between-controllers-forced-a-swiss-a330-to-abort-its-takeoff-at-jfk_a6ae618f99b2d9a633c6481b5",
+   "site": "Aviacionline"
+  },
+  {
+   "title": "NTSB Reveals How Three Words Put Five Aircraft in Danger at JFK Airport",
+   "url": "https://aviationa2z.com/index.php/2026/10/31/ntsb-reveals-how-three-words-put-five-aircraft-in-danger-at-jfk-airport/",
+   "site": "Aviation A2Z"
+  }
+ ],
+ "figures": [
+  {
+   "file": "timeline.svg",
+   "png": "timeline.png",
+   "caption": "The 34 seconds between the first crossing clearance and the rejected take-off, from the NTSB timeline.",
+   "alt": "Horizontal bar chart in seconds after 16:45:41: Delta 29 cleared to cross 4L at 0, SWR17K cleared for take-off at 9, take-off roll begins at about 29, rejected take-off reported at 34.",
+   "credit": "ATC SIM newsroom; data NTSB via Aviation A2Z"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "NTSB : la coordination « one at each » a fait traverser la piste 4L de JFK à quatre avions devant un A330 de Swiss",
+   "summary": "Le rapport final du NTSB sur l'incursion sur piste d'avril 2024 à JFK met en cause une phraséologie non standard et une coordination inefficace entre deux contrôleurs de la tour ; l'A330 de Swiss a interrompu son décollage vers 50 nœuds, à quelque 1 430 mètres d'un 767 de Delta en traversée.",
+   "figures": [
+    {
+     "file": "timeline.fr.svg",
+     "png": "timeline.fr.png",
+     "caption": "Les 34 secondes entre la première autorisation de traversée et le décollage interrompu, d'après la chronologie du NTSB.",
+     "alt": "Graphique à barres horizontales en secondes après 16:45:41 : Delta 29 autorisé à traverser la 4L à 0, SWR17K autorisé à décoller à 9, début de la course au décollage vers 29, décollage interrompu annoncé à 34."
+    }
+   ]
+  },
+  "ar": {
+   "title": "المجلس الأمريكي لسلامة النقل: تنسيق \"one at each\" جعل أربع طائرات تعبر المدرج 4L بمطار جون كينيدي أمام A330 لشركة Swiss",
+   "summary": "يُرجع التقرير النهائي للمجلس الوطني لسلامة النقل حول توغل أبريل 2024 على مدرج مطار جون كينيدي الحادث إلى عبارات غير قياسية وتنسيق غير فعال بين مراقبَين في البرج؛ وقد أوقفت طائرة A330 التابعة لـSwiss إقلاعها عند حوالي 50 عقدة، على بعد نحو 1430 متراً من طائرة 767 لدلتا كانت تعبر المدرج.",
+   "figures": [
+    {
+     "file": "timeline.ar.svg",
+     "png": "timeline.ar.png",
+     "caption": "الثواني الأربع والثلاثون بين أول إذن بالعبور وإيقاف الإقلاع، حسب التسلسل الزمني للمجلس الوطني لسلامة النقل.",
+     "alt": "رسم بياني بأعمدة أفقية بالثواني بعد 16:45:41: إذن عبور المدرج 4L لدلتا 29 عند 0، وإذن الإقلاع لـSWR17K عند 9، وبدء دحرجة الإقلاع عند حوالي 29، والإبلاغ عن إيقاف الإقلاع عند 34."
+    }
+   ]
+  }
+ }
+}

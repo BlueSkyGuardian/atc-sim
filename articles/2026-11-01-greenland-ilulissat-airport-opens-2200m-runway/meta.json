@@ -1,0 +1,80 @@
+{
+ "slug": "2026-11-01-greenland-ilulissat-airport-opens-2200m-runway",
+ "date": "2026-11-01",
+ "region": "europe",
+ "section": "Airlines & airports",
+ "title": "Greenland opens Ilulissat International Airport with a 2,200 m runway and direct Copenhagen jets",
+ "summary": "The new airport opened on 29 October with an Air Greenland A330-800 from Copenhagen, completing Greenland's three-airport programme; it runs under temporary operating conditions, with full operations planned for summer 2027.",
+ "sources": [
+  {
+   "title": "Greenland opens new Ilulissat International Airport",
+   "url": "https://airlinerworld.com/greenland-opens-new-ilulissat-international-airport/",
+   "site": "Airliner World"
+  },
+  {
+   "title": "Ilulissat International Airport Opens, Expanding Connections to North Greenland",
+   "url": "https://arcticportal.org/news-events/news/4189-ilulissat-international-airport-opens-expanding-connections-to-north-greenland",
+   "site": "Arctic Portal"
+  },
+  {
+   "title": "Greenland's New Ilulissat Airport Is Ready for Jets, Direct Flights and Arctic Tourism Boom",
+   "url": "https://aviationa2z.com/index.php/2026/10/30/greenlands-new-ilulissat-airport-is-ready-for-jets-direct-flights/",
+   "site": "Aviation A2Z"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "Greenland's three new airports and the direct routes to Ilulissat from Copenhagen and, from June 2027, Keflavík.",
+   "alt": "Map of Greenland, Iceland and Scandinavia marking Ilulissat (opened 29 October 2026), Nuuk (November 2024), Qaqortoq (April 2026) and Kangerlussuaq, with a line from Copenhagen to Ilulissat and a dashed line from Keflavík.",
+   "credit": "ATC SIM newsroom; Natural Earth; Airliner World, Aviation A2Z, Arctic Portal"
+  },
+  {
+   "file": "runway.svg",
+   "png": "runway.png",
+   "caption": "Ilulissat's runway, old and new.",
+   "alt": "Horizontal bar chart of runway length: old runway 845 metres, new runway 2,200 metres.",
+   "credit": "ATC SIM newsroom; Airliner World, Aviation A2Z, Arctic Portal"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Le Groenland ouvre l'aéroport international d'Ilulissat, avec une piste de 2 200 m et des jets directs depuis Copenhague",
+   "summary": "Le nouvel aéroport a ouvert le 29 octobre avec un A330-800 d'Air Greenland venu de Copenhague, achevant le programme de trois aéroports du Groenland ; il fonctionne sous conditions d'exploitation temporaires, l'exploitation complète étant prévue à l'été 2027.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Les trois nouveaux aéroports du Groenland et les liaisons directes vers Ilulissat depuis Copenhague et, à partir de juin 2027, Keflavík.",
+     "alt": "Carte du Groenland, de l'Islande et de la Scandinavie marquant Ilulissat (ouvert le 29 octobre 2026), Nuuk (novembre 2024), Qaqortoq (avril 2026) et Kangerlussuaq, avec une ligne de Copenhague à Ilulissat et une ligne en pointillé depuis Keflavík."
+    },
+    {
+     "file": "runway.fr.svg",
+     "png": "runway.fr.png",
+     "caption": "La piste d'Ilulissat, ancienne et nouvelle.",
+     "alt": "Graphique à barres horizontales de la longueur de piste : ancienne piste 845 mètres, nouvelle piste 2 200 mètres."
+    }
+   ]
+  },
+  "ar": {
+   "title": "غرينلاند تفتتح مطار إيلوليسات الدولي بمدرج طوله 2200 متر ورحلات نفاثة مباشرة من كوبنهاغن",
+   "summary": "افتُتح المطار الجديد يوم 29 أكتوبر باستقبال طائرة A330-800 تابعة لـAir Greenland قادمة من كوبنهاغن، ليكتمل برنامج المطارات الثلاثة في غرينلاند؛ ويشتغل بشروط استغلال مؤقتة، على أن يبلغ الاستغلال الكامل في صيف 2027.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "المطارات الثلاثة الجديدة في غرينلاند والخطوط المباشرة نحو إيلوليسات من كوبنهاغن، ومن كيفلافيك ابتداءً من يونيو 2027.",
+     "alt": "خريطة لغرينلاند وآيسلندا والدول الإسكندنافية تُظهر إيلوليسات (افتُتح في 29 أكتوبر 2026) ونوك (نونبر 2024) وكاكورتوك (أبريل 2026) وكانغرلوسواك، مع خط من كوبنهاغن إلى إيلوليسات وخط متقطع من كيفلافيك."
+    },
+    {
+     "file": "runway.ar.svg",
+     "png": "runway.ar.png",
+     "caption": "مدرج إيلوليسات القديم والجديد.",
+     "alt": "رسم بياني بأعمدة أفقية لطول المدرج: المدرج القديم 845 متراً، والمدرج الجديد 2200 متر."
+    }
+   ]
+  }
+ }
+}

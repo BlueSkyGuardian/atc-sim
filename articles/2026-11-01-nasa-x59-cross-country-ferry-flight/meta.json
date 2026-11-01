@@ -1,0 +1,95 @@
+{
+ "slug": "2026-11-01-nasa-x59-cross-country-ferry-flight",
+ "date": "2026-11-01",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "NASA's quiet supersonic X-59 crosses the US to Florida, a year after its first flight",
+ "summary": "The X-59 left Edwards on 28 October for Kennedy Space Center, via El Paso, Fort Worth and Birmingham, after more than 40 test flights reaching Mach 1.53 and over 56,000 feet; acoustic validation and community overflights come next.",
+ "sources": [
+  {
+   "title": "X-59 Heads to Florida as NASA Marks One-year First-flight Anniversary",
+   "url": "https://www.ainonline.com/aviation-news/aerospace/2026-10-30/x-59-heads-fl-nasa-marks-first-flight-anniversary",
+   "site": "AIN"
+  },
+  {
+   "title": "Experimental supersonic NASA jet lands in BHM along cross-country flight",
+   "url": "https://bhamnow.com/2026/10/30/experimental-supersonic-nasa-jet-lands-in-bhm-along-cross-country-flight/",
+   "site": "Bham Now"
+  },
+  {
+   "title": "NASA X-59 Quiet Supersonic Aircraft Reaches Birmingham on Cross-Country Flight to Kennedy Space Center",
+   "url": "https://avi-go.com/news/articles/77bf94dfd9521a791b9640a3aaaeb66b",
+   "site": "Avi-go"
+  },
+  {
+   "title": "NASA's Supersonic X-59 Heads for Florida Vacation",
+   "url": "https://www.flyingmag.com/nasa-supersonic-x59-kennedy-space-center-florida/",
+   "site": "FLYING"
+  },
+  {
+   "title": "X-59 Heads to Florida From Edwards",
+   "url": "https://avbrief.com/x-59-heads-to-florida-from-edwards/",
+   "site": "AvBrief"
+  },
+  {
+   "title": "NASA's X-59 Supersonic Jet Makes First Cross-Country Flight",
+   "url": "https://aiaa.org/2026/10/30/nasas-x-59-supersonic-jet-makes-first-cross-country-flight/",
+   "site": "AIAA"
+  }
+ ],
+ "figures": [
+  {
+   "file": "route.svg",
+   "png": "route.png",
+   "caption": "The X-59's route from Edwards Air Force Base to Kennedy Space Center, with its stops.",
+   "alt": "Map of the southern United States with the X-59's legs: Edwards (28 October), El Paso, NAS Fort Worth JRB, Birmingham (29 October, 539 nautical miles from Fort Worth) and a dashed last leg to Kennedy Space Center (KTTS).",
+   "credit": "ATC SIM newsroom; Natural Earth; AIN, Bham Now, Avi-go, FLYING"
+  },
+  {
+   "file": "altitude.svg",
+   "png": "altitude.png",
+   "caption": "How high the X-59 has flown: first flight, the planned Mach 1.4 test condition and its highest altitude so far.",
+   "alt": "Bar chart of altitude in feet: 12,000 on the first flight on 28 October 2025, 55,000 at Mach 1.4 on 12 June 2026, and more than 56,000 as the highest so far.",
+   "credit": "ATC SIM newsroom; data NASA via AIN, Avi-go and FLYING"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Le X-59, avion supersonique silencieux de la NASA, traverse les États-Unis un an après son premier vol",
+   "summary": "Le X-59 a quitté Edwards le 28 octobre pour le centre spatial Kennedy, via El Paso, Fort Worth et Birmingham, après plus de 40 vols d'essai jusqu'à Mach 1,53 et plus de 56 000 pieds ; viennent ensuite la validation acoustique et les survols de populations.",
+   "figures": [
+    {
+     "file": "route.fr.svg",
+     "png": "route.fr.png",
+     "caption": "L'itinéraire du X-59 de la base d'Edwards au centre spatial Kennedy, avec ses escales.",
+     "alt": "Carte du sud des États-Unis avec les étapes du X-59 : Edwards (28 octobre), El Paso, base aéronavale de Fort Worth, Birmingham (29 octobre, à 539 milles nautiques de Fort Worth) et, en pointillé, la dernière étape vers le centre spatial Kennedy (KTTS)."
+    },
+    {
+     "file": "altitude.fr.svg",
+     "png": "altitude.fr.png",
+     "caption": "Jusqu'où le X-59 est monté : premier vol, condition d'essai prévue à Mach 1,4 et altitude maximale atteinte à ce jour.",
+     "alt": "Graphique à barres de l'altitude en pieds : 12 000 au premier vol le 28 octobre 2025, 55 000 à Mach 1,4 le 12 juin 2026 et plus de 56 000 comme record actuel."
+    }
+   ]
+  },
+  "ar": {
+   "title": "طائرة X-59 الهادئة الأسرع من الصوت التابعة لناسا تعبر الولايات المتحدة نحو فلوريدا بعد سنة من رحلتها الأولى",
+   "summary": "غادرت X-59 قاعدة إدواردز يوم 28 أكتوبر متجهة إلى مركز كينيدي للفضاء عبر إل باسو وفورت وورث وبرمنغهام، بعد أكثر من 40 رحلة تجريبية بلغت فيها 1.53 ماخ وأكثر من 56000 قدم؛ وتليها مرحلة التحقق الصوتي ورحلات فوق التجمعات السكنية.",
+   "figures": [
+    {
+     "file": "route.ar.svg",
+     "png": "route.ar.png",
+     "caption": "مسار X-59 من قاعدة إدواردز الجوية إلى مركز كينيدي للفضاء ومحطات توقفها.",
+     "alt": "خريطة لجنوب الولايات المتحدة تُظهر مراحل رحلة X-59: إدواردز (28 أكتوبر) وإل باسو وقاعدة فورت وورث البحرية وبرمنغهام (29 أكتوبر، على بعد 539 ميلاً بحرياً من فورت وورث)، ثم المرحلة الأخيرة بخط متقطع نحو مركز كينيدي للفضاء (KTTS)."
+    },
+    {
+     "file": "altitude.ar.svg",
+     "png": "altitude.ar.png",
+     "caption": "الارتفاعات التي بلغتها X-59: الرحلة الأولى، وظروف الاختبار المبرمجة عند 1.4 ماخ، وأعلى ارتفاع حتى الآن.",
+     "alt": "رسم بياني بالأعمدة للارتفاع بالقدم: 12000 في الرحلة الأولى يوم 28 أكتوبر 2025، و55000 عند 1.4 ماخ يوم 12 يونيو 2026، وأكثر من 56000 كأعلى ارتفاع حتى الآن."
+    }
+   ]
+  }
+ }
+}

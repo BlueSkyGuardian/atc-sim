@@ -1,0 +1,66 @@
+{
+ "slug": "2026-11-01-morocco-dgac-aerodrome-certification-2027",
+ "date": "2026-11-01",
+ "region": "morocco",
+ "section": "Safety",
+ "title": "Morocco's DGAC targets definitive certification of Tétouan, Al Hoceima, Dakhla and Essaouira airports in 2027",
+ "summary": "A report attached to the 2027 Finance Bill says the DGAC plans definitive aerodrome certification for four airports in 2027, after Tangier's definitive certificate and renewals at Marrakech and Agadir, and lists new cybersecurity requirements for air traffic service providers.",
+ "sources": [
+  {
+   "title": "Aviation civile : Quatre aéroports visés par une certification définitive en 2027",
+   "url": "https://laquotidienne.ma/article/economie/aviation-civile-quatre-aeroports-vises-certification-definitive-2027",
+   "site": "La Quotidienne"
+  },
+  {
+   "title": "الطيران المدني يبرمج الاعتماد النهائي لأربعة مطارات في 2027",
+   "url": "https://anwarpress.com/741381/",
+   "site": "Anwar Press"
+  },
+  {
+   "title": "المكتب الوطني للمطارات: مطارات المغرب استقبلت أكثر من 29 مليون مسافر عند متم شتنبر 2026",
+   "url": "https://ar.le360.ma/economie/IEIB757NINDJPNV3DQIBV7SNJM/",
+   "site": "Le360"
+  },
+  {
+   "title": "Royal Air Maroc reliera Casablanca à Essaouira dès le 1er novembre",
+   "url": "https://www.aeronautique.ma/Royal-Air-Maroc-reliera-Casablanca-a-Essaouira-des-le-1er-novembre_a6120.html",
+   "site": "Aeronautique.ma"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The seven Moroccan airports named in the DGAC report: four targeted for definitive certification in 2027, three certified or renewed in 2025 and the first half of 2026.",
+   "alt": "Map of Morocco marking Tétouan, Al Hoceima, Essaouira and Dakhla in red (definitive certification targeted in 2027) and Tangier (definitive certification), Marrakech and Agadir (certificates renewed) in blue.",
+   "credit": "ATC SIM newsroom; Natural Earth; data DGAC via La Quotidienne and Anwar Press"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "La DGAC vise en 2027 la certification définitive des aéroports de Tétouan, Al Hoceima, Dakhla et Essaouira",
+   "summary": "Un rapport annexé au projet de loi de finances 2027 indique que la DGAC prévoit la certification définitive de quatre aéroports en 2027, après celle de Tanger et le renouvellement de Marrakech et d'Agadir, et cite de nouvelles exigences de cybersécurité pour les prestataires de services de la circulation aérienne.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Les sept aéroports marocains cités dans le rapport de la DGAC : quatre visés par une certification définitive en 2027, trois certifiés ou renouvelés en 2025 et au premier semestre 2026.",
+     "alt": "Carte du Maroc marquant en rouge Tétouan, Al Hoceima, Essaouira et Dakhla (certification définitive visée en 2027) et en bleu Tanger (certification définitive), Marrakech et Agadir (certificats renouvelés)."
+    }
+   ]
+  },
+  "ar": {
+   "title": "الطيران المدني يبرمج الإشهاد النهائي لمطارات تطوان والحسيمة والداخلة والصويرة في 2027",
+   "summary": "يفيد تقرير مرفق بمشروع قانون المالية لسنة 2027 بأن المديرية العامة للطيران المدني تبرمج الإشهاد النهائي لأربعة مطارات في 2027، بعد الإشهاد النهائي لمطار طنجة وتجديد شهادتي مراكش وأكادير، ويذكر متطلبات جديدة للأمن السيبراني خاصة بمقدمي خدمات الحركة الجوية.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "المطارات المغربية السبعة الواردة في تقرير المديرية العامة للطيران المدني: أربعة مبرمجة للإشهاد النهائي في 2027، وثلاثة حصلت على الإشهاد أو جُددت شهاداتها في 2025 والنصف الأول من 2026.",
+     "alt": "خريطة للمغرب تُظهر بالأحمر تطوان والحسيمة والصويرة والداخلة (إشهاد نهائي مبرمج في 2027)، وبالأزرق طنجة (إشهاد نهائي) ومراكش وأكادير (تجديد الشهادات)."
+    }
+   ]
+  }
+ }
+}
