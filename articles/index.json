@@ -1,6 +1,138 @@
 {
- "generated": 1793509106,
+ "generated": 1793595880,
  "articles": [
+  {
+   "slug": "2026-11-02-morocco-aeronautics-exports-nine-months",
+   "date": "2026-11-02",
+   "region": "morocco",
+   "section": "Morocco & Africa",
+   "title": "Morocco's aeronautics exports up 22.3% in nine months to MAD 26.2 billion, led by assembly",
+   "summary": "Office des Changes data show aeronautics exports of more than MAD 26.21 billion from January to September 2026, up 22.3%, with assembly up 27.5%. The full-year 2025 total, now published, was MAD 29.93 billion, up 9.8%.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Les exportations aéronautiques marocaines bondissent de 22,3 % en neuf mois, à 26,2 milliards de dirhams",
+    "ar": "صادرات قطاع الطيران المغربي ترتفع بـ22.3% في تسعة أشهر إلى 26.2 مليار درهم بقيادة التجميع"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "exports.svg",
+    "exports.png",
+    "segments.svg",
+    "segments.png",
+    "exports.fr.svg",
+    "exports.fr.png",
+    "segments.fr.svg",
+    "segments.fr.png",
+    "exports.ar.svg",
+    "exports.ar.png",
+    "segments.ar.svg",
+    "segments.ar.png"
+   ],
+   "updated": 1793595869
+  },
+  {
+   "slug": "2026-11-02-italy-enav-november-strikes-bari-malpensa",
+   "date": "2026-11-02",
+   "region": "europe",
+   "section": "Air traffic control & airspace",
+   "title": "Italy: after the 30 October transport strike was postponed, ENAV faces ATC strikes on 6, 21 and 22 November",
+   "summary": "A ministerial order postponed the transport part of USB's 30 October general strike because of the All Saints' protected period. ENAV staff now have strikes notified at Bari on 6 November, nationally on 21 November (13:00–17:00) and at Milan Malpensa on 22 November.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Italie : après le report de la grève des transports du 30 octobre, ENAV face à des grèves les 6, 21 et 22 novembre",
+    "ar": "إيطاليا: بعد تأجيل إضراب النقل ليوم 30 أكتوبر، ENAV تواجه إضرابات للمراقبة الجوية في 6 و21 و22 نونبر"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793595872
+  },
+  {
+   "slug": "2026-11-02-faa-smart-ai-traffic-tool-first-results",
+   "date": "2026-11-02",
+   "region": "international",
+   "section": "Technology & innovation",
+   "title": "FAA's AI-supported SMART flow tool: 110 flights rerouted around Washington in its first weeks, DOT says",
+   "summary": "The US DOT says SMART, the FAA's AI-supported traffic management tool used at DCA, IAD and BWI since 21 September, has helped reroute 110 flights, saving on average more than 10 minutes and 56 gallons of fuel each. Humans keep the final decision.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "L'outil de flux SMART de la FAA, assisté par l'IA : 110 vols réacheminés autour de Washington, selon le DOT",
+    "ar": "أداة SMART لإدارة التدفق المدعومة بالذكاء الاصطناعي: إعادة توجيه 110 رحلات حول واشنطن بحسب وزارة النقل الأمريكية"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "results.svg",
+    "results.png",
+    "map.svg",
+    "map.png",
+    "results.fr.svg",
+    "results.fr.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "results.ar.svg",
+    "results.ar.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793595879
+  },
+  {
+   "slug": "2026-11-02-learjet-60-crash-greenacres-florida",
+   "date": "2026-11-02",
+   "region": "international",
+   "section": "Safety",
+   "title": "Learjet 60 bound for the Bahamas falls from 35,250 ft and crashes in Florida, killing all nine aboard",
+   "summary": "The Austin–North Eleuthera business jet N722BD descended from 35,250 to 8,750 feet in about a minute before hitting Greenacres, Palm Beach County, on 1 November. The crew had reported icing and turbulence and declared a Mayday; the NTSB is investigating.",
+   "langs": [
+    "en",
+    "fr",
+    "ar"
+   ],
+   "titles": {
+    "fr": "Un Learjet 60 en route vers les Bahamas chute de 35 250 pieds et s'écrase en Floride : neuf morts",
+    "ar": "طائرة Learjet 60 متجهة إلى البهاما تهوي من 35250 قدماً وتتحطم في فلوريدا ومقتل ركابها التسعة"
+   },
+   "files": [
+    "meta.json",
+    "body.md",
+    "body.fr.md",
+    "body.ar.md",
+    "map.svg",
+    "map.png",
+    "map.fr.svg",
+    "map.fr.png",
+    "map.ar.svg",
+    "map.ar.png"
+   ],
+   "updated": 1793595875
+  },
   {
    "slug": "2026-11-01-morocco-dgac-aerodrome-certification-2027",
    "date": "2026-11-01",
@@ -29,7 +161,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793509106
+   "updated": 1793594288
   },
   {
    "slug": "2026-11-01-greenland-ilulissat-airport-opens-2200m-runway",
@@ -65,7 +197,7 @@
     "runway.ar.svg",
     "runway.ar.png"
    ],
-   "updated": 1793509106
+   "updated": 1793594288
   },
   {
    "slug": "2026-11-01-nasa-x59-cross-country-ferry-flight",
@@ -101,7 +233,7 @@
     "altitude.ar.svg",
     "altitude.ar.png"
    ],
-   "updated": 1793509106
+   "updated": 1793594288
   },
   {
    "slug": "2026-11-01-ntsb-jfk-runway-4l-crossing-swiss-a330",
@@ -131,7 +263,7 @@
     "timeline.ar.svg",
     "timeline.ar.png"
    ],
-   "updated": 1793509106
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-31-marrakech-menara-8-1-million-nine-months",
@@ -167,7 +299,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-31-easa-eurocontrol-atco-cbta-workshop-2029",
@@ -197,7 +329,7 @@
     "traffic.ar.svg",
     "traffic.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-31-eurocontrol-autumn-forecast-11-2-million-flights",
@@ -233,7 +365,7 @@
     "growth.ar.svg",
     "growth.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-31-gulf-airspace-saudi-airports-restrictions",
@@ -263,7 +395,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-31-joby-evtol-tampa-bay-eipp-florida",
@@ -293,7 +425,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-30-royal-air-maroc-2026-outlook-9-3-million",
@@ -329,7 +461,7 @@
     "targets.ar.svg",
     "targets.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-30-galileo-second-generation-four-more-satellites",
@@ -365,7 +497,7 @@
     "signing.ar.svg",
     "signing.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-30-airbus-nine-months-547-deliveries-870-target",
@@ -401,7 +533,7 @@
     "target.ar.svg",
     "target.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-30-iata-air-cargo-september-fuel-doubles",
@@ -437,7 +569,7 @@
     "lanes.ar.svg",
     "lanes.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-ram-casablanca-essaouira-domestic-route",
@@ -465,7 +597,7 @@
     "passengers.svg",
     "passengers.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-ram-casablanca-sao-paulo-fifth-flight",
@@ -495,7 +627,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-eurocontrol-week-43-spain-france-delays",
@@ -531,7 +663,7 @@
     "causes.ar.svg",
     "causes.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-france-november-5-strike-air-traffic",
@@ -559,7 +691,7 @@
     "cuts.svg",
     "cuts.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-frequentis-artas-eurocontrol-2031",
@@ -589,7 +721,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-atlanta-electronic-flight-strips-tfdm",
@@ -619,7 +751,7 @@
     "rollout.ar.svg",
     "rollout.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-faa-mobile-clearance-text-ifr-clearances",
@@ -647,7 +779,7 @@
     "phases.svg",
     "phases.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-jetzero-faa-cleen-engine-airflow",
@@ -677,7 +809,7 @@
     "map.ar.svg",
     "map.ar.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-29-spacex-faa-launch-corridors-airspace",
@@ -703,7 +835,7 @@
     "launches.svg",
     "launches.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-28-morocco-airports-nine-months-traffic",
@@ -731,7 +863,7 @@
     "movements.svg",
     "movements.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-28-ryanair-rabat-base-winter-morocco",
@@ -757,7 +889,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-28-italy-enav-strike-october-30",
@@ -783,7 +915,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   },
   {
    "slug": "2026-10-28-atsb-sydney-taxiing-conflicts-reports",
@@ -809,7 +941,7 @@
     "map.svg",
     "map.png"
    ],
-   "updated": 1793507876
+   "updated": 1793594288
   }
  ]
 }

@@ -1,0 +1,35 @@
+{
+ "slug": "2026-11-02-morocco-aeronautics-exports-nine-months",
+ "date": "2026-11-02",
+ "region": "morocco",
+ "section": "Morocco & Africa",
+ "title": "Morocco's aeronautics exports up 22.3% in nine months to MAD 26.2 billion, led by assembly",
+ "summary": "Office des Changes data show aeronautics exports of more than MAD 26.21 billion from January to September 2026, up 22.3%, with assembly up 27.5%. The full-year 2025 total, now published, was MAD 29.93 billion, up 9.8%.",
+ "sources": [
+  {"title": "Morocco's Aeronautics Exports Jump 22.3%, Automotive Sector Grows 14.3%", "url": "https://www.moroccoworldnews.com/2026/10/344538/moroccos-aeronautics-exports-jump-22-3-automotive-sector-grows-14-3/", "site": "Morocco World News"},
+  {"title": "Aéronautique : les exportations marocaines approchent 30 milliards de dirhams en 2025", "url": "https://www.aeronautique.ma/Aeronautique-les-exportations-marocaines-approchent-30-milliards-de-dirhams-en-2025_a6130.html", "site": "Aéronautique.ma"}
+ ],
+ "figures": [
+  {"file": "exports.svg", "png": "exports.png", "caption": "Moroccan aeronautics exports in 2019, 2024 and 2025, in billions of dirhams (full years, Office des Changes annual report).", "alt": "Bar chart: Moroccan aeronautics exports of 18.6 billion dirhams in 2019, 27.3 billion in 2024 and 29.9 billion in 2025.", "credit": "ATC SIM newsroom; data Office des Changes via Aéronautique.ma"},
+  {"file": "segments.svg", "png": "segments.png", "caption": "Aeronautics exports by segment in 2025: assembly and EWIS (electrical wiring), in billions of dirhams.", "alt": "Horizontal bar chart: assembly 20.0 billion dirhams and EWIS 9.9 billion dirhams in 2025.", "credit": "ATC SIM newsroom; data Office des Changes via Aéronautique.ma"}
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Les exportations aéronautiques marocaines bondissent de 22,3 % en neuf mois, à 26,2 milliards de dirhams",
+   "summary": "Selon l'Office des Changes, les exportations aéronautiques ont dépassé 26,21 milliards de dirhams de janvier à septembre 2026, en hausse de 22,3 %, avec un assemblage en progression de 27,5 %. Le total de l'année 2025, désormais publié, s'établit à 29,93 milliards, en hausse de 9,8 %.",
+   "figures": [
+    {"file": "exports.fr.svg", "png": "exports.fr.png", "caption": "Exportations aéronautiques marocaines en 2019, 2024 et 2025, en milliards de dirhams (années pleines, rapport annuel de l'Office des Changes).", "alt": "Graphique en barres : exportations aéronautiques marocaines de 18,6 milliards de dirhams en 2019, 27,3 milliards en 2024 et 29,9 milliards en 2025."},
+    {"file": "segments.fr.svg", "png": "segments.fr.png", "caption": "Exportations aéronautiques par segment en 2025 : assemblage et EWIS (câblage électrique), en milliards de dirhams.", "alt": "Graphique en barres horizontales : assemblage 20,0 milliards de dirhams et EWIS 9,9 milliards de dirhams en 2025."}
+   ]
+  },
+  "ar": {
+   "title": "صادرات قطاع الطيران المغربي ترتفع بـ22.3% في تسعة أشهر إلى 26.2 مليار درهم بقيادة التجميع",
+   "summary": "تُظهر معطيات مكتب الصرف أن صادرات قطاع الطيران تجاوزت 26.21 مليار درهم من يناير إلى شتنبر 2026، بارتفاع نسبته 22.3%، مع نمو التجميع بنسبة 27.5%. أما مجموع سنة 2025، الذي نُشر مؤخراً، فبلغ 29.93 مليار درهم بارتفاع نسبته 9.8%.",
+   "figures": [
+    {"file": "exports.ar.svg", "png": "exports.ar.png", "caption": "صادرات قطاع الطيران المغربي في 2019 و2024 و2025، بملايير الدراهم (سنوات كاملة، التقرير السنوي لمكتب الصرف).", "alt": "رسم بياني بالأعمدة: صادرات قطاع الطيران المغربي 18.6 مليار درهم في 2019، و27.3 مليار في 2024، و29.9 مليار في 2025."},
+    {"file": "segments.ar.svg", "png": "segments.ar.png", "caption": "صادرات قطاع الطيران حسب الفرع في 2025: التجميع وEWIS (الأسلاك الكهربائية)، بملايير الدراهم.", "alt": "رسم بياني بأعمدة أفقية: التجميع 20.0 مليار درهم وEWIS 9.9 مليار درهم في 2025."}
+   ]
+  }
+ }
+}

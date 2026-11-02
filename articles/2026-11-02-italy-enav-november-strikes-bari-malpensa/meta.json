@@ -1,0 +1,61 @@
+{
+ "slug": "2026-11-02-italy-enav-november-strikes-bari-malpensa",
+ "date": "2026-11-02",
+ "region": "europe",
+ "section": "Air traffic control & airspace",
+ "title": "Italy: after the 30 October transport strike was postponed, ENAV faces ATC strikes on 6, 21 and 22 November",
+ "summary": "A ministerial order postponed the transport part of USB's 30 October general strike because of the All Saints' protected period. ENAV staff now have strikes notified at Bari on 6 November, nationally on 21 November (13:00–17:00) and at Milan Malpensa on 22 November.",
+ "sources": [
+  {
+   "title": "Sciopero 30 ottobre 2026: rinvio per i trasporti, cosa cambia per treni, aerei e bus",
+   "url": "https://www.trasporti-italia.com/mobilita/scioperi/sciopero-30-ottobre-2026-rinvio-per-trasporti-treni-aerei-bus/1533162/",
+   "site": "Trasporti-Italia"
+  },
+  {
+   "title": "Lo sciopero di venerdì non dovrebbe avere ripercussioni sui trasporti",
+   "url": "https://www.ilpost.it/2026/10/29/sciopero-trasporti-precettazione-disagi/",
+   "site": "Il Post"
+  },
+  {
+   "title": "Sciopero aerei novembre 2026, si parte il 6 da Bari: tutte le date e gli orari",
+   "url": "https://www.missionline.it/sciopero-aerei-novembre-2026-si-parte-il-6-da-bari-tutte-le-date-e-gli-orari/",
+   "site": "Missionline"
+  }
+ ],
+ "figures": [
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The ENAV strikes notified for November: Bari (6 November, 13:00–17:00), a national strike (21 November, 13:00–17:00) and Milan Malpensa (22 November, 24 hours). Rome Fiumicino is shown for reference.",
+   "alt": "Map of Italy with red markers at Bari and Milan Malpensa and a blue airport marker at Rome Fiumicino; the subtitle lists the November strike dates and hours.",
+   "credit": "ATC SIM newsroom; Natural Earth; dates Missionline"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Italie : après le report de la grève des transports du 30 octobre, ENAV face à des grèves les 6, 21 et 22 novembre",
+   "summary": "Une ordonnance ministérielle a reporté le volet transports de la grève générale de l'USB du 30 octobre, en raison de la période protégée de la Toussaint. Des grèves du personnel d'ENAV sont annoncées à Bari le 6 novembre, au niveau national le 21 novembre (13h–17h) et à Milan Malpensa le 22 novembre.",
+   "figures": [
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Les grèves d'ENAV annoncées pour novembre : Bari (6 novembre, 13h–17h), une grève nationale (21 novembre, 13h–17h) et Milan Malpensa (22 novembre, 24 heures). Rome Fiumicino figure à titre de repère.",
+     "alt": "Carte de l'Italie avec des repères rouges à Bari et Milan Malpensa et un repère d'aéroport bleu à Rome Fiumicino ; le sous-titre donne les dates et horaires des grèves de novembre."
+    }
+   ]
+  },
+  "ar": {
+   "title": "إيطاليا: بعد تأجيل إضراب النقل ليوم 30 أكتوبر، ENAV تواجه إضرابات للمراقبة الجوية في 6 و21 و22 نونبر",
+   "summary": "أجّل أمر وزاري الشق المتعلق بالنقل من الإضراب العام الذي دعت إليه نقابة USB يوم 30 أكتوبر بسبب الفترة المحمية لعيد جميع القديسين. وأُعلن عن إضرابات لموظفي ENAV في باري يوم 6 نونبر، وعلى الصعيد الوطني يوم 21 نونبر (13:00-17:00)، وفي ميلانو مالبينسا يوم 22 نونبر.",
+   "figures": [
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "إضرابات ENAV المعلنة لشهر نونبر: باري (6 نونبر، من 13:00 إلى 17:00)، وإضراب وطني (21 نونبر، من 13:00 إلى 17:00)، وميلانو مالبينسا (22 نونبر، 24 ساعة). ويظهر مطار روما فيوميتشينو كمرجع.",
+     "alt": "خريطة لإيطاليا تحمل علامتين حمراوين في باري وميلانو مالبينسا وعلامة مطار زرقاء في روما فيوميتشينو، ويتضمن العنوان الفرعي تواريخ إضرابات نونبر وتوقيتاتها."
+    }
+   ]
+  }
+ }
+}

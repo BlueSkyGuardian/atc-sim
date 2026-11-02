@@ -1,0 +1,25 @@
+Six semaines après sa mise en service autour de Washington, l'outil de gestion du trafic assisté par l'intelligence artificielle de l'Administration fédérale de l'aviation (FAA) américaine affiche ses premiers résultats publiés. Le **30 octobre 2026**, le département américain des Transports (DOT) a [repris un article du New York Post](https://www.transportation.gov/briefing-room/must-read-dot-ai-program-easing-flight-traffic-control-tower-headaches-still-dems) selon lequel, lors de son déploiement initial, l'outil baptisé **SMART** a contribué à **réacheminer 110 vols**, faisant gagner **en moyenne plus de 10 minutes et 56 gallons de carburant par vol**, certains vols gagnant **jusqu'à 30 minutes**, au bénéfice de **14 644 passagers**.
+
+{{figure:results.svg}}
+
+## Ce qu'est SMART, et ce qu'il n'est pas
+
+SMART signifie **Strategic Management of Airspace, Routes and Trajectories** (gestion stratégique de l'espace aérien, des routes et des trajectoires). Selon l'[annonce de la FAA du 21 septembre](https://www.faa.gov/newsroom/trumps-transportation-secretary-sean-p-duffy-delivers-state-art-air-traffic-control), il rassemble **environ 200 flux de données** (météo, trajectoires, flux de trafic et effectifs de contrôleurs notamment) sur une plateforme unique, où un moteur assisté par l'IA prévoit l'évolution de la situation et recommande des solutions avant que les problèmes n'apparaissent. L'outil est fourni par **Air Space Intelligence**, qui a remporté en juin, selon [Nextgov/FCW](https://nextgov.com/artificial-intelligence/2026/09/dc-area-airports-first-deploy-ai-tool-airspace-management/416114), un contrat de la FAA de 12 ans et **875 millions de dollars** pour fournir SMART et des services de données de gestion des flux à un Air Traffic Control System Command Center modernisé.
+
+C'est un **outil de gestion des flux de trafic, pas un outil de séparation** : selon la description de Nextgov/FCW, il exploite les programmes des compagnies, la météo, la capacité des aéroports et les contraintes d'espace aérien pour prévoir les flux, et non les conflits en temps réel que résolvent les contrôleurs. La FAA indique que son personnel examine chaque recommandation de SMART et que la direction de l'organisme de contrôle local peut accepter ou refuser chacune d'elles ; SMART « ne peut ni remplacer les contrôleurs ni prendre le contrôle d'un aéronef ». Le secrétaire aux Transports Sean Duffy a expliqué en septembre qu'il ne s'agirait « pas de l'IA la plus compliquée, mais d'une IA qui leur fournira de l'information », permettant d'« accélérer ou ralentir » les avions pour qu'ils arrivent à Reagan National par tranches d'une minute.
+
+{{figure:map.svg}}
+
+## Où il fonctionne
+
+L'utilisation opérationnelle limitée a commencé le **21 septembre 2026** dans l'espace aérien de la capitale américaine. Nextgov/FCW cite les trois aéroports concernés : **Washington Reagan National (DCA), Washington Dulles (IAD) et Baltimore/Washington (BWI)**. La FAA prévoit d'étendre l'outil progressivement à d'autres régions du pays dans les prochains mois.
+
+« Au lieu de laisser le trafic aérien subir tous ces problèmes, nous prenons les devants », a déclaré au New York Post Rebecca Guy, directrice technique par intérim de la FAA. L'administrateur de la FAA, Bryan Bedford, avait affirmé en septembre que « combiner SMART avec nos mises à niveau matérielles en cours nous donne les outils pour réduire les retards ». Ces mises à niveau relèvent d'un programme de modernisation pour lequel l'administration indique déployer **12,5 milliards de dollars** dans les télécommunications, les radios, les radars et les strips électroniques, avec un achèvement visé fin 2028.
+
+## Tout le monde n'est pas convaincu
+
+L'outil reste politiquement contesté. Le texte du DOT cite une lettre de critiques démocrates estimant que ces efforts ne sauraient « remplacer la reconstruction des effectifs de contrôleurs aériens dirigés par des humains », et rappelle que la représentante Alexandria Ocasio-Cortez a appelé la FAA à arrêter le déploiement. La FAA affirme de son côté poursuivre ses recrutements : environ **4 000 contrôleurs** sont entrés en formation au cours des 18 premiers mois de l'administration, et quelque **11 000 contrôleurs** travaillent aujourd'hui dans ses organismes.
+
+## Des chiffres à lire avec prudence
+
+Les résultats proviennent d'une source unique, la reprise par le DOT d'un article de presse, et couvrent une courte période initiale. Ils n'ont pas été publiés sous la forme d'une évaluation officielle, et le texte ne précise ni la méthode de mesure du temps et du carburant économisés, ni le nombre de vols traités dans la région sur la même période. Pour les gestionnaires de flux et les contrôleurs, l'intérêt tient moins aux chiffres qu'au modèle : un outil prédictif qui propose des réacheminements avant que la congestion ou la météo ne s'installent, la décision finale restant à l'unité humaine de gestion du trafic. Reste à voir si ce modèle tiendra lorsque SMART s'étendra au-delà de Washington.

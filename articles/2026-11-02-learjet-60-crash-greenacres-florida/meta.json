@@ -1,0 +1,33 @@
+{
+ "slug": "2026-11-02-learjet-60-crash-greenacres-florida",
+ "date": "2026-11-02",
+ "region": "international",
+ "section": "Safety",
+ "title": "Learjet 60 bound for the Bahamas falls from 35,250 ft and crashes in Florida, killing all nine aboard",
+ "summary": "The Austin–North Eleuthera business jet N722BD descended from 35,250 to 8,750 feet in about a minute before hitting Greenacres, Palm Beach County, on 1 November. The crew had reported icing and turbulence and declared a Mayday; the NTSB is investigating.",
+ "sources": [
+  {"title": "Learjet with 9 aboard crashes in Palm Beach County, Florida: FAA", "url": "https://abcnews.com/US/learjet-9-aboard-crashes-palm-beach-florida-faa/story?id=137753599", "site": "ABC News"},
+  {"title": "Learjet 60 N722BD Crash Near West Palm Beach Kills Nine", "url": "https://bizjetjournal.com/business-aviation-news/learjet-60-n722bd-crash-palm-beach-florida", "site": "BizJet Journal"},
+  {"title": "Footage Shows Learjet Falling 35,000 Feet in About a Minute, Killing All 9 Aboard", "url": "https://www.yahoo.com/news/weather-news/articles/footage-shows-learjet-falling-35-230749686.html", "site": "Yahoo News"}
+ ],
+ "figures": [
+  {"file": "map.svg", "png": "map.png", "caption": "The planned flight from Austin (KAUS) to North Eleuthera (MYEH) and the crash site at Greenacres, Florida. The dashed line joins origin and destination; it is not the route flown.", "alt": "Map of the Gulf of Mexico, Florida and the Bahamas with Austin and North Eleuthera marked as airports, a dashed straight line between them and a red marker at Greenacres on Florida's east coast.", "credit": "ATC SIM newsroom; Natural Earth; data FAA via ABC News"}
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "Un Learjet 60 en route vers les Bahamas chute de 35 250 pieds et s'écrase en Floride : neuf morts",
+   "summary": "Le biréacteur d'affaires N722BD, parti d'Austin pour North Eleuthera, est descendu de 35 250 à 8 750 pieds en une minute environ avant de s'écraser à Greenacres (Floride) le 1er novembre. L'équipage avait signalé givrage et turbulences puis lancé un Mayday ; le NTSB enquête.",
+   "figures": [
+    {"file": "map.fr.svg", "png": "map.fr.png", "caption": "Le vol prévu d'Austin (KAUS) à North Eleuthera (MYEH) et le lieu de l'accident à Greenacres (Floride). La ligne en pointillés relie l'origine et la destination ; ce n'est pas la route suivie.", "alt": "Carte du golfe du Mexique, de la Floride et des Bahamas montrant Austin et North Eleuthera comme aéroports, une ligne droite en pointillés entre les deux et un repère rouge à Greenacres, sur la côte est de la Floride."}
+   ]
+  },
+  "ar": {
+   "title": "طائرة Learjet 60 متجهة إلى البهاما تهوي من 35250 قدماً وتتحطم في فلوريدا ومقتل ركابها التسعة",
+   "summary": "هبطت طائرة رجال الأعمال N722BD، المتجهة من أوستن إلى نورث إليوثيرا، من 35250 إلى 8750 قدماً في نحو دقيقة قبل أن تتحطم في غريناكرز بفلوريدا يوم 1 نونبر. وكان الطاقم قد أبلغ عن الجليد والاضطرابات ثم أطلق نداء استغاثة، ويتولى المجلس الوطني لسلامة النقل التحقيق.",
+   "figures": [
+    {"file": "map.ar.svg", "png": "map.ar.png", "caption": "الرحلة المبرمجة من أوستن (KAUS) إلى نورث إليوثيرا (MYEH) وموقع الحادث في غريناكرز بفلوريدا. الخط المتقطع يربط بين نقطتي الانطلاق والوصول وليس المسار الفعلي للرحلة.", "alt": "خريطة لخليج المكسيك وفلوريدا وجزر البهاما تُظهر مطاري أوستن ونورث إليوثيرا وخطاً مستقيماً متقطعاً بينهما وعلامة حمراء في غريناكرز على الساحل الشرقي لفلوريدا."}
+   ]
+  }
+ }
+}

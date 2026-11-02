@@ -1,0 +1,80 @@
+{
+ "slug": "2026-11-02-faa-smart-ai-traffic-tool-first-results",
+ "date": "2026-11-02",
+ "region": "international",
+ "section": "Technology & innovation",
+ "title": "FAA's AI-supported SMART flow tool: 110 flights rerouted around Washington in its first weeks, DOT says",
+ "summary": "The US DOT says SMART, the FAA's AI-supported traffic management tool used at DCA, IAD and BWI since 21 September, has helped reroute 110 flights, saving on average more than 10 minutes and 56 gallons of fuel each. Humans keep the final decision.",
+ "sources": [
+  {
+   "title": "MUST READ: DOT AI program Easing Flight Traffic, Control Tower Headaches—But Still Dems Oppose",
+   "url": "https://www.transportation.gov/briefing-room/must-read-dot-ai-program-easing-flight-traffic-control-tower-headaches-still-dems",
+   "site": "US Department of Transportation"
+  },
+  {
+   "title": "Trump's Transportation Secretary Sean P. Duffy Delivers State-of-the Art Air Traffic Control Management Tool",
+   "url": "https://www.faa.gov/newsroom/trumps-transportation-secretary-sean-p-duffy-delivers-state-art-air-traffic-control",
+   "site": "FAA"
+  },
+  {
+   "title": "DC-area airports first to deploy AI tool for airspace management",
+   "url": "https://nextgov.com/artificial-intelligence/2026/09/dc-area-airports-first-deploy-ai-tool-airspace-management/416114",
+   "site": "Nextgov/FCW"
+  }
+ ],
+ "figures": [
+  {
+   "file": "results.svg",
+   "png": "results.png",
+   "caption": "SMART's first reported results: time saved per rerouted flight, on average (more than 10 minutes) and at best (up to 30 minutes), over 110 rerouted flights.",
+   "alt": "Horizontal bar chart: average time saved per rerouted flight more than 10 minutes, best case up to 30 minutes.",
+   "credit": "ATC SIM newsroom; data US DOT (New York Post)"
+  },
+  {
+   "file": "map.svg",
+   "png": "map.png",
+   "caption": "The three Washington-area airports where the FAA began using SMART on 21 September 2026: Reagan National (DCA), Dulles (IAD) and Baltimore/Washington (BWI).",
+   "alt": "Map of the Chesapeake Bay area marking Reagan National, Dulles and Baltimore/Washington airports.",
+   "credit": "ATC SIM newsroom; Natural Earth; FAA, Nextgov/FCW"
+  }
+ ],
+ "author": "ATC SIM newsroom",
+ "translations": {
+  "fr": {
+   "title": "L'outil de flux SMART de la FAA, assisté par l'IA : 110 vols réacheminés autour de Washington, selon le DOT",
+   "summary": "Selon le département américain des Transports, SMART, l'outil de gestion du trafic assisté par l'IA de la FAA utilisé à DCA, IAD et BWI depuis le 21 septembre, a aidé à réacheminer 110 vols, avec en moyenne plus de 10 minutes et 56 gallons de carburant économisés par vol. La décision finale reste humaine.",
+   "figures": [
+    {
+     "file": "results.fr.svg",
+     "png": "results.fr.png",
+     "caption": "Premiers résultats annoncés de SMART : temps gagné par vol réacheminé, en moyenne (plus de 10 minutes) et au mieux (jusqu'à 30 minutes), sur 110 vols réacheminés.",
+     "alt": "Graphique en barres horizontales : temps moyen gagné par vol réacheminé plus de 10 minutes, meilleur cas jusqu'à 30 minutes."
+    },
+    {
+     "file": "map.fr.svg",
+     "png": "map.fr.png",
+     "caption": "Les trois aéroports de la région de Washington où la FAA a commencé à utiliser SMART le 21 septembre 2026 : Reagan National (DCA), Dulles (IAD) et Baltimore/Washington (BWI).",
+     "alt": "Carte de la région de la baie de Chesapeake indiquant les aéroports Reagan National, Dulles et Baltimore/Washington."
+    }
+   ]
+  },
+  "ar": {
+   "title": "أداة SMART لإدارة التدفق المدعومة بالذكاء الاصطناعي: إعادة توجيه 110 رحلات حول واشنطن بحسب وزارة النقل الأمريكية",
+   "summary": "تقول وزارة النقل الأمريكية إن SMART، أداة إدارة الحركة الجوية المدعومة بالذكاء الاصطناعي المستعملة في مطارات DCA وIAD وBWI منذ 21 شتنبر، ساعدت على إعادة توجيه 110 رحلات، بتوفير أكثر من 10 دقائق و56 غالوناً من الوقود في المتوسط لكل رحلة، مع بقاء القرار النهائي بيد البشر.",
+   "figures": [
+    {
+     "file": "results.ar.svg",
+     "png": "results.ar.png",
+     "caption": "أولى النتائج المعلنة لنظام SMART: الوقت الموفَّر لكل رحلة أعيد توجيهها، في المتوسط (أكثر من 10 دقائق) وفي أفضل الحالات (حتى 30 دقيقة)، على مجموع 110 رحلات.",
+     "alt": "رسم بياني بأعمدة أفقية: متوسط الوقت الموفَّر لكل رحلة أعيد توجيهها أكثر من 10 دقائق، وأفضل حالة حتى 30 دقيقة."
+    },
+    {
+     "file": "map.ar.svg",
+     "png": "map.ar.png",
+     "caption": "مطارات منطقة واشنطن الثلاثة التي بدأت فيها إدارة الطيران الفيدرالية استعمال SMART في 21 شتنبر 2026: ريغان الوطني (DCA) ودالاس (IAD) وبالتيمور/واشنطن (BWI).",
+     "alt": "خريطة لمنطقة خليج تشيسابيك تُظهر مطارات ريغان الوطني ودالاس وبالتيمور/واشنطن."
+    }
+   ]
+  }
+ }
+}
